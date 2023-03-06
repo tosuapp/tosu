@@ -124,9 +124,8 @@ export class Process {
     readSharpString(address: number): string {
         const length = this.readInt(address + 0x4)
         try {
+            // TODO: fix memory leak
             const buffer = this.readBuffer(address + 0x8, length * 2)
-            console.log(typeof buffer)
-
             const out = buffer.toString("utf16le")
             return out
         } catch (_) {
