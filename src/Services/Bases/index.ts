@@ -9,11 +9,17 @@ export interface BaseData {
     chatCheckerAddr: number;
     skinDataAddr: number;
     settingsClassAddr: number;
+    rulesetsAddr: number;
+    canRunSlowlyAddr: number;
+    getAudioLengthAddr: number;
 }
 
 export class Bases {
     services: DataRepo
     bases: BaseData
+
+    // set default leaderStart = windows
+    leaderStart: number = 0x8
 
     constructor(services: DataRepo) {
         this.services = services;
@@ -24,7 +30,14 @@ export class Bases {
             playTimeAddr: 0,
             chatCheckerAddr: 0,
             skinDataAddr: 0,
-            settingsClassAddr: 0
+            settingsClassAddr: 0,
+            rulesetsAddr: 0,
+            canRunSlowlyAddr: 0,
+            getAudioLengthAddr: 0,
+        }
+
+        if (process.platform !== "win32") {
+            this.leaderStart = 0xC
         }
     }
 
@@ -40,6 +53,10 @@ export class Bases {
 
         this.bases[key] = 0;
         return 0;
+    }
+
+    getLeaderStart() {
+        return this.leaderStart;
     }
 
     checkIsBasesValid(): boolean {

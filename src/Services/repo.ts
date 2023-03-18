@@ -1,15 +1,23 @@
 import { Process } from "@/Memory/process";
 import { Bases } from "./Bases";
 import { AllTimesData } from "./Entities/AllTimesData";
-import { BeatmapData } from "./Entities/BeatmapData";
+import { BassDensityData } from "./Entities/BassDensityData";
+import { BeatmapPPData } from "./Entities/BeatmapPpData";
 import { MenuData } from "./Entities/MenuData";
+import { ResultsScreenData } from "./Entities/ResultsScreenData";
+import { GamePlayData } from "./Entities/GamePlayData";
+import { Settings } from "./Settings";
 
 export interface DataRepoList {
     process: Process;
     bases: Bases;
+    settings: Settings;
     allTimesData: AllTimesData;
-    beatmapData: BeatmapData;
+    beatmapPpData: BeatmapPPData;
     menuData: MenuData;
+    bassDensityData: BassDensityData;
+    gamePlayData: GamePlayData;
+    resultsScreenData: ResultsScreenData;
 }
 
 export class DataRepo {
@@ -59,12 +67,5 @@ export class DataRepo {
             },
             {} as Pick<DataRepoList, T[number]>
         );
-    }
-
-    /**
-     * Clears services list
-     */
-    clear(): void {
-        this.list = {};
     }
 }

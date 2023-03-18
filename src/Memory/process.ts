@@ -121,16 +121,14 @@ export class Process {
         return utils.readString(this.handle, address);
     }
 
+    /* dumbass thing ever... please pr this, if you know, how to deal with that better... */
     readSharpString(address: number): string {
         const length = this.readInt(address + 0x4)
-        try {
-            // TODO: fix memory leak
-            const buffer = this.readBuffer(address + 0x8, length * 2)
-            const out = buffer.toString("utf16le")
-            return out
-        } catch (_) {
+        if (length < 0 || length > 4096) {
             return ""
         }
+
+        return this.readBuffer(address + 0x8, length * 2).toString("utf16le")
     }
 
     readBuffer(address: number, size: number): Buffer {

@@ -9,19 +9,24 @@ export class AllTimesData {
     MenuMods: number = 0;
     ChatStatus: number = 0;
     SkinFolder: string = "";
+    SongsFolder: string = "";
     ShowInterface: boolean = false;
+    IsWatchingReplay: number = 0;
 
     constructor(services: DataRepo) {
         this.services = services;
     }
 
-    updateState() {
-        const { process, bases } = this.services.getServices(["process", "bases"]);
+    async updateState() {
+        const { process, bases, settings } = this.services.getServices(["process", "bases", "settings"]);
         if (process === null) {
             throw new Error("Process not found")
         }
         if (bases === null) {
             throw new Error("Bases repo not found")
+        }
+        if (settings === null) {
+            throw new Error("Settings repo not found")
         }
 
         const {
@@ -30,7 +35,8 @@ export class AllTimesData {
             menuModsAddr,
             chatCheckerAddr,
             skinDataAddr,
-            settingsClassAddr
+            settingsClassAddr,
+            canRunSlowlyAddr
         } = bases.bases
 
         // [Status - 0x4]
@@ -38,19 +44,31 @@ export class AllTimesData {
         // [PlayTime + 0x5]
         this.PlayTime = process.readInt(process.readInt(playTimeAddr + 0x5))
         // [MenuMods + 0x9]
-        this.MenuMods = process.readInt(process.readInt(menuModsAddr + 0x9)),
+        this.MenuMods = process.readInt(process.readInt(menuModsAddr + 0x9))
         // ChatChecker - 0x20
-        this.ChatStatus = process.readByte(chatCheckerAddr - 0x20),
+        this.ChatStatus = process.readByte(chatCheckerAddr - 0x20)
         // [[[SkinData + 4] + 0] + 68]
         this.SkinFolder = process.readSharpString(
              process.readInt(
-                 process.readPointer(
+                process.readPointer(
                     skinDataAddr + 4
-                 ) + 68
-             )
-         ),
-         // [[SettingsClass + 0x8] + 0x4] + 0xC
+                ) + 68
+            )
+        )
+        // [[SettingsClass + 0x8] + 0x4] + 0xC
         this.ShowInterface = Boolean(process.readByte(process.readInt(process.readInt(settingsClassAddr + 0x8) + 0x4) + 0xC))
+        this.SongsFolder = process.readSharpString(
+            process.readInt(
+                process.readInt(
+                    process.readInt(settingsClassAddr + 0x8) + 0xB8
+                ) + 0x4
+            )
+        )
+
+        this.IsWatchingReplay = process.readByte(process.readInt(canRunSlowlyAddr + 0x46))
+
+        settings.setSkinFolder(this.SkinFolder)
+        settings.setShowInterface(this.ShowInterface);
 
         wLogger.debug("State: AllTimesData updated")
     }

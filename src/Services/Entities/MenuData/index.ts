@@ -27,6 +27,7 @@ export class MenuData {
     RankedStatus: number = 0;
     MD5: string = "";
     ObjectCount: number = 0;
+    MP3Length: number = 0;
 
     previousMD5: string = "";
 
@@ -34,14 +35,8 @@ export class MenuData {
         this.services = services;
     }
 
-    updateState() {
+    async updateState() {
         const { process, bases } = this.services.getServices(["process", "bases"]);
-        if (process === null) {
-            throw new Error("Process not found")
-        }
-        if (bases === null) {
-            throw new Error("Bases repo not found")
-        }
 
         const {
             baseAddr,
@@ -52,8 +47,12 @@ export class MenuData {
         this.MD5 = process.readSharpString(process.readInt(
             beatmapAddr + 0x6C
         ))
+        //  [[Beatmap] + 0x94]
+        this.Path = process.readSharpString(process.readInt(
+            beatmapAddr + 0x94
+        ))
 
-        if (this.MD5 === this.previousMD5) {
+        if (this.MD5 === this.previousMD5 || !this.Path.endsWith(".osu")) {
             wLogger.debug("State: MenuData not needed to be updated")
             return;
         }
@@ -95,23 +94,19 @@ export class MenuData {
         this.BackgroundFilename = process.readSharpString(process.readInt(
             beatmapAddr + 0x68
         ))
-        // //  [[Beatmap] + 0x78]
+        //  [[Beatmap] + 0x78]
         this.Folder = process.readSharpString(process.readInt(
             beatmapAddr + 0x78
         ))
-        // //  [[Beatmap] + 0x7C]
+        //  [[Beatmap] + 0x7C]
         this.Creator = process.readSharpString(process.readInt(
             beatmapAddr + 0x7C
         ))
-        // //  [[Beatmap] + 0x80]
+        //  [[Beatmap] + 0x80]
         this.Name = process.readSharpString(process.readInt(
             beatmapAddr + 0x80
         ))
-        // //  [[Beatmap] + 0x94]
-        this.Path = process.readSharpString(process.readInt(
-            beatmapAddr + 0x94
-        ))
-        // //  [[Beatmap] + 0xB0]
+        //  [[Beatmap] + 0xB0]
         this.Difficulty = process.readSharpString(process.readInt(
             beatmapAddr + 0xB0
         ))
@@ -119,13 +114,21 @@ export class MenuData {
         this.MapID = process.readInt(beatmapAddr + 0xCC)
         //  [Beatmap] + 0xD0
         this.SetID = process.readInt(beatmapAddr + 0xD0)
-        //  // unknown, unsubmitted, pending/wip/graveyard, unused, ranked, approved, qualified
+        // unknown, unsubmitted, pending/wip/graveyard, unused, ranked, approved, qualified
         //  [Beatmap] + 0x130
         this.RankedStatus = process.readInt(beatmapAddr + 0x130)
         //  [Beatmap] + 0xFC
         this.ObjectCount = process.readInt(beatmapAddr + 0xFC)
+        
 
         wLogger.debug("State: MenuData updated")
         this.previousMD5 = this.MD5;
+    }
+
+    updateMP3Length() {
+        const { process, bases } = this.services.getServices(["process", "bases"]);
+
+        // [[GetAudioLength + 0x7] + 0x4]
+        this.MP3Length = Math.round(process.readDouble(process.readPointer(bases.getBase("getAudioLengthAddr") + 0x7) + 0x4));
     }
 }
