@@ -46,7 +46,7 @@ jobs:
 
       - name: Build Windows 🔧
         run: |
-          yarn ts:compile
+          yarn compile:win
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
