@@ -1,10 +1,10 @@
 export interface InSettingsValues {
 	showInterface: boolean;
-    folders: {
-        game: string;
-        skin: string;
-        songs: string;
-    }
+	folders: {
+		game: string;
+		skin: string;
+		songs: string;
+	};
 }
 
 interface BeatmapPaths {
@@ -22,9 +22,9 @@ interface BeatmapStats {
 	HP: number;
 	SR: number;
 	BPM: {
-        min: number;
-        max: number;
-    }
+		min: number;
+		max: number;
+	};
 	maxCombo: number;
 	fullSR: number;
 	memoryAR: number;
@@ -48,10 +48,10 @@ interface BeatmapTimings {
 }
 interface Beatmap {
 	time: BeatmapTimings;
-    id: number;
+	id: number;
 	set: number;
 	md5: string;
-    // TODO: make ranked status enum
+	// TODO: make ranked status enum
 	rankedStatus: number;
 	metadata: BeatmapMetadata;
 	stats: BeatmapStats;
@@ -59,17 +59,17 @@ interface Beatmap {
 }
 
 interface SelectedMods {
-    num: number;
+	num: number;
 	str: string;
 }
 
 interface PP {
-	"100": number;
-	"99": number;
-	"98": number;
-	"97": number;
-	"96": number;
-	"95": number;
+	'100': number;
+	'99': number;
+	'98': number;
+	'97': number;
+	'96': number;
+	'95': number;
 	strains: number[];
 }
 
@@ -98,39 +98,39 @@ interface Leaderboard {
 	hasLeaderboard: boolean;
 	isVisible: boolean;
 	ourplayer: LeaderboardPlayer;
-    slots: LeaderboardPlayer[];
+	slots: LeaderboardPlayer[];
 }
 
 interface KeyOverlay {
-   k1: KeyOverlayButton;
-   k2: KeyOverlayButton;
-   m1: KeyOverlayButton;
-   m2: KeyOverlayButton
+	k1: KeyOverlayButton;
+	k2: KeyOverlayButton;
+	m1: KeyOverlayButton;
+	m2: KeyOverlayButton;
 }
-    
+
 interface KeyOverlayButton {
-    isPressed: boolean;
-    count: number;
+	isPressed: boolean;
+	count: number;
 }
 
 /**
  * Most of in-game menu values, such as selected beatmap, game status, current pp for map, etc...
-*/
+ */
 export interface InMenuValues {
-    mainMenu: {
-        /**
-         * Actually a float!
-         */
-        bassDensity: number;
-    }
-    // TODO: Make enum for osu in-game statuses
+	mainMenu: {
+		/**
+		 * Actually a float!
+		 */
+		bassDensity: number;
+	};
+	// TODO: Make enum for osu in-game statuses
 	state: number;
-    // TODO: Make enum for osu in-game modes
-    gameMode: number;
-    isChatEnabled: number;
-    bm: Beatmap;
-    mods: SelectedMods;
-    pp: PP;
+	// TODO: Make enum for osu in-game modes
+	gameMode: number;
+	isChatEnabled: number;
+	bm: Beatmap;
+	mods: SelectedMods;
+	pp: PP;
 }
 
 interface GameplayGrade {
@@ -145,16 +145,16 @@ interface GameplayCombo {
 
 interface GameplayHP {
 	normal: number;
-    smooth: number;
+	smooth: number;
 }
 
 interface GameplayHits {
-	"300": number;
+	'300': number;
 	geki: number;
-	"100": number;
+	'100': number;
 	katu: number;
-	"50": number;
-	"0": number;
+	'50': number;
+	'0': number;
 	sliderBreaks: number;
 	grade: GameplayGrade;
 	unstableRate: number;
@@ -163,16 +163,16 @@ interface GameplayHits {
 
 export interface GameplayValues {
 	// TODO: Make enum for osu in-game modes
-    gameMode: number;
+	gameMode: number;
 	name: string;
 	score: number;
 	accuracy: number;
 	combo: GameplayCombo;
-    hp: GameplayHP;
-    hits: GameplayHits;
-    pp: GameplayPP;
-	keyOverlay: KeyOverlay
-	leaderboard: Leaderboard
+	hp: GameplayHP;
+	hits: GameplayHits;
+	pp: GameplayPP;
+	keyOverlay: KeyOverlay;
+	leaderboard: Leaderboard;
 }
 
 export interface ResultsScreenValues {
@@ -180,23 +180,21 @@ export interface ResultsScreenValues {
 	score: number;
 	maxCombo: number;
 	mods: SelectedMods;
-	"300": number;
+	'300': number;
 	geki: number;
-	"100": number;
+	'100': number;
 	katu: number;
-	"50": number;
-	"0": number;
+	'50': number;
+	'0': number;
 }
 
-export interface TourneyValues {
-
-}
+export interface TourneyValues {}
 
 export interface ApiAnswer {
-    settings: InSettingsValues;
-    menu: InMenuValues;
-    gameplay: GameplayValues;
-    resultsScreen: ResultsScreenValues;
-    // TODO: not implemented yet
-    tourney?: TourneyValues;
+	settings: InSettingsValues;
+	menu: InMenuValues;
+	gameplay: GameplayValues;
+	resultsScreen: ResultsScreenValues;
+	// TODO: not implemented yet
+	tourney?: TourneyValues;
 }

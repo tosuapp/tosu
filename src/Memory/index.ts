@@ -1,1 +1,1 @@
-export default require('./g-utils.node')
+export default require('./g-utils.node');

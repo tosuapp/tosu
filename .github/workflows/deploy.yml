@@ -1,0 +1,55 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+concurrency:
+  group: build-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Install Node.js 🔧
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Rust 🔧
+        uses: ATiltedTree/setup-rust@v1
+        with:
+          rust-version: stable
+          components: clippy
+
+      - name: Install Deps 🔧
+        run: |
+          npm install -g yarn
+          yarn
+
+      - name: Compile TS 🔧
+        run: |
+          yarn ts:compile
+
+      - name: Build Windows 🔧
+        run: |
+          yarn ts:compile
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: osumemoryjs-win64-${{ github.ref_name }}.exe
+          path: dist/osumemory-js.exe

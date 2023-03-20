@@ -1,107 +1,123 @@
-import { DataRepo } from "@/Services/repo";
+import { DataRepo } from '@/Services/repo';
+
+import { AbstractEntity } from '../types';
 
 interface BeatmapPPAcc {
-    "100": number;
-    "99": number;
-    "98": number;
-    "97": number;
-    "96": number;
-    "95": number;
+	'100': number;
+	'99': number;
+	'98': number;
+	'97': number;
+	'96': number;
+	'95': number;
 }
 
 interface BeatmapPPAttributes {
-    ar: number;
-    cs: number;
-    hp: number;
-    od: number;
-    maxCombo: number;
-    fullStars: number;
-    stars: number;
+	ar: number;
+	cs: number;
+	hp: number;
+	od: number;
+	maxCombo: number;
+	fullStars: number;
+	stars: number;
 }
 
 interface BeatmapPPCurrentAttributes {
-    stars: number;
-    pp: number;
-    fcPP: number;
-    maxThisPlayPP: number;
+	stars: number;
+	pp: number;
+	fcPP: number;
+	maxThisPlayPP: number;
 }
 
 interface BeatmapPPTimings {
-    firstObj: number;
-    full: number;
+	firstObj: number;
+	full: number;
 }
 
-export class BeatmapPPData {
-    services: DataRepo
+export class BeatmapPPData extends AbstractEntity {
+	strains: number[];
+	minBPM: number;
+	maxBPM: number;
+	ppAcc: BeatmapPPAcc;
+	calculatedMapAttributes: BeatmapPPAttributes;
+	currAttributes: BeatmapPPCurrentAttributes;
+	timings: BeatmapPPTimings;
 
-    strains: number[] = [];
-    minBPM: number = 0.00;
-    maxBPM: number = 0.00;
-    ppAcc: BeatmapPPAcc = {
-        "100": 0.00,
-        "99": 0.00,
-        "98": 0.00,
-        "97": 0.00,
-        "96": 0.00,
-        "95": 0.00
-    };
-    calculatedMapAttributes: BeatmapPPAttributes = {
-        ar: 0.00,
-        cs: 0.00,
-        hp: 0.00,
-        od: 0.00,
-        maxCombo: 0,
-        fullStars: 0.00,
-        stars: 0.00
-    }
-    currAttributes: BeatmapPPCurrentAttributes = {
-        stars: 0.00,
-        pp: 0.00,
-        maxThisPlayPP: 0.00,
-        fcPP: 0.00
-    }
-    timings: BeatmapPPTimings = {
-        firstObj: 0,
-        full: 0,
-    }
+	constructor(services: DataRepo) {
+		super(services);
 
-    constructor(services: DataRepo) {
-        this.services = services;
-    }
+		this.init();
+	}
 
-    updateState(strains: number[], ppAcc: BeatmapPPAcc, mapAttributes: BeatmapPPAttributes) {
-        this.strains = strains;
-        this.ppAcc = ppAcc;
-        this.calculatedMapAttributes = mapAttributes
-    }
+	init() {
+		this.strains = [];
+		this.minBPM = 0.0;
+		this.maxBPM = 0.0;
+		this.ppAcc = {
+			'100': 0.0,
+			'99': 0.0,
+			'98': 0.0,
+			'97': 0.0,
+			'96': 0.0,
+			'95': 0.0
+		};
+		this.calculatedMapAttributes = {
+			ar: 0.0,
+			cs: 0.0,
+			hp: 0.0,
+			od: 0.0,
+			maxCombo: 0,
+			fullStars: 0.0,
+			stars: 0.0
+		};
+		this.currAttributes = {
+			stars: 0.0,
+			pp: 0.0,
+			maxThisPlayPP: 0.0,
+			fcPP: 0.0
+		};
+		this.timings = {
+			firstObj: 0,
+			full: 0
+		};
+	}
 
-    updateCurrentAttributes(stars: number, pp: number) {
-        const maxThisPlayPP = pp > this.currAttributes.pp ? pp : this.currAttributes.pp;
+	updatePPData(
+		strains: number[],
+		ppAcc: BeatmapPPAcc,
+		mapAttributes: BeatmapPPAttributes
+	) {
+		this.strains = strains;
+		this.ppAcc = ppAcc;
+		this.calculatedMapAttributes = mapAttributes;
+	}
 
-        this.currAttributes = {
-            ...this.currAttributes,
-            stars,
-            pp,
-            maxThisPlayPP
-        }
-    }
+	updateCurrentAttributes(stars: number, pp: number) {
+		const maxThisPlayPP = pp > this.currAttributes.pp ? pp : this.currAttributes.pp;
 
-    updateFcPP(fcPP: number) {
-        this.currAttributes = {
-            ...this.currAttributes,
-            fcPP: fcPP
-        }
-    }
+		this.currAttributes = {
+			...this.currAttributes,
+			stars,
+			pp,
+			maxThisPlayPP
+		};
+	}
 
-    updateBPM(minBPM: number, maxBPM: number) {
-        this.minBPM = minBPM;
-        this.maxBPM = maxBPM;
-    }
+	updateFcPP(fcPP: number) {
+		this.currAttributes = {
+			...this.currAttributes,
+			fcPP: fcPP
+		};
+	}
 
-    updateTimings(firstObj: number, full: number) {
-        this.timings = {
-            firstObj,
-            full
-        }
-    }
+	updateBPM(minBPM: number, maxBPM: number) {
+		this.minBPM = minBPM;
+		this.maxBPM = maxBPM;
+	}
+
+	updateTimings(firstObj: number, full: number) {
+		this.timings = {
+			firstObj,
+			full
+		};
+	}
 }

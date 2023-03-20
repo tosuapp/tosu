@@ -1,1 +1,1 @@
-export const OSU_REGEX = /.*osu!\.exe.*/g
+export const OSU_REGEX = /.*osu!\.exe.*/g;
