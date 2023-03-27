@@ -83,7 +83,7 @@ interface CustomContext extends Koa.Context {
 			return;
 		}
 
-		ctx.body = ctx.instancesManager.osuInstances[0].getState();
+		ctx.body = ctx.instancesManager.osuInstances[Object.keys(ctx.instancesManager.osuInstances)[0]].getState();
 	});
 
 	const wsRouter = new Router();
@@ -104,7 +104,7 @@ interface CustomContext extends Koa.Context {
 			}
 
 			ctx.websocket.send(
-				JSON.stringify(ctx.instancesManager.osuInstances[0].getState())
+				JSON.stringify(ctx.instancesManager.osuInstances[Object.keys(ctx.instancesManager.osuInstances)[0]].getState())
 			);
 			await sleep(500);
 		}
