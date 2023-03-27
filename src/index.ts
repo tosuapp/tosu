@@ -87,6 +87,10 @@ interface CustomContext extends Koa.Context {
 	});
 
 	const wsRouter = new Router();
+	wsRouter.use(async (ctx, next) => {
+		ctx.instancesManager = instancesManager;
+		await next();
+	})
 
 	wsRouter.get('/ws', async (ctx) => {
 		wLogger.debug('>>> ws: CONNECTED');
@@ -101,6 +105,7 @@ interface CustomContext extends Koa.Context {
 			if (Object.keys(ctx.instancesManager.osuInstances).length < 1) {
 				ctx.websocket.send('{}');
 				await sleep(500);
+				continue;
 			}
 
 			ctx.websocket.send(
