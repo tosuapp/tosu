@@ -64,7 +64,7 @@ interface CustomContext extends Koa.Context {
 		}
 
 		const { settings } =
-			ctx.instancesManager.osuInstances[0].servicesRepo.getServices(['settings']);
+			ctx.instancesManager.osuInstances[Object.keys(ctx.instancesManager.osuInstances)[0]].servicesRepo.getServices(['settings']);
 		if (settings.songsFolder === '') {
 			ctx.response.status = 404;
 			ctx.body = {
