@@ -1,39 +1,33 @@
 import Router from '@koa/router';
-import findProcess from 'find-process';
-import { stat } from 'fs';
 import Koa from 'koa';
-import mount from 'koa-mount';
 import send from 'koa-send';
 import serve from 'koa-static';
 import Websockify from 'koa-websocket';
-import path from 'path';
+import { servicesVersion } from 'typescript';
 
+import { InstancesManager } from './Instances/InstancesManager';
 import { OsuInstance } from './Instances/Osu';
 import { sleep } from './Utils/sleep';
-import { OSU_REGEX } from './constants';
 import { wLogger } from './logger';
+
+interface CustomContext extends Koa.Context {
+	instancesManager: InstancesManager;
+}
 
 (async () => {
 	wLogger.info('Starting tsosumemory');
 
 	wLogger.info('Searching for osu!');
-	let osuPid = 0;
-	while (osuPid === 0) {
-		const osuProcesses = await findProcess('name', OSU_REGEX);
-		if (osuProcesses.length < 1) {
-			wLogger.info('osu! not found, please start it... ');
-			continue;
-		}
 
-		osuPid = osuProcesses[0].pid;
-		wLogger.info('osu! found!');
-	}
+	const instancesManager = new InstancesManager();
+	instancesManager.runWatcher();
 
-	wLogger.info('Running memory chimera...');
-	const osuInstance = new OsuInstance(osuPid);
-	osuInstance.start();
+	const app = Websockify<{}, CustomContext>(new Koa());
+	app.use(async (ctx, next) => {
+		ctx.instancesManager = instancesManager;
+		await next();
+	});
 
-	const app = Websockify(new Koa());
 	app.use(async (ctx, next) => {
 		ctx.set('Access-Control-Allow-Origin', '*');
 		ctx.set(
@@ -46,12 +40,31 @@ import { wLogger } from './logger';
 
 	const router = new Router();
 
-	router.get('/json', (ctx) => {
-		ctx.body = osuInstance.getState();
+	const sendFunc = serve('./static', {
+		index: '/index.html'
 	});
 
-	router.get('/Songs/(.*)', async (ctx) => {
-		const { settings } = osuInstance.servicesRepo.getServices(['settings']);
+	router.get('/(.*)', async (ctx, next) => {
+		let staticPath = ctx.request.path.replace('/static', '');
+		if (staticPath === '/') {
+			ctx.body =
+				'please enter correct static path, you can find needed folder in your static folder';
+			return;
+		}
+
+		ctx.path = staticPath;
+		await sendFunc(ctx, next);
+	});
+
+	router.get('/Songs/(.*)', async (ctx: CustomContext) => {
+		if (Object.keys(ctx.instancesManager.osuInstances).length < 1) {
+			ctx.response.status = 500;
+			ctx.body = null;
+			return;
+		}
+
+		const { settings } =
+			ctx.instancesManager.osuInstances[0].servicesRepo.getServices(['settings']);
 		if (settings.songsFolder === '') {
 			ctx.response.status = 404;
 			ctx.body = {
@@ -63,10 +76,14 @@ import { wLogger } from './logger';
 		await send(ctx, mapPath, { root: settings.songsFolder });
 	});
 
-	router.get('/static/(.*)', async (ctx) => {
-		const staticPath = ctx.request.path.replace('/static', '');
-		console.log(staticPath);
-		await send(ctx, staticPath, { root: './static', index: 'index.html' });
+	router.get('/json', (ctx) => {
+		if (Object.keys(ctx.instancesManager.osuInstances).length < 1) {
+			ctx.response.status = 500;
+			ctx.body = null;
+			return;
+		}
+
+		ctx.body = ctx.instancesManager.osuInstances[0].getState();
 	});
 
 	const wsRouter = new Router();
@@ -81,13 +98,19 @@ import { wLogger } from './logger';
 		});
 
 		while (isSocketConnected) {
-			ctx.websocket.send(JSON.stringify(osuInstance.getState()));
+			if (Object.keys(ctx.instancesManager.osuInstances).length < 1) {
+				ctx.websocket.send('{}');
+				await sleep(500);
+			}
+
+			ctx.websocket.send(
+				JSON.stringify(ctx.instancesManager.osuInstances[0].getState())
+			);
 			await sleep(500);
 		}
 	});
 
 	app.ws.use(wsRouter.routes()).use(wsRouter.allowedMethods());
-
 	app.use(router.routes()).use(router.allowedMethods());
 
 	app.listen(24050, '127.0.0.1');

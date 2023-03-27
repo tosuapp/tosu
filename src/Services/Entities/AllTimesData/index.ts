@@ -1,5 +1,4 @@
 import { DataRepo } from '@/Services/repo';
-import { wLogger } from '@/logger';
 
 import { AbstractEntity } from '../types';
 
@@ -73,7 +72,5 @@ export class AllTimesData extends AbstractEntity {
 
 		settings.setSkinFolder(this.SkinFolder);
 		settings.setShowInterface(this.ShowInterface);
-
-		wLogger.debug('State: AllTimesData updated');
 	}
 }

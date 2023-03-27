@@ -23,6 +23,8 @@ export interface KeyOverlay {
 }
 
 export class GamePlayData extends AbstractEntity {
+	isDefaultState: boolean = true;
+
 	Retries: number;
 	PlayerName: string;
 	Mods: OsuMods;
@@ -59,9 +61,10 @@ export class GamePlayData extends AbstractEntity {
 	}
 
 	init() {
+		this.isDefaultState = true;
 		this.Retries = 0;
 		this.PlayerName = '';
-		this.Mods;
+		this.Mods = 0;
 		this.HitErrors = [];
 		this.Mode = 0;
 		this.MaxCombo = 0;
@@ -100,8 +103,41 @@ export class GamePlayData extends AbstractEntity {
 		const { baseAddr, rulesetsAddr } = bases.bases;
 
 		const rulesetAddr = process.readInt(process.readInt(rulesetsAddr - 0xb) + 0x4);
+		/*
+		Lower is crutch for zero state osu! when ruleset is not exists for a while...
+		_        _
+		( `-.__.-' )
+		 `-.    .-'
+			\  /
+			 ||
+			 ||
+			//\\
+		   //  \\
+		  ||    ||
+		  ||____||
+		  ||====||
+		   \\  //
+			\\//
+		     ||
+			 ||
+			 ||
+			 ||
+			 ||
+			 ||
+			 ||
+			 ||
+			 []
+		*/
+		if (rulesetAddr === 0) {
+			wLogger.debug('RulesetAddr is 0');
+			return;
+		}
 		const gameplayBase = process.readInt(rulesetAddr + 0x68);
 		const scoreBase = process.readInt(gameplayBase + 0x38);
+
+		// Resetting default state value, to define other componenets that we have touched gamePlayData
+		// needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
+		this.isDefaultState = false;
 
 		if (allTimesData.IsWatchingReplay) {
 			// rulesetAddr mean ReplayWatcher... Sooo....
@@ -160,9 +196,6 @@ export class GamePlayData extends AbstractEntity {
 		// [Ruleset + 0x7C] + 0x24
 		const leaderBoardAddr =
 			leaderBoardBase > 0 ? process.readInt(leaderBoardBase + 0x24) : 0;
-		wLogger.debug(
-			`leaderboardAddr = ${leaderBoardAddr.toString(16)} (${leaderBoardAddr})`
-		);
 		if (!this.Leaderboard) {
 			this.Leaderboard = new Leaderboard(process, leaderBoardAddr);
 		} else {
@@ -198,7 +231,7 @@ export class GamePlayData extends AbstractEntity {
 			menuData.ObjectCount - this.Hit300 - this.Hit100 - this.Hit50 - this.HitMiss;
 		this.GradeCurrent = calculateGrade(
 			menuData.MenuGameMode,
-			allTimesData.MenuMods,
+			this.Mods,
 			this.Hit300,
 			this.Hit100,
 			this.Hit50,
@@ -207,7 +240,7 @@ export class GamePlayData extends AbstractEntity {
 		);
 		this.GradeExpected = calculateGrade(
 			menuData.MenuGameMode,
-			allTimesData.MenuMods,
+			this.Mods,
 			this.Hit300 + remaining,
 			this.Hit100,
 			this.Hit50,
@@ -296,13 +329,11 @@ export class GamePlayData extends AbstractEntity {
 	}
 
 	private updateStars() {
-		const { settings, menuData, allTimesData, beatmapPpData } =
-			this.services.getServices([
-				'settings',
-				'menuData',
-				'allTimesData',
-				'beatmapPpData'
-			]);
+		const { settings, menuData, beatmapPpData } = this.services.getServices([
+			'settings',
+			'menuData',
+			'beatmapPpData'
+		]);
 
 		if (!settings.gameFolder) {
 			return;
@@ -328,7 +359,7 @@ export class GamePlayData extends AbstractEntity {
 				this.HitGeki
 			),
 			combo: this.MaxCombo,
-			mods: allTimesData.MenuMods,
+			mods: this.Mods,
 			nMisses: this.HitMiss,
 			n50: this.Hit50,
 			n100: this.Hit100,

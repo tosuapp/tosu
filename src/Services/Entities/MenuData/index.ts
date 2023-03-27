@@ -47,7 +47,6 @@ export class MenuData extends AbstractEntity {
 		this.Path = process.readSharpString(process.readInt(beatmapAddr + 0x94));
 
 		if (this.MD5 === this.previousMD5 || !this.Path.endsWith('.osu')) {
-			wLogger.debug('State: MenuData not needed to be updated');
 			return;
 		}
 

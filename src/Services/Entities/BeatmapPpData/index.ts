@@ -92,7 +92,10 @@ export class BeatmapPPData extends AbstractEntity {
 	}
 
 	updateCurrentAttributes(stars: number, pp: number) {
-		const maxThisPlayPP = pp > this.currAttributes.pp ? pp : this.currAttributes.pp;
+		const maxThisPlayPP =
+			pp > this.currAttributes.maxThisPlayPP
+				? pp
+				: this.currAttributes.maxThisPlayPP;
 
 		this.currAttributes = {
 			...this.currAttributes,

@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import findProcess from 'find-process';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
@@ -40,12 +41,14 @@ export class OsuInstance {
 
 	isReady: boolean;
 	isDestroyed: boolean = false;
+	emitter: EventEmitter;
 
 	constructor(pid: number) {
 		this.pid = pid;
 		this.servicesRepo = new DataRepo();
 
 		this.process = new Process(this.pid);
+		this.emitter = new EventEmitter();
 
 		this.path = this.process.getModule('osu!.exe').path;
 
@@ -63,80 +66,77 @@ export class OsuInstance {
 		);
 	}
 
-	onDestroy() {
-		wLogger.info(`osu!.exe at ${this.pid} got destroyed`);
-	}
-
 	async start() {
-		wLogger.info(`RESOLVING PATTERNS FOR ${this.pid}`);
+		wLogger.info(`Running memory chimera... RESOLVING PATTERNS FOR ${this.pid}`);
 		while (!this.isReady) {
-			const processes = await findProcess('pid', this.pid);
-			if (processes.length < 1) {
-				wLogger.info('We have lost osu! process');
-				this.onDestroy();
-				break;
-			}
-
 			const basesRepo = this.servicesRepo.get('bases');
 			if (!basesRepo) {
 				throw new Error('Bases repo not initialized, missed somewhere?');
 			}
 
 			try {
-				basesRepo.setBase('baseAddr', this.process.scanSync(SCAN_PATTERNS.Base));
+				basesRepo.setBase(
+					'baseAddr',
+					this.process.scanSync(SCAN_PATTERNS.Base, true)
+				);
 				basesRepo.setBase(
 					'chatCheckerAddr',
-					this.process.scanSync(SCAN_PATTERNS.ChatChecker)
+					this.process.scanSync(SCAN_PATTERNS.ChatChecker, true)
 				);
 				basesRepo.setBase(
 					'menuModsAddr',
-					this.process.scanSync(SCAN_PATTERNS.InMenuMods)
+					this.process.scanSync(SCAN_PATTERNS.InMenuMods, true)
 				);
 				basesRepo.setBase(
 					'playTimeAddr',
-					this.process.scanSync(SCAN_PATTERNS.PlayTime)
+					this.process.scanSync(SCAN_PATTERNS.PlayTime, true)
 				);
 				basesRepo.setBase(
 					'settingsClassAddr',
-					this.process.scanSync(SCAN_PATTERNS.SettingsClass)
+					this.process.scanSync(SCAN_PATTERNS.SettingsClass, true)
 				);
 				basesRepo.setBase(
 					'statusAddr',
-					this.process.scanSync(SCAN_PATTERNS.Status)
+					this.process.scanSync(SCAN_PATTERNS.Status, true)
 				);
 				basesRepo.setBase(
 					'skinDataAddr',
-					this.process.scanSync(SCAN_PATTERNS.SkinData)
+					this.process.scanSync(SCAN_PATTERNS.SkinData, true)
 				);
 				basesRepo.setBase(
 					'rulesetsAddr',
-					this.process.scanSync(SCAN_PATTERNS.Rulesets)
+					this.process.scanSync(SCAN_PATTERNS.Rulesets, true)
 				);
 				basesRepo.setBase(
 					'canRunSlowlyAddr',
-					this.process.scanSync('55 8B EC 80 3D ?? ?? ?? ?? 00 75 26 80 3D')
+					this.process.scanSync(
+						'55 8B EC 80 3D ?? ?? ?? ?? 00 75 26 80 3D',
+						true
+					)
 				);
 				basesRepo.setBase(
 					'getAudioLengthAddr',
-					this.process.scanSync('55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 85 C0')
+					this.process.scanSync('55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 85 C0', true)
 				);
 
 				if (!basesRepo.checkIsBasesValid()) {
 					wLogger.info('PATTERN RESOLVING FAILED, TRYING AGAIN....');
-					continue;
+					throw new Error('Memory resolve failed');
 				}
 
 				wLogger.info('ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA');
 				this.isReady = true;
-				break;
 			} catch (exc) {
 				console.log(exc);
 				wLogger.error('PATTERN SCANNING FAILED, TRYING ONE MORE TIME...');
+				this.emitter.emit('onResolveFailed', this.pid);
+				break;
 			}
 		}
 
 		this.update();
 		this.updateAllStats();
+		this.watchProcessHealth();
 	}
 
 	async update() {
@@ -157,8 +157,7 @@ export class OsuInstance {
 		]);
 
 		let retriesTemp = 0;
-
-		while (true) {
+		while (!this.isDestroyed) {
 			await Promise.all([
 				allTimesData.updateState(),
 				menuData.updateState(),
@@ -175,15 +174,17 @@ export class OsuInstance {
 
 			switch (allTimesData.Status) {
 				case 0:
-					bassDensityData.updateState();
+					await bassDensityData.updateState();
 					break;
 				case 5:
 					// Reset Gameplay/ResultScreen data on joining to songSelect
-					gamePlayData.init();
-					resultsScreenData.init();
+					if (!gamePlayData.isDefaultState) {
+						gamePlayData.init();
+						resultsScreenData.init();
+					}
 					break;
 				case 2:
-					gamePlayData.updateState();
+					await gamePlayData.updateState();
 					if (retriesTemp > gamePlayData.Retries) {
 						// unvalidate gamePlayData, because user restarted map
 						gamePlayData.init();
@@ -193,7 +194,7 @@ export class OsuInstance {
 					retriesTemp = gamePlayData.Retries;
 					break;
 				case 7:
-					resultsScreenData.updateState();
+					await resultsScreenData.updateState();
 					break;
 				default:
 					gamePlayData.init();
@@ -205,7 +206,7 @@ export class OsuInstance {
 	}
 
 	async updateAllStats() {
-		const { menuData, allTimesData, settings, beatmapPpData } =
+		const { menuData, allTimesData, settings, gamePlayData, beatmapPpData } =
 			this.servicesRepo.getServices([
 				'menuData',
 				'allTimesData',
@@ -216,10 +217,15 @@ export class OsuInstance {
 		let prevBeatmapMd5 = '';
 		let prevMods = 0;
 		let prevGM = 0;
-		while (true) {
+
+		while (!this.isDestroyed) {
+			const currentMods =
+				allTimesData.Status === 2 || allTimesData.Status === 7
+					? gamePlayData.Mods
+					: allTimesData.MenuMods;
 			if (
 				(prevBeatmapMd5 !== menuData.MD5 ||
-					prevMods !== allTimesData.MenuMods ||
+					prevMods !== currentMods ||
 					prevGM !== menuData.MenuGameMode) &&
 				menuData.Path.endsWith('.osu') &&
 				settings.gameFolder
@@ -234,17 +240,23 @@ export class OsuInstance {
 					menuData.Folder,
 					menuData.Path
 				);
-				const beatmap = new Beatmap({
-					path: mapPath,
-					ar: menuData.AR,
-					od: menuData.OD,
-					cs: menuData.CS,
-					hp: menuData.HP
-				});
+				let beatmap;
+				try {
+					beatmap = new Beatmap({
+						path: mapPath,
+						ar: menuData.AR,
+						od: menuData.OD,
+						cs: menuData.CS,
+						hp: menuData.HP
+					});
+				} catch (_) {
+					wLogger.debug("can't get map");
+					continue;
+				}
 
 				const calc = new Calculator();
 
-				const currAttrs = calc.mods(allTimesData.MenuMods);
+				const currAttrs = calc.mods(currentMods);
 				const strains = currAttrs.strains(beatmap);
 				const mapAttributes = currAttrs.acc(100).mapAttributes(beatmap);
 				const fcPerformance = currAttrs.acc(100).performance(beatmap);
@@ -273,7 +285,6 @@ export class OsuInstance {
 					// no-default
 				}
 
-				// .sort((a, b) => a - b)
 				beatmapPpData.updatePPData(resultStrains, ppAcc as never, {
 					ar: mapAttributes.ar,
 					cs: mapAttributes.cs,
@@ -294,6 +305,18 @@ export class OsuInstance {
 						: 0;
 				const full = Math.round(lazerBeatmap.totalLength);
 				beatmapPpData.updateTimings(firstObj, full);
+			}
+
+			await sleep(500);
+		}
+	}
+
+	async watchProcessHealth() {
+		while (!this.isDestroyed) {
+			if (!Process.isProcessExist(this.process.handle)) {
+				this.isDestroyed = true;
+				wLogger.info(`osu!.exe at ${this.pid} got destroyed`);
+				this.emitter.emit('onDestroy', this.pid);
 			}
 
 			await sleep(500);

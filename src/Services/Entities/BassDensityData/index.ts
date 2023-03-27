@@ -59,6 +59,5 @@ export class BassDensityData extends AbstractEntity {
 
 		this.currentAudioVelocity = currentAudioVelocity;
 		this.density = (1 + currentAudioVelocity) * 0.5;
-		wLogger.debug(`BassDensity: ${this.density}`);
 	}
 }
