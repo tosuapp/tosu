@@ -1,13 +1,13 @@
 import { DataRepo } from '../repo';
 
 export abstract class AbstractEntity {
-	services: DataRepo;
+    services: DataRepo;
 
-	constructor(services: DataRepo) {
-		this.services = services;
-	}
+    constructor(services: DataRepo) {
+        this.services = services;
+    }
 
-	async updateState() {
-		throw Error('Error: updateState not implemented');
-	}
+    async updateState() {
+        throw Error('Error: updateState not implemented');
+    }
 }
