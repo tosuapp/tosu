@@ -64,8 +64,6 @@
     "url": "https://github.com/KotRikD/osumemory-ts/issues"
   },
   "engines": {
-    "npm": ">=9.5.0",
-    "typescript": ">=4.9.5",
     "node": ">=18.14.2"
   }
 }

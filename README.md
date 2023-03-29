@@ -1,8 +1,6 @@
 <h1 align="center">Welcome to osumemory-ts 👋</h1>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
-  <img src="https://img.shields.io/badge/npm-%3E%3D9.5.0-blue.svg" />
-  <img src="https://img.shields.io/badge/typescript-%3E%3D4.9.5-blue.svg" />
   <img src="https://img.shields.io/badge/node-%3E%3D18.14.2-blue.svg" />
   <a href="https://github.com/KotRikD/osumemory-ts#readme" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
@@ -24,7 +22,6 @@
 
 ## Prerequisites
 
-- npm >=9.5.0
 - typescript >=4.9.5
 - node >=18.14.2
 
