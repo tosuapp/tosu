@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import findProcess from 'find-process';
 import { BeatmapDecoder } from 'osu-parsers';
+import fs from 'fs';
 import path from 'path';
 import { Beatmap, Calculator } from 'rosu-pp';
 
@@ -167,9 +168,15 @@ export class OsuInstance {
 
 			if (!settings.gameFolder) {
 				settings.setGameFolder(path.join(this.path, '../'));
-				settings.setSongsFolder(
-					path.join(this.path, '../', allTimesData.SongsFolder)
-				);
+				
+				// condition when user have different BeatmapDirectory in osu! config
+				if (fs.existsSync(allTimesData.SongsFolder)) {
+					settings.setSongsFolder(allTimesData.SongsFolder)
+				} else {
+					settings.setSongsFolder(
+						path.join(this.path, '../', allTimesData.SongsFolder)
+					);
+				}
 			}
 
 			switch (allTimesData.Status) {
