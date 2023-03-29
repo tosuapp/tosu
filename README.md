@@ -48,6 +48,8 @@ yarn run:dev
 * Twitter: [@kotrik0](https://twitter.com/kotrik0)
 * Github: [@KotRikD](https://github.com/KotRikD)
 
+Special thanks to [@xxCherry](https://github.com/xxCherry), for providing memory reading library
+
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KotRikD/osumemory-ts/issues). You can also take a look at the [contributing guide](https://github.com/KotRikD/osumemory-ts/blob/master/CONTRIBUTING.md).
