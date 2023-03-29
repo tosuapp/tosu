@@ -161,10 +161,11 @@ export class OsuInstance {
 		while (!this.isDestroyed) {
 			await Promise.all([
 				allTimesData.updateState(),
-				menuData.updateState(),
-				// osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
-				menuData.updateMP3Length()
+				menuData.updateState(),				
 			]);
+
+			// osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
+			menuData.updateMP3Length()
 
 			if (!settings.gameFolder) {
 				settings.setGameFolder(path.join(this.path, '../'));

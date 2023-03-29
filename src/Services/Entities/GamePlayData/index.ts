@@ -122,10 +122,6 @@ export class GamePlayData extends AbstractEntity {
 			 ||
 			 ||
 			 ||
-			 ||
-			 ||
-			 ||
-			 ||
 			 []
 		*/
 		if (rulesetAddr === 0) {

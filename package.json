@@ -1,10 +1,10 @@
 {
-  "name": "osumemory-js",
+  "author": "Mikhail Babynichev",
+  "name": "osumemory-ts",
   "version": "1.0.0",
   "main": "dist/index.js",
   "bin": "dist/index.js",
-  "private": "true",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "scripts": {
     "ts:run": "ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
     "ts:compile": "ncc build src/index.ts -o dist -m -d",
@@ -54,5 +54,18 @@
     "prettier": "^2.8.5",
     "tsconfig-paths": "^3.14.2",
     "typescript": "^4.9.5"
+  },
+  "homepage": "https://github.com/KotRikD/osumemory-ts#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KotRikD/osumemory-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KotRikD/osumemory-ts/issues"
+  },
+  "engines": {
+    "npm": ">=9.5.0",
+    "typescript": ">=4.9.5",
+    "node": ">=18.14.2"
   }
 }
