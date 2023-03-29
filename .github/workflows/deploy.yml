@@ -38,7 +38,7 @@ jobs:
       - name: Install Deps 🔧
         run: |
           npm install -g yarn
-          yarn
+          yarn install --frozen-lockfile
 
       - name: Compile TS 🔧
         run: |
