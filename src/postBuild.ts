@@ -35,4 +35,4 @@ async function windowsPostBuild(output) {
 	fs.writeFileSync(output, Buffer.from(exe.generate()));
 }
 
-windowsPostBuild(path.join(__dirname, '../', './dist/osumemory-js.exe'));
+windowsPostBuild(path.join(__dirname, '../', './dist/osumemory-ts.exe'));
