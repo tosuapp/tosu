@@ -1,4 +1,9 @@
+import { BeatmapDecoder } from 'osu-parsers';
+import path from 'path';
+import { Beatmap, Calculator } from 'rosu-pp';
+
 import { DataRepo } from '@/Services/repo';
+import { wLogger } from '@/logger';
 
 import { AbstractEntity } from '../types';
 
@@ -122,5 +127,114 @@ export class BeatmapPPData extends AbstractEntity {
             firstObj,
             full
         };
+    }
+
+    async updateMapMetadata() {
+        const { menuData, allTimesData, settings, gamePlayData } =
+            this.services.getServices([
+                'menuData',
+                'allTimesData',
+                'settings',
+                'gamePlayData'
+            ]);
+        let prevBeatmapMd5 = '';
+        let prevMods = 0;
+        let prevGM = 0;
+
+        const currentMods =
+            allTimesData.Status === 2 || allTimesData.Status === 7
+                ? gamePlayData.Mods
+                : allTimesData.MenuMods;
+        if (
+            (prevBeatmapMd5 !== menuData.MD5 ||
+                prevMods !== currentMods ||
+                prevGM !== menuData.MenuGameMode) &&
+            menuData.Path.endsWith('.osu') &&
+            settings.gameFolder
+        ) {
+            // Repeating original gosumemory logic
+            prevBeatmapMd5 = menuData.MD5;
+            prevMods = allTimesData.MenuMods;
+            prevGM = menuData.MenuGameMode;
+
+            const mapPath = path.join(
+                settings.songsFolder,
+                menuData.Folder,
+                menuData.Path
+            );
+            let beatmap;
+            try {
+                beatmap = new Beatmap({
+                    path: mapPath,
+                    ar: menuData.AR,
+                    od: menuData.OD,
+                    cs: menuData.CS,
+                    hp: menuData.HP
+                });
+            } catch (_) {
+                wLogger.debug("can't get map");
+                return;
+            }
+
+            const calc = new Calculator();
+
+            const currAttrs = calc.mods(currentMods);
+            const strains = currAttrs.strains(beatmap);
+            const mapAttributes = currAttrs.acc(100).mapAttributes(beatmap);
+            const fcPerformance = currAttrs.acc(100).performance(beatmap);
+
+            const ppAcc = {};
+            for (const acc of [100, 99, 98, 97, 96, 95]) {
+                const performance = currAttrs.acc(acc).performance(beatmap);
+                ppAcc[acc] = performance.pp;
+            }
+
+            const resultStrains: number[] = [];
+            switch (strains.mode) {
+                case 0:
+                    resultStrains.push(...strains.aimNoSliders);
+                    break;
+                case 1:
+                    resultStrains.push(...strains.color);
+                    break;
+                case 2:
+                    resultStrains.push(...strains.movement);
+                    break;
+                case 3:
+                    resultStrains.push(...strains.strains);
+                    break;
+                default:
+                // no-default
+            }
+
+            try {
+                const decoder = new BeatmapDecoder();
+                const lazerBeatmap = await decoder.decodeFromPath(mapPath);
+                this.updateBPM(lazerBeatmap.bpmMin, lazerBeatmap.bpmMax);
+
+                const firstObj =
+                    lazerBeatmap.hitObjects.length > 0
+                        ? Math.round(lazerBeatmap.hitObjects.at(0)!.startTime)
+                        : 0;
+                const full = Math.round(lazerBeatmap.totalLength);
+
+                this.updateTimings(firstObj, full);
+            } catch (e) {
+                console.error(e);
+                wLogger.error(
+                    "Something happend, when we're tried to parse beatmap"
+                );
+            }
+
+            this.updatePPData(resultStrains, ppAcc as never, {
+                ar: mapAttributes.ar,
+                cs: mapAttributes.cs,
+                od: mapAttributes.od,
+                hp: mapAttributes.hp,
+                maxCombo: fcPerformance.difficulty.maxCombo,
+                fullStars: fcPerformance.difficulty.stars,
+                stars: fcPerformance.difficulty.stars
+            });
+        }
     }
 }

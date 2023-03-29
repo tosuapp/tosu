@@ -212,7 +212,7 @@ export class GamePlayData extends AbstractEntity {
 
         this.updateLeaderboard(process, rulesetAddr);
         this.updateGrade(menuData);
-        this.updateStars();
+        this.updateStarsAndPerformance();
     }
 
     private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
@@ -345,7 +345,7 @@ export class GamePlayData extends AbstractEntity {
         this.Leaderboard.readLeaderboard();
     }
 
-    private updateStars() {
+    private updateStarsAndPerformance() {
         const { settings, menuData, beatmapPpData } = this.services.getServices(
             ['settings', 'menuData', 'beatmapPpData']
         );
@@ -386,7 +386,6 @@ export class GamePlayData extends AbstractEntity {
         };
 
         const curPerformance = new Calculator(scoreParams).performance(beatmap);
-
         const fcPerformance = new Calculator({
             ...scoreParams,
             passedObjects: resolvePassedObjects(
