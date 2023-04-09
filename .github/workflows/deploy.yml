@@ -41,6 +41,12 @@ jobs:
           rust-version: stable
           components: clippy
 
+      - name: Compile Memory lib 🔧
+        run: |
+          cd packages/tsprocess
+          npm install
+          npm run build
+
       - name: Install Deps 🔧
         run: |
           npm install -g yarn
