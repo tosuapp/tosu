@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
-    runs-on: "${{ matrix.runner }}"
+    runs-on: "${{ matrix.os }}"
     name: "${{ matrix.name }}"
     steps:
       - name: Checkout 🛎️
