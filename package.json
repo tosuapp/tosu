@@ -16,7 +16,7 @@
   "pkg": {
     "scripts": "dist/**/*.js",
     "assets": [
-      "dist/index.node",
+      "dist/**/*.node",
       "dist/target/**/*"
     ],
     "targets": [
