@@ -18,6 +18,16 @@
 
 > Eponymous software for reading osu! memory, accounting for most of gosumemory's issues
 
+Features Done
+---
+- [X] LOW CPU USAGE (I actually checked, this thing has a much lower memory recoil than the gosu)
+- [X] ALL GAMEMODES SUPPORT
+- [X] Menu state (map information, star rating, map metadata)
+- [X] Gameplay information (300's, 100's, 50's, live pp calculations, other stuff)
+- [X] ResultScreen information (result screen information with grades + gameplay data)
+- [ ] Tournament state (in beta right now, dont have chat reading, and some output data)
+- [ ] In-game overlay (kinda hard thing to make + i need some RFC for it)
+
 ### 🏠 [Homepage](https://github.com/KotRikD/osumemory-ts#readme)
 
 ## Prerequisites
