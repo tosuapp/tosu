@@ -24,7 +24,7 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
     runs-on: "${{ matrix.os }}"
-    name: "${{ matrix.name }}"
+    name: "Build on ${{ matrix.os }}"
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
@@ -54,21 +54,21 @@ jobs:
           yarn compile
 
       - name: Upload Artifact (Linux)
-        if: startsWith( matrix.runner, 'ubuntu' )
+        if: startsWith( matrix.os, 'ubuntu' )
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.name }}-${{ github.ref_name }}
           path: dist/osumemory-ts
   
       - name: Upload Artifact (Mac OS)
-        if: startsWith( matrix.runner, 'macos' )
+        if: startsWith( matrix.os, 'macos' )
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.name }}-${{ github.ref_name }}
           path: dist/osumemory-ts.app
 
       - name: Upload Artifact (Windows)
-        if: startsWith( matrix.runner, 'windows' )
+        if: startsWith( matrix.os, 'windows' )
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.name }}-${{ github.ref_name }}
