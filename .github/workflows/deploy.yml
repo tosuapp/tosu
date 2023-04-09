@@ -21,7 +21,8 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        # os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest]
 
     runs-on: "${{ matrix.os }}"
     name: "Build on ${{ matrix.os }}"
@@ -53,23 +54,23 @@ jobs:
         run: |
           yarn compile
 
-      - name: Upload Artifact (Linux)
-        if: startsWith( matrix.os, 'ubuntu' )
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.name }}-${{ github.ref_name }}
-          path: dist/osumemory-ts
+      # - name: Upload Artifact (Linux)
+      #   if: startsWith( matrix.os, 'ubuntu' )
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ matrix.os }}-${{ github.ref_name }}
+      #     path: dist/osumemory-ts
   
-      - name: Upload Artifact (Mac OS)
-        if: startsWith( matrix.os, 'macos' )
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.name }}-${{ github.ref_name }}
-          path: dist/osumemory-ts.app
+      # - name: Upload Artifact (Mac OS)
+      #   if: startsWith( matrix.os, 'macos' )
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ matrix.os }}-${{ github.ref_name }}
+      #     path: dist/osumemory-ts.app
 
       - name: Upload Artifact (Windows)
         if: startsWith( matrix.os, 'windows' )
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.name }}-${{ github.ref_name }}
+          name: ${{ matrix.os }}-${{ github.ref_name }}
           path: dist/osumemory-ts.exe
