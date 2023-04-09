@@ -10,14 +10,13 @@
     "ts:run": "ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
     "ts:compile": "ncc build src/index.ts -o dist -m -d",
     "run:dev": "yarn ts:run src/index.ts",
-    "compile:win": "pkg --compress brotli . && yarn ts:run src/postBuild.ts",
+    "compile": "pkg --compress brotli . && yarn ts:run src/postBuild.ts",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss}\""
   },
   "pkg": {
     "scripts": "dist/**/*.js",
     "assets": [
       "dist/index.node",
-      "dist/g-utils.node",
       "dist/target/**/*"
     ],
     "targets": [
@@ -46,6 +45,7 @@
     "resedit": "^2.0.0",
     "rosu-pp": "^0.9.4",
     "ts-node": "^10.9.1",
+    "tsprocess": "file:./packages/tsprocess",
     "winston": "^3.8.2"
   },
   "devDependencies": {

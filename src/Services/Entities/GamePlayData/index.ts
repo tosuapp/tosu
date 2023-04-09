@@ -1,12 +1,13 @@
 import path from 'path';
 import { Beatmap, Calculator } from 'rosu-pp';
+import { Process } from 'tsprocess/dist/process';
 
 import { Leaderboard } from '@/Instances/Leaderboard';
-import { Process } from '@/Memory/process';
 import { DataRepo } from '@/Services/repo';
 import { calculateGrade } from '@/Utils/calculateGrade';
 import { OsuMods } from '@/Utils/osuMods.types';
 import { resolvePassedObjects } from '@/Utils/resolvePassedObjects';
+import { config } from '@/config';
 import { wLogger } from '@/logger';
 
 import { MenuData } from '../MenuData';
@@ -192,10 +193,6 @@ export class GamePlayData extends AbstractEntity {
             }
         }
 
-        // [[Ruleset + 0xB0] + 0x10] + 0x4
-        const keyOverlayArrayAddr = process.readInt(
-            process.readInt(process.readInt(rulesetAddr + 0xb0) + 0x10) + 0x4
-        );
         if (this.ComboPrev > this.MaxCombo) {
             this.ComboPrev = 0;
         }
@@ -206,13 +203,35 @@ export class GamePlayData extends AbstractEntity {
         this.ComboPrev = this.Combo;
 
         // [[[Ruleset + 0x68] + 0x38] + 0x38]
-        this.HitErrors = this.getHitErrors(process, scoreBase);
+        this.HitErrors = this.getHitErrors(
+            process,
+            bases.leaderStart,
+            scoreBase
+        );
 
-        this.KeyOverlay = this.getKeyOverlay(process, keyOverlayArrayAddr);
-
-        this.updateLeaderboard(process, rulesetAddr);
+        this.updateLeaderboard(process, bases.leaderStart, rulesetAddr);
         this.updateGrade(menuData);
         this.updateStarsAndPerformance();
+    }
+
+    async updateKeyOverlay() {
+        const { process, bases } = this.services.getServices([
+            'process',
+            'bases'
+        ]);
+
+        const rulesetAddr = process.readInt(
+            process.readInt(bases.bases.rulesetsAddr - 0xb) + 0x4
+        );
+        if (rulesetAddr === 0) {
+            return;
+        }
+
+        // [[Ruleset + 0xB0] + 0x10] + 0x4
+        const keyOverlayArrayAddr = process.readInt(
+            process.readInt(process.readInt(rulesetAddr + 0xb0) + 0x10) + 0x4
+        );
+        this.KeyOverlay = this.getKeyOverlay(process, keyOverlayArrayAddr);
     }
 
     private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
@@ -262,6 +281,7 @@ export class GamePlayData extends AbstractEntity {
 
     private getHitErrors(
         process: Process,
+        leaderStart: number,
         scoreBase: number = 0
     ): Array<number> {
         if (scoreBase === 0) return [];
@@ -273,7 +293,7 @@ export class GamePlayData extends AbstractEntity {
         const size = process.readInt(base + 0xc);
 
         for (let i = 0; i < size; i++) {
-            let current = items + 0x8 + 0x4 * i;
+            let current = items + leaderStart + 0x4 * i;
             let error = process.readInt(current);
 
             errors.push(error);
@@ -330,7 +350,11 @@ export class GamePlayData extends AbstractEntity {
         );
     }
 
-    private updateLeaderboard(process: Process, rulesetAddr: number) {
+    private updateLeaderboard(
+        process: Process,
+        leaderStart: number,
+        rulesetAddr: number
+    ) {
         // [Ruleset + 0x7C]
         const leaderBoardBase = process.readInt(rulesetAddr + 0x7c);
 
@@ -342,10 +366,14 @@ export class GamePlayData extends AbstractEntity {
         } else {
             this.Leaderboard.updateBase(leaderBoardAddr);
         }
-        this.Leaderboard.readLeaderboard();
+        this.Leaderboard.readLeaderboard(leaderStart);
     }
 
     private updateStarsAndPerformance() {
+        if (!config.calculatePP) {
+            return;
+        }
+
         const { settings, menuData, beatmapPpData } = this.services.getServices(
             ['settings', 'menuData', 'beatmapPpData']
         );
@@ -359,13 +387,19 @@ export class GamePlayData extends AbstractEntity {
             menuData.Folder,
             menuData.Path
         );
-        const beatmap = new Beatmap({
-            path: mapPath,
-            ar: menuData.AR,
-            od: menuData.OD,
-            cs: menuData.CS,
-            hp: menuData.HP
-        });
+        let beatmap;
+        try {
+            beatmap = new Beatmap({
+                path: mapPath,
+                ar: menuData.AR,
+                od: menuData.OD,
+                cs: menuData.CS,
+                hp: menuData.HP
+            });
+        } catch (e) {
+            wLogger.debug("can't get map");
+            return;
+        }
 
         const scoreParams = {
             passedObjects: resolvePassedObjects(

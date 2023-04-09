@@ -1,4 +1,4 @@
-import { Process } from '@/Memory/process';
+import { Process } from 'tsprocess/dist/process';
 
 import { Bases } from './Bases';
 import { AllTimesData } from './Entities/AllTimesData';
@@ -7,6 +7,8 @@ import { BeatmapPPData } from './Entities/BeatmapPpData';
 import { GamePlayData } from './Entities/GamePlayData';
 import { MenuData } from './Entities/MenuData';
 import { ResultsScreenData } from './Entities/ResultsScreenData';
+import { TourneyManagerData } from './Entities/TourneyManagerData';
+import { TourneyUserProfileData } from './Entities/TourneyUserProfileData';
 import { Settings } from './Settings';
 
 export interface DataRepoList {
@@ -19,6 +21,8 @@ export interface DataRepoList {
     bassDensityData: BassDensityData;
     gamePlayData: GamePlayData;
     resultsScreenData: ResultsScreenData;
+    tourneyUserProfileData: TourneyUserProfileData;
+    tourneyManagerData: TourneyManagerData;
 }
 
 export class DataRepo {

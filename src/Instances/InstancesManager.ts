@@ -33,6 +33,10 @@ export class InstancesManager {
                 }
 
                 const osuInstance = new OsuInstance(process.pid);
+                if (process.cmd.includes('-spectateclient')) {
+                    osuInstance.setIsTourneySpectator(true);
+                }
+
                 osuInstance.emitter.on(
                     'onDestroy',
                     this.onProcessDestroy.bind(this)

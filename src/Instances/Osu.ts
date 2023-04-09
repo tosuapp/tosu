@@ -1,11 +1,9 @@
 import EventEmitter from 'events';
 import fs from 'fs';
-import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
-import { Beatmap, Calculator } from 'rosu-pp';
+import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/Api/Utils/BuildResult';
-import { Process } from '@/Memory/process';
 import { BaseData, Bases } from '@/Services/Bases';
 import { AllTimesData } from '@/Services/Entities/AllTimesData';
 import { BassDensityData } from '@/Services/Entities/BassDensityData';
@@ -13,10 +11,15 @@ import { BeatmapPPData } from '@/Services/Entities/BeatmapPpData';
 import { GamePlayData } from '@/Services/Entities/GamePlayData';
 import { MenuData } from '@/Services/Entities/MenuData';
 import { ResultsScreenData } from '@/Services/Entities/ResultsScreenData';
+import { TourneyManagerData } from '@/Services/Entities/TourneyManagerData';
+import { TourneyUserProfileData } from '@/Services/Entities/TourneyUserProfileData';
 import { Settings } from '@/Services/Settings';
 import { DataRepo } from '@/Services/repo';
 import { sleep } from '@/Utils/sleep';
+import { config } from '@/config';
 import { wLogger } from '@/logger';
+
+import { InstancesManager } from './InstancesManager';
 
 const SCAN_PATTERNS: {
     [k in keyof BaseData]: string;
@@ -42,6 +45,9 @@ export class OsuInstance {
 
     isReady: boolean;
     isDestroyed: boolean = false;
+    isTourneyManager: boolean = false;
+    isTourneySpectator: boolean = false;
+
     emitter: EventEmitter;
 
     constructor(pid: number) {
@@ -51,7 +57,7 @@ export class OsuInstance {
         this.process = new Process(this.pid);
         this.emitter = new EventEmitter();
 
-        this.path = this.process.getModule('osu!.exe').path;
+        this.path = this.process.path;
 
         this.servicesRepo.set('process', this.process);
         this.servicesRepo.set('bases', new Bases(this.servicesRepo));
@@ -77,6 +83,18 @@ export class OsuInstance {
             'resultsScreenData',
             new ResultsScreenData(this.servicesRepo)
         );
+        this.servicesRepo.set(
+            'tourneyUserProfileData',
+            new TourneyUserProfileData(this.servicesRepo)
+        );
+        this.servicesRepo.set(
+            'tourneyManagerData',
+            new TourneyManagerData(this.servicesRepo)
+        );
+    }
+
+    setIsTourneySpectator(newVal: boolean) {
+        this.isTourneySpectator = newVal;
     }
 
     async start() {
@@ -119,26 +137,32 @@ export class OsuInstance {
         }
 
         this.update();
+        if (config.enableKeyOverlay) {
+            this.updateKeyOverlay();
+        }
+        this.updateMapMetadata();
         this.watchProcessHealth();
     }
 
     async update() {
         const {
             allTimesData,
-            beatmapPpData,
             menuData,
             bassDensityData,
             gamePlayData,
             resultsScreenData,
-            settings
+            settings,
+            tourneyUserProfileData,
+            tourneyManagerData
         } = this.servicesRepo.getServices([
             'allTimesData',
-            'beatmapPpData',
             'menuData',
             'bassDensityData',
             'gamePlayData',
             'resultsScreenData',
-            'settings'
+            'settings',
+            'tourneyUserProfileData',
+            'tourneyManagerData'
         ]);
 
         let retriesTemp = 0;
@@ -176,6 +200,9 @@ export class OsuInstance {
                     }
                     break;
                 case 2:
+                    if (allTimesData.PlayTime < 150) {
+                        return;
+                    }
                     await gamePlayData.updateState();
                     if (retriesTemp > gamePlayData.Retries) {
                         // unvalidate gamePlayData, because user restarted map
@@ -188,14 +215,88 @@ export class OsuInstance {
                 case 7:
                     await resultsScreenData.updateState();
                     break;
+                case 22:
+                    this.isTourneyManager = true;
+                    await tourneyManagerData.updateState();
+                    break;
                 default:
                     gamePlayData.init();
                     resultsScreenData.init();
                     break;
             }
 
-            await beatmapPpData.updateMapMetadata();
-            await sleep(150);
+            if (this.isTourneySpectator) {
+                await tourneyUserProfileData.updateState();
+            }
+
+            await sleep(config.pollRate);
+        }
+    }
+
+    async updateKeyOverlay() {
+        const { allTimesData, gamePlayData } = this.servicesRepo.getServices([
+            'allTimesData',
+            'gamePlayData'
+        ]);
+
+        while (!this.isDestroyed) {
+            switch (allTimesData.Status) {
+                case 2:
+                    if (allTimesData.PlayTime < 150) {
+                        return;
+                    }
+
+                    await gamePlayData.updateKeyOverlay();
+                    // await
+                    break;
+                default:
+                // no-default
+            }
+
+            await sleep(config.keyOverlayPollRate);
+        }
+    }
+
+    async updateMapMetadata() {
+        while (true) {
+            const {
+                menuData,
+                allTimesData,
+                settings,
+                gamePlayData,
+                beatmapPpData
+            } = this.servicesRepo.getServices([
+                'menuData',
+                'allTimesData',
+                'settings',
+                'gamePlayData',
+                'beatmapPpData'
+            ]);
+            let prevBeatmapMd5 = '';
+            let prevMods = 0;
+            let prevGM = 0;
+
+            const currentMods =
+                allTimesData.Status === 2 || allTimesData.Status === 7
+                    ? gamePlayData.Mods
+                    : allTimesData.MenuMods;
+
+            if (
+                (prevBeatmapMd5 !== menuData.MD5 ||
+                    prevMods !== currentMods ||
+                    prevGM !== menuData.MenuGameMode) &&
+                menuData.Path.endsWith('.osu') &&
+                settings.gameFolder
+            ) {
+                // Repeating original gosumemory logic
+                prevBeatmapMd5 = menuData.MD5;
+                prevMods = allTimesData.MenuMods;
+                prevGM = menuData.MenuGameMode;
+
+                await beatmapPpData.updateMapMetadata(currentMods);
+            }
+
+            await sleep(config.pollRate);
         }
     }
 
@@ -207,11 +308,11 @@ export class OsuInstance {
                 this.emitter.emit('onDestroy', this.pid);
             }
 
-            await sleep(500);
+            await sleep(config.pollRate);
         }
     }
 
-    getState() {
-        return buildResult(this.servicesRepo);
+    getState(instancesManager: InstancesManager) {
+        return buildResult(this.servicesRepo, instancesManager);
     }
 }

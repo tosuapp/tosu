@@ -1,11 +1,17 @@
 import path from 'path';
 
+import { InstancesManager } from '@/Instances/InstancesManager';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/Instances/Leaderboard';
 import { DataRepo } from '@/Services/repo';
 import { getOsuModsString } from '@/Utils/osuMods';
 import { OsuMods } from '@/Utils/osuMods.types';
 
-import { ApiAnswer, LeaderboardPlayer } from './types';
+import {
+    ApiAnswer,
+    LeaderboardPlayer,
+    TourneyIpcClient,
+    TourneyValues
+} from './types';
 
 const defaultLBPlayer = {
     name: '',
@@ -39,7 +45,10 @@ const convertMemoryPlayerToResult = (
     isPassing: Number(memoryPlayer.IsPassing)
 });
 
-export const buildResult = (service: DataRepo): ApiAnswer => {
+export const buildResult = (
+    service: DataRepo,
+    instancesManager: InstancesManager
+): ApiAnswer => {
     const {
         settings,
         bassDensityData,
@@ -224,6 +233,123 @@ export const buildResult = (service: DataRepo): ApiAnswer => {
             katu: resultsScreenData.HitKatu,
             '50': resultsScreenData.Hit50,
             '0': resultsScreenData.HitMiss
+        },
+        tourney: buildTourneyData(instancesManager)
+    };
+};
+
+const buildTourneyData = (
+    instancesManager: InstancesManager
+): TourneyValues | undefined => {
+    const osuTourneyManager = Object.values(
+        instancesManager.osuInstances
+    ).filter((instance) => instance.isTourneyManager);
+    if (osuTourneyManager.length < 1) {
+        return undefined;
+    }
+
+    const osuTourneyClients = Object.values(
+        instancesManager.osuInstances
+    ).filter((instance) => instance.isTourneySpectator);
+
+    const mappedOsuTourneyClients = osuTourneyClients.map<TourneyIpcClient>(
+        (instance, iterator) => {
+            const { allTimesData, gamePlayData, tourneyUserProfileData } =
+                instance.servicesRepo.getServices([
+                    'allTimesData',
+                    'gamePlayData',
+                    'tourneyUserProfileData'
+                ]);
+
+            const currentMods =
+                allTimesData.Status === 2 || allTimesData.Status === 7
+                    ? gamePlayData.Mods
+                    : allTimesData.MenuMods;
+
+            const spectatorTeam =
+                iterator < osuTourneyClients.length / 2 ? 'left' : 'right';
+
+            return {
+                team: spectatorTeam,
+                ipcSpec: '',
+                spectating: {
+                    name: tourneyUserProfileData.Name,
+                    country: tourneyUserProfileData.Country,
+                    userID: tourneyUserProfileData.UserID,
+                    accuracy: tourneyUserProfileData.Accuracy,
+                    rankedScore: tourneyUserProfileData.RankedScore,
+                    playCount: tourneyUserProfileData.PlayCount,
+                    globalRank: tourneyUserProfileData.GlobalRank,
+                    totalPP: tourneyUserProfileData.PP
+                },
+                gameplay: {
+                    gameMode: gamePlayData.Mode,
+                    name: gamePlayData.PlayerName,
+                    score:
+                        (gamePlayData.Mods & OsuMods.ScoreV2) ===
+                        OsuMods.ScoreV2
+                            ? gamePlayData.ScoreV2
+                            : gamePlayData.Score,
+                    accuracy: gamePlayData.Accuracy,
+                    combo: {
+                        current: gamePlayData.Combo,
+                        max: gamePlayData.MaxCombo
+                    },
+                    hp: {
+                        normal: gamePlayData.PlayerHP,
+                        smooth: gamePlayData.PlayerHPSmooth
+                    },
+                    hits: {
+                        '300': gamePlayData.Hit300,
+                        geki: gamePlayData.HitGeki,
+                        '100': gamePlayData.Hit100,
+                        katu: gamePlayData.HitKatu,
+                        '50': gamePlayData.Hit50,
+                        '0': gamePlayData.HitMiss,
+                        sliderBreaks: gamePlayData.HitSB,
+                        grade: {
+                            current: gamePlayData.GradeCurrent,
+                            maxThisPlay: gamePlayData.GradeExpected
+                        },
+                        unstableRate: gamePlayData.UnstableRate,
+                        hitErrorArray: gamePlayData.HitErrors
+                    },
+                    mods: {
+                        num: currentMods,
+                        str: getOsuModsString(currentMods)
+                    }
+                }
+            };
         }
+    );
+
+    const { tourneyManagerData } =
+        osuTourneyManager[0].servicesRepo.getServices(['tourneyManagerData']);
+
+    return {
+        manager: {
+            ipcState: tourneyManagerData.IPCState,
+            bestOF: tourneyManagerData.BestOf,
+            teamName: {
+                left: tourneyManagerData.FirstTeamName,
+                right: tourneyManagerData.SecondTeamName
+            },
+            stars: {
+                left: tourneyManagerData.LeftStars,
+                right: tourneyManagerData.RightStars
+            },
+            bools: {
+                scoreVisible: tourneyManagerData.ScoreVisible,
+                starsVisible: tourneyManagerData.StarsVisible
+            },
+            chat: [],
+            gameplay: {
+                score: {
+                    left: tourneyManagerData.FirstTeamScore,
+                    right: tourneyManagerData.SecondTeamScore
+                }
+            }
+        },
+        ipcClients: [...mappedOsuTourneyClients]
     };
 };

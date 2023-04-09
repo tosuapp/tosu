@@ -1,4 +1,4 @@
-import { Process } from '@/Memory/process';
+import { Process } from 'tsprocess/dist/process';
 
 export interface LeaderboardPlayer {
     Name: string;
@@ -81,7 +81,7 @@ export class Leaderboard {
         ];
     }
 
-    readLeaderboard() {
+    readLeaderboard(leaderStart: number) {
         if (this.leaderboardBase === 0) {
             this.clear();
             return this.leaderBoard;
@@ -103,7 +103,7 @@ export class Leaderboard {
         const itemsSize = this.process.readInt(playersArray + 0xc);
 
         for (let i = 0; i < itemsSize; i++) {
-            const current = items + 0x8 + 0x4 * i;
+            const current = items + leaderStart + 0x4 * i;
 
             const [player] = this.readLeaderPlayerStruct(
                 this.process.readInt(current)

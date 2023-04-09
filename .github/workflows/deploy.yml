@@ -19,7 +19,12 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    runs-on: "${{ matrix.runner }}"
+    name: "${{ matrix.name }}"
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
@@ -44,12 +49,27 @@ jobs:
         run: |
           yarn ts:compile
 
-      - name: Build Windows 🔧
+      - name: Build App 🔧
         run: |
-          yarn compile:win
+          yarn compile
 
-      - name: Upload Artifact
+      - name: Upload Artifact (Linux)
+        if: startsWith( matrix.runner, 'ubuntu' )
         uses: actions/upload-artifact@v3
         with:
-          name: osumemoryts-win64-${{ github.ref_name }}
+          name: ${{ matrix.name }}-${{ github.ref_name }}
+          path: dist/osumemory-ts
+  
+      - name: Upload Artifact (Mac OS)
+        if: startsWith( matrix.runner, 'macos' )
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}-${{ github.ref_name }}
+          path: dist/osumemory-ts.app
+
+      - name: Upload Artifact (Windows)
+        if: startsWith( matrix.runner, 'windows' )
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}-${{ github.ref_name }}
           path: dist/osumemory-ts.exe

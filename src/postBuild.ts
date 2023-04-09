@@ -35,4 +35,6 @@ async function windowsPostBuild(output) {
     fs.writeFileSync(output, Buffer.from(exe.generate()));
 }
 
-windowsPostBuild(path.join(__dirname, '../', './dist/osumemory-ts.exe'));
+if (process.platform === 'win32') {
+    windowsPostBuild(path.join(__dirname, '../', './dist/osumemory-ts.exe'));
+}

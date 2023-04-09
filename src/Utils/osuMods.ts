@@ -31,7 +31,9 @@ const MODS_MAP: { [K in OsuMods]: string } = {
     [OsuMods.Key3]: '3K',
     [OsuMods.Key2]: '2K',
     [OsuMods.ScoreV2]: 'V2',
-    [OsuMods.Mirror]: 'MR'
+    [OsuMods.Mirror]: 'MR',
+    [OsuMods.NoMod]: '',
+    [OsuMods.FadeIn]: ''
 };
 
 const MODS_ORDER: { [key: string]: number } = {

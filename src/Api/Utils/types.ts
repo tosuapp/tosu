@@ -161,6 +161,20 @@ interface GameplayHits {
     hitErrorArray: number[];
 }
 
+interface TourneyHits
+    extends Pick<
+        GameplayHits,
+        | '300'
+        | 'geki'
+        | '100'
+        | 'katu'
+        | '50'
+        | '0'
+        | 'sliderBreaks'
+        | 'unstableRate'
+        | 'hitErrorArray'
+    > {}
+
 export interface GameplayValues {
     // TODO: Make enum for osu in-game modes
     gameMode: number;
@@ -188,13 +202,87 @@ export interface ResultsScreenValues {
     '0': number;
 }
 
-export interface TourneyValues {}
+interface TourneyMessage {
+    team: string;
+    time: string;
+    name: string;
+    messageBody: string;
+}
+
+interface TourneyManagerGameplay {
+    score: TourneyScore;
+}
+
+interface TourneyBools {
+    scoreVisible: boolean;
+    starsVisible: boolean;
+}
+
+interface TourneyName {
+    left: string;
+    right: string;
+}
+
+interface TourneyStars {
+    left: number;
+    right: number;
+}
+
+interface TourneyScore {
+    left: number;
+    right: number;
+}
+
+interface TourneyManager {
+    ipcState: number;
+    bestOF: number;
+    teamName: TourneyName;
+    stars: TourneyStars;
+    bools: TourneyBools;
+    chat: TourneyMessage[];
+    gameplay: TourneyManagerGameplay;
+}
+
+interface TourneyGameplay {
+    gameMode: number;
+    score: number;
+    name: string;
+    /** actually float */
+    accuracy: number;
+    hits: TourneyHits;
+    combo: GameplayCombo;
+    mods: SelectedMods;
+    hp: GameplayHP;
+}
+
+export interface TourneyIpcClient {
+    team: string;
+    ipcSpec: string;
+    spectating: TourneyIpcSpec;
+    gameplay: TourneyGameplay;
+}
+
+interface TourneyIpcSpec {
+    name: string;
+    country: string;
+    userID: number;
+    /** actually float */
+    accuracy: number;
+    rankedScore: number;
+    playCount: number;
+    globalRank: number;
+    totalPP: number;
+}
+
+export interface TourneyValues {
+    manager: TourneyManager;
+    ipcClients: TourneyIpcClient[];
+}
 
 export interface ApiAnswer {
     settings: InSettingsValues;
     menu: InMenuValues;
     gameplay: GameplayValues;
     resultsScreen: ResultsScreenValues;
-    // TODO: not implemented yet
     tourney?: TourneyValues;
 }

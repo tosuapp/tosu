@@ -5,7 +5,9 @@ import serve from 'koa-static';
 import Websockify from 'koa-websocket';
 
 import { InstancesManager } from './Instances/InstancesManager';
+import { OsuInstance } from './Instances/Osu';
 import { sleep } from './Utils/sleep';
+import { config } from './config';
 import { wLogger } from './logger';
 
 interface CustomContext extends Koa.Context {
@@ -46,7 +48,7 @@ interface CustomContext extends Koa.Context {
     });
 
     router.get('/(.*)', async (ctx, next) => {
-        let staticPath = ctx.request.path.replace('/static', '');
+        const staticPath = ctx.request.path.replace(/^\/static/g, '');
         if (staticPath === '/') {
             ctx.body =
                 'please enter correct static path, you can find needed folder in your static folder';
@@ -64,9 +66,9 @@ interface CustomContext extends Koa.Context {
             return;
         }
 
-        const { settings } = ctx.instancesManager.osuInstances[
-            Object.keys(ctx.instancesManager.osuInstances)[0]
-        ].servicesRepo.getServices(['settings']);
+        const { settings } = (
+            Object.values(ctx.instancesManager.osuInstances)[0] as OsuInstance
+        ).servicesRepo.getServices(['settings']);
         if (settings.songsFolder === '') {
             ctx.response.status = 404;
             ctx.body = {
@@ -85,10 +87,9 @@ interface CustomContext extends Koa.Context {
             return;
         }
 
-        ctx.body =
-            ctx.instancesManager.osuInstances[
-                Object.keys(ctx.instancesManager.osuInstances)[0]
-            ].getState();
+        ctx.body = (
+            Object.values(ctx.instancesManager.osuInstances)[0] as OsuInstance
+        ).getState(ctx.instancesManager);
     });
 
     const wsRouter = new Router();
@@ -115,12 +116,14 @@ interface CustomContext extends Koa.Context {
 
             ctx.websocket.send(
                 JSON.stringify(
-                    ctx.instancesManager.osuInstances[
-                        Object.keys(ctx.instancesManager.osuInstances)[0]
-                    ].getState()
+                    (
+                        Object.values(
+                            ctx.instancesManager.osuInstances
+                        )[0] as OsuInstance
+                    ).getState(ctx.instancesManager)
                 )
             );
-            await sleep(500);
+            await sleep(config.wsSendInterval);
         }
     });
 
