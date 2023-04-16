@@ -1,4 +1,5 @@
 .env
+tsosu.env
 dist/
 node_modules
 yarn-error.log

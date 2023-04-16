@@ -1,4 +1,5 @@
 import Router from '@koa/router';
+import fs from 'fs';
 import Koa from 'koa';
 import send from 'koa-send';
 import serve from 'koa-static';
@@ -8,6 +9,7 @@ import { InstancesManager } from './Instances/InstancesManager';
 import { OsuInstance } from './Instances/Osu';
 import { sleep } from './Utils/sleep';
 import { config } from './config';
+import { OVERLAYS_STATIC } from './constants/overlaysStatic';
 import { wLogger } from './logger';
 
 interface CustomContext extends Koa.Context {
@@ -50,8 +52,8 @@ interface CustomContext extends Koa.Context {
     router.get('/(.*)', async (ctx, next) => {
         const staticPath = ctx.request.path.replace(/^\/static/g, '');
         if (staticPath === '/') {
-            ctx.body =
-                'please enter correct static path, you can find needed folder in your static folder';
+            ctx.type = 'html';
+            ctx.body = OVERLAYS_STATIC;
             return;
         }
 
@@ -90,6 +92,11 @@ interface CustomContext extends Koa.Context {
         ctx.body = (
             Object.values(ctx.instancesManager.osuInstances)[0] as OsuInstance
         ).getState(ctx.instancesManager);
+    });
+
+    router.get('/api/getOverlays', async (ctx) => {
+        ctx.body = await fs.promises.readdir('./static');
+        return;
     });
 
     const wsRouter = new Router();

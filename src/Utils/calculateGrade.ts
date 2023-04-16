@@ -36,7 +36,9 @@ export const calculateGrade = (
         }
 
         return 'D';
-    } else if (mode === 2) {
+    }
+
+    if (mode === 2) {
         if (acc == 100) {
             return SSGrade;
         }
@@ -54,7 +56,9 @@ export const calculateGrade = (
         }
 
         return 'D';
-    } else if (mode === 3) {
+    }
+
+    if (mode === 3) {
         if (acc == 100) {
             return SSGrade;
         }

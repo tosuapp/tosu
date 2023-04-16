@@ -110,7 +110,7 @@ export class OsuInstance {
             }
 
             try {
-                for (const baseKey of Object.keys(SCAN_PATTERNS)) {
+                for (const baseKey in SCAN_PATTERNS) {
                     basesRepo.setBase(
                         baseKey as never,
                         this.process.scanSync(SCAN_PATTERNS[baseKey], true)
@@ -173,7 +173,7 @@ export class OsuInstance {
             ]);
 
             // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
-            menuData.updateMP3Length();
+            await menuData.updateMP3Length();
 
             if (!settings.gameFolder) {
                 settings.setGameFolder(path.join(this.path, '../'));
@@ -201,7 +201,7 @@ export class OsuInstance {
                     break;
                 case 2:
                     if (allTimesData.PlayTime < 150) {
-                        return;
+                        continue;
                     }
                     await gamePlayData.updateState();
                     if (retriesTemp > gamePlayData.Retries) {
@@ -216,7 +216,9 @@ export class OsuInstance {
                     await resultsScreenData.updateState();
                     break;
                 case 22:
-                    this.isTourneyManager = true;
+                    if (!this.isTourneyManager) {
+                        this.isTourneyManager = true;
+                    }
                     await tourneyManagerData.updateState();
                     break;
                 default:
@@ -243,7 +245,7 @@ export class OsuInstance {
             switch (allTimesData.Status) {
                 case 2:
                     if (allTimesData.PlayTime < 150) {
-                        return;
+                        continue;
                     }
 
                     await gamePlayData.updateKeyOverlay();

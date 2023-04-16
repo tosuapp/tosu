@@ -1,6 +1,22 @@
 import * as dotenv from 'dotenv';
+import fs from 'fs';
 
-dotenv.config();
+const curDir = fs.readdirSync('./');
+if (!curDir.includes('tsosu.env')) {
+    fs.writeFileSync(
+        './tsosu.env',
+        `DEBUG_LOG=false
+CALCULATE_PP=true
+ENABLE_KEY_OVERLAY=true
+WS_SEND_INTERVAL=150
+POLL_RATE=150
+KEYOVERLAY_POLL_RATE=150`
+    );
+}
+
+dotenv.config({
+    path: 'tsosu.env'
+});
 
 export const config = {
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
