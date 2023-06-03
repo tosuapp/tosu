@@ -410,18 +410,11 @@ export class GamePlayData extends AbstractEntity {
 
         const curPerformance = new Calculator(scoreParams).performance(beatmap);
         const fcPerformance = new Calculator({
-            ...scoreParams,
-            passedObjects: resolvePassedObjects(
-                this.Mode,
-                this.Hit300 + this.HitMiss,
-                this.Hit100,
-                this.Hit50,
-                0,
-                this.HitKatu,
-                this.HitGeki
-            ),
-            n300: this.Hit300 + this.HitMiss,
-            nMisses: 0
+            mods: this.Mods,
+            nMisses: this.HitMiss,
+            n50: this.Hit50,
+            n100: this.Hit100,
+            n300: this.Hit300
         }).performance(beatmap);
 
         beatmapPpData.updateCurrentAttributes(
