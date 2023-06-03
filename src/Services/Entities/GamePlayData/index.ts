@@ -34,7 +34,6 @@ export class GamePlayData extends AbstractEntity {
     Mode: number;
     MaxCombo: number;
     Score: number;
-    ScoreV2: number;
     Hit100: number;
     Hit300: number;
     Hit50: number;
@@ -71,7 +70,6 @@ export class GamePlayData extends AbstractEntity {
         this.Mode = 0;
         this.MaxCombo = 0;
         this.Score = 0;
-        this.ScoreV2 = 0;
         this.Hit100 = 0;
         this.Hit300 = 0;
         this.Hit50 = 0;
@@ -145,9 +143,7 @@ export class GamePlayData extends AbstractEntity {
         // [[Ruleset + 0x68] + 0x38] + 0x68
         this.MaxCombo = process.readShort(scoreBase + 0x68);
         // [[Ruleset + 0x68] + 0x38] + 0x78
-        this.Score = process.readInt(scoreBase + 0x78);
-        // Ruleset + 0xF8
-        this.ScoreV2 = process.readInt(rulesetAddr + 0xf8);
+        this.Score = process.readInt(rulesetAddr + 0x100);
         // [[Ruleset + 0x68] + 0x38] + 0x88
         this.Hit100 = process.readShort(scoreBase + 0x88);
         // [[Ruleset + 0x68] + 0x38] + 0x8A
@@ -175,16 +171,9 @@ export class GamePlayData extends AbstractEntity {
             process.readInt(gameplayBase + 0x48) + 0xc
         );
 
-        if ((this.Mods & OsuMods.ScoreV2) === OsuMods.ScoreV2) {
-            this.Score = this.ScoreV2;
-        }
-
         if (this.MaxCombo > 0) {
             const baseUR = this.calculateUR();
-            if (
-                (this.Mods & OsuMods.DoubleTime) === OsuMods.DoubleTime ||
-                (this.Mods & OsuMods.Nightcore) === OsuMods.Nightcore
-            ) {
+            if ((this.Mods & OsuMods.DoubleTime) === OsuMods.DoubleTime) {
                 this.UnstableRate = baseUR / 1.5;
             } else if ((this.Mods & OsuMods.HalfTime) === OsuMods.HalfTime) {
                 this.UnstableRate = baseUR * 1.33;

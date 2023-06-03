@@ -150,10 +150,7 @@ export const buildResult = (
         gameplay: {
             gameMode: gamePlayData.Mode,
             name: gamePlayData.PlayerName,
-            score:
-                (gamePlayData.Mods & OsuMods.ScoreV2) === OsuMods.ScoreV2
-                    ? gamePlayData.ScoreV2
-                    : gamePlayData.Score,
+            score: gamePlayData.Score,
             accuracy: gamePlayData.Accuracy,
             combo: {
                 current: gamePlayData.Combo,
@@ -285,11 +282,7 @@ const buildTourneyData = (
                 gameplay: {
                     gameMode: gamePlayData.Mode,
                     name: gamePlayData.PlayerName,
-                    score:
-                        (gamePlayData.Mods & OsuMods.ScoreV2) ===
-                        OsuMods.ScoreV2
-                            ? gamePlayData.ScoreV2
-                            : gamePlayData.Score,
+                    score: gamePlayData.Score,
                     accuracy: gamePlayData.Accuracy,
                     combo: {
                         current: gamePlayData.Combo,
