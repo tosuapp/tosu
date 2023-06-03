@@ -201,14 +201,14 @@ export class OsuInstance {
                     break;
                 case 2:
                     if (allTimesData.PlayTime < 150) {
-                        continue;
+                        break;
                     }
                     await gamePlayData.updateState();
                     if (retriesTemp > gamePlayData.Retries) {
                         // unvalidate gamePlayData, because user restarted map
                         gamePlayData.init();
                         retriesTemp = 0;
-                        continue;
+                        break;
                     }
                     retriesTemp = gamePlayData.Retries;
                     break;
@@ -245,7 +245,7 @@ export class OsuInstance {
             switch (allTimesData.Status) {
                 case 2:
                     if (allTimesData.PlayTime < 150) {
-                        continue;
+                        break;
                     }
 
                     await gamePlayData.updateKeyOverlay();
@@ -260,6 +260,10 @@ export class OsuInstance {
     }
 
     async updateMapMetadata() {
+        let prevBeatmapMd5 = '';
+        let prevMods = 0;
+        let prevGM = 0;
+
         while (true) {
             const {
                 menuData,
@@ -274,9 +278,6 @@ export class OsuInstance {
                 'gamePlayData',
                 'beatmapPpData'
             ]);
-            let prevBeatmapMd5 = '';
-            let prevMods = 0;
-            let prevGM = 0;
 
             const currentMods =
                 allTimesData.Status === 2 || allTimesData.Status === 7
