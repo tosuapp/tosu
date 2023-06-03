@@ -208,9 +208,9 @@ export class BeatmapPPData extends AbstractEntity {
                     ? Math.floor((menuData.MP3Length - full) / offset)
                     : 0;
 
-            if (fromLeft > 0)
-                resultStrains = Array(fromLeft).fill(0).concat(resultStrains);
-            if (fromRight > 0)
+            if (Number.isFinite(fromLeft) && fromLeft > 0)
+            resultStrains = Array(fromLeft).fill(0).concat(resultStrains);
+            if (Number.isFinite(fromRight) && fromRight > 0)
                 resultStrains = resultStrains.concat(Array(fromRight).fill(0));
 
             this.updateTimings(firstObj, full);
