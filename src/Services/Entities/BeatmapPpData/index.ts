@@ -171,7 +171,9 @@ export class BeatmapPPData extends AbstractEntity {
             ppAcc[acc] = performance.pp;
         }
 
-        const resultStrains: number[] = [];
+        let resultStrains: number[] = [];
+        const offset: number = strains.sectionLength;
+
         switch (strains.mode) {
             case 0:
                 resultStrains.push(...strains.aimNoSliders);
@@ -199,6 +201,17 @@ export class BeatmapPPData extends AbstractEntity {
                     ? Math.round(lazerBeatmap.hitObjects.at(0)!.startTime)
                     : 0;
             const full = Math.round(lazerBeatmap.totalLength);
+
+            const fromLeft = Math.floor(firstObj / offset);
+            const fromRight =
+                menuData.MP3Length > full
+                    ? Math.floor((menuData.MP3Length - full) / offset)
+                    : 0;
+
+            if (fromLeft > 0)
+                resultStrains = Array(fromLeft).fill(0).concat(resultStrains);
+            if (fromRight > 0)
+                resultStrains = resultStrains.concat(Array(fromRight).fill(0));
 
             this.updateTimings(firstObj, full);
         } catch (e) {
