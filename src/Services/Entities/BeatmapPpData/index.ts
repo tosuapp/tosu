@@ -2,12 +2,12 @@ import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 import { Beatmap, Calculator } from 'rosu-pp';
 
+import { BeatmapStrains } from '@/Api/Utils/types';
 import { DataRepo } from '@/Services/repo';
 import { config } from '@/config';
 import { wLogger } from '@/logger';
 
 import { AbstractEntity } from '../types';
-import { BeatmapStrains } from '@/Api/Utils/types';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -60,7 +60,7 @@ export class BeatmapPPData extends AbstractEntity {
         this.strains = [];
         this.strainsAll = {
             series: [],
-            xaxis: [],
+            xaxis: []
         };
         this.minBPM = 0.0;
         this.maxBPM = 0.0;
@@ -143,11 +143,9 @@ export class BeatmapPPData extends AbstractEntity {
     async updateMapMetadata(currentMods: number) {
         const start = performance.now();
 
-        const { menuData, settings, beatmapPpData } = this.services.getServices([
-            'menuData',
-            'settings',
-            'beatmapPpData',
-        ]);
+        const { menuData, settings, beatmapPpData } = this.services.getServices(
+            ['menuData', 'settings', 'beatmapPpData']
+        );
 
         const mapPath = path.join(
             settings.songsFolder,
@@ -188,7 +186,7 @@ export class BeatmapPPData extends AbstractEntity {
 
         const resultStrains: BeatmapStrains = {
             series: [],
-            xaxis: [],
+            xaxis: []
         };
         let oldStrains: number[] = [];
 
@@ -217,26 +215,24 @@ export class BeatmapPPData extends AbstractEntity {
         const LEFT_OFFSET = Math.floor(beatmapPpData.timings.firstObj / offset);
         const RIGHT_OFFSET =
             menuData.MP3Length > beatmapPpData.timings.full
-                ? Math.ceil((menuData.MP3Length - beatmapPpData.timings.full) / offset)
+                ? Math.ceil(
+                      (menuData.MP3Length - beatmapPpData.timings.full) / offset
+                  )
                 : 0;
 
-
-
         console.log(LEFT_OFFSET, RIGHT_OFFSET);
-
 
         const updateWithOffset = (name: string, values: number[]) => {
             let data: number[] = [];
 
-
-            if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) data = Array(LEFT_OFFSET).fill(-100);
+            if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0)
+                data = Array(LEFT_OFFSET).fill(-100);
             data = data.concat(values);
-            if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) data = data.concat(Array(RIGHT_OFFSET).fill(-100));
-
+            if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0)
+                data = data.concat(Array(RIGHT_OFFSET).fill(-100));
 
             resultStrains.series.push({ name, data });
         };
-
 
         switch (strains.mode) {
             case 0:
@@ -275,31 +271,44 @@ export class BeatmapPPData extends AbstractEntity {
 
         const end_graph = performance.now();
 
-
         for (let i = 0; i < LEFT_OFFSET; i++) {
             resultStrains.xaxis.push(i * offset);
-        };
+        }
 
         const amount = Math.ceil(beatmapPpData.timings.full / offset);
         for (let i = 0; i < amount; i++) {
-            resultStrains.xaxis.push(beatmapPpData.timings.firstObj + (i * offset));
-        };
+            resultStrains.xaxis.push(
+                beatmapPpData.timings.firstObj + i * offset
+            );
+        }
 
         for (let i = 0; i < RIGHT_OFFSET; i++) {
-            resultStrains.xaxis.push(beatmapPpData.timings.full + (i * offset));
-        };
+            resultStrains.xaxis.push(beatmapPpData.timings.full + i * offset);
+        }
 
         const end_time = performance.now();
 
-        console.log((end_check - start).toFixed(2) + 'ms', 'spend on check conditions');
-        console.log((end_calc - end_check).toFixed(2) + 'ms', 'spend on calc pp and strains');
-        console.log((end_parse - end_calc).toFixed(2) + 'ms', 'spend on parse beatmap');
-        console.log((end_graph - end_parse).toFixed(2) + 'ms', 'spend on graph sorting');
-        console.log((end_time - end_graph).toFixed(2) + 'ms', 'spend on time calculation');
+        console.log(
+            (end_check - start).toFixed(2) + 'ms',
+            'spend on check conditions'
+        );
+        console.log(
+            (end_calc - end_check).toFixed(2) + 'ms',
+            'spend on calc pp and strains'
+        );
+        console.log(
+            (end_parse - end_calc).toFixed(2) + 'ms',
+            'spend on parse beatmap'
+        );
+        console.log(
+            (end_graph - end_parse).toFixed(2) + 'ms',
+            'spend on graph sorting'
+        );
+        console.log(
+            (end_time - end_graph).toFixed(2) + 'ms',
+            'spend on time calculation'
+        );
         console.log('\n\n');
-
-
-
 
         this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
             ar: mapAttributes.ar,

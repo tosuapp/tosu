@@ -1,9 +1,9 @@
 export interface BeatmapStrains {
     series: {
-        name: string,
-        data: number[]
-    }[],
-    xaxis: number[],
+        name: string;
+        data: number[];
+    }[];
+    xaxis: number[];
 }
 
 export interface InSettingsValues {
