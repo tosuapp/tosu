@@ -51,12 +51,13 @@ export class MenuData extends AbstractEntity {
             process.readInt(beatmapAddr + 0x94)
         );
 
+        // [Base - 0x33]
+        this.MenuGameMode = process.readPointer(baseAddr - 0x33);
+
         if (this.MD5 === this.previousMD5 || !this.Path.endsWith('.osu')) {
             return;
         }
 
-        // [Base - 0x33]
-        this.MenuGameMode = process.readPointer(baseAddr - 0x33);
         // [Base - 0x33] + 0xC
         this.Plays = process.readInt(process.readInt(baseAddr - 0x33) + 0xc);
         // [[Beatmap] + 0x18]
@@ -132,7 +133,7 @@ export class MenuData extends AbstractEntity {
         this.MP3Length = Math.round(
             process.readDouble(
                 process.readPointer(bases.getBase('getAudioLengthAddr') + 0x7) +
-                    0x4
+                0x4
             )
         );
     }
