@@ -261,10 +261,7 @@ export class OsuInstance {
     }
 
     async updateMapMetadata() {
-        let prevBeatmapMd5 = '';
-        let prevMods = 0;
-        let prevGM = 0;
-        let prevTime = 0;
+        let previousState = '';
 
         while (true) {
             const {
@@ -286,19 +283,15 @@ export class OsuInstance {
                     ? gamePlayData.Mods
                     : allTimesData.MenuMods;
 
+            const currentTimeMD5 = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
+
             if (
-                (prevBeatmapMd5 !== menuData.MD5 ||
-                    prevMods !== currentMods ||
-                    prevGM !== menuData.MenuGameMode ||
-                    prevTime !== menuData.MP3Length) &&
                 menuData.Path.endsWith('.osu') &&
-                settings.gameFolder
+                settings.gameFolder &&
+                previousState !== currentTimeMD5
             ) {
-                // Repeating original gosumemory logic
-                prevBeatmapMd5 = menuData.MD5;
-                prevMods = allTimesData.MenuMods;
-                prevGM = menuData.MenuGameMode;
-                prevTime = menuData.MP3Length;
+                console.log(currentTimeMD5);
+                previousState = currentTimeMD5;
 
                 await beatmapPpData.updateMapMetadata(currentMods);
             }
