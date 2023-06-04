@@ -176,7 +176,7 @@ export class BeatmapPPData extends AbstractEntity {
 
         switch (strains.mode) {
             case 0:
-                resultStrains.push(...strains.aimNoSliders);
+                resultStrains.push(...strains.aim);
                 break;
             case 1:
                 resultStrains.push(...strains.color);
