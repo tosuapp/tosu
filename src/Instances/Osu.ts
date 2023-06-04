@@ -264,6 +264,7 @@ export class OsuInstance {
         let prevBeatmapMd5 = '';
         let prevMods = 0;
         let prevGM = 0;
+        let prevTime = 0;
 
         while (true) {
             const {
@@ -288,7 +289,8 @@ export class OsuInstance {
             if (
                 (prevBeatmapMd5 !== menuData.MD5 ||
                     prevMods !== currentMods ||
-                    prevGM !== menuData.MenuGameMode) &&
+                    prevGM !== menuData.MenuGameMode ||
+                    prevTime !== menuData.MP3Length) &&
                 menuData.Path.endsWith('.osu') &&
                 settings.gameFolder
             ) {
@@ -296,6 +298,7 @@ export class OsuInstance {
                 prevBeatmapMd5 = menuData.MD5;
                 prevMods = allTimesData.MenuMods;
                 prevGM = menuData.MenuGameMode;
+                prevTime = menuData.MP3Length;
 
                 await beatmapPpData.updateMapMetadata(currentMods);
             }
