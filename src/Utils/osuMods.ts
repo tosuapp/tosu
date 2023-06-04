@@ -21,7 +21,6 @@ const MODS_MAP: { [K in OsuMods]: string } = {
     [OsuMods.Key6]: '6K',
     [OsuMods.Key7]: '7K',
     [OsuMods.Key8]: '8K',
-    [OsuMods.Flashlight]: 'Fl',
     [OsuMods.Random]: 'RD',
     [OsuMods.Cinema]: 'CN',
     [OsuMods.Target]: 'Target',
