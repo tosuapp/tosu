@@ -2,6 +2,7 @@ import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 import { Beatmap, Calculator } from 'rosu-pp';
 
+import { BeatmapStrains } from '@/Api/Utils/types';
 import { DataRepo } from '@/Services/repo';
 import { config } from '@/config';
 import { wLogger } from '@/logger';
@@ -41,6 +42,7 @@ interface BeatmapPPTimings {
 
 export class BeatmapPPData extends AbstractEntity {
     strains: number[];
+    strainsAll: BeatmapStrains;
     minBPM: number;
     maxBPM: number;
     ppAcc: BeatmapPPAcc;
@@ -56,6 +58,10 @@ export class BeatmapPPData extends AbstractEntity {
 
     init() {
         this.strains = [];
+        this.strainsAll = {
+            series: [],
+            xaxis: []
+        };
         this.minBPM = 0.0;
         this.maxBPM = 0.0;
         this.ppAcc = {
@@ -89,10 +95,12 @@ export class BeatmapPPData extends AbstractEntity {
 
     updatePPData(
         strains: number[],
+        strainsAll: BeatmapStrains,
         ppAcc: BeatmapPPAcc,
         mapAttributes: BeatmapPPAttributes
     ) {
         this.strains = strains;
+        this.strainsAll = strainsAll;
         if (config.calculatePP) {
             this.ppAcc = ppAcc;
         }
@@ -133,10 +141,11 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     async updateMapMetadata(currentMods: number) {
-        const { menuData, settings } = this.services.getServices([
-            'menuData',
-            'settings'
-        ]);
+        const start_time = performance.now();
+
+        const { menuData, settings, beatmapPpData } = this.services.getServices(
+            ['menuData', 'settings', 'beatmapPpData']
+        );
 
         const mapPath = path.join(
             settings.songsFolder,
@@ -157,9 +166,16 @@ export class BeatmapPPData extends AbstractEntity {
             return;
         }
 
+        const beatmap_check_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                beatmap_check_time - start_time
+            ).toFixed(2)}ms on opening beatmap`
+        );
+
         const calc = new Calculator();
 
-        const currAttrs = calc.mods(currentMods);
+        const currAttrs = calc.mods(currentMods).mode(menuData.MenuGameMode);
         const strains = currAttrs.strains(beatmap);
         const mapAttributes = currAttrs.acc(100).mapAttributes(beatmap);
         const fcPerformance = currAttrs.acc(100).performance(beatmap);
@@ -171,26 +187,20 @@ export class BeatmapPPData extends AbstractEntity {
             ppAcc[acc] = performance.pp;
         }
 
-        let resultStrains: number[] = [];
+        const calculation_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                calculation_time - beatmap_check_time
+            ).toFixed(2)}ms on attributes & starins calculation`
+        );
+
+        const resultStrains: BeatmapStrains = {
+            series: [],
+            xaxis: []
+        };
+        let oldStrains: number[] = [];
+
         const offset: number = strains.sectionLength;
-
-        switch (strains.mode) {
-            case 0:
-                resultStrains.push(...strains.aim);
-                break;
-            case 1:
-                resultStrains.push(...strains.color);
-                break;
-            case 2:
-                resultStrains.push(...strains.movement);
-                break;
-            case 3:
-                resultStrains.push(...strains.strains);
-                break;
-            default:
-            // no-default
-        }
-
         try {
             const decoder = new BeatmapDecoder();
             const lazerBeatmap = await decoder.decodeFromPath(mapPath);
@@ -202,17 +212,6 @@ export class BeatmapPPData extends AbstractEntity {
                     : 0;
             const full = Math.round(lazerBeatmap.totalLength);
 
-            const fromLeft = Math.floor(firstObj / offset);
-            const fromRight =
-                menuData.MP3Length > full
-                    ? Math.floor((menuData.MP3Length - full) / offset)
-                    : 0;
-
-            if (Number.isFinite(fromLeft) && fromLeft > 0)
-            resultStrains = Array(fromLeft).fill(0).concat(resultStrains);
-            if (Number.isFinite(fromRight) && fromRight > 0)
-                resultStrains = resultStrains.concat(Array(fromRight).fill(0));
-
             this.updateTimings(firstObj, full);
         } catch (e) {
             console.error(e);
@@ -221,7 +220,101 @@ export class BeatmapPPData extends AbstractEntity {
             );
         }
 
-        this.updatePPData(resultStrains, ppAcc as never, {
+        const beatmap_parse_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                beatmap_parse_time - calculation_time
+            ).toFixed(2)}ms on parsing beatmap`
+        );
+
+        const LEFT_OFFSET = Math.floor(beatmapPpData.timings.firstObj / offset);
+        const RIGHT_OFFSET =
+            menuData.MP3Length > beatmapPpData.timings.full
+                ? Math.ceil(
+                      (menuData.MP3Length - beatmapPpData.timings.full) / offset
+                  )
+                : 0;
+
+        const updateWithOffset = (name: string, values: number[]) => {
+            let data: number[] = [];
+
+            if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0)
+                data = Array(LEFT_OFFSET).fill(-100);
+            data = data.concat(values);
+            if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0)
+                data = data.concat(Array(RIGHT_OFFSET).fill(-100));
+
+            resultStrains.series.push({ name, data });
+        };
+
+        switch (strains.mode) {
+            case 0:
+                updateWithOffset('aim', strains.aim);
+                updateWithOffset('aimNoSliders', strains.aimNoSliders);
+                updateWithOffset('flashlight', strains.flashlight);
+                updateWithOffset('speed', strains.speed);
+
+                oldStrains.push(...strains.aim);
+                break;
+            case 1:
+                updateWithOffset('color', strains.color);
+                updateWithOffset('rhythm', strains.rhythm);
+                updateWithOffset('stamina', strains.stamina);
+
+                oldStrains.push(...strains.color);
+                break;
+            case 2:
+                updateWithOffset('movement', strains.movement);
+
+                oldStrains.push(...strains.movement);
+                break;
+            case 3:
+                updateWithOffset('strains', strains.strains);
+
+                oldStrains.push(...strains.strains);
+                break;
+            default:
+            // no-default
+        }
+
+        if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
+            oldStrains = Array(LEFT_OFFSET).fill(0).concat(oldStrains);
+        }
+
+        if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
+            oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
+        }
+
+        const graph_process_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                graph_process_time - beatmap_parse_time
+            ).toFixed(2)}ms on prcoessing graph strains`
+        );
+
+        for (let i = 0; i < LEFT_OFFSET; i++) {
+            resultStrains.xaxis.push(i * offset);
+        }
+
+        const amount = Math.ceil(beatmapPpData.timings.full / offset);
+        for (let i = 0; i < amount; i++) {
+            resultStrains.xaxis.push(
+                beatmapPpData.timings.firstObj + i * offset
+            );
+        }
+
+        for (let i = 0; i < RIGHT_OFFSET; i++) {
+            resultStrains.xaxis.push(beatmapPpData.timings.full + i * offset);
+        }
+
+        const end_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Total elapsed time: ${(
+                end_time - start_time
+            ).toFixed(2)}ms`
+        );
+
+        this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
             ar: mapAttributes.ar,
             cs: mapAttributes.cs,
             od: mapAttributes.od,
