@@ -1,3 +1,11 @@
+export interface BeatmapStrains {
+    series: {
+        name: string,
+        data: number[]
+    }[],
+    xaxis: number[],
+}
+
 export interface InSettingsValues {
     showInterface: boolean;
     folders: {
@@ -71,6 +79,7 @@ interface PP {
     '96': number;
     '95': number;
     strains: number[];
+    strainsAll: BeatmapStrains;
 }
 
 interface GameplayPP {

@@ -144,7 +144,8 @@ export const buildResult = (
             },
             pp: {
                 ...beatmapPpData.ppAcc,
-                strains: beatmapPpData.strains
+                strains: beatmapPpData.strains,
+                strainsAll: beatmapPpData.strainsAll,
             }
         },
         gameplay: {
