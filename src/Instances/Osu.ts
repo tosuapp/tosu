@@ -165,7 +165,7 @@ export class OsuInstance {
             'tourneyManagerData'
         ]);
 
-        let retriesTemp = 0;
+        let prevTime = 0;
         while (!this.isDestroyed) {
             await Promise.all([
                 allTimesData.updateState(),
@@ -200,17 +200,18 @@ export class OsuInstance {
                     }
                     break;
                 case 2:
+                    // Reset gameplay data on retry
+                    if (prevTime > allTimesData.PlayTime) {
+                        gamePlayData.init();
+                    }
+
+                    prevTime = allTimesData.PlayTime;
+
                     if (allTimesData.PlayTime < 150) {
                         break;
                     }
+
                     await gamePlayData.updateState();
-                    if (retriesTemp > gamePlayData.Retries) {
-                        // unvalidate gamePlayData, because user restarted map
-                        gamePlayData.init();
-                        retriesTemp = 0;
-                        break;
-                    }
-                    retriesTemp = gamePlayData.Retries;
                     break;
                 case 7:
                     await resultsScreenData.updateState();
