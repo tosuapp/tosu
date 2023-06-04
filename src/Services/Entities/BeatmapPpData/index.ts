@@ -141,7 +141,7 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     async updateMapMetadata(currentMods: number) {
-        const start = performance.now();
+        const start_time = performance.now();
 
         const { menuData, settings, beatmapPpData } = this.services.getServices(
             ['menuData', 'settings', 'beatmapPpData']
@@ -166,7 +166,12 @@ export class BeatmapPPData extends AbstractEntity {
             return;
         }
 
-        const end_check = performance.now();
+        const beatmap_check_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                beatmap_check_time - start_time
+            ).toFixed(2)}ms on opening beatmap`
+        );
 
         const calc = new Calculator();
 
@@ -182,7 +187,12 @@ export class BeatmapPPData extends AbstractEntity {
             ppAcc[acc] = performance.pp;
         }
 
-        const end_calc = performance.now();
+        const calculation_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                calculation_time - beatmap_check_time
+            ).toFixed(2)}ms on attributes & starins calculation`
+        );
 
         const resultStrains: BeatmapStrains = {
             series: [],
@@ -210,7 +220,12 @@ export class BeatmapPPData extends AbstractEntity {
             );
         }
 
-        const end_parse = performance.now();
+        const beatmap_parse_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                beatmap_parse_time - calculation_time
+            ).toFixed(2)}ms on parsing beatmap`
+        );
 
         const LEFT_OFFSET = Math.floor(beatmapPpData.timings.firstObj / offset);
         const RIGHT_OFFSET =
@@ -219,8 +234,6 @@ export class BeatmapPPData extends AbstractEntity {
                       (menuData.MP3Length - beatmapPpData.timings.full) / offset
                   )
                 : 0;
-
-        console.log(LEFT_OFFSET, RIGHT_OFFSET);
 
         const updateWithOffset = (name: string, values: number[]) => {
             let data: number[] = [];
@@ -264,12 +277,20 @@ export class BeatmapPPData extends AbstractEntity {
             // no-default
         }
 
-        if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0)
+        if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
             oldStrains = Array(LEFT_OFFSET).fill(0).concat(oldStrains);
-        if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0)
-            oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
+        }
 
-        const end_graph = performance.now();
+        if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
+            oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
+        }
+
+        const graph_process_time = performance.now();
+        wLogger.debug(
+            `(updateMapMetadata) Spend:${(
+                graph_process_time - beatmap_parse_time
+            ).toFixed(2)}ms on prcoessing graph strains`
+        );
 
         for (let i = 0; i < LEFT_OFFSET; i++) {
             resultStrains.xaxis.push(i * offset);
@@ -287,28 +308,11 @@ export class BeatmapPPData extends AbstractEntity {
         }
 
         const end_time = performance.now();
-
-        console.log(
-            (end_check - start).toFixed(2) + 'ms',
-            'spend on check conditions'
+        wLogger.debug(
+            `(updateMapMetadata) Total elapsed time: ${(
+                end_time - start_time
+            ).toFixed(2)}ms`
         );
-        console.log(
-            (end_calc - end_check).toFixed(2) + 'ms',
-            'spend on calc pp and strains'
-        );
-        console.log(
-            (end_parse - end_calc).toFixed(2) + 'ms',
-            'spend on parse beatmap'
-        );
-        console.log(
-            (end_graph - end_parse).toFixed(2) + 'ms',
-            'spend on graph sorting'
-        );
-        console.log(
-            (end_time - end_graph).toFixed(2) + 'ms',
-            'spend on time calculation'
-        );
-        console.log('\n\n');
 
         this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
             ar: mapAttributes.ar,
