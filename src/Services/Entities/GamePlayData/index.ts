@@ -92,14 +92,14 @@ export class GamePlayData extends AbstractEntity {
             M1Pressed: false,
             M1Count: 0,
             M2Pressed: false,
-            M2Count: 0,
+            M2Count: 0
         };
         this.isReplayUiHidden = false;
 
         // below is gata that shouldn't be reseted on retry
         if (isRetry == true) {
             return;
-        };
+        }
 
         this.isDefaultState = true;
         this.Retries = 0;
@@ -264,7 +264,9 @@ export class GamePlayData extends AbstractEntity {
 
         this.KeyOverlay = keys;
 
-        wLogger.debug(`[GamePlayData:updateKeyOverlay] updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`);
+        wLogger.debug(
+            `[GamePlayData:updateKeyOverlay] updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`
+        );
     }
 
     private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
@@ -411,7 +413,9 @@ export class GamePlayData extends AbstractEntity {
     private updateStarsAndPerformance() {
         wLogger.debug(`[GamePlayData:updateStarsAndPerformance] starting`);
         if (!config.calculatePP) {
-            wLogger.debug(`[GamePlayData:updateStarsAndPerformance] pp calculation disabled`);
+            wLogger.debug(
+                `[GamePlayData:updateStarsAndPerformance] pp calculation disabled`
+            );
             return;
         }
 
@@ -420,7 +424,9 @@ export class GamePlayData extends AbstractEntity {
         );
 
         if (!settings.gameFolder) {
-            wLogger.debug(`[GamePlayData:updateStarsAndPerformance] game folder not found`);
+            wLogger.debug(
+                `[GamePlayData:updateStarsAndPerformance] game folder not found`
+            );
             return;
         }
 

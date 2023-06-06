@@ -1,7 +1,7 @@
 import { DataRepo } from '@/Services/repo';
+import { wLogger } from '@/logger';
 
 import { AbstractEntity } from '../types';
-import { wLogger } from '@/logger';
 
 export class AllTimesData extends AbstractEntity {
     Status: number = 0;

@@ -136,7 +136,7 @@ export class MenuData extends AbstractEntity {
         this.MP3Length = Math.round(
             process.readDouble(
                 process.readPointer(bases.getBase('getAudioLengthAddr') + 0x7) +
-                0x4
+                    0x4
             )
         );
     }
