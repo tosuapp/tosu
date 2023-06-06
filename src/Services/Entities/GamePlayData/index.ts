@@ -61,13 +61,8 @@ export class GamePlayData extends AbstractEntity {
         this.init();
     }
 
-    init() {
-        this.isDefaultState = true;
-        this.Retries = 0;
-        this.PlayerName = '';
-        this.Mods = 0;
+    init(isRetry?: boolean) {
         this.HitErrors = [];
-        this.Mode = 0;
         this.MaxCombo = 0;
         this.Score = 0;
         this.Hit100 = 0;
@@ -87,9 +82,20 @@ export class GamePlayData extends AbstractEntity {
         this.UnstableRate = 0;
         this.GradeCurrent = '';
         this.GradeExpected = '';
-        this.Leaderboard = undefined;
         this.KeyOverlay = {} as KeyOverlay;
         this.isReplayUiHidden = false;
+
+        // below is gata that shouldn't be reseted on retry
+        if (isRetry == true) {
+            return;
+        };
+
+        this.isDefaultState = true;
+        this.Retries = 0;
+        this.PlayerName = '';
+        this.Mode = 0;
+        this.Mods = 0;
+        this.Leaderboard = undefined;
     }
 
     async updateState() {

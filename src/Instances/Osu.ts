@@ -202,7 +202,7 @@ export class OsuInstance {
                 case 2:
                     // Reset gameplay data on retry
                     if (prevTime > allTimesData.PlayTime) {
-                        gamePlayData.init();
+                        gamePlayData.init(true);
                     }
 
                     prevTime = allTimesData.PlayTime;
@@ -290,7 +290,6 @@ export class OsuInstance {
                 settings.gameFolder &&
                 previousState !== currentTimeMD5
             ) {
-                console.log(currentTimeMD5);
                 previousState = currentTimeMD5;
 
                 await beatmapPpData.updateMapMetadata(currentMods);
