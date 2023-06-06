@@ -1,6 +1,12 @@
 export const OVERLAYS_STATIC = `<html>
 <head>
     <title>ts osu overlays list</title>
+    <style>
+    body {
+        color: white;
+        background: black;
+    }
+    </style>
 </head>
 <body>
     <ul id="overlays-list">
