@@ -205,13 +205,20 @@ export class BeatmapPPData extends AbstractEntity {
         const offset: number = strains.sectionLength;
         try {
             const decoder = new BeatmapDecoder();
-            const lazerBeatmap = await decoder.decodeFromPath(mapPath);
+            const lazerBeatmap = await decoder.decodeFromPath(mapPath, {
+                parseColours: false,
+                parseDifficulty: false,
+                parseEditor: false,
+                parseEvents: false,
+                parseGeneral: false,
+                parseMetadata: false
+            });
+
             this.updateBPM(lazerBeatmap.bpmMin, lazerBeatmap.bpmMax);
 
-            const firstObj =
-                lazerBeatmap.hitObjects.length > 0
-                    ? Math.round(lazerBeatmap.hitObjects.at(0)!.startTime)
-                    : 0;
+            const firstObj = Math.round(
+                lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
+            );
             const full = Math.round(lazerBeatmap.totalLength);
 
             this.updateTimings(firstObj, full);
@@ -317,7 +324,7 @@ export class BeatmapPPData extends AbstractEntity {
         );
 
         wLogger.debug(`[BeatmapPpData:updateMapMetadata] updating`);
-        
+
         this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
             ar: mapAttributes.ar,
             cs: mapAttributes.cs,

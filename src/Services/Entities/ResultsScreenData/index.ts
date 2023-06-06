@@ -1,8 +1,8 @@
 import { DataRepo } from '@/Services/repo';
 import { OsuMods } from '@/Utils/osuMods.types';
+import { wLogger } from '@/logger';
 
 import { AbstractEntity } from '../types';
-import { wLogger } from '@/logger';
 
 export class ResultsScreenData extends AbstractEntity {
     PlayerName: string;
@@ -25,7 +25,7 @@ export class ResultsScreenData extends AbstractEntity {
 
     init() {
         wLogger.debug(`[ResultsScreenData:init] reseting`);
-        
+
         this.PlayerName = '';
         this.Mods = 0;
         this.Mode = 0;
