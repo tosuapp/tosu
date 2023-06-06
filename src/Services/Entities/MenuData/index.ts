@@ -36,6 +36,8 @@ export class MenuData extends AbstractEntity {
     }
 
     async updateState() {
+        wLogger.debug(`[MenuData:updateState] starting`);
+
         const { process, bases } = this.services.getServices([
             'process',
             'bases'
@@ -124,6 +126,7 @@ export class MenuData extends AbstractEntity {
     }
 
     updateMP3Length() {
+        wLogger.debug(`[MenuData:updateMP3Length] starting`);
         const { process, bases } = this.services.getServices([
             'process',
             'bases'
@@ -133,7 +136,7 @@ export class MenuData extends AbstractEntity {
         this.MP3Length = Math.round(
             process.readDouble(
                 process.readPointer(bases.getBase('getAudioLengthAddr') + 0x7) +
-                    0x4
+                0x4
             )
         );
     }

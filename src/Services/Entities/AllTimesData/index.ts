@@ -1,6 +1,7 @@
 import { DataRepo } from '@/Services/repo';
 
 import { AbstractEntity } from '../types';
+import { wLogger } from '@/logger';
 
 export class AllTimesData extends AbstractEntity {
     Status: number = 0;
@@ -17,6 +18,8 @@ export class AllTimesData extends AbstractEntity {
     }
 
     async updateState() {
+        wLogger.debug(`[AllTimesData:updateState] starting`);
+
         const { process, bases, settings } = this.services.getServices([
             'process',
             'bases',
@@ -74,6 +77,7 @@ export class AllTimesData extends AbstractEntity {
             process.readInt(canRunSlowlyAddr + 0x46)
         );
 
+        wLogger.debug(`[MenuData:updateState] updated`);
         settings.setSkinFolder(this.SkinFolder);
         settings.setShowInterface(this.ShowInterface);
     }

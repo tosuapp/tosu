@@ -13,6 +13,8 @@ export class BassDensityData extends AbstractEntity {
     }
 
     async updateState() {
+        wLogger.debug(`[BaseDensityData:updateState] starting`);
+
         const { process: osuProcess, bases } = this.services.getServices([
             'process',
             'bases'
@@ -62,5 +64,7 @@ export class BassDensityData extends AbstractEntity {
 
         this.currentAudioVelocity = currentAudioVelocity;
         this.density = (1 + currentAudioVelocity) * 0.5;
+
+        wLogger.debug(`[BaseDensityData:updateState] updated`);
     }
 }

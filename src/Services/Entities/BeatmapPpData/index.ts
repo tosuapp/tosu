@@ -141,6 +141,8 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     async updateMapMetadata(currentMods: number) {
+        wLogger.debug(`[BeatmapPpData:updateMapMetadata] starting`);
+
         const start_time = performance.now();
 
         const { menuData, settings, beatmapPpData } = this.services.getServices(
@@ -314,6 +316,8 @@ export class BeatmapPPData extends AbstractEntity {
             ).toFixed(2)}ms`
         );
 
+        wLogger.debug(`[BeatmapPpData:updateMapMetadata] updating`);
+        
         this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
             ar: mapAttributes.ar,
             cs: mapAttributes.cs,

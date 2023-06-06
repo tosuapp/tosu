@@ -21,6 +21,8 @@ export class TourneyManagerData extends AbstractEntity {
     }
 
     async updateState() {
+        wLogger.debug(`[TourneyManagerData:updateState] starting`);
+
         const { process, bases, allTimesData } = this.services.getServices([
             'process',
             'bases',
@@ -81,5 +83,7 @@ export class TourneyManagerData extends AbstractEntity {
         this.IPCBaseAddr = process.readInt(
             process.readInt(process.readInt(rulesetAddr + 0x34) + 0x4) + 0x4
         );
+
+        wLogger.debug(`[TourneyManagerData:updateState] updated`);
     }
 }

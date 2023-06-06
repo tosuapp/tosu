@@ -145,6 +145,8 @@ export class OsuInstance {
     }
 
     async update() {
+        wLogger.debug('[InstancesOsu:update] starting');
+
         const {
             allTimesData,
             menuData,
@@ -237,6 +239,8 @@ export class OsuInstance {
     }
 
     async updateKeyOverlay() {
+        wLogger.debug(`[InstancesOsu:updateKeyOverlay] starting`);
+
         const { allTimesData, gamePlayData } = this.servicesRepo.getServices([
             'allTimesData',
             'gamePlayData'
@@ -261,6 +265,8 @@ export class OsuInstance {
     }
 
     async updateMapMetadata() {
+        wLogger.debug(`[InstancesOsu:updateMapMetadata] starting`);
+
         let previousState = '';
 
         while (true) {

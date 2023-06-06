@@ -22,6 +22,8 @@ export class TourneyUserProfileData extends AbstractEntity {
     }
 
     async updateState() {
+        wLogger.debug(`[TourneyUserProfileData:updateState] starting`);
+
         const { process } = this.services.getServices(['process']);
 
         if (!this.UserInfoBase) {
@@ -58,5 +60,7 @@ export class TourneyUserProfileData extends AbstractEntity {
         );
         // [[UserInfo - 0x5]] + 0x70
         this.UserID = process.readInt(this.UserInfoBase + 0x70);
+
+        wLogger.debug(`[TourneyUserProfileData:updateState] updated`);
     }
 }

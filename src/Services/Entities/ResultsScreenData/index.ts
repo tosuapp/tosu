@@ -2,6 +2,7 @@ import { DataRepo } from '@/Services/repo';
 import { OsuMods } from '@/Utils/osuMods.types';
 
 import { AbstractEntity } from '../types';
+import { wLogger } from '@/logger';
 
 export class ResultsScreenData extends AbstractEntity {
     PlayerName: string;
@@ -23,6 +24,8 @@ export class ResultsScreenData extends AbstractEntity {
     }
 
     init() {
+        wLogger.debug(`[ResultsScreenData:init] reseting`);
+        
         this.PlayerName = '';
         this.Mods = 0;
         this.Mode = 0;
@@ -37,6 +40,8 @@ export class ResultsScreenData extends AbstractEntity {
     }
 
     async updateState() {
+        wLogger.debug(`[ResultsScreenData:updateState] starting`);
+
         const { process, bases, allTimesData } = this.services.getServices([
             'process',
             'bases',
@@ -86,5 +91,7 @@ export class ResultsScreenData extends AbstractEntity {
         this.HitKatu = process.readShort(resultScreenBase + 0x90);
         // HitMiss    int16   `mem:"[Ruleset + 0x38] + 0x92"`
         this.HitMiss = process.readShort(resultScreenBase + 0x92);
+
+        wLogger.debug(`[ResultsScreenData:updateState] updated`);
     }
 }
