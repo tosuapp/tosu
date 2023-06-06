@@ -65,18 +65,18 @@ jobs:
       #   uses: actions/upload-artifact@v3
       #   with:
       #     name: ${{ matrix.os }}-${{ github.ref_name }}
-      #     path: dist/osumemory-ts
+      #     path: dist/tosu
   
       # - name: Upload Artifact (Mac OS)
       #   if: startsWith( matrix.os, 'macos' )
       #   uses: actions/upload-artifact@v3
       #   with:
       #     name: ${{ matrix.os }}-${{ github.ref_name }}
-      #     path: dist/osumemory-ts.app
+      #     path: dist/tosu.app
 
       - name: Upload Artifact (Windows)
         if: startsWith( matrix.os, 'windows' )
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-${{ github.ref_name }}
-          path: dist/osumemory-ts.exe
+          path: dist/tosu.exe

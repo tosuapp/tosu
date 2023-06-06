@@ -17,7 +17,7 @@ interface CustomContext extends Koa.Context {
 }
 
 (async () => {
-    wLogger.info('Starting tsosumemory');
+    wLogger.info('Starting tosu');
 
     wLogger.info('Searching for osu!');
 

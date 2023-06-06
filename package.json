@@ -1,6 +1,6 @@
 {
   "author": "Mikhail Babynichev",
-  "name": "osumemory-ts",
+  "name": "tosu",
   "version": "1.1.0",
   "main": "dist/index.js",
   "bin": "dist/index.js",
@@ -64,13 +64,13 @@
       "git add ."
     ]
   },
-  "homepage": "https://github.com/KotRikD/osumemory-ts#readme",
+  "homepage": "https://github.com/KotRikD/tosu#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KotRikD/osumemory-ts.git"
+    "url": "git+https://github.com/KotRikD/tosu.git"
   },
   "bugs": {
-    "url": "https://github.com/KotRikD/osumemory-ts/issues"
+    "url": "https://github.com/KotRikD/tosu/issues"
   },
   "engines": {
     "node": ">=18.14.2"
