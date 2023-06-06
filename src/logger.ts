@@ -16,7 +16,7 @@ winston.configure({
         new transports.Console({
             format: format.combine(
                 format.colorize(),
-                label({ label: 'tosumemory' }),
+                label({ label: 'tosu' }),
                 timestamp(),
                 customFormat
             )

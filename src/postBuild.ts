@@ -22,7 +22,7 @@ async function windowsPostBuild(output) {
     vi.setStringValues(
         { lang: 1033, codepage: 1200 },
         {
-            ProductName: 'osumemory-ts',
+            ProductName: 'tosu',
             FileDescription: 'osu! memory reader, built in typescript',
             CompanyName: 'KotRik',
             LegalCopyright: `MIT License.`
@@ -36,5 +36,5 @@ async function windowsPostBuild(output) {
 }
 
 if (process.platform === 'win32') {
-    windowsPostBuild(path.join(__dirname, '../', './dist/osumemory-ts.exe'));
+    windowsPostBuild(path.join(__dirname, '../', './dist/tosu.exe'));
 }
