@@ -35,8 +35,6 @@ Features Done
 - typescript >=4.9.5
 - node >=18.14.2
 
-<br>
-
 ## Install
 
 ### Install `yarn` (if you don't have it already)
@@ -55,8 +53,6 @@ yarn install
 ```sh
 cd packages/tsprocess && npm install && npm run build
 ```
-
-<br>
 
 ## Build
 
@@ -84,15 +80,11 @@ yarn ts:compile
 yarn compile
 ```
 
-<br>
-
 ## Usage
 
 ```sh
 yarn run:dev
 ```
-
-<br>
 
 ## Author
 
@@ -104,19 +96,13 @@ yarn run:dev
 
 Special thanks to [@xxCherry](https://github.com/xxCherry), for providing memory reading library
 
-<br>
-
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KotRikD/tosu/issues). You can also take a look at the [contributing guide](https://github.com/KotRikD/tosu/blob/master/CONTRIBUTING.md).
 
-<br>
-
 ## Show your support
 
 Give a ⭐️ if this project helped you!
-
-<br>
 
 ## 📝 License
 
