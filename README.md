@@ -1,4 +1,5 @@
 <h1 align="center">Welcome to tosu 👋</h1>
+<img src=".github/logo.png" />
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
   <img src="https://img.shields.io/badge/node-%3E%3D18.14.2-blue.svg" />
