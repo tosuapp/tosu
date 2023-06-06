@@ -62,6 +62,8 @@ export class GamePlayData extends AbstractEntity {
     }
 
     init(isRetry?: boolean) {
+        wLogger.debug(`[GameplayData:init] reseting (retry:${isRetry})`);
+
         this.HitErrors = [];
         this.MaxCombo = 0;
         this.Score = 0;
@@ -82,7 +84,16 @@ export class GamePlayData extends AbstractEntity {
         this.UnstableRate = 0;
         this.GradeCurrent = '';
         this.GradeExpected = '';
-        this.KeyOverlay = {} as KeyOverlay;
+        this.KeyOverlay = {
+            K1Pressed: false,
+            K1Count: 0,
+            K2Pressed: false,
+            K2Count: 0,
+            M1Pressed: false,
+            M1Count: 0,
+            M2Pressed: false,
+            M2Count: 0,
+        };
         this.isReplayUiHidden = false;
 
         // below is gata that shouldn't be reseted on retry
@@ -200,6 +211,7 @@ export class GamePlayData extends AbstractEntity {
         this.ComboPrev = this.Combo;
 
         wLogger.debug(`[GamePlayData:updateState] updated`);
+
         // [[[Ruleset + 0x68] + 0x38] + 0x38]
         this.HitErrors = this.getHitErrors(
             process,
@@ -214,6 +226,7 @@ export class GamePlayData extends AbstractEntity {
 
     async updateKeyOverlay() {
         wLogger.debug(`[GamePlayData:updateKeyOverlay] starting`);
+
         const { process, bases } = this.services.getServices([
             'process',
             'bases'
@@ -230,7 +243,28 @@ export class GamePlayData extends AbstractEntity {
         const keyOverlayArrayAddr = process.readInt(
             process.readInt(process.readInt(rulesetAddr + 0xb0) + 0x10) + 0x4
         );
-        this.KeyOverlay = this.getKeyOverlay(process, keyOverlayArrayAddr);
+
+        const keys = this.getKeyOverlay(process, keyOverlayArrayAddr);
+        if (keys.K1Count < 0 || keys.K1Count > 1_000_000) {
+            keys.K1Pressed = false;
+            keys.K1Count = 0;
+        }
+        if (keys.K2Count < 0 || keys.K2Count > 1_000_000) {
+            keys.K2Pressed = false;
+            keys.K2Count = 0;
+        }
+        if (keys.M1Count < 0 || keys.M1Count > 1_000_000) {
+            keys.M1Pressed = false;
+            keys.M1Count = 0;
+        }
+        if (keys.M2Count < 0 || keys.M2Count > 1_000_000) {
+            keys.M2Pressed = false;
+            keys.M2Count = 0;
+        }
+
+        this.KeyOverlay = keys;
+
+        wLogger.debug(`[GamePlayData:updateKeyOverlay] updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`);
     }
 
     private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
@@ -300,6 +334,7 @@ export class GamePlayData extends AbstractEntity {
         }
 
         wLogger.debug(`[GamePlayData:getHitErrors] done`);
+
         return errors;
     }
 
@@ -325,6 +360,7 @@ export class GamePlayData extends AbstractEntity {
 
     private updateGrade(menuData: MenuData) {
         wLogger.debug(`[GamePlayData:updateGrade] processing`);
+
         const remaining =
             menuData.ObjectCount -
             this.Hit300 -
@@ -439,6 +475,7 @@ export class GamePlayData extends AbstractEntity {
             curPerformance.pp
         );
         beatmapPpData.updateFcPP(fcPerformance.pp);
+
         wLogger.debug(`[GamePlayData:updateStarsAndPerformance] updated`);
     }
 }
