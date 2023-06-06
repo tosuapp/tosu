@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/KotRikD/tosu/compare/v1.1.0...v1.2.0) (2023-06-06)
+
+
+### Features
+
+* rename osumemory-ts to tosu ([#13](https://github.com/KotRikD/tosu/issues/13)) ([061596b](https://github.com/KotRikD/tosu/commit/061596b8f8442117404a28f7a74582eb2120d0f6))
+
+
+### Bug Fixes
+
+* empty keyoverlay object on map retry & remove big negative and positive number ([710264b](https://github.com/KotRikD/tosu/commit/710264b599ab73372603096fb5b8bf1461c63709))
+* exclude unwanted data from reseting on retry ([d4239de](https://github.com/KotRikD/tosu/commit/d4239de1ad8cd764afc63b61dd3e8f3338ccfb81))
+* more information about building and installing ([33b4fdc](https://github.com/KotRikD/tosu/commit/33b4fdcd233915dfc77bf899d29848167903bb51))
+* optimize beatmap parsing ([#14](https://github.com/KotRikD/tosu/issues/14)) ([267fd0c](https://github.com/KotRikD/tosu/commit/267fd0c1a3a6853c3e83784a5b19decdfd283e17))
+* remove flashbang ([80f2f8a](https://github.com/KotRikD/tosu/commit/80f2f8a2a984564b8dd22ec6c61c6799845408f4))
+
 ## 1.1.0 (2023-06-04)
 
 
