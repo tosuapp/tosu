@@ -35,17 +35,64 @@ Features Done
 - typescript >=4.9.5
 - node >=18.14.2
 
+<br>
+
 ## Install
+
+### Install `yarn` (if you don't have it already)
+
+```sh
+npm install -g yarn
+```
+
+### Install dependecies
+```sh
+yarn install
+```
+
+### Compile Memory lib
+
+```sh
+cd packages/tsprocess && npm install && npm run build
+```
+
+<br>
+
+## Build
+
+### Install `yarn` (if you don't have it already)
+
+```sh
+npm install -g yarn
+```
+
+### Install dependecies (optional)
 
 ```sh
 yarn install
 ```
+
+### Compile TS
+
+```sh
+yarn ts:compile
+```
+
+### Build App
+
+```sh
+yarn compile
+```
+
+<br>
 
 ## Usage
 
 ```sh
 yarn run:dev
 ```
+
+<br>
 
 ## Author
 
@@ -57,13 +104,19 @@ yarn run:dev
 
 Special thanks to [@xxCherry](https://github.com/xxCherry), for providing memory reading library
 
+<br>
+
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KotRikD/osumemory-ts/issues). You can also take a look at the [contributing guide](https://github.com/KotRikD/osumemory-ts/blob/master/CONTRIBUTING.md).
 
+<br>
+
 ## Show your support
 
 Give a ⭐️ if this project helped you!
+
+<br>
 
 ## 📝 License
 
