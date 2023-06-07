@@ -45,12 +45,13 @@ interface CustomContext extends Koa.Context {
 
     const router = new Router();
 
-    const sendFunc = serve('./static', {
+    const sendFunc = serve(config.staticFolderPath, {
         index: '/index.html'
     });
 
     router.get('/(.*)', async (ctx, next) => {
         const staticPath = ctx.request.path.replace(/^\/static/g, '');
+
         if (staticPath === '/') {
             ctx.type = 'html';
             ctx.body = OVERLAYS_STATIC;
