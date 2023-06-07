@@ -78,5 +78,5 @@ jobs:
         if: startsWith( matrix.os, 'windows' )
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-${{ github.ref_name }}
+          name: ${{ matrix.os }}-${{ github.ref_name//\//_ }}
           path: dist/tosu.exe
