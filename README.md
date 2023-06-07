@@ -38,18 +38,18 @@ Features Done
 
 ## Install
 
-### Install `yarn` (if you don't have it already)
+#### Install `yarn` (if you don't have it already)
 
 ```sh
 npm install -g yarn
 ```
 
-### Install dependecies
+#### Install dependecies
 ```sh
 yarn install
 ```
 
-### Compile Memory lib
+#### Compile Memory lib
 
 ```sh
 cd packages/tsprocess && npm install && npm run build
@@ -57,25 +57,25 @@ cd packages/tsprocess && npm install && npm run build
 
 ## Build
 
-### Install `yarn` (if you don't have it already)
+#### Install `yarn` (if you don't have it already)
 
 ```sh
 npm install -g yarn
 ```
 
-### Install dependecies (optional)
+#### Install dependecies (optional)
 
 ```sh
 yarn install
 ```
 
-### Compile TS
+#### Compile TS
 
 ```sh
 yarn ts:compile
 ```
 
-### Build App
+#### Build App
 
 ```sh
 yarn compile
