@@ -13,8 +13,8 @@ WS_SEND_INTERVAL=150
 POLL_RATE=150
 KEYOVERLAY_POLL_RATE=150
 
-DEFAULT_IP=127.0.0.1
-DEFAULT_PORT=24050
+SERVER_IP=127.0.0.1
+SERVER_PORT=24050
 STATIC_FOLDER_PATH=./static`
     );
 }
@@ -29,8 +29,7 @@ export const config = {
     wsSendInterval: Number(process.env.WS_SEND_INTERVAL || '500'),
     pollRate: Number(process.env.POLL_RATE || '500'),
     keyOverlayPollRate: Number(process.env.KEYOVERLAY_POLL_RATE || '100'),
-
-    defaultIP: process.env.DEFAULT_IP || '127.0.0.1',
-    defaultPort: Number(process.env.DEFAULT_PORT || '24050'),
+    serverIP: process.env.SERVER_IP || '127.0.0.1',
+    serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static'
 };
