@@ -45,12 +45,13 @@ interface CustomContext extends Koa.Context {
 
     const router = new Router();
 
-    const sendFunc = serve('./static', {
+    const sendFunc = serve(config.staticFolderPath, {
         index: '/index.html'
     });
 
     router.get('/(.*)', async (ctx, next) => {
         const staticPath = ctx.request.path.replace(/^\/static/g, '');
+
         if (staticPath === '/') {
             ctx.type = 'html';
             ctx.body = OVERLAYS_STATIC;
@@ -95,7 +96,7 @@ interface CustomContext extends Koa.Context {
     });
 
     router.get('/api/getOverlays', async (ctx) => {
-        ctx.body = await fs.promises.readdir('./static');
+        ctx.body = await fs.promises.readdir(config.staticFolderPath);
         return;
     });
 
@@ -137,5 +138,5 @@ interface CustomContext extends Koa.Context {
     app.ws.use(wsRouter.routes()).use(wsRouter.allowedMethods());
     app.use(router.routes()).use(router.allowedMethods());
 
-    app.listen(24050, '127.0.0.1');
+    app.listen(config.defaultPort, config.defaultIP);
 })();
