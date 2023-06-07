@@ -1,10 +1,11 @@
 import * as dotenv from 'dotenv';
+import path from 'path';
 import fs from 'fs';
 
-const curDir = fs.readdirSync('./');
-if (!curDir.includes('tsosu.env')) {
-    fs.writeFileSync(
-        './tsosu.env',
+
+const configPath = path.join(process.cwd(), 'tsosu.env');
+if (!fs.existsSync(configPath)) {
+    fs.writeFileSync(configPath,
         `DEBUG_LOG=false
 CALCULATE_PP=true
 ENABLE_KEY_OVERLAY=true
@@ -18,9 +19,8 @@ STATIC_FOLDER_PATH=./static`
     );
 }
 
-dotenv.config({
-    path: 'tsosu.env'
-});
+dotenv.config({ path: configPath });
+
 
 export const config = {
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
