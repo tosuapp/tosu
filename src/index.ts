@@ -8,7 +8,7 @@ import Websockify from 'koa-websocket';
 import { InstancesManager } from './Instances/InstancesManager';
 import { OsuInstance } from './Instances/Osu';
 import { sleep } from './Utils/sleep';
-import { config } from './config';
+import { config, updateConfig } from './config';
 import { OVERLAYS_STATIC } from './constants/overlaysStatic';
 import { wLogger } from './logger';
 
@@ -17,6 +17,8 @@ interface CustomContext extends Koa.Context {
 }
 
 (async () => {
+    updateConfig();
+
     wLogger.info('Starting tosu');
 
     wLogger.info('Searching for osu!');
