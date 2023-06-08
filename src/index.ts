@@ -117,7 +117,6 @@ interface CustomContext extends Koa.Context {
 
         while (isSocketConnected) {
             if (Object.keys(ctx.instancesManager.osuInstances).length < 1) {
-                ctx.websocket.send('{}');
                 await sleep(500);
                 continue;
             }
