@@ -138,5 +138,5 @@ interface CustomContext extends Koa.Context {
     app.ws.use(wsRouter.routes()).use(wsRouter.allowedMethods());
     app.use(router.routes()).use(router.allowedMethods());
 
-    app.listen(config.defaultPort, config.defaultIP);
+    app.listen(config.serverPort, config.serverIP);
 })();
