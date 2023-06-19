@@ -1,3 +1,4 @@
+import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 import { Beatmap, Calculator } from 'rosu-pp';
@@ -165,7 +166,7 @@ export class BeatmapPPData extends AbstractEntity {
             menuData.Folder,
             menuData.Path
         );
-        let beatmap;
+        let beatmap: Beatmap;
         try {
             beatmap = new Beatmap({
                 path: mapPath,
@@ -216,9 +217,12 @@ export class BeatmapPPData extends AbstractEntity {
 
         const offset: number = strains.sectionLength;
 
+        let lazerBeatmap: ParsedBeatmap;
+
         try {
             const decoder = new BeatmapDecoder();
-            const lazerBeatmap = await decoder.decodeFromPath(mapPath, {
+
+            lazerBeatmap = await decoder.decodeFromPath(mapPath, {
                 parseColours: false,
                 parseDifficulty: false,
                 parseEditor: false,
@@ -237,25 +241,12 @@ export class BeatmapPPData extends AbstractEntity {
             const full = Math.round(lazerBeatmap.totalLength);
 
             this.updateTimings(firstObj, full);
-
-            this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
-                ar: mapAttributes.ar,
-                cs: mapAttributes.cs,
-                od: mapAttributes.od,
-                hp: mapAttributes.hp,
-                circles: lazerBeatmap.hittable,
-                sliders: lazerBeatmap.slidable,
-                spinners: lazerBeatmap.spinnable,
-                holds: lazerBeatmap.holdable,
-                maxCombo: fcPerformance.difficulty.maxCombo,
-                fullStars: fcPerformance.difficulty.stars,
-                stars: fcPerformance.difficulty.stars
-            });
         } catch (e) {
             console.error(e);
             wLogger.error(
                 "Something happend, when we're tried to parse beatmap"
             );
+            return;
         }
 
         const beatmap_parse_time = performance.now();
@@ -353,5 +344,19 @@ export class BeatmapPPData extends AbstractEntity {
         );
 
         wLogger.debug(`[BeatmapPpData:updateMapMetadata] updating`);
+
+        this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
+            ar: mapAttributes.ar,
+            cs: mapAttributes.cs,
+            od: mapAttributes.od,
+            hp: mapAttributes.hp,
+            circles: lazerBeatmap.hittable,
+            sliders: lazerBeatmap.slidable,
+            spinners: lazerBeatmap.spinnable,
+            holds: lazerBeatmap.holdable,
+            maxCombo: fcPerformance.difficulty.maxCombo,
+            fullStars: fcPerformance.difficulty.stars,
+            stars: fcPerformance.difficulty.stars
+        });
     }
 }
