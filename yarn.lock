@@ -1963,37 +1963,37 @@ only@~0.0.2:
   resolved "https://registry.yarnpkg.com/only/-/only-0.0.2.tgz#2afde84d03e50b9a8edc444e30610a70295edfb4"
   integrity sha512-Fvw+Jemq5fjjyWz6CpKx6w9s7xxqo3+JCyM0WXWeCSOboZ8ABkyvP8ID4CZuChA/wxSx+XSJmdOm8rGVyJ1hdQ==
 
-osu-catch-stable@^3.2.2:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/osu-catch-stable/-/osu-catch-stable-3.2.3.tgz#d11cd0a0632dccf90fc01e911d5f670080e50ae4"
-  integrity sha512-jpHWUWOV3q9HIpEGS9casjSTcy+Y1P/qrhqfku2bhfY5TdG1KcwVasHgL/sa+92cp52LqjM7DRhRMn7YVgZ1Ng==
-
-osu-classes@^2.1.3:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/osu-classes/-/osu-classes-2.2.1.tgz#78d15ef10dd9b0d1b5620dffcbfafcdd43e4f5e0"
-  integrity sha512-mgzAQ1KXU5SKUrZZE221kZ2c/l8H89NxlufICV5AScSYH1OARlahbpMcxPja2rwsJGEH4NQbtd7LRO5W0rtGKQ==
-
-osu-mania-stable@^4.0.3:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/osu-mania-stable/-/osu-mania-stable-4.0.4.tgz#8af7dfda251fad5e90ae8766b5feaf73c8768af0"
-  integrity sha512-yCCKFc6+0AMpn9ENvIjUFC3gRa6B/OA3NEiO20RLGm0RNcetJLRSi16P/gBR8LLBNhmA+Vpx970cwWq9FS3VMA==
-
-osu-parsers@^4.0.0:
+osu-catch-stable@^4.0.0:
   version "4.0.0"
-  resolved "https://registry.yarnpkg.com/osu-parsers/-/osu-parsers-4.0.0.tgz#a90b46be5f002fd630053723c553e8d752ca7933"
-  integrity sha512-z7R5kxCyWZsIY04UNMVNBFwUZ9mVSMMZuAzH/BgcOzx9aVU9Xb5yz0M5K2XYmXGtVgWMqCNh7NUfg7iDV5Bllg==
+  resolved "https://registry.yarnpkg.com/osu-catch-stable/-/osu-catch-stable-4.0.0.tgz#60a5b150840a9d4efe53b230a92945e43ac13908"
+  integrity sha512-qOayn6WifpZ7+mT4qj6gCgGmbOxx5/PVL/NIm6NsZ86O6O0qH+6R+ytSV2TtB4RXklBYKP/nK2dTdS9kSbXznQ==
+
+osu-classes@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/osu-classes/-/osu-classes-3.0.0.tgz#3617e1d5fe4227f060a90ff9969ed5fc22a8d688"
+  integrity sha512-LVslpXRjzHqUN0IJOmTwMnoKUNSeCyr7dKhsbPR7jvtkJoYyZtMpr9AS/nVdJmL5MPKKoEa3unLfffdUSmonoA==
+
+osu-mania-stable@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/osu-mania-stable/-/osu-mania-stable-5.0.0.tgz#ddc5103743e5082326e9bb6d97b2add553b98b90"
+  integrity sha512-9UYjgZ2YYBFgVxNDON1rSXQO7KQ5DMuJxRsavDRLKFsoE7foHHc4y1AUBgOH0u6vuGVDOleBXhvvGjwsHAibjw==
+
+osu-parsers@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/osu-parsers/-/osu-parsers-4.1.0.tgz#165b901b0c8b08de1370468b2ad348c918e1a0e2"
+  integrity sha512-bPMlNkGx1TG0qIr/D3zPZ3CEOC3onwcSNYG1vAstAnltmIx1vlvOuZSVrl5fCjmZytc3sz+ZAEUW8vC7iQ0lnQ==
   dependencies:
     lzma-js-simple-v2 "^1.2.2"
 
-osu-standard-stable@^4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/osu-standard-stable/-/osu-standard-stable-4.0.4.tgz#eaf30e4d3441d552549b88bf4742286c12cc923d"
-  integrity sha512-Rb1aJTViU+ZFMe197aKlYhjMThuQ/jPHF9+KybKvElLY10/+nDgbD+lyVw2fp/4G/IgI3ghxSuD4nakgrLLGaA==
+osu-standard-stable@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/osu-standard-stable/-/osu-standard-stable-5.0.0.tgz#dc82e0d4224c13d05effaa64904f4d34d8b0e9c6"
+  integrity sha512-qCzS1DFStHjgeDZguLRY5k4OgJSNXHG+sUdi1jm2Xwgk23QsyexwRQyTs5phFMuAnQmxeyjzWELLHOo99A/gMA==
 
-osu-taiko-stable@^4.0.4:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/osu-taiko-stable/-/osu-taiko-stable-4.0.5.tgz#d87d1fb3f25046427b398c00e4326b18acd9e58f"
-  integrity sha512-2MRYH7NjraRAcJLDOfPcjDosgMv0RYA1hcOpxtI+YLPNr7tIjaxLmksbzP4NLM//au7jDbF4QmBb14k8bPOq6Q==
+osu-taiko-stable@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/osu-taiko-stable/-/osu-taiko-stable-5.0.0.tgz#f3db101721923b5601e82b2032f0e5a56659365b"
+  integrity sha512-zvkFfAysl2BOSTTRN7sNtA590I+1hRYhEnArvQrUOWU94UTeyCLgh2yvlYXqVXeIQlhVDcrSxT8JR9RnGk3voA==
 
 p-is-promise@^3.0.0:
   version "3.0.0"
