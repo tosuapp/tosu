@@ -1,3 +1,4 @@
+import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 import { Beatmap, Calculator } from 'rosu-pp';
@@ -23,6 +24,10 @@ interface BeatmapPPAttributes {
     cs: number;
     hp: number;
     od: number;
+    circles: number;
+    sliders: number;
+    spinners: number;
+    holds: number;
     maxCombo: number;
     fullStars: number;
     stars: number;
@@ -43,6 +48,7 @@ interface BeatmapPPTimings {
 export class BeatmapPPData extends AbstractEntity {
     strains: number[];
     strainsAll: BeatmapStrains;
+    commonBPM: number;
     minBPM: number;
     maxBPM: number;
     ppAcc: BeatmapPPAcc;
@@ -62,6 +68,7 @@ export class BeatmapPPData extends AbstractEntity {
             series: [],
             xaxis: []
         };
+        this.commonBPM = 0.0;
         this.minBPM = 0.0;
         this.maxBPM = 0.0;
         this.ppAcc = {
@@ -77,6 +84,10 @@ export class BeatmapPPData extends AbstractEntity {
             cs: 0.0,
             hp: 0.0,
             od: 0.0,
+            circles: 0,
+            sliders: 0,
+            spinners: 0,
+            holds: 0,
             maxCombo: 0,
             fullStars: 0.0,
             stars: 0.0
@@ -128,7 +139,8 @@ export class BeatmapPPData extends AbstractEntity {
         };
     }
 
-    updateBPM(minBPM: number, maxBPM: number) {
+    updateBPM(commonBPM: number, minBPM: number, maxBPM: number) {
+        this.commonBPM = commonBPM;
         this.minBPM = minBPM;
         this.maxBPM = maxBPM;
     }
@@ -154,7 +166,7 @@ export class BeatmapPPData extends AbstractEntity {
             menuData.Folder,
             menuData.Path
         );
-        let beatmap;
+        let beatmap: Beatmap;
         try {
             beatmap = new Beatmap({
                 path: mapPath,
@@ -200,12 +212,17 @@ export class BeatmapPPData extends AbstractEntity {
             series: [],
             xaxis: []
         };
+
         let oldStrains: number[] = [];
 
         const offset: number = strains.sectionLength;
+
+        let lazerBeatmap: ParsedBeatmap;
+
         try {
             const decoder = new BeatmapDecoder();
-            const lazerBeatmap = await decoder.decodeFromPath(mapPath, {
+
+            lazerBeatmap = await decoder.decodeFromPath(mapPath, {
                 parseColours: false,
                 parseDifficulty: false,
                 parseEditor: false,
@@ -214,7 +231,9 @@ export class BeatmapPPData extends AbstractEntity {
                 parseMetadata: false
             });
 
-            this.updateBPM(lazerBeatmap.bpmMin, lazerBeatmap.bpmMax);
+            const { bpm, bpmMin, bpmMax } = lazerBeatmap;
+
+            this.updateBPM(bpm, bpmMin, bpmMax);
 
             const firstObj = Math.round(
                 lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
@@ -227,6 +246,7 @@ export class BeatmapPPData extends AbstractEntity {
             wLogger.error(
                 "Something happend, when we're tried to parse beatmap"
             );
+            return;
         }
 
         const beatmap_parse_time = performance.now();
@@ -330,6 +350,10 @@ export class BeatmapPPData extends AbstractEntity {
             cs: mapAttributes.cs,
             od: mapAttributes.od,
             hp: mapAttributes.hp,
+            circles: lazerBeatmap.hittable,
+            sliders: lazerBeatmap.slidable,
+            spinners: lazerBeatmap.spinnable,
+            holds: lazerBeatmap.holdable,
             maxCombo: fcPerformance.difficulty.maxCombo,
             fullStars: fcPerformance.difficulty.stars,
             stars: fcPerformance.difficulty.stars

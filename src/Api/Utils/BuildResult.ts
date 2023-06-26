@@ -117,9 +117,14 @@ export const buildResult = (
                     HP: beatmapPpData.calculatedMapAttributes.hp,
                     SR: beatmapPpData.currAttributes.stars,
                     BPM: {
+                        common: beatmapPpData.commonBPM,
                         min: beatmapPpData.minBPM,
                         max: beatmapPpData.maxBPM
                     },
+                    circles: beatmapPpData.calculatedMapAttributes.circles,
+                    sliders: beatmapPpData.calculatedMapAttributes.sliders,
+                    spinners: beatmapPpData.calculatedMapAttributes.spinners,
+                    holds: beatmapPpData.calculatedMapAttributes.holds,
                     maxCombo: beatmapPpData.calculatedMapAttributes.maxCombo,
                     fullSR: beatmapPpData.calculatedMapAttributes.fullStars,
                     memoryAR: menuData.AR,

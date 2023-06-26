@@ -30,9 +30,14 @@ interface BeatmapStats {
     HP: number;
     SR: number;
     BPM: {
+        common: number;
         min: number;
         max: number;
     };
+    circles: number;
+    sliders: number;
+    spinners: number;
+    holds: number;
     maxCombo: number;
     fullSR: number;
     memoryAR: number;
