@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/KotRikD/tosu/compare/v1.2.0...v1.3.0) (2023-06-26)
+
+
+### Features
+
+* add new options to config file on startup ([c40cd0f](https://github.com/KotRikD/tosu/commit/c40cd0fc10f8ee0325c32e27bfd319bf636e9753))
+
+
+### Bug Fixes
+
+* fix font size in readme ([e2d046a](https://github.com/KotRikD/tosu/commit/e2d046a8174afec381b828e183093065812ea1c7))
+* fix incorrect config names for port & ip ([22b06fe](https://github.com/KotRikD/tosu/commit/22b06fec466973395c97313ab8aebfd021d2e1a6))
+* fix sending empty object when osu is not launched ([f703b4b](https://github.com/KotRikD/tosu/commit/f703b4ba8864b91f2c830bc26f59c90d1d81a5dd))
+* ignore package-lock ([3551364](https://github.com/KotRikD/tosu/commit/3551364537f9f8c8484a336265238e7a21184352))
+* remove adding all changes after prettier:fix ([f9af0cf](https://github.com/KotRikD/tosu/commit/f9af0cf9198bc4c5e184c9513ef3c7bf546ff56d))
+
 ## [1.2.0](https://github.com/KotRikD/tosu/compare/v1.1.0...v1.2.0) (2023-06-06)
 
 
