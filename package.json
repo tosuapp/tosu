@@ -1,7 +1,7 @@
 {
   "author": "Mikhail Babynichev",
   "license": "GPL-3.0",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "scripts": {
     "prepare": "husky install",
     "start": "pnpm run -C packages/tosu run:dev",
@@ -21,7 +21,7 @@
   },
   "lint-staged": {
     "**/*.{js,ts}": [
-      "yarn prettier:fix"
+      "pnpm run prettier:fix"
     ]
   },
   "homepage": "https://github.com/KotRikD/tosu#readme",
