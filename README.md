@@ -38,53 +38,41 @@ Features Done
 
 ## Install
 
-#### Install `yarn` (if you don't have it already)
+#### Install `pnpm` (if you don't have it already)
 
 ```sh
-npm install -g yarn
+npm install -g pnpm
 ```
 
 #### Install dependecies
 ```sh
-yarn install
-```
-
-#### Compile Memory lib
-
-```sh
-cd packages/tsprocess && npm install && npm run build
+pnpm install
 ```
 
 ## Build
 
-#### Install `yarn` (if you don't have it already)
+#### Install `pnpm` (if you don't have it already)
 
 ```sh
-npm install -g yarn
+npm install -g pnpm
 ```
 
 #### Install dependecies (optional)
 
 ```sh
-yarn install
+pnpm install
 ```
 
-#### Compile TS
+#### Compile TS & App
 
 ```sh
-yarn ts:compile
-```
-
-#### Build App
-
-```sh
-yarn compile
+pnpm run compile
 ```
 
 ## Usage
 
 ```sh
-yarn run:dev
+pnpm run start
 ```
 
 ## Author

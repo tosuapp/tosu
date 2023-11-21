@@ -41,24 +41,14 @@ jobs:
           rust-version: stable
           components: clippy
 
-      - name: Compile Memory lib 🔧
-        run: |
-          cd packages/tsprocess
-          npm install
-          npm run build
-
       - name: Install Deps 🔧
         run: |
-          npm install -g yarn
-          yarn install --frozen-lockfile
-
-      - name: Compile TS 🔧
-        run: |
-          yarn ts:compile
+          npm install -g pnpm@^8
+          pnpm install --frozen-lockfile
 
       - name: Build App 🔧
         run: |
-          yarn compile
+          pnpm run build
 
       # - name: Upload Artifact (Linux)
       #   if: startsWith( matrix.os, 'ubuntu' )
@@ -79,4 +69,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-${{ github.ref_name }}
-          path: dist/tosu.exe
+          path: packages/tosu/dist/tosu.exe

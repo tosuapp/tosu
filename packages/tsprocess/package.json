@@ -8,13 +8,9 @@
     "build": "tsc",
     "postinstall": "node-gyp clean configure build"
   },
-  "devDependencies": {
-    "@types/node": "18.15.11"
-  },
   "dependencies": {
     "node-gyp": "9.3.0",
-    "node-addon-api": "6.0.0",
-    "typescript": "4.9.5"
+    "node-addon-api": "6.0.0"
   },
   "files": [
     "lib",

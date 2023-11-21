@@ -1,0 +1,48 @@
+{
+    "name": "tosu",
+    "version": "1.3.0",
+    "main": "dist/index.js",
+    "bin": "dist/index.js",
+    "scripts": {
+        "ts:run": "ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
+        "ts:compile": "ncc build src/index.ts -o dist -m -d",
+        "run:dev": "pnpm run ts:run src/index.ts",
+        "compile": "pnpm run ts:compile && pkg --compress brotli . && pnpm run ts:run src/postBuild.ts"
+    },
+    "pkg": {
+        "scripts": "dist/**/*.js",
+        "assets": [
+          "dist/**/*.node",
+          "dist/target/**/*"
+        ],
+        "targets": [
+          "node18-win-x64"
+        ],
+        "outputPath": "dist"
+    },
+    "dependencies": {
+        "@types/koa__router": "^12.0.0",
+        "@koa/router": "^12.0.0",
+        "@types/koa": "^2.13.5",
+        "@vercel/ncc": "^0.36.1",
+        "dotenv": "^16.0.3",
+        "find-process": "^1.4.7",
+        "koa": "^2.14.1",
+        "koa-mount": "^4.0.0",
+        "koa-send": "^5.0.1",
+        "koa-static": "^5.0.0",
+        "koa-websocket": "^7.0.0",
+        "osu-catch-stable": "^4.0.0",
+        "osu-classes": "^3.0.0",
+        "osu-mania-stable": "^5.0.0",
+        "osu-parsers": "^4.1.0",
+        "osu-standard-stable": "^5.0.0",
+        "osu-taiko-stable": "^5.0.0",
+        "pkg": "^5.8.0",
+        "resedit": "^2.0.0",
+        "rosu-pp": "^0.9.4",
+        "ts-node": "^10.9.1",
+        "tsprocess": "workspace:*",
+        "winston": "^3.8.2"
+    }
+}
