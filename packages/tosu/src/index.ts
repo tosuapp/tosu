@@ -5,12 +5,12 @@ import send from 'koa-send';
 import serve from 'koa-static';
 import Websockify from 'koa-websocket';
 
-import { config, updateConfig } from './config';
-import { OVERLAYS_STATIC } from './constants/overlaysStatic';
-import { wLogger } from './logger';
-import { InstanceManager } from './objects/instanceManager/instanceManager';
-import { OsuInstance } from './objects/instanceManager/osuInstance';
-import { sleep } from './utils/sleep';
+import { config, updateConfig } from '@/config';
+import { OVERLAYS_STATIC } from '@/constants/overlaysStatic';
+import { configureLogger, wLogger } from '@/logger';
+import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { OsuInstance } from '@/objects/instanceManager/osuInstance';
+import { sleep } from '@/utils/sleep';
 
 interface CustomContext extends Koa.Context {
     instancesManager: InstanceManager;
@@ -18,6 +18,7 @@ interface CustomContext extends Koa.Context {
 
 (async () => {
     updateConfig();
+    configureLogger()
 
     wLogger.info('Starting tosu');
 

@@ -7,25 +7,26 @@
         "ts:run": "ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
         "ts:compile": "ncc build src/index.ts -o dist -m -d",
         "run:dev": "pnpm run ts:run src/index.ts",
-        "compile": "pnpm run ts:compile && pkg --compress brotli . && pnpm run ts:run src/postBuild.ts"
+        "compile": "pnpm run ts:compile && pkg --compress GZip . && pnpm run ts:run src/postBuild.ts"
     },
     "pkg": {
         "scripts": "dist/**/*.js",
         "assets": [
-          "dist/**/*.node",
-          "dist/target/**/*"
+            "dist/**/*.node",
+            "dist/target/**/*"
         ],
         "targets": [
-          "node18-win-x64"
+            "node18-win-x64"
         ],
         "outputPath": "dist"
     },
     "dependencies": {
-        "@types/koa__router": "^12.0.0",
         "@koa/router": "^12.0.0",
         "@types/koa": "^2.13.5",
+        "@types/koa__router": "^12.0.0",
         "@vercel/ncc": "^0.36.1",
         "dotenv": "^16.0.3",
+        "expressionparser": "^1.1.5",
         "find-process": "^1.4.7",
         "koa": "^2.14.1",
         "koa-mount": "^4.0.0",

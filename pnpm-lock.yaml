@@ -48,6 +48,9 @@ importers:
       dotenv:
         specifier: ^16.0.3
         version: 16.3.1
+      expressionparser:
+        specifier: ^1.1.5
+        version: 1.1.5
       find-process:
         specifier: ^1.4.7
         version: 1.4.7
@@ -1073,6 +1076,10 @@ packages:
   /expand-template@2.0.3:
     resolution: {integrity: sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==}
     engines: {node: '>=6'}
+    dev: false
+
+  /expressionparser@1.1.5:
+    resolution: {integrity: sha512-9GldsRvXhcJ+ZPiK7fel5KBpgU+LjjQjnyWQVugJcvRc99lXTBICwXKaQV2laZ1KUlTVUBnMmFpgtkMVwwMiHA==}
     dev: false
 
   /fast-glob@3.3.2:
