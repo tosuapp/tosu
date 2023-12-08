@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/KotRikD/tosu/compare/v1.3.1...v1.3.2) (2023-12-08)
+
+
+### Bug Fixes
+
+* app won't start ([c1cd4ec](https://github.com/KotRikD/tosu/commit/c1cd4ec8ffd8afc210a39f24239cc6ec72f3360c))
+
 ### [1.3.1](https://github.com/KotRikD/tosu/compare/v1.3.0...v1.3.1) (2023-11-21)
 
 ## [1.3.0](https://github.com/KotRikD/tosu/compare/v1.2.0...v1.3.0) (2023-06-26)
