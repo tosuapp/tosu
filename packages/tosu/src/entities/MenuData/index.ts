@@ -50,7 +50,7 @@ export class MenuData extends AbstractEntity {
         this.MD5 = process.readSharpString(process.readInt(beatmapAddr + 0x6c));
         //  [[Beatmap] + 0x94]
         this.Path = process.readSharpString(
-            process.readInt(beatmapAddr + 0x94)
+            process.readInt(beatmapAddr + 0x90)
         );
 
         // [Base - 0x33]
@@ -122,6 +122,7 @@ export class MenuData extends AbstractEntity {
         this.ObjectCount = process.readInt(beatmapAddr + 0xfc);
 
         wLogger.debug('State: MenuData updated');
+
         this.previousMD5 = this.MD5;
     }
 
