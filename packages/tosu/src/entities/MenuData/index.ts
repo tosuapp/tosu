@@ -48,7 +48,7 @@ export class MenuData extends AbstractEntity {
         const beatmapAddr = process.readPointer(baseAddr - 0xc);
         //  [[Beatmap] + 0x6C]
         this.MD5 = process.readSharpString(process.readInt(beatmapAddr + 0x6c));
-        //  [[Beatmap] + 0x94]
+        //  [[Beatmap] + 0x90]
         this.Path = process.readSharpString(
             process.readInt(beatmapAddr + 0x90)
         );
@@ -107,9 +107,9 @@ export class MenuData extends AbstractEntity {
         this.Name = process.readSharpString(
             process.readInt(beatmapAddr + 0x80)
         );
-        //  [[Beatmap] + 0xB0]
+        //  [[Beatmap] + 0xAC]
         this.Difficulty = process.readSharpString(
-            process.readInt(beatmapAddr + 0xb0)
+            process.readInt(beatmapAddr + 0xac)
         );
         //  [Beatmap] + 0xCC
         this.MapID = process.readInt(beatmapAddr + 0xcc);
