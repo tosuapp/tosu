@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.4](https://github.com/KotRikD/tosu/compare/v1.3.3...v1.3.4) (2023-12-15)
+
+
+### Bug Fixes
+
+* difficulty name moved too ([709744b](https://github.com/KotRikD/tosu/commit/709744bfd33244643c97be2949063f3154f759c7))
+
 ### [1.3.3](https://github.com/KotRikD/tosu/compare/v1.3.2...v1.3.3) (2023-12-15)
 
 
