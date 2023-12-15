@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.3](https://github.com/KotRikD/tosu/compare/v1.3.2...v1.3.3) (2023-12-15)
+
+
+### Bug Fixes
+
+* move beatmap address ([863da31](https://github.com/KotRikD/tosu/commit/863da315c3b72a48e8cb13f799e7668d7af786ee))
+
 ### [1.3.2](https://github.com/KotRikD/tosu/compare/v1.3.1...v1.3.2) (2023-12-08)
 
 
