@@ -10,10 +10,10 @@
 
 namespace memory { 
     template <class T>
-    inline T read(HANDLE hProcess, uintptr_t address) {
+    inline std::tuple<T, bool> read(HANDLE hProcess, uintptr_t address) {
         T value;
-        ReadProcessMemory(hProcess, reinterpret_cast<void*>(address), &value, sizeof(T), 0);
-        return value;
+        auto result = ReadProcessMemory(hProcess, reinterpret_cast<void*>(address), &value, sizeof(T), 0);
+        return {value, result};
     }
 
     inline bool read_buffer(HANDLE hProcess, uintptr_t address, size_t size, char* dstBuffer) {

@@ -1,4 +1,5 @@
 #include "process.h"
+#include <format>
 #include <napi.h>
 
 Napi::Value readByte(const Napi::CallbackInfo &args) {
@@ -12,7 +13,14 @@ Napi::Value readByte(const Napi::CallbackInfo &args) {
   auto handle =
       reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Int32Value());
   auto address = args[1].As<Napi::Number>().Uint32Value();
-  return Napi::Number::New(env, memory::read<int8_t>(handle, address));
+  auto result = memory::read<int8_t>(handle, address);
+  if (!std::get<1>(result)) {
+    Napi::TypeError::New(env,
+                         std::format("Couldn't read byte at {:x}", address))
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  return Napi::Number::New(env, std::get<0>(result));
 }
 
 Napi::Value readShort(const Napi::CallbackInfo &args) {
@@ -26,7 +34,14 @@ Napi::Value readShort(const Napi::CallbackInfo &args) {
   auto handle =
       reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Int32Value());
   auto address = args[1].As<Napi::Number>().Uint32Value();
-  return Napi::Number::New(env, memory::read<int16_t>(handle, address));
+  auto result = memory::read<int16_t>(handle, address);
+  if (!std::get<1>(result)) {
+    Napi::TypeError::New(env,
+                         std::format("Couldn't read short at {:x}", address))
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  return Napi::Number::New(env, std::get<0>(result));
 }
 
 Napi::Value readInt(const Napi::CallbackInfo &args) {
@@ -40,7 +55,13 @@ Napi::Value readInt(const Napi::CallbackInfo &args) {
   auto handle =
       reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Int32Value());
   auto address = args[1].As<Napi::Number>().Uint32Value();
-  return Napi::Number::New(env, memory::read<int32_t>(handle, address));
+  auto result = memory::read<int32_t>(handle, address);
+  if (!std::get<1>(result)) {
+    Napi::TypeError::New(env, std::format("Couldn't read int at {:x}", address))
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  return Napi::Number::New(env, std::get<0>(result));
 }
 
 Napi::Value readFloat(const Napi::CallbackInfo &args) {
@@ -54,7 +75,14 @@ Napi::Value readFloat(const Napi::CallbackInfo &args) {
   auto handle =
       reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Int32Value());
   auto address = args[1].As<Napi::Number>().Uint32Value();
-  return Napi::Number::New(env, memory::read<float_t>(handle, address));
+  auto result = memory::read<float_t>(handle, address);
+  if (!std::get<1>(result)) {
+    Napi::TypeError::New(env,
+                         std::format("Couldn't read float at {:x}", address))
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  return Napi::Number::New(env, std::get<0>(result));
 }
 
 Napi::Value readLong(const Napi::CallbackInfo &args) {
@@ -68,7 +96,14 @@ Napi::Value readLong(const Napi::CallbackInfo &args) {
   auto handle =
       reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Int32Value());
   auto address = args[1].As<Napi::Number>().Uint32Value();
-  return Napi::Number::New(env, memory::read<int64_t>(handle, address));
+  auto result = memory::read<int64_t>(handle, address);
+  if (!std::get<1>(result)) {
+    Napi::TypeError::New(env,
+                         std::format("Couldn't read long at {:x}", address))
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  return Napi::Number::New(env, std::get<0>(result));
 }
 
 Napi::Value readDouble(const Napi::CallbackInfo &args) {
@@ -82,7 +117,14 @@ Napi::Value readDouble(const Napi::CallbackInfo &args) {
   auto handle =
       reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Int32Value());
   auto address = args[1].As<Napi::Number>().Uint32Value();
-  return Napi::Number::New(env, memory::read<double_t>(handle, address));
+  auto result = memory::read<double_t>(handle, address);
+  if (!std::get<1>(result)) {
+    Napi::TypeError::New(env,
+                         std::format("Couldn't read double at {:x}", address))
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  return Napi::Number::New(env, std::get<0>(result));
 }
 
 Napi::Value scanSync(const Napi::CallbackInfo &args) {
@@ -102,6 +144,15 @@ Napi::Value scanSync(const Napi::CallbackInfo &args) {
   auto vec = std::vector<uint8_t>(signature.ByteLength());
   memcpy(vec.data(), signature.Data(), signature.ByteLength());
 
+  auto result = memory::find_pattern(handle, vec, refresh, baseAddress);
+
+  if (!result) {
+    Napi::TypeError::New(env, "Couldn't find signature")
+        .ThrowAsJavaScriptException();
+
+    return env.Null();
+  }
+
   return Napi::Number::New(
       env, memory::find_pattern(handle, vec, refresh, baseAddress));
 }
@@ -119,8 +170,17 @@ Napi::Value readBuffer(const Napi::CallbackInfo &args) {
   auto address = args[1].As<Napi::Number>().Uint32Value();
   auto size = args[2].As<Napi::Number>().Uint32Value();
   auto buffer = new char[size];
-  char *data = (char *)malloc(sizeof(char) * size);
-  memory::read_buffer(handle, address, size, data);
+  auto data = (char *)malloc(sizeof(char) * size);
+  auto result = memory::read_buffer(handle, address, size, data);
+
+  if (!result) {
+    free(data);
+    Napi::TypeError::New(env,
+                         std::format("Couldn't read buffer at {:x}", address))
+        .ThrowAsJavaScriptException();
+
+    return env.Null();
+  }
 
   auto out = Napi::Buffer<char>::Copy(env, data, size);
   free(data);
