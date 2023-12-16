@@ -1,6 +1,6 @@
-import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import fs from 'fs';
+import { injectGameOverlay } from 'game-overlay';
 import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 

@@ -1,0 +1,3 @@
+@tosu/game-overlay
+---
+A temp project to allow users use gosu memory game Overlay, probably in future will be replaced with own interpretation of this thing. I just wouldn't make it, due I agree with BlackShark's position about this (that it can give rise to a certain set of people who will use it for the evil of the game (cheats, etc.)) for the same reason, he doesn't even want to tell me how he compiled original `gameOverlay` project. Yes, this file that your `gosumemory` downloads at first launch!

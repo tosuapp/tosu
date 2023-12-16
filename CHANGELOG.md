@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/KotRikD/tosu/compare/v1.3.4...v1.4.0) (2023-12-16)
+
+
+### Features
+
+* gosumemory gameOverlay implementation ([1b1b987](https://github.com/KotRikD/tosu/commit/1b1b987dc523db9160423c8b39b0fbb6b92f34f9))
+
 ### [1.3.4](https://github.com/KotRikD/tosu/compare/v1.3.3...v1.3.4) (2023-12-15)
 
 

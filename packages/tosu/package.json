@@ -27,6 +27,7 @@
         "@vercel/ncc": "^0.36.1",
         "dotenv": "^16.0.3",
         "find-process": "^1.4.7",
+        "game-overlay": "workspace:*",
         "koa": "^2.14.1",
         "koa-mount": "^4.0.0",
         "koa-send": "^5.0.1",
@@ -43,7 +44,6 @@
         "rosu-pp": "^0.9.4",
         "ts-node": "^10.9.1",
         "tsprocess": "workspace:*",
-        "winston": "^3.8.2",
-        "@tosu/game-overlay": "workspace:*"
+        "winston": "^3.8.2"
     }
 }
