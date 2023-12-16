@@ -5,3 +5,5 @@ node_modules
 yarn-error.log
 static/
 package-lock.json
+config.ini
+gameOverlay/

@@ -1,3 +1,4 @@
+import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import fs from 'fs';
 import path from 'path';
@@ -123,8 +124,15 @@ export class OsuInstance {
                     'PATTERN SCANNING FAILED, TRYING ONE MORE TIME...'
                 );
                 this.emitter.emit('onResolveFailed', this.pid);
-                break;
+                return;
             }
+        }
+
+        /**
+         * ENABLING GOSU OVERLAY
+         */
+        if (config.enableGosuOverlay) {
+            await injectGameOverlay(this.process);
         }
 
         this.update();

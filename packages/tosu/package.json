@@ -43,6 +43,7 @@
         "rosu-pp": "^0.9.4",
         "ts-node": "^10.9.1",
         "tsprocess": "workspace:*",
-        "winston": "^3.8.2"
+        "winston": "^3.8.2",
+        "@tosu/game-overlay": "workspace:*"
     }
 }

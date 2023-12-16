@@ -27,7 +27,7 @@ Features Done
 - [X] Gameplay information (300's, 100's, 50's, live pp calculations, other stuff)
 - [X] ResultScreen information (result screen information with grades + gameplay data)
 - [ ] Tournament state (in beta right now, dont have chat reading, and some output data)
-- [ ] In-game overlay (kinda hard thing to make + i need some RFC for it)
+- [x] In-game overlay (based on gosumemory closed overlay injection)
 
 ### 🏠 [Homepage](https://github.com/KotRikD/tosu#readme)
 

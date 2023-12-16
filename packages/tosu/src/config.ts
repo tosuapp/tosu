@@ -16,7 +16,8 @@ POLL_RATE=150
 KEYOVERLAY_POLL_RATE=150
 SERVER_IP=127.0.0.1
 SERVER_PORT=24050
-STATIC_FOLDER_PATH=./static`
+STATIC_FOLDER_PATH=./static
+ENABLE_GOSU_OVERLAY=false`
     );
 }
 
@@ -31,7 +32,8 @@ export const config = {
     keyOverlayPollRate: Number(process.env.KEYOVERLAY_POLL_RATE || '100'),
     serverIP: process.env.SERVER_IP || '127.0.0.1',
     serverPort: Number(process.env.SERVER_PORT || '24050'),
-    staticFolderPath: process.env.STATIC_FOLDER_PATH || './static'
+    staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
+    enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true'
 };
 
 export const updateConfig = () => {
@@ -80,6 +82,11 @@ export const updateConfig = () => {
     if (!process.env.STATIC_FOLDER_PATH) {
         newOptions += 'STATIC_FOLDER_PATH, ';
         fs.appendFileSync(configPath, '\nSTATIC_FOLDER_PATH=./static', 'utf8');
+    }
+
+    if (!process.env.ENABLE_GOSU_OVERLAY) {
+        newOptions += 'nENABLE_GOSU_OVERLAY, ';
+        fs.appendFileSync(configPath, '\nENABLE_GOSU_OVERLAY=false', 'utf8');
     }
 
     if (newOptions !== '')
