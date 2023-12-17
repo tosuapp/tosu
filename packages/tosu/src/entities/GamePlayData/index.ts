@@ -131,6 +131,11 @@ export class GamePlayData extends AbstractEntity {
         }
 
         const gameplayBase = process.readInt(rulesetAddr + 0x68);
+        if (gameplayBase === 0) {
+            wLogger.debug('gameplayBase is zero');
+            return;
+        }
+
         const scoreBase = process.readInt(gameplayBase + 0x38);
 
         // Resetting default state value, to define other componenets that we have touched gamePlayData
@@ -239,10 +244,20 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
+        const keyOverlayPtr = process.readInt(rulesetAddr + 0xb0);
+        if (keyOverlayPtr === 0) {
+            wLogger.debug('keyOverlayPtr is zero');
+            return;
+        }
+
         // [[Ruleset + 0xB0] + 0x10] + 0x4
         const keyOverlayArrayAddr = process.readInt(
-            process.readInt(process.readInt(rulesetAddr + 0xb0) + 0x10) + 0x4
+            process.readInt(keyOverlayPtr + 0x10) + 0x4
         );
+        if (keyOverlayArrayAddr === 0) {
+            wLogger.debug('keyOverlayArrayAddr is zero');
+            return;
+        }
 
         const keys = this.getKeyOverlay(process, keyOverlayArrayAddr);
         if (keys.K1Count < 0 || keys.K1Count > 1_000_000) {

@@ -33,6 +33,11 @@ export class BassDensityData extends AbstractEntity {
         const rulesetAddr = osuProcess.readInt(
             osuProcess.readInt(bases.getBase('rulesetsAddr') - 0xb) + 0x4
         );
+        if (rulesetAddr === 0) {
+            wLogger.debug('rulesetAddr is zero');
+            return;
+        }
+
         // [Ruleset + 0x44] + 0x10
         const audioVelocityBase = osuProcess.readInt(
             osuProcess.readInt(rulesetAddr + 0x44) + 0x10

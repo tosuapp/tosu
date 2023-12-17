@@ -62,8 +62,16 @@ export class ResultsScreenData extends AbstractEntity {
         const rulesetAddr = process.readInt(
             process.readInt(rulesetsAddr - 0xb) + 0x4
         );
+        if (rulesetAddr === 0) {
+            wLogger.debug('rulesetAddr is zero');
+            return;
+        }
 
         const resultScreenBase = process.readInt(rulesetAddr + 0x38);
+        if (resultScreenBase === 0) {
+            wLogger.debug('resultScreenBase is zero');
+            return;
+        }
 
         // PlayerName string  `mem:"[[Ruleset + 0x38] + 0x28]"`
         this.PlayerName = process.readSharpString(

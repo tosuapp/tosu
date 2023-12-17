@@ -58,6 +58,10 @@ export class Process {
 
     /* dumbass thing ever... please pr this, if you know, how to deal with that better... */
     readSharpString(address: number): string {
+        // Check for null strings (exists somehow in osu!)
+        if (address === 0) {
+            return '';
+        }
         const length = this.readInt(address + 0x4);
         if (length < 0 || length > 4096) {
             return '';

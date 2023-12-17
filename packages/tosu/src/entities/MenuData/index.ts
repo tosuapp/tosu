@@ -46,6 +46,10 @@ export class MenuData extends AbstractEntity {
         const { baseAddr } = bases.bases;
 
         const beatmapAddr = process.readPointer(baseAddr - 0xc);
+        if (beatmapAddr === 0) {
+            wLogger.debug('beatmapAddr is 0');
+            return;
+        }
         //  [[Beatmap] + 0x6C]
         this.MD5 = process.readSharpString(process.readInt(beatmapAddr + 0x6c));
         //  [[Beatmap] + 0x90]
@@ -111,13 +115,13 @@ export class MenuData extends AbstractEntity {
         this.Difficulty = process.readSharpString(
             process.readInt(beatmapAddr + 0xac)
         );
+        //  [Beatmap] + 0xC8
+        this.MapID = process.readInt(beatmapAddr + 0xc8);
         //  [Beatmap] + 0xCC
-        this.MapID = process.readInt(beatmapAddr + 0xcc);
-        //  [Beatmap] + 0xD0
-        this.SetID = process.readInt(beatmapAddr + 0xd0);
+        this.SetID = process.readInt(beatmapAddr + 0xcc);
         // unknown, unsubmitted, pending/wip/graveyard, unused, ranked, approved, qualified
-        //  [Beatmap] + 0x130
-        this.RankedStatus = process.readInt(beatmapAddr + 0x130);
+        //  [Beatmap] + 0x12C
+        this.RankedStatus = process.readInt(beatmapAddr + 0x12c);
         //  [Beatmap] + 0xFC
         this.ObjectCount = process.readInt(beatmapAddr + 0xfc);
 

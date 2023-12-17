@@ -35,11 +35,16 @@ export class Leaderboard {
         this.leaderboardBase = newBase;
     }
 
-    private readLeaderPlayerStruct(base: number): [LeaderboardPlayer, boolean] {
+    private readLeaderPlayerStruct(
+        base: number
+    ): [LeaderboardPlayer, boolean] | undefined {
         const IsLeaderBoardVisible = this.process.readByte(
             this.process.readInt(base + 0x24) + 0x20
         );
         const scoreboardEntry = this.process.readInt(base + 0x20);
+        if (scoreboardEntry === 0) {
+            return undefined;
+        }
 
         // [[Base + 0x20] + 0x1C] + 0x8
         const ModsXor1 = this.process.readInt(
@@ -88,8 +93,10 @@ export class Leaderboard {
         }
 
         const playerBase = this.process.readInt(this.leaderboardBase + 0x10);
-        [this.player, this.isScoreboardVisible] =
-            this.readLeaderPlayerStruct(playerBase);
+        const playerEntry = this.readLeaderPlayerStruct(playerBase);
+        if (playerEntry) {
+            [this.player, this.isScoreboardVisible] = playerEntry;
+        }
 
         const playersArray = this.process.readInt(this.leaderboardBase + 0x4);
         const amOfSlots = this.process.readInt(playersArray + 0xc);
@@ -105,10 +112,16 @@ export class Leaderboard {
         for (let i = 0; i < itemsSize; i++) {
             const current = items + leaderStart + 0x4 * i;
 
-            const [player] = this.readLeaderPlayerStruct(
+            const lbEntry = this.readLeaderPlayerStruct(
                 this.process.readInt(current)
             );
-            newLeaderBoard.push(player);
+
+            if (!lbEntry) {
+                // break due to un-consistency of leaderboard
+                break;
+            }
+
+            newLeaderBoard.push(lbEntry[0]);
         }
         this.leaderBoard = newLeaderBoard;
     }

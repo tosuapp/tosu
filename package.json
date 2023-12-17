@@ -21,7 +21,8 @@
   },
   "lint-staged": {
     "**/*.{js,ts}": [
-      "pnpm run prettier:fix"
+      "pnpm run prettier:fix",
+      "git add"
     ]
   },
   "homepage": "https://github.com/KotRikD/tosu#readme",
