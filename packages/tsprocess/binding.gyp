@@ -5,15 +5,10 @@
       'sources': [ 'lib/functions.cc' ],
       'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")"],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
-      "cflags_cc": ["-std=c++23", "-fno-exceptions"],
+      "cflags": ["-std=c++23", "-fno-exceptions"],
       'msvs_settings': {
         'VCCLCompilerTool': { 'ExceptionHandling': 1 },
       },
-      "msbuild_settings": {
-        "ClCompile": {
-            "LanguageStandard": "stdcpplatest"
-        }
-      }
     },
     {
         "target_name": "copy_binary",
