@@ -6,4 +6,5 @@ yarn-error.log
 static/
 package-lock.json
 config.ini
+tosu.exe
 **/tosu/gameOverlay/

@@ -1,6 +1,23 @@
 #include "process.h"
-#include <format>
+#include <memory>
 #include <napi.h>
+#include <stdexcept>
+#include <string>
+
+// https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
+template <typename... Args>
+std::string string_format(const std::string &format, Args... args) {
+  int size_s = std::snprintf(nullptr, 0, format.c_str(), args...) +
+               1; // Extra space for '\0'
+  if (size_s <= 0) {
+    throw std::runtime_error("Error during formatting.");
+  }
+  auto size = static_cast<size_t>(size_s);
+  std::unique_ptr<char[]> buf(new char[size]);
+  std::snprintf(buf.get(), size, format.c_str(), args...);
+  return std::string(buf.get(),
+                     buf.get() + size - 1); // We don't want the '\0' inside
+}
 
 Napi::Value readByte(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
@@ -16,7 +33,7 @@ Napi::Value readByte(const Napi::CallbackInfo &args) {
   auto result = memory::read<int8_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env,
-                         std::format("Couldn't read byte at {:x}", address))
+                         string_format("Couldn't read byte at %x", address))
         .ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -37,7 +54,7 @@ Napi::Value readShort(const Napi::CallbackInfo &args) {
   auto result = memory::read<int16_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env,
-                         std::format("Couldn't read short at {:x}", address))
+                         string_format("Couldn't read short at %x", address))
         .ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -57,7 +74,7 @@ Napi::Value readInt(const Napi::CallbackInfo &args) {
   auto address = args[1].As<Napi::Number>().Uint32Value();
   auto result = memory::read<int32_t>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, std::format("Couldn't read int at {:x}", address))
+    Napi::TypeError::New(env, string_format("Couldn't read int at %x", address))
         .ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -78,7 +95,7 @@ Napi::Value readFloat(const Napi::CallbackInfo &args) {
   auto result = memory::read<float_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env,
-                         std::format("Couldn't read float at {:x}", address))
+                         string_format("Couldn't read float at %x", address))
         .ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -99,7 +116,7 @@ Napi::Value readLong(const Napi::CallbackInfo &args) {
   auto result = memory::read<int64_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env,
-                         std::format("Couldn't read long at {:x}", address))
+                         string_format("Couldn't read long at %x", address))
         .ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -120,7 +137,7 @@ Napi::Value readDouble(const Napi::CallbackInfo &args) {
   auto result = memory::read<double_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env,
-                         std::format("Couldn't read double at {:x}", address))
+                         string_format("Couldn't read double at %x", address))
         .ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -176,7 +193,7 @@ Napi::Value readBuffer(const Napi::CallbackInfo &args) {
   if (!result) {
     free(data);
     Napi::TypeError::New(env,
-                         std::format("Couldn't read buffer at {:x}", address))
+                         string_format("Couldn't read buffer at %x", address))
         .ThrowAsJavaScriptException();
 
     return env.Null();
