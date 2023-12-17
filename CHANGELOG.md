@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.1](https://github.com/KotRikD/tosu/compare/v1.4.0...v1.4.1) (2023-12-17)
+
+
+### Bug Fixes
+
+* most of crushs from now is catched, and fixed bId,sId of maps ([edd0e6a](https://github.com/KotRikD/tosu/commit/edd0e6a429fc17094e4e599e3912b0f59f84be63))
+
 ## [1.4.0](https://github.com/KotRikD/tosu/compare/v1.3.4...v1.4.0) (2023-12-16)
 
 
