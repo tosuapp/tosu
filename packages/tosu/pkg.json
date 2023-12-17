@@ -1,0 +1,11 @@
+{
+    "scripts": "dist/**/*.js",
+    "assets": [
+      "dist/**/*.node",
+      "dist/target/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
+}
