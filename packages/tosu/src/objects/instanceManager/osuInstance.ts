@@ -168,69 +168,78 @@ export class OsuInstance {
 
         let prevTime = 0;
         while (!this.isDestroyed) {
-            await Promise.all([
-                allTimesData.updateState(),
-                menuData.updateState()
-            ]);
+            try {
+                await Promise.all([
+                    allTimesData.updateState(),
+                    menuData.updateState()
+                ]);
 
-            // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
-            await menuData.updateMP3Length();
+                // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
+                await menuData.updateMP3Length();
 
-            if (!settings.gameFolder) {
-                settings.setGameFolder(path.join(this.path, '../'));
+                if (!settings.gameFolder) {
+                    settings.setGameFolder(path.join(this.path, '../'));
 
-                // condition when user have different BeatmapDirectory in osu! config
-                if (fs.existsSync(allTimesData.SongsFolder)) {
-                    settings.setSongsFolder(allTimesData.SongsFolder);
-                } else {
-                    settings.setSongsFolder(
-                        path.join(this.path, '../', allTimesData.SongsFolder)
-                    );
+                    // condition when user have different BeatmapDirectory in osu! config
+                    if (fs.existsSync(allTimesData.SongsFolder)) {
+                        settings.setSongsFolder(allTimesData.SongsFolder);
+                    } else {
+                        settings.setSongsFolder(
+                            path.join(
+                                this.path,
+                                '../',
+                                allTimesData.SongsFolder
+                            )
+                        );
+                    }
                 }
-            }
 
-            switch (allTimesData.Status) {
-                case 0:
-                    await bassDensityData.updateState();
-                    break;
-                case 5:
-                    // Reset Gameplay/ResultScreen data on joining to songSelect
-                    if (!gamePlayData.isDefaultState) {
+                switch (allTimesData.Status) {
+                    case 0:
+                        await bassDensityData.updateState();
+                        break;
+                    case 5:
+                        // Reset Gameplay/ResultScreen data on joining to songSelect
+                        if (!gamePlayData.isDefaultState) {
+                            gamePlayData.init();
+                            resultsScreenData.init();
+                        }
+                        break;
+                    case 2:
+                        // Reset gameplay data on retry
+                        if (prevTime > allTimesData.PlayTime) {
+                            gamePlayData.init(true);
+                        }
+
+                        prevTime = allTimesData.PlayTime;
+
+                        if (allTimesData.PlayTime < 150) {
+                            break;
+                        }
+
+                        await gamePlayData.updateState();
+                        break;
+                    case 7:
+                        await resultsScreenData.updateState();
+                        break;
+                    case 22:
+                        if (!this.isTourneyManager) {
+                            this.isTourneyManager = true;
+                        }
+                        await tourneyManagerData.updateState();
+                        break;
+                    default:
                         gamePlayData.init();
                         resultsScreenData.init();
-                    }
-                    break;
-                case 2:
-                    // Reset gameplay data on retry
-                    if (prevTime > allTimesData.PlayTime) {
-                        gamePlayData.init(true);
-                    }
-
-                    prevTime = allTimesData.PlayTime;
-
-                    if (allTimesData.PlayTime < 150) {
                         break;
-                    }
+                }
 
-                    await gamePlayData.updateState();
-                    break;
-                case 7:
-                    await resultsScreenData.updateState();
-                    break;
-                case 22:
-                    if (!this.isTourneyManager) {
-                        this.isTourneyManager = true;
-                    }
-                    await tourneyManagerData.updateState();
-                    break;
-                default:
-                    gamePlayData.init();
-                    resultsScreenData.init();
-                    break;
-            }
-
-            if (this.isTourneySpectator) {
-                await tourneyUserProfileData.updateState();
+                if (this.isTourneySpectator) {
+                    await tourneyUserProfileData.updateState();
+                }
+            } catch (exc) {
+                wLogger.error('error happend while another loop executed`');
+                console.error(exc);
             }
 
             await sleep(config.pollRate);
@@ -297,7 +306,12 @@ export class OsuInstance {
             ) {
                 previousState = currentTimeMD5;
 
-                await beatmapPpData.updateMapMetadata(currentMods);
+                try {
+                    await beatmapPpData.updateMapMetadata(currentMods);
+                } catch (exc) {
+                    wLogger.error("can't update beatmap metadata");
+                    console.error(exc);
+                }
             }
 
             await sleep(config.pollRate);

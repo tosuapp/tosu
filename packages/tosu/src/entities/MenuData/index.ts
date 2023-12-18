@@ -50,13 +50,12 @@ export class MenuData extends AbstractEntity {
             wLogger.debug('beatmapAddr is 0');
             return;
         }
-        //  [[Beatmap] + 0x6C]
+        // [[Beatmap] + 0x6C]
         this.MD5 = process.readSharpString(process.readInt(beatmapAddr + 0x6c));
-        //  [[Beatmap] + 0x90]
+        // [[Beatmap] + 0x90]
         this.Path = process.readSharpString(
             process.readInt(beatmapAddr + 0x90)
         );
-
         // [Base - 0x33]
         this.MenuGameMode = process.readPointer(baseAddr - 0x33);
 

@@ -41,7 +41,7 @@ You need unpack it to folder, and if you need overlays, download the [Blackshark
 
 ## Prerequisites
 
-- typescript >=4.9.5
+- typescript >=5.3.3
 - node >=18.14.2
 
 ## Install

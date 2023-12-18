@@ -1,7 +1,7 @@
+import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
-import { Beatmap, Calculator } from 'rosu-pp';
 
 import { BeatmapStrains } from '@/api/types';
 import { config } from '@/config';

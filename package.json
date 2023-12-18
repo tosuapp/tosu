@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@types/node": "^18.14.6",
-    "tsconfig-paths": "^3.14.2",
-    "typescript": "^4.9.5"
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
@@ -21,8 +21,7 @@
   },
   "lint-staged": {
     "**/*.{js,ts}": [
-      "pnpm run prettier:fix",
-      "git add"
+      "pnpm run prettier:fix"
     ]
   },
   "homepage": "https://github.com/KotRikD/tosu#readme",

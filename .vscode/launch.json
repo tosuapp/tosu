@@ -6,12 +6,12 @@
     "configurations": [
         {
             "type": "node",
-            "name": "run tosumemory:dev",
+            "name": "run tosu",
             "request": "launch",
             "args": ["src/index.ts"],
             "outputCapture": "std",
             "runtimeArgs": ["--nolazy", "--inspect", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
-            "cwd": "${workspaceRoot}",
+            "cwd": "${workspaceRoot}/packages/tosu",
         },
         {
             "type": "node",
@@ -20,7 +20,7 @@
             "args": ["${relativeFile}"],
             "outputCapture": "std",
             "runtimeArgs": ["--nolazy", "--inspect", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
-            "cwd": "${workspaceRoot}",
+            "cwd": "${workspaceRoot}/packages/tosu",
         }
     ]
 }

@@ -53,17 +53,10 @@ export class AllTimesData extends AbstractEntity {
         this.MenuMods = process.readInt(process.readInt(menuModsAddr + 0x9));
         // ChatChecker - 0x20
         this.ChatStatus = process.readByte(chatCheckerAddr - 0x20);
-        try {
-            // [[[SkinData + 4] + 0] + 68]
-            this.SkinFolder = process.readSharpString(
-                process.readInt(process.readPointer(skinDataAddr + 4) + 68)
-            );
-        } catch (exc) {
-            console.log(exc);
-            wLogger.error(
-                "CANT UPDATE SKIN FOLDER (don't mind, this can happen sometimes)"
-            );
-        }
+        // [[[SkinData + 4] + 0] + 68]
+        this.SkinFolder = process.readSharpString(
+            process.readInt(process.readPointer(skinDataAddr + 4) + 68)
+        );
         // [[SettingsClass + 0x8] + 0x4] + 0xC
         this.ShowInterface = Boolean(
             process.readByte(

@@ -1,4 +1,7 @@
 {
+    "ts-node": {
+      "files": true
+    },
     "compilerOptions": {
       "lib": ["ES2020"],
       "module": "commonjs",
@@ -18,7 +21,10 @@
       "baseUrl": ".",
       "paths": {
         "@/*": ["src/*"]
-      }
+      },
+      "typeRoots": [
+        "./src/@types"
+      ]
     },
     "exclude": ["node_modules", "src/postBuild.ts"],
     "include": ["src"]
