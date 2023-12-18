@@ -1,5 +1,5 @@
+import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
 import path from 'path';
-import { Beatmap, Calculator } from 'rosu-pp';
 import { Process } from 'tsprocess/dist/process';
 
 import { config } from '@/config';
@@ -137,6 +137,10 @@ export class GamePlayData extends AbstractEntity {
         }
 
         const scoreBase = process.readInt(gameplayBase + 0x38);
+        if (scoreBase === 0) {
+            wLogger.debug('scoreBase is zero');
+            return;
+        }
 
         // Resetting default state value, to define other componenets that we have touched gamePlayData
         // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
@@ -156,7 +160,7 @@ export class GamePlayData extends AbstractEntity {
         this.Retries = process.readInt(process.readInt(baseAddr - 0x33) + 0x8);
         // [[[Ruleset + 0x68] + 0x38] + 0x28]
         this.PlayerName = process.readSharpString(
-            process.readInt(process.readInt(gameplayBase + 0x38) + 0x28)
+            process.readInt(scoreBase + 0x28)
         );
         // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
         this.Mods =
