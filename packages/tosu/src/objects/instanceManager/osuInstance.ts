@@ -213,7 +213,11 @@ export class OsuInstance {
 
                         prevTime = allTimesData.PlayTime;
 
-                        if (allTimesData.PlayTime < 150) {
+                        if (
+                            allTimesData.PlayTime < 150 &&
+                            !gamePlayData.isDefaultState
+                        ) {
+                            gamePlayData.init();
                             break;
                         }
 
@@ -238,7 +242,7 @@ export class OsuInstance {
                     await tourneyUserProfileData.updateState();
                 }
             } catch (exc) {
-                wLogger.error('error happend while another loop executed`');
+                wLogger.error('error happend while another loop executed');
                 console.error(exc);
             }
 
@@ -255,20 +259,27 @@ export class OsuInstance {
         ]);
 
         while (!this.isDestroyed) {
-            switch (allTimesData.Status) {
-                case 2:
-                    if (allTimesData.PlayTime < 150) {
+            try {
+                switch (allTimesData.Status) {
+                    case 2:
+                        if (allTimesData.PlayTime < 150) {
+                            break;
+                        }
+
+                        await gamePlayData.updateKeyOverlay();
+                        // await
                         break;
-                    }
+                    default:
+                    // no-default
+                }
 
-                    await gamePlayData.updateKeyOverlay();
-                    // await
-                    break;
-                default:
-                // no-default
+                await sleep(config.keyOverlayPollRate);
+            } catch (exc) {
+                wLogger.error(
+                    'error happend while keyboard overlay attempted to parse'
+                );
+                console.error(exc);
             }
-
-            await sleep(config.keyOverlayPollRate);
         }
     }
 
