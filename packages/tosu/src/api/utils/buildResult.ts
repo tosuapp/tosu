@@ -3,6 +3,7 @@ import path from 'path';
 import { DataRepo } from '@/entities/DataRepoList';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {
@@ -273,7 +274,6 @@ const buildTourneyData = (
 
             return {
                 team: spectatorTeam,
-                ipcSpec: '',
                 spectating: {
                     name: tourneyUserProfileData.Name,
                     country: tourneyUserProfileData.Country,
@@ -325,6 +325,23 @@ const buildTourneyData = (
         'tourneyManagerData'
     ]);
 
+    const mappedChat = tourneyManagerData.Messages.map((message) => {
+        const ipcClient = mappedOsuTourneyClients.find(
+            (client) => client.spectating.name === message.name
+        );
+
+        return {
+            team: ipcClient
+                ? ipcClient.team
+                : message.name === 'BanchoBot'
+                ? 'bot'
+                : 'unknown',
+            time: message.time,
+            name: message.name,
+            messageBody: message.content
+        };
+    });
+
     return {
         manager: {
             ipcState: tourneyManagerData.IPCState,
@@ -341,7 +358,7 @@ const buildTourneyData = (
                 scoreVisible: tourneyManagerData.ScoreVisible,
                 starsVisible: tourneyManagerData.StarsVisible
             },
-            chat: [],
+            chat: mappedChat,
             gameplay: {
                 score: {
                     left: tourneyManagerData.FirstTeamScore,
