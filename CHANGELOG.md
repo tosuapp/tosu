@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/KotRikD/tosu/compare/v1.4.1...v1.5.0) (2023-12-20)
+
+
+### Features
+
+* chat reading ([#24](https://github.com/KotRikD/tosu/issues/24)) ([0091171](https://github.com/KotRikD/tosu/commit/0091171ea519c7206ffbb73bde9c653e50b59ce5))
+* contributing guide ([a0a628a](https://github.com/KotRikD/tosu/commit/a0a628aeee505eb3ec40f20f3ccd9f6955342d75))
+* dont bundle node_modules/ ([7be0d63](https://github.com/KotRikD/tosu/commit/7be0d6360bc435fe4da60a426bd884f6c6e56a01))
+* use fastify instead of koa ([#22](https://github.com/KotRikD/tosu/issues/22)) ([edebd3c](https://github.com/KotRikD/tosu/commit/edebd3c2885bec3a7d65c9a0e91fb974996e63e0))
+
+
+### Bug Fixes
+
+* more try/catches because at fast speeds, still having issues with offsets ([89c544e](https://github.com/KotRikD/tosu/commit/89c544e3378240feb6db14e504084a385bbeb3ca))
+* use protect check instead of state for region scanner ([#23](https://github.com/KotRikD/tosu/issues/23)) ([e547bce](https://github.com/KotRikD/tosu/commit/e547bcea2fc45bd8392d53240157a64449d837b1))
+
 ### [1.4.1](https://github.com/KotRikD/tosu/compare/v1.4.0...v1.4.1) (2023-12-17)
 
 
