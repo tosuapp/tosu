@@ -4,6 +4,7 @@ import { DataRepo } from '@/entities/DataRepoList';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
+import { fixDecimals } from '@/utils/fixDecimals';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {
@@ -111,26 +112,28 @@ export const buildResult = (
                     difficulty: menuData.Difficulty
                 },
                 stats: {
-                    AR: beatmapPpData.calculatedMapAttributes.ar,
-                    CS: beatmapPpData.calculatedMapAttributes.cs,
-                    OD: beatmapPpData.calculatedMapAttributes.od,
-                    HP: beatmapPpData.calculatedMapAttributes.hp,
-                    SR: beatmapPpData.currAttributes.stars,
+                    AR: fixDecimals(beatmapPpData.calculatedMapAttributes.ar),
+                    CS: fixDecimals(beatmapPpData.calculatedMapAttributes.cs),
+                    OD: fixDecimals(beatmapPpData.calculatedMapAttributes.od),
+                    HP: fixDecimals(beatmapPpData.calculatedMapAttributes.hp),
+                    SR: fixDecimals(beatmapPpData.currAttributes.stars),
                     BPM: {
-                        common: beatmapPpData.commonBPM,
-                        min: beatmapPpData.minBPM,
-                        max: beatmapPpData.maxBPM
+                        common: fixDecimals(beatmapPpData.commonBPM),
+                        min: fixDecimals(beatmapPpData.minBPM),
+                        max: fixDecimals(beatmapPpData.maxBPM)
                     },
                     circles: beatmapPpData.calculatedMapAttributes.circles,
                     sliders: beatmapPpData.calculatedMapAttributes.sliders,
                     spinners: beatmapPpData.calculatedMapAttributes.spinners,
                     holds: beatmapPpData.calculatedMapAttributes.holds,
                     maxCombo: beatmapPpData.calculatedMapAttributes.maxCombo,
-                    fullSR: beatmapPpData.calculatedMapAttributes.fullStars,
-                    memoryAR: menuData.AR,
-                    memoryCS: menuData.CS,
-                    memoryOD: menuData.OD,
-                    memoryHP: menuData.HP
+                    fullSR: fixDecimals(
+                        beatmapPpData.calculatedMapAttributes.fullStars
+                    ),
+                    memoryAR: fixDecimals(menuData.AR),
+                    memoryCS: fixDecimals(menuData.CS),
+                    memoryOD: fixDecimals(menuData.OD),
+                    memoryHP: fixDecimals(menuData.HP)
                 },
                 path: {
                     full: path.join(
@@ -182,9 +185,11 @@ export const buildResult = (
                 hitErrorArray: gamePlayData.HitErrors
             },
             pp: {
-                current: beatmapPpData.currAttributes.pp,
-                fc: beatmapPpData.currAttributes.fcPP,
-                maxThisPlay: beatmapPpData.currAttributes.maxThisPlayPP
+                current: fixDecimals(beatmapPpData.currAttributes.pp),
+                fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
+                maxThisPlay: fixDecimals(
+                    beatmapPpData.currAttributes.maxThisPlayPP
+                )
             },
             keyOverlay: {
                 k1: {
