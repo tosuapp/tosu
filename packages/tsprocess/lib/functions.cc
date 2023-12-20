@@ -81,6 +81,26 @@ Napi::Value readInt(const Napi::CallbackInfo &args) {
   return Napi::Number::New(env, std::get<0>(result));
 }
 
+Napi::Value readUInt(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() < 2) {
+    Napi::TypeError::New(env, "Wrong number of arguments")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  auto handle =
+      reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Int32Value());
+  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto result = memory::read<uint32_t>(handle, address);
+  if (!std::get<1>(result)) {
+    Napi::TypeError::New(env, string_format("Couldn't read uint at %x", address))
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  return Napi::Number::New(env, std::get<0>(result));
+}
+
 Napi::Value readFloat(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
   if (args.Length() < 2) {
@@ -348,6 +368,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["readByte"] = Napi::Function::New(env, readByte);
   exports["readShort"] = Napi::Function::New(env, readShort);
   exports["readInt"] = Napi::Function::New(env, readInt);
+  exports["readUInt"] = Napi::Function::New(env, readUInt);
   exports["readFloat"] = Napi::Function::New(env, readFloat);
   exports["readLong"] = Napi::Function::New(env, readLong);
   exports["readDouble"] = Napi::Function::New(env, readDouble);

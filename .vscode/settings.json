@@ -1,3 +1,6 @@
 {
-    "discord.enabled": true
+    "discord.enabled": true,
+    "files.associations": {
+        "xlocale": "cpp"
+    }
 }

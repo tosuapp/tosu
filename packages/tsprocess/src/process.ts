@@ -40,6 +40,10 @@ export class Process {
         return ProcessUtils.readInt(this.handle, address);
     }
 
+    readUInt(address: number): number {
+        return ProcessUtils.readUInt(this.handle, address);
+    }
+
     readPointer(address: number): number {
         return this.readInt(this.readInt(address));
     }

@@ -16,6 +16,7 @@ import { ResultsScreenData } from '@/entities/ResultsScreenData';
 import { Settings } from '@/entities/Settings';
 import { TourneyManagerData } from '@/entities/TourneyManagerData';
 import { TourneyUserProfileData } from '@/entities/TourneyUserProfileData';
+import { UserProfile } from '@/entities/UserProfile';
 import { wLogger } from '@/logger';
 import { BaseData, MemoryBase } from '@/objects/memoryBase';
 import { sleep } from '@/utils/sleep';
@@ -34,7 +35,8 @@ const SCAN_PATTERNS: {
     settingsClassAddr: '83 E0 20 85 C0 7E 2F',
     rulesetsAddr: '7D 15 A1 ?? ?? ?? ?? 85 C0',
     canRunSlowlyAddr: '55 8B EC 80 3D ?? ?? ?? ?? 00 75 26 80 3D',
-    getAudioLengthAddr: '55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 85 C0'
+    getAudioLengthAddr: '55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 85 C0',
+    userProfileAddr: 'A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 6A 00 6A'
 };
 
 export class OsuInstance {
@@ -83,6 +85,7 @@ export class OsuInstance {
             'tourneyManagerData',
             new TourneyManagerData(this.entities)
         );
+        this.entities.set('userProfile', new UserProfile(this.entities));
     }
 
     setIsTourneySpectator(newVal: boolean) {
@@ -155,7 +158,8 @@ export class OsuInstance {
             resultsScreenData,
             settings,
             tourneyUserProfileData,
-            tourneyManagerData
+            tourneyManagerData,
+            userProfile
         } = this.entities.getServices([
             'allTimesData',
             'menuData',
@@ -165,7 +169,8 @@ export class OsuInstance {
             'resultsScreenData',
             'settings',
             'tourneyUserProfileData',
-            'tourneyManagerData'
+            'tourneyManagerData',
+            'userProfile'
         ]);
 
         let prevTime = 0;
@@ -244,6 +249,8 @@ export class OsuInstance {
                 if (this.isTourneySpectator) {
                     await tourneyUserProfileData.updateState();
                 }
+
+                await userProfile.updateState();
             } catch (exc) {
                 wLogger.error('error happend while another loop executed');
                 console.error(exc);

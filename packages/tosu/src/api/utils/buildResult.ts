@@ -56,7 +56,8 @@ export const buildResult = (
         menuData,
         gamePlayData,
         resultsScreenData,
-        beatmapPpData
+        beatmapPpData,
+        userProfile
     } = service.getServices([
         'settings',
         'bassDensityData',
@@ -64,7 +65,8 @@ export const buildResult = (
         'menuData',
         'gamePlayData',
         'resultsScreenData',
-        'beatmapPpData'
+        'beatmapPpData',
+        'userProfile'
     ]);
 
     const currentMods =
@@ -224,7 +226,8 @@ export const buildResult = (
                           convertMemoryPlayerToResult(slot)
                       )
                     : []
-            }
+            },
+            _isReplayUiHidden: gamePlayData.isReplayUiHidden
         },
         resultsScreen: {
             name: resultsScreenData.PlayerName,
@@ -240,6 +243,20 @@ export const buildResult = (
             katu: resultsScreenData.HitKatu,
             '50': resultsScreenData.Hit50,
             '0': resultsScreenData.HitMiss
+        },
+        userProfile: {
+            accuracy: userProfile.accuracy,
+            rankedScore: userProfile.rankedScore,
+            id: userProfile.id,
+            level: userProfile.level,
+            playCount: userProfile.playCount,
+            playMode: userProfile.playMode,
+            rank: userProfile.rank,
+            countryCode: userProfile.countryCode,
+            performancePoints: userProfile.performancePoints,
+            isOsu: userProfile.isOsu,
+            isConnected: userProfile.isConnected,
+            backgroundColour: userProfile.backgroundColour.toString(16)
         },
         tourney: buildTourneyData(instancesManager)
     };

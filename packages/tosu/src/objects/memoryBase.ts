@@ -12,6 +12,7 @@ export interface BaseData {
     rulesetsAddr: number;
     canRunSlowlyAddr: number;
     getAudioLengthAddr: number;
+    userProfileAddr: number;
 }
 
 export class MemoryBase {
@@ -33,7 +34,8 @@ export class MemoryBase {
             settingsClassAddr: 0,
             rulesetsAddr: 0,
             canRunSlowlyAddr: 0,
-            getAudioLengthAddr: 0
+            getAudioLengthAddr: 0,
+            userProfileAddr: 0
         };
 
         if (process.platform !== 'win32') {
