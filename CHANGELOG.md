@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/KotRikD/tosu/compare/v1.5.0...v1.6.0) (2023-12-20)
+
+
+### Features
+
+* make overlay static more beautiful ([#25](https://github.com/KotRikD/tosu/issues/25)) ([f145a57](https://github.com/KotRikD/tosu/commit/f145a57d009df482a733e20fee2fce7cb7fd8904))
+* userProfile reading ([#29](https://github.com/KotRikD/tosu/issues/29)) ([22ec473](https://github.com/KotRikD/tosu/commit/22ec47356d16805e139901950924a0b8fcd2bb92))
+
+
+### Bug Fixes
+
+* cors are broken ([#28](https://github.com/KotRikD/tosu/issues/28)) ([77f4e85](https://github.com/KotRikD/tosu/commit/77f4e85bf66366ee197ba769b6743a00b33fe6ae))
+* if user not connected, dont update it ([318f30f](https://github.com/KotRikD/tosu/commit/318f30f1801e58a8911eae8fbd615a54c9e4e277))
+* little json improvments ([#26](https://github.com/KotRikD/tosu/issues/26)) ([78033e9](https://github.com/KotRikD/tosu/commit/78033e9ddd280b32bd7e47d19132094a510f8ecb))
+* reset pp values after joining songSelect ([7e11723](https://github.com/KotRikD/tosu/commit/7e11723d916274e667e17fe0302385302f340817))
+
 ## [1.5.0](https://github.com/KotRikD/tosu/compare/v1.4.1...v1.5.0) (2023-12-20)
 
 
