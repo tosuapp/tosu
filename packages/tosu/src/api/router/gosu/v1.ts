@@ -74,6 +74,15 @@ export const buildV1Router = (app: FastifyInstance) => {
         const mapPath = parsedURL.pathname.replace('/Songs', '');
 
         reply.hijack();
+        reply.raw.setHeader('Access-Control-Allow-Origin', '*');
+        reply.raw.setHeader(
+            'Access-Control-Allow-Headers',
+            'Origin, X-Requested-With, Content-Type, Accept'
+        );
+        reply.raw.setHeader(
+            'Access-Control-Allow-Methods',
+            'POST, GET, PUT, DELETE, OPTIONS'
+        );
         send(req, mapPath, { root: settings.songsFolder }).pipe(reply.raw);
     });
 };
