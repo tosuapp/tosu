@@ -22,7 +22,7 @@ export const buildFastifyApp = async (instanceManager: InstanceManager) => {
         req.instanceManager = instanceManager;
     });
     // apply cors rules to request
-    app.addHook('onRequest', async (req, reply) => {
+    app.addHook('onRequest', async (_, reply) => {
         reply.header('Access-Control-Allow-Origin', '*');
         reply.header(
             'Access-Control-Allow-Headers',
