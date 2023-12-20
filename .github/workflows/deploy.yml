@@ -25,26 +25,26 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
-
+    
       - name: Install Node.js 🔧
         uses: actions/setup-node@v3
         with:
           node-version: 18
-
+    
       - name: Install Rust 🔧
         uses: ATiltedTree/setup-rust@v1
         with:
           rust-version: stable
           components: clippy
-
+    
       - name: Install Deps 🔧
         run: |
           npm install -g pnpm@^8
           pnpm install --frozen-lockfile
-
-      - name: Lint project
-      run: |
-        pnpm run prettier:ci
+  
+      - name: Lint App 🔧
+        run: |
+          pnpm run prettier:ci
 
   build:
     strategy:
@@ -54,21 +54,22 @@ jobs:
 
     runs-on: "${{ matrix.os }}"
     name: "Build on ${{ matrix.os }}"
+    
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
-
+    
       - name: Install Node.js 🔧
         uses: actions/setup-node@v3
         with:
           node-version: 18
-
+    
       - name: Install Rust 🔧
         uses: ATiltedTree/setup-rust@v1
         with:
           rust-version: stable
           components: clippy
-
+    
       - name: Install Deps 🔧
         run: |
           npm install -g pnpm@^8
