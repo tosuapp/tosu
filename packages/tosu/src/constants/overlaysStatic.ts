@@ -1,10 +1,21 @@
 export const OVERLAYS_STATIC = `<html>
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
     <title>ts osu overlays list</title>
     <style>
+    * {
+        font-family: 'Roboto', sans-serif;
+    }
+
     body {
         color: white;
-        background: black;
+        background: rgb(60, 60, 60);
+    }
+
+    a {
+        color: white;
     }
     </style>
 </head>

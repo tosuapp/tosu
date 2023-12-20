@@ -142,6 +142,12 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
+        let hpBarBase = process.readInt(gameplayBase + 0x40);
+        if (hpBarBase === 0) {
+            wLogger.debug('hpBar is zero');
+            return;
+        }
+
         // Resetting default state value, to define other componenets that we have touched gamePlayData
         // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
         this.isDefaultState = false;
@@ -187,17 +193,11 @@ export class GamePlayData extends AbstractEntity {
         // [[Ruleset + 0x68] + 0x38] + 0x94
         this.Combo = process.readShort(scoreBase + 0x94);
         // [[Ruleset + 0x68] + 0x40] + 0x14
-        this.PlayerHPSmooth = process.readDouble(
-            process.readInt(gameplayBase + 0x40) + 0x14
-        );
+        this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14);
         // [[Ruleset + 0x68] + 0x40] + 0x1C
-        this.PlayerHP = process.readDouble(
-            process.readInt(gameplayBase + 0x40) + 0x1c
-        );
+        this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
         // [[Ruleset + 0x68] + 0x48] + 0xC
-        this.Accuracy = process.readDouble(
-            process.readInt(gameplayBase + 0x48) + 0xc
-        );
+        this.Accuracy = process.readDouble(hpBarBase + 0xc);
 
         if (this.MaxCombo > 0) {
             const baseUR = this.calculateUR();
