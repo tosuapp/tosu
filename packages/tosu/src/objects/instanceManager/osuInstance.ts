@@ -150,6 +150,7 @@ export class OsuInstance {
             allTimesData,
             menuData,
             bassDensityData,
+            beatmapPpData,
             gamePlayData,
             resultsScreenData,
             settings,
@@ -159,6 +160,7 @@ export class OsuInstance {
             'allTimesData',
             'menuData',
             'bassDensityData',
+            'beatmapPpData',
             'gamePlayData',
             'resultsScreenData',
             'settings',
@@ -203,6 +205,7 @@ export class OsuInstance {
                         if (!gamePlayData.isDefaultState) {
                             gamePlayData.init();
                             resultsScreenData.init();
+                            beatmapPpData.resetCurrentAttributes();
                         }
                         break;
                     case 2:
