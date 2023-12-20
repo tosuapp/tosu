@@ -271,7 +271,6 @@ interface TourneyGameplay {
 
 export interface TourneyIpcClient {
     team: string;
-    ipcSpec: string;
     spectating: TourneyIpcSpec;
     gameplay: TourneyGameplay;
 }

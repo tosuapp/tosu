@@ -26,7 +26,7 @@ Features Done
 - [X] Menu state (map information, star rating, map metadata)
 - [X] Gameplay information (300's, 100's, 50's, live pp calculations, other stuff)
 - [X] ResultScreen information (result screen information with grades + gameplay data)
-- [ ] Tournament state (in beta right now, dont have chat reading, and some output data)
+- [x] Tournament state
 - [x] In-game overlay (based on gosumemory closed overlay injection)
 
 ### 🏠 [Homepage](https://github.com/KotRikD/tosu#readme)
@@ -74,7 +74,7 @@ pnpm install
 #### Compile TS & App
 
 ```sh
-pnpm run compile
+pnpm run build
 ```
 
 ## Usage
