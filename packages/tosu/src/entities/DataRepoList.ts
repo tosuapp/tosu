@@ -11,6 +11,7 @@ import { ResultsScreenData } from './ResultsScreenData';
 import { Settings } from './Settings';
 import { TourneyManagerData } from './TourneyManagerData';
 import { TourneyUserProfileData } from './TourneyUserProfileData';
+import { UserProfile } from './UserProfile';
 
 export interface DataRepoList {
     process: Process;
@@ -24,6 +25,7 @@ export interface DataRepoList {
     resultsScreenData: ResultsScreenData;
     tourneyUserProfileData: TourneyUserProfileData;
     tourneyManagerData: TourneyManagerData;
+    userProfile: UserProfile;
 }
 
 export class DataRepo {

@@ -201,6 +201,8 @@ export interface GameplayValues {
     pp: GameplayPP;
     keyOverlay: KeyOverlay;
     leaderboard: Leaderboard;
+
+    _isReplayUiHidden: boolean;
 }
 
 export interface ResultsScreenValues {
@@ -292,10 +294,26 @@ export interface TourneyValues {
     ipcClients: TourneyIpcClient[];
 }
 
+export interface UserProfileAnswer {
+    accuracy: number;
+    rankedScore: number;
+    id: number;
+    level: number;
+    playCount: number;
+    playMode: number;
+    rank: number;
+    countryCode: number;
+    performancePoints: number;
+    isOsu: boolean;
+    isConnected: boolean;
+    backgroundColour: string;
+}
+
 export interface ApiAnswer {
     settings: InSettingsValues;
     menu: InMenuValues;
     gameplay: GameplayValues;
     resultsScreen: ResultsScreenValues;
+    userProfile: UserProfileAnswer;
     tourney?: TourneyValues;
 }
