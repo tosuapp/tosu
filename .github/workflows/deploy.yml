@@ -18,32 +18,29 @@ concurrency:
 permissions:
   contents: write
 
-flow-prepare-jobs: &flow-prepare-jobs
-  - name: Checkout 🛎️
-    uses: actions/checkout@v3
-
-  - name: Install Node.js 🔧
-    uses: actions/setup-node@v3
-    with:
-      node-version: 18
-
-  - name: Install Rust 🔧
-    uses: ATiltedTree/setup-rust@v1
-    with:
-      rust-version: stable
-      components: clippy
-
-  - name: Install Deps 🔧
-    run: |
-      npm install -g pnpm@^8
-      pnpm install --frozen-lockfile
-
 jobs:
   lint:
     runs-on: "windows-latest"
     name: "Lint project"
     steps:
-      <<: *flow-prepare-jobs
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Install Node.js 🔧
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Rust 🔧
+        uses: ATiltedTree/setup-rust@v1
+        with:
+          rust-version: stable
+          components: clippy
+
+      - name: Install Deps 🔧
+        run: |
+          npm install -g pnpm@^8
+          pnpm install --frozen-lockfile
 
       - name: Lint project
       run: |
@@ -58,7 +55,24 @@ jobs:
     runs-on: "${{ matrix.os }}"
     name: "Build on ${{ matrix.os }}"
     steps:
-      <<: *flow-prepare-jobs
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Install Node.js 🔧
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Rust 🔧
+        uses: ATiltedTree/setup-rust@v1
+        with:
+          rust-version: stable
+          components: clippy
+
+      - name: Install Deps 🔧
+        run: |
+          npm install -g pnpm@^8
+          pnpm install --frozen-lockfile
 
       - name: Build App 🔧
         run: |
