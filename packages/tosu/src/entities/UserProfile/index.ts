@@ -29,6 +29,11 @@ export class UserProfile extends AbstractEntity {
             bases.getBase('userProfileAddr') + 0x1
         );
 
+        this.isConnected = Boolean(process.readByte(profileBase + 0xa8));
+        if (!this.isConnected) {
+            return;
+        }
+
         this.accuracy = process.readDouble(profileBase + 0x4);
         this.rankedScore = process.readLong(profileBase + 0xc);
         this.id = process.readInt(profileBase + 0x70);
@@ -39,7 +44,6 @@ export class UserProfile extends AbstractEntity {
         this.countryCode = process.readInt(profileBase + 0x98);
         this.performancePoints = process.readShort(profileBase + 0x9c);
         this.isOsu = Boolean(process.readByte(profileBase + 0xa2));
-        this.isConnected = Boolean(process.readByte(profileBase + 0xa8));
         // ARGB, to convert use UserProfile.backgroundColour.toString(16)
         this.backgroundColour = process.readUInt(profileBase + 0xac);
     }
