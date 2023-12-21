@@ -2,6 +2,7 @@ import { AbstractEntity } from '../AbstractEntity';
 import { DataRepo } from '../DataRepoList';
 
 export class UserProfile extends AbstractEntity {
+    name: string;
     accuracy: number;
     rankedScore: number;
     id: number;
@@ -34,6 +35,9 @@ export class UserProfile extends AbstractEntity {
             return;
         }
 
+        this.name = process.readSharpString(
+            process.readInt(profileBase + 0x30)
+        );
         this.accuracy = process.readDouble(profileBase + 0x4);
         this.rankedScore = process.readLong(profileBase + 0xc);
         this.id = process.readInt(profileBase + 0x70);

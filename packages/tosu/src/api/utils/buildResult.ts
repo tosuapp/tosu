@@ -245,6 +245,7 @@ export const buildResult = (
             '0': resultsScreenData.HitMiss
         },
         userProfile: {
+            name: userProfile.name,
             accuracy: userProfile.accuracy,
             rankedScore: userProfile.rankedScore,
             id: userProfile.id,

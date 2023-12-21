@@ -295,6 +295,7 @@ export interface TourneyValues {
 }
 
 export interface UserProfileAnswer {
+    name: string;
     accuracy: number;
     rankedScore: number;
     id: number;
