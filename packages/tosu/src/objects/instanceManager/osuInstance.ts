@@ -225,7 +225,7 @@ export class OsuInstance {
                             allTimesData.PlayTime < 150 &&
                             !gamePlayData.isDefaultState
                         ) {
-                            gamePlayData.init();
+                            gamePlayData.init(true);
                             break;
                         }
 
