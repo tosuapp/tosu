@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/KotRikD/tosu/compare/v1.6.0...v1.7.0) (2023-12-21)
+
+
+### Features
+
+* pass name to buildResult ([a57365e](https://github.com/KotRikD/tosu/commit/a57365ebd604c14f3a03bbfbbf49d7bc75a735e0))
+
 ## [1.6.0](https://github.com/KotRikD/tosu/compare/v1.5.0...v1.6.0) (2023-12-20)
 
 
