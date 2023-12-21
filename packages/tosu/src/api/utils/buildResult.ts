@@ -257,7 +257,7 @@ export const buildResult = (
             performancePoints: userProfile.performancePoints,
             isOsu: userProfile.isOsu,
             isConnected: userProfile.isConnected,
-            backgroundColour: userProfile.backgroundColour.toString(16)
+            backgroundColour: userProfile.backgroundColour?.toString(16)
         },
         tourney: buildTourneyData(instancesManager)
     };
