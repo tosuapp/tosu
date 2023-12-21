@@ -197,7 +197,9 @@ export class GamePlayData extends AbstractEntity {
         // [[Ruleset + 0x68] + 0x40] + 0x1C
         this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
         // [[Ruleset + 0x68] + 0x48] + 0xC
-        this.Accuracy = process.readDouble(hpBarBase + 0xc);
+        this.Accuracy = process.readDouble(
+            process.readInt(gameplayBase + 0x48) + 0xc
+        );
 
         if (this.MaxCombo > 0) {
             const baseUR = this.calculateUR();
