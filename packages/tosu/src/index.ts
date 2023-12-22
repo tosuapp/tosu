@@ -1,4 +1,4 @@
-import { configureLogger, wLogger } from '@tosu/common';
+import { argumetsParser, configureLogger, wLogger } from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
 
 import { buildFastifyApp } from './api';
@@ -6,12 +6,15 @@ import { config, updateConfig } from './config';
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
 (async () => {
+    wLogger.info('Starting tosu');
+
+    const { update } = argumetsParser(process.argv);
+
+    if ((update != null && update == true) || update == null)
+        await autoUpdater();
+
     updateConfig();
     configureLogger();
-
-    await autoUpdater();
-
-    wLogger.info('Starting tosu');
 
     wLogger.info('Searching for osu!');
 
