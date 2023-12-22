@@ -1,3 +1,5 @@
+import { wLogger } from '@tosu/common';
+
 import { DataRepo } from '@/entities/DataRepoList';
 
 import { AbstractEntity } from '../AbstractEntity';

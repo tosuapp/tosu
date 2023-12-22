@@ -1,6 +1,7 @@
+import { configureLogger, wLogger } from '@tosu/common';
+
 import { buildFastifyApp } from './api';
 import { config, updateConfig } from './config';
-import { configureLogger, wLogger } from './logger';
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 import { autoUpdater } from './updater';
 

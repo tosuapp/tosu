@@ -1,9 +1,9 @@
 // @ts-nocheck
 import send from '@fastify/send';
+import { wLogger } from '@tosu/common';
 import { FastifyInstance } from 'fastify';
 
 import { config } from '@/config';
-import { wLogger } from '@/logger';
 import { sleep } from '@/utils/sleep';
 
 export const buildV1Router = (app: FastifyInstance) => {

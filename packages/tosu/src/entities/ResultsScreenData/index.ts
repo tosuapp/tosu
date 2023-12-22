@@ -1,5 +1,6 @@
+import { wLogger } from '@tosu/common';
+
 import { DataRepo } from '@/entities/DataRepoList';
-import { wLogger } from '@/logger';
 import { OsuMods } from '@/utils/osuMods.types';
 
 import { AbstractEntity } from '../AbstractEntity';

@@ -1,0 +1,16 @@
+{
+  "name": "@tosu/common",
+  "private": "true",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "winston": "^3.8.2",
+    "tosu": "workspace:*"
+  }
+}

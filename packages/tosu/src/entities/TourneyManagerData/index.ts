@@ -1,5 +1,6 @@
+import { wLogger } from '@tosu/common';
+
 import { DataRepo } from '@/entities/DataRepoList';
-import { wLogger } from '@/logger';
 
 import { AbstractEntity } from '../AbstractEntity';
 import { ITourneyManagetChatItem } from './types';

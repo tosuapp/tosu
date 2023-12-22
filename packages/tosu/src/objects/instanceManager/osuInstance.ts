@@ -1,3 +1,4 @@
+import { wLogger } from '@tosu/common';
 import EventEmitter from 'events';
 import fs from 'fs';
 import { injectGameOverlay } from 'game-overlay';
@@ -17,7 +18,6 @@ import { Settings } from '@/entities/Settings';
 import { TourneyManagerData } from '@/entities/TourneyManagerData';
 import { TourneyUserProfileData } from '@/entities/TourneyUserProfileData';
 import { UserProfile } from '@/entities/UserProfile';
-import { wLogger } from '@/logger';
 import { MemoryPatterns, PatternData } from '@/objects/memoryPatterns';
 import { sleep } from '@/utils/sleep';
 

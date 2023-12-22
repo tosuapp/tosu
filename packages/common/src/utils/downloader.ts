@@ -45,6 +45,13 @@ export const downloadFile = (
         // find url
         https
             .get(url, options, (response) => {
+                if (response.headers.location) {
+                    downloadFile(response.headers.location, destination)
+                        .then(resolve)
+                        .catch(reject);
+                    return;
+                }
+
                 const totalSize = parseInt(
                     response.headers['content-length']!,
                     10

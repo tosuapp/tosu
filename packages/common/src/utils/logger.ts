@@ -1,6 +1,5 @@
+import { config } from 'tosu/src/config';
 import winston, { format, transports } from 'winston';
-
-import { config } from './config';
 
 const { timestamp, label, printf } = format;
 
