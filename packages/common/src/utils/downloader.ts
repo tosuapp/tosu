@@ -8,8 +8,12 @@ const updateProgressBar = (progress: number): void => {
     const emptyWidth = progressBarWidth - filledWidth;
     const progressBar = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
     process.stdout.write(
-        `Progress: [${progressBar}] ${(progress * 100).toFixed(2)}%\r`
+        `Downloading: [${progressBar}] ${(progress * 100).toFixed(2)}%\r`
     );
+
+    if (progress === 1) {
+        process.stdout.write('\n');
+    }
 };
 
 /**
