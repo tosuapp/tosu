@@ -1,4 +1,4 @@
-import { downloadFile, wLogger } from '@tosu/common';
+import { downloadFile, platformResolver, wLogger } from '@tosu/common';
 import { exec, execFile, execFileSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -54,27 +54,13 @@ export const autoUpdater = () =>
     new Promise(async (resolve) => {
         wLogger.info('Checking updates');
 
-        const platform = process.platform;
-        const platformType =
-            platform === 'win32'
-                ? 'windows'
-                : platform === 'linux'
-                ? 'linux'
-                : platform === 'darwin'
-                ? 'macos'
-                : '';
-        const platformFileType =
-            platform === 'win32'
-                ? '.exe'
-                : platform === 'linux'
-                ? ''
-                : platform === 'darwin'
-                ? 'macos'
-                : '';
+        const { platformType, platformFileType } = platformResolver(
+            process.platform
+        );
 
         if (platformType === '') {
             wLogger.warn(
-                `Unsupported platform (${platform}). Unable to run updater`
+                `Unsupported platform (${process.platform}). Unable to run updater`
             );
 
             return;
@@ -114,24 +100,14 @@ export const autoUpdater = () =>
             return;
         }
 
-        // const downloadAsset = await downloadFile(
-        //   findAsset.browser_download_url,
-        //   fileDestination
-        // );
-
-        const unzipExecutable = await unzipAsset(
-            fileDestination,
-            process.cwd()
+        const downloadAsset = await downloadFile(
+            findAsset.browser_download_url,
+            fileDestination
         );
 
-        const currentExecutablePath = process.argv[0]; // Path to the current executable
+        const unzipExecutable = await unzipAsset(downloadAsset, process.cwd());
 
-        console.log({
-            fileDestination,
-            unzipExecutable,
-            backupExecutablePath,
-            newExecutablePath
-        });
+        const currentExecutablePath = process.argv[0]; // Path to the current executable
 
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
         await fs.promises.rename(unzipExecutable, newExecutablePath);
