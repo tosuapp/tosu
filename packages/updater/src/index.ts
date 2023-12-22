@@ -1,28 +1,16 @@
+import { downloadFile, wLogger } from '@tosu/common';
 import { exec, execFile, execFileSync, spawn } from 'child_process';
 import fs from 'fs';
-import https from 'https';
 import path from 'path';
+import { sleep } from 'tosu/src/utils/sleep';
 import unzipper from 'unzipper';
 
-import { wLogger } from './logger';
-import { sleep } from './utils/sleep';
-
-const progressBarWidth = 40;
-const currentVersion = '1.1.0';
+const currentVersion = '1.6.0';
 
 const repositoryName = 'tosu';
 const fileDestination = path.join(process.cwd(), 'update.zip');
 const newExecutablePath = path.join(process.cwd(), 'tosu.exe');
 const backupExecutablePath = path.join(process.cwd(), 'tosu_old.exe');
-
-const updateProgressBar = (progress: number): void => {
-    const filledWidth = Math.round(progressBarWidth * progress);
-    const emptyWidth = progressBarWidth - filledWidth;
-    const progressBar = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
-    process.stdout.write(
-        `Download update: [${progressBar}] ${(progress * 100).toFixed(2)}%\r`
-    );
-};
 
 const deleteNotLocked = async (filePath: string) => {
     try {
@@ -37,52 +25,6 @@ const deleteNotLocked = async (filePath: string) => {
         console.log(err.message, err.code);
     }
 };
-
-const downloadFile = (url: string, destination: string): Promise<string> =>
-    new Promise((resolve, reject) => {
-        const options = {
-            headers: {
-                Accept: 'application/octet-stream',
-                'User-Agent': '@KotRikD/tosu'
-            }
-        };
-
-        const file = fs.createWriteStream(destination);
-
-        file.on('error', (err) => {
-            fs.unlinkSync(destination);
-            reject(err);
-        });
-
-        file.on('finish', () => {
-            file.close();
-            resolve(destination);
-        });
-
-        // find url
-        https
-            .get(url, options, (res) => {
-                // actual download
-                https
-                    .get(res.headers.location!, options, (response) => {
-                        const totalSize = parseInt(
-                            response.headers['content-length']!,
-                            10
-                        );
-                        let downloadedSize = 0;
-
-                        response.on('data', (data) => {
-                            downloadedSize += data.length;
-                            const progress = downloadedSize / totalSize;
-                            updateProgressBar(progress);
-                        });
-
-                        response.pipe(file);
-                    })
-                    .on('error', reject);
-            })
-            .on('error', reject);
-    });
 
 const unzipAsset = (zipPath: string, extractPath: string): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -172,14 +114,24 @@ export const autoUpdater = () =>
             return;
         }
 
-        const downloadAsset = await downloadFile(
-            findAsset.browser_download_url,
-            fileDestination
+        // const downloadAsset = await downloadFile(
+        //   findAsset.browser_download_url,
+        //   fileDestination
+        // );
+
+        const unzipExecutable = await unzipAsset(
+            fileDestination,
+            process.cwd()
         );
 
-        const unzipExecutable = await unzipAsset(downloadAsset, process.cwd());
-
         const currentExecutablePath = process.argv[0]; // Path to the current executable
+
+        console.log({
+            fileDestination,
+            unzipExecutable,
+            backupExecutablePath,
+            newExecutablePath
+        });
 
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
         await fs.promises.rename(unzipExecutable, newExecutablePath);
@@ -203,6 +155,7 @@ export const autoUpdater = () =>
                     return;
                 }
 
+                await sleep(1000);
                 started = true;
             }
         );

@@ -1,9 +1,9 @@
 import { configureLogger, wLogger } from '@tosu/common';
+import { autoUpdater } from '@tosu/updater';
 
 import { buildFastifyApp } from './api';
 import { config, updateConfig } from './config';
 import { InstanceManager } from './objects/instanceManager/instanceManager';
-import { autoUpdater } from './updater';
 
 (async () => {
     updateConfig();
