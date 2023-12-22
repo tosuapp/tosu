@@ -1,4 +1,4 @@
-import { config } from 'tosu/src/config';
+// import { config } from 'tosu/src/config';
 import winston, { format, transports } from 'winston';
 
 const { timestamp, label, printf } = format;
@@ -9,7 +9,8 @@ const customFormat = printf(({ level, message, label, timestamp }) => {
 
 export const configureLogger = () =>
     winston.configure({
-        level: config.debugLogging ? 'debug' : 'info',
+        // level: config.debugLogging ? 'debug' : 'info',
+        level: 'info',
         transports: [
             //
             // - Write to all logs with specified level to console.

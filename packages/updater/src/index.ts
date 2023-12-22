@@ -1,8 +1,7 @@
-import { downloadFile, platformResolver, wLogger } from '@tosu/common';
+import { downloadFile, platformResolver, sleep, wLogger } from '@tosu/common';
 import { exec, execFile, execFileSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { sleep } from 'tosu/src/utils/sleep';
 import unzipper from 'unzipper';
 
 const currentVersion = '1.6.0';

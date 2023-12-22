@@ -36,9 +36,6 @@ importers:
 
   packages/common:
     dependencies:
-      tosu:
-        specifier: workspace:*
-        version: link:../tosu
       winston:
         specifier: ^3.8.2
         version: 3.11.0
@@ -150,9 +147,6 @@ importers:
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
-      tosu:
-        specifier: workspace:*
-        version: link:../tosu
       unzipper:
         specifier: ^0.10.14
         version: 0.10.14

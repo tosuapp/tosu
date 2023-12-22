@@ -10,7 +10,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "winston": "^3.8.2",
-    "tosu": "workspace:*"
+    "winston": "^3.8.2"
   }
 }
