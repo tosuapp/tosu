@@ -45,6 +45,12 @@ export class AllTimesData extends AbstractEntity {
             canRunSlowlyAddr
         } = bases.bases;
 
+        const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
+        if (skinOsuAddr === 0) {
+            return;
+        }
+        const skinOsuBase = process.readInt(skinOsuAddr);
+
         // [Status - 0x4]
         this.Status = process.readPointer(statusAddr - 0x4);
         // [PlayTime + 0x5]
@@ -53,9 +59,8 @@ export class AllTimesData extends AbstractEntity {
         this.MenuMods = process.readInt(process.readInt(menuModsAddr + 0x9));
         // ChatChecker - 0x20
         this.ChatStatus = process.readByte(chatCheckerAddr - 0x20);
-        // [[[SkinData + 4] + 0] + 68]
         this.SkinFolder = process.readSharpString(
-            process.readInt(process.readPointer(skinDataAddr + 4) + 68)
+            process.readInt(skinOsuBase + 0x44)
         );
         // [[SettingsClass + 0x8] + 0x4] + 0xC
         this.ShowInterface = Boolean(
@@ -78,7 +83,6 @@ export class AllTimesData extends AbstractEntity {
         );
 
         wLogger.debug(`[MenuData:updateState] updated`);
-        settings.setSkinFolder(this.SkinFolder);
         settings.setShowInterface(this.ShowInterface);
     }
 }

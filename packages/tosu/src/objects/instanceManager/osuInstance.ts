@@ -31,7 +31,7 @@ const SCAN_PATTERNS: {
     playTimeAddr: '5E 5F 5D C3 A1 ?? ?? ?? ?? 89 ?? 04', //+0x5
     chatCheckerAddr: '0A D7 23 3C 00 00 ?? 01', //-0x20 (value)
     statusAddr: '48 83 F8 04 73 1E',
-    skinDataAddr: '75 21 8B 1D',
+    skinDataAddr: '74 2C 85 FF 75 28 A1 ?? ?? ?? ?? 8D 15',
     settingsClassAddr: '83 E0 20 85 C0 7E 2F',
     rulesetsAddr: '7D 15 A1 ?? ?? ?? ?? 85 C0',
     canRunSlowlyAddr: '55 8B EC 80 3D ?? ?? ?? ?? 00 75 26 80 3D',
@@ -200,6 +200,14 @@ export class OsuInstance {
                         );
                     }
                 }
+
+                settings.setSkinFolder(
+                    path.join(
+                        settings.gameFolder,
+                        'Skins',
+                        allTimesData.SkinFolder
+                    )
+                );
 
                 switch (allTimesData.Status) {
                     case 0:
