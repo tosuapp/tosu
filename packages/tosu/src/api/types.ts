@@ -305,7 +305,6 @@ export interface UserProfileAnswer {
     rank: number;
     countryCode: number;
     performancePoints: number;
-    isOsu: boolean;
     isConnected: boolean;
     backgroundColour: string;
 }

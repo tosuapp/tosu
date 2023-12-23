@@ -12,7 +12,6 @@ export class UserProfile extends AbstractEntity {
     rank: number;
     countryCode: number;
     performancePoints: number;
-    isOsu: boolean;
     isConnected: boolean;
     backgroundColour: number;
 
@@ -47,7 +46,6 @@ export class UserProfile extends AbstractEntity {
         this.rank = process.readInt(profileBase + 0x84);
         this.countryCode = process.readInt(profileBase + 0x98);
         this.performancePoints = process.readShort(profileBase + 0x9c);
-        this.isOsu = Boolean(process.readByte(profileBase + 0xa2));
         // ARGB, to convert use UserProfile.backgroundColour.toString(16)
         this.backgroundColour = process.readUInt(profileBase + 0xac);
     }

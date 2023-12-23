@@ -255,7 +255,6 @@ export const buildResult = (
             rank: userProfile.rank,
             countryCode: userProfile.countryCode,
             performancePoints: userProfile.performancePoints,
-            isOsu: userProfile.isOsu,
             isConnected: userProfile.isConnected,
             backgroundColour: userProfile.backgroundColour?.toString(16)
         },
