@@ -29,13 +29,16 @@ Features Done
 - [x] Tournament state
 - [x] In-game overlay (based on gosumemory closed overlay injection)
 
-### 🏠 [Homepage](https://github.com/KotRikD/tosu#readme)
+### 🏠 [Homepage](https://github.com/KotRikD/tosu#readme) | 🙌 [Discord](https://discord.gg/WX7BTs8kwh)
 
 ### For end-user
 We provide a packaged exe with everything you need to run `tosu`, to do so go to [latest release](https://github.com/KotRikD/tosu/releases/latest) and download required archive.\
 You need unpack it to folder, and if you need overlays, download the [Blackshark/static](https://github.com/l3lackShark/static) repo and unpack it to `static` folder. After that you should be ready to go!
 
 `tosu` also provides in-game overlay based on gosumemory one. To enable it, you need to edit `tosu.env`, and turn on `ENABLE_GOSU_OVERLA=true` (make it equal `true`)
+
+### Support
+If you need help setting up this program or have any suggestions/comissions, feel free to go to the discord channel above in the `🔵 tosu` section
 
 # Everything below in README is needed for project development
 
