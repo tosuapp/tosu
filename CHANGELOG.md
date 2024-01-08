@@ -13,6 +13,21 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 * move call to body ([93a8267](https://github.com/KotRikD/tosu/commit/93a82679daa402fede932aa11103cfa74ab12ac0))
+* now i understand how it packs this ([4306827](https://github.com/KotRikD/tosu/commit/4306827d7919b565007f735b3e752c53a37b1935))
+* small fix on pattern ([c0e541d](https://github.com/KotRikD/tosu/commit/c0e541d863016706d6afdd89b13d2fb6b27e0ddc))
+* update pattern for current skin ([deed3cf](https://github.com/KotRikD/tosu/commit/deed3cfd7a574675264fb98a1a751eb6f12c0ac9))
+
+## [1.8.0](https://github.com/KotRikD/tosu/compare/v1.7.0...v1.8.0) (2024-01-08)
+
+
+### Features
+
+* autoupdater ([#31](https://github.com/KotRikD/tosu/issues/31)) ([1b1efd7](https://github.com/KotRikD/tosu/commit/1b1efd745ee3a82f3d7bcc732bff533208a45ecc))
+
+
+### Bug Fixes
+
+* move call to body ([93a8267](https://github.com/KotRikD/tosu/commit/93a82679daa402fede932aa11103cfa74ab12ac0))
 * small fix on pattern ([c0e541d](https://github.com/KotRikD/tosu/commit/c0e541d863016706d6afdd89b13d2fb6b27e0ddc))
 * update pattern for current skin ([deed3cf](https://github.com/KotRikD/tosu/commit/deed3cfd7a574675264fb98a1a751eb6f12c0ac9))
 
