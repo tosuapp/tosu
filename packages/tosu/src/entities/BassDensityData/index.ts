@@ -13,17 +13,12 @@ export class BassDensityData extends AbstractEntity {
     }
 
     async updateState() {
-        wLogger.debug(`[BaseDensityData:updateState] starting`);
-
-        const { process: osuProcess, bases } = this.services.getServices([
+        const { process: osuProcess, patterns } = this.services.getServices([
             'process',
-            'bases'
+            'patterns'
         ]);
         if (osuProcess === null) {
             throw new Error('Process not found');
-        }
-        if (bases === null) {
-            throw new Error('Bases repo not found');
         }
 
         const isWin = process.platform === 'win32';
@@ -31,7 +26,7 @@ export class BassDensityData extends AbstractEntity {
 
         // Ruleset = [[Rulesets - 0xB] + 0x4]
         const rulesetAddr = osuProcess.readInt(
-            osuProcess.readInt(bases.getBase('rulesetsAddr') - 0xb) + 0x4
+            osuProcess.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
         );
         if (rulesetAddr === 0) {
             wLogger.debug('rulesetAddr is zero');
@@ -69,7 +64,5 @@ export class BassDensityData extends AbstractEntity {
 
         this.currentAudioVelocity = currentAudioVelocity;
         this.density = (1 + currentAudioVelocity) * 0.5;
-
-        wLogger.debug(`[BaseDensityData:updateState] updated`);
     }
 }

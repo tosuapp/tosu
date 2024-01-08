@@ -110,17 +110,18 @@ export class GamePlayData extends AbstractEntity {
     }
 
     async updateState() {
-        wLogger.debug(`[GamePlayData:updateState] starting`);
-
-        const { process, bases, allTimesData, menuData } =
+        const { process, patterns, allTimesData, menuData } =
             this.services.getServices([
                 'process',
-                'bases',
+                'patterns',
                 'allTimesData',
                 'menuData'
             ]);
 
-        const { baseAddr, rulesetsAddr } = bases.bases;
+        const { baseAddr, rulesetsAddr } = patterns.getPatterns([
+            'baseAddr',
+            'rulesetsAddr'
+        ]);
 
         const rulesetAddr = process.readInt(
             process.readInt(rulesetsAddr - 0xb) + 0x4
@@ -221,30 +222,26 @@ export class GamePlayData extends AbstractEntity {
         this.HitMissPrev = this.HitMiss;
         this.ComboPrev = this.Combo;
 
-        wLogger.debug(`[GamePlayData:updateState] updated`);
-
         // [[[Ruleset + 0x68] + 0x38] + 0x38]
         this.HitErrors = this.getHitErrors(
             process,
-            bases.leaderStart,
+            patterns.getLeaderStart(),
             scoreBase
         );
 
-        this.updateLeaderboard(process, bases.leaderStart, rulesetAddr);
+        this.updateLeaderboard(process, patterns.getLeaderStart(), rulesetAddr);
         this.updateGrade(menuData);
         this.updateStarsAndPerformance();
     }
 
     async updateKeyOverlay() {
-        wLogger.debug(`[GamePlayData:updateKeyOverlay] starting`);
-
-        const { process, bases } = this.services.getServices([
+        const { process, patterns } = this.services.getServices([
             'process',
-            'bases'
+            'patterns'
         ]);
 
         const rulesetAddr = process.readInt(
-            process.readInt(bases.bases.rulesetsAddr - 0xb) + 0x4
+            process.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
         );
         if (rulesetAddr === 0) {
             return;
@@ -340,7 +337,6 @@ export class GamePlayData extends AbstractEntity {
         leaderStart: number,
         scoreBase: number = 0
     ): Array<number> {
-        wLogger.debug(`[GamePlayData:getHitErrors] processing`);
         if (scoreBase === 0) return [];
 
         const errors: Array<number> = [];
@@ -355,8 +351,6 @@ export class GamePlayData extends AbstractEntity {
 
             errors.push(error);
         }
-
-        wLogger.debug(`[GamePlayData:getHitErrors] done`);
 
         return errors;
     }
@@ -382,8 +376,6 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private updateGrade(menuData: MenuData) {
-        wLogger.debug(`[GamePlayData:updateGrade] processing`);
-
         const remaining =
             menuData.ObjectCount -
             this.Hit300 -
@@ -416,7 +408,6 @@ export class GamePlayData extends AbstractEntity {
         leaderStart: number,
         rulesetAddr: number
     ) {
-        wLogger.debug(`[GamePlayData:updateLeaderboard] processing`);
         // [Ruleset + 0x7C]
         const leaderBoardBase = process.readInt(rulesetAddr + 0x7c);
 
@@ -432,7 +423,6 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private updateStarsAndPerformance() {
-        wLogger.debug(`[GamePlayData:updateStarsAndPerformance] starting`);
         if (!config.calculatePP) {
             wLogger.debug(
                 `[GamePlayData:updateStarsAndPerformance] pp calculation disabled`
@@ -502,7 +492,5 @@ export class GamePlayData extends AbstractEntity {
             curPerformance.pp
         );
         beatmapPpData.updateFcPP(fcPerformance.pp);
-
-        wLogger.debug(`[GamePlayData:updateStarsAndPerformance] updated`);
     }
 }

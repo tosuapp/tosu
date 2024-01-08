@@ -36,14 +36,12 @@ export class MenuData extends AbstractEntity {
     }
 
     async updateState() {
-        wLogger.debug(`[MenuData:updateState] starting`);
-
-        const { process, bases } = this.services.getServices([
+        const { process, patterns } = this.services.getServices([
             'process',
-            'bases'
+            'patterns'
         ]);
 
-        const { baseAddr } = bases.bases;
+        const baseAddr = patterns.getPattern('baseAddr');
 
         const beatmapAddr = process.readPointer(baseAddr - 0xc);
         if (beatmapAddr === 0) {
@@ -124,22 +122,19 @@ export class MenuData extends AbstractEntity {
         //  [Beatmap] + 0xFC
         this.ObjectCount = process.readInt(beatmapAddr + 0xfc);
 
-        wLogger.debug('State: MenuData updated');
-
         this.previousMD5 = this.MD5;
     }
 
     updateMP3Length() {
-        wLogger.debug(`[MenuData:updateMP3Length] starting`);
-        const { process, bases } = this.services.getServices([
+        const { process, patterns } = this.services.getServices([
             'process',
-            'bases'
+            'patterns'
         ]);
 
         // [[GetAudioLength + 0x7] + 0x4]
         this.MP3Length = Math.round(
             process.readDouble(
-                process.readPointer(bases.getBase('getAudioLengthAddr') + 0x7) +
+                process.readPointer(patterns.getPattern('getAudioLengthPtr')) +
                     0x4
             )
         );

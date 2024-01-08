@@ -7,4 +7,5 @@ static/
 package-lock.json
 config.ini
 tosu.exe
+_version.js
 **/tosu/gameOverlay/

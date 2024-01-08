@@ -30,22 +30,12 @@ export class TourneyManagerData extends AbstractEntity {
     async updateState() {
         wLogger.debug(`[TourneyManagerData:updateState] starting`);
 
-        const { process, bases, allTimesData } = this.services.getServices([
+        const { process, patterns } = this.services.getServices([
             'process',
-            'bases',
-            'allTimesData'
+            'patterns'
         ]);
-        if (process === null) {
-            throw new Error('Process not found');
-        }
-        if (bases === null) {
-            throw new Error('Bases repo not found');
-        }
-        if (allTimesData === null) {
-            throw new Error('AllTimesData not found');
-        }
 
-        const { rulesetsAddr } = bases.bases;
+        const rulesetsAddr = patterns.getPattern('rulesetsAddr');
 
         const rulesetAddr = process.readInt(
             process.readInt(rulesetsAddr - 0xb) + 0x4
@@ -106,7 +96,7 @@ export class TourneyManagerData extends AbstractEntity {
         const tabsLength = process.readInt(tabsBase + 0x4);
 
         for (let i = 0; i < tabsLength; i++) {
-            const current = tabsBase + bases.leaderStart + 0x4 * i;
+            const current = tabsBase + patterns.getLeaderStart() + 0x4 * i;
 
             const slotAddr = process.readInt(current);
             if (slotAddr === 0) {
@@ -137,11 +127,12 @@ export class TourneyManagerData extends AbstractEntity {
             }
 
             for (let i = 0; i < messagesSize; i++) {
-                let current = messagesItems + bases.leaderStart + 0x4 * i;
-                let currentItem = process.readInt(current);
+                const current =
+                    messagesItems + patterns.getLeaderStart() + 0x4 * i;
+                const currentItem = process.readInt(current);
 
                 // [Base + 0x4]
-                let content = process.readSharpString(
+                const content = process.readSharpString(
                     process.readInt(currentItem + 0x4)
                 );
                 // NOTE: Check for empty, and !mp commands
@@ -149,10 +140,10 @@ export class TourneyManagerData extends AbstractEntity {
                     continue;
                 }
                 // [Base + 0x8]
-                let timeName = process.readSharpString(
+                const timeName = process.readSharpString(
                     process.readInt(currentItem + 0x8)
                 );
-                let [time, name] = timeName.split(' ');
+                const [time, name] = timeName.split(' ');
 
                 result.push({
                     time: time.trim(),

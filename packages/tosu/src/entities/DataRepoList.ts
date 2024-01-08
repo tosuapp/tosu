@@ -1,6 +1,6 @@
 import { Process } from 'tsprocess/dist/process';
 
-import { MemoryBase } from '@/objects/memoryBase';
+import { MemoryPatterns } from '@/objects/memoryPatterns';
 
 import { AllTimesData } from './AllTimesData';
 import { BassDensityData } from './BassDensityData';
@@ -15,8 +15,10 @@ import { UserProfile } from './UserProfile';
 
 export interface DataRepoList {
     process: Process;
-    bases: MemoryBase;
+    patterns: MemoryPatterns;
+
     settings: Settings;
+
     allTimesData: AllTimesData;
     beatmapPpData: BeatmapPPData;
     menuData: MenuData;
@@ -65,7 +67,7 @@ export class DataRepo {
         return services.reduce(
             (acc, item: keyof Pick<DataRepoList, T[number]>) => {
                 const instance = this.get(item);
-                if (!instance) {
+                if (!instance || instance === null) {
                     throw new Error(
                         `Service "${item}" was not set in DataRepo list`
                     );

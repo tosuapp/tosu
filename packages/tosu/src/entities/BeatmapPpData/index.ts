@@ -119,6 +119,9 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     updateCurrentAttributes(stars: number, pp: number) {
+        wLogger.debug(
+            `maxPP -> ${this.currAttributes.maxThisPlayPP} pp -> ${pp} stars -> ${stars}`
+        );
         const maxThisPlayPP =
             pp > this.currAttributes.maxThisPlayPP
                 ? pp
@@ -162,8 +165,6 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     async updateMapMetadata(currentMods: number) {
-        wLogger.debug(`[BeatmapPpData:updateMapMetadata] starting`);
-
         const start_time = performance.now();
 
         const { menuData, settings } = this.services.getServices([
@@ -349,8 +350,6 @@ export class BeatmapPPData extends AbstractEntity {
                 end_time - start_time
             ).toFixed(2)}ms`
         );
-
-        wLogger.debug(`[BeatmapPpData:updateMapMetadata] updating`);
 
         this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
             ar: mapAttributes.ar,

@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { load } from 'resedit/cjs';
+import semverParse from 'semver/functions/parse';
+
+import packageVersion from './_version';
 
 async function windowsPostBuild(output) {
     const ResEdit = await load();
@@ -18,6 +21,13 @@ async function windowsPostBuild(output) {
     );
 
     const vi = ResEdit.Resource.VersionInfo.fromEntries(res.entries)[0];
+    const semanticTosu = semverParse(packageVersion);
+
+    const tosuVersion = {
+        major: semanticTosu?.major || 0,
+        minor: semanticTosu?.minor || 0,
+        patch: semanticTosu?.patch || 0
+    };
 
     vi.setStringValues(
         { lang: 1033, codepage: 1200 },
@@ -28,8 +38,20 @@ async function windowsPostBuild(output) {
             LegalCopyright: `MIT License.`
         }
     );
-    vi.setFileVersion(1, 0, 0, 0, 1033);
-    vi.setProductVersion(1, 0, 0, 0, 1033);
+    vi.setFileVersion(
+        tosuVersion.major,
+        tosuVersion.minor,
+        tosuVersion.patch,
+        0,
+        1033
+    );
+    vi.setProductVersion(
+        tosuVersion.major,
+        tosuVersion.minor,
+        tosuVersion.patch,
+        0,
+        1033
+    );
     vi.outputToResourceEntries(res.entries);
     res.outputResource(exe);
     fs.writeFileSync(output, Buffer.from(exe.generate()));
