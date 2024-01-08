@@ -1,6 +1,6 @@
 import winston, { format, transports } from 'winston';
 
-import { config } from './config';
+import { config } from '../config';
 
 const { timestamp, label, printf } = format;
 

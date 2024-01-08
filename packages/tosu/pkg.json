@@ -2,7 +2,8 @@
     "scripts": "dist/**/*.js",
     "assets": [
       "dist/**/*.node",
-      "dist/target/**/*"
+      "dist/target/**/*",
+      "dist/_version.js"
     ],
     "targets": [
       "node18-win-x64"

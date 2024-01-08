@@ -1,11 +1,10 @@
+import { downloadFile } from '@tosu/common';
 import decompress from 'decompress';
 import { execFile } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Process } from 'tsprocess/dist/process';
-
-import { downloadFile } from './features/downloader';
 
 const checkGameOverlayConfig = () => {
     const configPath = path.join(process.cwd(), 'config.ini');

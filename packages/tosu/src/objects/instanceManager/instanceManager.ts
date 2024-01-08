@@ -1,6 +1,5 @@
+import { sleep } from '@tosu/common';
 import findProcess from 'find-process';
-
-import { sleep } from '@/utils/sleep';
 
 import { OsuInstance } from './osuInstance';
 

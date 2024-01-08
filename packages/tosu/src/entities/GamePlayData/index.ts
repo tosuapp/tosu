@@ -1,11 +1,11 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
+import { wLogger } from '@tosu/common';
+import { config } from '@tosu/common/dist/config';
 import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 
-import { config } from '@/config';
 import { DataRepo } from '@/entities/DataRepoList';
 import { Leaderboard } from '@/entities/GamePlayData/Leaderboard';
-import { wLogger } from '@/logger';
 import { calculateGrade } from '@/utils/calculateGrade';
 import { OsuMods } from '@/utils/osuMods.types';
 import { resolvePassedObjects } from '@/utils/resolvePassedObjects';

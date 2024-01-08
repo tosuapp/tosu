@@ -1,12 +1,12 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
+import { wLogger } from '@tosu/common';
+import { config } from '@tosu/common/dist/config';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 
 import { BeatmapStrains } from '@/api/types';
-import { config } from '@/config';
 import { DataRepo } from '@/entities/DataRepoList';
-import { wLogger } from '@/logger';
 
 import { AbstractEntity } from '../AbstractEntity';
 
