@@ -4,10 +4,11 @@
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {
+        "genver": "npx genversion _version.js",
         "ts:run": "ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
         "ts:compile": "ncc build src/index.ts -o dist -m -d",
-        "run:dev": "npx genversion _version.js && pnpm run ts:run src/index.ts",
-        "compile": "npx genversion dist/_version.js && pnpm run ts:compile && pkg -t node18-win-x64 --output dist/tosu.exe --debug --config pkg.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts"
+        "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
+        "compile": "pnpm run genver && pnpm run ts:compile && pkg -t node18-win-x64 --output dist/tosu.exe --debug --config pkg.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts"
     },
     "dependencies": {
         "@fastify/send": "^2.1.0",
