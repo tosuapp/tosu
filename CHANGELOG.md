@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/KotRikD/tosu/compare/v1.7.0...v1.8.0) (2024-01-08)
+
+
+### Features
+
+* autoupdater ([#31](https://github.com/KotRikD/tosu/issues/31)) ([1b1efd7](https://github.com/KotRikD/tosu/commit/1b1efd745ee3a82f3d7bcc732bff533208a45ecc))
+
+
+### Bug Fixes
+
+* small fix on pattern ([c0e541d](https://github.com/KotRikD/tosu/commit/c0e541d863016706d6afdd89b13d2fb6b27e0ddc))
+* update pattern for current skin ([deed3cf](https://github.com/KotRikD/tosu/commit/deed3cfd7a574675264fb98a1a751eb6f12c0ac9))
+
 ## [1.7.0](https://github.com/KotRikD/tosu/compare/v1.6.0...v1.7.0) (2023-12-21)
 
 
