@@ -4,13 +4,13 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepare" : "npm run build",
+    "prepare": "npm run build",
     "build": "tsc",
     "postinstall": "node-gyp clean configure build"
   },
   "dependencies": {
-    "node-gyp": "9.3.0",
-    "node-addon-api": "6.0.0"
+    "node-addon-api": "7.0.0",
+    "node-gyp": "10.0.1"
   },
   "files": [
     "lib",

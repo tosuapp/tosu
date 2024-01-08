@@ -1,0 +1,22 @@
+{
+    "bumpFiles": [
+        {
+            "filename": "package.json",
+            "type": "json"
+        },
+        {
+            "filename": "packages/tosu/package.json",
+            "type": "json"
+        }
+    ],
+    "packageFiles": [
+        {
+            "filename": "package.json",
+            "type": "json"
+        },
+        {
+            "filename": "packages/tosu/package.json",
+            "type": "json"
+        }
+    ]
+}

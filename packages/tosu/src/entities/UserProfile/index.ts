@@ -20,13 +20,13 @@ export class UserProfile extends AbstractEntity {
     }
 
     async updateState() {
-        const { bases, process } = this.services.getServices([
-            'bases',
+        const { patterns, process } = this.services.getServices([
+            'patterns',
             'process'
         ]);
 
         const profileBase = process.readPointer(
-            bases.getBase('userProfileAddr') + 0x1
+            patterns.getPattern('userProfilePtr')
         );
 
         this.isConnected = Boolean(process.readByte(profileBase + 0xa8));

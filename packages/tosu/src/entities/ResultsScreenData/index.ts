@@ -40,24 +40,22 @@ export class ResultsScreenData extends AbstractEntity {
     }
 
     async updateState() {
-        wLogger.debug(`[ResultsScreenData:updateState] starting`);
-
-        const { process, bases, allTimesData } = this.services.getServices([
+        const { process, patterns, allTimesData } = this.services.getServices([
             'process',
-            'bases',
+            'patterns',
             'allTimesData'
         ]);
         if (process === null) {
             throw new Error('Process not found');
         }
-        if (bases === null) {
+        if (patterns === null) {
             throw new Error('Bases repo not found');
         }
         if (allTimesData === null) {
             throw new Error('AllTimesData not found');
         }
 
-        const { rulesetsAddr } = bases.bases;
+        const { rulesetsAddr } = patterns.getPatterns(['rulesetsAddr']);
 
         const rulesetAddr = process.readInt(
             process.readInt(rulesetsAddr - 0xb) + 0x4
@@ -99,7 +97,5 @@ export class ResultsScreenData extends AbstractEntity {
         this.HitKatu = process.readShort(resultScreenBase + 0x90);
         // HitMiss    int16   `mem:"[Ruleset + 0x38] + 0x92"`
         this.HitMiss = process.readShort(resultScreenBase + 0x92);
-
-        wLogger.debug(`[ResultsScreenData:updateState] updated`);
     }
 }

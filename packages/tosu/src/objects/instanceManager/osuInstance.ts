@@ -18,25 +18,55 @@ import { TourneyManagerData } from '@/entities/TourneyManagerData';
 import { TourneyUserProfileData } from '@/entities/TourneyUserProfileData';
 import { UserProfile } from '@/entities/UserProfile';
 import { wLogger } from '@/logger';
-import { BaseData, MemoryBase } from '@/objects/memoryBase';
+import { MemoryPatterns, PatternData } from '@/objects/memoryPatterns';
 import { sleep } from '@/utils/sleep';
 
 import { InstanceManager } from './instanceManager';
 
 const SCAN_PATTERNS: {
-    [k in keyof BaseData]: string;
+    [k in keyof PatternData]: {
+        pattern: string;
+        offset?: number;
+    };
 } = {
-    baseAddr: 'F8 01 74 04 83 65', //-0xC
-    menuModsAddr: 'C8 FF 00 00 00 00 00 81 0D 00 00 00 00 00 08 00 00', //+0x9
-    playTimeAddr: '5E 5F 5D C3 A1 ?? ?? ?? ?? 89 ?? 04', //+0x5
-    chatCheckerAddr: '0A D7 23 3C 00 00 ?? 01', //-0x20 (value)
-    statusAddr: '48 83 F8 04 73 1E',
-    skinDataAddr: '74 2C 85 FF 75 28 A1 ?? ?? ?? ?? 8D 15',
-    settingsClassAddr: '83 E0 20 85 C0 7E 2F',
-    rulesetsAddr: '7D 15 A1 ?? ?? ?? ?? 85 C0',
-    canRunSlowlyAddr: '55 8B EC 80 3D ?? ?? ?? ?? 00 75 26 80 3D',
-    getAudioLengthAddr: '55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 85 C0',
-    userProfileAddr: 'A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 6A 00 6A 00 8D 8D'
+    baseAddr: {
+        pattern: 'F8 01 74 04 83 65'
+    },
+    playTimeAddr: {
+        pattern: '5E 5F 5D C3 A1 ?? ?? ?? ?? 89 ?? 04'
+    },
+    chatCheckerAddr: {
+        pattern: '0A D7 23 3C 00 00 ?? 01'
+    },
+
+    skinDataAddr: {
+        pattern: '74 2C 85 FF 75 28 A1 ?? ?? ?? ?? 8D 15'
+    },
+    settingsClassAddr: {
+        pattern: '83 E0 20 85 C0 7E 2F'
+    },
+    rulesetsAddr: {
+        pattern: '7D 15 A1 ?? ?? ?? ?? 85 C0'
+    },
+    canRunSlowlyAddr: {
+        pattern: '55 8B EC 80 3D ?? ?? ?? ?? 00 75 26 80 3D'
+    },
+    statusPtr: {
+        pattern: '48 83 F8 04 73 1E',
+        offset: -0x4
+    },
+    menuModsPtr: {
+        pattern: 'C8 FF 00 00 00 00 00 81 0D 00 00 00 00 00 08 00 00',
+        offset: 0x9
+    },
+    getAudioLengthPtr: {
+        pattern: '55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 85 C0',
+        offset: 0x7
+    },
+    userProfilePtr: {
+        pattern: 'A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 6A 00 6A 00 8D 8D',
+        offset: 0x1
+    }
 };
 
 export class OsuInstance {
@@ -63,7 +93,7 @@ export class OsuInstance {
         this.path = this.process.path;
 
         this.entities.set('process', this.process);
-        this.entities.set('bases', new MemoryBase(this.entities));
+        this.entities.set('patterns', new MemoryPatterns());
         this.entities.set('settings', new Settings());
         this.entities.set('allTimesData', new AllTimesData(this.entities));
         this.entities.set('beatmapPpData', new BeatmapPPData(this.entities));
@@ -97,8 +127,8 @@ export class OsuInstance {
             `Running memory chimera... RESOLVING PATTERNS FOR ${this.pid}`
         );
         while (!this.isReady) {
-            const basesRepo = this.entities.get('bases');
-            if (!basesRepo) {
+            const patternsRepo = this.entities.get('patterns');
+            if (!patternsRepo) {
                 throw new Error(
                     'Bases repo not initialized, missed somewhere?'
                 );
@@ -106,13 +136,21 @@ export class OsuInstance {
 
             try {
                 for (const baseKey in SCAN_PATTERNS) {
-                    basesRepo.setBase(
+                    const patternValue = this.process.scanSync(
+                        SCAN_PATTERNS[baseKey].pattern,
+                        true
+                    );
+                    if (patternValue === 0) {
+                        continue;
+                    }
+
+                    patternsRepo.setPattern(
                         baseKey as never,
-                        this.process.scanSync(SCAN_PATTERNS[baseKey], true)
+                        patternValue + (SCAN_PATTERNS[baseKey].offset || 0)
                     );
                 }
 
-                if (!basesRepo.checkIsBasesValid()) {
+                if (!patternsRepo.checkIsBasesValid()) {
                     wLogger.info('PATTERN RESOLVING FAILED, TRYING AGAIN....');
                     throw new Error('Memory resolve failed');
                 }
