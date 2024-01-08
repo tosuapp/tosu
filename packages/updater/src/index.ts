@@ -1,10 +1,11 @@
 import { downloadFile, platformResolver, sleep, wLogger } from '@tosu/common';
-import { exec, execFile, execFileSync, spawn } from 'child_process';
+import { exec, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import unzipper from 'unzipper';
 
-const currentVersion = '1.6.0';
+// NOTE: _version.js packs with pkg support in tosu build
+const currentVersion = require(process.cwd() + '/_version.js');
 
 const repositoryName = 'tosu';
 const fileDestination = path.join(process.cwd(), 'update.zip');

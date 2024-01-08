@@ -1,7 +1,8 @@
-import { wLogger } from '@tosu/common';
 import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+
+import { wLogger } from './';
 
 const configPath = path.join(process.cwd(), 'tsosu.env');
 if (!fs.existsSync(configPath)) {

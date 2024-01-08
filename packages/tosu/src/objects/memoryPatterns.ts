@@ -1,4 +1,4 @@
-import { wLogger } from '@/logger';
+import { wLogger } from '@tosu/common';
 
 export interface PatternData {
     baseAddr: number;

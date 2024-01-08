@@ -1,11 +1,11 @@
 import fastifyStatic from '@fastify/static';
 import fastifyWebsocket from '@fastify/websocket';
+import { config } from '@tosu/common/dist/config';
 import { fastify } from 'fastify';
 import { readdir } from 'node:fs/promises';
 import path from 'path';
 
 import { buildV1Router } from '@/api/router/gosu/v1';
-import { config } from '@/config';
 import { OVERLAYS_STATIC } from '@/constants/overlaysStatic';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
 
