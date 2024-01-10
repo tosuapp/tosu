@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.1](https://github.com/KotRikD/tosu/compare/v1.8.0...v1.8.1) (2024-01-10)
+
+
+### Bug Fixes
+
+* fix import ([#36](https://github.com/KotRikD/tosu/issues/36)) ([d2e3bba](https://github.com/KotRikD/tosu/commit/d2e3bba7206bc2b32a77578c204598244c155f66))
+
 ## [1.8.0](https://github.com/KotRikD/tosu/compare/v1.7.0...v1.8.0) (2024-01-08)
 
 
