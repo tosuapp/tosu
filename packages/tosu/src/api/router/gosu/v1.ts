@@ -1,10 +1,8 @@
-// @ts-nocheck
 import send from '@fastify/send';
 import { wLogger } from '@tosu/common';
+import { sleep } from '@tosu/common';
 import { config } from '@tosu/common/dist/config';
 import { FastifyInstance } from 'fastify';
-
-import { sleep } from '@/utils/sleep';
 
 export const buildV1Router = (app: FastifyInstance) => {
     app.register(async (app) => {
@@ -83,6 +81,7 @@ export const buildV1Router = (app: FastifyInstance) => {
             'Access-Control-Allow-Methods',
             'POST, GET, PUT, DELETE, OPTIONS'
         );
+        // @ts-ignore
         send(req, mapPath, { root: settings.songsFolder }).pipe(reply.raw);
     });
 };
