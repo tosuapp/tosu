@@ -8,40 +8,40 @@ const configPath = path.join(process.cwd(), 'tsosu.env');
 if (!fs.existsSync(configPath)) {
     fs.writeFileSync(
         configPath,
-        `# Конфиг подразумевает под собой набор ключей-значений для включения/выключения функциональность tosu
-# Ниже ты можешь видеть, что есть КАКАЯ_ТО_ФУНКЦИЯ=true/false,
-# true = включён
-# false = выключен
+        `# The config implies a set of key-values to enable/disable tosu functionality
+# Below you can see that there is EVERY_THE_FUNCTION=true/false,
+# true = on
+# false = off
 
-# Включает/выключает подсчёт ПП. Очень удобно использовать для турнирного клиента, когда тебе важно только подсчёт очков, и статистика карты например
+# Turns PP counting on/off. Very useful for tournament client, when you only care about scoring and map stats for example
 CALCULATE_PP=true
-# Включает/выключает чтение клавиш K1/K2/M1/M2 на клавиатуре
+# Enables/disables reading K1/K2/M1/M2 keys on the keyboard
 ENABLE_KEY_OVERLAY=true
 
-# Справка: 1 секунда = 1000 милисекунд
-# Раз в какое значение, программа должна считывать значения игры (в милисекундах)
+# Reference: 1 second = 1000 milliseconds
+# Once in what value, the programme should read the game values (in milliseconds)
 POLL_RATE=150
-# Раз в какое значение, программа должна считывать значения клавиш K1/K2/M1/M2 (в милисекундах)
+# Once per value, the programme should read the values of keys K1/K2/M1/M2 (in milliseconds)
 KEYOVERLAY_POLL_RATE=150
-# Раз в какое значение, программа должна отправлять информацию о значениях в вебсокет (оверлей) (в милисекундах)
+# Once in what value, the programme should send information about values to the websocket (overlay) (in milliseconds)
 WS_SEND_INTERVAL=150
 
-# Включает/выключает внутриигровой оверлей gosumemory (!!ОТВЕТСТВЕННОСТЬ ЗА ЕГО ИСПОЛЬЗОВАНИЕ Я НЕ НЕСУ!!)
+# Enables/disables the in-game gosumemory overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
 ENABLE_GOSU_OVERLAY=false
 
-# WARNING: ВСЁ ЧТО НИЖЕ - БЕЗ НАДОБНОСТИ НЕ ТРОГАТЬ
+# WARNING: EVERYTHING BELOW IS NOT TO BE TOUCHED UNNECESSARILY.
 
-# Включает логи для разработчиков tosu, не очень интуитивная вещь, для тебя - конечного пользователя
-# лучше не включать, без просьбы разработчика
+# Enables logs for tosu developers, not very intuitive for you, the end user.
+# best not to include without developer's request.
 DEBUG_LOG=false
 
-# IP адрес, на котором будет запщуен сервер websocket api
+# IP address where the websocket api server will be registered
 # 127.0.0.1 = localhost
-# 0.0.0.0 = все адреса
+# 0.0.0.0.0 = all addresses
 SERVER_IP=127.0.0.1
-# Порт, на котором будет запущен сервер websocket api
+# The port on which the websocket api server will run
 SERVER_PORT=24050
-# Папка из которой будут браться оверлеи
+# The folder from which the overlays will be taken.
 STATIC_FOLDER_PATH=./static`
     );
 }
