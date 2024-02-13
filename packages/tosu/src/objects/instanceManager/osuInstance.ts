@@ -220,7 +220,8 @@ export class OsuInstance {
                 ]);
 
                 // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
-                await menuData.updateMP3Length();
+                if (menuData.Folder != '' && menuData.Folder != null)
+                    menuData.updateMP3Length();
 
                 if (!settings.gameFolder) {
                     settings.setGameFolder(path.join(this.path, '../'));
@@ -367,7 +368,7 @@ export class OsuInstance {
             const currentTimeMD5 = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
 
             if (
-                menuData.Path.endsWith('.osu') &&
+                menuData.Path?.endsWith('.osu') &&
                 settings.gameFolder &&
                 previousState !== currentTimeMD5
             ) {
