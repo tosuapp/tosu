@@ -34,9 +34,6 @@
         "semver": "^7.5.4",
         "ts-node": "^10.9.1",
         "tsprocess": "workspace:*",
-        "@tosu/common": "workspace:*",
-        "@tosu/updater": "workspace:*",
-        "winston": "^3.8.2",
-        "unzipper": "^0.10.14"
+        "winston": "^3.8.2"
     }
 }
