@@ -4,7 +4,7 @@ import path from 'path';
 
 import { wLogger } from './';
 
-const configPath = path.join(process.cwd(), 'tsosu.env');
+const configPath = path.join(path.dirname(process.execPath), 'tsosu.env');
 if (!fs.existsSync(configPath)) {
     fs.writeFileSync(
         configPath,
