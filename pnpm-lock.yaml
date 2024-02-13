@@ -43,6 +43,12 @@ importers:
         specifier: ^3.8.2
         version: 3.11.0
 
+  packages/find-process:
+    devDependencies:
+      cargo-cp-artifact:
+        specifier: ^0.1
+        version: 0.1.8
+
   packages/gameOverlay:
     dependencies:
       '@tosu/common':
@@ -72,6 +78,9 @@ importers:
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
+      '@tosu/find-process':
+        specifier: workspace:*
+        version: link:../find-process
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
@@ -84,9 +93,6 @@ importers:
       fastify:
         specifier: ^4.25.1
         version: 4.25.1
-      find-process:
-        specifier: ^1.4.7
-        version: 1.4.7
       game-overlay:
         specifier: workspace:*
         version: link:../gameOverlay
@@ -1583,17 +1589,6 @@ packages:
     resolution: {integrity: sha512-yVn71XCCaNgxz58ERTl8nA/8YYtIQDY9mHSrgFBfiFtdNNfY0h183Vh8BRkKxD8x9TUw3ec290uJKhDVxqGZBw==}
     dependencies:
       parents: 1.0.1
-    dev: false
-
-  /find-process@1.4.7:
-    resolution: {integrity: sha512-/U4CYp1214Xrp3u3Fqr9yNynUrr5Le4y0SsJh2lMDDSbpwYSz3M2SMWQC+wqcx79cN8PQtHQIL8KnuY9M66fdg==}
-    hasBin: true
-    dependencies:
-      chalk: 4.1.2
-      commander: 5.1.0
-      debug: 4.3.4
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /find-up@2.1.0:
