@@ -228,9 +228,11 @@ export class BeatmapPPData extends AbstractEntity {
         let oldStrains: number[] = [];
 
         const offset: number = strains.sectionLength;
+        const firstObj = this.timings.firstObj / mapAttributes.clockRate;
+        const lastObj = this.timings.full / mapAttributes.clockRate;
+        const mp3Length = menuData.MP3Length / mapAttributes.clockRate;
 
         let lazerBeatmap: ParsedBeatmap;
-
         try {
             const decoder = new BeatmapDecoder();
 
@@ -268,11 +270,9 @@ export class BeatmapPPData extends AbstractEntity {
             ).toFixed(2)}ms on parsing beatmap`
         );
 
-        const LEFT_OFFSET = Math.floor(this.timings.firstObj / offset);
+        const LEFT_OFFSET = Math.floor(firstObj / offset);
         const RIGHT_OFFSET =
-            menuData.MP3Length > this.timings.full
-                ? Math.ceil((menuData.MP3Length - this.timings.full) / offset)
-                : 0;
+            mp3Length > lastObj ? Math.ceil((mp3Length - lastObj) / offset) : 0;
 
         const updateWithOffset = (name: string, values: number[]) => {
             let data: number[] = [];
@@ -335,13 +335,13 @@ export class BeatmapPPData extends AbstractEntity {
             resultStrains.xaxis.push(i * offset);
         }
 
-        const amount = Math.ceil(this.timings.full / offset);
+        const amount = Math.ceil(lastObj / offset);
         for (let i = 0; i < amount; i++) {
-            resultStrains.xaxis.push(this.timings.firstObj + i * offset);
+            resultStrains.xaxis.push(firstObj + i * offset);
         }
 
         for (let i = 0; i < RIGHT_OFFSET; i++) {
-            resultStrains.xaxis.push(this.timings.full + i * offset);
+            resultStrains.xaxis.push(lastObj + i * offset);
         }
 
         const end_time = performance.now();
