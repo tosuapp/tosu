@@ -1,0 +1,20 @@
+{
+  "name": "@tosu/find-process",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build-artifact": "cargo-cp-artifact -nc find-process.node -- cargo build --message-format=json-render-diagnostics",
+    "build-debug": "npm run build --",
+    "build-release": "npm run build-artifact -- --release",
+    "prepare": "npm run build-release",
+    "build": "tsc",
+    "test": "cargo test"
+  },
+  "keywords": [],
+  "author": "cyperdark",
+  "license": "ISC",
+  "devDependencies": {
+    "cargo-cp-artifact": "^0.1"
+  }
+}
