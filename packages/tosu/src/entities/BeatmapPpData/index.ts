@@ -240,13 +240,15 @@ export class BeatmapPPData extends AbstractEntity {
                 parseColours: false,
                 parseDifficulty: false,
                 parseEditor: false,
-                parseEvents: false,
+                parseEvents: true,
                 parseGeneral: false,
                 parseMetadata: false
             });
 
             const { bpm, bpmMin, bpmMax } = lazerBeatmap;
 
+            menuData.BackgroundFilename =
+                lazerBeatmap.events.backgroundPath || '';
             this.updateBPM(bpm, bpmMin, bpmMax);
 
             const firstObj = Math.round(
