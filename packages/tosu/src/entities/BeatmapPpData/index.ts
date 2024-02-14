@@ -122,10 +122,7 @@ export class BeatmapPPData extends AbstractEntity {
         wLogger.debug(
             `maxPP -> ${this.currAttributes.maxThisPlayPP} pp -> ${pp} stars -> ${stars}`
         );
-        const maxThisPlayPP =
-            pp > this.currAttributes.maxThisPlayPP
-                ? pp
-                : this.currAttributes.maxThisPlayPP;
+        const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
         this.currAttributes = {
             ...this.currAttributes,
