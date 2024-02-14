@@ -140,9 +140,9 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     updateBPM(commonBPM: number, minBPM: number, maxBPM: number) {
-        this.commonBPM = commonBPM;
-        this.minBPM = minBPM;
-        this.maxBPM = maxBPM;
+        this.commonBPM = Math.round(commonBPM);
+        this.minBPM = Math.round(minBPM);
+        this.maxBPM = Math.round(maxBPM);
     }
 
     updateTimings(firstObj: number, full: number) {
@@ -241,7 +241,11 @@ export class BeatmapPPData extends AbstractEntity {
 
             menuData.BackgroundFilename =
                 lazerBeatmap.events.backgroundPath || '';
-            this.updateBPM(bpm, bpmMin, bpmMax);
+            this.updateBPM(
+                bpm * mapAttributes.clockRate,
+                bpmMin * mapAttributes.clockRate,
+                bpmMax * mapAttributes.clockRate
+            );
 
             const firstObj = Math.round(
                 lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
