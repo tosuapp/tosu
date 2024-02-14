@@ -227,11 +227,6 @@ export class BeatmapPPData extends AbstractEntity {
 
         let oldStrains: number[] = [];
 
-        const offset: number = strains.sectionLength;
-        const firstObj = this.timings.firstObj / mapAttributes.clockRate;
-        const lastObj = this.timings.full / mapAttributes.clockRate;
-        const mp3Length = menuData.MP3Length / mapAttributes.clockRate;
-
         let lazerBeatmap: ParsedBeatmap;
         try {
             const decoder = new BeatmapDecoder();
@@ -265,6 +260,12 @@ export class BeatmapPPData extends AbstractEntity {
             return;
         }
 
+        const offset = strains.sectionLength;
+        const firstObj = this.timings.firstObj / mapAttributes.clockRate;
+        const lastObj = this.timings.full / mapAttributes.clockRate;
+        const graphLength = lastObj - firstObj;
+        const mp3Length = menuData.MP3Length / mapAttributes.clockRate;
+
         const beatmap_parse_time = performance.now();
         wLogger.debug(
             `(updateMapMetadata) Spend:${(
@@ -274,16 +275,29 @@ export class BeatmapPPData extends AbstractEntity {
 
         const LEFT_OFFSET = Math.floor(firstObj / offset);
         const RIGHT_OFFSET =
-            mp3Length > lastObj ? Math.ceil((mp3Length - lastObj) / offset) : 0;
+            mp3Length >= lastObj
+                ? Math.ceil((mp3Length - lastObj) / offset)
+                : 0;
 
         const updateWithOffset = (name: string, values: number[]) => {
             let data: number[] = [];
+            let approximateTime =
+                LEFT_OFFSET * offset +
+                values.length * offset +
+                RIGHT_OFFSET * offset;
 
             if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0)
                 data = Array(LEFT_OFFSET).fill(-100);
             data = data.concat(values);
             if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0)
                 data = data.concat(Array(RIGHT_OFFSET).fill(-100));
+
+            const missingPoints =
+                mp3Length >= approximateTime
+                    ? Math.ceil((mp3Length - approximateTime) / offset)
+                    : 0;
+            if (missingPoints > 0)
+                data = data.concat(Array(missingPoints).fill(-100));
 
             resultStrains.series.push({ name, data });
         };
@@ -337,7 +351,7 @@ export class BeatmapPPData extends AbstractEntity {
             resultStrains.xaxis.push(i * offset);
         }
 
-        const amount = Math.ceil(lastObj / offset);
+        const amount = Math.ceil(graphLength / offset);
         for (let i = 0; i < amount; i++) {
             resultStrains.xaxis.push(firstObj + i * offset);
         }
