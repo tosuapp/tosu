@@ -21,10 +21,9 @@ export class InstanceManager {
         delete this.osuInstances[pid];
     }
 
-    async runWatcher() {
-        while (true) {
+    private handleProcesses() {
+        try {
             const osuProcesses = process_by_name('osu!.exe');
-
             for (const process of osuProcesses || []) {
                 if (process.pid in this.osuInstances) {
                     // dont deploy not needed instances
@@ -48,6 +47,14 @@ export class InstanceManager {
                 this.osuInstances[process.pid] = osuInstance;
                 osuInstance.start();
             }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async runWatcher() {
+        while (true) {
+            this.handleProcesses();
 
             await sleep(5000);
         }
