@@ -193,7 +193,7 @@ export class GamePlayData extends AbstractEntity {
         // [[Ruleset + 0x68] + 0x38] + 0x94
         this.Combo = process.readShort(scoreBase + 0x94);
         // [[Ruleset + 0x68] + 0x40] + 0x14
-        this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14);
+        this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14) || 0;
         // [[Ruleset + 0x68] + 0x40] + 0x1C
         this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
         // [[Ruleset + 0x68] + 0x48] + 0xC
