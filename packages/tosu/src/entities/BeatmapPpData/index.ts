@@ -242,9 +242,11 @@ export class BeatmapPPData extends AbstractEntity {
             if (
                 lazerBeatmap.events.backgroundPath !=
                 menuData.BackgroundFilename
-            )
+            ) {
                 menuData.BackgroundFilename =
                     lazerBeatmap.events.backgroundPath || '';
+            }
+
             this.updateBPM(
                 bpm * mapAttributes.clockRate,
                 bpmMin * mapAttributes.clockRate,

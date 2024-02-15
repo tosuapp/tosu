@@ -67,7 +67,7 @@ export const legacyApi = ({
         });
     });
 
-    app.route(/\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/\/Songs\/(?<filePath>[^?]+)/, 'GET', (req, res) => {
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}
         );
