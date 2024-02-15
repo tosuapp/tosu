@@ -5,4 +5,5 @@
  * @returns float number with two digits after
  */
 export const fixDecimals = (decimalNumber: number) =>
-    Math.ceil(decimalNumber * 100) / 100;
+    parseFloat(decimalNumber.toFixed(2));
+// Math.ceil(decimalNumber * 100) / 100;
