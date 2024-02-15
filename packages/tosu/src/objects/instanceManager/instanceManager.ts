@@ -1,4 +1,4 @@
-import { sleep } from '@tosu/common';
+import { sleep, wLogger } from '@tosu/common';
 import { process_by_name } from '@tosu/find-process';
 
 import { OsuInstance } from './osuInstance';
@@ -21,10 +21,9 @@ export class InstanceManager {
         delete this.osuInstances[pid];
     }
 
-    async runWatcher() {
-        while (true) {
+    private handleProcesses() {
+        try {
             const osuProcesses = process_by_name('osu!.exe');
-
             for (const process of osuProcesses || []) {
                 if (process.pid in this.osuInstances) {
                     // dont deploy not needed instances
@@ -48,6 +47,14 @@ export class InstanceManager {
                 this.osuInstances[process.pid] = osuInstance;
                 osuInstance.start();
             }
+        } catch (error) {
+            wLogger.error(error);
+        }
+    }
+
+    async runWatcher() {
+        while (true) {
+            this.handleProcesses();
 
             await sleep(5000);
         }

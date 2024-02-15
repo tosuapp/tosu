@@ -264,6 +264,7 @@ export class OsuInstance {
                         // Reset gameplay data on retry
                         if (prevTime > allTimesData.PlayTime) {
                             gamePlayData.init(true);
+                            beatmapPpData.resetCurrentAttributes();
                         }
 
                         prevTime = allTimesData.PlayTime;
