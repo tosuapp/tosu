@@ -7,15 +7,23 @@ import { readSongsFolder } from '../handlers/songs';
 
 export const ApiV2 = ({
     app,
-    webSocket
+    webSocket,
+    keysWebsocket
 }: {
     app: HttpServer;
     webSocket: WebSocket.Server;
+    keysWebsocket: WebSocket.Server;
 }) => {
     app.server.on('upgrade', function (request, socket, head) {
         if (request.url == '/websocket/v2') {
             webSocket.handleUpgrade(request, socket, head, function (ws) {
                 webSocket.emit('connection', ws, request);
+            });
+        }
+
+        if (request.url == '/websocket/v2/keys') {
+            keysWebsocket.handleUpgrade(request, socket, head, function (ws) {
+                keysWebsocket.emit('connection', ws, request);
             });
         }
     });

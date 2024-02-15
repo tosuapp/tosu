@@ -5,7 +5,7 @@ import {
     updateConfig,
     wLogger
 } from '@tosu/common';
-import { HttpServer, WebSocketV1, WebSocketV2 } from '@tosu/server';
+import { HttpServer, WebSocketV1, WebSocketV2, WebSocketKeys } from '@tosu/server';
 import { autoUpdater } from '@tosu/updater';
 
 import { httpMiddleware } from './api/middleware';
@@ -33,11 +33,16 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     const httpServer = new HttpServer();
     const legacyWebSocket = WebSocketV1(instancesManager);
     const webSocketV2 = WebSocketV2(instancesManager);
+    const keysWebsocket = WebSocketKeys(instancesManager);
 
     httpMiddleware({ app: httpServer, instanceManager: instancesManager });
     baseApi(httpServer);
     legacyApi({ app: httpServer, webSocket: legacyWebSocket });
-    ApiV2({ app: httpServer, webSocket: webSocketV2 });
+    ApiV2({
+        app: httpServer,
+        webSocket: webSocketV2,
+        keysWebsocket: keysWebsocket
+    });
 
     httpServer.listen(config.serverPort, config.serverIP);
 })();

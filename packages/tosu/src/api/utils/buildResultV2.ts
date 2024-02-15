@@ -9,6 +9,7 @@ import { getOsuModsString } from '@/utils/osuMods';
 import {
     ApiV2Answer,
     BeatmapStatuses,
+    KeyOverlay,
     Leaderboard,
     Modes,
     Tourney,
@@ -318,24 +319,6 @@ export const buildResult = (
                   convertMemoryPlayerToResult(slot, Modes[gamePlayData.Mode])
               )
             : [],
-        keyOverlay: {
-            k1: {
-                isPressed: gamePlayData.KeyOverlay.K1Pressed,
-                count: gamePlayData.KeyOverlay.K1Count
-            },
-            k2: {
-                isPressed: gamePlayData.KeyOverlay.K2Pressed,
-                count: gamePlayData.KeyOverlay.K2Count
-            },
-            m1: {
-                isPressed: gamePlayData.KeyOverlay.M1Pressed,
-                count: gamePlayData.KeyOverlay.M1Count
-            },
-            m2: {
-                isPressed: gamePlayData.KeyOverlay.M2Pressed,
-                count: gamePlayData.KeyOverlay.M2Count
-            }
-        },
         performance: {
             accuracy: beatmapPpData.ppAcc,
             graph: beatmapPpData.strainsAll
@@ -409,6 +392,29 @@ export const buildResult = (
         },
 
         tourney: buildTourneyData(instancesManager)
+    };
+};
+
+export const buildKeyOverlay = (service: DataRepo): KeyOverlay => {
+    const { gamePlayData } = service.getServices(['gamePlayData']);
+
+    return {
+        k1: {
+            isPressed: gamePlayData.KeyOverlay.K1Pressed,
+            count: gamePlayData.KeyOverlay.K1Count
+        },
+        k2: {
+            isPressed: gamePlayData.KeyOverlay.K2Pressed,
+            count: gamePlayData.KeyOverlay.K2Count
+        },
+        m1: {
+            isPressed: gamePlayData.KeyOverlay.M1Pressed,
+            count: gamePlayData.KeyOverlay.M1Count
+        },
+        m2: {
+            isPressed: gamePlayData.KeyOverlay.M2Pressed,
+            count: gamePlayData.KeyOverlay.M2Count
+        }
     };
 };
 

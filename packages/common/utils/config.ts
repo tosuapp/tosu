@@ -52,7 +52,7 @@ export const config = {
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
     enableKeyOverlay: (process.env.ENABLE_KEY_OVERLAY || '') === 'true',
-    wsSendInterval: Number(process.env.WS_SEND_INTERVAL || '500'),
+    // wsSendInterval: Number(process.env.WS_SEND_INTERVAL || '500'),
     pollRate: Number(process.env.POLL_RATE || '500'),
     keyOverlayPollRate: Number(process.env.KEYOVERLAY_POLL_RATE || '100'),
     serverIP: process.env.SERVER_IP || '127.0.0.1',
@@ -79,10 +79,10 @@ export const updateConfig = () => {
         fs.appendFileSync(configPath, '\nENABLE_KEY_OVERLAY=true', 'utf8');
     }
 
-    if (!process.env.WS_SEND_INTERVAL) {
-        newOptions += 'WS_SEND_INTERVAL, ';
-        fs.appendFileSync(configPath, '\nWS_SEND_INTERVAL=150', 'utf8');
-    }
+    // if (!process.env.WS_SEND_INTERVAL) {
+    //     newOptions += 'WS_SEND_INTERVAL, ';
+    //     fs.appendFileSync(configPath, '\nWS_SEND_INTERVAL=150', 'utf8');
+    // }
 
     if (!process.env.POLL_RATE) {
         newOptions += 'POLL_RATE, ';

@@ -23,7 +23,6 @@ export interface ApiV2Answer {
     beatmap: Beatmap;
     player: Player;
     leaderboard: Leaderboard[];
-    keyOverlay: KeyOverlay;
     performance: Performance;
     resultsScreen: ResultsScreen;
     folders: Folders;

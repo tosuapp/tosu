@@ -6,7 +6,10 @@ import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/api/utils/buildResult';
-import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
+import {
+    buildKeyOverlay,
+    buildResult as buildResultV2
+} from '@/api/utils/buildResultV2';
 import { AllTimesData } from '@/entities/AllTimesData';
 import { BassDensityData } from '@/entities/BassDensityData';
 import { BeatmapPPData } from '@/entities/BeatmapPpData';
@@ -398,5 +401,9 @@ export class OsuInstance {
 
     getStateV2(instancesManager: InstanceManager) {
         return buildResultV2(this.entities, instancesManager);
+    }
+
+    getKeyOverlay() {
+        return buildKeyOverlay(this.entities);
     }
 }
