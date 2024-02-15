@@ -18,7 +18,7 @@ const defaultLBPlayer = {
     score: 0,
     combo: 0,
     maxCombo: 0,
-    mods: 'NM',
+    mods: '',
     h300: 0,
     h100: 0,
     h50: 0,
