@@ -7,7 +7,7 @@
 	"trailingComma": "none",
 	"quoteProps": "as-needed",
 	"bracketSpacing": true,
-	"endOfLine": "lf",
+	"endOfLine": "auto",
 	"plugins": ["@trivago/prettier-plugin-sort-imports"],
 	"importOrderSeparation": true,
 	"importOrderSortSpecifiers": true,
