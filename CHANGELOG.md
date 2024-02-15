@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/KotRikD/tosu/compare/v1.8.1...v1.9.0) (2024-02-15)
+
+
+### Features
+
+* english version ([6de5912](https://github.com/KotRikD/tosu/commit/6de5912ed50da5ef8061e311780bd8cfa1ec6d83))
+* native http server ([99d210a](https://github.com/KotRikD/tosu/commit/99d210ae938af4bad9fde4870e13de4d9db5cdbe))
+* switch from `find-process` to rust alternative ([a98279b](https://github.com/KotRikD/tosu/commit/a98279b68171388c29436b488959ecae8ad46ff2))
+* **WIP:** detailed env config ([53bf3eb](https://github.com/KotRikD/tosu/commit/53bf3eb9ddfbc66926cffa6848e8c79c4c9af5c6))
+
+
+### Bug Fixes
+
+* attempt to fix len 0 at index 0 ([49a08da](https://github.com/KotRikD/tosu/commit/49a08da5fddfcd83b7e665d5ed950db43f786173))
+* Empty background path ([0f8379c](https://github.com/KotRikD/tosu/commit/0f8379cb1a48013ccd622d6b96c9217b8abe918b))
+* Fix startup issues with beatmap folder ([3a592b6](https://github.com/KotRikD/tosu/commit/3a592b6ee2f2d803837c393600eedc9501cdb932))
+* graph length for dt/ht ([d821a29](https://github.com/KotRikD/tosu/commit/d821a295046a14e953976b9f8f5a30532ed63b15))
+* Incorrect graph offset + add missing points to graph ([b43b621](https://github.com/KotRikD/tosu/commit/b43b62129572eed985827e9b4756c51f2e6791f2))
+* Make folders path gosu compatible ([#39](https://github.com/KotRikD/tosu/issues/39)) ([5409099](https://github.com/KotRikD/tosu/commit/540909960b6e338b7af411c89a443d4f5ff44f81))
+* memory leak + tournament client ([ba8edbf](https://github.com/KotRikD/tosu/commit/ba8edbfe3e270c56572a15c2004fbd01f8ba17c0))
+* mit x 2021 ([57664c7](https://github.com/KotRikD/tosu/commit/57664c7fe0fc6046c5f7ee85c8c009e50b2ca85a))
+* Place .env in the same directory as executable ([df14e91](https://github.com/KotRikD/tosu/commit/df14e91709de36d450c64ee6054e20b5b4f72804))
+* Remove NM name from mods str ([0957b58](https://github.com/KotRikD/tosu/commit/0957b583363f512f8b12be14e9b19c1c9eb02a39))
+* remove unzipper from main repo ([a974ddf](https://github.com/KotRikD/tosu/commit/a974ddfff5753791331cfd6405ee2f3d4b2e4214))
+* Reset pp data on retry + enhance ([139cc2d](https://github.com/KotRikD/tosu/commit/139cc2df11b387eadb49a0daebb515d6f94f81ba))
+* round bpm & multiple it by speedRate (DT/HT) ([5dc8f7a](https://github.com/KotRikD/tosu/commit/5dc8f7a28fe808b5258b8b6fcbb8ecfa56c6454c))
+* use wLogger instead of console ([5a571cf](https://github.com/KotRikD/tosu/commit/5a571cf0f4f6d284a82c43c5f7ce1552dd52d419))
+
 ### [1.8.1](https://github.com/KotRikD/tosu/compare/v1.8.0...v1.8.1) (2024-01-10)
 
 
