@@ -1,9 +1,18 @@
 import { config, sleep, wLogger } from '@tosu/common';
 import WebSocket from 'ws';
 
-export const WebSocketV1 = (instancesManager: any) => {
-    const wss = new WebSocket.Server({ noServer: true });
-    wss.on('connection', async (ws) => {
+const socketsHandler = ({
+    instancesManager,
+    pollRate,
+    socket,
+    state
+}: {
+    socket: WebSocket.Server;
+    instancesManager: any;
+    pollRate: number;
+    state: string;
+}) => {
+    socket.on('connection', async (ws) => {
         wLogger.debug('>>> ws: CONNECTED');
         let isSocketConnected = true;
 
@@ -26,9 +35,25 @@ export const WebSocketV1 = (instancesManager: any) => {
                 continue;
             }
 
-            ws.send(JSON.stringify(osuInstances[0].getState(instancesManager)));
-            await sleep(config.pollRate);
+            try {
+                ws.send(
+                    JSON.stringify(osuInstances[0][state](instancesManager))
+                );
+            } catch (error) {}
+
+            await sleep(pollRate);
         }
+    });
+};
+
+export const WebSocketV1 = (instancesManager: any) => {
+    const wss = new WebSocket.Server({ noServer: true });
+
+    socketsHandler({
+        socket: wss,
+        instancesManager,
+        pollRate: config.pollRate,
+        state: 'getState'
     });
 
     return wss;
@@ -36,36 +61,12 @@ export const WebSocketV1 = (instancesManager: any) => {
 
 export const WebSocketV2 = (instancesManager: any) => {
     const wss = new WebSocket.Server({ noServer: true });
-    wss.on('connection', async (ws) => {
-        wLogger.debug('>>> websocketV2: CONNECTED');
-        let isSocketConnected = true;
 
-        ws.on('close', function (reasonCode, description) {
-            isSocketConnected = false;
-            wLogger.debug('>>> websocketV2: CLOSED');
-        });
-
-        ws.on('error', function (reasonCode, description) {
-            isSocketConnected = false;
-            wLogger.debug(
-                `>>> websocketV2: error: ${reasonCode} [${description}]`
-            );
-        });
-
-        while (isSocketConnected) {
-            const osuInstances: any = Object.values(
-                instancesManager.osuInstances || {}
-            );
-            if (osuInstances.length < 1) {
-                await sleep(500);
-                continue;
-            }
-
-            ws.send(
-                JSON.stringify(osuInstances[0].getStateV2(instancesManager))
-            );
-            await sleep(config.pollRate);
-        }
+    socketsHandler({
+        socket: wss,
+        instancesManager,
+        pollRate: config.pollRate,
+        state: 'getStateV2'
     });
 
     return wss;
@@ -73,34 +74,12 @@ export const WebSocketV2 = (instancesManager: any) => {
 
 export const WebSocketKeys = (instancesManager: any) => {
     const wss = new WebSocket.Server({ noServer: true });
-    wss.on('connection', async (ws) => {
-        wLogger.debug('>>> websocketV2: CONNECTED');
-        let isSocketConnected = true;
 
-        ws.on('close', function (reasonCode, description) {
-            isSocketConnected = false;
-            wLogger.debug('>>> websocketV2: CLOSED');
-        });
-
-        ws.on('error', function (reasonCode, description) {
-            isSocketConnected = false;
-            wLogger.debug(
-                `>>> websocketV2: error: ${reasonCode} [${description}]`
-            );
-        });
-
-        while (isSocketConnected) {
-            const osuInstances: any = Object.values(
-                instancesManager.osuInstances || {}
-            );
-            if (osuInstances.length < 1) {
-                await sleep(500);
-                continue;
-            }
-
-            ws.send(JSON.stringify(osuInstances[0].getKeyOverlay()));
-            await sleep(config.keyOverlayPollRate);
-        }
+    socketsHandler({
+        socket: wss,
+        instancesManager,
+        pollRate: config.keyOverlayPollRate,
+        state: 'getKeyOverlay'
     });
 
     return wss;
