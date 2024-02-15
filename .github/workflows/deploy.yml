@@ -3,12 +3,10 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - '*'
+      - 'master'
     tags:
-      - '*'
+      - 'v*'
   pull_request:
-    branches:
-      - '*'
 
 concurrency:
   group: build-${{ github.ref_name }}
@@ -29,6 +27,10 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
+
+      - name: Set env
+        if: github.event_name == 'pull_request'
+        run: echo "PR_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-8)" >> $GITHUB_ENV
 
       - name: Install Node.js 🔧
         uses: actions/setup-node@v3
@@ -68,5 +70,5 @@ jobs:
         if: startsWith( matrix.os, 'windows' )
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-${{ github.ref_name }}
+          name: tosu-${{ matrix.os }}-${{ env.PR_SHA_SHORT || github.ref_name }}
           path: packages/tosu/dist/tosu.exe
