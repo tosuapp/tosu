@@ -116,19 +116,28 @@ export class HttpServer {
             (value, key) => (req.query[key] = value)
         );
 
-        const routes = this.routes[method] || [];
+        const routes = (this.routes[method] || []).sort(
+            (a, b) => b.path.toString().length - a.path.toString().length
+        );
         for (let i = 0; i < routes.length; i++) {
             const route = routes[i];
             let routeExists = false;
 
-            if (route.path instanceof RegExp && route.path.test(url)) {
+            if (
+                route.path instanceof RegExp &&
+                route.path.test(parsedURL.pathname)
+            ) {
                 routeExists = true;
 
                 // turn groups to route params
-                const array = Object.keys(route.path.exec(url)?.groups || {});
+                const array = Object.keys(
+                    route.path.exec(parsedURL.pathname)?.groups || {}
+                );
                 for (let g = 0; g < array.length; g++) {
                     const key = array[g];
-                    const value = route.path.exec(url)?.groups?.[key];
+                    const value = route.path.exec(parsedURL.pathname)?.groups?.[
+                        key
+                    ];
 
                     if (key == null || value == null) continue;
                     req.params[key] = value;
