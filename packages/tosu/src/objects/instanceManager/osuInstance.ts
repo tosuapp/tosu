@@ -224,7 +224,7 @@ export class OsuInstance {
                     menuData.updateMP3Length();
 
                 if (!settings.gameFolder) {
-                    settings.setGameFolder(path.join(this.path, '../'));
+                    settings.setGameFolder(path.join(this.path, '..'));
 
                     // condition when user have different BeatmapDirectory in osu! config
                     if (fs.existsSync(allTimesData.SongsFolder)) {
@@ -240,13 +240,7 @@ export class OsuInstance {
                     }
                 }
 
-                settings.setSkinFolder(
-                    path.join(
-                        settings.gameFolder,
-                        'Skins',
-                        allTimesData.SkinFolder
-                    )
-                );
+                settings.setSkinFolder(path.join(allTimesData.SkinFolder));
 
                 switch (allTimesData.Status) {
                     case 0:

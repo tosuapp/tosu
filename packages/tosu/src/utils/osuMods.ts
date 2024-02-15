@@ -74,7 +74,7 @@ export const getOsuModsString = (mods: OsuMods): string => {
     enabled = enabled.sort((a, b) => (a.i > b.i ? 1 : b.i > a.i ? -1 : 0));
     enabled.filter((r) => (converted += r.n));
 
-    if (converted === '') return 'NM';
+    if (converted === '') return '';
     if (converted.includes('DT') && converted.includes('NC'))
         return converted.replace('DT', '');
 
