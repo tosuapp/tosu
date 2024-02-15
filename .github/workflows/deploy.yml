@@ -28,9 +28,11 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
 
-      - name: Set env
+      - name: Set output pr sha
         if: github.event_name == 'pull_request'
-        run: echo "PR_SHA_SHORT=$(git rev-parse HEAD | cut -c 1-8)" >> $GITHUB_ENV
+        id: set-pr-sha
+        run: |
+          echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-8)" >> "$GITHUB_OUTPUT"
 
       - name: Install Node.js 🔧
         uses: actions/setup-node@v3
@@ -70,5 +72,5 @@ jobs:
         if: startsWith( matrix.os, 'windows' )
         uses: actions/upload-artifact@v3
         with:
-          name: tosu-${{ matrix.os }}-${{ env.PR_SHA_SHORT || github.ref_name }}
+          name: tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}
           path: packages/tosu/dist/tosu.exe
