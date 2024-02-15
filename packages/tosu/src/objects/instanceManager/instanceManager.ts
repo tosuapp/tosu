@@ -1,4 +1,4 @@
-import { sleep } from '@tosu/common';
+import { sleep, wLogger } from '@tosu/common';
 import { process_by_name } from '@tosu/find-process';
 
 import { OsuInstance } from './osuInstance';
@@ -48,7 +48,7 @@ export class InstanceManager {
                 osuInstance.start();
             }
         } catch (error) {
-            console.log(error);
+            wLogger.error(error);
         }
     }
 
