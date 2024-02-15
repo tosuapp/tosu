@@ -36,10 +36,11 @@ export const legacyApi = ({
     });
 
     app.server.on('upgrade', function (request, socket, head) {
-        if (request.url == '/ws')
+        if (request.url == '/ws') {
             oldWebsocket.handleUpgrade(request, socket, head, function (ws) {
                 oldWebsocket.emit('connection', ws, request);
             });
+        }
     });
 
     app.route('/json', 'GET', (req, res) => {
@@ -90,14 +91,16 @@ export const legacyApi = ({
                 if (err.code === 'ENOENT') {
                     res.writeHead(404, { 'Content-Type': 'text/html' });
                     res.end('404 Not Found');
-                } else {
-                    res.writeHead(500);
-                    res.end(`Server Error: ${err.code}`);
+                    return;
                 }
-            } else {
-                res.writeHead(200, { 'Content-Type': contentType });
-                res.end(content, 'utf-8');
+
+                res.writeHead(500);
+                res.end(`Server Error: ${err.code}`);
+                return;
             }
+
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content, 'utf-8');
         });
     });
 
@@ -109,13 +112,14 @@ export const legacyApi = ({
 
         const extension = path.extname(url);
         const selectedFolder = decodeURI(path.join(staticPath, url));
-        if (url == '/')
+        if (url == '/') {
             return readDirectory(selectedFolder, url, (html: string) => {
                 res.writeHead(200, {
                     'Content-Type': getContentType('file.html')
                 });
                 res.end(html);
             });
+        }
 
         if (extension == '' && !url.endsWith('/')) {
             res.writeHead(301, { Location: url + '/' });
@@ -133,13 +137,14 @@ export const legacyApi = ({
                 return res.end(content, 'utf-8');
             }
 
-            if (err.code === 'ENOENT')
+            if (err.code === 'ENOENT') {
                 return readDirectory(selectedFolder, url, (html: string) => {
                     res.writeHead(200, {
                         'Content-Type': getContentType('file.html')
                     });
                     res.end(html);
                 });
+            }
 
             res.writeHead(500);
             res.end(`Server Error: ${err.code}`);
