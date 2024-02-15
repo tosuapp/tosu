@@ -30,7 +30,7 @@ jobs:
 
       - name: Set env
         if: github.event_name == 'pull_request'
-        run: echo "PR_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-8)" >> $GITHUB_ENV
+        run: echo "PR_SHA_SHORT=$(git rev-parse HEAD | cut -c 1-8)" >> $GITHUB_ENV
 
       - name: Install Node.js 🔧
         uses: actions/setup-node@v3
