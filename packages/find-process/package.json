@@ -2,6 +2,7 @@
   "name": "@tosu/find-process",
   "version": "0.0.1",
   "description": "",
+  "author": "cyperdark",
   "main": "index.js",
   "scripts": {
     "build-artifact": "cargo-cp-artifact -nc find-process.node -- cargo build --message-format=json-render-diagnostics",

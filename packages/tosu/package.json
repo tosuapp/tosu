@@ -11,29 +11,26 @@
         "compile": "pnpm run genver && pnpm run ts:compile && pkg -t node18-win-x64 --output dist/tosu.exe --debug --config pkg.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts"
     },
     "dependencies": {
-        "@fastify/send": "^2.1.0",
-        "@fastify/static": "^6.12.0",
-        "@fastify/websocket": "^8.3.0",
         "@kotrikd/rosu-pp": "^0.10.0",
         "@tosu/common": "workspace:*",
         "@tosu/find-process": "workspace:*",
+        "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
-        "@types/ws": "^8.5.10",
-        "@vercel/ncc": "^0.38.1",
-        "fastify": "^4.25.1",
         "game-overlay": "workspace:*",
-        "genversion": "^3.1.1",
         "osu-catch-stable": "^4.0.0",
         "osu-classes": "^3.0.0",
         "osu-mania-stable": "^5.0.0",
         "osu-parsers": "^4.1.0",
         "osu-standard-stable": "^5.0.0",
         "osu-taiko-stable": "^5.0.0",
-        "pkg": "^5.8.0",
         "resedit": "^2.0.0",
         "semver": "^7.5.4",
-        "ts-node": "^10.9.1",
-        "tsprocess": "workspace:*",
-        "winston": "^3.8.2"
+        "tsprocess": "workspace:*"
+    },
+    "devDependencies": {
+        "@vercel/ncc": "^0.38.1",
+        "genversion": "^3.1.1",
+        "pkg": "^5.8.0",
+        "ts-node": "^10.9.1"
     }
 }

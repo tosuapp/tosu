@@ -1,5 +1,5 @@
 {
-  "name": "@tosu/updater",
+  "name": "@tosu/server",
   "version": "0.0.1",
   "description": "",
   "author": "cyperdark",
@@ -10,7 +10,10 @@
     "build": "tsc"
   },
   "dependencies": {
-    "unzipper": "^0.10.14",
-    "@tosu/common": "workspace:*"
+    "@tosu/common": "workspace:*",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.10"
   }
 }

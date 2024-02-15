@@ -94,9 +94,10 @@ export class MenuData extends AbstractEntity {
             process.readInt(beatmapAddr + 0x64)
         );
         // //  [[Beatmap] + 0x68]
-        // this.BackgroundFilename = process.readSharpString(
-        //     process.readInt(beatmapAddr + 0x68)
-        // );
+        this.BackgroundFilename = process.readSharpString(
+            process.readInt(beatmapAddr + 0x68)
+        );
+        // this.BackgroundFilename = "";
         //  [[Beatmap] + 0x78]
         this.Folder = process.readSharpString(
             process.readInt(beatmapAddr + 0x78)

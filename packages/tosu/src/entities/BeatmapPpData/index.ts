@@ -239,8 +239,12 @@ export class BeatmapPPData extends AbstractEntity {
 
             const { bpm, bpmMin, bpmMax } = lazerBeatmap;
 
-            menuData.BackgroundFilename =
-                lazerBeatmap.events.backgroundPath || '';
+            if (
+                lazerBeatmap.events.backgroundPath !=
+                menuData.BackgroundFilename
+            )
+                menuData.BackgroundFilename =
+                    lazerBeatmap.events.backgroundPath || '';
             this.updateBPM(
                 bpm * mapAttributes.clockRate,
                 bpmMin * mapAttributes.clockRate,
