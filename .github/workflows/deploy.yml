@@ -31,6 +31,7 @@ jobs:
       - name: Set output pr sha
         if: github.event_name == 'pull_request'
         id: set-pr-sha
+        shell: bash
         run: |
           echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-8)" >> "$GITHUB_OUTPUT"
 
