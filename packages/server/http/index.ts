@@ -3,7 +3,7 @@ import http, { IncomingMessage, ServerResponse } from 'http';
 
 import { getContentType, sendJson } from '../utils/index';
 
-interface ExtendedIncomingMessage extends IncomingMessage {
+export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     query: { [key: string]: string };
     params: { [key: string]: string };

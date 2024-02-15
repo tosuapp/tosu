@@ -5,10 +5,13 @@ import {
     updateConfig,
     wLogger
 } from '@tosu/common';
-import { HttpServer, WebSocketV1 } from '@tosu/server';
+import { HttpServer, WebSocketV1, WebSocketV2 } from '@tosu/server';
 import { autoUpdater } from '@tosu/updater';
 
+import { httpMiddleware } from './api/middleware';
+import { baseApi } from './api/router/base';
 import { legacyApi } from './api/router/v1';
+import { ApiV2 } from './api/router/v2';
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
 (async () => {
@@ -28,11 +31,13 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     instancesManager.runWatcher();
 
     const httpServer = new HttpServer();
-    const oldWebsocket = WebSocketV1(instancesManager);
-    legacyApi({
-        app: httpServer,
-        instanceManager: instancesManager,
-        oldWebsocket: oldWebsocket
-    });
+    const legacyWebSocket = WebSocketV1(instancesManager);
+    const webSocketV2 = WebSocketV2(instancesManager);
+
+    httpMiddleware({ app: httpServer, instanceManager: instancesManager });
+    baseApi(httpServer);
+    legacyApi({ app: httpServer, webSocket: legacyWebSocket });
+    ApiV2({ app: httpServer, webSocket: webSocketV2 });
+
     httpServer.listen(config.serverPort, config.serverIP);
 })();

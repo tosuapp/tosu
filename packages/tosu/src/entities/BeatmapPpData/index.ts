@@ -4,7 +4,7 @@ import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 
-import { BeatmapStrains } from '@/api/types';
+import { BeatmapStrains } from '@/api/types/v1';
 import { DataRepo } from '@/entities/DataRepoList';
 
 import { AbstractEntity } from '../AbstractEntity';
@@ -30,6 +30,15 @@ interface BeatmapPPAttributes {
     maxCombo: number;
     fullStars: number;
     stars: number;
+    aim?: number | undefined;
+    speed?: number | undefined;
+    flashlight?: number | undefined;
+    sliderFactor?: number | undefined;
+    stamina?: number | undefined;
+    rhythm?: number | undefined;
+    color?: number | undefined;
+    peak?: number | undefined;
+    hitWindow?: number | undefined;
 }
 
 interface BeatmapPPCurrentAttributes {
@@ -89,7 +98,16 @@ export class BeatmapPPData extends AbstractEntity {
             holds: 0,
             maxCombo: 0,
             fullStars: 0.0,
-            stars: 0.0
+            stars: 0.0,
+            aim: 0.0,
+            speed: 0.0,
+            flashlight: 0.0,
+            sliderFactor: 0.0,
+            stamina: 0.0,
+            rhythm: 0.0,
+            color: 0.0,
+            peak: 0.0,
+            hitWindow: 0.0
         };
         this.currAttributes = {
             stars: 0.0,
@@ -384,7 +402,25 @@ export class BeatmapPPData extends AbstractEntity {
             holds: lazerBeatmap.holdable,
             maxCombo: fcPerformance.difficulty.maxCombo,
             fullStars: fcPerformance.difficulty.stars,
-            stars: fcPerformance.difficulty.stars
+            stars: fcPerformance.difficulty.stars,
+            // @ts-ignore
+            aim: fcPerformance.difficulty.aim,
+            // @ts-ignore
+            speed: fcPerformance.difficulty.speed,
+            // @ts-ignore
+            flashlight: fcPerformance.difficulty.flashlight,
+            // @ts-ignore
+            sliderFactor: fcPerformance.difficulty.sliderFactor,
+            // @ts-ignore
+            stamina: fcPerformance.difficulty.stamina,
+            // @ts-ignore
+            rhythm: fcPerformance.difficulty.rhythm,
+            // @ts-ignore
+            color: fcPerformance.difficulty.color,
+            // @ts-ignore
+            peak: fcPerformance.difficulty.peak,
+            // @ts-ignore
+            hitWindow: fcPerformance.difficulty.hitWindow
         });
     }
 }

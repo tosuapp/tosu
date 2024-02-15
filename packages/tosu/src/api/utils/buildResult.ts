@@ -11,7 +11,7 @@ import {
     LeaderboardPlayer,
     TourneyIpcClient,
     TourneyValues
-} from '../types';
+} from '../types/v1';
 
 const defaultLBPlayer = {
     name: '',
