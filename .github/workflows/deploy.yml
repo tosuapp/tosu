@@ -3,15 +3,13 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - '*'
+      - 'master'
     tags:
-      - '*'
+      - 'v*'
   pull_request:
-    branches:
-      - '*'
 
 concurrency:
-  group: build-${{ github.ref_name }}
+  group: build-${{ github.sha }}
   cancel-in-progress: true
 
 permissions:
@@ -29,6 +27,13 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
+
+      - name: Set output pr sha
+        if: github.event_name == 'pull_request'
+        id: set-pr-sha
+        shell: bash
+        run: |
+          echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
 
       - name: Install Node.js 🔧
         uses: actions/setup-node@v3
@@ -68,5 +73,5 @@ jobs:
         if: startsWith( matrix.os, 'windows' )
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-${{ github.ref_name }}
+          name: tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}
           path: packages/tosu/dist/tosu.exe
