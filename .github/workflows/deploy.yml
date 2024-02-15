@@ -9,7 +9,7 @@ on:
   pull_request:
 
 concurrency:
-  group: build-${{ github.ref_name }}
+  group: build-${{ github.sha }}
   cancel-in-progress: true
 
 permissions:
@@ -33,7 +33,7 @@ jobs:
         id: set-pr-sha
         shell: bash
         run: |
-          echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-8)" >> "$GITHUB_OUTPUT"
+          echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
 
       - name: Install Node.js 🔧
         uses: actions/setup-node@v3
