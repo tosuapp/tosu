@@ -1,8 +1,9 @@
 import { argumetsParser, configureLogger, wLogger } from '@tosu/common';
 import { config, updateConfig } from '@tosu/common/dist/config';
+import { HttpServer, WebSocketV1 } from '@tosu/server';
 import { autoUpdater } from '@tosu/updater';
 
-import { buildFastifyApp } from './api';
+import { legacyApi } from './api/router/v1';
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
 (async () => {
@@ -21,10 +22,12 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     const instancesManager = new InstanceManager();
     instancesManager.runWatcher();
 
-    const app = await buildFastifyApp(instancesManager);
-
-    app.listen({
-        host: config.serverIP,
-        port: config.serverPort
+    const httpServer = new HttpServer();
+    const oldWebsocket = WebSocketV1(instancesManager);
+    legacyApi({
+        app: httpServer,
+        instanceManager: instancesManager,
+        oldWebsocket: oldWebsocket
     });
+    httpServer.listen(config.serverPort, config.serverIP);
 })();

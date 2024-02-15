@@ -138,8 +138,8 @@ export const buildResult = (
                 },
                 path: {
                     full: path.join(
-                        menuData.Folder,
-                        menuData.BackgroundFilename
+                        menuData.Folder || '',
+                        menuData.BackgroundFilename || ''
                     ),
                     folder: menuData.Folder,
                     file: menuData.Path,
