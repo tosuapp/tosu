@@ -108,10 +108,6 @@ export class HttpServer {
         req.query = {};
         req.params = {};
 
-        // add functions (thats probably shittiest way to do so, but i want to try it)
-        req.getContentType = getContentType;
-        req.sendJson = sendJson;
-
         parsedURL.searchParams.forEach(
             (value, key) => (req.query[key] = value)
         );

@@ -7,10 +7,15 @@ import fs from 'fs';
 import http from 'http';
 import path from 'path';
 
+import { readDirectory } from '../utils/reader';
+
+const currentVersion = require(process.cwd() + '/_version.js');
+
 export const readSongsFolder = (
     req: ExtendedIncomingMessage,
     res: http.ServerResponse
 ) => {
+    const url = req.url || '/';
     const osuInstances: any = Object.values(
         req.instanceManager.osuInstances || {}
     );
@@ -29,16 +34,26 @@ export const readSongsFolder = (
     const contentType = getContentType(cleanedUrl);
 
     const filePath = path.join(settings.songsFolder, cleanedUrl);
+    const isDirectory = path.extname(filePath) == '';
+    if (isDirectory) {
+        return readDirectory(filePath, url, (html: string) => {
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            res.end(html);
+        });
+    }
+
     return fs.readFile(filePath, (err, content) => {
         if (err) {
             if (err.code === 'ENOENT') {
                 res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('404 Not Found');
+                res.end(`[${currentVersion}] 404 Not Found`);
                 return;
             }
 
             res.writeHead(500);
-            res.end(`Server Error: ${err.code}`);
+            res.end(`[${currentVersion}] Server Error: ${err.code}`);
             return;
         }
 

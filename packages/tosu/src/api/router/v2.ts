@@ -4,6 +4,9 @@ import fs from 'fs';
 import path from 'path';
 
 import { readSongsFolder } from '../handlers/songs';
+import { readDirectory } from '../utils/reader';
+
+const currentVersion = require(process.cwd() + '/_version.js');
 
 export const ApiV2 = ({
     app,
@@ -45,6 +48,8 @@ export const ApiV2 = ({
     app.route(/\/files\/beatmap\/(?<filePath>.*)/, 'GET', readSongsFolder);
 
     app.route(/\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
+        const url = req.url || '/';
+
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}
         );
@@ -71,16 +76,26 @@ export const ApiV2 = ({
             settings.skinFolder,
             cleanedUrl
         );
+        const isDirectory = path.extname(filePath) == '';
+        if (isDirectory) {
+            return readDirectory(filePath, url, (html: string) => {
+                res.writeHead(200, {
+                    'Content-Type': getContentType('file.html')
+                });
+                res.end(html);
+            });
+        }
+
         return fs.readFile(filePath, (err, content) => {
             if (err) {
                 if (err.code === 'ENOENT') {
                     res.writeHead(404, { 'Content-Type': 'text/html' });
-                    res.end('404 Not Found');
+                    res.end(`[${currentVersion}] 404 Not Found`);
                     return;
                 }
 
                 res.writeHead(500);
-                res.end(`Server Error: ${err.code}`);
+                res.end(`[${currentVersion}] Server Error: ${err.code}`);
                 return;
             }
 
