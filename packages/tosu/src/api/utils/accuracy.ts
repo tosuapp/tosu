@@ -1,4 +1,4 @@
-export interface types {
+export interface IRankCalculate {
     (
         hits: {
             300: any;
@@ -12,7 +12,10 @@ export interface types {
     ): number;
 }
 
-const accuracyCalculator: types = (hits, mode = 'osu') => {
+/**
+ * Used to calculate accuracy out of hits (mainly for leaderboards)
+ */
+const accuracyCalculator: IRankCalculate = (hits, mode = 'osu') => {
     const h300 = parseInt(hits[300]);
     const h100 = parseInt(hits[100]);
     const h50 = parseInt(hits[50]);

@@ -313,7 +313,6 @@ export interface Hits3 {
     '300': number;
     geki: number;
     katu: number;
-    unstableRate: string;
 }
 
 export interface Mods3 {

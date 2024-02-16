@@ -6,8 +6,6 @@ import path from 'path';
 import { readSongsFolder } from '../handlers/songs';
 import { readDirectory } from '../utils/reader';
 
-const currentVersion = require(process.cwd() + '/_version.js');
-
 export const ApiV2 = ({
     app,
     webSocket,
@@ -38,7 +36,7 @@ export const ApiV2 = ({
         );
         if (osuInstances.length < 1) {
             res.statusCode = 500;
-            return res.end('nothing');
+            return sendJson(res, { error: 'not_ready' });
         }
 
         const json = osuInstances[0].getStateV2(req.instanceManager);
@@ -55,7 +53,7 @@ export const ApiV2 = ({
         );
         if (osuInstances.length < 1) {
             res.statusCode = 500;
-            return res.end('nothing');
+            return sendJson(res, { error: 'not_ready' });
         }
 
         const { settings } = osuInstances[0].entities.getServices(['settings']);
@@ -90,12 +88,12 @@ export const ApiV2 = ({
             if (err) {
                 if (err.code === 'ENOENT') {
                     res.writeHead(404, { 'Content-Type': 'text/html' });
-                    res.end(`[${currentVersion}] 404 Not Found`);
+                    res.end(`404 Not Found`);
                     return;
                 }
 
                 res.writeHead(500);
-                res.end(`[${currentVersion}] Server Error: ${err.code}`);
+                res.end(`Server Error: ${err.code}`);
                 return;
             }
 

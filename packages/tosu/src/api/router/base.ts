@@ -5,8 +5,6 @@ import path from 'path';
 
 import { readDirectory } from '../utils/reader';
 
-const currentVersion = require(process.cwd() + '/_version.js');
-
 export const baseApi = (app: HttpServer) => {
     app.route('/json', 'GET', (req, res) => {
         const osuInstances: any = Object.values(
@@ -14,7 +12,7 @@ export const baseApi = (app: HttpServer) => {
         );
         if (osuInstances.length < 1) {
             res.statusCode = 500;
-            return res.end('nothing');
+            return sendJson(res, { error: 'not_ready' });
         }
 
         const json = osuInstances[0].getState(req.instanceManager);
@@ -75,7 +73,7 @@ export const baseApi = (app: HttpServer) => {
             }
 
             res.writeHead(500);
-            res.end(`[${currentVersion}] Server Error: ${err.code}`);
+            res.end(`Server Error: ${err.code}`);
         });
     });
 };

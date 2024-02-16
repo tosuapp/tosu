@@ -119,8 +119,6 @@ export const buildResult = (
             }
         },
         profile: {
-            // profile: {
-
             id: userProfile.id,
             name: userProfile.name,
             mode: {
@@ -334,8 +332,7 @@ export const buildResult = (
                 100: resultsScreenData.Hit100,
                 katu: resultsScreenData.HitKatu,
                 50: resultsScreenData.Hit50,
-                0: resultsScreenData.HitMiss,
-                unstableRate: '' // dont have
+                0: resultsScreenData.HitMiss
             },
             mods: {
                 number: resultsScreenData.Mods,

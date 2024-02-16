@@ -23,8 +23,6 @@ ENABLE_KEY_OVERLAY=true
 POLL_RATE=150
 # Once per value, the programme should read the values of keys K1/K2/M1/M2 (in milliseconds)
 KEYOVERLAY_POLL_RATE=150
-# Once in what value, the programme should send information about values to the websocket (overlay) (in milliseconds)
-WS_SEND_INTERVAL=150
 
 # Enables/disables the in-game gosumemory overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
 ENABLE_GOSU_OVERLAY=false
@@ -52,7 +50,6 @@ export const config = {
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
     enableKeyOverlay: (process.env.ENABLE_KEY_OVERLAY || '') === 'true',
-    // wsSendInterval: Number(process.env.WS_SEND_INTERVAL || '500'),
     pollRate: Number(process.env.POLL_RATE || '500'),
     keyOverlayPollRate: Number(process.env.KEYOVERLAY_POLL_RATE || '100'),
     serverIP: process.env.SERVER_IP || '127.0.0.1',
@@ -78,11 +75,6 @@ export const updateConfig = () => {
         newOptions += 'ENABLE_KEY_OVERLAY, ';
         fs.appendFileSync(configPath, '\nENABLE_KEY_OVERLAY=true', 'utf8');
     }
-
-    // if (!process.env.WS_SEND_INTERVAL) {
-    //     newOptions += 'WS_SEND_INTERVAL, ';
-    //     fs.appendFileSync(configPath, '\nWS_SEND_INTERVAL=150', 'utf8');
-    // }
 
     if (!process.env.POLL_RATE) {
         newOptions += 'POLL_RATE, ';

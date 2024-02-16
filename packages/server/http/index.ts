@@ -28,12 +28,10 @@ export class HttpServer {
     private middlewares: RequestHandler[] = [];
     server: http.Server;
     private routes: {
-        [method: string]: [
-            {
-                path: string | RegExp;
-                handler: RouteHandler;
-            }
-        ];
+        [method: string]: {
+            path: string | RegExp;
+            handler: RouteHandler;
+        }[];
     } = {};
 
     constructor() {
@@ -59,10 +57,8 @@ export class HttpServer {
             | 'PATCH',
         handler: RouteHandler
     ) {
-        // @ts-ignore
         if (this.routes[method] == null) this.routes[method] = [];
 
-        // @ts-ignore
         const find = this.routes[method].find((r) => r.path == path);
         if (!find) this.routes[method].push({ path, handler });
     }
