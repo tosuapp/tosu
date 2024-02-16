@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/KotRikD/tosu/compare/v1.9.0...v1.9.1) (2024-02-16)
+
+
+### Bug Fixes
+
+* spectator window ([#53](https://github.com/KotRikD/tosu/issues/53)) ([83323e7](https://github.com/KotRikD/tosu/commit/83323e752e3320436616811db0cf06e70bc83b69))
+
 ## [1.9.0](https://github.com/KotRikD/tosu/compare/v1.8.1...v1.9.0) (2024-02-15)
 
 
