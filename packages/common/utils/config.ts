@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-import { wLogger } from './utils/logger';
+import { wLogger } from './logger';
 
 const configPath = path.join(path.dirname(process.execPath), 'tsosu.env');
 if (!fs.existsSync(configPath)) {

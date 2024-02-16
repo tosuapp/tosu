@@ -12,8 +12,6 @@
     "build": "tsc",
     "test": "cargo test"
   },
-  "keywords": [],
-  "author": "cyperdark",
   "license": "MIT",
   "devDependencies": {
     "cargo-cp-artifact": "^0.1"

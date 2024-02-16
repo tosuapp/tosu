@@ -1,31 +1,27 @@
 {
-    "ts-node": {
-      "files": true
-    },
-    "compilerOptions": {
-      "lib": ["ES2020"],
-      "module": "commonjs",
-      "moduleResolution": "Node",
-      "allowJs": true,
-      "esModuleInterop": true,
-      "outDir": "dist",
-      "rootDir": "src",
-      "sourceMap": false,
-      "declaration": false,
-      "strict": true,
-      "noImplicitAny": false,
-      "target": "ES2020",
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "strictPropertyInitialization": false,
-      "baseUrl": ".",
-      "paths": {
-        "@/*": ["src/*"]
-      },
-      "typeRoots": [
-        "./src/@types"
-      ]
-    },
-    "exclude": ["node_modules", "src/postBuild.ts"],
-    "include": ["src"]
-  }
+  "compilerOptions": {
+    "lib": [
+      "ES2020"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "Node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "rootDir": "./",
+    "sourceMap": false,
+    "declaration": false,
+    "strict": true,
+    "noImplicitAny": false,
+    "target": "ES2020",
+    "strictPropertyInitialization": false,
+    "baseUrl": ".",
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+  ],
+  "include": [
+    "**/*"
+  ],
+}

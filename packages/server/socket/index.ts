@@ -1,5 +1,4 @@
-import { sleep, wLogger } from '@tosu/common';
-import { config } from '@tosu/common/dist/config';
+import { config, sleep, wLogger } from '@tosu/common';
 import WebSocket from 'ws';
 
 export const WebSocketV1 = (instancesManager: any) => {
