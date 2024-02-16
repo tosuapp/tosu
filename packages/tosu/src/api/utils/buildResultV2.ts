@@ -7,6 +7,7 @@ import { fixDecimals } from '@/utils/fixDecimals';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {
+    ApiKeypressAnswer,
     ApiV2Answer,
     BeatmapStatuses,
     KeyOverlay,
@@ -395,10 +396,18 @@ export const buildResult = (
     };
 };
 
-export const buildKeyOverlay = (service: DataRepo): KeyOverlay => {
-    const { gamePlayData } = service.getServices(['gamePlayData']);
+export const buildKeyOverlay = (service: DataRepo): ApiKeypressAnswer => {
+    const { gamePlayData, beatmapPpData } = service.getServices([
+        'gamePlayData',
+        'beatmapPpData'
+    ]);
 
     return {
+        bpm: {
+            common: beatmapPpData.commonBPM,
+            min: beatmapPpData.minBPM,
+            max: beatmapPpData.maxBPM
+        },
         k1: {
             isPressed: gamePlayData.KeyOverlay.K1Pressed,
             count: gamePlayData.KeyOverlay.K1Count

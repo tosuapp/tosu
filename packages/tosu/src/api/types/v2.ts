@@ -435,3 +435,7 @@ export interface TourneyClients {
         };
     };
 }
+
+export interface ApiKeypressAnswer extends KeyOverlay {
+    bpm: Bpm;
+}
