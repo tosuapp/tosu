@@ -18,7 +18,7 @@
 
 <h1 align="center">Welcome to tosu 👋</h1>
 <div align="center">
-<img src="https://raw.githubusercontent.com/KotRikD/tosu/1a04261851da9226b28320fcc9f05ba3ad0df431/.github/logo.png" />
+<img src=".github/logo.png" />
 </div>
 
 <br>
@@ -30,9 +30,9 @@ Eponymous software for reading osu! memory, accounting for most of gosumemory's 
 <br>
 
 <div  align="center">
-<a href="https://github.com/KotRikD/tosu/releases/latest"><img src="https://raw.githubusercontent.com/KotRikD/tosu/432da13e14d93a38916d6867749568d101aa3659/.github/btn-dl.jpg" /></a>
-<a href="#"><img src="https://raw.githubusercontent.com/KotRikD/tosu/432da13e14d93a38916d6867749568d101aa3659/.github/btn-pp.jpg" /></a>
-<a href="https://discord.gg/WX7BTs8kwh"><img src="https://raw.githubusercontent.com/KotRikD/tosu/432da13e14d93a38916d6867749568d101aa3659/.github/btn-ds.jpg" /></a>
+<a href="https://github.com/KotRikD/tosu/releases/latest"><img src=".github/btn-dl.jpg" /></a>
+<a href="#"><img src=".github/btn-pp.jpg" /></a>
+<a href="https://discord.gg/WX7BTs8kwh"><img src=".github/btn-ds.jpg" /></a>
 </div>
 
 
