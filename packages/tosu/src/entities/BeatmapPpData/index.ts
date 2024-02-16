@@ -403,24 +403,15 @@ export class BeatmapPPData extends AbstractEntity {
             maxCombo: fcPerformance.difficulty.maxCombo,
             fullStars: fcPerformance.difficulty.stars,
             stars: fcPerformance.difficulty.stars,
-            // @ts-ignore
-            aim: fcPerformance.difficulty.aim,
-            // @ts-ignore
-            speed: fcPerformance.difficulty.speed,
-            // @ts-ignore
-            flashlight: fcPerformance.difficulty.flashlight,
-            // @ts-ignore
-            sliderFactor: fcPerformance.difficulty.sliderFactor,
-            // @ts-ignore
-            stamina: fcPerformance.difficulty.stamina,
-            // @ts-ignore
-            rhythm: fcPerformance.difficulty.rhythm,
-            // @ts-ignore
-            color: fcPerformance.difficulty.color,
-            // @ts-ignore
-            peak: fcPerformance.difficulty.peak,
-            // @ts-ignore
-            hitWindow: fcPerformance.difficulty.hitWindow
+            aim: (fcPerformance.difficulty as any).aim,
+            speed: (fcPerformance.difficulty as any).speed,
+            flashlight: (fcPerformance.difficulty as any).flashlight,
+            sliderFactor: (fcPerformance.difficulty as any).sliderFactor,
+            stamina: (fcPerformance.difficulty as any).stamina,
+            rhythm: (fcPerformance.difficulty as any).rhythm,
+            color: (fcPerformance.difficulty as any).color,
+            peak: (fcPerformance.difficulty as any).peak,
+            hitWindow: (fcPerformance.difficulty as any).hitWindow
         });
     }
 }
