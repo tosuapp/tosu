@@ -18,6 +18,7 @@ import {
     TourneyClients
 } from '../types/v2';
 import accuracyCalculator from './accuracy';
+import { CountryCodes } from './countryCodes';
 import rankCalculate from './rank';
 
 const convertMemoryPlayerToResult = (
@@ -135,8 +136,8 @@ export const buildResult = (
             globalRank: userProfile.rank,
 
             countryCode: {
-                code: userProfile.countryCode
-                // name: '', //
+                code: userProfile.countryCode,
+                name: CountryCodes[userProfile.countryCode]?.toUpperCase() || ''
             },
 
             backgroundColour: userProfile.backgroundColour?.toString(16)

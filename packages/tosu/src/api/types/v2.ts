@@ -75,6 +75,7 @@ export interface Profile {
 
 export interface CountryCode {
     code: number;
+    name: string;
 }
 
 export interface Beatmap {
