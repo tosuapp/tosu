@@ -4,8 +4,8 @@
 
 - `Typescript` >=5.3.3
 - `Node.js` >=18.14.2
-- `Rust` >= idk?
-- `pnpm` >= any
+- `Rust` >= any
+- `pnpm` >= 8
 
 <br />
 
