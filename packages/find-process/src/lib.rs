@@ -12,7 +12,11 @@ fn process_by_name(mut cx: FunctionContext) -> JsResult<JsValue> {
         if process.name() == &process_name {
             let id = cx.number(process.pid().as_u32());
             let name = cx.string(process.name().to_string());
-            let cmd = cx.string(process.cmd()[0].to_string());
+
+            let mut clean_cmd = process.cmd().to_vec();
+            clean_cmd.remove(0);
+
+            let cmd = cx.string(clean_cmd.join(" "));
 
             let obj = cx.empty_object();
             let _ = obj.set(&mut cx, "pid", id);
