@@ -47,7 +47,10 @@ export class TourneyManagerData extends AbstractEntity {
         }
 
         if (this.ChatAreaAddr === 0) {
-            this.ChatAreaAddr = process.scanSync(TOURNAMENT_CHAT_AREA, true);
+            this.ChatAreaAddr = await process.scanAsync(
+                TOURNAMENT_CHAT_AREA,
+                true
+            );
             wLogger.debug('[TMD] Chat area found');
             return;
         }

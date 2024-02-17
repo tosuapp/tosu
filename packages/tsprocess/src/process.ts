@@ -86,7 +86,7 @@ export class Process {
         refresh: boolean = false,
         baseAddress: number = 0
     ): number {
-        let buffer = Buffer.from(
+        const buffer = Buffer.from(
             pattern
                 .split(' ')
                 .map((x) => (x === '??' ? '00' : x))
@@ -103,7 +103,7 @@ export class Process {
         refresh: boolean = false,
         baseAddress: number = 0
     ): void {
-        let buffer = Buffer.from(
+        const buffer = Buffer.from(
             pattern
                 .split(' ')
                 .map((x) => (x === '??' ? '00' : x))
@@ -112,6 +112,34 @@ export class Process {
         );
 
         ProcessUtils.scan(this.handle, baseAddress, buffer, refresh, callback);
+    }
+
+    scanAsync(
+        pattern: string,
+        refresh: boolean = false,
+        baseAddress: number = 0
+    ): Promise<number> {
+        const buffer = Buffer.from(
+            pattern
+                .split(' ')
+                .map((x) => (x === '??' ? '00' : x))
+                .join(''),
+            'hex'
+        );
+
+        return new Promise((resolve, reject) => {
+            try {
+                ProcessUtils.scan(
+                    this.handle,
+                    baseAddress,
+                    buffer,
+                    refresh,
+                    resolve
+                );
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
     static getProcesses(): Array<ProcessInfo> {
