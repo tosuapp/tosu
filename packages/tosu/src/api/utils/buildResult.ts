@@ -245,6 +245,7 @@ export const buildResult = (
             '0': resultsScreenData.HitMiss
         },
         userProfile: {
+            rawLoginStatus: userProfile.rawLoginStatus,
             name: userProfile.name,
             accuracy: userProfile.accuracy,
             rankedScore: userProfile.rankedScore,
@@ -255,7 +256,7 @@ export const buildResult = (
             rank: userProfile.rank,
             countryCode: userProfile.countryCode,
             performancePoints: userProfile.performancePoints,
-            isConnected: userProfile.isConnected,
+            rawBanchoStatus: userProfile.rawBanchoStatus,
             backgroundColour: userProfile.backgroundColour?.toString(16)
         },
         tourney: buildTourneyData(instancesManager)

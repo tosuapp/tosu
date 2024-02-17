@@ -12,6 +12,7 @@ export interface PatternData {
     menuModsPtr: number;
     getAudioLengthPtr: number;
     userProfilePtr: number;
+    IsLoggedIn: number;
 }
 
 export class MemoryPatterns {
@@ -32,7 +33,8 @@ export class MemoryPatterns {
             statusPtr: 0,
             menuModsPtr: 0,
             getAudioLengthPtr: 0,
-            userProfilePtr: 0
+            userProfilePtr: 0,
+            IsLoggedIn: 0
         };
 
         if (process.platform !== 'win32') {

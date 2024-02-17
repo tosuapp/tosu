@@ -9,13 +9,14 @@ import { getOsuModsString } from '@/utils/osuMods';
 import {
     ApiKeypressAnswer,
     ApiV2Answer,
+    BanchoStatusEnum,
     BeatmapStatuses,
-    KeyOverlay,
     Leaderboard,
     Modes,
     Tourney,
     TourneyChatMessages,
-    TourneyClients
+    TourneyClients,
+    UserLoginStatus
 } from '../types/v2';
 import accuracyCalculator from './accuracy';
 import { CountryCodes } from './countryCodes';
@@ -110,7 +111,6 @@ export const buildResult = (
 
             beatmapHasLeaderboard: Boolean(gamePlayData.Leaderboard),
             // userLogined: userProfile.isConnected, // we dont have that, yet
-            connectedToBancho: userProfile.isConnected,
 
             bassDensity: bassDensityData.density,
 
@@ -120,6 +120,14 @@ export const buildResult = (
             }
         },
         profile: {
+            userStatus: {
+                number: userProfile.rawLoginStatus,
+                name: UserLoginStatus[userProfile.rawLoginStatus]
+            },
+            banchoStatus: {
+                number: userProfile.rawBanchoStatus,
+                name: BanchoStatusEnum[userProfile.rawBanchoStatus]
+            },
             id: userProfile.id,
             name: userProfile.name,
             mode: {

@@ -295,6 +295,7 @@ export interface TourneyValues {
 }
 
 export interface UserProfileAnswer {
+    rawLoginStatus: number;
     name: string;
     accuracy: number;
     rankedScore: number;
@@ -305,7 +306,7 @@ export interface UserProfileAnswer {
     rank: number;
     countryCode: number;
     performancePoints: number;
-    isConnected: boolean;
+    rawBanchoStatus: number;
     backgroundColour: string;
 }
 

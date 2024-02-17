@@ -15,6 +15,20 @@ export enum Modes {
     mania = 3
 }
 
+export enum BanchoStatusEnum {
+    idle = 0,
+    afk = 1,
+    playing = 2
+}
+
+export enum UserLoginStatus {
+    reconnecting = 0,
+    guest = 256,
+    recieving_data = 257,
+    disconnected = 65537,
+    connected = 65793
+}
+
 export interface ApiV2Answer {
     state: number;
     session: Session;
@@ -49,7 +63,6 @@ export interface Settings {
     beatmapHasLeaderboard: boolean;
     leaderboardVisible: boolean;
     replayUIVisible: boolean;
-    connectedToBancho: boolean;
     bassDensity: number;
     mode: Mode;
 }
@@ -60,6 +73,8 @@ export interface Mode {
 }
 
 export interface Profile {
+    userStatus: UserStatus;
+    banchoStatus: BanchoStatus;
     id: number;
     name: string;
     mode: Mode;
@@ -71,6 +86,16 @@ export interface Profile {
     globalRank: number;
     countryCode: CountryCode;
     backgroundColour: string;
+}
+
+export interface UserStatus {
+    number: number;
+    name: string;
+}
+
+export interface BanchoStatus {
+    number: number;
+    name: string;
 }
 
 export interface CountryCode {
