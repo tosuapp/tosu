@@ -1,6 +1,5 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
-import { wLogger } from '@tosu/common';
-import { config } from '@tosu/common/dist/config';
+import { config, wLogger } from '@tosu/common';
 import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 

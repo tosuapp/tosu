@@ -1,6 +1,4 @@
-import { wLogger } from '@tosu/common';
-import { sleep } from '@tosu/common';
-import { config } from '@tosu/common/dist/config';
+import { config, sleep, wLogger } from '@tosu/common';
 import EventEmitter from 'events';
 import fs from 'fs';
 import { injectGameOverlay } from 'game-overlay';

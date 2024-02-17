@@ -1,5 +1,10 @@
-import { argumetsParser, configureLogger, wLogger } from '@tosu/common';
-import { config, updateConfig } from '@tosu/common/dist/config';
+import {
+    argumetsParser,
+    config,
+    configureLogger,
+    updateConfig,
+    wLogger
+} from '@tosu/common';
 import { HttpServer, WebSocketV1 } from '@tosu/server';
 import { autoUpdater } from '@tosu/updater';
 

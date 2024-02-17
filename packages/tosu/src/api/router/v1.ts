@@ -1,6 +1,6 @@
-import { config } from '@tosu/common/dist/config';
-import type { WebSocket } from '@tosu/server';
+import { config } from '@tosu/common';
 import { HttpServer, getContentType, sendJson } from '@tosu/server';
+import type { WebSocket } from '@tosu/server';
 import fs from 'fs';
 import path from 'path';
 
