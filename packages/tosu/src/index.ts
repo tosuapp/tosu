@@ -22,7 +22,10 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
 
     const { update } = argumetsParser(process.argv);
 
-    if ((update != null && update == true) || update == null)
+    if (
+        process.env.NODE_ENV == 'development' &&
+        ((update != null && update == true) || update == null)
+    )
         await autoUpdater();
 
     wLogger.info('Searching for osu!');
