@@ -28,9 +28,11 @@ export class TourneyUserProfileData extends AbstractEntity {
         const { process } = this.services.getServices(['process']);
 
         if (!this.UserInfoBase) {
-            this.UserInfoBase = process.readPointer(
-                process.scanSync(TOURNEY_PROFILE_BASE, true) - 0x5
+            const tourneyProfileBase = await process.scanAsync(
+                TOURNEY_PROFILE_BASE,
+                true
             );
+            this.UserInfoBase = process.readPointer(tourneyProfileBase - 0x5);
             wLogger.debug('[TUPD] Slot is not equiped');
             return;
         }
