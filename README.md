@@ -31,7 +31,7 @@ Eponymous software for reading osu! memory, accounting for most of gosumemory's 
 
 <div  align="center">
 <a href="https://github.com/KotRikD/tosu/releases/latest"><img src=".github/btn-dl.jpg" /></a>
-<a href="#"><img src=".github/btn-pp.jpg" /></a>
+<a href="https://github.com/cyperdark/osu-counters/tree/master/counters"><img src=".github/btn-pp.jpg" /></a>
 <a href="https://discord.gg/WX7BTs8kwh"><img src=".github/btn-ds.jpg" /></a>
 </div>
 
@@ -41,7 +41,7 @@ Instruction
 1. Download [tosu](https://github.com/KotRikD/tosu/releases/latest)
 2. Extract tosu.exe to a `Folder`
 3. Inside `Folder` create `static` folder (if it's doesn't already)
-4. Download the [PP Counters](https://github.com/l3lackShark/static) unpack it to `static` folder. After that you should be ready to go!
+4. Download the [PP Counters](https://github.com/cyperdark/osu-counters/tree/master/counters) unpack it to `static` folder. After that you should be ready to go!
 5. OR You can place your `pp counter` to `static` folder directory, or create sub folder `/static/{your_counter_name}`
 6. Your counter folder should have this path for index.html `/static/{your_counter_name}/index.html` or `/static/index.html` (if you have only one counter, and want to place it in root folder)
 7. Run `tosu.exe`, and it will create `tosu.env`, it's a file for tosu settings, you can tweak it how you want
