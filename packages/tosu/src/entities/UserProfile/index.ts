@@ -33,7 +33,7 @@ export class UserProfile extends AbstractEntity {
         );
 
         const isLoginned = process.readPointer(
-            patterns.getPattern('IsLoggedIn')
+            patterns.getPattern('isLoggedPtr')
         );
 
         this.rawLoginStatus = isLoginned;
