@@ -29,7 +29,6 @@ export const ApiV2 = ({
         }
     });
 
-    // todo
     app.route('/json/v2', 'GET', (req, res) => {
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}
@@ -40,6 +39,19 @@ export const ApiV2 = ({
         }
 
         const json = osuInstances[0].getStateV2(req.instanceManager);
+        sendJson(res, json);
+    });
+
+    app.route('/json/v2/keys', 'GET', (req, res) => {
+        const osuInstances: any = Object.values(
+            req.instanceManager.osuInstances || {}
+        );
+        if (osuInstances.length < 1) {
+            res.statusCode = 500;
+            return sendJson(res, { error: 'not_ready' });
+        }
+
+        const json = osuInstances[0].getKeyOverlay();
         sendJson(res, json);
     });
 
