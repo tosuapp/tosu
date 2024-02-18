@@ -85,7 +85,7 @@ In-game overlay
 Routes
 ---
 - `/` - List of all counters you have
-- `/json - Example of `/ws` response
+- `/json` - Example of `/ws` response
 - `/json/v2` - Example of `/websocket/v2` response
 - `/ws` - [response example]([https://github.com/KotRikD/tosu/releases/latest](https://github.com/KotRikD/tosu/wiki/v1-websocket-api-response))
 - `/websocket/v2` - [response example]([https://github.com/KotRikD/tosu/releases/latest](https://github.com/KotRikD/tosu/wiki/v2-websocket-api-response))
