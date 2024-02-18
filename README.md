@@ -87,12 +87,12 @@ Routes
 gosu compatible api
 - `/` - List of all counters you have
 - `/json` - Example of `/ws` response
-- `/ws` - [response example]([https://github.com/KotRikD/tosu/releases/latest](https://github.com/KotRikD/tosu/wiki/v1-websocket-api-response))
+- `/ws` - [response example](https://github.com/KotRikD/tosu/wiki/v1-websocket-api-response)
 - `/Songs/{path}` - Show content of the file, or show list of files for a folder
 
 v2 _**(tosu own api)**_
 - `/json/v2` - Example of `/websocket/v2` response
-- `/websocket/v2` - [response example]([https://github.com/KotRikD/tosu/releases/latest](https://github.com/KotRikD/tosu/wiki/v2-websocket-api-response))
+- `/websocket/v2` - [response example](https://github.com/KotRikD/tosu/wiki/v2-websocket-api-response)
 - `/files/beatmap/{path}` - same as `/Songs/{path}`
 - `/files/skin/{path}` - similar as `/files/beatmap/{path}`, but for a skin
 ---
