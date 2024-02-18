@@ -18,11 +18,16 @@ export const netDateBinaryToDate = (
     dateDataHi: number,
     dateDataLo: number
 ): Date => {
+    const buffer = Buffer.alloc(8);
+
     const ticksMask = 0x3fffffff;
 
     dateDataHi &= ticksMask;
 
-    const dateData = (BigInt(dateDataHi) << 32n) | BigInt(dateDataLo);
+    buffer.writeInt32LE(dateDataLo);
+    buffer.writeInt32LE(dateDataHi, 4);
+
+    const dateData = buffer.readBigInt64LE();
 
     const ticksPerMillisecond = 10000n;
     const epochTicks = 621355968000000000n;
