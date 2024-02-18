@@ -235,12 +235,7 @@ export interface Combo2 {
     max: number;
 }
 
-export interface Mods2 {
-    number: number;
-    name: string;
-}
-
-export interface KeyOverlay {
+export interface ApiKeysAnswer {
     k1: K1;
     k2: K2;
     m1: M1;

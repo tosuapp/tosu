@@ -8,7 +8,7 @@ import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {
-    ApiKeypressAnswer,
+    ApiKeysAnswer,
     ApiV2Answer,
     BanchoStatusEnum,
     BeatmapStatuses,
@@ -330,7 +330,10 @@ export const buildResult = (
             graph: beatmapPpData.strainsAll
         },
         resultsScreen: {
-            mode: resultsScreenData.Mode,
+            mode: {
+                number: gamePlayData.Mode,
+                name: Modes[gamePlayData.Mode]
+            },
             score: resultsScreenData.Score,
             name: resultsScreenData.PlayerName,
             hits: {
@@ -399,18 +402,10 @@ export const buildResult = (
     };
 };
 
-export const buildKeyOverlay = (service: DataRepo): ApiKeypressAnswer => {
-    const { gamePlayData, beatmapPpData } = service.getServices([
-        'gamePlayData',
-        'beatmapPpData'
-    ]);
+export const buildKeyOverlay = (service: DataRepo): ApiKeysAnswer => {
+    const { gamePlayData } = service.getServices(['gamePlayData']);
 
     return {
-        bpm: {
-            common: beatmapPpData.commonBPM,
-            min: beatmapPpData.minBPM,
-            max: beatmapPpData.maxBPM
-        },
         k1: {
             isPressed: gamePlayData.KeyOverlay.K1Pressed,
             count: gamePlayData.KeyOverlay.K1Count
