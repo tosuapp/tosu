@@ -43,11 +43,11 @@ const MODS_ORDER: { [key: string]: number } = {
     nc: 3,
     ht: 3,
     hr: 4,
+    fl: 5,
+    td: 5,
     so: 5,
-    sd: 5,
-    pf: 5,
-    fl: 6,
-    td: 7
+    sd: 6,
+    pf: 7
 };
 
 /**
