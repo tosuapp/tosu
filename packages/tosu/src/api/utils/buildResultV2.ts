@@ -350,7 +350,7 @@ export const buildResult = (
             },
             maxCombo: resultsScreenData.MaxCombo,
             rank: resultsScreenData.Grade,
-            createdAt: resultsScreenData.Date.toISOString()
+            createdAt: resultsScreenData.Date
         },
         folders: {
             game: settings.gameFolder,

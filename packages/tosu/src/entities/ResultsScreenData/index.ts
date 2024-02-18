@@ -20,7 +20,7 @@ export class ResultsScreenData extends AbstractEntity {
     HitKatu: number;
     HitMiss: number;
     Grade: string;
-    Date: Date;
+    Date: string;
 
     constructor(services: DataRepo) {
         super(services);
@@ -42,7 +42,7 @@ export class ResultsScreenData extends AbstractEntity {
         this.HitGeki = 0;
         this.HitKatu = 0;
         this.HitMiss = 0;
-        this.Date = Date.prototype;
+        this.Date = '';
     }
 
     async updateState() {
@@ -115,9 +115,10 @@ export class ResultsScreenData extends AbstractEntity {
                 0: this.HitMiss
             }
         });
+
         this.Date = netDateBinaryToDate(
             process.readInt(resultScreenBase + 0xa4),
             process.readInt(resultScreenBase + 0xa0)
-        );
+        ).toISOString();
     }
 }

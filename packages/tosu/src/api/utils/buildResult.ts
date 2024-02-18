@@ -245,7 +245,7 @@ export const buildResult = (
             '50': resultsScreenData.Hit50,
             '0': resultsScreenData.HitMiss,
             grade: resultsScreenData.Grade,
-            createdAt: resultsScreenData.Date.toISOString()
+            createdAt: resultsScreenData.Date
         },
         userProfile: {
             rawLoginStatus: userProfile.rawLoginStatus,

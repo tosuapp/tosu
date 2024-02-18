@@ -27,6 +27,7 @@ export const netDateBinaryToDate = (
     const ticksPerMillisecond = 10000n;
     const epochTicks = 621355968000000000n;
     const milliseconds = (dateData - epochTicks) / ticksPerMillisecond;
+
     return addTimezoneOffset(new Date(Number(milliseconds)));
 };
 
