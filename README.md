@@ -68,7 +68,7 @@ Features
   - Leaderboards list _**(array)**_
   - Folders paths and Files names
   - Direct paths to files
-  - Result screen _**(achieved rank & date are missing)**_
+  - Result screen
   - Tourney data _**(not tested, yet)**_
 - [X] LOW CPU USAGE (I actually checked, this thing has a much lower memory recoil than the gosu)
 ---
