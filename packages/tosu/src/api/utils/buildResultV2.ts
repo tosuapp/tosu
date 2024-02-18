@@ -332,7 +332,7 @@ export const buildResult = (
             graph: beatmapPpData.strainsAll
         },
         resultsScreen: {
-            mode: '', // todo
+            mode: resultsScreenData.Mode,
             score: resultsScreenData.Score,
             name: resultsScreenData.PlayerName,
             hits: {
@@ -348,9 +348,8 @@ export const buildResult = (
                 name: getOsuModsString(resultsScreenData.Mods)
             },
             maxCombo: resultsScreenData.MaxCombo,
-            rank: '', // dont have
-
-            createdAt: '' // dont have
+            rank: resultsScreenData.Grade,
+            createdAt: resultsScreenData.Date.toISOString()
         },
         folders: {
             game: settings.gameFolder,

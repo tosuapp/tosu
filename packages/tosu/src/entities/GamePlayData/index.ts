@@ -391,6 +391,7 @@ export class GamePlayData extends AbstractEntity {
             this.HitMiss,
             this.Accuracy
         );
+
         this.GradeExpected = calculateGrade(
             this.Mode,
             this.Mods,

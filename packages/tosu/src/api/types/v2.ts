@@ -322,7 +322,7 @@ export interface Series {
 }
 
 export interface ResultsScreen {
-    mode: string;
+    mode: number;
     score: number;
     name: string;
     hits: Hits3;
