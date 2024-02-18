@@ -35,7 +35,7 @@ export interface ApiV2Answer {
     settings: Settings;
     profile: Profile;
     beatmap: Beatmap;
-    player: Player;
+    play: Play;
     leaderboard: Leaderboard[];
     performance: Performance;
     resultsScreen: ResultsScreen;
@@ -64,48 +64,33 @@ export interface Settings {
     leaderboardVisible: boolean;
     replayUIVisible: boolean;
     bassDensity: number;
-    mode: Mode;
+    mode: NumberName;
 }
 
-export interface Mode {
+export interface NumberName {
     number: number;
     name: string;
 }
 
 export interface Profile {
-    userStatus: UserStatus;
-    banchoStatus: BanchoStatus;
+    userStatus: NumberName;
+    banchoStatus: NumberName;
     id: number;
     name: string;
-    mode: Mode;
+    mode: NumberName;
     rankedScore: number;
     level: number;
     accuracy: number;
     pp: number;
     playCount: number;
     globalRank: number;
-    countryCode: CountryCode;
+    countryCode: NumberName;
     backgroundColour: string;
-}
-
-export interface UserStatus {
-    number: number;
-    name: string;
-}
-
-export interface BanchoStatus {
-    number: number;
-    name: string;
-}
-
-export interface CountryCode {
-    code: number;
-    name: string;
 }
 
 export interface Beatmap {
     time: BeatmapTime;
-    status: Status;
+    status: NumberName;
     checksum: string;
     id: number;
     set: number;
@@ -116,11 +101,6 @@ export interface Beatmap {
     mapper: string;
     version: string;
     stats: Stats;
-}
-
-export interface Status {
-    number: number;
-    name: string;
 }
 
 export interface Stats {
@@ -182,8 +162,8 @@ export interface Objects {
     total: number;
 }
 
-export interface Player {
-    mode: Mode2;
+export interface Play {
+    mode: NumberName;
     name: string;
     score: number;
     accuracy: number;
@@ -191,14 +171,10 @@ export interface Player {
     hits: Hits;
     hitErrorArray: any[];
     combo: Combo;
-    mods: Mods;
+    mods: NumberName;
     rank: Rank;
     pp: Pp;
-}
-
-export interface Mode2 {
-    number: number;
-    name: string;
+    unstableRate: number;
 }
 
 export interface HealthBar {
@@ -214,17 +190,11 @@ export interface Hits {
     geki: number;
     katu: number;
     sliderBreaks: number;
-    unstableRate: number;
 }
 
 export interface Combo {
     current: number;
     max: number;
-}
-
-export interface Mods {
-    number: number;
-    name: string;
 }
 
 export interface Rank {
@@ -247,7 +217,7 @@ export interface Leaderboard {
     accuracy: number;
     hits: Hits2;
     combo: Combo2;
-    mods: Mods2;
+    mods: NumberName;
     rank: string;
 }
 
@@ -322,11 +292,11 @@ export interface Series {
 }
 
 export interface ResultsScreen {
-    mode: number;
+    mode: NumberName;
     score: number;
     name: string;
     hits: Hits3;
-    mods: Mods3;
+    mods: NumberName;
     maxCombo: number;
     rank: string;
     createdAt: string;
@@ -339,11 +309,6 @@ export interface Hits3 {
     '300': number;
     geki: number;
     katu: number;
-}
-
-export interface Mods3 {
-    number: number;
-    name: string;
 }
 
 export interface Folders {
@@ -413,54 +378,5 @@ export interface TourneyClients {
         globalRank: number;
         totalPP: number;
     };
-    play: {
-        mode: {
-            number: number;
-            name: string;
-        };
-
-        name: string;
-
-        score: number;
-        accuracy: number;
-
-        healthBar: {
-            normal: number;
-            smooth: number;
-        };
-        hits: {
-            300: number;
-            geki: number;
-            100: number;
-            katu: number;
-            50: number;
-            0: number;
-            sliderBreaks: number;
-            unstableRate: number;
-        };
-
-        hitErrorArray: number[];
-
-        mods: {
-            num: number;
-            str: string;
-        };
-        combo: {
-            current: number;
-            max: number;
-        };
-        rank: {
-            current: string;
-            maxThisPlay: string;
-        };
-        pp: {
-            current: number;
-            fc: number;
-            maxAchievedThisPlay: number;
-        };
-    };
-}
-
-export interface ApiKeypressAnswer extends KeyOverlay {
-    bpm: Bpm;
+    play: Play;
 }

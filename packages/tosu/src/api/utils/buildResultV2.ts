@@ -143,7 +143,7 @@ export const buildResult = (
             globalRank: userProfile.rank,
 
             countryCode: {
-                code: userProfile.countryCode,
+                number: userProfile.countryCode,
                 name: CountryCodes[userProfile.countryCode]?.toUpperCase() || ''
             },
 
@@ -272,7 +272,7 @@ export const buildResult = (
                 maxCombo: beatmapPpData.calculatedMapAttributes.maxCombo
             }
         },
-        player: {
+        play: {
             mode: {
                 number: gamePlayData.Mode,
                 name: Modes[gamePlayData.Mode]
@@ -294,9 +294,7 @@ export const buildResult = (
                 katu: gamePlayData.HitKatu,
                 50: gamePlayData.Hit50,
                 0: gamePlayData.HitMiss,
-                sliderBreaks: gamePlayData.HitSB,
-
-                unstableRate: gamePlayData.UnstableRate
+                sliderBreaks: gamePlayData.HitSB
             },
 
             hitErrorArray: gamePlayData.HitErrors,
@@ -319,7 +317,8 @@ export const buildResult = (
                 maxAchievedThisPlay: fixDecimals(
                     beatmapPpData.currAttributes.maxThisPlayPP
                 )
-            }
+            },
+            unstableRate: gamePlayData.UnstableRate
         },
         leaderboard: gamePlayData.Leaderboard
             ? gamePlayData.Leaderboard.leaderBoard.map((slot) =>
@@ -501,15 +500,14 @@ const buildTourneyData = (
                         katu: gamePlayData.HitKatu,
                         50: gamePlayData.Hit50,
                         0: gamePlayData.HitMiss,
-                        sliderBreaks: gamePlayData.HitSB,
-                        unstableRate: gamePlayData.UnstableRate
+                        sliderBreaks: gamePlayData.HitSB
                     },
 
                     hitErrorArray: gamePlayData.HitErrors,
 
                     mods: {
-                        num: currentMods,
-                        str: getOsuModsString(currentMods)
+                        number: currentMods,
+                        name: getOsuModsString(currentMods)
                     },
                     combo: {
                         current: gamePlayData.Combo,
@@ -525,7 +523,9 @@ const buildTourneyData = (
                         maxAchievedThisPlay: fixDecimals(
                             beatmapPpData.currAttributes.maxThisPlayPP
                         )
-                    }
+                    },
+
+                    unstableRate: gamePlayData.UnstableRate
                 }
             };
         }
