@@ -230,6 +230,7 @@ export const buildResult = (
             _isReplayUiHidden: gamePlayData.isReplayUiHidden
         },
         resultsScreen: {
+            mode: gamePlayData.Mode,
             name: resultsScreenData.PlayerName,
             score: resultsScreenData.Score,
             maxCombo: resultsScreenData.MaxCombo,
@@ -242,7 +243,9 @@ export const buildResult = (
             '100': resultsScreenData.Hit100,
             katu: resultsScreenData.HitKatu,
             '50': resultsScreenData.Hit50,
-            '0': resultsScreenData.HitMiss
+            '0': resultsScreenData.HitMiss,
+            grade: resultsScreenData.Grade,
+            createdAt: resultsScreenData.Date.toISOString()
         },
         userProfile: {
             rawLoginStatus: userProfile.rawLoginStatus,

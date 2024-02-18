@@ -206,6 +206,7 @@ export interface GameplayValues {
 }
 
 export interface ResultsScreenValues {
+    mode: number;
     name: string;
     score: number;
     maxCombo: number;
@@ -216,6 +217,8 @@ export interface ResultsScreenValues {
     katu: number;
     '50': number;
     '0': number;
+    grade: string;
+    createdAt: string;
 }
 
 interface TourneyMessage {
