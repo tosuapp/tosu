@@ -97,7 +97,7 @@ export const buildResult = (
     return {
         state: allTimesData.Status,
         session: {
-            playTime: 0, // needed, seconds
+            playTime: allTimesData.GameTime,
             playCount: 0 // need counting
         },
         settings: {

@@ -72,6 +72,10 @@ const SCAN_PATTERNS: {
     isLoggedPtr: {
         pattern: 'B8 0B 00 00 8B 35',
         offset: -0xb
+    },
+    gameTimePtr: {
+        pattern: 'FF 15 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 3B',
+        offset: 0x7
     }
 };
 
