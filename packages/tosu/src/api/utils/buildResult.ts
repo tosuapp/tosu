@@ -3,7 +3,7 @@ import path from 'path';
 import { DataRepo } from '@/entities/DataRepoList';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
-import { fixDecimals } from '@/utils/fixDecimals';
+import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {

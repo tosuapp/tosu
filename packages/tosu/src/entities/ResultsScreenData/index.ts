@@ -1,9 +1,8 @@
 import { wLogger } from '@tosu/common';
 
 import { DataRepo } from '@/entities/DataRepoList';
-import { calculateAccuracy } from '@/utils/calculateAccuracy';
-import { calculateGrade } from '@/utils/calculateGrade';
-import { netDateBinaryToDate } from '@/utils/netDateBinaryToDate';
+import { calculateGrade } from '@/utils/calculators';
+import { netDateBinaryToDate } from '@/utils/converters';
 import { OsuMods } from '@/utils/osuMods.types';
 
 import { AbstractEntity } from '../AbstractEntity';
@@ -104,23 +103,18 @@ export class ResultsScreenData extends AbstractEntity {
         this.HitKatu = process.readShort(resultScreenBase + 0x90);
         // HitMiss    int16   `mem:"[Ruleset + 0x38] + 0x92"`
         this.HitMiss = process.readShort(resultScreenBase + 0x92);
-        this.Grade = calculateGrade(
-            this.Mode,
-            this.Mods,
-            this.Hit300,
-            this.Hit100,
-            this.Hit50,
-            this.HitMiss,
-            calculateAccuracy(
-                this.Mode,
-                this.Hit300,
-                this.Hit100,
-                this.Hit50,
-                this.HitMiss,
-                this.HitKatu,
-                this.HitGeki
-            ) * 100
-        );
+        this.Grade = calculateGrade({
+            mods: this.Mods,
+            mode: this.Mode,
+            hits: {
+                300: this.Hit300,
+                geki: 0,
+                100: this.Hit100,
+                katu: 0,
+                50: this.Hit50,
+                0: this.HitMiss
+            }
+        });
         this.Date = netDateBinaryToDate(
             process.readInt(resultScreenBase + 0xa4),
             process.readInt(resultScreenBase + 0xa0)

@@ -3,7 +3,8 @@ import path from 'path';
 import { DataRepo } from '@/entities/DataRepoList';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
-import { fixDecimals } from '@/utils/fixDecimals';
+import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
+import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {
@@ -18,9 +19,7 @@ import {
     TourneyClients,
     UserLoginStatus
 } from '../types/v2';
-import accuracyCalculator from './accuracy';
 import { CountryCodes } from './countryCodes';
-import rankCalculate from './rank';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
@@ -46,7 +45,7 @@ const convertMemoryPlayerToResult = (
         name: memoryPlayer.Name,
 
         score: memoryPlayer.Score,
-        accuracy: accuracyCalculator(hits, gameMode),
+        accuracy: calculateAccuracy({ hits, mode: gameMode }),
 
         hits: hits,
 
@@ -58,7 +57,7 @@ const convertMemoryPlayerToResult = (
             number: memoryPlayer.Mods,
             name: modsName
         },
-        rank: rankCalculate({
+        rank: calculateGrade({
             mods: modsName,
             mode: gameMode,
             hits: hits
