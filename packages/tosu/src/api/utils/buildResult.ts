@@ -47,7 +47,7 @@ const convertMemoryPlayerToResult = (
 
 export const buildResult = (
     service: DataRepo,
-    instancesManager: InstanceManager
+    instanceManager: InstanceManager
 ): ApiAnswer => {
     const {
         settings,
@@ -262,22 +262,22 @@ export const buildResult = (
             rawBanchoStatus: userProfile.rawBanchoStatus,
             backgroundColour: userProfile.backgroundColour?.toString(16)
         },
-        tourney: buildTourneyData(instancesManager)
+        tourney: buildTourneyData(instanceManager)
     };
 };
 
 const buildTourneyData = (
-    instancesManager: InstanceManager
+    instanceManager: InstanceManager
 ): TourneyValues | undefined => {
     const osuTourneyManager = Object.values(
-        instancesManager.osuInstances
+        instanceManager.osuInstances
     ).filter((instance) => instance.isTourneyManager);
     if (osuTourneyManager.length < 1) {
         return undefined;
     }
 
     const osuTourneyClients = Object.values(
-        instancesManager.osuInstances
+        instanceManager.osuInstances
     ).filter((instance) => instance.isTourneySpectator);
 
     const mappedOsuTourneyClients = osuTourneyClients.map<TourneyIpcClient>(

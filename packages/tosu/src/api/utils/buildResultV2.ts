@@ -67,7 +67,7 @@ const convertMemoryPlayerToResult = (
 
 export const buildResult = (
     service: DataRepo,
-    instancesManager: InstanceManager
+    instanceManager: InstanceManager
 ): ApiV2Answer => {
     const {
         settings,
@@ -398,7 +398,7 @@ export const buildResult = (
             scoresdb: path.join(settings.gameFolder, 'scores.db')
         },
 
-        tourney: buildTourneyData(instancesManager)
+        tourney: buildTourneyData(instanceManager)
     };
 };
 
@@ -426,17 +426,17 @@ export const buildKeyOverlay = (service: DataRepo): ApiKeysAnswer => {
 };
 
 const buildTourneyData = (
-    instancesManager: InstanceManager
+    instanceManager: InstanceManager
 ): Tourney | undefined => {
     const osuTourneyManager = Object.values(
-        instancesManager.osuInstances
+        instanceManager.osuInstances
     ).filter((instance) => instance.isTourneyManager);
     if (osuTourneyManager.length < 1) {
         return undefined;
     }
 
     const osuTourneyClients = Object.values(
-        instancesManager.osuInstances
+        instanceManager.osuInstances
     ).filter((instance) => instance.isTourneySpectator);
 
     const mappedOsuTourneyClients = osuTourneyClients.map(

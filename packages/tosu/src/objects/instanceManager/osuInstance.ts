@@ -403,12 +403,12 @@ export class OsuInstance {
         }
     }
 
-    getState(instancesManager: InstanceManager) {
-        return buildResult(this.entities, instancesManager);
+    getState(instanceManager: InstanceManager) {
+        return buildResult(this.entities, instanceManager);
     }
 
-    getStateV2(instancesManager: InstanceManager) {
-        return buildResultV2(this.entities, instancesManager);
+    getStateV2(instanceManager: InstanceManager) {
+        return buildResultV2(this.entities, instanceManager);
     }
 
     getKeyOverlay() {
