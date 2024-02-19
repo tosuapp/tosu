@@ -1,8 +1,9 @@
+import { Server } from '@tosu/server';
 import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-import { wLogger } from './logger';
+import { configureLogger, wLogger } from './logger';
 
 const configPath = path.join(path.dirname(process.execPath), 'tsosu.env');
 if (!fs.existsSync(configPath)) {
@@ -44,8 +45,6 @@ STATIC_FOLDER_PATH=./static`
     );
 }
 
-dotenv.config({ path: configPath });
-
 export const config = {
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
@@ -58,7 +57,7 @@ export const config = {
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true'
 };
 
-export const updateConfig = () => {
+export const updateConfigFile = () => {
     let newOptions = '';
 
     if (!process.env.DEBUG_LOG) {
@@ -108,4 +107,52 @@ export const updateConfig = () => {
 
     if (newOptions !== '')
         wLogger.warn(`New options available in config: ${newOptions}\n`);
+};
+
+export const watchConfigFile = ({ httpServer }: { httpServer: Server }) => {
+    refreshConfig(httpServer, false);
+    updateConfigFile();
+
+    configureLogger();
+
+    fs.watchFile(configPath, (current, previous) => {
+        refreshConfig(httpServer, true);
+    });
+};
+
+export const refreshConfig = (httpServer: Server, refresh: boolean) => {
+    const status = refresh == true ? 'reload' : 'load';
+
+    const { parsed, error } = dotenv.config({ path: configPath });
+    if (error != null || parsed == null) {
+        wLogger.error(`Config ${status} failed`);
+        return;
+    }
+
+    const debugLogging = (parsed.DEBUG_LOG || '') === 'true';
+
+    const serverIP = parsed.SERVER_IP || '127.0.0.1';
+    const serverPort = Number(parsed.SERVER_PORT || '24050');
+
+    if (config.debugLogging != debugLogging) {
+        config.debugLogging = debugLogging;
+
+        configureLogger();
+    }
+
+    if (config.serverIP != serverIP || config.serverPort != serverPort) {
+        config.serverIP = serverIP;
+        config.serverPort = serverPort;
+
+        httpServer.restart();
+    }
+
+    config.calculatePP = (parsed.CALCULATE_PP || '') === 'true';
+    config.enableKeyOverlay = (parsed.ENABLE_KEY_OVERLAY || '') === 'true';
+    config.pollRate = Number(parsed.POLL_RATE || '500');
+    config.keyOverlayPollRate = Number(parsed.KEYOVERLAY_POLL_RATE || '100');
+    config.staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
+    config.enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
+
+    wLogger.info(`Config ${status}ed`);
 };

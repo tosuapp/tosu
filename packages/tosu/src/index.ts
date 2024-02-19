@@ -1,23 +1,18 @@
-import {
-    argumetsParser,
-    configureLogger,
-    updateConfig,
-    wLogger
-} from '@tosu/common';
+import { argumetsParser, wLogger, watchConfigFile } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater } from '@tosu/updater';
 
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
 (async () => {
-    updateConfig();
-    configureLogger();
+    const instanceManager = new InstanceManager();
+    const httpServer = new Server({ instanceManager });
+
+    watchConfigFile({ httpServer });
 
     wLogger.info('Starting tosu');
 
     const { update } = argumetsParser(process.argv);
-    const instanceManager = new InstanceManager();
-    const httpServer = new Server({ instanceManager });
 
     if (
         process.env.NODE_ENV != 'development' &&
