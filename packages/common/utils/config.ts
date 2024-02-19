@@ -45,6 +45,8 @@ STATIC_FOLDER_PATH=./static`
     );
 }
 
+dotenv.config({ path: configPath });
+
 export const config = {
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
@@ -110,10 +112,10 @@ export const updateConfigFile = () => {
 };
 
 export const watchConfigFile = ({ httpServer }: { httpServer: Server }) => {
+    configureLogger();
+
     refreshConfig(httpServer, false);
     updateConfigFile();
-
-    configureLogger();
 
     fs.watchFile(configPath, (current, previous) => {
         refreshConfig(httpServer, true);
@@ -134,12 +136,6 @@ export const refreshConfig = (httpServer: Server, refresh: boolean) => {
     const serverIP = parsed.SERVER_IP || '127.0.0.1';
     const serverPort = Number(parsed.SERVER_PORT || '24050');
 
-    if (config.debugLogging != debugLogging) {
-        config.debugLogging = debugLogging;
-
-        configureLogger();
-    }
-
     if (config.serverIP != serverIP || config.serverPort != serverPort) {
         config.serverIP = serverIP;
         config.serverPort = serverPort;
@@ -147,6 +143,7 @@ export const refreshConfig = (httpServer: Server, refresh: boolean) => {
         httpServer.restart();
     }
 
+    config.debugLogging = debugLogging;
     config.calculatePP = (parsed.CALCULATE_PP || '') === 'true';
     config.enableKeyOverlay = (parsed.ENABLE_KEY_OVERLAY || '') === 'true';
     config.pollRate = Number(parsed.POLL_RATE || '500');
@@ -155,4 +152,5 @@ export const refreshConfig = (httpServer: Server, refresh: boolean) => {
     config.enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
 
     wLogger.info(`Config ${status}ed`);
+    configureLogger();
 };
