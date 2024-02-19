@@ -35,24 +35,26 @@ export function directoryWalker({
     }
 
     return fs.readFile(filePath, (err, content) => {
-        if (err) {
-            if (err.code === 'ENOENT' && _htmlRedirect == true) {
-                return readDirectory(
-                    filePath.replace('index.html', ''),
-                    baseUrl,
-                    (html: string) => {
-                        res.writeHead(200, {
-                            'Content-Type': getContentType('file.html')
-                        });
-                        res.end(html);
-                    }
-                );
-            } else if (err.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end(`404 Not Found`);
-                return;
-            }
+        if (err?.code === 'ENOENT' && _htmlRedirect == true) {
+            return readDirectory(
+                filePath.replace('index.html', ''),
+                baseUrl,
+                (html: string) => {
+                    res.writeHead(200, {
+                        'Content-Type': getContentType('file.html')
+                    });
+                    res.end(html);
+                }
+            );
+        }
 
+        if (err?.code === 'ENOENT') {
+            res.writeHead(404, { 'Content-Type': 'text/html' });
+            res.end(`404 Not Found`);
+            return;
+        }
+
+        if (err) {
             res.writeHead(500);
             res.end(`Server Error: ${err.code}`);
             return;
