@@ -1,8 +1,6 @@
 import { wLogger } from '@tosu/common';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
-import { getContentType, sendJson } from '../utils/index';
-
 export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     query: { [key: string]: string };

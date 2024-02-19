@@ -1,11 +1,10 @@
-import { config } from '@tosu/common/dist/config';
-import { HttpServer, getContentType, sendJson } from '@tosu/server';
-import fs from 'fs';
+import { config } from '@tosu/common';
 import path from 'path';
 
-import { readDirectory } from '../utils/reader';
+import { HttpServer, getContentType, sendJson } from '../index';
+import { directoryWalker, readDirectory } from '../utils/directories';
 
-export const baseApi = (app: HttpServer) => {
+export default function baseApi(app: HttpServer) {
     app.route('/json', 'GET', (req, res) => {
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}
@@ -32,14 +31,12 @@ export const baseApi = (app: HttpServer) => {
 
     app.route(/.*/, 'GET', (req, res) => {
         const url = req.url || '/';
-        const staticPath =
+        const folderPath =
             config.staticFolderPath ||
             path.join(path.dirname(process.execPath), 'static');
 
-        const extension = path.extname(url);
-        const selectedFolder = decodeURI(path.join(staticPath, url));
         if (url == '/') {
-            return readDirectory(selectedFolder, url, (html: string) => {
+            return readDirectory(folderPath, url, (html: string) => {
                 res.writeHead(200, {
                     'Content-Type': getContentType('file.html')
                 });
@@ -47,33 +44,19 @@ export const baseApi = (app: HttpServer) => {
             });
         }
 
+        const extension = path.extname(url);
         if (extension == '' && !url.endsWith('/')) {
             res.writeHead(301, { Location: url + '/' });
             return res.end();
         }
 
-        const selecteIndexHTML = url.endsWith('/')
-            ? path.join(selectedFolder, 'index.html')
-            : selectedFolder;
-        return fs.readFile(selecteIndexHTML, (err, content) => {
-            if (err == null) {
-                res.writeHead(200, {
-                    'Content-Type': getContentType(selecteIndexHTML)
-                });
-                return res.end(content, 'utf-8');
-            }
-
-            if (err.code === 'ENOENT') {
-                return readDirectory(selectedFolder, url, (html: string) => {
-                    res.writeHead(200, {
-                        'Content-Type': getContentType('file.html')
-                    });
-                    res.end(html);
-                });
-            }
-
-            res.writeHead(500);
-            res.end(`Server Error: ${err.code}`);
+        const selectIndexHTML = url.endsWith('/') ? url + 'index.html' : url;
+        directoryWalker({
+            _htmlRedirect: true,
+            res,
+            baseUrl: url,
+            pathname: selectIndexHTML,
+            folderPath
         });
     });
-};
+}

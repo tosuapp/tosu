@@ -1,31 +1,38 @@
-import type { WebSocket } from '@tosu/server';
-import { HttpServer, getContentType, sendJson } from '@tosu/server';
-import fs from 'fs';
 import path from 'path';
 
-import { readSongsFolder } from '../handlers/songs';
-import { readDirectory } from '../utils/reader';
+import { HttpServer, Websocket, sendJson } from '../index';
+import { directoryWalker } from '../utils/directories';
 
-export const ApiV2 = ({
+export default function v2Api({
     app,
-    webSocket,
+    websocket,
     keysWebsocket
 }: {
     app: HttpServer;
-    webSocket: WebSocket.Server;
-    keysWebsocket: WebSocket.Server;
-}) => {
+    websocket: Websocket;
+    keysWebsocket: Websocket;
+}) {
     app.server.on('upgrade', function (request, socket, head) {
         if (request.url == '/websocket/v2') {
-            webSocket.handleUpgrade(request, socket, head, function (ws) {
-                webSocket.emit('connection', ws, request);
-            });
+            websocket.socket.handleUpgrade(
+                request,
+                socket,
+                head,
+                function (ws) {
+                    websocket.socket.emit('connection', ws, request);
+                }
+            );
         }
 
         if (request.url == '/websocket/v2/keys') {
-            keysWebsocket.handleUpgrade(request, socket, head, function (ws) {
-                keysWebsocket.emit('connection', ws, request);
-            });
+            keysWebsocket.socket.handleUpgrade(
+                request,
+                socket,
+                head,
+                function (ws) {
+                    keysWebsocket.socket.emit('connection', ws, request);
+                }
+            );
         }
     });
 
@@ -55,7 +62,30 @@ export const ApiV2 = ({
         sendJson(res, json);
     });
 
-    app.route(/\/files\/beatmap\/(?<filePath>.*)/, 'GET', readSongsFolder);
+    app.route(/\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
+        const url = req.url || '/';
+
+        const osuInstances: any = Object.values(
+            req.instanceManager.osuInstances || {}
+        );
+        if (osuInstances.length < 1) {
+            res.statusCode = 500;
+            return sendJson(res, { error: 'not_ready' });
+        }
+
+        const { settings } = osuInstances[0].entities.getServices(['settings']);
+        if (settings.songsFolder === '') {
+            res.statusCode = 500;
+            return sendJson(res, { error: 'not_ready' });
+        }
+
+        directoryWalker({
+            res,
+            baseUrl: url,
+            pathname: req.params.filePath,
+            folderPath: settings.songsFolder
+        });
+    });
 
     app.route(/\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.url || '/';
@@ -77,40 +107,16 @@ export const ApiV2 = ({
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const cleanedUrl = decodeURI(req.params.filePath);
-        const contentType = getContentType(cleanedUrl);
-
-        const filePath = path.join(
+        const folder = path.join(
             settings.gameFolder,
             'Skins',
-            settings.skinFolder,
-            cleanedUrl
+            settings.skinFolder
         );
-        const isDirectory = path.extname(filePath) == '';
-        if (isDirectory) {
-            return readDirectory(filePath, url, (html: string) => {
-                res.writeHead(200, {
-                    'Content-Type': getContentType('file.html')
-                });
-                res.end(html);
-            });
-        }
-
-        return fs.readFile(filePath, (err, content) => {
-            if (err) {
-                if (err.code === 'ENOENT') {
-                    res.writeHead(404, { 'Content-Type': 'text/html' });
-                    res.end(`404 Not Found`);
-                    return;
-                }
-
-                res.writeHead(500);
-                res.end(`Server Error: ${err.code}`);
-                return;
-            }
-
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
+        directoryWalker({
+            res,
+            baseUrl: url,
+            pathname: req.params.filePath,
+            folderPath: folder
         });
     });
-};
+}
