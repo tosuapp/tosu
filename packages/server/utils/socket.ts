@@ -1,7 +1,7 @@
 import { config, wLogger } from '@tosu/common';
 import WebSocket from 'ws';
 
-import { getUniqueID } from './index';
+import { getUniqueID } from './hashing';
 
 interface ModifiedWebsocket extends WebSocket {
     id: string;
