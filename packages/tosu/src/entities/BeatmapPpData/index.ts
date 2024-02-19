@@ -6,6 +6,7 @@ import path from 'path';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { DataRepo } from '@/entities/DataRepoList';
+import { fixDecimals } from '@/utils/converters';
 
 import { AbstractEntity } from '../AbstractEntity';
 
@@ -224,7 +225,7 @@ export class BeatmapPPData extends AbstractEntity {
 
         for (const acc of [100, 99, 98, 97, 96, 95]) {
             const performance = currAttrs.acc(acc).performance(beatmap);
-            ppAcc[acc] = performance.pp;
+            ppAcc[acc] = fixDecimals(performance.pp);
         }
 
         const calculation_time = performance.now();
