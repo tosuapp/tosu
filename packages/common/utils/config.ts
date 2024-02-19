@@ -151,6 +151,13 @@ export const refreshConfig = (httpServer: Server, refresh: boolean) => {
     config.staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
     config.enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
 
+    if (
+        config.staticFolderPath == './static' &&
+        !fs.existsSync(path.join(process.cwd(), 'static'))
+    ) {
+        fs.mkdirSync(path.join(process.cwd(), 'static'));
+    }
+
     wLogger.info(`Config ${status}ed`);
     configureLogger();
 };
