@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/KotRikD/tosu/compare/v1.9.1...v2.0.0) (2024-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* Merge (#44) API v2 
+
+### Features
+
+* add fields from v2 to v1 ([450fef2](https://github.com/KotRikD/tosu/commit/450fef2afc8ea70b1db301a56e36ae44e6e468c6))
+* add json route for `websocket/v2/keys ([804c0a7](https://github.com/KotRikD/tosu/commit/804c0a77324d348c0aac028955df7ab6262ceb07))
+* Create v2 endpoints. Json & WebSocket ([f7f2737](https://github.com/KotRikD/tosu/commit/f7f27376ea465cbaf9642bf76e6793eeac8852a7))
+* disable autoupdater for development ([937a2c4](https://github.com/KotRikD/tosu/commit/937a2c4a611efb522d75d77f11bd77c5cb41a7ad))
+* Display content of the songs and skin folders ([f0d37a1](https://github.com/KotRikD/tosu/commit/f0d37a13d4f41c09b0211c4324c33f02aaee088b))
+* Merge ([#44](https://github.com/KotRikD/tosu/issues/44)) API v2  ([ede27fc](https://github.com/KotRikD/tosu/commit/ede27fc59f66c976cea1196a027a84ea481c1c27))
+* Move `tosu/api` to `server/` ([fc8d65f](https://github.com/KotRikD/tosu/commit/fc8d65f484a692bfa42827d74fad83467a570c10))
+* Move keyOverlay to their own socket (only v2) ([1b6430b](https://github.com/KotRikD/tosu/commit/1b6430b478bf545fb484e52409443136b4d34abf))
+* Reload config file on the fly ([ae72f56](https://github.com/KotRikD/tosu/commit/ae72f56f4dffafdb31e09c396f8895ad6c798397))
+* Rename isConnected to rawBanchoStatus + add rawLoginStatus ([79f8b36](https://github.com/KotRikD/tosu/commit/79f8b36d670bb1e50ad6947a10204e247a2f8afb))
+
+
+### Bug Fixes
+
+* add socket handler to reduce the code ([238fbc1](https://github.com/KotRikD/tosu/commit/238fbc1e3847c5b612877bfaa16a733b207c7e56))
+* Combine functions into one file + remove duplicates ([b494b52](https://github.com/KotRikD/tosu/commit/b494b5298e4f84282ebe0553d291fb6508824811))
+* Create static folder if doesnt exist in root folder of the program ([5dbc2e8](https://github.com/KotRikD/tosu/commit/5dbc2e82970d75d179342341a07ece6a2108a4d8))
+* cyclic ([49e49f8](https://github.com/KotRikD/tosu/commit/49e49f8f43c231f7c0aeaaeb430440bf0d857d58))
+* disable autoUpdate for dev mode ([3f45765](https://github.com/KotRikD/tosu/commit/3f45765399b3f77ab199323310ddf09d64b664e4))
+* Fix incorrect rounding leading to results like 1.0 when it's 0.99 ([585ee10](https://github.com/KotRikD/tosu/commit/585ee10056a43ecaaac310c611e206945839e2a9))
+* fixes ([5a5301b](https://github.com/KotRikD/tosu/commit/5a5301be4af037da076f26551b5e4a9ab5b1bcc1))
+* forget about this file ([fa6a7df](https://github.com/KotRikD/tosu/commit/fa6a7dfdd531faf69819a25de80a9129ea0d41db))
+* guard condition ([22830d7](https://github.com/KotRikD/tosu/commit/22830d7ebe948fcb4d99300a412465e54868fedf))
+* Logger ([82e049e](https://github.com/KotRikD/tosu/commit/82e049e1d970aa0471327dc3aaee28acc378d362))
+* make tournament scans async ([8ff5f03](https://github.com/KotRikD/tosu/commit/8ff5f03ccdb1d61176669f85fe17960c33b25e49))
+* Modes order ([9c8c2ce](https://github.com/KotRikD/tosu/commit/9c8c2ce7e5bfea4580d8e621b7945d20f1548882))
+* Move to own file ([ccc964c](https://github.com/KotRikD/tosu/commit/ccc964cb44a932e27dd2c5c3949e6bb12073fc4c))
+* Naming for api routes ([fdfaa97](https://github.com/KotRikD/tosu/commit/fdfaa9716f0b6aba23ac0876256f6dc00be448ff))
+* no src for common, server, updater ([578a8bb](https://github.com/KotRikD/tosu/commit/578a8bb3099be54bec1bdbae6c85a6fef33f900d))
+* optimization for multiple connections ([fb06ca6](https://github.com/KotRikD/tosu/commit/fb06ca6da6ab89c1b620f6d30e7f049b8b9a986e))
+* Remove naming confusion ([5b85e0f](https://github.com/KotRikD/tosu/commit/5b85e0f159d7c273e507a9e39a2ca96acf04c6ed))
+* Remove some extensions ([fe7e092](https://github.com/KotRikD/tosu/commit/fe7e09224b2760bc6616c69b37c55ba8fb5d5bd3))
+* Rename fields to be consistant ([d9dd0d7](https://github.com/KotRikD/tosu/commit/d9dd0d7bd0a07b590a8b6875bc5772a4279eb29f))
+* Rename IsLoggedIn pattern name to follow rest of patterns ([680d2b0](https://github.com/KotRikD/tosu/commit/680d2b06592d225d38e7f73b9bace1d735c341c4))
+* Rounup to 2 digits ([7143011](https://github.com/KotRikD/tosu/commit/714301195ad54889c089e7e5f46642a2b41afa99))
+* Sometimes there is null (no clue why) ([b447855](https://github.com/KotRikD/tosu/commit/b4478554828eb9c3ab8020bf993d215e78f1c47e))
+* ts ignore ([fe648fb](https://github.com/KotRikD/tosu/commit/fe648fb44c78f0e209d735d915c2f8105afecf75))
+* Types and namings ([0c07369](https://github.com/KotRikD/tosu/commit/0c073693137bf8136e6b2ead0d7e31109843aa78))
+* use buffer to make bigint value for ticks converter ([8d7ddf9](https://github.com/KotRikD/tosu/commit/8d7ddf9d2e778489199a4feb4a0a9b7ee6be53b5))
+* Use string instead of Date for resultScreen.createAt ([a9d8f71](https://github.com/KotRikD/tosu/commit/a9d8f714f90714529580f4cfd959ff9611199712))
+* Use url pathname, instead of full url with query ([ca9c50b](https://github.com/KotRikD/tosu/commit/ca9c50b61f055eb7be2257393568607e65187015))
+
 ### [1.9.1](https://github.com/KotRikD/tosu/compare/v1.9.0...v1.9.1) (2024-02-16)
 
 
