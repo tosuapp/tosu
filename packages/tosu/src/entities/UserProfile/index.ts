@@ -1,3 +1,5 @@
+import { UserLoginStatus } from '@/api/types/v2';
+
 import { AbstractEntity } from '../AbstractEntity';
 import { DataRepo } from '../DataRepoList';
 
@@ -12,8 +14,9 @@ export class UserProfile extends AbstractEntity {
     rank: number;
     countryCode: number;
     performancePoints: number;
-    isConnected: boolean;
+    rawBanchoStatus: number;
     backgroundColour: number;
+    rawLoginStatus: number;
 
     constructor(services: DataRepo) {
         super(services);
@@ -29,10 +32,12 @@ export class UserProfile extends AbstractEntity {
             patterns.getPattern('userProfilePtr')
         );
 
-        this.isConnected = Boolean(process.readByte(profileBase + 0xa8));
-        if (!this.isConnected) {
-            return;
-        }
+        const isLoginned = process.readPointer(
+            patterns.getPattern('isLoggedPtr')
+        );
+
+        this.rawLoginStatus = isLoginned;
+        this.rawBanchoStatus = process.readByte(profileBase + 0x88);
 
         this.name = process.readSharpString(
             process.readInt(profileBase + 0x30)

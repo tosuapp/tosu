@@ -4,8 +4,9 @@ import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 
-import { BeatmapStrains } from '@/api/types';
+import { BeatmapStrains } from '@/api/types/v1';
 import { DataRepo } from '@/entities/DataRepoList';
+import { fixDecimals } from '@/utils/converters';
 
 import { AbstractEntity } from '../AbstractEntity';
 
@@ -30,6 +31,15 @@ interface BeatmapPPAttributes {
     maxCombo: number;
     fullStars: number;
     stars: number;
+    aim?: number | undefined;
+    speed?: number | undefined;
+    flashlight?: number | undefined;
+    sliderFactor?: number | undefined;
+    stamina?: number | undefined;
+    rhythm?: number | undefined;
+    color?: number | undefined;
+    peak?: number | undefined;
+    hitWindow?: number | undefined;
 }
 
 interface BeatmapPPCurrentAttributes {
@@ -89,7 +99,16 @@ export class BeatmapPPData extends AbstractEntity {
             holds: 0,
             maxCombo: 0,
             fullStars: 0.0,
-            stars: 0.0
+            stars: 0.0,
+            aim: 0.0,
+            speed: 0.0,
+            flashlight: 0.0,
+            sliderFactor: 0.0,
+            stamina: 0.0,
+            rhythm: 0.0,
+            color: 0.0,
+            peak: 0.0,
+            hitWindow: 0.0
         };
         this.currAttributes = {
             stars: 0.0,
@@ -206,7 +225,7 @@ export class BeatmapPPData extends AbstractEntity {
 
         for (const acc of [100, 99, 98, 97, 96, 95]) {
             const performance = currAttrs.acc(acc).performance(beatmap);
-            ppAcc[acc] = performance.pp;
+            ppAcc[acc] = fixDecimals(performance.pp);
         }
 
         const calculation_time = performance.now();
@@ -384,7 +403,16 @@ export class BeatmapPPData extends AbstractEntity {
             holds: lazerBeatmap.holdable,
             maxCombo: fcPerformance.difficulty.maxCombo,
             fullStars: fcPerformance.difficulty.stars,
-            stars: fcPerformance.difficulty.stars
+            stars: fcPerformance.difficulty.stars,
+            aim: (fcPerformance.difficulty as any).aim,
+            speed: (fcPerformance.difficulty as any).speed,
+            flashlight: (fcPerformance.difficulty as any).flashlight,
+            sliderFactor: (fcPerformance.difficulty as any).sliderFactor,
+            stamina: (fcPerformance.difficulty as any).stamina,
+            rhythm: (fcPerformance.difficulty as any).rhythm,
+            color: (fcPerformance.difficulty as any).color,
+            peak: (fcPerformance.difficulty as any).peak,
+            hitWindow: (fcPerformance.difficulty as any).hitWindow
         });
     }
 }

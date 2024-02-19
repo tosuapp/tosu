@@ -3,7 +3,7 @@ export const OVERLAYS_STATIC = `<html>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
-    <title>ts osu overlays list</title>
+    <title>{PAGE_URL}</title>
     <style>
     * {
         // padding: 0;
@@ -24,7 +24,12 @@ export const OVERLAYS_STATIC = `<html>
         margin: 30px;
         list-style: decimal-leading-zero;
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-columns: 25% 25% 25% 25%;
+        padding: 0;
+    }
+
+    li {
+        margin-left: 2em;
     }
 
     a {
@@ -33,6 +38,7 @@ export const OVERLAYS_STATIC = `<html>
         text-underline-offset: 6px;
         transition: 0.2s ease;
         transition-property: text-underline-offset, color;
+        overflow-wrap: break-word;
     }
 
     a:hover {

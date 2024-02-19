@@ -6,6 +6,10 @@ import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/api/utils/buildResult';
+import {
+    buildKeyOverlay,
+    buildResult as buildResultV2
+} from '@/api/utils/buildResultV2';
 import { AllTimesData } from '@/entities/AllTimesData';
 import { BassDensityData } from '@/entities/BassDensityData';
 import { BeatmapPPData } from '@/entities/BeatmapPpData';
@@ -64,6 +68,14 @@ const SCAN_PATTERNS: {
     userProfilePtr: {
         pattern: 'A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 6A 00 6A 00 8D 8D',
         offset: 0x1
+    },
+    isLoggedPtr: {
+        pattern: 'B8 0B 00 00 8B 35',
+        offset: -0xb
+    },
+    gameTimePtr: {
+        pattern: 'FF 15 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 3B',
+        offset: 0x7
     }
 };
 
@@ -391,7 +403,15 @@ export class OsuInstance {
         }
     }
 
-    getState(instancesManager: InstanceManager) {
-        return buildResult(this.entities, instancesManager);
+    getState(instanceManager: InstanceManager) {
+        return buildResult(this.entities, instanceManager);
+    }
+
+    getStateV2(instanceManager: InstanceManager) {
+        return buildResultV2(this.entities, instanceManager);
+    }
+
+    getKeyOverlay() {
+        return buildKeyOverlay(this.entities);
     }
 }

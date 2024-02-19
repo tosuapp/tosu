@@ -10,6 +10,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@tosu/server": "workspace:*",
     "dotenv": "^16.0.3",
     "winston": "^3.8.2"
   }

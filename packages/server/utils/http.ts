@@ -1,9 +1,7 @@
 import { wLogger } from '@tosu/common';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
-import { getContentType, sendJson } from '../utils/index';
-
-interface ExtendedIncomingMessage extends IncomingMessage {
+export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     query: { [key: string]: string };
     params: { [key: string]: string };
@@ -28,12 +26,10 @@ export class HttpServer {
     private middlewares: RequestHandler[] = [];
     server: http.Server;
     private routes: {
-        [method: string]: [
-            {
-                path: string | RegExp;
-                handler: RouteHandler;
-            }
-        ];
+        [method: string]: {
+            path: string | RegExp;
+            handler: RouteHandler;
+        }[];
     } = {};
 
     constructor() {
@@ -59,10 +55,8 @@ export class HttpServer {
             | 'PATCH',
         handler: RouteHandler
     ) {
-        // @ts-ignore
         if (this.routes[method] == null) this.routes[method] = [];
 
-        // @ts-ignore
         const find = this.routes[method].find((r) => r.path == path);
         if (!find) this.routes[method].push({ path, handler });
     }
@@ -108,27 +102,32 @@ export class HttpServer {
         req.query = {};
         req.params = {};
 
-        // add functions (thats probably shittiest way to do so, but i want to try it)
-        req.getContentType = getContentType;
-        req.sendJson = sendJson;
-
         parsedURL.searchParams.forEach(
             (value, key) => (req.query[key] = value)
         );
 
-        const routes = this.routes[method] || [];
+        const routes = (this.routes[method] || []).sort(
+            (a, b) => b.path.toString().length - a.path.toString().length
+        );
         for (let i = 0; i < routes.length; i++) {
             const route = routes[i];
             let routeExists = false;
 
-            if (route.path instanceof RegExp && route.path.test(url)) {
+            if (
+                route.path instanceof RegExp &&
+                route.path.test(parsedURL.pathname)
+            ) {
                 routeExists = true;
 
                 // turn groups to route params
-                const array = Object.keys(route.path.exec(url)?.groups || {});
+                const array = Object.keys(
+                    route.path.exec(parsedURL.pathname)?.groups || {}
+                );
                 for (let g = 0; g < array.length; g++) {
                     const key = array[g];
-                    const value = route.path.exec(url)?.groups?.[key];
+                    const value = route.path.exec(parsedURL.pathname)?.groups?.[
+                        key
+                    ];
 
                     if (key == null || value == null) continue;
                     req.params[key] = value;

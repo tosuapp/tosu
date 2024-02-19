@@ -5,9 +5,8 @@ import { Process } from 'tsprocess/dist/process';
 
 import { DataRepo } from '@/entities/DataRepoList';
 import { Leaderboard } from '@/entities/GamePlayData/Leaderboard';
-import { calculateGrade } from '@/utils/calculateGrade';
+import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { OsuMods } from '@/utils/osuMods.types';
-import { resolvePassedObjects } from '@/utils/resolvePassedObjects';
 
 import { AbstractEntity } from '../AbstractEntity';
 import { MenuData } from '../MenuData';
@@ -193,7 +192,7 @@ export class GamePlayData extends AbstractEntity {
         // [[Ruleset + 0x68] + 0x38] + 0x94
         this.Combo = process.readShort(scoreBase + 0x94);
         // [[Ruleset + 0x68] + 0x40] + 0x14
-        this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14);
+        this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14) || 0;
         // [[Ruleset + 0x68] + 0x40] + 0x1C
         this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
         // [[Ruleset + 0x68] + 0x48] + 0xC
@@ -382,24 +381,31 @@ export class GamePlayData extends AbstractEntity {
             this.Hit50 -
             this.HitMiss;
 
-        this.GradeCurrent = calculateGrade(
-            this.Mode,
-            this.Mods,
-            this.Hit300,
-            this.Hit100,
-            this.Hit50,
-            this.HitMiss,
-            this.Accuracy
-        );
-        this.GradeExpected = calculateGrade(
-            this.Mode,
-            this.Mods,
-            this.Hit300 + remaining,
-            this.Hit100,
-            this.Hit50,
-            this.HitMiss,
-            this.Accuracy
-        );
+        this.GradeCurrent = calculateGrade({
+            mods: this.Mods,
+            mode: this.Mode,
+            hits: {
+                300: this.Hit300,
+                geki: 0,
+                100: this.Hit100,
+                katu: 0,
+                50: this.Hit50,
+                0: this.HitMiss
+            }
+        });
+
+        this.GradeExpected = calculateGrade({
+            mods: this.Mods,
+            mode: this.Mode,
+            hits: {
+                300: this.Hit300 + remaining,
+                geki: 0,
+                100: this.Hit100,
+                katu: 0,
+                50: this.Hit50,
+                0: this.HitMiss
+            }
+        });
     }
 
     private updateLeaderboard(
@@ -460,7 +466,7 @@ export class GamePlayData extends AbstractEntity {
         }
 
         const scoreParams = {
-            passedObjects: resolvePassedObjects(
+            passedObjects: calculatePassedObjects(
                 this.Mode,
                 this.Hit300,
                 this.Hit100,

@@ -4,6 +4,7 @@ import { AbstractEntity } from '../AbstractEntity';
 
 export class AllTimesData extends AbstractEntity {
     Status: number = 0;
+    GameTime: number = 0;
     PlayTime: number = 0;
     MenuMods: number = 0;
     ChatStatus: number = 0;
@@ -30,7 +31,8 @@ export class AllTimesData extends AbstractEntity {
             chatCheckerAddr,
             skinDataAddr,
             settingsClassAddr,
-            canRunSlowlyAddr
+            canRunSlowlyAddr,
+            gameTimePtr
         } = patterns.getPatterns([
             'statusPtr',
             'playTimeAddr',
@@ -38,7 +40,8 @@ export class AllTimesData extends AbstractEntity {
             'chatCheckerAddr',
             'skinDataAddr',
             'settingsClassAddr',
-            'canRunSlowlyAddr'
+            'canRunSlowlyAddr',
+            'gameTimePtr'
         ]);
 
         const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
@@ -51,6 +54,7 @@ export class AllTimesData extends AbstractEntity {
         this.Status = process.readPointer(statusPtr);
         // [PlayTime + 0x5]
         this.PlayTime = process.readInt(process.readInt(playTimeAddr + 0x5));
+        this.GameTime = process.readPointer(gameTimePtr);
         // [MenuMods + 0x9]
         this.MenuMods = process.readPointer(menuModsPtr);
         // ChatChecker - 0x20

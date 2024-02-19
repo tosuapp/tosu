@@ -3,7 +3,7 @@ import path from 'path';
 import { DataRepo } from '@/entities/DataRepoList';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
-import { fixDecimals } from '@/utils/fixDecimals';
+import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {
@@ -11,7 +11,7 @@ import {
     LeaderboardPlayer,
     TourneyIpcClient,
     TourneyValues
-} from '../types';
+} from '../types/v1';
 
 const defaultLBPlayer = {
     name: '',
@@ -47,7 +47,7 @@ const convertMemoryPlayerToResult = (
 
 export const buildResult = (
     service: DataRepo,
-    instancesManager: InstanceManager
+    instanceManager: InstanceManager
 ): ApiAnswer => {
     const {
         settings,
@@ -230,6 +230,7 @@ export const buildResult = (
             _isReplayUiHidden: gamePlayData.isReplayUiHidden
         },
         resultsScreen: {
+            mode: gamePlayData.Mode,
             name: resultsScreenData.PlayerName,
             score: resultsScreenData.Score,
             maxCombo: resultsScreenData.MaxCombo,
@@ -242,9 +243,12 @@ export const buildResult = (
             '100': resultsScreenData.Hit100,
             katu: resultsScreenData.HitKatu,
             '50': resultsScreenData.Hit50,
-            '0': resultsScreenData.HitMiss
+            '0': resultsScreenData.HitMiss,
+            grade: resultsScreenData.Grade,
+            createdAt: resultsScreenData.Date
         },
         userProfile: {
+            rawLoginStatus: userProfile.rawLoginStatus,
             name: userProfile.name,
             accuracy: userProfile.accuracy,
             rankedScore: userProfile.rankedScore,
@@ -255,25 +259,25 @@ export const buildResult = (
             rank: userProfile.rank,
             countryCode: userProfile.countryCode,
             performancePoints: userProfile.performancePoints,
-            isConnected: userProfile.isConnected,
+            rawBanchoStatus: userProfile.rawBanchoStatus,
             backgroundColour: userProfile.backgroundColour?.toString(16)
         },
-        tourney: buildTourneyData(instancesManager)
+        tourney: buildTourneyData(instanceManager)
     };
 };
 
 const buildTourneyData = (
-    instancesManager: InstanceManager
+    instanceManager: InstanceManager
 ): TourneyValues | undefined => {
     const osuTourneyManager = Object.values(
-        instancesManager.osuInstances
+        instanceManager.osuInstances
     ).filter((instance) => instance.isTourneyManager);
     if (osuTourneyManager.length < 1) {
         return undefined;
     }
 
     const osuTourneyClients = Object.values(
-        instancesManager.osuInstances
+        instanceManager.osuInstances
     ).filter((instance) => instance.isTourneySpectator);
 
     const mappedOsuTourneyClients = osuTourneyClients.map<TourneyIpcClient>(
