@@ -1,4 +1,3 @@
-import { Server } from '@tosu/server';
 import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -111,7 +110,7 @@ export const updateConfigFile = () => {
         wLogger.warn(`New options available in config: ${newOptions}\n`);
 };
 
-export const watchConfigFile = ({ httpServer }: { httpServer: Server }) => {
+export const watchConfigFile = ({ httpServer }: { httpServer: any }) => {
     configureLogger();
 
     refreshConfig(httpServer, false);
@@ -122,7 +121,7 @@ export const watchConfigFile = ({ httpServer }: { httpServer: Server }) => {
     });
 };
 
-export const refreshConfig = (httpServer: Server, refresh: boolean) => {
+export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const status = refresh == true ? 'reload' : 'load';
 
     const { parsed, error } = dotenv.config({ path: configPath });
