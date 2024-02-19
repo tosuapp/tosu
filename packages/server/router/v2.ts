@@ -3,7 +3,7 @@ import path from 'path';
 import { HttpServer, Websocket, sendJson } from '../index';
 import { directoryWalker } from '../utils/directories';
 
-export default function v2Api({
+export default function buildV2Api({
     app,
     websocket,
     keysWebsocket

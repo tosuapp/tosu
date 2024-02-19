@@ -4,7 +4,7 @@ import path from 'path';
 import { HttpServer, getContentType, sendJson } from '../index';
 import { directoryWalker, readDirectory } from '../utils/directories';
 
-export default function baseApi(app: HttpServer) {
+export default function buildBaseApi(app: HttpServer) {
     app.route('/json', 'GET', (req, res) => {
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}

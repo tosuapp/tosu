@@ -1,7 +1,7 @@
 import { HttpServer, Websocket, sendJson } from '../index';
 import { directoryWalker } from '../utils/directories';
 
-export default function v1Api({
+export default function buildV1Api({
     app,
     websocket
 }: {

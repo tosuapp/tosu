@@ -1,8 +1,8 @@
 import { config } from '@tosu/common';
 
-import baseApi from './router/index';
-import v1Api from './router/v1';
-import v2Api from './router/v2';
+import buildBaseApi from './router/index';
+import buildV1Api from './router/v1';
+import buildV2Api from './router/v2';
 import { HttpServer } from './utils/http';
 import { Websocket } from './utils/socket';
 
@@ -33,12 +33,12 @@ export class Server {
             stateFunctionName: 'getKeyOverlay'
         });
 
-        baseApi(this.app);
-        v1Api({
+        buildBaseApi(this.app);
+        buildV1Api({
             app: this.app,
             websocket: WS_V1
         });
-        v2Api({
+        buildV2Api({
             app: this.app,
             websocket: WS_V2,
             keysWebsocket: WS_V2_KEYS
