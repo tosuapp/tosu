@@ -12,7 +12,8 @@ const updateProgressBar = (progress: number): void => {
     );
 
     if (progress === 1) {
-        process.stdout.write('\n');
+        process.stdout.clearLine(0);
+        process.stdout.cursorTo(0);
     }
 };
 
