@@ -105,10 +105,10 @@ export interface Beatmap {
 
 export interface Stats {
     stars: Stars;
-    AR: Ar;
-    CS: Cs;
-    OD: Od;
-    HP: Hp;
+    ar: Ar;
+    cs: Cs;
+    od: Od;
+    hp: Hp;
     bpm: Bpm;
     objects: Objects;
     maxCombo: number;
@@ -163,8 +163,8 @@ export interface Objects {
 }
 
 export interface Play {
+    playerName: string;
     mode: NumberName;
-    name: string;
     score: number;
     accuracy: number;
     healthBar: HealthBar;

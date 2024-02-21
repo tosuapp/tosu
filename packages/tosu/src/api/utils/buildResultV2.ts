@@ -226,25 +226,25 @@ export const buildResult = (
                     )
                 },
 
-                AR: {
+                ar: {
                     original: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.ar
                     ),
                     converted: fixDecimals(menuData.AR)
                 },
-                CS: {
+                cs: {
                     original: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.cs
                     ),
                     converted: fixDecimals(menuData.CS)
                 },
-                OD: {
+                od: {
                     original: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.od
                     ),
                     converted: fixDecimals(menuData.OD)
                 },
-                HP: {
+                hp: {
                     original: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.hp
                     ),
@@ -273,11 +273,12 @@ export const buildResult = (
             }
         },
         play: {
+            playerName: gamePlayData.PlayerName,
+
             mode: {
                 number: gamePlayData.Mode,
                 name: Modes[gamePlayData.Mode]
             },
-            name: gamePlayData.PlayerName,
 
             score: gamePlayData.Score,
             accuracy: gamePlayData.Accuracy,
@@ -474,12 +475,12 @@ const buildTourneyData = (
                     totalPP: tourneyUserProfileData.PP
                 },
                 play: {
+                    playerName: gamePlayData.PlayerName,
+
                     mode: {
                         number: gamePlayData.Mode,
                         name: Modes[gamePlayData.Mode]
                     },
-
-                    name: gamePlayData.PlayerName,
 
                     score: gamePlayData.Score,
                     accuracy: gamePlayData.Accuracy,

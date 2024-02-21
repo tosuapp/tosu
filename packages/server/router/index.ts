@@ -30,7 +30,7 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route(/.*/, 'GET', (req, res) => {
-        const url = req.url || '/';
+        const url = req.pathname || '/';
         const folderPath =
             config.staticFolderPath ||
             path.join(path.dirname(process.execPath), 'static');
