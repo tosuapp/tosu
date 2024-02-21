@@ -22,7 +22,7 @@ export default function buildV1Api({
     });
 
     app.route(/\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
-        const url = req.url || '/';
+        const url = req.pathname || '/';
 
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}

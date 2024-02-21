@@ -5,6 +5,7 @@ export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     query: { [key: string]: string };
     params: { [key: string]: string };
+    pathname: string;
     getContentType: (text: string) => string;
     sendJson: (
         response: http.ServerResponse,
@@ -101,6 +102,7 @@ export class HttpServer {
         // parse query parameters
         req.query = {};
         req.params = {};
+        req.pathname = parsedURL.pathname;
 
         parsedURL.searchParams.forEach(
             (value, key) => (req.query[key] = value)
