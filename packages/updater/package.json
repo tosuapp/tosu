@@ -10,7 +10,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "unzipper": "^0.10.14",
     "@tosu/common": "workspace:*"
   }
 }

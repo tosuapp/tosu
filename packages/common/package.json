@@ -10,7 +10,9 @@
     "build": "tsc"
   },
   "dependencies": {
+    "adm-zip": "^0.5.10",
     "dotenv": "^16.0.3",
+    "unzipper": "^0.10.14",
     "winston": "^3.8.2"
   }
 }

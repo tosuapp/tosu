@@ -4,3 +4,5 @@ export * from './utils/platforms';
 export * from './utils/agruments';
 export * from './utils/sleep';
 export * from './utils/config';
+export * from './utils/unzip';
+export * from './utils/directories';

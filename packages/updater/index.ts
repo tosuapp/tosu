@@ -1,8 +1,13 @@
-import { downloadFile, platformResolver, sleep, wLogger } from '@tosu/common';
+import {
+    downloadFile,
+    platformResolver,
+    sleep,
+    unzipTosu,
+    wLogger
+} from '@tosu/common';
 import { exec, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import unzipper from 'unzipper';
 
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
@@ -25,30 +30,6 @@ const deleteNotLocked = async (filePath: string) => {
         console.log(err.message, err.code);
     }
 };
-
-const unzipAsset = (zipPath: string, extractPath: string): Promise<string> =>
-    new Promise((resolve, reject) => {
-        const zip = fs.createReadStream(zipPath).pipe(unzipper.Parse());
-
-        zip.on('entry', async (entry) => {
-            const fileName = entry.path;
-            if (fileName === 'tosu' || fileName === 'tosu.exe') {
-                const { name, ext } = path.parse(fileName);
-                const modifyName = path.join(extractPath, `${name}_new${ext}`);
-
-                entry
-                    .pipe(fs.createWriteStream(modifyName))
-                    .on('finish', () => {
-                        resolve(modifyName);
-                    });
-            } else {
-                entry.autodrain();
-            }
-        });
-
-        zip.on('error', reject);
-        // zip.on('finish', resolve);
-    });
 
 export const autoUpdater = () =>
     new Promise(async (resolve) => {
@@ -105,7 +86,7 @@ export const autoUpdater = () =>
             fileDestination
         );
 
-        const unzipExecutable = await unzipAsset(downloadAsset, process.cwd());
+        const unzipExecutable = await unzipTosu(downloadAsset, process.cwd());
 
         const currentExecutablePath = process.argv[0]; // Path to the current executable
 
@@ -122,7 +103,6 @@ export const autoUpdater = () =>
 
         oldProcess.unref();
 
-        let started = false;
         exec(
             `start "" "${newExecutablePath}"`,
             async (error, stdout, stderr) => {
@@ -131,18 +111,14 @@ export const autoUpdater = () =>
                     return;
                 }
 
+                await sleep(2500);
+
+                wLogger.info('Closing program');
+
                 await sleep(1000);
-                started = true;
+
+                oldProcess.kill();
+                process.exit();
             }
         );
-
-        while (started == false) {
-            await sleep(1000);
-        }
-
-        wLogger.info('Closing program');
-
-        await sleep(1000);
-        oldProcess.kill();
-        process.exit();
     });
