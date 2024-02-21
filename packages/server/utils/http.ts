@@ -5,6 +5,7 @@ export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     query: { [key: string]: string };
     params: { [key: string]: string };
+    pathname: string;
     getContentType: (text: string) => string;
     sendJson: (
         response: http.ServerResponse,
@@ -94,13 +95,13 @@ export class HttpServer {
     private handleNext(req: ExtendedIncomingMessage, res: http.ServerResponse) {
         const method = req.method || 'GET';
         const hostname = req.headers.host; // Hostname
-        const url = req.url || '/'; // URL
 
         const parsedURL = new URL(`http://${hostname}${req.url}`);
 
         // parse query parameters
         req.query = {};
         req.params = {};
+        req.pathname = parsedURL.pathname;
 
         parsedURL.searchParams.forEach(
             (value, key) => (req.query[key] = value)
@@ -133,7 +134,7 @@ export class HttpServer {
                     req.params[key] = value;
                 }
             } else if (typeof route.path == 'string')
-                routeExists = route.path == url;
+                routeExists = route.path == parsedURL.pathname;
 
             if (!routeExists) continue;
             return route.handler(req, res);

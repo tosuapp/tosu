@@ -63,6 +63,9 @@ importers:
 
   packages/server:
     dependencies:
+      '@kotrikd/rosu-pp':
+        specifier: ^0.10.0
+        version: 0.10.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
