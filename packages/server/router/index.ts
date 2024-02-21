@@ -1,9 +1,11 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
-import { config, wLogger } from '@tosu/common';
+import { config, downloadFile, unzip, wLogger } from '@tosu/common';
+import fs from 'fs';
 import path from 'path';
 
 import { HttpServer, getContentType, sendJson } from '../index';
-import { directoryWalker, readDirectory } from '../utils/directories';
+import { buildExternalCounters, buildLocalCounters } from '../utils/counters';
+import { directoryWalker } from '../utils/directories';
 
 export default function buildBaseApi(app: HttpServer) {
     app.route('/json', 'GET', (req, res) => {
@@ -19,15 +21,126 @@ export default function buildBaseApi(app: HttpServer) {
         sendJson(res, json);
     });
 
-    app.route('/api/overlays', 'GET', (req, res) => {
-        const staticPath =
-            config.staticFolderPath ||
-            path.join(path.dirname(process.execPath), 'static');
+    app.route(/\/api\/download\/(?<url>.*)/, 'GET', (req, res) => {
+        try {
+            const folderName = req.query.name;
+            if (!folderName) {
+                return sendJson(res, {
+                    error: 'no folder name'
+                });
+            }
 
-        readDirectory(staticPath, '/', (html: string) => {
-            res.writeHead(200, { 'Content-Type': getContentType('file.html') });
-            res.end(html);
-        });
+            const cacheFolder = path.join(
+                path.dirname(process.execPath),
+                '.cache'
+            );
+            const staticPath =
+                config.staticFolderPath ||
+                path.join(path.dirname(process.execPath), 'static');
+            const folderPath = path.join(staticPath, decodeURI(folderName));
+
+            if (fs.existsSync(folderPath)) {
+                return sendJson(res, {
+                    error: 'Folder already exist'
+                });
+            }
+
+            if (!fs.existsSync(cacheFolder)) fs.mkdirSync(cacheFolder);
+
+            const startUnzip = (result) => {
+                unzip(result, folderPath)
+                    .then(() => {
+                        wLogger.info(`PP Counter downloaded: ${folderName}`);
+                        sendJson(res, {
+                            status: 'Finished',
+                            path: result
+                        });
+                    })
+                    .catch((reason) => {
+                        sendJson(res, {
+                            error: reason
+                        });
+                    });
+            };
+
+            downloadFile(
+                req.params.url,
+                path.join(cacheFolder, `${Date.now()}.zip`)
+            )
+                .then(startUnzip)
+                .catch((reason) => {
+                    sendJson(res, {
+                        error: reason
+                    });
+                });
+        } catch (error) {
+            wLogger.error((error as any).message);
+
+            return sendJson(res, {
+                error: (error as any).message
+            });
+        }
+    });
+
+    app.route(/\/api\/deleteCounter\/(?<name>.*)/, 'GET', (req, res) => {
+        try {
+            const folderName = req.params.name;
+            if (!folderName) {
+                return sendJson(res, {
+                    error: 'no folder name'
+                });
+            }
+
+            const staticPath =
+                config.staticFolderPath ||
+                path.join(path.dirname(process.execPath), 'static');
+            const folderPath = path.join(staticPath, decodeURI(folderName));
+
+            if (!fs.existsSync(folderPath)) {
+                return sendJson(res, {
+                    error: `Folder doesn't exists`
+                });
+            }
+
+            wLogger.info(`PP Counter removed: ${folderName}`);
+
+            fs.rmSync(folderPath, { recursive: true, force: true });
+            return sendJson(res, {
+                status: 'deleted'
+            });
+        } catch (error) {
+            return sendJson(res, {
+                error: (error as any).message
+            });
+        }
+    });
+
+    app.route('/homepage.min.css', 'GET', (req, res) => {
+        // @KOTRIK REMOVE THAT SHIT
+        fs.readFile(
+            'F:/coding/wip/tosu/packages/server/assets/homepage.min.css',
+            'utf8',
+            (err, content) => {
+                res.writeHead(200, {
+                    'Content-Type': getContentType('file.html')
+                });
+                res.end(content);
+            }
+        );
+    });
+
+    app.route('/homepage.js', 'GET', (req, res) => {
+        // @KOTRIK REMOVE THAT SHIT
+        fs.readFile(
+            'F:/coding/wip/tosu/packages/server/assets/homepage.js',
+            'utf8',
+            (err, content) => {
+                res.writeHead(200, {
+                    'Content-Type': getContentType('file.html')
+                });
+                res.end(content);
+            }
+        );
     });
 
     app.route('/api/calculate/pp', 'GET', (req, res) => {
@@ -87,12 +200,11 @@ export default function buildBaseApi(app: HttpServer) {
             path.join(path.dirname(process.execPath), 'static');
 
         if (url == '/') {
-            return readDirectory(folderPath, url, (html: string) => {
-                res.writeHead(200, {
-                    'Content-Type': getContentType('file.html')
-                });
-                res.end(html);
-            });
+            if (req.query?.tab == '1') {
+                return buildExternalCounters(res);
+            }
+
+            return buildLocalCounters(res);
         }
 
         const extension = path.extname(url);

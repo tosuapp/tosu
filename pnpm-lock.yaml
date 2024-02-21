@@ -36,9 +36,15 @@ importers:
 
   packages/common:
     dependencies:
+      adm-zip:
+        specifier: ^0.5.10
+        version: 0.5.10
       dotenv:
         specifier: ^16.0.3
         version: 16.3.1
+      unzipper:
+        specifier: ^0.10.14
+        version: 0.10.14
       winston:
         specifier: ^3.8.2
         version: 3.11.0
@@ -155,9 +161,6 @@ importers:
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
-      unzipper:
-        specifier: ^0.10.14
-        version: 0.10.14
 
 packages:
 
@@ -528,6 +531,11 @@ packages:
 
   /add-stream@1.0.0:
     resolution: {integrity: sha512-qQLMr+8o0WC4FZGQTcJiKBVC59JylcPSrTtk6usvmIDFUOCKegapy1VHQwRbFMOFyb/inzUVqHs+eMYKDM1YeQ==}
+    dev: false
+
+  /adm-zip@0.5.10:
+    resolution: {integrity: sha512-x0HvcHqVJNTPk/Bw8JbLWlWoo6Wwnsug0fnYYro1HBrjxZ3G7/AZk7Ahv8JwDe1uIcz8eBqvu86FuF1POiG7vQ==}
+    engines: {node: '>=6.0'}
     dev: false
 
   /agent-base@6.0.2:

@@ -1,0 +1,292 @@
+:root {
+    --text-1: #647a91;
+    --text-links: #6593c5;
+    --background-1: #191e25;
+    --block-1: #242d37;
+    --block-2: 211.25deg, 75.28%, 68.43%;
+    --block-color-1: #97a7b9;
+    --button-download: #568cc7;
+    --button-delete: #d57397;
+    --submit-delete: #56c763;
+    --notification-block-green: #56c763;
+    --notification-color-green: #191e25;
+    --notification-block-red: #d57397;
+    --notification-color-red: #191e25;
+}
+* {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    min-width: 0;
+}
+::-moz-selection {
+    color: var(--background-1);
+    background-color: var(--text-links);
+}
+::selection {
+    color: var(--background-1);
+    background-color: var(--text-links);
+}
+::-webkit-scrollbar {
+    width: 16px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--text-links);
+    border-radius: 0.2em;
+}
+button {
+    font-size: 1em;
+    font-family: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    border: 0;
+    outline: 0;
+}
+img {
+    display: flex;
+}
+body {
+    font-size: 20px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    justify-content: center;
+    flex-direction: column;
+    display: flex;
+    max-width: min(1280px, 100vw - 2em);
+    min-height: 100vh !important;
+    color: var(--text-1);
+    margin: 0 auto;
+    background: var(--background-1);
+}
+iframe {
+    pointer-events: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+main,
+header,
+footer {
+    width: 1280px;
+}
+main {
+    display: grid;
+    min-height: 0;
+    margin-top: 1em;
+    margin-bottom: 3em;
+}
+footer {
+    text-align: center;
+    font-size: 0.8em;
+    position: sticky;
+    bottom: 0;
+    padding: 0.6em 0;
+    margin-top: auto;
+}
+footer::before {
+    content: '';
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(0deg, black 0%, transparent 100%);
+    mask-image: linear-gradient(0deg, black 0%, transparent 100%);
+    position: absolute;
+    height: 7em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-1);
+    z-index: 0;
+}
+footer > * {
+    z-index: 1;
+}
+a {
+    color: var(--text-links);
+}
+.flexer {
+    justify-content: flex-start;
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+}
+.tabs {
+    justify-content: center;
+    position: sticky;
+    cursor: pointer;
+    top: 1em;
+    width: calc(100% - 1.5em);
+    margin: 0 auto;
+    gap: 1em;
+    z-index: 1;
+}
+.tabs .tab-item {
+    color: var(--text-1);
+    padding: 0.4em 0.6em;
+    text-decoration: underline;
+    text-underline-position: under;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(0, 0, 0, 0);
+    text-underline-offset: 0.3em;
+    transition: 0.1s ease;
+    transition-property: color, text-decoration-color;
+}
+.tabs .tab-item.active {
+    color: var(--text-links);
+    text-decoration-color: var(--text-links);
+}
+.tabs::before {
+    content: '';
+    position: absolute;
+    top: -2em;
+    left: -3em;
+    right: -3em;
+    bottom: 0;
+    background: var(--background-1);
+}
+.indent-left {
+    margin-left: auto;
+}
+.results {
+    display: grid;
+    gap: 0.5em;
+}
+.no-results {
+    text-align: center;
+    width: 100%;
+    margin: 2em 0;
+}
+.result-item {
+    display: grid;
+    gap: 0.8em;
+    color: var(--block-color-1);
+    padding: 1em;
+    background: var(--block-1);
+    border-radius: 0.3em;
+}
+.result-item hr {
+    border-color: var(--background-1);
+}
+.result-item .ri-gallery {
+    gap: 0.4em;
+}
+.result-item .ri-gallery img {
+    height: 7.5em;
+    border-radius: 0.4em;
+}
+.result-item .ri-links {
+    font-size: 0.9em;
+    gap: 0.4em;
+    margin-top: 0.4em;
+}
+.result-item .ri-links img {
+    height: 1.2em;
+    border-radius: 0.2em;
+}
+.result-item .ri-footer {
+    font-size: 0.9em;
+    gap: 1em;
+}
+.copyable {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    padding: 0.1em 0.2em;
+    background: hsl(var(--block-2), 0.2);
+    transition: 0.5s ease;
+    transition-property: background, filter;
+    border-radius: 0.2em;
+}
+.copyable:active {
+    filter: brightness(2);
+    background: hsl(var(--block-2), 0.4);
+    transition: 0.1s ease;
+}
+.notification {
+    font-size: 0.8em;
+    font-weight: bold;
+    position: absolute;
+    left: 50%;
+    bottom: 2em;
+    padding: 0.5em 1.6em;
+    translate: 0 0;
+    box-shadow: 0 0.7em 1.2em rgba(0, 0, 0, 0.7);
+    transition: 0.3s ease;
+    transition-property: translate, opacity;
+    border-radius: 0.3em;
+}
+.notification.hidden {
+    opacity: 0;
+    translate: 0 1em;
+}
+.notification.red {
+    color: var(--notification-color-red);
+    background: var(--notification-block-red);
+}
+.notification.green {
+    color: var(--notification-color-green);
+    background: var(--notification-block-green);
+}
+@keyframes spin {
+    0% {
+        rotate: 0;
+    }
+    100% {
+        rotate: 360deg;
+    }
+}
+.button {
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.4em 1em;
+    border-radius: 0.4em;
+    transition: 0.1s ease;
+    transition-property: translate, filter;
+}
+.button span {
+    display: block;
+    pointer-events: none;
+    transition: 0.3s ease;
+    transition-property: opacity, width;
+}
+.button img {
+    width: 1em;
+    height: 1em;
+    -o-object-fit: cover;
+    object-fit: cover;
+    transition: 0.3s ease;
+    transition-property: opacity, width, height;
+    animation: spin 1s infinite forwards linear;
+}
+.button:hover {
+    filter: brightness(1.1);
+    translate: 0 -0.05em;
+}
+.button:active {
+    filter: brightness(0.9);
+    translate: 0 0.1em;
+}
+.button.disable {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    pointer-events: none;
+    filter: grayscale(1);
+}
+.dl-button {
+    color: var(--background-1);
+    background: var(--button-download);
+}
+.delete-button {
+    color: var(--background-1);
+    background: var(--button-delete);
+}
+.submit-button {
+    display: block;
+    color: var(--background-1);
+    padding: 0.2em 1em;
+    background: var(--submit-delete);
+}

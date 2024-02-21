@@ -1,0 +1,38 @@
+<html>
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="/homepage.min.css">
+  <title>Counters dashboard</title>
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <header></header>
+  <main>
+    <div class="tabs flexer">
+      <a href="/?tab=0" class="tab-item">Installed</a>
+      <a href="/?tab=1" class="tab-item">Available</a>
+      <div class="indent-left">
+        <a href="https://github.com/cyperdark/osu-counters/?tab=readme-ov-file#how-to-submit-pp-counter" target="_blank"
+           class="button submit-button">Submit</a>
+      </div>
+    </div>
+    <div class="results">
+      {{LIST}}
+    </div>
+  </main>
+  <footer>
+    <span>created by </span><a href="https://osuck.net/" target="_blank">cyperdark</a>
+  </footer>
+  <script src="/homepage.js" defer></script>
+</body>
+
+
+</html>
