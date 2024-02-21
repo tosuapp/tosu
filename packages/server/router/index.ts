@@ -1,5 +1,6 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
 import { config, downloadFile, unzip, wLogger } from '@tosu/common';
+import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -102,7 +103,52 @@ export default function buildBaseApi(app: HttpServer) {
         }
     });
 
-    app.route(/\/api\/deleteCounter\/(?<name>.*)/, 'GET', (req, res) => {
+    app.route(/\/api\/counters\/open\/(?<name>.*)/, 'GET', (req, res) => {
+        try {
+            const folderName = req.params.name;
+            if (!folderName) {
+                return sendJson(res, {
+                    error: 'no folder name'
+                });
+            }
+
+            const staticPath =
+                config.staticFolderPath ||
+                path.join(path.dirname(process.execPath), 'static');
+            const folderPath = path.join(staticPath, decodeURI(folderName));
+
+            if (!fs.existsSync(folderPath)) {
+                return sendJson(res, {
+                    error: `Folder doesn't exists`
+                });
+            }
+
+            // ADDED MULTI PLATFORM SUPPORT
+            // mac exec(`open "${path}"`, (err, stdout, stderr) => {
+            // linux exec(`xdg-open "${path}"`, (err, stdout, stderr) => {
+
+            wLogger.info(`PP Counter opened: ${folderName}`);
+
+            exec(`start "" "${folderPath}"`, (err, stdout, stderr) => {
+                if (err) {
+                    console.error('Error opening file explorer:', err);
+                    return sendJson(res, {
+                        error: `Error opening file explorer: ${err.message}`
+                    });
+                }
+
+                return sendJson(res, {
+                    status: 'opened'
+                });
+            });
+        } catch (error) {
+            return sendJson(res, {
+                error: (error as any).message
+            });
+        }
+    });
+
+    app.route(/\/api\/counters\/delete\/(?<name>.*)/, 'GET', (req, res) => {
         try {
             const folderName = req.params.name;
             if (!folderName) {
