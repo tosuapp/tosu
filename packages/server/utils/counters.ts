@@ -18,6 +18,9 @@ const icons_images = {
         'https://img.shields.io/badge/Download_PP_Counter-67A564?style=for-the-badge&logo=cloud&logoColor=white'
 };
 
+const emptryNotice = `<div class="no-results">No counters<br /><a href="/?tab=1">Go here to get one 👉</a></div>`;
+const emptryCounters = `<div class="no-results">No counters<br />Change your search phrase</div>`;
+
 function splitTextByIndex(text, letter) {
     const index = text.indexOf(letter);
     if (index === -1) {
@@ -55,7 +58,11 @@ export function parseTXT(filePath: string) {
     return object;
 }
 
-function rebuildJSON(
+function rebuildJSON({
+    array,
+    external,
+    query
+}: {
     array: {
         name: string;
         author: string;
@@ -69,12 +76,23 @@ function rebuildJSON(
             url: string;
         }[];
         downloadLink?: string;
-    }[],
-    external?: boolean
-) {
+    }[];
+    external?: boolean;
+    query?: string;
+}) {
     let items = '';
     for (let i = 0; i < array.length; i++) {
         const item = array[i];
+
+        if (query != null) {
+            if (
+                !(
+                    item.name.toLowerCase().includes(query) ||
+                    item.name.toLowerCase().includes(query)
+                )
+            )
+                continue;
+        }
 
         const name = `<h4>${item.name}</h4>`;
         const author = `<span>by <a>${item.author}</a></span>`;
@@ -100,8 +118,11 @@ function rebuildJSON(
         const resolution = `<div>Resolution: <span nf nft="width" nfv="${item.resolution[0]}" class="copyable">${item.resolution[0]}</span> x <span nf nft="height" nfv="${item.resolution[1]}" class="copyable">${item.resolution[1]}</span></div>`;
 
         const button = item.downloadLink
-            ? `<div class="indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
-            : `<div class="indent-left"><button class="button delete-button flexer" n="${item.name}" a="${item.author}"><span>Delete</span></button></div>`;
+            ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
+            : `<div class="buttons-group flexer indent-left">
+                <button class="button open-button flexer" n="${item.name}" a="${item.author}"><span>Open Folder</span></button>
+                <button class="button delete-button flexer" n="${item.name}" a="${item.author}"><span>Delete</span></button>
+            </div>`;
 
         const assets = (item.assets || [])
             .map((r) => {
@@ -149,13 +170,20 @@ function getLocalCounters() {
     return array;
 }
 
-export function buildLocalCounters(res: http.ServerResponse) {
+export function buildLocalCounters(res: http.ServerResponse, query?: string) {
     const array = getLocalCounters();
-    const build = rebuildJSON(array);
+    const build = rebuildJSON({
+        array,
+        external: false,
+        query
+    });
 
-    const emptryNotice = `<div class="no-results">
-  No counters<br /><a href="/?tab=1">Go here to get one 👉</a>
-  </div>`;
+    if (query != null) {
+        res.writeHead(200, {
+            'Content-Type': getContentType('file.html')
+        });
+        return res.end(build || emptryCounters);
+    }
 
     fs.readFile(
         'F:/coding/wip/tosu/packages/server/assets/homepage.html',
@@ -171,7 +199,10 @@ export function buildLocalCounters(res: http.ServerResponse) {
     );
 }
 
-export async function buildExternalCounters(res: http.ServerResponse) {
+export async function buildExternalCounters(
+    res: http.ServerResponse,
+    query?: string
+) {
     const request = await fetch(
         `https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json`
     );
@@ -182,11 +213,24 @@ export async function buildExternalCounters(res: http.ServerResponse) {
         (r) => !exists.find((s) => s.name == r.name && s.author == r.author)
     );
 
+    const build = rebuildJSON({
+        array,
+        external: true,
+        query
+    });
+
+    if (query != null) {
+        res.writeHead(200, {
+            'Content-Type': getContentType('file.html')
+        });
+        return res.end(build || emptryCounters);
+    }
+
     fs.readFile(
         'F:/coding/wip/tosu/packages/server/assets/homepage.html',
         'utf8',
         (err, content) => {
-            const html = content.replace('{{LIST}}', rebuildJSON(array, true));
+            const html = content.replace('{{LIST}}', build);
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')

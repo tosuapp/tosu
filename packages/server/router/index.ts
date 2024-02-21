@@ -21,7 +21,27 @@ export default function buildBaseApi(app: HttpServer) {
         sendJson(res, json);
     });
 
-    app.route(/\/api\/download\/(?<url>.*)/, 'GET', (req, res) => {
+    app.route(/\/api\/counters\/search\/(?<query>.*)/, 'GET', (req, res) => {
+        try {
+            const query = decodeURI(req.params.query)
+                .replace(/[^a-z0-9A-Z]/, '')
+                .toLowerCase();
+
+            if (req.query?.tab == '1') {
+                return buildExternalCounters(res, query);
+            }
+
+            return buildLocalCounters(res, query);
+        } catch (error) {
+            wLogger.error((error as any).message);
+
+            return sendJson(res, {
+                error: (error as any).message
+            });
+        }
+    });
+
+    app.route(/\/api\/counters\/download\/(?<url>.*)/, 'GET', (req, res) => {
         try {
             const folderName = req.query.name;
             if (!folderName) {
