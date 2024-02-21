@@ -42,7 +42,7 @@ export class Websocket {
 
             wLogger.debug(`[${ws.id}](${this.clients.size}) >>> ws: CONNECTED`);
 
-            this.socket.on('close', (reason, description) => {
+            ws.on('close', (reason, description) => {
                 this.clients.delete(ws.id);
 
                 wLogger.debug(
@@ -50,7 +50,7 @@ export class Websocket {
                 );
             });
 
-            this.socket.on('error', (reason, description) => {
+            ws.on('error', (reason, description) => {
                 this.clients.delete(ws.id);
 
                 wLogger.debug(
