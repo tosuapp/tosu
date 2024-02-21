@@ -3,6 +3,7 @@ import http, { IncomingMessage, ServerResponse } from 'http';
 
 export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
+    pathname: string;
     query: { [key: string]: string };
     params: { [key: string]: string };
     pathname: string;
