@@ -20,6 +20,7 @@ const icons_images = {
 
 const emptryNotice = `<div class="no-results">No counters<br /><a href="/?tab=1">Go here to get one 👉</a></div>`;
 const emptryCounters = `<div class="no-results">No counters<br />Change your search phrase</div>`;
+const noMoreCounters = `<div class="no-results">Nice job!<br />You downloaded all available pp counters</div>`;
 
 function splitTextByIndex(text, letter) {
     const index = text.indexOf(letter);
@@ -111,11 +112,25 @@ function rebuildJSON({
             .filter((r) => r != null)
             .join(' ');
 
-        const iframe = `<iframe src="http://${config.serverIP}:${config.serverPort}/${item.name} by ${item.author}/" width="${item.resolution[0]}px" height="${item.resolution[1]}px" scrolling="no" frameborder="0"></iframe>`;
+        const iframe = `<iframe src="http://${config.serverIP}:${
+            config.serverPort
+        }/${item.name} by ${item.author}/" width="${
+            item.resolution[0] == -1 ? 500 : item.resolution[0]
+        }px" height="${
+            item.resolution[1] == -1 ? 500 : item.resolution[1]
+        }px" scrolling="no" frameborder="0"></iframe>`;
 
         const url = `<div>URL: <span nf nft="url" nfv="http://${config.serverIP}:${config.serverPort}/${item.name} by ${item.author}/" class="copyable">/${item.name} by ${item.author}/</span></div>`;
 
-        const resolution = `<div>Resolution: <span nf nft="width" nfv="${item.resolution[0]}" class="copyable">${item.resolution[0]}</span> x <span nf nft="height" nfv="${item.resolution[1]}" class="copyable">${item.resolution[1]}</span></div>`;
+        const resolution = `<div>Resolution: <span nf nft="width" nfv="${
+            item.resolution[0] == -1 ? 'ANY' : item.resolution[0]
+        }" class="copyable">${
+            item.resolution[0] == -1 ? 'ANY' : item.resolution[0]
+        }</span> x <span nf nft="height" nfv="${
+            item.resolution[1] == -1 ? 'ANY' : item.resolution[1]
+        }" class="copyable">${
+            item.resolution[1] == -1 ? 'ANY' : item.resolution[1]
+        }</span></div>`;
 
         const button = item.downloadLink
             ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
@@ -147,7 +162,7 @@ function rebuildJSON({
           ${button}
         </div>
         <hr>
-        <div class="ri-gallery flexer" style="--width: ${item.resolution[0]}px">${gallery}</div>
+        <div class="ri-gallery flexer">${gallery}</div>
         ${footer}
       </div>`;
     }
@@ -230,7 +245,7 @@ export async function buildExternalCounters(
         'F:/coding/wip/tosu/packages/server/assets/homepage.html',
         'utf8',
         (err, content) => {
-            const html = content.replace('{{LIST}}', build);
+            const html = content.replace('{{LIST}}', build || noMoreCounters);
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
