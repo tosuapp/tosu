@@ -1,11 +1,21 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
-import { config, downloadFile, unzip, wLogger } from '@tosu/common';
+import {
+    config,
+    downloadFile,
+    unzip,
+    wLogger,
+    writeConfig
+} from '@tosu/common';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
 import { HttpServer, getContentType, sendJson } from '../index';
-import { buildExternalCounters, buildLocalCounters } from '../utils/counters';
+import {
+    buildExternalCounters,
+    buildLocalCounters,
+    buildSettings
+} from '../utils/counters';
 import { directoryWalker } from '../utils/directories';
 
 export default function buildBaseApi(app: HttpServer) {
@@ -43,51 +53,51 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route(/\/api\/counters\/download\/(?<url>.*)/, 'GET', (req, res) => {
+        const folderName = req.query.name;
+        if (!folderName) {
+            return sendJson(res, {
+                error: 'no folder name'
+            });
+        }
+
+        const cacheFolder = path.join(path.dirname(process.execPath), '.cache');
+        const staticPath =
+            config.staticFolderPath ||
+            path.join(path.dirname(process.execPath), 'static');
+        const folderPath = path.join(staticPath, decodeURI(folderName));
+
+        const tempPath = path.join(cacheFolder, `${Date.now()}.zip`);
+
+        if (fs.existsSync(folderPath)) {
+            return sendJson(res, {
+                error: 'Folder already exist'
+            });
+        }
+
+        if (!fs.existsSync(cacheFolder)) fs.mkdirSync(cacheFolder);
+
         try {
-            const folderName = req.query.name;
-            if (!folderName) {
-                return sendJson(res, {
-                    error: 'no folder name'
-                });
-            }
-
-            const cacheFolder = path.join(
-                path.dirname(process.execPath),
-                '.cache'
-            );
-            const staticPath =
-                config.staticFolderPath ||
-                path.join(path.dirname(process.execPath), 'static');
-            const folderPath = path.join(staticPath, decodeURI(folderName));
-
-            if (fs.existsSync(folderPath)) {
-                return sendJson(res, {
-                    error: 'Folder already exist'
-                });
-            }
-
-            if (!fs.existsSync(cacheFolder)) fs.mkdirSync(cacheFolder);
-
             const startUnzip = (result) => {
                 unzip(result, folderPath)
                     .then(() => {
                         wLogger.info(`PP Counter downloaded: ${folderName}`);
+                        fs.unlinkSync(tempPath);
+
                         sendJson(res, {
                             status: 'Finished',
                             path: result
                         });
                     })
                     .catch((reason) => {
+                        fs.unlinkSync(tempPath);
+
                         sendJson(res, {
                             error: reason
                         });
                     });
             };
 
-            downloadFile(
-                req.params.url,
-                path.join(cacheFolder, `${Date.now()}.zip`)
-            )
+            downloadFile(req.params.url, tempPath)
                 .then(startUnzip)
                 .catch((reason) => {
                     sendJson(res, {
@@ -97,7 +107,7 @@ export default function buildBaseApi(app: HttpServer) {
         } catch (error) {
             wLogger.error((error as any).message);
 
-            return sendJson(res, {
+            sendJson(res, {
                 error: (error as any).message
             });
         }
@@ -226,11 +236,14 @@ export default function buildBaseApi(app: HttpServer) {
     app.route('/homepage.min.css', 'GET', (req, res) => {
         // @KOTRIK REMOVE THAT SHIT
         fs.readFile(
-            'F:/coding/wip/tosu/packages/server/assets/homepage.min.css',
+            path.join(
+                'F:/coding/wip/tosu/packages/server/assets/',
+                'homepage.min.css'
+            ),
             'utf8',
             (err, content) => {
                 res.writeHead(200, {
-                    'Content-Type': getContentType('file.html')
+                    'Content-Type': getContentType('homepage.min.css')
                 });
                 res.end(content);
             }
@@ -240,11 +253,14 @@ export default function buildBaseApi(app: HttpServer) {
     app.route('/homepage.js', 'GET', (req, res) => {
         // @KOTRIK REMOVE THAT SHIT
         fs.readFile(
-            'F:/coding/wip/tosu/packages/server/assets/homepage.js',
+            path.join(
+                'F:/coding/wip/tosu/packages/server/assets/',
+                'homepage.js'
+            ),
             'utf8',
             (err, content) => {
                 res.writeHead(200, {
-                    'Content-Type': getContentType('file.html')
+                    'Content-Type': getContentType('homepage.js')
                 });
                 res.end(content);
             }
@@ -310,6 +326,10 @@ export default function buildBaseApi(app: HttpServer) {
         if (url == '/') {
             if (req.query?.tab == '1') {
                 return buildExternalCounters(res);
+            }
+
+            if (req.query?.tab == '2') {
+                return buildSettings(res);
             }
 
             return buildLocalCounters(res);
