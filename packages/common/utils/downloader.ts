@@ -35,18 +35,6 @@ export const downloadFile = (
             }
         };
 
-        const file = fs.createWriteStream(destination);
-
-        file.on('error', (err) => {
-            fs.unlinkSync(destination);
-            reject(err);
-        });
-
-        file.on('finish', () => {
-            file.close();
-            resolve(destination);
-        });
-
         // find url
         https
             .get(url, options, (response) => {
@@ -56,6 +44,18 @@ export const downloadFile = (
                         .catch(reject);
                     return;
                 }
+
+                const file = fs.createWriteStream(destination);
+
+                file.on('error', (err) => {
+                    fs.unlinkSync(destination);
+                    reject(err);
+                });
+
+                file.on('finish', () => {
+                    file.close();
+                    resolve(destination);
+                });
 
                 const totalSize = parseInt(
                     response.headers['content-length']!,
