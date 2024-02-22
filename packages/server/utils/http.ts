@@ -69,6 +69,7 @@ export class HttpServer {
     ) {
         const startTime = performance.now();
         let index = 0;
+        let body = '';
 
         res.on('finish', () => {
             const finishTime = performance.now();
@@ -87,6 +88,19 @@ export class HttpServer {
                 return;
             }
 
+            // get data aka body
+            if (['POST', 'PUT', 'PATCH'].includes(req.method || '')) {
+                req.on('data', (chunk) => {
+                    body += chunk;
+                });
+
+                req.on('end', () => {
+                    req.body = body;
+
+                    this.handleNext(req, res);
+                });
+                return;
+            }
             this.handleNext(req, res);
         };
 
