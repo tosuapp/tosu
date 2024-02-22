@@ -45,7 +45,8 @@ SERVER_IP=127.0.0.1
 # The port on which the websocket api server will run
 SERVER_PORT=24050
 # The folder from which the overlays will be taken.
-STATIC_FOLDER_PATH=./static`
+STATIC_FOLDER_PATH=./static`,
+        'utf8'
     );
 }
 
@@ -107,7 +108,7 @@ export const updateConfigFile = () => {
     }
 
     if (!process.env.ENABLE_GOSU_OVERLAY) {
-        newOptions += 'nENABLE_GOSU_OVERLAY, ';
+        newOptions += 'ENABLE_GOSU_OVERLAY, ';
         fs.appendFileSync(configPath, '\nENABLE_GOSU_OVERLAY=false', 'utf8');
     }
 
@@ -127,6 +128,7 @@ export const watchConfigFile = ({ httpServer }: { httpServer: any }) => {
 };
 
 export const refreshConfig = (httpServer: any, refresh: boolean) => {
+    let updated = false;
     const status = refresh == true ? 'reload' : 'load';
 
     const { parsed, error } = dotenv.config({ path: configPath });
@@ -136,9 +138,26 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     }
 
     const debugLogging = (parsed.DEBUG_LOG || '') === 'true';
-
     const serverIP = parsed.SERVER_IP || '127.0.0.1';
     const serverPort = Number(parsed.SERVER_PORT || '24050');
+    const calculatePP = (parsed.CALCULATE_PP || '') === 'true';
+    const enableKeyOverlay = (parsed.ENABLE_KEY_OVERLAY || '') === 'true';
+    const pollRate = Number(parsed.POLL_RATE || '500');
+    const keyOverlayPollRate = Number(parsed.KEYOVERLAY_POLL_RATE || '100');
+    const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
+    const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
+
+    // determine whether config actually was updated or not
+    updated =
+        config.debugLogging != debugLogging ||
+        config.calculatePP != calculatePP ||
+        config.enableKeyOverlay != enableKeyOverlay ||
+        config.pollRate != pollRate ||
+        config.keyOverlayPollRate != keyOverlayPollRate ||
+        config.staticFolderPath != staticFolderPath ||
+        config.enableGosuOverlay != enableGosuOverlay ||
+        config.serverIP != serverIP ||
+        config.serverPort != serverPort;
 
     if (config.serverIP != serverIP || config.serverPort != serverPort) {
         config.serverIP = serverIP;
@@ -148,12 +167,13 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     }
 
     config.debugLogging = debugLogging;
-    config.calculatePP = (parsed.CALCULATE_PP || '') === 'true';
-    config.enableKeyOverlay = (parsed.ENABLE_KEY_OVERLAY || '') === 'true';
-    config.pollRate = Number(parsed.POLL_RATE || '500');
-    config.keyOverlayPollRate = Number(parsed.KEYOVERLAY_POLL_RATE || '100');
-    config.staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
-    config.enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
+    config.calculatePP = calculatePP;
+    config.enableKeyOverlay = enableKeyOverlay;
+    config.pollRate = pollRate >= 0 ? pollRate : 100;
+    config.keyOverlayPollRate =
+        keyOverlayPollRate >= 0 ? keyOverlayPollRate : 100;
+    config.staticFolderPath = staticFolderPath;
+    config.enableGosuOverlay = enableGosuOverlay;
 
     if (
         config.staticFolderPath == './static' &&
@@ -162,6 +182,6 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         fs.mkdirSync(path.join(process.cwd(), 'static'));
     }
 
-    wLogger.info(`Config ${status}ed`);
+    if (updated) wLogger.info(`Config ${status}ed`);
     configureLogger();
 };
