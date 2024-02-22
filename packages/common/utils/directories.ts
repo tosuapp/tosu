@@ -8,7 +8,7 @@ export function recursiveFilesSearch({
 }: {
     dir: string;
     filename: string;
-    fileList: string[];
+    fileList: { filePath: string; created: number }[];
 }) {
     const files = fs.readdirSync(dir);
     files.forEach((file) => {
@@ -17,8 +17,13 @@ export function recursiveFilesSearch({
         if (stats.isDirectory()) {
             recursiveFilesSearch({ dir: filePath, filename, fileList });
         } else if (filePath.includes(filename)) {
-            fileList.push(filePath);
+            const stats = fs.statSync(filePath);
+
+            fileList.push({ filePath, created: stats.mtimeMs });
         }
     });
-    return fileList;
+
+    fileList.sort((a, b) => a.created - b.created);
+
+    return fileList.map((r) => r.filePath);
 }
