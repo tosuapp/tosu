@@ -185,3 +185,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     if (updated) wLogger.info(`Config ${status}ed`);
     configureLogger();
 };
+
+export const writeConfig = (httpServer: any, text: string) => {
+    fs.writeFileSync(configPath, text, 'utf8');
+    refreshConfig(httpServer, true);
+};

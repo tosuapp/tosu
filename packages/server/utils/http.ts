@@ -1,9 +1,12 @@
 import { wLogger } from '@tosu/common';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
+import { Server } from '../index';
+
 export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     pathname: string;
+    body: string;
     query: { [key: string]: string };
     params: { [key: string]: string };
     pathname: string;
@@ -27,6 +30,7 @@ type RouteHandler = {
 export class HttpServer {
     private middlewares: RequestHandler[] = [];
     server: http.Server;
+    Server: Server;
     private routes: {
         [method: string]: {
             path: string | RegExp;
@@ -34,7 +38,8 @@ export class HttpServer {
         }[];
     } = {};
 
-    constructor() {
+    constructor(hold: any) {
+        this.Server = hold;
         // @ts-ignore
         this.server = http.createServer(this.handleRequest.bind(this));
     }

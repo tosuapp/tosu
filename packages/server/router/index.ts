@@ -181,6 +181,48 @@ export default function buildBaseApi(app: HttpServer) {
         }
     });
 
+    app.route('/api/settingsSave', 'POST', (req, res) => {
+        const body = req.body;
+        // try {
+        //     body = JSON.parse(req.body);
+        // } catch (error) {
+        //     return sendJson(res, {
+        //         error: (error as any).message,
+        //     });
+        // };
+
+        if (body == '') {
+            return sendJson(res, {
+                error: 'No settings'
+            });
+        }
+
+        writeConfig(app.Server, body);
+
+        sendJson(res, {
+            status: 'updated'
+        });
+    });
+
+    app.route(/\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
+        // @KOTRIK REMOVE THAT SHIT
+        fs.readFile(
+            path.join(
+                'F:/coding/wip/tosu/packages/server/assets/',
+                'images',
+                req.params.filePath
+            ),
+            (err, content) => {
+                res.writeHead(200, {
+                    'Content-Type': getContentType(req.params.filePath)
+                });
+                // console.log(res.getHeaders(), req.params, err, path.join('F:/coding/wip/tosu/packages/server/assets/', 'images', req.params.filePath));
+
+                res.end(content);
+            }
+        );
+    });
+
     app.route('/homepage.min.css', 'GET', (req, res) => {
         // @KOTRIK REMOVE THAT SHIT
         fs.readFile(

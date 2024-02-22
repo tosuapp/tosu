@@ -8,7 +8,7 @@ import { Websocket } from './utils/socket';
 
 export class Server {
     instanceManager: any;
-    app = new HttpServer();
+    app = new HttpServer(this);
 
     constructor({ instanceManager }: { instanceManager: any }) {
         this.instanceManager = instanceManager;

@@ -8,6 +8,7 @@
     --button-download: #568cc7;
     --button-delete: #d57397;
     --button-open: #73a6d5;
+    --button-save: #73a6d5;
     --submit-delete: #56c763;
     --notification-block-green: #56c763;
     --notification-color-green: #191e25;
@@ -16,6 +17,8 @@
     --search-color-2: #707f8d;
     --search-color-1: #cbd8e5;
     --search-block: #3f4e5d;
+    --header-color: #939393;
+    --header-background: #14171c;
 }
 * {
     position: relative;
@@ -71,13 +74,80 @@ iframe {
     -moz-user-select: none;
     user-select: none;
 }
+header {
+    position: sticky;
+    font-size: 0.9em;
+    color: var(--header-color);
+    top: 0;
+    gap: 1.2em;
+    height: 2em;
+    z-index: 2;
+}
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -1000px;
+    right: -1000px;
+    bottom: 0;
+    background: var(--header-background);
+}
+header a {
+    text-decoration: none;
+    color: var(--header-color) !important;
+    gap: 0.7em;
+    transition: filter 0.2s ease;
+}
+header a img {
+    width: 1.2em;
+    height: 1.2em;
+}
+header a:hover {
+    filter: brightness(1.2);
+}
+header a::before,
+header a::after {
+    content: '';
+    -webkit-mask-image: var(--icon-image);
+    mask-image: var(--icon-image);
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    width: 1em;
+    height: 1em;
+    background-color: var(--header-color);
+}
+header a.github {
+    --icon-image: url('/images/github.svg');
+}
+header a.github::after {
+    display: none;
+}
+header a.sbmt {
+    --icon-image: url('/images/link.svg');
+}
+header a.sbmt::before {
+    display: none;
+}
+header a.discord {
+    --icon-image: url('/images/discord.svg');
+}
+header a.discord::before {
+    width: 1.3em;
+}
+header a.discord::after {
+    display: none;
+}
+.imglink {
+    font-size: 0.9em;
+}
 main {
     display: grid;
     min-height: 0;
-    margin-top: 1em;
+    margin-top: 2em;
     margin-bottom: 3em;
 }
 footer {
+    font-weight: 600;
     text-align: center;
     font-size: 0.8em;
     position: sticky;
@@ -113,7 +183,7 @@ a {
 .tabs {
     justify-content: center;
     position: sticky;
-    top: 1em;
+    top: 2em;
     width: calc(100% - 1.5em);
     margin: 0 auto;
     gap: 1em;
@@ -237,6 +307,7 @@ a {
     }
 }
 .button {
+    white-space: nowrap;
     text-decoration: none;
     font-size: 0.9em;
     font-weight: 700;
@@ -292,6 +363,10 @@ a {
     color: var(--background-1);
     background: var(--button-open);
 }
+.save-button {
+    color: var(--background-1);
+    background: var(--button-save);
+}
 .submit-button {
     display: block;
     color: var(--background-1);
@@ -323,4 +398,92 @@ a {
     pointer-events: none;
     filter: grayscale(1);
     opacity: 0.5;
+}
+.settings {
+    display: grid;
+    gap: 0.8em;
+    color: var(--block-color-1);
+    padding: 1em;
+    background: var(--block-1);
+    border-radius: 0.3em;
+}
+.settings .si-btn {
+    margin-top: 1em;
+}
+.si div:nth-child(1) {
+    width: 25em;
+}
+.si p,
+.si .settings-note {
+    filter: brightness(0.8);
+    font-size: 0.8em;
+    max-width: 25em;
+}
+.si .settings-note {
+    margin-top: 0.5em;
+    font-style: italic;
+}
+.si input[type='text'],
+.si input[type='number'] {
+    font-size: 0.9em;
+    font-family: inherit;
+    color: var(--search-color-1);
+    width: 20em;
+    padding: 0.2em 0.6em;
+    background: var(--search-block);
+    outline: 0;
+    border-radius: 0.2em;
+    border: 0;
+    transition: 0.2s ease;
+    transition-property: filter, opacity;
+}
+.si input[type='text']::-moz-placeholder,
+.si input[type='number']::-moz-placeholder {
+    color: var(--search-color-2);
+}
+.si input[type='text']::placeholder,
+.si input[type='number']::placeholder {
+    color: var(--search-color-2);
+}
+.si-checkbox {
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    gap: 0.4em;
+    height: 1em;
+}
+.si-checkbox input {
+    display: none;
+}
+.si-checkbox input:checked ~ .checkmark::before {
+    scale: 0.7;
+    background: var(--search-color-1);
+}
+.si-checkbox input:checked ~ .status::before {
+    content: 'Enabled';
+}
+.si-checkbox .checkmark {
+    background: #637a91;
+    width: 1em;
+    height: 1em;
+    border-radius: 0.2em;
+    overflow: hidden;
+    display: block;
+}
+.si-checkbox .checkmark::before {
+    content: '';
+    display: block;
+    width: 1em;
+    height: 1em;
+    scale: 1;
+    background: #637a91;
+    transition: background 0.1s ease, scale 0.3s ease;
+    border-radius: 0.2em;
+}
+.si-checkbox .status {
+    font-size: 0.9em;
+}
+.si-checkbox .status::before {
+    content: 'Disabled';
 }
