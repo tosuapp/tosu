@@ -75,17 +75,15 @@ export class Websocket {
             }
 
             if (this.clients.size > 0) {
-                this.clients.forEach((value, key) => {
-                    try {
-                        value.send(
-                            JSON.stringify(
-                                osuInstances[0][this.stateFunctionName](
-                                    this.instanceManager
-                                )
-                            )
-                        );
-                    } catch (error) {}
-                });
+                try {
+                    const message = JSON.stringify(
+                        osuInstances[0][this.stateFunctionName](
+                            this.instanceManager
+                        )
+                    );
+
+                    this.clients.forEach((client, key) => client.send(message));
+                } catch (error) {}
             }
 
             setTimeout(this.loop, config[this.pollRateFieldName]);
