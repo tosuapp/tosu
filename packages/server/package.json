@@ -10,6 +10,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@kotrikd/rosu-pp": "^0.10.0",
     "@tosu/common": "workspace:*",
     "ws": "^8.16.0"
   },

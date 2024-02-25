@@ -95,6 +95,25 @@ v2 _**(tosu own api)**_
 - `/websocket/v2` - [response example](https://github.com/KotRikD/tosu/wiki/v2-websocket-api-response)
 - `/files/beatmap/{path}` - same as `/Songs/{path}`
 - `/files/skin/{path}` - similar as `/files/beatmap/{path}`, but for a skin
+
+api
+- `/api/calculate/pp` - Calculate pp for beatmap with custom data
+  - [Response example](https://github.com/KotRikD/tosu/wiki/api-calculate-pp-response-example)
+  - BY DEFAULT IT USES CURRENT BEATMAP (:))
+  - All parameters are optional
+  - `path` - Path to .osu file. Example: C:/osu/Songs/beatmap/file.osu
+  - `mode` - Osu = 0, Taiko = 1, Catch = 2, Mania = 3
+  - `mods` - Mods id. Example: 64 - DT
+  - `acc` - Accuracy % from 0 to 100
+  - `nGeki` - Amount of Geki (300g / MAX)
+  - `nKatu` - Amount of Katu (100k / 200)
+  - `n300` - Amount of 300
+  - `n100` - Amount of 100
+  - `n50` - Amount of 50
+  - `nMisses` - Amount of Misses
+  - `combo` - combo
+  - `passedObjects` - Sum of nGeki, nKatu, n300, n100, n50, nMisses
+  - `clockRate` - Map rate number. Example: 1.5 = DT
 ---
 
 
