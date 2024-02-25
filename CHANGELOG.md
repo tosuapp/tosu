@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/KotRikD/tosu/compare/v2.0.0...v2.1.0) (2024-02-25)
+
+
+### Features
+
+* Add api to calculate pp for a map with custom parameters ([7c03eb8](https://github.com/KotRikD/tosu/commit/7c03eb872363674d66211df35b689abc59f4a836))
+
+
+### Bug Fixes
+
+* Rename fields for api v2 ([78a88b6](https://github.com/KotRikD/tosu/commit/78a88b68bdb246459d56043ae000129bf14573e3))
+* Replace full url with pathname ([d8233e4](https://github.com/KotRikD/tosu/commit/d8233e493bfee753330f43ff2eca4f7db5cbb516))
+* stringify message once ([c512928](https://github.com/KotRikD/tosu/commit/c51292821cb13f2e3a01b34e0f8abebb7b95eb70))
+
 ## [2.0.0](https://github.com/KotRikD/tosu/compare/v1.9.1...v2.0.0) (2024-02-19)
 
 
