@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/KotRikD/tosu/compare/v2.1.0...v2.1.1) (2024-02-26)
+
+
+### Bug Fixes
+
+* replace signature for tourney spectator ([ed12124](https://github.com/KotRikD/tosu/commit/ed121241dfc3b885bc9a1a559856f80d72807ea0))
+
 ## [2.1.0](https://github.com/KotRikD/tosu/compare/v2.0.0...v2.1.0) (2024-02-25)
 
 
