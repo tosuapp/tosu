@@ -1,5 +1,3 @@
-import { UserLoginStatus } from '@/api/types/v2';
-
 import { AbstractEntity } from '../AbstractEntity';
 import { DataRepo } from '../DataRepoList';
 
@@ -32,11 +30,9 @@ export class UserProfile extends AbstractEntity {
             patterns.getPattern('userProfilePtr')
         );
 
-        const isLoginned = process.readPointer(
-            patterns.getPattern('isLoggedPtr')
+        this.rawLoginStatus = process.readPointer(
+            patterns.getPattern('rawLoginStatusPtr')
         );
-
-        this.rawLoginStatus = isLoginned;
         this.rawBanchoStatus = process.readByte(profileBase + 0x88);
 
         this.name = process.readSharpString(

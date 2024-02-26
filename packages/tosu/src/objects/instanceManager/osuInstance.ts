@@ -1,7 +1,7 @@
 import { config, sleep, wLogger } from '@tosu/common';
+import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import fs from 'fs';
-import { injectGameOverlay } from 'game-overlay';
 import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 
@@ -69,7 +69,7 @@ const SCAN_PATTERNS: {
         pattern: 'A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 6A 00 6A 00 8D 8D',
         offset: 0x1
     },
-    isLoggedPtr: {
+    rawLoginStatusPtr: {
         pattern: 'B8 0B 00 00 8B 35',
         offset: -0xb
     },

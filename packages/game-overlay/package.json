@@ -1,5 +1,5 @@
 {
-    "name": "game-overlay",
+    "name": "@tosu/game-overlay",
     "private": "true",
     "version": "0.0.1",
     "main": "dist/index.js",

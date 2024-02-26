@@ -39,10 +39,18 @@ export class BassDensityData extends AbstractEntity {
             osuProcess.readInt(rulesetAddr + 0x44) + 0x10
         );
 
+        const bassDensityLength = osuProcess.readInt(audioVelocityBase + 0x4);
+        if (bassDensityLength < 40) {
+            wLogger.debug(
+                'bassDensity length less than 40 (basically it have 1024 values)'
+            );
+            return;
+        }
+
         let bass = 0.0;
         let currentAudioVelocity = this.currentAudioVelocity;
         for (let i = 0; i < 40; i++) {
-            let current = audioVelocityBase + leaderStart + 0x4 * i;
+            const current = audioVelocityBase + leaderStart + 0x4 * i;
 
             const value = osuProcess.readFloat(current);
             if (value < 0) {
