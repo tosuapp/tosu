@@ -12,7 +12,7 @@ export interface PatternData {
     menuModsPtr: number;
     getAudioLengthPtr: number;
     userProfilePtr: number;
-    isLoggedPtr: number;
+    rawLoginStatusPtr: number;
     gameTimePtr: number;
 }
 
@@ -35,7 +35,7 @@ export class MemoryPatterns {
             menuModsPtr: 0,
             getAudioLengthPtr: 0,
             userProfilePtr: 0,
-            isLoggedPtr: 0,
+            rawLoginStatusPtr: 0,
             gameTimePtr: 0
         };
 

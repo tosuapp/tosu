@@ -16,7 +16,7 @@
         "@tosu/find-process": "workspace:*",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
-        "game-overlay": "workspace:*",
+        "@tosu/game-overlay": "workspace:*",
         "osu-catch-stable": "^4.0.0",
         "osu-classes": "^3.0.0",
         "osu-mania-stable": "^5.0.0",

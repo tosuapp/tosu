@@ -49,7 +49,7 @@ importers:
         specifier: ^0.1
         version: 0.1.8
 
-  packages/gameOverlay:
+  packages/game-overlay:
     dependencies:
       '@tosu/common':
         specifier: workspace:*
@@ -88,15 +88,15 @@ importers:
       '@tosu/find-process':
         specifier: workspace:*
         version: link:../find-process
+      '@tosu/game-overlay':
+        specifier: workspace:*
+        version: link:../game-overlay
       '@tosu/server':
         specifier: workspace:*
         version: link:../server
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
-      game-overlay:
-        specifier: workspace:*
-        version: link:../gameOverlay
       osu-catch-stable:
         specifier: ^4.0.0
         version: 4.0.0(osu-classes@3.0.1)
