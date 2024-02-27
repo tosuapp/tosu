@@ -40,12 +40,12 @@ const SCAN_PATTERNS: {
     chatCheckerAddr: {
         pattern: '0A D7 23 3C 00 00 ?? 01'
     },
-
     skinDataAddr: {
         pattern: '74 2C 85 FF 75 28 A1 ?? ?? ?? ?? 8D 15'
     },
-    settingsClassAddr: {
-        pattern: '83 E0 20 85 C0 7E 2F'
+    configurationAddr: {
+        pattern: '8B 0D ?? ?? ?? ?? 39 09 E8 ?? ?? ?? ?? 85 C0 7E',
+        offset: 0x2
     },
     rulesetsAddr: {
         pattern: '7D 15 A1 ?? ?? ?? ?? 85 C0'
