@@ -151,6 +151,7 @@ export class Settings {
     gameFolder: string = '';
     skinFolder: string = '';
     songsFolder: string = '';
+    BeatmapDirectory: string = '';
 
     setShowInterface(value: boolean) {
         this.showInterface = value;

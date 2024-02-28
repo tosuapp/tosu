@@ -68,7 +68,7 @@ export class AllTimesData extends AbstractEntity {
         BeatmapDirectory: {
             type: 'bstring',
             setValue: (settings, value) => {
-                settings.songsFolder = value;
+                settings.BeatmapDirectory = value;
             }
         },
         ScoreMeter: {

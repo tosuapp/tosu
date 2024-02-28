@@ -237,14 +237,14 @@ export class OsuInstance {
                     settings.setGameFolder(path.join(this.path, '..'));
 
                     // condition when user have different BeatmapDirectory in osu! config
-                    if (fs.existsSync(allTimesData.SongsFolder)) {
-                        settings.setSongsFolder(allTimesData.SongsFolder);
+                    if (fs.existsSync(settings.BeatmapDirectory)) {
+                        settings.setSongsFolder(settings.BeatmapDirectory);
                     } else {
                         settings.setSongsFolder(
                             path.join(
                                 this.path,
                                 '../',
-                                allTimesData.SongsFolder
+                                settings.BeatmapDirectory
                             )
                         );
                     }
