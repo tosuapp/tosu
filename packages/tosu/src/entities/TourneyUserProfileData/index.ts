@@ -4,9 +4,6 @@ import { DataRepo } from '@/entities/DataRepoList';
 
 import { AbstractEntity } from '../AbstractEntity';
 
-// GameBase -> StreamingManager.CurrentlySpectating
-const TOURNEY_PROFILE_BASE = '8B 0D ?? ?? ?? ?? 85 C0 74 05 8B 50 30'; // -0x4
-
 export class TourneyUserProfileData extends AbstractEntity {
     UserInfoBase: number = 0;
 
@@ -26,14 +23,15 @@ export class TourneyUserProfileData extends AbstractEntity {
     async updateState() {
         wLogger.debug(`[TourneyUserProfileData:updateState] starting`);
 
-        const { process } = this.services.getServices(['process']);
+        const { process, patterns } = this.services.getServices([
+            'process',
+            'patterns'
+        ]);
 
         if (!this.UserInfoBase) {
-            const tourneyProfileBase = process.scanSync(
-                TOURNEY_PROFILE_BASE,
-                true
+            this.UserInfoBase = process.readPointer(
+                patterns.getPattern('spectatingUserPtr')
             );
-            this.UserInfoBase = process.readPointer(tourneyProfileBase - 0x4);
             wLogger.debug('[TUPD] Slot is not equiped');
             return;
         }

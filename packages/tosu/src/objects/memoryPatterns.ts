@@ -14,6 +14,7 @@ export interface PatternData {
     userProfilePtr: number;
     rawLoginStatusPtr: number;
     gameTimePtr: number;
+    spectatingUserPtr: number;
 }
 
 export class MemoryPatterns {
@@ -36,7 +37,8 @@ export class MemoryPatterns {
             getAudioLengthPtr: 0,
             userProfilePtr: 0,
             rawLoginStatusPtr: 0,
-            gameTimePtr: 0
+            gameTimePtr: 0,
+            spectatingUserPtr: 0
         };
 
         if (process.platform !== 'win32') {
@@ -71,9 +73,7 @@ export class MemoryPatterns {
 
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
-            wLogger.debug(
-                `${entry[0]}: 0${entry[1].toString(16).toUpperCase()}`
-            )
+            wLogger.debug(`${entry[0]}: ${entry[1].toString(16).toUpperCase()}`)
         );
         return !Object.values(this.patterns).some((base) => base === 0);
     }
