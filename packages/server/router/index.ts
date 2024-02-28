@@ -216,7 +216,7 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route(/\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
-        // @KOTRIK REMOVE THAT SHIT
+        // FIXME: REMOVE THAT SHIT
         fs.readFile(
             path.join(
                 'F:/coding/wip/tosu/packages/server/assets/',
@@ -235,7 +235,7 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route('/homepage.min.css', 'GET', (req, res) => {
-        // @KOTRIK REMOVE THAT SHIT
+        // FIXME: REMOVE THAT SHIT
         fs.readFile(
             path.join(
                 'F:/coding/wip/tosu/packages/server/assets/',
@@ -252,7 +252,7 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route('/homepage.js', 'GET', (req, res) => {
-        // @KOTRIK REMOVE THAT SHIT
+        // FIXME: REMOVE THAT SHIT
         fs.readFile(
             path.join(
                 'F:/coding/wip/tosu/packages/server/assets/',
