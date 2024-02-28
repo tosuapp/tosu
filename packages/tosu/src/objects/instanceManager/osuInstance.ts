@@ -96,6 +96,8 @@ export class OsuInstance {
     isTourneyManager: boolean = false;
     isTourneySpectator: boolean = false;
 
+    ipcId: number = 0;
+
     emitter: EventEmitter;
 
     constructor(pid: number) {
@@ -131,6 +133,10 @@ export class OsuInstance {
             new TourneyManagerData(this.entities)
         );
         this.entities.set('userProfile', new UserProfile(this.entities));
+    }
+
+    setTourneyIpcId(ipcId: number) {
+        this.ipcId = ipcId;
     }
 
     setIsTourneySpectator(newVal: boolean) {
