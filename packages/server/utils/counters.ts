@@ -247,7 +247,7 @@ function getLocalCounters() {
         }));
 
     const array = countersListTXT.map((r) => parseTXT(r));
-    return array.concat(arrayOfLocal);
+    return array.concat(arrayOfLocal).filter((r) => r.name != '');
 }
 
 export function buildLocalCounters(res: http.ServerResponse, query?: string) {
@@ -366,6 +366,23 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.enableKeyOverlay}`)
         );
 
+    const enableGosuOverlayHTML = settingsItemHTML
+        .replace('{NAME}', `ENABLE_GOSU_OVERLAY`)
+        .replace(
+            '{DESCRIPTION}',
+            `Enables/disables the in-game gosumemory overlay<br>(!!!I AM NOT RESPONSIBLE FOR USING IT!!!)`
+        )
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{NAME}/gm, 'ENABLE_GOSU_OVERLAY')
+                .replace(
+                    '{ADDON}',
+                    config.enableGosuOverlay ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.enableGosuOverlay}`)
+        );
+
     const pollRateHTML = settingsItemHTML
         .replace('{NAME}', `POLL_RATE`)
         .replace(
@@ -445,6 +462,7 @@ export function buildSettings(res: http.ServerResponse) {
     ${debugHTML}
     ${calculatePPHTML}
     ${enableKeyOverlayHTML}
+    ${enableGosuOverlayHTML}
     ${pollRateHTML}
     ${keyOverlayPollRateHTML}
     ${serverIPHTML}
