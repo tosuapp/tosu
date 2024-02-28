@@ -273,28 +273,28 @@ export const buildResult = (
                 },
 
                 ar: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.AR),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.ar
-                    ),
-                    converted: fixDecimals(menuData.AR)
+                    )
                 },
                 cs: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.CS),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.cs
-                    ),
-                    converted: fixDecimals(menuData.CS)
+                    )
                 },
                 od: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.OD),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.od
-                    ),
-                    converted: fixDecimals(menuData.OD)
+                    )
                 },
                 hp: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.HP),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.hp
-                    ),
-                    converted: fixDecimals(menuData.HP)
+                    )
                 },
 
                 bpm: {
