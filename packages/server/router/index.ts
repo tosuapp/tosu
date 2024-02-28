@@ -13,6 +13,7 @@ import path from 'path';
 import { HttpServer, getContentType, sendJson } from '../index';
 import {
     buildExternalCounters,
+    buildInstructionLocal,
     buildLocalCounters,
     buildSettings
 } from '../utils/counters';
@@ -330,6 +331,10 @@ export default function buildBaseApi(app: HttpServer) {
 
             if (req.query?.tab == '2') {
                 return buildSettings(res);
+            }
+
+            if (req.query?.tab == '3') {
+                return buildInstructionLocal(res);
             }
 
             return buildLocalCounters(res);

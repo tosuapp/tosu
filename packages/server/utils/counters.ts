@@ -99,6 +99,11 @@ function rebuildJSON({
         const name = nameHTML.replace('{NAME}', item.name);
         const author = authorHTML.replace('{AUTHOR}', item.author);
 
+        const counterName =
+            (item.author || '').toLowerCase() == 'local'
+                ? item.name
+                : `${item.name} by ${item.author}`;
+
         const links = item.authorlinks
             .map((r) => {
                 const domain =
@@ -118,38 +123,50 @@ function rebuildJSON({
         const iframe = iframeHTML
             .replace(
                 '{URL}',
-                `http://${config.serverIP}:${config.serverPort}/${item.name} by ${item.author}/`
+                `http://${config.serverIP}:${config.serverPort}/${counterName}/`
             )
             .replace(
                 '{WIDTH}',
-                item.resolution[0] == -1 ? '500' : `${item.resolution[0]}px`
+                item.resolution[0] == -1
+                    ? '500px'
+                    : item.resolution[0] == -2
+                    ? '100%'
+                    : `${item.resolution[0]}px`
             )
             .replace(
                 '{HEIGHT}',
-                item.resolution[1] == -1 ? '500' : `${item.resolution[1]}px`
+                item.resolution[1] == -1 ? '500px' : `${item.resolution[1]}px`
             );
 
         const metadata = metadataHTML
             .replace(
                 '{COPY_URL}',
-                `http://${config.serverIP}:${config.serverPort}/${item.name} by ${item.author}/`
+                `http://${config.serverIP}:${config.serverPort}/${counterName}/`
             )
-            .replace('{TEXT_URL}', `/${item.name} by ${item.author}/`)
+            .replace('{TEXT_URL}', `/${counterName}/`)
             .replace(
                 '{COPY_X}',
-                item.resolution[0] == -1 ? 'ANY' : item.resolution[0].toString()
+                item.resolution[0] == -1 || item.resolution[0] == -2
+                    ? 'ANY'
+                    : item.resolution[0].toString()
             )
             .replace(
                 '{X}',
-                item.resolution[0] == -1 ? 'ANY' : item.resolution[0].toString()
+                item.resolution[0] == -1 || item.resolution[0] == -2
+                    ? 'ANY'
+                    : item.resolution[0].toString()
             )
             .replace(
                 '{COPY_Y}',
-                item.resolution[1] == -1 ? 'ANY' : item.resolution[1].toString()
+                item.resolution[1] == -1 || item.resolution[1] == -2
+                    ? 'ANY'
+                    : item.resolution[1].toString()
             )
             .replace(
                 '{Y}',
-                item.resolution[1] == -1 ? 'ANY' : item.resolution[1].toString()
+                item.resolution[1] == -1 || item.resolution[1] == -2
+                    ? 'ANY'
+                    : item.resolution[1].toString()
             );
 
         const button = item.downloadLink
@@ -190,14 +207,34 @@ function getLocalCounters() {
         config.staticFolderPath ||
         path.join(path.dirname(process.execPath), 'static');
 
-    const countersList = recursiveFilesSearch({
+    const countersListTXT = recursiveFilesSearch({
         dir: staticPath,
         fileList: [],
         filename: 'metadata.txt'
     });
 
-    const array = countersList.map((r) => parseTXT(r));
-    return array;
+    const countersListHTML = recursiveFilesSearch({
+        dir: staticPath,
+        fileList: [],
+        filename: 'index.html'
+    });
+
+    const arrayOfLocal = countersListHTML
+        .filter((r) => {
+            const folder = path.dirname(r);
+            return (
+                countersListTXT.find((s) => path.dirname(s) == folder) == null
+            );
+        })
+        .map((r) => ({
+            name: path.basename(path.dirname(r)),
+            author: 'local',
+            resolution: [-2, '400'],
+            authorlinks: []
+        }));
+
+    const array = countersListTXT.map((r) => parseTXT(r));
+    return array.concat(arrayOfLocal);
 }
 
 export function buildLocalCounters(res: http.ServerResponse, query?: string) {
@@ -408,6 +445,32 @@ export function buildSettings(res: http.ServerResponse) {
         'utf8',
         (err, content) => {
             const html = content.replace('{{LIST}}', settings);
+
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            res.end(html);
+        }
+    );
+}
+
+export function buildInstructionLocal(res: http.ServerResponse) {
+    const pageContent = `<div class="settings">
+        <h3>How to Add Your Own Counter <a>Locally</a></h3>
+        <p>
+          1. <b>Create a new folder</b>:<br>- First, create a <a>new folder</a> inside your static folder.<br><br>
+          2. <b>Move your pp counter files</b>:<br>- Next, move <a>your pp counter</a> files into the newly created folder.<br><br>
+          3. <b>Download and place metadata file</b>:<br>- Download the <a
+             href="https://raw.githubusercontent.com/cyperdark/osu-counters/master/quickstart/metadata.txt"
+             target="_blank">metadata.txt</a> file and place it in the counter folder.<br><br>
+          4. <b>Fill out the metadata file</b>:<br>- Finally, <a>open</a> the metadata.txt file and <a>fill out</a> the necessary information.
+        </p>
+      </div>`;
+    fs.readFile(
+        'F:/coding/wip/tosu/packages/server/assets/homepage.html',
+        'utf8',
+        (err, content) => {
+            const html = content.replace('{{LIST}}', pageContent);
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
