@@ -2,3 +2,4 @@
 node_modules/
 dist/
 static/
+packages/server/assets/homepage.js

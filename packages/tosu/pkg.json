@@ -3,10 +3,11 @@
     "assets": [
       "dist/**/*.node",
       "dist/target/**/*",
-      "dist/_version.js"
+      "dist/_version.js",
+      "dist/assets/**/*"
     ],
     "targets": [
       "node18-win-x64"
     ],
     "outputPath": "dist"
-}
+}   

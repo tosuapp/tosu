@@ -1,0 +1,51 @@
+<html>
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="/homepage.min.css">
+  <title>tosu dashboard</title>
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <header class="flexer">
+    <a href="https://osuck.link/tosu" target="_blank" class="flexer github">
+      github
+    </a>
+    <div>‧</div>
+    <a href="https://osuck.link/tosu-discord" target="_blank" class="flexer discord">
+      discord
+    </a>
+    <a href="https://osuck.link/tosu-counter-submit" target="_blank" class="flexer indent-left sbmt">
+      submit pp counter
+    </a>
+  </header>
+  <main>
+    <div class="tabs flexer">
+      <a href="/?tab=0" class="tab-item">Installed</a>
+      <a href="/?tab=1" class="tab-item">Available</a>
+      <a href="/?tab=2" class="tab-item">Settings</a>
+      <a href="/?tab=3" class="tab-item">How to add counter</a>
+      <div class="indent-left">
+        <input class="search-bar" type="text" placeholder="search">
+        <!-- <a href="https://github.com/cyperdark/osu-counters/?tab=readme-ov-file#how-to-submit-pp-counter" target="_blank" class="button submit-button">Submit</a> -->
+      </div>
+    </div>
+    <div class="results">
+      {{LIST}}
+    </div>
+  </main>
+  <footer>
+    <span>created by </span><a href="https://osuck.net/" target="_blank">cyperdark</a>
+  </footer>
+  <script src="/homepage.js" defer></script>
+</body>
+
+
+</html>

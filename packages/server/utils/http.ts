@@ -1,8 +1,11 @@
 import { wLogger } from '@tosu/common';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
+import { Server } from '../index';
+
 export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
+    body: string;
     query: { [key: string]: string };
     params: { [key: string]: string };
     pathname: string;
@@ -26,6 +29,7 @@ type RouteHandler = {
 export class HttpServer {
     private middlewares: RequestHandler[] = [];
     server: http.Server;
+    Server: Server;
     private routes: {
         [method: string]: {
             path: string | RegExp;
@@ -33,7 +37,8 @@ export class HttpServer {
         }[];
     } = {};
 
-    constructor() {
+    constructor(hold: any) {
+        this.Server = hold;
         // @ts-ignore
         this.server = http.createServer(this.handleRequest.bind(this));
     }
@@ -68,6 +73,7 @@ export class HttpServer {
     ) {
         const startTime = performance.now();
         let index = 0;
+        let body = '';
 
         res.on('finish', () => {
             const finishTime = performance.now();
@@ -86,6 +92,19 @@ export class HttpServer {
                 return;
             }
 
+            // get data aka body
+            if (['POST', 'PUT', 'PATCH'].includes(req.method || '')) {
+                req.on('data', (chunk) => {
+                    body += chunk;
+                });
+
+                req.on('end', () => {
+                    req.body = body;
+
+                    this.handleNext(req, res);
+                });
+                return;
+            }
             this.handleNext(req, res);
         };
 
