@@ -82,6 +82,12 @@ export enum SortType {
     title
 }
 
+export enum ChatStatus {
+    hidden,
+    visible,
+    visibleWithFriendsList
+}
+
 export interface ApiV2Answer {
     state: number;
     session: Session;
@@ -113,7 +119,7 @@ export interface Session {
 export interface Settings {
     interfaceVisible: boolean;
     replayUIVisible: boolean;
-    chatVisible: number;
+    chatVisibilityStatus: NumberName;
     leaderboard: SettingsLeaderboard;
 
     progressBarType: boolean;

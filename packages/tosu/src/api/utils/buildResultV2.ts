@@ -12,6 +12,7 @@ import {
     ApiV2Answer,
     BanchoStatusEnum,
     BeatmapStatuses,
+    ChatStatus,
     GroupType,
     Leaderboard,
     LeaderboardType,
@@ -107,7 +108,10 @@ export const buildResult = (
         settings: {
             interfaceVisible: settings.showInterface,
             replayUIVisible: gamePlayData.isReplayUiHidden,
-            chatVisible: Number(Boolean(allTimesData.ChatStatus)),
+            chatVisibilityStatus: {
+                number: allTimesData.ChatStatus,
+                name: ChatStatus[allTimesData.ChatStatus]
+            },
 
             leaderboard: {
                 // FIXME: i dont understand where tf you getting it from, it doesnt work in menu
