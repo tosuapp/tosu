@@ -280,8 +280,9 @@ const buildTourneyData = (
         instanceManager.osuInstances
     ).filter((instance) => instance.isTourneySpectator);
 
-    const mappedOsuTourneyClients = osuTourneyClients.map<TourneyIpcClient>(
-        (instance, iterator) => {
+    const mappedOsuTourneyClients = osuTourneyClients
+        .sort((a, b) => a.ipcId - b.ipcId)
+        .map<TourneyIpcClient>((instance, iterator) => {
             const { allTimesData, gamePlayData, tourneyUserProfileData } =
                 instance.entities.getServices([
                     'allTimesData',
@@ -343,8 +344,7 @@ const buildTourneyData = (
                     }
                 }
             };
-        }
-    );
+        });
 
     const { tourneyManagerData } = osuTourneyManager[0].entities.getServices([
         'tourneyManagerData'

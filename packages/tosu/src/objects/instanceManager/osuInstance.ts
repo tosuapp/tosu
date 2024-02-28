@@ -29,6 +29,7 @@ const SCAN_PATTERNS: {
     [k in keyof PatternData]: {
         pattern: string;
         offset?: number;
+        isTourneyOnly?: boolean;
     };
 } = {
     baseAddr: {
@@ -76,6 +77,10 @@ const SCAN_PATTERNS: {
     gameTimePtr: {
         pattern: 'FF 15 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 3B',
         offset: 0x7
+    },
+    spectatingUserPtr: {
+        pattern: '8B 0D ?? ?? ?? ?? 85 C0 74 05 8B 50 30',
+        offset: -0x4
     }
 };
 
@@ -90,6 +95,8 @@ export class OsuInstance {
     isDestroyed: boolean = false;
     isTourneyManager: boolean = false;
     isTourneySpectator: boolean = false;
+
+    ipcId: number = 0;
 
     emitter: EventEmitter;
 
@@ -126,6 +133,10 @@ export class OsuInstance {
             new TourneyManagerData(this.entities)
         );
         this.entities.set('userProfile', new UserProfile(this.entities));
+    }
+
+    setTourneyIpcId(ipcId: number) {
+        this.ipcId = ipcId;
     }
 
     setIsTourneySpectator(newVal: boolean) {

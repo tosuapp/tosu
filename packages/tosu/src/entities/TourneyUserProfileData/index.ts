@@ -4,9 +4,6 @@ import { DataRepo } from '@/entities/DataRepoList';
 
 import { AbstractEntity } from '../AbstractEntity';
 
-// GameBase -> StreamingManager.CurrentlySpectating
-const TOURNEY_PROFILE_BASE = '8B 0D ?? ?? ?? ?? 85 C0 74 05 8B 50 30'; // -0x4
-
 export class TourneyUserProfileData extends AbstractEntity {
     UserInfoBase: number = 0;
 
@@ -26,38 +23,39 @@ export class TourneyUserProfileData extends AbstractEntity {
     async updateState() {
         wLogger.debug(`[TourneyUserProfileData:updateState] starting`);
 
-        const { process } = this.services.getServices(['process']);
+        const { process, patterns } = this.services.getServices([
+            'process',
+            'patterns'
+        ]);
 
         if (!this.UserInfoBase) {
-            const tourneyProfileBase = process.scanSync(
-                TOURNEY_PROFILE_BASE,
-                true
+            this.UserInfoBase = process.readPointer(
+                patterns.getPattern('spectatingUserPtr')
             );
-            this.UserInfoBase = process.readPointer(tourneyProfileBase - 0x4);
             wLogger.debug('[TUPD] Slot is not equiped');
             return;
         }
 
         try {
-            // [[UserInfo - 0x5]] + 0x4
+            // UserDrawable + 0x4
             this.Accuracy = process.readDouble(this.UserInfoBase + 0x4);
-            // [[UserInfo - 0x5]] + UserInfoAddr
+            // UserDrawable + 0xc
             this.RankedScore = process.readLong(this.UserInfoBase + 0xc);
-            // [[UserInfo - 0x5]] + 0x7C
+            // UserDrawable + 0x7C
             this.PlayCount = process.readInt(this.UserInfoBase + 0x7c);
-            // [[UserInfo - 0x5]] + 0x84
+            // UserDrawable + 0x84
             this.GlobalRank = process.readInt(this.UserInfoBase + 0x84);
-            // [[UserInfo - 0x5]] + 0x9C
+            // UserDrawable + 0x9C
             this.PP = process.readInt(this.UserInfoBase + 0x9c);
-            // [[[UserInfo - 0x5]] + 0x30]
+            // [UserDrawable + 0x30]
             this.Name = process.readSharpString(
                 process.readInt(this.UserInfoBase + 0x30)
             );
-            // [[[UserInfo - 0x5]] + 0x2C]
+            // [UserDrawable + 0x2C]
             this.Country = process.readSharpString(
                 process.readInt(this.UserInfoBase + 0x2c)
             );
-            // [[UserInfo - 0x5]] + 0x70
+            // UserDrawable + 0x70
             this.UserID = process.readInt(this.UserInfoBase + 0x70);
         } catch (exc) {
             wLogger.error('[TourneyUserProfileData] signature failed');
