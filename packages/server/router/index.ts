@@ -313,39 +313,48 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route(/.*/, 'GET', (req, res) => {
-        const url = req.pathname || '/';
-        const folderPath =
-            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
+        try {
+            const url = req.pathname || '/';
+            const folderPath =
+                config.staticFolderPath ||
+                path.join(pkgRunningFolder, 'static');
 
-        if (url == '/') {
-            if (req.query?.tab == '1') {
-                return buildExternalCounters(res);
+            if (url == '/') {
+                if (req.query?.tab == '1') {
+                    return buildExternalCounters(res);
+                }
+
+                if (req.query?.tab == '2') {
+                    return buildSettings(res);
+                }
+
+                if (req.query?.tab == '3') {
+                    return buildInstructionLocal(res);
+                }
+
+                return buildLocalCounters(res);
             }
 
-            if (req.query?.tab == '2') {
-                return buildSettings(res);
+            const extension = path.extname(url);
+            if (extension == '' && !url.endsWith('/')) {
+                res.writeHead(301, { Location: url + '/' });
+                return res.end();
             }
 
-            if (req.query?.tab == '3') {
-                return buildInstructionLocal(res);
-            }
-
-            return buildLocalCounters(res);
+            const selectIndexHTML = url.endsWith('/')
+                ? url + 'index.html'
+                : url;
+            directoryWalker({
+                _htmlRedirect: true,
+                res,
+                baseUrl: url,
+                pathname: selectIndexHTML,
+                folderPath
+            });
+        } catch (error) {
+            return sendJson(res, {
+                error: (error as any).message
+            });
         }
-
-        const extension = path.extname(url);
-        if (extension == '' && !url.endsWith('/')) {
-            res.writeHead(301, { Location: url + '/' });
-            return res.end();
-        }
-
-        const selectIndexHTML = url.endsWith('/') ? url + 'index.html' : url;
-        directoryWalker({
-            _htmlRedirect: true,
-            res,
-            baseUrl: url,
-            pathname: selectIndexHTML,
-            folderPath
-        });
     });
 }
