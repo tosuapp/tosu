@@ -1,20 +1,39 @@
-enum ReleaseStream {
-    CuttingEdge,
-    Stable,
-    Beta,
-    Fallback
+export interface Keybinds {
+    osu: KeybindsOsu;
+    fruits: KeybindsFruits;
+    taiko: KeybindsTaiko;
+    quickRetry: string;
 }
 
-enum ScoreMeterType {
-    None,
-    Colour,
-    Error
+export interface KeybindsOsu {
+    k1: string;
+    k2: string;
+    smokeKey: string;
+}
+
+export interface KeybindsFruits {
+    k1: string;
+    k2: string;
+    Dash: string;
+}
+
+export interface KeybindsTaiko {
+    innerLeft: string;
+    innerRight: string;
+    outerLeft: string;
+    outerRight: string;
 }
 
 interface Volume {
     master: number;
     music: number;
     effect: number;
+}
+
+interface Audio {
+    ignoreBeatmapSounds: boolean;
+    useSkinSamples: boolean;
+    volume: Volume;
 }
 
 interface Background {
@@ -24,10 +43,12 @@ interface Background {
 }
 
 interface Client {
-    branch: ReleaseStream;
+    updateAvailable: boolean;
+    branch: number;
+    version: string;
 }
 
-interface Window {
+interface Resolution {
     fullscreen: boolean;
     width: number;
     height: number;
@@ -36,7 +57,7 @@ interface Window {
 }
 
 interface ScoreMeter {
-    type: ScoreMeterType;
+    type: number;
     size: number;
 }
 
@@ -45,28 +66,86 @@ interface Offset {
 }
 
 interface Cursor {
+    useSkinCursor: boolean;
+    autoSize: boolean;
     size: number;
 }
 
 interface Mouse {
+    disableButtons: boolean;
+    disableWheel: boolean;
+    rawInput: boolean;
     sensitivity: number;
 }
 
+interface Mania {
+    speedBPMScale: boolean;
+    usePerBeatmapSpeedScale: boolean;
+}
+
 export class Settings {
-    volume: Volume = { master: 0, music: 0, effect: 0 };
+    audio: Audio = {
+        ignoreBeatmapSounds: false,
+        useSkinSamples: false,
+        volume: {
+            master: 0,
+            music: 0,
+            effect: 0
+        }
+    };
     background: Background = { dim: 0, video: false, storyboard: false };
-    client: Client = { branch: 0 };
-    window: Window = {
+    client: Client = { updateAvailable: false, branch: 0, version: '' };
+    resolution: Resolution = {
         fullscreen: false,
         width: 0,
         height: 0,
         widthFullscreen: 0,
         heightFullscreen: 0
     };
-    scoreMeter: ScoreMeter = { type: ScoreMeterType.None, size: 0 };
+    scoreMeter: ScoreMeter = { type: 0, size: 0 };
     offset: Offset = { universal: 0 };
-    cursor: Cursor = { size: 0 };
-    mouse: Mouse = { sensitivity: 0 };
+    cursor: Cursor = { useSkinCursor: false, autoSize: false, size: 0 };
+    mouse: Mouse = {
+        rawInput: false,
+        disableButtons: false,
+        disableWheel: false,
+        sensitivity: 0
+    };
+    mania: Mania = { speedBPMScale: false, usePerBeatmapSpeedScale: false };
+
+    skin = {
+        useDefaultSkinInEditor: false,
+        ignoreBeatmapSkins: false,
+        tintSliderBall: false,
+        useTaikoSkin: false,
+        name: ''
+    };
+
+    keybinds: Keybinds = {
+        osu: {
+            k1: '',
+            k2: '',
+            smokeKey: ''
+        },
+        fruits: {
+            k1: '',
+            k2: '',
+            Dash: ''
+        },
+        taiko: {
+            innerLeft: '',
+            innerRight: '',
+            outerLeft: '',
+            outerRight: ''
+        },
+        quickRetry: ''
+    };
+
+    groupType: number = 0;
+    sortType: number = 0;
+
+    leaderboardType: number = 0;
+    progressBarType: boolean = false;
 
     showInterface: boolean = false;
     gameFolder: string = '';

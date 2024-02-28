@@ -12,8 +12,12 @@ import {
     ApiV2Answer,
     BanchoStatusEnum,
     BeatmapStatuses,
+    GroupType,
     Leaderboard,
+    LeaderboardType,
     Modes,
+    ScoreMeterType,
+    SortType,
     Tourney,
     TourneyChatMessages,
     TourneyClients,
@@ -101,22 +105,60 @@ export const buildResult = (
             playCount: 0 // need counting
         },
         settings: {
-            leaderboardVisible: gamePlayData.Leaderboard
-                ? gamePlayData.Leaderboard.isScoreboardVisible
-                : false,
             interfaceVisible: settings.showInterface,
             replayUIVisible: gamePlayData.isReplayUiHidden,
             chatVisible: Number(Boolean(allTimesData.ChatStatus)),
 
-            beatmapHasLeaderboard: Boolean(gamePlayData.Leaderboard),
-            // userLogined: userProfile.isConnected, // we dont have that, yet
+            leaderboard: {
+                // FIXME: i dont understand where tf you getting it from, it doesnt work in menu
+                available: Boolean(gamePlayData.Leaderboard),
+                visible: gamePlayData.Leaderboard
+                    ? gamePlayData.Leaderboard.isScoreboardVisible
+                    : false,
+                type: {
+                    number: settings.leaderboardType,
+                    name: LeaderboardType[settings.leaderboardType]
+                }
+            },
 
+            progressBarType: settings.progressBarType,
             bassDensity: bassDensityData.density,
 
+            resolution: settings.resolution,
+            client: settings.client,
+
+            scoreMeter: {
+                type: {
+                    number: settings.scoreMeter.type,
+                    name: ScoreMeterType[settings.scoreMeter.type]
+                },
+                size: settings.scoreMeter.size
+            },
+            cursor: settings.cursor,
+            mouse: settings.mouse,
+            mania: settings.mania,
+
+            sort: {
+                number: settings.sortType,
+                name: SortType[settings.sortType]
+            },
+            group: {
+                number: settings.groupType,
+                name: GroupType[settings.groupType]
+            },
+
+            skin: settings.skin,
             mode: {
                 number: menuData.MenuGameMode,
                 name: Modes[menuData.MenuGameMode]
-            }
+            },
+            audio: {
+                ...settings.audio,
+                offset: settings.offset
+            },
+            background: settings.background,
+
+            keybinds: settings.keybinds
         },
         profile: {
             userStatus: {

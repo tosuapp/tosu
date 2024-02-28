@@ -29,6 +29,59 @@ export enum UserLoginStatus {
     connected = 65793
 }
 
+export enum ReleaseStream {
+    cuttingEdge,
+    stable,
+    beta,
+    fallback
+}
+
+export enum ScoreMeterType {
+    none,
+    colour,
+    error
+}
+
+export enum LeaderboardType {
+    local,
+    global,
+    selectedmods,
+    friends,
+    country
+}
+
+export enum GroupType {
+    none,
+    artist,
+    bpm,
+    creator,
+    date,
+    difficulty,
+    length,
+    rank,
+    myMaps,
+    search = 12,
+    show_All = 12,
+    title,
+    lastPlayed,
+    onlineFavourites,
+    maniaKeys,
+    mode,
+    collection,
+    rankedStatus
+}
+
+export enum SortType {
+    artist,
+    bpm,
+    creator,
+    date,
+    difficulty,
+    length,
+    rank,
+    title
+}
+
 export interface ApiV2Answer {
     state: number;
     session: Session;
@@ -59,12 +112,130 @@ export interface Session {
 
 export interface Settings {
     interfaceVisible: boolean;
-    chatVisible: number;
-    beatmapHasLeaderboard: boolean;
-    leaderboardVisible: boolean;
     replayUIVisible: boolean;
+    chatVisible: number;
+    leaderboard: SettingsLeaderboard;
+
+    progressBarType: boolean;
     bassDensity: number;
+
+    resolution: Resolution;
+    client: Client;
+
+    scoreMeter: ScoreMeter;
+    cursor: Cursor;
+    mouse: Mouse;
+    mania: Mania;
+
+    sort: NumberName;
+    group: NumberName;
+
+    skin: Skin;
     mode: NumberName;
+    audio: Audio;
+    background: Background;
+
+    keybinds: Keybinds;
+}
+
+export interface Skin {
+    useDefaultSkinInEditor: boolean;
+    ignoreBeatmapSkins: boolean;
+    tintSliderBall: boolean;
+    useTaikoSkin: boolean;
+    name: string;
+}
+
+export interface Cursor {
+    useSkinCursor: boolean;
+    autoSize: boolean;
+    size: number;
+}
+
+export interface Mouse {
+    rawInput: boolean;
+    disableButtons: boolean;
+    disableWheel: boolean;
+    sensitivity: number;
+}
+
+export interface Mania {
+    speedBPMScale: boolean;
+    usePerBeatmapSpeedScale: boolean;
+}
+
+export interface SettingsLeaderboard {
+    available: boolean;
+    visible: boolean;
+    type: NumberName;
+}
+
+export interface Resolution {
+    fullscreen: boolean;
+    width: number;
+    height: number;
+    widthFullscreen: number;
+    heightFullscreen: number;
+}
+
+export interface Client {
+    updateAvailable: boolean;
+    branch: number;
+    version: string;
+}
+
+export interface ScoreMeter {
+    type: NumberName;
+    size: number;
+}
+
+export interface Background {
+    storyboard: boolean;
+    video: boolean;
+    dim: number;
+}
+
+export interface Audio {
+    ignoreBeatmapSounds: boolean;
+    useSkinSamples: boolean;
+    volume: Volume;
+    offset: Offset;
+}
+
+export interface Offset {
+    universal: number;
+}
+
+export interface Volume {
+    master: number;
+    music: number;
+    effect: number;
+}
+
+export interface Keybinds {
+    osu: Osu;
+    fruits: Fruits;
+    taiko: Taiko;
+    quickRetry: string;
+}
+
+export interface Osu {
+    k1: string;
+    k2: string;
+    smokeKey: string;
+}
+
+export interface Fruits {
+    k1: string;
+    k2: string;
+    Dash: string;
+}
+
+export interface Taiko {
+    innerLeft: string;
+    innerRight: string;
+    outerLeft: string;
+    outerRight: string;
 }
 
 export interface NumberName {

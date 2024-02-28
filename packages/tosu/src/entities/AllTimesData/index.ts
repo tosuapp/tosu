@@ -25,19 +25,19 @@ export class AllTimesData extends AbstractEntity {
         VolumeUniversal: {
             type: 'int',
             setValue: (settings, value) => {
-                settings.volume.master = value;
+                settings.audio.volume.master = value;
             }
         },
         VolumeEffect: {
             type: 'int',
             setValue: (settings, value) => {
-                settings.volume.effect = value;
+                settings.audio.volume.effect = value;
             }
         },
         VolumeMusic: {
             type: 'int',
             setValue: (settings, value) => {
-                settings.volume.music = value;
+                settings.audio.volume.music = value;
             }
         },
         _ReleaseStream: {
@@ -103,31 +103,218 @@ export class AllTimesData extends AbstractEntity {
         Fullscreen: {
             type: 'bool',
             setValue: (settings, value) => {
-                settings.window.fullscreen = value;
+                settings.resolution.fullscreen = value;
             }
         },
         Width: {
             type: 'int',
             setValue: (settings, value) => {
-                settings.window.width = value;
+                settings.resolution.width = value;
             }
         },
         Height: {
             type: 'int',
             setValue: (settings, value) => {
-                settings.window.height = value;
+                settings.resolution.height = value;
             }
         },
         WidthFullscreen: {
             type: 'int',
             setValue: (settings, value) => {
-                settings.window.widthFullscreen = value;
+                settings.resolution.widthFullscreen = value;
             }
         },
         HeightFullscreen: {
             type: 'int',
             setValue: (settings, value) => {
-                settings.window.heightFullscreen = value;
+                settings.resolution.heightFullscreen = value;
+            }
+        },
+        AutomaticCursorSizing: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.cursor.autoSize = value;
+            }
+        },
+        IgnoreBeatmapSamples: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.audio.ignoreBeatmapSounds = value;
+            }
+        },
+        SkinSamples: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.audio.useSkinSamples = value;
+            }
+        },
+        LastVersion: {
+            type: 'bstring',
+            setValue: (settings, value) => {
+                settings.client.version = value;
+            }
+        },
+        ManiaSpeedBPMScale: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mania.speedBPMScale = value;
+            }
+        },
+        UsePerBeatmapManiaSpeed: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mania.usePerBeatmapSpeedScale = value;
+            }
+        },
+        MouseDisableButtons: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mouse.disableButtons = value;
+            }
+        },
+        MouseDisableWheel: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mouse.disableWheel = value;
+            }
+        },
+        ProgressBarType: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.progressBarType = value;
+            }
+        },
+        RankType: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.leaderboardType = value;
+            }
+        },
+        UpdatePending: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.client.updateAvailable = value;
+            }
+        },
+
+        UseSkinCursor: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.cursor.useSkinCursor = value;
+            }
+        },
+        RawInput: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mouse.rawInput = value;
+            }
+        },
+        TreeSortMode: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.groupType = value;
+            }
+        },
+        TreeSortMode2: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.sortType = value;
+            }
+        },
+        keyOsuLeft: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.osu.k1 = value;
+            }
+        },
+        keyOsuRight: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.osu.k2 = value;
+            }
+        },
+        keyOsuSmoke: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.osu.smokeKey = value;
+            }
+        },
+        keyFruitsDash: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.fruits.Dash = value;
+            }
+        },
+        keyFruitsLeft: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.fruits.k1 = value;
+            }
+        },
+        keyFruitsRight: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.fruits.k2 = value;
+            }
+        },
+        keyTaikoInnerLeft: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.taiko.innerLeft = value;
+            }
+        },
+        keyTaikoInnerRight: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.taiko.innerRight = value;
+            }
+        },
+        keyTaikoOuterLeft: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.taiko.outerLeft = value;
+            }
+        },
+        keyTaikoOuterRight: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.taiko.outerRight = value;
+            }
+        },
+        keyQuickRetry: {
+            type: 'string',
+            setValue: (settings, value) => {
+                settings.keybinds.quickRetry = value;
+            }
+        },
+        EditorDefaultSkin: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.useDefaultSkinInEditor = value;
+            }
+        },
+        ComboColourSliderBall: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.tintSliderBall = value;
+            }
+        },
+        IgnoreBeatmapSkins: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.ignoreBeatmapSkins = value;
+            }
+        },
+        Skin: {
+            type: 'bstring',
+            setValue: (settings, value) => {
+                settings.skin.name = value;
+            }
+        },
+        UseTaikoSkin: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.useTaikoSkin = value;
             }
         }
     };
