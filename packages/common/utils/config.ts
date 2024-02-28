@@ -5,9 +5,7 @@ import path from 'path';
 import { configureLogger, wLogger } from './logger';
 
 const configPath = path.join(
-    process.env.NODE_ENV === 'development'
-        ? process.cwd()
-        : path.dirname(process.execPath),
+    'pkg' in process ? path.dirname(process.execPath) : process.cwd(),
     'tsosu.env'
 );
 if (!fs.existsSync(configPath)) {

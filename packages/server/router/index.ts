@@ -19,6 +19,14 @@ import {
 } from '../utils/counters';
 import { directoryWalker } from '../utils/directories';
 
+const pkgAssetsPath =
+    'pkg' in process
+        ? path.join(__dirname, 'assets')
+        : path.join(__filename, '../../../assets');
+
+const pkgRunningFolder =
+    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
+
 export default function buildBaseApi(app: HttpServer) {
     app.route('/json', 'GET', (req, res) => {
         const osuInstances: any = Object.values(
@@ -61,10 +69,9 @@ export default function buildBaseApi(app: HttpServer) {
             });
         }
 
-        const cacheFolder = path.join(path.dirname(process.execPath), '.cache');
+        const cacheFolder = path.join(pkgRunningFolder, '.cache');
         const staticPath =
-            config.staticFolderPath ||
-            path.join(path.dirname(process.execPath), 'static');
+            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
         const folderPath = path.join(staticPath, decodeURI(folderName));
 
         const tempPath = path.join(cacheFolder, `${Date.now()}.zip`);
@@ -125,7 +132,7 @@ export default function buildBaseApi(app: HttpServer) {
 
             const staticPath =
                 config.staticFolderPath ||
-                path.join(path.dirname(process.execPath), 'static');
+                path.join(pkgRunningFolder, 'static');
             const folderPath = path.join(staticPath, decodeURI(folderName));
 
             if (!fs.existsSync(folderPath)) {
@@ -170,7 +177,7 @@ export default function buildBaseApi(app: HttpServer) {
 
             const staticPath =
                 config.staticFolderPath ||
-                path.join(path.dirname(process.execPath), 'static');
+                path.join(pkgRunningFolder, 'static');
             const folderPath = path.join(staticPath, decodeURI(folderName));
 
             if (!fs.existsSync(folderPath)) {
@@ -216,18 +223,12 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route(/\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
-        // FIXME: REMOVE THAT SHIT
         fs.readFile(
-            path.join(
-                'F:/coding/wip/tosu/packages/server/assets/',
-                'images',
-                req.params.filePath
-            ),
+            path.join(pkgAssetsPath, 'images', req.params.filePath),
             (err, content) => {
                 res.writeHead(200, {
                     'Content-Type': getContentType(req.params.filePath)
                 });
-                // console.log(res.getHeaders(), req.params, err, path.join('F:/coding/wip/tosu/packages/server/assets/', 'images', req.params.filePath));
 
                 res.end(content);
             }
@@ -237,10 +238,7 @@ export default function buildBaseApi(app: HttpServer) {
     app.route('/homepage.min.css', 'GET', (req, res) => {
         // FIXME: REMOVE THAT SHIT
         fs.readFile(
-            path.join(
-                'F:/coding/wip/tosu/packages/server/assets/',
-                'homepage.min.css'
-            ),
+            path.join(pkgAssetsPath, 'homepage.min.css'),
             'utf8',
             (err, content) => {
                 res.writeHead(200, {
@@ -252,12 +250,8 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route('/homepage.js', 'GET', (req, res) => {
-        // FIXME: REMOVE THAT SHIT
         fs.readFile(
-            path.join(
-                'F:/coding/wip/tosu/packages/server/assets/',
-                'homepage.js'
-            ),
+            path.join(pkgAssetsPath, 'homepage.js'),
             'utf8',
             (err, content) => {
                 res.writeHead(200, {
@@ -321,8 +315,7 @@ export default function buildBaseApi(app: HttpServer) {
     app.route(/.*/, 'GET', (req, res) => {
         const url = req.pathname || '/';
         const folderPath =
-            config.staticFolderPath ||
-            path.join(path.dirname(process.execPath), 'static');
+            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
 
         if (url == '/') {
             if (req.query?.tab == '1') {

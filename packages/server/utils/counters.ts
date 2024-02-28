@@ -8,8 +8,8 @@ import {
     authorHTML,
     authorLinksHTML,
     checkboxHTML,
-    emptryCounters,
-    emptryNotice,
+    emptyCounters,
+    emptyNotice,
     galleryImageHTML,
     icons_images,
     iframeHTML,
@@ -21,6 +21,20 @@ import {
     saveSettingsButtonHTML,
     settingsItemHTML
 } from './htmls';
+
+/**
+ * ТАК КАК БЛЯТЬ У НАС В ЖЫЭСЕ
+ * НЕ ПРИДУМАЛИ НОРМАЛЬНО ПАКЕТИРОВАТЬ ГОВНО БЕЗ ВЕБПАКА
+ * ИДЕМ И ПИЛИМ КОСТЫЛИ
+ * kys js!
+ */
+const pkgAssetsPath =
+    'pkg' in process
+        ? path.join(__dirname, 'assets')
+        : path.join(__filename, '../../../assets');
+
+const pkgRunningFolder =
+    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
 
 function splitTextByIndex(text, letter) {
     const index = text.indexOf(letter);
@@ -204,8 +218,7 @@ function rebuildJSON({
 
 function getLocalCounters() {
     const staticPath =
-        config.staticFolderPath ||
-        path.join(path.dirname(process.execPath), 'static');
+        config.staticFolderPath || path.join(pkgRunningFolder, 'static');
 
     const countersListTXT = recursiveFilesSearch({
         dir: staticPath,
@@ -249,14 +262,14 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
         res.writeHead(200, {
             'Content-Type': getContentType('file.html')
         });
-        return res.end(build || emptryCounters);
+        return res.end(build || emptyCounters);
     }
 
     fs.readFile(
-        'F:/coding/wip/tosu/packages/server/assets/homepage.html',
+        path.join(pkgAssetsPath, 'homepage.html'),
         'utf8',
         (err, content) => {
-            const html = content.replace('{{LIST}}', build || emptryNotice);
+            const html = content.replace('{{LIST}}', build || emptyNotice);
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
@@ -290,11 +303,11 @@ export async function buildExternalCounters(
         res.writeHead(200, {
             'Content-Type': getContentType('file.html')
         });
-        return res.end(build || emptryCounters);
+        return res.end(build || emptyCounters);
     }
 
     fs.readFile(
-        'F:/coding/wip/tosu/packages/server/assets/homepage.html',
+        path.join(pkgAssetsPath, 'homepage.html'),
         'utf8',
         (err, content) => {
             const html = content.replace('{{LIST}}', build || noMoreCounters);
@@ -441,7 +454,8 @@ export function buildSettings(res: http.ServerResponse) {
     </div>`;
 
     fs.readFile(
-        'F:/coding/wip/tosu/packages/server/assets/homepage.html',
+        path.join(pkgAssetsPath, 'homepage.html'),
+        // '../assets/homepage.html',
         'utf8',
         (err, content) => {
             const html = content.replace('{{LIST}}', settings);
@@ -467,7 +481,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
         </p>
       </div>`;
     fs.readFile(
-        'F:/coding/wip/tosu/packages/server/assets/homepage.html',
+        path.join(pkgAssetsPath, 'homepage.html'),
         'utf8',
         (err, content) => {
             const html = content.replace('{{LIST}}', pageContent);

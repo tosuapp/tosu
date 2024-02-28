@@ -5,8 +5,8 @@ export const icons_images = {
     'discord.com': '/images/discord-5865f2.svg'
 };
 
-export const emptryNotice = `<div class="no-results">No counters<br /><a href="/?tab=1">Go here to get one 👉</a></div>`;
-export const emptryCounters = `<div class="no-results">No counters<br />Change your search phrase</div>`;
+export const emptyNotice = `<div class="no-results">No counters<br /><a href="/?tab=1">Go here to get one 👉</a></div>`;
+export const emptyCounters = `<div class="no-results">No counters<br />Change your search phrase</div>`;
 export const noMoreCounters = `<div class="no-results">Nice job!<br />You downloaded all available pp counters</div>`;
 
 export const iframeHTML = `<iframe src="{URL}" width="{WIDTH}" height="{HEIGHT}" scrolling="no" frameborder="0"></iframe>`;
