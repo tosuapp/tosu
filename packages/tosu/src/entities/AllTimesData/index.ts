@@ -1,3 +1,4 @@
+import { wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
 import { DataRepo } from '@/entities/DataRepoList';
@@ -328,50 +329,55 @@ export class AllTimesData extends AbstractEntity {
         settings: Settings,
         configurationAddr: number
     ) {
-        const items = process.readInt(configurationAddr + 0x8);
-        const size = process.readInt(configurationAddr + 0x1c);
+        try {
+            const items = process.readInt(configurationAddr + 0x8);
+            const size = process.readInt(configurationAddr + 0x1c);
 
-        for (let i = 0; i < size; i++) {
-            const current = items + 0x8 + 0x10 * i;
+            for (let i = 0; i < size; i++) {
+                const current = items + 0x8 + 0x10 * i;
 
-            const key = process.readSharpString(process.readInt(current));
-            const bindable = process.readInt(current + 0x4);
+                const key = process.readSharpString(process.readInt(current));
+                const bindable = process.readInt(current + 0x4);
 
-            const configBindable = this.configList[key];
+                const configBindable = this.configList[key];
 
-            if (configBindable !== undefined) {
-                let value: any;
+                if (configBindable !== undefined) {
+                    let value: any;
 
-                switch (configBindable.type) {
-                    case 'byte':
-                        value = process.readByte(bindable + 0xc);
-                        break;
-                    case 'bool':
-                        value = process.readByte(bindable + 0xc) == 1;
-                        break;
-                    case 'int':
-                    case 'double':
-                        value = process.readDouble(bindable + 0x4);
-                        break;
-                    case 'string':
-                        value = process.readSharpString(
-                            process.readInt(current + 0x4)
-                        );
-                        break;
-                    case 'bstring':
-                        value = process.readSharpString(
-                            process.readInt(bindable + 0x4)
-                        );
-                        break;
-                    case 'enum':
-                        value = process.readInt(bindable + 0xc);
-                        break;
-                    default:
-                        return;
+                    switch (configBindable.type) {
+                        case 'byte':
+                            value = process.readByte(bindable + 0xc);
+                            break;
+                        case 'bool':
+                            value = process.readByte(bindable + 0xc) == 1;
+                            break;
+                        case 'int':
+                        case 'double':
+                            value = process.readDouble(bindable + 0x4);
+                            break;
+                        case 'string':
+                            value = process.readSharpString(
+                                process.readInt(current + 0x4)
+                            );
+                            break;
+                        case 'bstring':
+                            value = process.readSharpString(
+                                process.readInt(bindable + 0x4)
+                            );
+                            break;
+                        case 'enum':
+                            value = process.readInt(bindable + 0xc);
+                            break;
+                        default:
+                            return;
+                    }
+
+                    configBindable.setValue(settings, value);
                 }
-
-                configBindable.setValue(settings, value);
             }
+        } catch (exc) {
+            wLogger.error("can't update config state");
+            console.error(exc);
         }
     }
 
