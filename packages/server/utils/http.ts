@@ -5,7 +5,6 @@ import { Server } from '../index';
 
 export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
-    pathname: string;
     body: string;
     query: { [key: string]: string };
     params: { [key: string]: string };
