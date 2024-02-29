@@ -107,7 +107,7 @@ export const buildResult = (
         },
         settings: {
             interfaceVisible: settings.showInterface,
-            replayUIVisible: gamePlayData.isReplayUiHidden,
+            replayUIVisible: gamePlayData.isReplayUiHidden == false,
             chatVisibilityStatus: {
                 number: allTimesData.ChatStatus,
                 name: ChatStatus[allTimesData.ChatStatus]
