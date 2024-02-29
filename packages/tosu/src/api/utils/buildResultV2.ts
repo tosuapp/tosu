@@ -114,8 +114,6 @@ export const buildResult = (
             },
 
             leaderboard: {
-                // FIXME: i dont understand where tf you getting it from, it doesnt work in menu
-                available: Boolean(gamePlayData.Leaderboard),
                 visible: gamePlayData.Leaderboard
                     ? gamePlayData.Leaderboard.isScoreboardVisible
                     : false,

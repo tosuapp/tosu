@@ -1,91 +1,91 @@
 export enum BeatmapStatuses {
-    graveyard = '-2',
-    wip = '-1',
-    pending = 0,
-    ranked = 1,
-    approved = 2,
-    qualified = 3,
-    loved = 4
+    Graveyard = '-2',
+    Wip = '-1',
+    Pending = 0,
+    Ranked = 1,
+    Approved = 2,
+    Qualified = 3,
+    Loved = 4
 }
 
 export enum Modes {
-    osu = 0,
-    taiko = 1,
-    fruits = 2,
-    mania = 3
+    Osu = 0,
+    Taiko = 1,
+    Fruits = 2,
+    Mania = 3
 }
 
 export enum BanchoStatusEnum {
-    idle = 0,
-    afk = 1,
-    playing = 2
+    Idle = 0,
+    Afk = 1,
+    Playing = 2
 }
 
 export enum UserLoginStatus {
-    reconnecting = 0,
-    guest = 256,
-    recieving_data = 257,
-    disconnected = 65537,
-    connected = 65793
+    Reconnecting = 0,
+    Guest = 256,
+    Recieving_data = 257,
+    Disconnected = 65537,
+    Connected = 65793
 }
 
 export enum ReleaseStream {
-    cuttingEdge,
-    stable,
-    beta,
-    fallback
+    CuttingEdge,
+    Stable,
+    Beta,
+    Fallback
 }
 
 export enum ScoreMeterType {
-    none,
-    colour,
-    error
+    None,
+    Colour,
+    Error
 }
 
 export enum LeaderboardType {
-    local,
-    global,
-    selectedmods,
-    friends,
-    country
+    Local,
+    Global,
+    Selectedmods,
+    Friends,
+    Country
 }
 
 export enum GroupType {
-    none,
-    artist,
-    bpm,
-    creator,
-    date,
-    difficulty,
-    length,
-    rank,
-    myMaps,
-    search = 12,
-    show_All = 12,
-    title,
-    lastPlayed,
-    onlineFavourites,
-    maniaKeys,
-    mode,
-    collection,
-    rankedStatus
+    None,
+    Artist,
+    BPM,
+    Creator,
+    Date,
+    Difficulty,
+    Length,
+    Rank,
+    MyMaps,
+    Search = 12,
+    Show_All = 12,
+    Title,
+    LastPlayed,
+    OnlineFavourites,
+    ManiaKeys,
+    Mode,
+    Collection,
+    RankedStatus
 }
 
 export enum SortType {
-    artist,
-    bpm,
-    creator,
-    date,
-    difficulty,
-    length,
-    rank,
-    title
+    Artist,
+    BPM,
+    Creator,
+    Date,
+    Difficulty,
+    Length,
+    Rank,
+    Title
 }
 
 export enum ChatStatus {
-    hidden,
-    visible,
-    visibleWithFriendsList
+    Hidden,
+    Visible,
+    VisibleWithFriendsList
 }
 
 export interface ApiV2Answer {
@@ -171,7 +171,6 @@ export interface Mania {
 }
 
 export interface SettingsLeaderboard {
-    available: boolean;
     visible: boolean;
     type: NumberName;
 }
