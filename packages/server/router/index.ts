@@ -41,7 +41,7 @@ export default function buildBaseApi(app: HttpServer) {
         sendJson(res, json);
     });
 
-    app.route(/\/api\/counters\/search\/(?<query>.*)/, 'GET', (req, res) => {
+    app.route(/^\/api\/counters\/search\/(?<query>.*)/, 'GET', (req, res) => {
         try {
             const query = decodeURI(req.params.query)
                 .replace(/[^a-z0-9A-Z]/, '')
@@ -61,7 +61,7 @@ export default function buildBaseApi(app: HttpServer) {
         }
     });
 
-    app.route(/\/api\/counters\/download\/(?<url>.*)/, 'GET', (req, res) => {
+    app.route(/^\/api\/counters\/download\/(?<url>.*)/, 'GET', (req, res) => {
         const folderName = req.query.name;
         if (!folderName) {
             return sendJson(res, {
@@ -121,7 +121,7 @@ export default function buildBaseApi(app: HttpServer) {
         }
     });
 
-    app.route(/\/api\/counters\/open\/(?<name>.*)/, 'GET', (req, res) => {
+    app.route(/^\/api\/counters\/open\/(?<name>.*)/, 'GET', (req, res) => {
         try {
             const folderName = req.params.name;
             if (!folderName) {
@@ -166,7 +166,7 @@ export default function buildBaseApi(app: HttpServer) {
         }
     });
 
-    app.route(/\/api\/counters\/delete\/(?<name>.*)/, 'GET', (req, res) => {
+    app.route(/^\/api\/counters\/delete\/(?<name>.*)/, 'GET', (req, res) => {
         try {
             const folderName = req.params.name;
             if (!folderName) {
@@ -222,7 +222,7 @@ export default function buildBaseApi(app: HttpServer) {
         });
     });
 
-    app.route(/\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/^\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
         fs.readFile(
             path.join(pkgAssetsPath, 'images', req.params.filePath),
             (err, content) => {

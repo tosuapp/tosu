@@ -62,7 +62,7 @@ export default function buildV2Api({
         sendJson(res, json);
     });
 
-    app.route(/\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
 
         const osuInstances: any = Object.values(
@@ -87,7 +87,7 @@ export default function buildV2Api({
         });
     });
 
-    app.route(/\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/^\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
 
         const osuInstances: any = Object.values(
