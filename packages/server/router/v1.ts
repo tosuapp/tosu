@@ -21,7 +21,7 @@ export default function buildV1Api({
         }
     });
 
-    app.route(/\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/^\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
 
         const osuInstances: any = Object.values(
