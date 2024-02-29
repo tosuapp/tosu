@@ -153,9 +153,9 @@ export class GamePlayData extends AbstractEntity {
 
         if (allTimesData.IsWatchingReplay) {
             // rulesetAddr mean ReplayWatcher... Sooo....
-            // Ruleset + 0x1D4
+            // Ruleset + 0x1d8
             this.isReplayUiHidden = Boolean(
-                process.readByte(rulesetAddr + 0x1d4)
+                process.readByte(rulesetAddr + 0x1d8)
             );
         } else {
             this.isReplayUiHidden = false;
