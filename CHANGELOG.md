@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/KotRikD/tosu/compare/v2.1.1...v2.2.0) (2024-03-01)
+
+
+### Features
+
+* Add body parsing for POST, PATCH, PUT requests ([c4cf5e8](https://github.com/KotRikD/tosu/commit/c4cf5e8a922af0aed18f7f2ee004e80d1d40beae))
+* Add button to open counter folder ([f7f3d7a](https://github.com/KotRikD/tosu/commit/f7f3d7a3c47bfc2dc308368bde5fadebcbd8a73d))
+* add config reader ([#63](https://github.com/KotRikD/tosu/issues/63)) ([1e03fb6](https://github.com/KotRikD/tosu/commit/1e03fb6c2bb96c00b4e4629991494afb2b09f5d5))
+* Add header ([33b4253](https://github.com/KotRikD/tosu/commit/33b42537eab76a3e80b5cd7f2d3ca513fcf5dcff))
+* Add pathname to request ([35face6](https://github.com/KotRikD/tosu/commit/35face6f47cdd2562052bdc1ae3499624342e984))
+* add search to counters page ([b5c9dc0](https://github.com/KotRikD/tosu/commit/b5c9dc0e370cbf25a30e6f7a1cacaef768502d9b))
+* Add settings page ([d667bcb](https://github.com/KotRikD/tosu/commit/d667bcb2631b7edf10f33857c982c8edcda82d15))
+* Instruction page ([59c1741](https://github.com/KotRikD/tosu/commit/59c174155339abde0e2fde9b3d416bf1f3b6b67d))
+* package htmls into production build ([a2922fc](https://github.com/KotRikD/tosu/commit/a2922fc882963ccae438f913d7dfdb9686d7f57f))
+* PP Counters Manager ([9d134af](https://github.com/KotRikD/tosu/commit/9d134afb8c33645864137be8bef84245366a0775))
+* Show `config reloaded` message only on if settings was updated ([11fea7b](https://github.com/KotRikD/tosu/commit/11fea7badc7b3545c2e428dddcebe1aabfd40562))
+* Switch from `unzipper` to `adm-zip` ([10f7d3e](https://github.com/KotRikD/tosu/commit/10f7d3eac7e499e767ab835f921c93c89c91c2c3))
+* **tourney:** sort clients by ipc id ([1d08d0d](https://github.com/KotRikD/tosu/commit/1d08d0d2558c3143b7833c8cc20eb89ff02871f2))
+
+
+### Bug Fixes
+
+* .prettierignore ([0f82b69](https://github.com/KotRikD/tosu/commit/0f82b692494912fd9c61f6c7591a5353568ad97c))
+* Add confirm menu for counter delete button ([8bd7840](https://github.com/KotRikD/tosu/commit/8bd7840984b394e39b37e861ba78b428d380aac4))
+* Add encoding to responses ([f7aeba9](https://github.com/KotRikD/tosu/commit/f7aeba90e5881fcef86620cb207e1e81655dbbad))
+* Add error handle to main page ([fd9a0cc](https://github.com/KotRikD/tosu/commit/fd9a0cc355ec22086d06cd5555d2f4d9604a2df7))
+* Create file only when request is started ([707793b](https://github.com/KotRikD/tosu/commit/707793b46e348ec277a8a35be80747585ab846d0))
+* empty counters, missing option, delete local counter ([1d0e4ea](https://github.com/KotRikD/tosu/commit/1d0e4ea73d7b228d9fc8bd5e1399656ce2cc59bb))
+* Fix closing old websocket connections ([326c825](https://github.com/KotRikD/tosu/commit/326c82507d1cf1069304497b7ee1c81f27cfb499))
+* Host files localy ([6765241](https://github.com/KotRikD/tosu/commit/676524189f8a8b19c7a7e063c07554684849a506))
+* Iframe size fix + no counters message ([9a97e64](https://github.com/KotRikD/tosu/commit/9a97e64cd29759bf357abaf3e0b6979dc998322c))
+* make spectating user permanent ptr ([05b1731](https://github.com/KotRikD/tosu/commit/05b1731c03be4e6efef923d1f8a656012c44e766))
+* Minor api fixes ([4518544](https://github.com/KotRikD/tosu/commit/451854423345486ac8506620b8a41a06b7de494d))
+* o7 unzipper ([4124294](https://github.com/KotRikD/tosu/commit/412429481e836e7060fdec94e67694936575a653))
+* Remove download bar after it's finished ([0d52588](https://github.com/KotRikD/tosu/commit/0d52588c1c902306871cacb0b8fcbf209485ffda))
+* replayUIVIsible not working properly ([11451cd](https://github.com/KotRikD/tosu/commit/11451cd32c2c09af46bcb2dcf9be89fbcc1e1d48))
+* Routes bug with regex ([ace496d](https://github.com/KotRikD/tosu/commit/ace496d1b0e6389ba1d4b86264e0cdde27b5b8fb))
+* Sort files by date ([ae5b874](https://github.com/KotRikD/tosu/commit/ae5b8744770853707595062232b12a85b38850de))
+
 ### [2.1.1](https://github.com/KotRikD/tosu/compare/v2.1.0...v2.1.1) (2024-02-26)
 
 
