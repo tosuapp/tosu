@@ -6,7 +6,12 @@ on:
     tags:
       - "v*"
     paths:
-      - "packages/**"
+      - "packages/**/*"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  pull_request:
+    paths:
+      - "packages/**/*"
       - "package.json"
       - "pnpm-lock.yaml"
 
@@ -50,7 +55,7 @@ jobs:
         with: { rust-version: stable, components: clippy }
 
       - name: 🛠️ - Install Deps
-        run: npm install -g pnpm@^8 & pnpm install --frozen-lockfile
+        run: npm install -g pnpm@^8 && pnpm install --frozen-lockfile
 
       - name: 📦 - Build
         run: pnpm build
