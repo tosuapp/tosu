@@ -286,7 +286,6 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
-        console.log(process.readInt(keyOverlayArrayAddr).toString(16));
         return {
             // [Base + 0x8] + 0x1C
             K1Pressed: Boolean(
