@@ -44,12 +44,12 @@ const SCAN_PATTERNS: {
         pattern: '74 2C 85 FF 75 28 A1 ?? ?? ?? ?? 8D 15'
     },
     configurationAddr: {
-        pattern: '8B 0D ?? ?? ?? ?? 39 09 E8 ?? ?? ?? ?? 85 C0 7E',
-        offset: 0x2
+        pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
+        offset: -0xd
     },
     bindingsAddr: {
-        pattern: '33 D2 E8 ?? ?? ?? ?? 8D 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? B9',
-        offset: 0x9
+        pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
+        offset: 0x2a
     },
     rulesetsAddr: {
         pattern: '7D 15 A1 ?? ?? ?? ?? 85 C0'
