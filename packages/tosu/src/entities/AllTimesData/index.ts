@@ -459,8 +459,5 @@ export class AllTimesData extends AbstractEntity {
             settings,
             process.readPointer(bindingsAddr)
         );
-
-        console.log(settings.keybinds.osu.k1);
-        console.log(settings.keybinds.osu.k2);
     }
 }
