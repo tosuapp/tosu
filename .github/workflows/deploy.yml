@@ -6,7 +6,12 @@ on:
     tags:
       - "v*"
     paths:
-      - "packages/**"
+      - "packages/**/*"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  pull_request:
+    paths:
+      - "packages/**/*"
       - "package.json"
       - "pnpm-lock.yaml"
 
@@ -36,11 +41,6 @@ jobs:
         shell: bash
         run: echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
 
-      - name: 📐 - Define variables (2)
-        id: set-artifact-name
-        shell: bash
-        run: echo "ARTIFACT_NAME='tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}'"
-
       - name: 🛠️ - Install Node
         uses: actions/setup-node@v3
         with: { node-version: 18 }
@@ -50,7 +50,7 @@ jobs:
         with: { rust-version: stable, components: clippy }
 
       - name: 🛠️ - Install Deps
-        run: npm install -g pnpm@^8 & pnpm install --frozen-lockfile
+        run: npm install -g pnpm@^8 && pnpm install --frozen-lockfile
 
       - name: 📦 - Build
         run: pnpm build
@@ -59,7 +59,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with: {
-          name: "${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }}",
+          name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/tosu/dist/tosu.exe
         }
 

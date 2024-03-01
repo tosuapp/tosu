@@ -5,8 +5,6 @@ import { DataRepo } from '@/entities/DataRepoList';
 import { AbstractEntity } from '../AbstractEntity';
 
 export class TourneyUserProfileData extends AbstractEntity {
-    UserInfoBase: number = 0;
-
     Accuracy: number = 0.0;
     RankedScore: number = 0;
     PlayCount: number = 0;
@@ -28,38 +26,37 @@ export class TourneyUserProfileData extends AbstractEntity {
             'patterns'
         ]);
 
-        if (!this.UserInfoBase) {
-            this.UserInfoBase = process.readPointer(
-                patterns.getPattern('spectatingUserPtr')
-            );
+        const spectatingUserDrawable = process.readPointer(
+            patterns.getPattern('spectatingUserPtr')
+        );
+        if (!spectatingUserDrawable) {
             wLogger.debug('[TUPD] Slot is not equiped');
             return;
         }
 
         try {
             // UserDrawable + 0x4
-            this.Accuracy = process.readDouble(this.UserInfoBase + 0x4);
+            this.Accuracy = process.readDouble(spectatingUserDrawable + 0x4);
             // UserDrawable + 0xc
-            this.RankedScore = process.readLong(this.UserInfoBase + 0xc);
+            this.RankedScore = process.readLong(spectatingUserDrawable + 0xc);
             // UserDrawable + 0x7C
-            this.PlayCount = process.readInt(this.UserInfoBase + 0x7c);
+            this.PlayCount = process.readInt(spectatingUserDrawable + 0x7c);
             // UserDrawable + 0x84
-            this.GlobalRank = process.readInt(this.UserInfoBase + 0x84);
+            this.GlobalRank = process.readInt(spectatingUserDrawable + 0x84);
             // UserDrawable + 0x9C
-            this.PP = process.readInt(this.UserInfoBase + 0x9c);
+            this.PP = process.readInt(spectatingUserDrawable + 0x9c);
             // [UserDrawable + 0x30]
             this.Name = process.readSharpString(
-                process.readInt(this.UserInfoBase + 0x30)
+                process.readInt(spectatingUserDrawable + 0x30)
             );
             // [UserDrawable + 0x2C]
             this.Country = process.readSharpString(
-                process.readInt(this.UserInfoBase + 0x2c)
+                process.readInt(spectatingUserDrawable + 0x2c)
             );
             // UserDrawable + 0x70
-            this.UserID = process.readInt(this.UserInfoBase + 0x70);
+            this.UserID = process.readInt(spectatingUserDrawable + 0x70);
         } catch (exc) {
             wLogger.error('[TourneyUserProfileData] signature failed');
-            this.UserInfoBase = 0;
         }
 
         wLogger.debug(`[TourneyUserProfileData:updateState] updated`);
