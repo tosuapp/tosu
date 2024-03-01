@@ -6,6 +6,7 @@ export interface PatternData {
     chatCheckerAddr: number;
     skinDataAddr: number;
     configurationAddr: number;
+    bindingsAddr: number;
     rulesetsAddr: number;
     canRunSlowlyAddr: number;
     statusPtr: number;
@@ -29,6 +30,7 @@ export class MemoryPatterns {
             chatCheckerAddr: 0,
             skinDataAddr: 0,
             configurationAddr: 0,
+            bindingsAddr: 0,
             rulesetsAddr: 0,
             canRunSlowlyAddr: 0,
             statusPtr: 0,

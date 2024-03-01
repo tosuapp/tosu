@@ -2,13 +2,17 @@ import { wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
 import { DataRepo } from '@/entities/DataRepoList';
+import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 
 import { AbstractEntity } from '../AbstractEntity';
 import { Settings } from '../Settings';
 
-interface ConfigBindable {
-    type: 'bool' | 'byte' | 'int' | 'double' | 'string' | 'bstring' | 'enum';
+interface IBindable {
     setValue: (settings: Settings, value: any) => void;
+}
+
+interface IConfigBindable extends IBindable {
+    type: 'bool' | 'byte' | 'int' | 'double' | 'string' | 'bstring' | 'enum';
 }
 
 export class AllTimesData extends AbstractEntity {
@@ -22,7 +26,7 @@ export class AllTimesData extends AbstractEntity {
     ShowInterface: boolean = false;
     IsWatchingReplay: number = 0;
 
-    private configList: Record<string, ConfigBindable> = {
+    private configList: Record<string, IConfigBindable> = {
         VolumeUniversal: {
             type: 'int',
             setValue: (settings, value) => {
@@ -222,72 +226,6 @@ export class AllTimesData extends AbstractEntity {
                 settings.sortType = value;
             }
         },
-        keyOsuLeft: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.osu.k1 = value;
-            }
-        },
-        keyOsuRight: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.osu.k2 = value;
-            }
-        },
-        keyOsuSmoke: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.osu.smokeKey = value;
-            }
-        },
-        keyFruitsDash: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.fruits.Dash = value;
-            }
-        },
-        keyFruitsLeft: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.fruits.k1 = value;
-            }
-        },
-        keyFruitsRight: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.fruits.k2 = value;
-            }
-        },
-        keyTaikoInnerLeft: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.taiko.innerLeft = value;
-            }
-        },
-        keyTaikoInnerRight: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.taiko.innerRight = value;
-            }
-        },
-        keyTaikoOuterLeft: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.taiko.outerLeft = value;
-            }
-        },
-        keyTaikoOuterRight: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.taiko.outerRight = value;
-            }
-        },
-        keyQuickRetry: {
-            type: 'string',
-            setValue: (settings, value) => {
-                settings.keybinds.quickRetry = value;
-            }
-        },
         EditorDefaultSkin: {
             type: 'bool',
             setValue: (settings, value) => {
@@ -320,6 +258,64 @@ export class AllTimesData extends AbstractEntity {
         }
     };
 
+    private bindingList: Record<number, IBindable> = {
+        [Bindings.OsuLeft]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.osu.k1 = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.OsuRight]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.osu.k2 = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.OsuSmoke]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.osu.smokeKey = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.FruitsDash]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.fruits.Dash = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.FruitsLeft]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.fruits.k1 = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.FruitsRight]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.fruits.k2 = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.TaikoInnerLeft]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.taiko.innerLeft = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.TaikoInnerRight]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.taiko.innerRight = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.TaikoOuterLeft]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.taiko.outerLeft = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.TaikoOuterRight]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.taiko.outerRight = VirtualKeyCode[value];
+            }
+        },
+        [Bindings.QuickRetry]: {
+            setValue: (settings, value: number) => {
+                settings.keybinds.quickRetry = VirtualKeyCode[value];
+            }
+        }
+    };
+
     constructor(services: DataRepo) {
         super(services);
     }
@@ -330,12 +326,7 @@ export class AllTimesData extends AbstractEntity {
         configurationAddr: number
     ) {
         try {
-            const items = process.readInt(configurationAddr + 0x8);
-            const size = process.readInt(configurationAddr + 0x1c);
-
-            for (let i = 0; i < size; i++) {
-                const current = items + 0x8 + 0x10 * i;
-
+            process.readSharpDictionary(configurationAddr, (current) => {
                 const key = process.readSharpString(process.readInt(current));
                 const bindable = process.readInt(current + 0x4);
 
@@ -369,14 +360,39 @@ export class AllTimesData extends AbstractEntity {
                             value = process.readInt(bindable + 0xc);
                             break;
                         default:
-                            return;
+                            return false;
                     }
 
                     configBindable.setValue(settings, value);
                 }
-            }
+                return true;
+            });
         } catch (exc) {
             wLogger.error("can't update config state");
+            console.error(exc);
+        }
+    }
+
+    async updateBindingState(
+        process: Process,
+        settings: Settings,
+        bindingConfigAddr: number
+    ) {
+        try {
+            process.readSharpDictionary(bindingConfigAddr, (current) => {
+                const key = process.readInt(current);
+                const value = process.readInt(current + 0xc);
+
+                const bindable = this.bindingList[key];
+
+                if (bindable !== undefined) {
+                    bindable.setValue(settings, value);
+                }
+
+                return true;
+            });
+        } catch (exc) {
+            wLogger.error("can't update binding state");
             console.error(exc);
         }
     }
@@ -395,6 +411,7 @@ export class AllTimesData extends AbstractEntity {
             chatCheckerAddr,
             skinDataAddr,
             configurationAddr,
+            bindingsAddr,
             canRunSlowlyAddr,
             gameTimePtr
         } = patterns.getPatterns([
@@ -404,6 +421,7 @@ export class AllTimesData extends AbstractEntity {
             'chatCheckerAddr',
             'skinDataAddr',
             'configurationAddr',
+            'bindingsAddr',
             'canRunSlowlyAddr',
             'gameTimePtr'
         ]);
@@ -435,5 +453,14 @@ export class AllTimesData extends AbstractEntity {
             settings,
             process.readPointer(configurationAddr)
         );
+
+        this.updateBindingState(
+            process,
+            settings,
+            process.readPointer(bindingsAddr)
+        );
+
+        console.log(settings.keybinds.osu.k1);
+        console.log(settings.keybinds.osu.k2);
     }
 }

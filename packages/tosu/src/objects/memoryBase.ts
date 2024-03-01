@@ -10,6 +10,7 @@ export interface BaseData {
     chatCheckerAddr: number;
     skinDataAddr: number;
     configurationAddr: number;
+    bindingsAddr: number;
     rulesetsAddr: number;
     canRunSlowlyAddr: number;
     getAudioLengthAddr: number;
@@ -33,6 +34,7 @@ export class MemoryBase {
             chatCheckerAddr: 0,
             skinDataAddr: 0,
             configurationAddr: 0,
+            bindingsAddr: 0,
             rulesetsAddr: 0,
             canRunSlowlyAddr: 0,
             getAudioLengthAddr: 0,
