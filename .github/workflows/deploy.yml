@@ -1,12 +1,14 @@
-name: Build and Deploy
+name: build & deploy
 
 on:
   push:
-    branches:
-      - 'master'
+    branches: [ "master" ]
     tags:
-      - 'v*'
-  pull_request:
+      - "v*"
+    paths:
+      - "packages/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 concurrency:
   group: build-${{ github.sha }}
@@ -19,59 +21,55 @@ jobs:
   build:
     strategy:
       matrix:
-        # os: [windows-latest, ubuntu-latest, macos-latest]
-        os: [windows-latest]
+        os: [ windows-latest ]
 
-    runs-on: "${{ matrix.os }}"
-    name: "Build on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+
+    name: "build for ${{ matrix.os }}"
     steps:
-      - name: Checkout 🛎️
+      - name: 🛎️ - Checkout
         uses: actions/checkout@v3
 
-      - name: Set output pr sha
+      - name: 📐 - set output PR sha
         if: github.event_name == 'pull_request'
         id: set-pr-sha
         shell: bash
-        run: |
-          echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
+        run: echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
 
-      - name: Install Node.js 🔧
+      - name: 🛠️ - Install Node
         uses: actions/setup-node@v3
-        with:
-          node-version: 18
+        with: { node-version: 18 }
 
-      - name: Install Rust 🔧
+      - name: 🛠️ - Install Rust
         uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
-          components: clippy
+        with: { rust-version: stable, components: clippy }
 
-      - name: Install Deps 🔧
-        run: |
-          npm install -g pnpm@^8
-          pnpm install --frozen-lockfile
+      - name: 🛠️ - Install Deps
+        run: npm install -g pnpm@^8 & pnpm install --frozen-lockfile
 
-      - name: Build App 🔧
-        run: |
-          pnpm run build
+      - name: 📦 - Build
+        run: pnpm build
 
-      # - name: Upload Artifact (Linux)
-      #   if: startsWith( matrix.os, 'ubuntu' )
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ matrix.os }}-${{ github.ref_name }}
-      #     path: dist/tosu
-  
-      # - name: Upload Artifact (Mac OS)
-      #   if: startsWith( matrix.os, 'macos' )
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ matrix.os }}-${{ github.ref_name }}
-      #     path: dist/tosu.app
-
-      - name: Upload Artifact (Windows)
-        if: startsWith( matrix.os, 'windows' )
+      - name: 🚀 - Upload artifacts for windows
+        if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
-        with:
-          name: tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}
+        with: {
+          name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/tosu/dist/tosu.exe
+        }
+
+      - name: 🚀 - Upload artifacts for linux
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with: {
+          name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
+          path: packages/tosu/dist/tosu.exe
+        }
+
+      - name: 🚀 - Upload artifacts for mac
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v3
+        with: {
+          name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
+          path: packages/tosu/dist/tosu.exe
+        }
