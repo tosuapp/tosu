@@ -58,18 +58,18 @@ jobs:
           path: packages/tosu/dist/tosu.exe
         }
 
-      - name: 🚀 - Upload artifacts for linux
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
-        with: {
-          name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
-          path: packages/tosu/dist/tosu.exe
-        }
+      # - name: 🚀 - Upload artifacts for linux
+      #   if: matrix.os == 'ubuntu-latest'
+      #   uses: actions/upload-artifact@v3
+      #   with: {
+      #     name: "${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }}",
+      #     path: packages/tosu/dist/tosu.exe
+      #  }
 
-      - name: 🚀 - Upload artifacts for mac
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v3
-        with: {
-          name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
-          path: packages/tosu/dist/tosu.exe
-        }
+      # - name: 🚀 - Upload artifacts for mac
+      #   if: matrix.os == 'macos-latest'
+      #   uses: actions/upload-artifact@v3
+      #   with: {
+      #     name: "${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }}",
+      #     path: packages/tosu/dist/tosu.exe
+      #   }
