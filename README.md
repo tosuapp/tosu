@@ -41,9 +41,9 @@ Instruction
 1. Download [tosu](https://github.com/KotRikD/tosu/releases/latest)
 2. Extract tosu.exe to a `Folder`
 3. Inside `Folder` create `static` folder (if it's doesn't already)
-4. Download the [PP Counters](https://github.com/cyperdark/osu-counters/tree/master/counters) unpack it to `static` folder. After that you should be ready to go!
-5. OR You can place your `pp counter` to `static` folder directory, or create sub folder `/static/{your_counter_name}`
-6. Your counter folder should have this path for index.html `/static/{your_counter_name}/index.html` or `/static/index.html` (if you have only one counter, and want to place it in root folder)
+4. Use overlays manager to download counters: `http://127.0.0.1:24050` (by default)
+5. OR You can create sub folder `/static/{your_counter_name}`, and put you pp counter files in here (You must have index.html)
+6. Your counter folder should have this path for index.html `/static/{your_counter_name}/index.html`
 7. Run `tosu.exe`, and it will create `tosu.env`, it's a file for tosu settings, you can tweak it how you want
 8. Have fun!
 
