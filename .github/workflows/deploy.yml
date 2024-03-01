@@ -30,11 +30,16 @@ jobs:
       - name: 🛎️ - Checkout
         uses: actions/checkout@v3
 
-      - name: 📐 - set output PR sha
+      - name: 📐 - Define variables (1)
         if: github.event_name == 'pull_request'
         id: set-pr-sha
         shell: bash
         run: echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: 📐 - Define variables (2)
+        id: set-artifact-name
+        shell: bash
+        run: echo "ARTIFACT_NAME='tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}'"
 
       - name: 🛠️ - Install Node
         uses: actions/setup-node@v3
@@ -54,7 +59,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with: {
-          name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
+          name: "${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }}",
           path: packages/tosu/dist/tosu.exe
         }
 
