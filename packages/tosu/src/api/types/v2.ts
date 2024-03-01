@@ -1,32 +1,91 @@
 export enum BeatmapStatuses {
-    graveyard = '-2',
-    wip = '-1',
-    pending = 0,
-    ranked = 1,
-    approved = 2,
-    qualified = 3,
-    loved = 4
+    Graveyard = '-2',
+    Wip = '-1',
+    Pending = 0,
+    Ranked = 1,
+    Approved = 2,
+    Qualified = 3,
+    Loved = 4
 }
 
 export enum Modes {
-    osu = 0,
-    taiko = 1,
-    fruits = 2,
-    mania = 3
+    Osu = 0,
+    Taiko = 1,
+    Fruits = 2,
+    Mania = 3
 }
 
 export enum BanchoStatusEnum {
-    idle = 0,
-    afk = 1,
-    playing = 2
+    Idle = 0,
+    Afk = 1,
+    Playing = 2
 }
 
 export enum UserLoginStatus {
-    reconnecting = 0,
-    guest = 256,
-    recieving_data = 257,
-    disconnected = 65537,
-    connected = 65793
+    Reconnecting = 0,
+    Guest = 256,
+    Recieving_data = 257,
+    Disconnected = 65537,
+    Connected = 65793
+}
+
+export enum ReleaseStream {
+    CuttingEdge,
+    Stable,
+    Beta,
+    Fallback
+}
+
+export enum ScoreMeterType {
+    None,
+    Colour,
+    Error
+}
+
+export enum LeaderboardType {
+    Local,
+    Global,
+    Selectedmods,
+    Friends,
+    Country
+}
+
+export enum GroupType {
+    None,
+    Artist,
+    BPM,
+    Creator,
+    Date,
+    Difficulty,
+    Length,
+    Rank,
+    MyMaps,
+    Search = 12,
+    Show_All = 12,
+    Title,
+    LastPlayed,
+    OnlineFavourites,
+    ManiaKeys,
+    Mode,
+    Collection,
+    RankedStatus
+}
+
+export enum SortType {
+    Artist,
+    BPM,
+    Creator,
+    Date,
+    Difficulty,
+    Length,
+    Rank,
+    Title
+}
+
+export enum ChatStatus {
+    Hidden,
+    Visible,
+    VisibleWithFriendsList
 }
 
 export interface ApiV2Answer {
@@ -59,12 +118,129 @@ export interface Session {
 
 export interface Settings {
     interfaceVisible: boolean;
-    chatVisible: number;
-    beatmapHasLeaderboard: boolean;
-    leaderboardVisible: boolean;
     replayUIVisible: boolean;
+    chatVisibilityStatus: NumberName;
+    leaderboard: SettingsLeaderboard;
+
+    progressBarType: boolean;
     bassDensity: number;
+
+    resolution: Resolution;
+    client: Client;
+
+    scoreMeter: ScoreMeter;
+    cursor: Cursor;
+    mouse: Mouse;
+    mania: Mania;
+
+    sort: NumberName;
+    group: NumberName;
+
+    skin: Skin;
     mode: NumberName;
+    audio: Audio;
+    background: Background;
+
+    keybinds: Keybinds;
+}
+
+export interface Skin {
+    useDefaultSkinInEditor: boolean;
+    ignoreBeatmapSkins: boolean;
+    tintSliderBall: boolean;
+    useTaikoSkin: boolean;
+    name: string;
+}
+
+export interface Cursor {
+    useSkinCursor: boolean;
+    autoSize: boolean;
+    size: number;
+}
+
+export interface Mouse {
+    rawInput: boolean;
+    disableButtons: boolean;
+    disableWheel: boolean;
+    sensitivity: number;
+}
+
+export interface Mania {
+    speedBPMScale: boolean;
+    usePerBeatmapSpeedScale: boolean;
+}
+
+export interface SettingsLeaderboard {
+    visible: boolean;
+    type: NumberName;
+}
+
+export interface Resolution {
+    fullscreen: boolean;
+    width: number;
+    height: number;
+    widthFullscreen: number;
+    heightFullscreen: number;
+}
+
+export interface Client {
+    updateAvailable: boolean;
+    branch: number;
+    version: string;
+}
+
+export interface ScoreMeter {
+    type: NumberName;
+    size: number;
+}
+
+export interface Background {
+    storyboard: boolean;
+    video: boolean;
+    dim: number;
+}
+
+export interface Audio {
+    ignoreBeatmapSounds: boolean;
+    useSkinSamples: boolean;
+    volume: Volume;
+    offset: Offset;
+}
+
+export interface Offset {
+    universal: number;
+}
+
+export interface Volume {
+    master: number;
+    music: number;
+    effect: number;
+}
+
+export interface Keybinds {
+    osu: Osu;
+    fruits: Fruits;
+    taiko: Taiko;
+    quickRetry: string;
+}
+
+export interface Osu {
+    k1: string;
+    k2: string;
+    smokeKey: string;
+}
+
+export interface Fruits {
+    k1: string;
+    k2: string;
+    Dash: string;
+}
+
+export interface Taiko {
+    innerLeft: string;
+    innerRight: string;
+    outerLeft: string;
+    outerRight: string;
 }
 
 export interface NumberName {

@@ -203,7 +203,7 @@ export class BeatmapPPData extends AbstractEntity {
                 hp: menuData.HP
             });
         } catch (_) {
-            wLogger.debug("can't get map");
+            wLogger.debug(`can't get map: ${mapPath}`);
             return;
         }
 

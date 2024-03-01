@@ -58,7 +58,7 @@ Features
 - [X] Brand _**new api**_ for websocket
 - [x] _**In-game**_ overlay (based on gosumemory closed overlay injection)
 - [x] _**Available**_ websocket data:
-  - Settings _**(limited atm)**_
+  - Settings
   - Gameplay data
   - User ingame data
   - Beatmap data

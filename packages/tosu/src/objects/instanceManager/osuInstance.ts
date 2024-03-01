@@ -41,12 +41,16 @@ const SCAN_PATTERNS: {
     chatCheckerAddr: {
         pattern: '0A D7 23 3C 00 00 ?? 01'
     },
-
     skinDataAddr: {
         pattern: '74 2C 85 FF 75 28 A1 ?? ?? ?? ?? 8D 15'
     },
-    settingsClassAddr: {
-        pattern: '83 E0 20 85 C0 7E 2F'
+    configurationAddr: {
+        pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
+        offset: -0xd
+    },
+    bindingsAddr: {
+        pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
+        offset: 0x2a
     },
     rulesetsAddr: {
         pattern: '7D 15 A1 ?? ?? ?? ?? 85 C0'
@@ -248,14 +252,14 @@ export class OsuInstance {
                     settings.setGameFolder(path.join(this.path, '..'));
 
                     // condition when user have different BeatmapDirectory in osu! config
-                    if (fs.existsSync(allTimesData.SongsFolder)) {
-                        settings.setSongsFolder(allTimesData.SongsFolder);
+                    if (fs.existsSync(settings.BeatmapDirectory)) {
+                        settings.setSongsFolder(settings.BeatmapDirectory);
                     } else {
                         settings.setSongsFolder(
                             path.join(
                                 this.path,
                                 '../',
-                                allTimesData.SongsFolder
+                                settings.BeatmapDirectory
                             )
                         );
                     }

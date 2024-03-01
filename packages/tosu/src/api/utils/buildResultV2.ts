@@ -12,8 +12,13 @@ import {
     ApiV2Answer,
     BanchoStatusEnum,
     BeatmapStatuses,
+    ChatStatus,
+    GroupType,
     Leaderboard,
+    LeaderboardType,
     Modes,
+    ScoreMeterType,
+    SortType,
     Tourney,
     TourneyChatMessages,
     TourneyClients,
@@ -101,22 +106,61 @@ export const buildResult = (
             playCount: 0 // need counting
         },
         settings: {
-            leaderboardVisible: gamePlayData.Leaderboard
-                ? gamePlayData.Leaderboard.isScoreboardVisible
-                : false,
             interfaceVisible: settings.showInterface,
-            replayUIVisible: gamePlayData.isReplayUiHidden,
-            chatVisible: Number(Boolean(allTimesData.ChatStatus)),
+            replayUIVisible: gamePlayData.isReplayUiHidden == false,
+            chatVisibilityStatus: {
+                number: allTimesData.ChatStatus,
+                name: ChatStatus[allTimesData.ChatStatus]
+            },
 
-            beatmapHasLeaderboard: Boolean(gamePlayData.Leaderboard),
-            // userLogined: userProfile.isConnected, // we dont have that, yet
+            leaderboard: {
+                visible: gamePlayData.Leaderboard
+                    ? gamePlayData.Leaderboard.isScoreboardVisible
+                    : false,
+                type: {
+                    number: settings.leaderboardType,
+                    name: LeaderboardType[settings.leaderboardType]
+                }
+            },
 
+            progressBarType: settings.progressBarType,
             bassDensity: bassDensityData.density,
 
+            resolution: settings.resolution,
+            client: settings.client,
+
+            scoreMeter: {
+                type: {
+                    number: settings.scoreMeter.type,
+                    name: ScoreMeterType[settings.scoreMeter.type]
+                },
+                size: settings.scoreMeter.size
+            },
+            cursor: settings.cursor,
+            mouse: settings.mouse,
+            mania: settings.mania,
+
+            sort: {
+                number: settings.sortType,
+                name: SortType[settings.sortType]
+            },
+            group: {
+                number: settings.groupType,
+                name: GroupType[settings.groupType]
+            },
+
+            skin: settings.skin,
             mode: {
                 number: menuData.MenuGameMode,
                 name: Modes[menuData.MenuGameMode]
-            }
+            },
+            audio: {
+                ...settings.audio,
+                offset: settings.offset
+            },
+            background: settings.background,
+
+            keybinds: settings.keybinds
         },
         profile: {
             userStatus: {
@@ -227,28 +271,28 @@ export const buildResult = (
                 },
 
                 ar: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.AR),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.ar
-                    ),
-                    converted: fixDecimals(menuData.AR)
+                    )
                 },
                 cs: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.CS),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.cs
-                    ),
-                    converted: fixDecimals(menuData.CS)
+                    )
                 },
                 od: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.OD),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.od
-                    ),
-                    converted: fixDecimals(menuData.OD)
+                    )
                 },
                 hp: {
-                    original: fixDecimals(
+                    original: fixDecimals(menuData.HP),
+                    converted: fixDecimals(
                         beatmapPpData.calculatedMapAttributes.hp
-                    ),
-                    converted: fixDecimals(menuData.HP)
+                    )
                 },
 
                 bpm: {

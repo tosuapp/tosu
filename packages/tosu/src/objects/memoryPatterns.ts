@@ -5,7 +5,8 @@ export interface PatternData {
     playTimeAddr: number;
     chatCheckerAddr: number;
     skinDataAddr: number;
-    settingsClassAddr: number;
+    configurationAddr: number;
+    bindingsAddr: number;
     rulesetsAddr: number;
     canRunSlowlyAddr: number;
     statusPtr: number;
@@ -29,7 +30,8 @@ export class MemoryPatterns {
             playTimeAddr: 0,
             chatCheckerAddr: 0,
             skinDataAddr: 0,
-            settingsClassAddr: 0,
+            configurationAddr: 0,
+            bindingsAddr: 0,
             rulesetsAddr: 0,
             canRunSlowlyAddr: 0,
             statusPtr: 0,

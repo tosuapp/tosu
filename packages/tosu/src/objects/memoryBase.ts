@@ -9,7 +9,8 @@ export interface BaseData {
     playTimeAddr: number;
     chatCheckerAddr: number;
     skinDataAddr: number;
-    settingsClassAddr: number;
+    configurationAddr: number;
+    bindingsAddr: number;
     rulesetsAddr: number;
     canRunSlowlyAddr: number;
     getAudioLengthAddr: number;
@@ -32,7 +33,8 @@ export class MemoryBase {
             playTimeAddr: 0,
             chatCheckerAddr: 0,
             skinDataAddr: 0,
-            settingsClassAddr: 0,
+            configurationAddr: 0,
+            bindingsAddr: 0,
             rulesetsAddr: 0,
             canRunSlowlyAddr: 0,
             getAudioLengthAddr: 0,
