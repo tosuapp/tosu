@@ -77,7 +77,7 @@ Features
 
 In-game overlay
 ---
-- To enable it, you need to edit `tosu.env`, and turn on `ENABLE_GOSU_OVERLA=true` (make it equal `true`)
+- To enable it, you need to edit `tosu.env`, and turn on `ENABLE_GOSU_OVERLAY=true` (make it equal `true`)
 ---
 
 <br>
