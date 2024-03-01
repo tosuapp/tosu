@@ -1,18 +1,10 @@
 <p align="center">
   <img alt="Version" src="https://img.shields.io/github/release/KotRikD/tosu.svg?style=for-the-badge" />
   <img src="https://img.shields.io/badge/node-%3E%3D18.14.2-blue.svg?style=for-the-badge&logo=node.js&logoColor=white" />
-  <a href="https://github.com/KotRikD/tosu#readme" target="_blank">
-    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg?style=for-the-badge" />
-  </a>
-  <a href="https://github.com/KotRikD/tosu/graphs/commit-activity" target="_blank">
-    <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge" />
-  </a>
-  <a href="https://github.com/KotRikD/tosu/blob/master/LICENSE" target="_blank">
-    <img alt="License: GPL--3.0" src="https://img.shields.io/github/license/KotRikD/tosu?style=for-the-badge" />
-  </a>
-  <a href="https://twitter.com/kotrik0" target="_blank">
-    <img alt="Twitter: kotrik0" src="https://img.shields.io/badge/kotrik0-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
-  </a>
+  <a href="https://github.com/KotRikD/tosu#readme" target="_blank"><img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg?style=for-the-badge" /></a>
+  <a href="https://github.com/KotRikD/tosu/graphs/commit-activity" target="_blank"><img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge" /></a>
+  <a href="https://github.com/KotRikD/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/KotRikD/tosu?style=for-the-badge" /></a>
+  <a href="https://twitter.com/kotrik0" target="_blank"><img alt="Twitter: kotrik0" src="https://img.shields.io/badge/kotrik0-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" /></a>
 </p>
 
 
