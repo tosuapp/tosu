@@ -2,10 +2,10 @@ import {
     downloadFile,
     platformResolver,
     sleep,
-    unzipTosu,
+    unzip,
     wLogger
 } from '@tosu/common';
-import { exec, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -14,7 +14,6 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
 const repositoryName = 'tosu';
 const fileDestination = path.join(process.cwd(), 'update.zip');
-const newExecutablePath = path.join(process.cwd(), 'tosu.exe');
 const backupExecutablePath = path.join(process.cwd(), 'tosu_old.exe');
 
 const deleteNotLocked = async (filePath: string) => {
@@ -35,9 +34,7 @@ export const autoUpdater = () =>
     new Promise(async (resolve) => {
         wLogger.info('Checking updates');
 
-        const { platformType, platformFileType } = platformResolver(
-            process.platform
-        );
+        const { platformType } = platformResolver(process.platform);
 
         if (platformType === '') {
             wLogger.warn(
@@ -64,6 +61,7 @@ export const autoUpdater = () =>
 
             if (fs.existsSync(fileDestination))
                 await deleteNotLocked(fileDestination);
+            await sleep(5 * 1000);
             if (fs.existsSync(backupExecutablePath))
                 await deleteNotLocked(backupExecutablePath);
 
@@ -86,39 +84,23 @@ export const autoUpdater = () =>
             fileDestination
         );
 
-        const unzipExecutable = await unzipTosu(downloadAsset, process.cwd());
-
         const currentExecutablePath = process.argv[0]; // Path to the current executable
 
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
-        await fs.promises.rename(unzipExecutable, newExecutablePath);
+
+        await unzip(downloadAsset, process.cwd());
 
         wLogger.info('Restarting program');
 
-        // Start the updated executable
-        const oldProcess = spawn(backupExecutablePath, [], {
+        spawn(process.argv[0], process.argv.slice(1), {
             detached: true,
+            shell: true,
             stdio: 'ignore'
-        });
+        }).unref();
 
-        oldProcess.unref();
+        wLogger.info('Closing program');
 
-        exec(
-            `start "" "${newExecutablePath}"`,
-            async (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`Error starting updated process: ${error}`);
-                    return;
-                }
+        await sleep(1000);
 
-                await sleep(2500);
-
-                wLogger.info('Closing program');
-
-                await sleep(1000);
-
-                oldProcess.kill();
-                process.exit();
-            }
-        );
+        process.exit();
     });
