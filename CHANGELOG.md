@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/KotRikD/tosu/compare/v2.2.0...v2.3.0) (2024-03-02)
+
+
+### Features
+
+* Comment out unsupported platforms. ([3de1407](https://github.com/KotRikD/tosu/commit/3de1407e7813cb5b40f11ee1033a24a417cbb94f))
+* Define artifact name as env variable ([c5eb76e](https://github.com/KotRikD/tosu/commit/c5eb76ee72d77735c87c22dd1c1d9b5623b7cf88))
+
+
+### Bug Fixes
+
+* **ci:** glob ([511cbce](https://github.com/KotRikD/tosu/commit/511cbce20a2fb1bdac0b470ef296d36f6f924a43))
+* **ci:** return old style ([9b32507](https://github.com/KotRikD/tosu/commit/9b3250752b4128d867bcc6d2bb0ea9650f12fc22))
+* improve deploy.yml ([463d220](https://github.com/KotRikD/tosu/commit/463d220d6e50d845b32e58b403a0ab153be23a9d))
+* updater can't unarchive and restart downloaded update :/ ([03caca8](https://github.com/KotRikD/tosu/commit/03caca8d1d122fd241273e101299b76f1282d9a9))
+* user drawable caches and kernel panics if GC clears it ([5c4548a](https://github.com/KotRikD/tosu/commit/5c4548a4c115571cc8a0815068d6134210b7f723))
+
 ## [2.2.0](https://github.com/KotRikD/tosu/compare/v2.1.1...v2.2.0) (2024-03-01)
 
 
