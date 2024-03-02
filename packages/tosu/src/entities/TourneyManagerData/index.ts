@@ -67,13 +67,9 @@ export class TourneyManagerData extends AbstractEntity {
         // BO           int32  `mem:"[Ruleset + 0x20] + 0x30"`
         this.BestOf = process.readInt(teamRightBase + 0x30);
         // StarsVisible int8   `mem:"[Ruleset + 0x20] + 0x38"`
-        this.StarsVisible = Boolean(
-            process.readShort(teamRightBase + 0x38) - 255
-        );
+        this.StarsVisible = Boolean(process.readByte(teamRightBase + 0x38));
         // ScoreVisible int8   `mem:"[Ruleset + 0x20] + 0x39"`
-        this.ScoreVisible = Boolean(
-            process.readShort(teamRightBase + 0x39) - 255
-        );
+        this.ScoreVisible = Boolean(process.readByte(teamRightBase + 0x39));
         // TeamOneName  string `mem:"[[[Ruleset + 0x1C] + 0x20] + 0x144]"`
         this.FirstTeamName = process.readSharpString(
             process.readInt(process.readInt(teamLeftBase + 0x20) + 0x144)
@@ -94,9 +90,13 @@ export class TourneyManagerData extends AbstractEntity {
         const chatBase = this.ChatAreaAddr - 0x44;
 
         // [Base + 0x1C] + 0x4
-        const tabsBase = process.readInt(
-            process.readInt(chatBase + 0x1c) + 0x4
-        );
+        let tabsBase = 0;
+        try {
+            tabsBase = process.readInt(process.readInt(chatBase + 0x1c) + 0x4);
+        } catch (_) {
+            wLogger.debug("can't find tabs, probably they're missing rn");
+            return;
+        }
         const tabsLength = process.readInt(tabsBase + 0x4);
 
         for (let i = 0; i < tabsLength; i++) {
