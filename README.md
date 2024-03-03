@@ -32,13 +32,11 @@ Instruction
 ---
 1. Download [tosu](https://github.com/KotRikD/tosu/releases/latest)
 2. Extract tosu.exe to a `Folder`
-3. Inside `Folder` create `static` folder (if it's doesn't already)
-4. Use overlays manager to download counters: `http://127.0.0.1:24050` (by default)
-5. OR You can create sub folder `/static/{your_counter_name}`, and put you pp counter files in here (You must have index.html)
-6. Your counter folder should have this path for index.html `/static/{your_counter_name}/index.html`
-7. Run `tosu.exe`, and it will create `tosu.env`, it's a file for tosu settings, you can tweak it how you want
+3. Run `tosu.exe`
+4. Go to [http://127.0.0.1:24050](http://127.0.0.1:24050)
+5. Now you in overlays dashboard, in here you can download counters, or tweek settings of tosu
+6. Here you can watch showcase of dashboard: [link](https://youtu.be/3eW4TD_zwhM)
 8. Have fun!
-
 ---
 
 <br>
