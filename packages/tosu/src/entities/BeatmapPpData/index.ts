@@ -3,6 +3,7 @@ import { config, wLogger } from '@tosu/common';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
+import fs from 'fs';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { DataRepo } from '@/entities/DataRepoList';
@@ -186,7 +187,7 @@ export class BeatmapPPData extends AbstractEntity {
         return this.beatmap;
     }
 
-    async updateMapMetadata(currentMods: number) {
+    updateMapMetadata(currentMods: number) {
         const start_time = performance.now();
 
         const { menuData, settings } = this.services.getServices([
@@ -200,18 +201,23 @@ export class BeatmapPPData extends AbstractEntity {
             menuData.Folder,
             menuData.Path
         );
+
+        let beatmapContent: string;
+
         try {
-            this.beatmap = new Beatmap({
-                path: mapPath,
-                ar: menuData.AR,
-                od: menuData.OD,
-                cs: menuData.CS,
-                hp: menuData.HP
-            });
-        } catch (_) {
+            beatmapContent = fs.readFileSync(mapPath, 'utf8');
+        } catch (error) {
             wLogger.debug(`BPPD(updateMapMetadata) Can't get map: ${mapPath}`);
             return;
         }
+
+        this.beatmap = new Beatmap({
+            content: beatmapContent,
+            ar: menuData.AR,
+            od: menuData.OD,
+            cs: menuData.CS,
+            hp: menuData.HP
+        });
 
         const beatmap_check_time = performance.now();
         wLogger.debug(
@@ -252,13 +258,15 @@ export class BeatmapPPData extends AbstractEntity {
         try {
             const decoder = new BeatmapDecoder();
 
-            lazerBeatmap = await decoder.decodeFromPath(mapPath, {
+            lazerBeatmap = decoder.decodeFromString(beatmapContent, {
                 parseColours: false,
                 parseDifficulty: false,
                 parseEditor: false,
                 parseEvents: true,
                 parseGeneral: false,
-                parseMetadata: false
+                parseStoryboard: false,
+                parseMetadata: false,
+                parseTimingPoints: false
             });
 
             const { bpm, bpmMin, bpmMax } = lazerBeatmap;
