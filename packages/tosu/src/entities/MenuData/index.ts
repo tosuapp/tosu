@@ -32,6 +32,8 @@ export class MenuData extends AbstractEntity {
 
     previousMD5: string = '';
 
+    mp3ErrorAttempts: number = 0;
+
     constructor(services: DataRepo) {
         super(services);
     }
@@ -128,17 +130,31 @@ export class MenuData extends AbstractEntity {
     }
 
     updateMP3Length() {
-        const { process, patterns } = this.services.getServices([
-            'process',
-            'patterns'
-        ]);
+        try {
+            const { process, patterns } = this.services.getServices([
+                'process',
+                'patterns'
+            ]);
 
-        // [[GetAudioLength + 0x7] + 0x4]
-        this.MP3Length = Math.round(
-            process.readDouble(
-                process.readPointer(patterns.getPattern('getAudioLengthPtr')) +
-                    0x4
-            )
-        );
+            // [[GetAudioLength + 0x7] + 0x4]
+            this.MP3Length = Math.round(
+                process.readDouble(
+                    process.readPointer(
+                        patterns.getPattern('getAudioLengthPtr')
+                    ) + 0x4
+                )
+            );
+
+            this.mp3ErrorAttempts = 0;
+        } catch (exc) {
+            this.mp3ErrorAttempts += 1;
+
+            if (this.mp3ErrorAttempts > 5) {
+                wLogger.error(
+                    `Unable to parse beatmap mp3 length (you can ignore it)`
+                );
+                console.error(exc);
+            }
+        }
     }
 }

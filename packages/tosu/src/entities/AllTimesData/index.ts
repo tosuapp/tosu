@@ -26,6 +26,243 @@ export class AllTimesData extends AbstractEntity {
     ShowInterface: boolean = false;
     IsWatchingReplay: number = 0;
 
+    bindingNames = new Map();
+
+    configStateErrorAttempts: number = 0;
+    bindingStateErrorAttempts: number = 0;
+
+    private configList: Record<string, IConfigBindable> = {
+        VolumeUniversal: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.audio.volume.master = value;
+            }
+        },
+        VolumeEffect: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.audio.volume.effect = value;
+            }
+        },
+        VolumeMusic: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.audio.volume.music = value;
+            }
+        },
+        _ReleaseStream: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.client.branch = value;
+            }
+        },
+        DimLevel: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.background.dim = value;
+            }
+        },
+        ShowStoryboard: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.background.storyboard = value;
+            }
+        },
+        ShowInterface: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.showInterface = value;
+            }
+        },
+        BeatmapDirectory: {
+            type: 'bstring',
+            setValue: (settings, value) => {
+                settings.BeatmapDirectory = value;
+            }
+        },
+        ScoreMeter: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.scoreMeter.type = value;
+            }
+        },
+        ScoreMeterScale: {
+            type: 'double',
+            setValue: (settings, value) => {
+                settings.scoreMeter.size = value;
+            }
+        },
+        Offset: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.offset.universal = value;
+            }
+        },
+        CursorSize: {
+            type: 'double',
+            setValue: (settings, value) => {
+                settings.cursor.size = value;
+            }
+        },
+        MouseSpeed: {
+            type: 'double',
+            setValue: (settings, value) => {
+                settings.mouse.sensitivity = value;
+            }
+        },
+        Fullscreen: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.resolution.fullscreen = value;
+            }
+        },
+        Width: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.resolution.width = value;
+            }
+        },
+        Height: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.resolution.height = value;
+            }
+        },
+        WidthFullscreen: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.resolution.widthFullscreen = value;
+            }
+        },
+        HeightFullscreen: {
+            type: 'int',
+            setValue: (settings, value) => {
+                settings.resolution.heightFullscreen = value;
+            }
+        },
+        AutomaticCursorSizing: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.cursor.autoSize = value;
+            }
+        },
+        IgnoreBeatmapSamples: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.audio.ignoreBeatmapSounds = value;
+            }
+        },
+        SkinSamples: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.audio.useSkinSamples = value;
+            }
+        },
+        LastVersion: {
+            type: 'bstring',
+            setValue: (settings, value) => {
+                settings.client.version = value;
+            }
+        },
+        ManiaSpeedBPMScale: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mania.speedBPMScale = value;
+            }
+        },
+        UsePerBeatmapManiaSpeed: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mania.usePerBeatmapSpeedScale = value;
+            }
+        },
+        MouseDisableButtons: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mouse.disableButtons = value;
+            }
+        },
+        MouseDisableWheel: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mouse.disableWheel = value;
+            }
+        },
+        ProgressBarType: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.progressBarType = value;
+            }
+        },
+        RankType: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.leaderboardType = value;
+            }
+        },
+        UpdatePending: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.client.updateAvailable = value;
+            }
+        },
+
+        UseSkinCursor: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.cursor.useSkinCursor = value;
+            }
+        },
+        RawInput: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.mouse.rawInput = value;
+            }
+        },
+        TreeSortMode: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.groupType = value;
+            }
+        },
+        TreeSortMode2: {
+            type: 'enum',
+            setValue: (settings, value) => {
+                settings.sortType = value;
+            }
+        },
+        EditorDefaultSkin: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.useDefaultSkinInEditor = value;
+            }
+        },
+        ComboColourSliderBall: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.tintSliderBall = value;
+            }
+        },
+        IgnoreBeatmapSkins: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.ignoreBeatmapSkins = value;
+            }
+        },
+        Skin: {
+            type: 'bstring',
+            setValue: (settings, value) => {
+                settings.skin.name = value;
+            }
+        },
+        UseTaikoSkin: {
+            type: 'bool',
+            setValue: (settings, value) => {
+                settings.skin.useTaikoSkin = value;
+            }
+        }
+    };
+
     private bindingList: Record<number, IBindable> = {
         [Bindings.OsuLeft]: {
             setValue: (settings, value: number) => {
@@ -88,6 +325,75 @@ export class AllTimesData extends AbstractEntity {
         super(services);
     }
 
+    updateConfigState(
+        process: Process,
+        settings: Settings,
+        configurationAddr: number
+    ) {
+        try {
+            const rawSharpDictionary =
+                process.readSharpDictionary(configurationAddr);
+            for (let i = 0; i < rawSharpDictionary.length; i++) {
+                const current = rawSharpDictionary[i];
+                const keyAddress = process.readInt(current);
+                let key;
+                if (this.bindingNames.has(keyAddress)) {
+                    key = this.bindingNames.get(keyAddress);
+                } else {
+                    key = process.readSharpString(keyAddress);
+                    this.bindingNames.set(keyAddress, key);
+                }
+                const bindable = process.readInt(current + 0x4);
+
+                if (!(key in this.configList)) {
+                    continue;
+                }
+                let value: any;
+
+                switch (this.configList[key].type) {
+                    case 'byte':
+                        value = process.readByte(bindable + 0xc);
+                        break;
+                    case 'bool':
+                        value = Boolean(process.readByte(bindable + 0xc));
+                        break;
+                    case 'int':
+                    case 'double':
+                        value = process.readDouble(bindable + 0x4);
+                        break;
+                    case 'string':
+                        value = process.readSharpString(
+                            process.readInt(current + 0x4)
+                        );
+                        break;
+                    case 'bstring':
+                        value = process.readSharpString(
+                            process.readInt(bindable + 0x4)
+                        );
+                        break;
+                    case 'enum':
+                        value = process.readInt(bindable + 0xc);
+                        break;
+                    default:
+                        break;
+                }
+
+                if (value) {
+                    this.configList[key].setValue(settings, value);
+                }
+            }
+        } catch (exc) {
+            this.configStateErrorAttempts += 1;
+
+            if (this.configStateErrorAttempts > 5) {
+                wLogger.error(
+                "ATD(updateConfigState) Can't update config state",
+                    exc
+            );
+            }
+        }
+    }
+
     updateBindingState(
         process: Process,
         settings: Settings,
@@ -107,10 +413,14 @@ export class AllTimesData extends AbstractEntity {
                 }
             }
         } catch (exc) {
-            wLogger.error(
+            this.bindingStateErrorAttempts += 1;
+
+            if (this.bindingStateErrorAttempts > 5) {
+                wLogger.error(
                 "ATD(updateBindingState) Can't update binding state",
-                exc
+                    exc
             );
+            }
         }
     }
 
