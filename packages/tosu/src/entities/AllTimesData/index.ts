@@ -382,6 +382,8 @@ export class AllTimesData extends AbstractEntity {
                     this.configList[key].setValue(settings, value);
                 }
             }
+
+            this.configStateErrorAttempts = 0;
         } catch (exc) {
             this.configStateErrorAttempts += 1;
 
@@ -412,6 +414,8 @@ export class AllTimesData extends AbstractEntity {
                     bindable.setValue(settings, value);
                 }
             }
+
+            this.bindingStateErrorAttempts = 0;
         } catch (exc) {
             this.bindingStateErrorAttempts += 1;
 
