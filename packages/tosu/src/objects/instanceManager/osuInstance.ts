@@ -278,6 +278,17 @@ export class OsuInstance {
                     case 0:
                         bassDensityData.updateState();
                         break;
+
+                    // skip editor, to prevent constant data reset
+                    case 1:
+                        if (this.previousTime == allTimesData.PlayTime) break;
+
+                        this.previousTime = allTimesData.PlayTime;
+                        beatmapPpData.updateEditorPP();
+                        break;
+
+                    // EditorSongSElect and SongSelect
+                    case 4:
                     case 5:
                         // Reset Gameplay/ResultScreen data on joining to songSelect
                         if (!gamePlayData.isDefaultState) {

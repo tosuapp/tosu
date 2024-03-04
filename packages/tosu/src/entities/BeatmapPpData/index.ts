@@ -1,5 +1,6 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
+import fs from 'fs';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
@@ -428,5 +429,77 @@ export class BeatmapPPData extends AbstractEntity {
             peak: (fcPerformance.difficulty as any).peak,
             hitWindow: (fcPerformance.difficulty as any).hitWindow
         });
+    }
+
+    updateEditorPP() {
+        const start_time = performance.now();
+
+        const { allTimesData, menuData, settings } = this.services.getServices([
+            'allTimesData',
+            'menuData',
+            'settings',
+            'beatmapPpData'
+        ]);
+
+        const mapPath = path.join(
+            settings.songsFolder,
+            menuData.Folder,
+            menuData.Path
+        );
+
+        let beatmapContent: string;
+
+        try {
+            beatmapContent = fs.readFileSync(mapPath, 'utf8');
+        } catch (error) {
+            wLogger.debug(`can't get map: ${mapPath}`);
+            return;
+        }
+
+        const beatmap = new Beatmap({
+            content: beatmapContent,
+            ar: menuData.AR,
+            od: menuData.OD,
+            cs: menuData.CS,
+            hp: menuData.HP
+        });
+
+        const decoder = new BeatmapDecoder().decodeFromString(beatmapContent, {
+            parseHitObjects: true,
+
+            parseColours: false,
+            parseDifficulty: false,
+            parseEditor: false,
+            parseEvents: true,
+            parseGeneral: false,
+            parseMetadata: false,
+            parseStoryboard: false,
+            parseTimingPoints: false
+        });
+
+        const beatmap_parse_time = performance.now();
+        wLogger.debug(
+            `(updateEditorPP) Spend:${(beatmap_parse_time - start_time).toFixed(
+                2
+            )}ms on beatmap parsing`
+        );
+
+        const passedObjects = decoder.hitObjects.filter(
+            (r) => r.startTime <= allTimesData.PlayTime
+        );
+
+        const curPerformance = new Calculator({
+            passedObjects: passedObjects.length
+        }).performance(beatmap);
+
+        const calculate_time = performance.now();
+
+        this.currAttributes.pp = curPerformance.pp;
+
+        wLogger.debug(
+            `(updateEditorPP) Spend:${(
+                calculate_time - beatmap_parse_time
+            ).toFixed(2)}ms on calculating performance`
+        );
     }
 }
