@@ -26,6 +26,8 @@ export class AllTimesData extends AbstractEntity {
     ShowInterface: boolean = false;
     IsWatchingReplay: number = 0;
 
+    bindingNames = new Map();
+
     private configList: Record<string, IConfigBindable> = {
         VolumeUniversal: {
             type: 'int',
@@ -320,77 +322,87 @@ export class AllTimesData extends AbstractEntity {
         super(services);
     }
 
-    async updateConfigState(
+    updateConfigState(
         process: Process,
         settings: Settings,
         configurationAddr: number
     ) {
         try {
-            process.readSharpDictionary(configurationAddr, (current) => {
-                const key = process.readSharpString(process.readInt(current));
+            const rawSharpDictionary =
+                process.readSharpDictionary(configurationAddr);
+            for (let i = 0; i < rawSharpDictionary.length; i++) {
+                const current = rawSharpDictionary[i];
+                const keyAddress = process.readInt(current);
+                let key;
+                if (this.bindingNames.has(keyAddress)) {
+                    key = this.bindingNames.get(keyAddress);
+                } else {
+                    key = process.readSharpString(keyAddress);
+                    this.bindingNames.set(keyAddress, key);
+                }
                 const bindable = process.readInt(current + 0x4);
 
-                const configBindable = this.configList[key];
-
-                if (configBindable !== undefined) {
-                    let value: any;
-
-                    switch (configBindable.type) {
-                        case 'byte':
-                            value = process.readByte(bindable + 0xc);
-                            break;
-                        case 'bool':
-                            value = process.readByte(bindable + 0xc) == 1;
-                            break;
-                        case 'int':
-                        case 'double':
-                            value = process.readDouble(bindable + 0x4);
-                            break;
-                        case 'string':
-                            value = process.readSharpString(
-                                process.readInt(current + 0x4)
-                            );
-                            break;
-                        case 'bstring':
-                            value = process.readSharpString(
-                                process.readInt(bindable + 0x4)
-                            );
-                            break;
-                        case 'enum':
-                            value = process.readInt(bindable + 0xc);
-                            break;
-                        default:
-                            return false;
-                    }
-
-                    configBindable.setValue(settings, value);
+                if (!(key in this.configList)) {
+                    continue;
                 }
-                return true;
-            });
+                let value: any;
+
+                switch (this.configList[key].type) {
+                    case 'byte':
+                        value = process.readByte(bindable + 0xc);
+                        break;
+                    case 'bool':
+                        value = Boolean(process.readByte(bindable + 0xc));
+                        break;
+                    case 'int':
+                    case 'double':
+                        value = process.readDouble(bindable + 0x4);
+                        break;
+                    case 'string':
+                        value = process.readSharpString(
+                            process.readInt(current + 0x4)
+                        );
+                        break;
+                    case 'bstring':
+                        value = process.readSharpString(
+                            process.readInt(bindable + 0x4)
+                        );
+                        break;
+                    case 'enum':
+                        value = process.readInt(bindable + 0xc);
+                        break;
+                    default:
+                        break;
+                }
+
+                if (value) {
+                    this.configList[key].setValue(settings, value);
+                }
+            }
         } catch (exc) {
             wLogger.error("can't update config state");
             console.error(exc);
         }
     }
 
-    async updateBindingState(
+    updateBindingState(
         process: Process,
         settings: Settings,
         bindingConfigAddr: number
     ) {
         try {
-            process.readSharpDictionary(bindingConfigAddr, (current) => {
+            const rawSharpDictionary =
+                process.readSharpDictionary(bindingConfigAddr);
+            for (let i = 0; i < rawSharpDictionary.length; i++) {
+                const current = rawSharpDictionary[i];
                 const key = process.readInt(current);
                 const value = process.readInt(current + 0xc);
 
                 const bindable = this.bindingList[key];
-
-                if (bindable !== undefined) {
+                if (bindable) {
                     bindable.setValue(settings, value);
                 }
-
-                return true;
-            });
+            }
         } catch (exc) {
             wLogger.error("can't update binding state");
             console.error(exc);

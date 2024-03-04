@@ -77,20 +77,18 @@ export class Process {
         return endString;
     }
 
-    readSharpDictionary(
-        address: number,
-        onLoop: (current: number) => boolean
-    ): void {
+    readSharpDictionary(address: number): number[] {
+        const result = [];
         const items = this.readInt(address + 0x8);
         const size = this.readInt(address + 0x1c);
 
         for (let i = 0; i < size; i++) {
-            const current = items + 0x8 + 0x10 * i;
+            const address = items + 0x8 + 0x10 * i;
 
-            if (!onLoop(current)) {
-                return;
-            }
+            result.push(address);
         }
+
+        return result;
     }
 
     readBuffer(address: number, size: number): Buffer {
