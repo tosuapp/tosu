@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-import { configureLogger, wLogger } from './logger';
+import { wLogger } from './logger';
 
 const configPath = path.join(
     'pkg' in process ? path.dirname(process.execPath) : process.cwd(),
@@ -115,8 +115,6 @@ export const updateConfigFile = () => {
 };
 
 export const watchConfigFile = ({ httpServer }: { httpServer: any }) => {
-    configureLogger();
-
     refreshConfig(httpServer, false);
     updateConfigFile();
 
@@ -181,7 +179,6 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     }
 
     if (updated) wLogger.info(`Config ${status}ed`);
-    configureLogger();
 };
 
 export const writeConfig = (httpServer: any, text: string) => {

@@ -368,8 +368,7 @@ export class AllTimesData extends AbstractEntity {
                 return true;
             });
         } catch (exc) {
-            wLogger.error("can't update config state");
-            console.error(exc);
+            wLogger.error("can't update config state", exc);
         }
     }
 
@@ -392,8 +391,7 @@ export class AllTimesData extends AbstractEntity {
                 return true;
             });
         } catch (exc) {
-            wLogger.error("can't update binding state");
-            console.error(exc);
+            wLogger.error("can't update binding state", exc);
         }
     }
 

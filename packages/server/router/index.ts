@@ -149,7 +149,7 @@ export default function buildBaseApi(app: HttpServer) {
 
             exec(`start "" "${folderPath}"`, (err, stdout, stderr) => {
                 if (err) {
-                    console.error('Error opening file explorer:', err);
+                    wLogger.error('Error opening file explorer:', err);
                     return sendJson(res, {
                         error: `Error opening file explorer: ${err.message}`
                     });

@@ -5,12 +5,12 @@ import { autoUpdater } from '@tosu/updater';
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
 (async () => {
+    wLogger.info('Starting tosu');
+
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
     watchConfigFile({ httpServer });
-
-    wLogger.info('Starting tosu');
 
     const { update } = argumetsParser(process.argv);
 

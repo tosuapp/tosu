@@ -1,4 +1,4 @@
-import { downloadFile } from '@tosu/common';
+import { downloadFile, wLogger } from '@tosu/common';
 import decompress from 'decompress';
 import { execFile } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
@@ -53,7 +53,7 @@ export const injectGameOverlay = async (p: Process) => {
             path.join(process.cwd(), 'gameOverlay', 'gosumemoryoverlay.dll')
         )
     ) {
-        console.log('Please delete gameOverlay folder, and restart program!');
+        wLogger.info('Please delete gameOverlay folder, and restart program!');
         process.exit(1);
     }
 
@@ -72,7 +72,7 @@ export const injectGameOverlay = async (p: Process) => {
             reject(err);
         });
         child.on('exit', () => {
-            console.log(
+            wLogger.info(
                 '[gosu-overlay] initialized successfully, see https://github.com/l3lackShark/gosumemory/wiki/GameOverlay for tutorial'
             );
             resolve(true);

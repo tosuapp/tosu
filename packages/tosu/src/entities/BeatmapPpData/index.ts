@@ -277,10 +277,10 @@ export class BeatmapPPData extends AbstractEntity {
             const full = Math.round(lazerBeatmap.totalLength);
 
             this.updateTimings(firstObj, full);
-        } catch (e) {
-            console.error(e);
+        } catch (exc) {
             wLogger.error(
-                "Something happend, when we're tried to parse beatmap"
+                "Something happend, when we're tried to parse beatmap",
+                exc
             );
             return;
         }
