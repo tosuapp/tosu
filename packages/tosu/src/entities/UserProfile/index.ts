@@ -20,7 +20,7 @@ export class UserProfile extends AbstractEntity {
         super(services);
     }
 
-    async updateState() {
+    updateState() {
         const { patterns, process } = this.services.getServices([
             'patterns',
             'process'

@@ -45,7 +45,7 @@ export class ResultsScreenData extends AbstractEntity {
         this.Date = '';
     }
 
-    async updateState() {
+    updateState() {
         const { process, patterns, allTimesData } = this.services.getServices([
             'process',
             'patterns',

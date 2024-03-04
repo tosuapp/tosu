@@ -18,7 +18,7 @@ export class TourneyUserProfileData extends AbstractEntity {
         super(services);
     }
 
-    async updateState() {
+    updateState() {
         wLogger.debug(`TUPD(updateState) Starting`);
 
         const { process, patterns } = this.services.getServices([

@@ -107,7 +107,7 @@ export class GamePlayData extends AbstractEntity {
         this.Leaderboard = undefined;
     }
 
-    async updateState() {
+    updateState() {
         const { process, patterns, allTimesData, menuData } =
             this.services.getServices([
                 'process',
@@ -232,7 +232,7 @@ export class GamePlayData extends AbstractEntity {
         this.updateStarsAndPerformance();
     }
 
-    async updateKeyOverlay() {
+    updateKeyOverlay() {
         const { process, patterns } = this.services.getServices([
             'process',
             'patterns'

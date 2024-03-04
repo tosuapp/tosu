@@ -114,7 +114,7 @@ export class AllTimesData extends AbstractEntity {
         }
     }
 
-    async updateState() {
+    updateState() {
         const { process, patterns, settings } = this.services.getServices([
             'process',
             'patterns',

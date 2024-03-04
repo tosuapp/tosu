@@ -13,7 +13,7 @@ export class BassDensityData extends AbstractEntity {
         super(services);
     }
 
-    async updateState() {
+    updateState() {
         const { process: osuProcess, patterns } = this.services.getServices([
             'process',
             'patterns'

@@ -36,7 +36,7 @@ export class MenuData extends AbstractEntity {
         super(services);
     }
 
-    async updateState() {
+    updateState() {
         const { process, patterns } = this.services.getServices([
             'process',
             'patterns'

@@ -7,7 +7,7 @@ export abstract class AbstractEntity {
         this.services = services;
     }
 
-    async updateState() {
+    updateState() {
         throw Error('Error: updateState not implemented');
     }
 }
