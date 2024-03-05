@@ -1,18 +1,22 @@
 import { config } from './config';
 
 const colors = {
-    error: '\x1b[31m',
-    info: '\x1b[32m',
-    debug: '\x1b[34m',
-    warn: '\x1b[33m',
-    reset: '\x1b[0m'
+    info: '\x1b[1m\x1b[40m\x1b[42m',
+    error: '\x1b[1m\x1b[37m\x1b[41m',
+    debug: '\x1b[1m\x1b[37m\x1b[44m',
+    warn: '\x1b[1m\x1b[40m\x1b[43m',
+    reset: '\x1b[0m',
+    grey: '\x1b[90m'
 };
 
 function colorText(status: string, ...anything: any) {
     const colorCode = colors[status] || colors.reset;
-    const timestamp = new Date().toISOString().replace('T', ' ');
+    const timestamp = new Date().toISOString().split('T')[1].replace('Z', '');
+
+    const time = `${colors.grey}${timestamp}${colors.reset}`;
     console.log(
-        `${timestamp} [tosu] ${colorCode}${status}${colors.reset}:`,
+        time,
+        `${colorCode} ${status.toUpperCase()} ${colors.reset}`,
         ...anything
     );
 }
