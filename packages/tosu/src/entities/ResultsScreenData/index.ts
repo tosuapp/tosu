@@ -29,7 +29,7 @@ export class ResultsScreenData extends AbstractEntity {
     }
 
     init() {
-        wLogger.debug(`[ResultsScreenData:init] reseting`);
+        wLogger.debug(`RSD(init) Reset`);
 
         this.PlayerName = '';
         this.Mods = 0;
@@ -67,13 +67,13 @@ export class ResultsScreenData extends AbstractEntity {
             process.readInt(rulesetsAddr - 0xb) + 0x4
         );
         if (rulesetAddr === 0) {
-            wLogger.debug('rulesetAddr is zero');
+            wLogger.debug('RSD(init) rulesetAddr is zero');
             return;
         }
 
         const resultScreenBase = process.readInt(rulesetAddr + 0x38);
         if (resultScreenBase === 0) {
-            wLogger.debug('resultScreenBase is zero');
+            wLogger.debug('RSD(init) resultScreenBase is zero');
             return;
         }
 

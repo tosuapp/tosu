@@ -210,7 +210,7 @@ export class OsuInstance {
     }
 
     async update() {
-        wLogger.debug('[InstancesOsu:update] starting');
+        wLogger.debug('OI(update) starting');
 
         const {
             allTimesData,
@@ -327,7 +327,7 @@ export class OsuInstance {
     }
 
     async updateKeyOverlay() {
-        wLogger.debug(`[InstancesOsu:updateKeyOverlay] starting`);
+        wLogger.debug(`OI(updateKeyOverlay) starting`);
 
         const { allTimesData, gamePlayData } = this.entities.getServices([
             'allTimesData',
@@ -352,7 +352,7 @@ export class OsuInstance {
                 await sleep(config.keyOverlayPollRate);
             } catch (exc) {
                 wLogger.error(
-                    'error happend while keyboard overlay attempted to parse',
+                    'OI(updateKeyOverlay) error happend while keyboard overlay attempted to parse',
                     exc
                 );
             }
@@ -360,7 +360,7 @@ export class OsuInstance {
     }
 
     async updateMapMetadata() {
-        wLogger.debug(`[InstancesOsu:updateMapMetadata] starting`);
+        wLogger.debug(`OI(updateMapMetadata) Starting`);
 
         let previousState = '';
 
@@ -396,7 +396,10 @@ export class OsuInstance {
                 try {
                     await beatmapPpData.updateMapMetadata(currentMods);
                 } catch (exc) {
-                    wLogger.error("can't update beatmap metadata", exc);
+                    wLogger.error(
+                        "OI(updateMapMetadata) Can't update beatmap metadata",
+                        exc
+                    );
                 }
             }
 
@@ -408,7 +411,9 @@ export class OsuInstance {
         while (!this.isDestroyed) {
             if (!Process.isProcessExist(this.process.handle)) {
                 this.isDestroyed = true;
-                wLogger.info(`osu!.exe at ${this.pid} got destroyed`);
+                wLogger.info(
+                    `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed`
+                );
                 this.emitter.emit('onDestroy', this.pid);
             }
 

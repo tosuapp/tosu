@@ -19,7 +19,7 @@ export class TourneyUserProfileData extends AbstractEntity {
     }
 
     async updateState() {
-        wLogger.debug(`[TourneyUserProfileData:updateState] starting`);
+        wLogger.debug(`TUPD(updateState) Starting`);
 
         const { process, patterns } = this.services.getServices([
             'process',
@@ -30,7 +30,7 @@ export class TourneyUserProfileData extends AbstractEntity {
             patterns.getPattern('spectatingUserPtr')
         );
         if (!spectatingUserDrawable) {
-            wLogger.debug('[TUPD] Slot is not equiped');
+            wLogger.debug('TUPD(updateState) Slot is not equiped');
             return;
         }
 
@@ -56,9 +56,9 @@ export class TourneyUserProfileData extends AbstractEntity {
             // UserDrawable + 0x70
             this.UserID = process.readInt(spectatingUserDrawable + 0x70);
         } catch (exc) {
-            wLogger.error('[TourneyUserProfileData] signature failed');
+            wLogger.error('TUPD(updateState) signature failed', exc);
         }
 
-        wLogger.debug(`[TourneyUserProfileData:updateState] updated`);
+        wLogger.debug(`TUPD(updateState) updated`);
     }
 }

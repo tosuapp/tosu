@@ -30,7 +30,7 @@ export class BassDensityData extends AbstractEntity {
             osuProcess.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
         );
         if (rulesetAddr === 0) {
-            wLogger.debug('rulesetAddr is zero');
+            wLogger.debug('BDD(updateState) rulesetAddr is zero');
             return;
         }
 
@@ -42,7 +42,7 @@ export class BassDensityData extends AbstractEntity {
         const bassDensityLength = osuProcess.readInt(audioVelocityBase + 0x4);
         if (bassDensityLength < 40) {
             wLogger.debug(
-                'bassDensity length less than 40 (basically it have 1024 values)'
+                'BDD(updateState) bassDensity length less than 40 (basically it have 1024 values)'
             );
             return;
         }

@@ -60,7 +60,7 @@ export class GamePlayData extends AbstractEntity {
     }
 
     init(isRetry?: boolean) {
-        wLogger.debug(`[GameplayData:init] reseting (retry:${isRetry})`);
+        wLogger.debug(`GD(init) Reset (isRetry:${isRetry})`);
 
         this.HitErrors = [];
         this.MaxCombo = 0;
@@ -125,25 +125,25 @@ export class GamePlayData extends AbstractEntity {
             process.readInt(rulesetsAddr - 0xb) + 0x4
         );
         if (rulesetAddr === 0) {
-            wLogger.debug('RulesetAddr is 0');
+            wLogger.debug('GD(updateState) RulesetAddr is 0');
             return;
         }
 
         const gameplayBase = process.readInt(rulesetAddr + 0x68);
         if (gameplayBase === 0) {
-            wLogger.debug('gameplayBase is zero');
+            wLogger.debug('GD(updateState) gameplayBase is zero');
             return;
         }
 
         const scoreBase = process.readInt(gameplayBase + 0x38);
         if (scoreBase === 0) {
-            wLogger.debug('scoreBase is zero');
+            wLogger.debug('GD(updateState) scoreBase is zero');
             return;
         }
 
         let hpBarBase = process.readInt(gameplayBase + 0x40);
         if (hpBarBase === 0) {
-            wLogger.debug('hpBar is zero');
+            wLogger.debug('GD(updateState) hpBar is zero');
             return;
         }
 
@@ -242,12 +242,13 @@ export class GamePlayData extends AbstractEntity {
             process.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
         );
         if (rulesetAddr === 0) {
+            wLogger.debug('GD(updateKeyOverlay) rulesetAddr is zero');
             return;
         }
 
         const keyOverlayPtr = process.readInt(rulesetAddr + 0xb0);
         if (keyOverlayPtr === 0) {
-            wLogger.debug('keyOverlayPtr is zero');
+            wLogger.debug('GD(updateKeyOverlay) keyOverlayPtr is zero');
             return;
         }
 
@@ -256,7 +257,7 @@ export class GamePlayData extends AbstractEntity {
             process.readInt(keyOverlayPtr + 0x10) + 0x4
         );
         if (keyOverlayArrayAddr === 0) {
-            wLogger.debug('keyOverlayArrayAddr is zero');
+            wLogger.debug('GD(updateKeyOverlay) keyOverlayArrayAddr is zero');
             return;
         }
 
@@ -281,7 +282,7 @@ export class GamePlayData extends AbstractEntity {
         this.KeyOverlay = keys;
 
         wLogger.debug(
-            `[GamePlayData:updateKeyOverlay] updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`
+            `GD(updateKeyOverlay) updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`
         );
     }
 
@@ -430,7 +431,7 @@ export class GamePlayData extends AbstractEntity {
     private updateStarsAndPerformance() {
         if (!config.calculatePP) {
             wLogger.debug(
-                `[GamePlayData:updateStarsAndPerformance] pp calculation disabled`
+                `GD(updateStarsAndPerformance) pp calculation disabled`
             );
             return;
         }
@@ -441,7 +442,7 @@ export class GamePlayData extends AbstractEntity {
 
         if (!settings.gameFolder) {
             wLogger.debug(
-                `[GamePlayData:updateStarsAndPerformance] game folder not found`
+                `GD(updateStarsAndPerformance) game folder not found`
             );
             return;
         }
@@ -460,8 +461,8 @@ export class GamePlayData extends AbstractEntity {
                 cs: menuData.CS,
                 hp: menuData.HP
             });
-        } catch (e) {
-            wLogger.debug("can't get map");
+        } catch (exc) {
+            wLogger.error("GD(updateStarsAndPerformance) Can't get map", exc);
             return;
         }
 
