@@ -67,7 +67,9 @@ export class MemoryBase {
     checkIsBasesValid(): boolean {
         Object.entries(this.bases).map((entry) =>
             wLogger.debug(
-                `${entry[0]}: 0${entry[1].toString(16).toUpperCase()}`
+                `MB(checkIsBasesValid) ${entry[0]}: 0${entry[1]
+                    .toString(16)
+                    .toUpperCase()}`
             )
         );
         return !Object.values(this.bases).some((base) => base === 0);

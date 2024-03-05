@@ -75,7 +75,11 @@ export class MemoryPatterns {
 
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
-            wLogger.debug(`${entry[0]}: ${entry[1].toString(16).toUpperCase()}`)
+            wLogger.debug(
+                `MP(checkIsBasesValid) ${entry[0]}: ${entry[1]
+                    .toString(16)
+                    .toUpperCase()}`
+            )
         );
         return !Object.values(this.patterns).some((base) => base === 0);
     }

@@ -46,7 +46,7 @@ export class MenuData extends AbstractEntity {
 
         const beatmapAddr = process.readPointer(baseAddr - 0xc);
         if (beatmapAddr === 0) {
-            wLogger.debug('beatmapAddr is 0');
+            wLogger.debug('MD(updateState) beatmapAddr is 0');
             return;
         }
         // [[Beatmap] + 0x6C]

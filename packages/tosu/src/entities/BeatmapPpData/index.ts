@@ -138,7 +138,9 @@ export class BeatmapPPData extends AbstractEntity {
 
     updateCurrentAttributes(stars: number, pp: number) {
         wLogger.debug(
-            `maxPP -> ${this.currAttributes.maxThisPlayPP} pp -> ${pp} stars -> ${stars}`
+            `BPPD(updateCurrentAttributes) maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(
+                2
+            )} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
         );
         const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
@@ -203,15 +205,15 @@ export class BeatmapPPData extends AbstractEntity {
                 hp: menuData.HP
             });
         } catch (_) {
-            wLogger.debug(`can't get map: ${mapPath}`);
+            wLogger.debug(`BPPD(updateMapMetadata) Can't get map: ${mapPath}`);
             return;
         }
 
         const beatmap_check_time = performance.now();
         wLogger.debug(
-            `(updateMapMetadata) Spend:${(
+            `BPPD(updateMapMetadata) [${(
                 beatmap_check_time - start_time
-            ).toFixed(2)}ms on opening beatmap`
+            ).toFixed(2)}ms] Spend on opening beatmap`
         );
 
         const calc = new Calculator();
@@ -230,9 +232,9 @@ export class BeatmapPPData extends AbstractEntity {
 
         const calculation_time = performance.now();
         wLogger.debug(
-            `(updateMapMetadata) Spend:${(
+            `BPPD(updateMapMetadata) [${(
                 calculation_time - beatmap_check_time
-            ).toFixed(2)}ms on attributes & starins calculation`
+            ).toFixed(2)}ms] Spend on attributes & strains calculation`
         );
 
         const resultStrains: BeatmapStrains = {
@@ -277,10 +279,10 @@ export class BeatmapPPData extends AbstractEntity {
             const full = Math.round(lazerBeatmap.totalLength);
 
             this.updateTimings(firstObj, full);
-        } catch (e) {
-            console.error(e);
+        } catch (exc) {
             wLogger.error(
-                "Something happend, when we're tried to parse beatmap"
+                "BPPD(updateMapMetadata) Something happend, when we're tried to parse beatmap",
+                exc
             );
             return;
         }
@@ -293,9 +295,9 @@ export class BeatmapPPData extends AbstractEntity {
 
         const beatmap_parse_time = performance.now();
         wLogger.debug(
-            `(updateMapMetadata) Spend:${(
+            `BPPD(updateMapMetadata) [${(
                 beatmap_parse_time - calculation_time
-            ).toFixed(2)}ms on parsing beatmap`
+            ).toFixed(2)}ms] Spend on parsing beatmap`
         );
 
         const LEFT_OFFSET = Math.floor(firstObj / offset);
@@ -367,9 +369,9 @@ export class BeatmapPPData extends AbstractEntity {
 
         const graph_process_time = performance.now();
         wLogger.debug(
-            `(updateMapMetadata) Spend:${(
+            `BPPD(updateMapMetadata) [${(
                 graph_process_time - beatmap_parse_time
-            ).toFixed(2)}ms on prcoessing graph strains`
+            ).toFixed(2)}ms] Spend on prcoessing graph strains`
         );
 
         for (let i = 0; i < LEFT_OFFSET; i++) {
@@ -387,9 +389,9 @@ export class BeatmapPPData extends AbstractEntity {
 
         const end_time = performance.now();
         wLogger.debug(
-            `(updateMapMetadata) Total elapsed time: ${(
-                end_time - start_time
-            ).toFixed(2)}ms`
+            `BPPD(updateMapMetadata) [${(end_time - start_time).toFixed(
+                2
+            )}ms] Total spent time`
         );
 
         this.updatePPData(oldStrains, resultStrains, ppAcc as never, {

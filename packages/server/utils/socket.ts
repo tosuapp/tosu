@@ -40,13 +40,13 @@ export class Websocket {
         this.socket.on('connection', (ws: ModifiedWebsocket) => {
             ws.id = getUniqueID();
 
-            wLogger.debug(`[${ws.id}](${this.clients.size}) >>> ws: CONNECTED`);
+            wLogger.debug(`WS(CONNECTED) >>> ${ws.id}`);
 
             ws.on('close', (reason, description) => {
                 this.clients.delete(ws.id);
 
                 wLogger.debug(
-                    `[${ws.id}](${this.clients.size}) >>> ws: CLOSED ${reason} [${description}]`
+                    `WS(CLOSED) >>> ${ws.id}: ${reason} [${description}]`
                 );
             });
 
@@ -54,7 +54,7 @@ export class Websocket {
                 this.clients.delete(ws.id);
 
                 wLogger.debug(
-                    `[${ws.id}](${this.clients.size}) >>> ws: ERROR ${reason} [${description}]`
+                    `WS(ERROR) >>> ${ws.id}: ${reason} [${description}]`
                 );
             });
 

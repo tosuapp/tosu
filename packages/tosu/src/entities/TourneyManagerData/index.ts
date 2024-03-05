@@ -29,7 +29,7 @@ export class TourneyManagerData extends AbstractEntity {
     }
 
     async updateState() {
-        wLogger.debug(`[TourneyManagerData:updateState] starting`);
+        wLogger.debug(`TMD(updateState) Starting`);
 
         const { process, patterns } = this.services.getServices([
             'process',
@@ -42,7 +42,7 @@ export class TourneyManagerData extends AbstractEntity {
             process.readInt(rulesetsAddr - 0xb) + 0x4
         );
         if (rulesetAddr === 0) {
-            wLogger.debug('[TMD] RulesetAddr is 0');
+            wLogger.debug('TMD(updateState) RulesetAddr is 0');
             return;
         }
 
@@ -51,7 +51,7 @@ export class TourneyManagerData extends AbstractEntity {
                 TOURNAMENT_CHAT_AREA,
                 true
             );
-            wLogger.debug('[TMD] Chat area found');
+            wLogger.debug('TMD(updateState) Chat area found');
             return;
         }
 
@@ -94,7 +94,9 @@ export class TourneyManagerData extends AbstractEntity {
         try {
             tabsBase = process.readInt(process.readInt(chatBase + 0x1c) + 0x4);
         } catch (_) {
-            wLogger.debug("can't find tabs, probably they're missing rn");
+            wLogger.debug(
+                "TMD(updateState) Can't find tabs, probably they're missing rn"
+            );
             return;
         }
         const tabsLength = process.readInt(tabsBase + 0x4);
@@ -157,9 +159,9 @@ export class TourneyManagerData extends AbstractEntity {
             }
 
             this.Messages = result;
-            wLogger.debug('[TourneyManagerData:chat] updated');
+            wLogger.debug('TMD(updateState) Chat Updated');
         }
 
-        wLogger.debug(`[TourneyManagerData:updateState] updated`);
+        wLogger.debug(`TMD(updateState) updated`);
     }
 }

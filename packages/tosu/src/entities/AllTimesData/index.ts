@@ -380,8 +380,10 @@ export class AllTimesData extends AbstractEntity {
                 }
             }
         } catch (exc) {
-            wLogger.error("can't update config state");
-            console.error(exc);
+            wLogger.error(
+                "ATD(updateConfigState) Can't update config state",
+                exc
+            );
         }
     }
 
@@ -404,8 +406,10 @@ export class AllTimesData extends AbstractEntity {
                 }
             }
         } catch (exc) {
-            wLogger.error("can't update binding state");
-            console.error(exc);
+            wLogger.error(
+                "ATD(updateBindingState) Can't update binding state",
+                exc
+            );
         }
     }
 
