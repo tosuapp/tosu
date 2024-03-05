@@ -138,7 +138,9 @@ export class BeatmapPPData extends AbstractEntity {
 
     updateCurrentAttributes(stars: number, pp: number) {
         wLogger.debug(
-            `BPPD(updateCurrentAttributes) maxPP -> ${this.currAttributes.maxThisPlayPP} pp -> ${pp} stars -> ${stars}`
+            `BPPD(updateCurrentAttributes) maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(
+                2
+            )} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
         );
         const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
@@ -232,7 +234,7 @@ export class BeatmapPPData extends AbstractEntity {
         wLogger.debug(
             `BPPD(updateMapMetadata) [${(
                 calculation_time - beatmap_check_time
-            ).toFixed(2)}ms] Spend on attributes & starins calculation`
+            ).toFixed(2)}ms] Spend on attributes & strains calculation`
         );
 
         const resultStrains: BeatmapStrains = {
