@@ -436,9 +436,10 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        const { settings, menuData, beatmapPpData } = this.services.getServices(
-            ['settings', 'menuData', 'beatmapPpData']
-        );
+        const { settings, beatmapPpData } = this.services.getServices([
+            'settings',
+            'beatmapPpData'
+        ]);
 
         if (!settings.gameFolder) {
             wLogger.debug(
@@ -447,22 +448,11 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        const mapPath = path.join(
-            settings.songsFolder,
-            menuData.Folder,
-            menuData.Path
-        );
-        let beatmap;
-        try {
-            beatmap = new Beatmap({
-                path: mapPath,
-                ar: menuData.AR,
-                od: menuData.OD,
-                cs: menuData.CS,
-                hp: menuData.HP
-            });
-        } catch (exc) {
-            wLogger.error("GD(updateStarsAndPerformance) Can't get map", exc);
+        const currentBeatmap = beatmapPpData.getCurrentBeatmap();
+        if (!currentBeatmap) {
+            wLogger.debug(
+                `GD(updateStarsAndPerformance) can't get current map`
+            );
             return;
         }
 
@@ -484,14 +474,16 @@ export class GamePlayData extends AbstractEntity {
             n300: this.Hit300
         };
 
-        const curPerformance = new Calculator(scoreParams).performance(beatmap);
+        const curPerformance = new Calculator(scoreParams).performance(
+            currentBeatmap
+        );
         const fcPerformance = new Calculator({
             mods: this.Mods,
             nMisses: this.HitMiss,
             n50: this.Hit50,
             n100: this.Hit100,
             n300: this.Hit300
-        }).performance(beatmap);
+        }).performance(currentBeatmap);
 
         beatmapPpData.updateCurrentAttributes(
             curPerformance.difficulty.stars,
