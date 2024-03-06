@@ -121,8 +121,8 @@ export class MenuData extends AbstractEntity {
         // unknown, unsubmitted, pending/wip/graveyard, unused, ranked, approved, qualified
         //  [Beatmap] + 0x12C
         this.RankedStatus = process.readInt(beatmapAddr + 0x12c);
-        //  [Beatmap] + 0xFC
-        this.ObjectCount = process.readInt(beatmapAddr + 0xfc);
+        //  [Beatmap] + 0xF8
+        this.ObjectCount = process.readInt(beatmapAddr + 0xf8);
 
         this.previousMD5 = this.MD5;
     }
