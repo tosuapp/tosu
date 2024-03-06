@@ -4,7 +4,6 @@ import fs from 'fs';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
-import fs from 'fs';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { DataRepo } from '@/entities/DataRepoList';
