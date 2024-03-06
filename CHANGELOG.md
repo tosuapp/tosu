@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/KotRikD/tosu/compare/v2.4.0...v2.4.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* update offset to ObjectCount ([6679fab](https://github.com/KotRikD/tosu/commit/6679fabff72917f93a9cf1accda904dd445f65e5))
+
 ## [2.4.0](https://github.com/KotRikD/tosu/compare/v2.3.0...v2.4.0) (2024-03-06)
 
 
