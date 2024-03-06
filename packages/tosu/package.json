@@ -9,7 +9,7 @@
         "ts:compile": "ncc build src/index.ts -o dist -m -d",
         "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
         "compile:prepare-htmls": "cp -rf node_modules/@tosu/server/assets ./dist",
-        "compile": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg -t node18-win-x64 --output dist/tosu.exe --debug --config pkg.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts"
+        "compile": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg -t node18-win-x64 --output dist/tosu.exe --debug --config pkg.json --compress brotli dist/index.js --options max-old-space-size=512 && pnpm run ts:run src/postBuild.ts"
     },
     "dependencies": {
         "@kotrikd/rosu-pp": "^0.10.0",

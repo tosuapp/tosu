@@ -55,6 +55,7 @@ interface BeatmapPPTimings {
 }
 
 export class BeatmapPPData extends AbstractEntity {
+    beatmap?: Beatmap;
     strains: number[];
     strainsAll: BeatmapStrains;
     commonBPM: number;
@@ -181,6 +182,10 @@ export class BeatmapPPData extends AbstractEntity {
         };
     }
 
+    getCurrentBeatmap() {
+        return this.beatmap;
+    }
+
     async updateMapMetadata(currentMods: number) {
         const start_time = performance.now();
 
@@ -195,9 +200,8 @@ export class BeatmapPPData extends AbstractEntity {
             menuData.Folder,
             menuData.Path
         );
-        let beatmap: Beatmap;
         try {
-            beatmap = new Beatmap({
+            this.beatmap = new Beatmap({
                 path: mapPath,
                 ar: menuData.AR,
                 od: menuData.OD,
@@ -219,14 +223,14 @@ export class BeatmapPPData extends AbstractEntity {
         const calc = new Calculator();
 
         const currAttrs = calc.mods(currentMods).mode(menuData.MenuGameMode);
-        const strains = currAttrs.strains(beatmap);
-        const mapAttributes = currAttrs.acc(100).mapAttributes(beatmap);
-        const fcPerformance = currAttrs.acc(100).performance(beatmap);
+        const strains = currAttrs.strains(this.beatmap);
+        const mapAttributes = currAttrs.acc(100).mapAttributes(this.beatmap);
+        const fcPerformance = currAttrs.acc(100).performance(this.beatmap);
 
         const ppAcc = {};
 
         for (const acc of [100, 99, 98, 97, 96, 95]) {
-            const performance = currAttrs.acc(acc).performance(beatmap);
+            const performance = currAttrs.acc(acc).performance(this.beatmap);
             ppAcc[acc] = fixDecimals(performance.pp);
         }
 
