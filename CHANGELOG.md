@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/KotRikD/tosu/compare/v2.3.0...v2.4.0) (2024-03-06)
+
+
+### Features
+
+* Remove `winston`, since we only use colored console.log ([dc01f8e](https://github.com/KotRikD/tosu/commit/dc01f8e52bc45f122c8904b8b7cad9b0b634dc47))
+
+
+### Bug Fixes
+
+* gosu option in .env ([e624e75](https://github.com/KotRikD/tosu/commit/e624e7560ba697a2b6bcce8c69a643985c0eb3db))
+* memory leak on bindings states ([e5bc281](https://github.com/KotRikD/tosu/commit/e5bc281ef6a1b9f4a495c5c44e5ee747d85e352c))
+* Refactor debug messages ([00ed181](https://github.com/KotRikD/tosu/commit/00ed181aa18e1a0ba1a2789a717223354cc4432c))
+* use cached beatmap instead of opening it each time ([fef47ae](https://github.com/KotRikD/tosu/commit/fef47ae73952bc4ec0bfa8ca3fa563521c02c64d))
+
 ## [2.3.0](https://github.com/KotRikD/tosu/compare/v2.2.0...v2.3.0) (2024-03-02)
 
 
