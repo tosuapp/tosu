@@ -3,6 +3,8 @@
 #include <napi.h>
 #include <stdexcept>
 #include <string>
+#include <locale>
+#include <codecvt>
 
 // https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
 template <typename... Args>
@@ -364,6 +366,26 @@ Napi::Value getProcessPath(const Napi::CallbackInfo &args) {
   return Napi::String::From(env, memory::get_process_path(handle));
 }
 
+Napi::Value getProcessCommandLine(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() < 1) {
+    Napi::TypeError::New(env, "Wrong number of arguments")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  auto pId = args[0].As<Napi::Number>().Uint32Value();
+
+  // Convert wstring to a wide character array
+  const wchar_t* wstr = memory::get_proc_command_line(pId).c_str();
+
+  // Convert wide character array to a UTF-8 encoded string
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+  std::string utf8Str = converter.to_bytes(wstr);
+
+  return Napi::String::From(env, Napi::String::New(env, utf8Str));
+}
+
 Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["readByte"] = Napi::Function::New(env, readByte);
   exports["readShort"] = Napi::Function::New(env, readShort);
@@ -380,6 +402,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["getProcesses"] = Napi::Function::New(env, getProcesses);
   exports["isProcessExist"] = Napi::Function::New(env, isProcessExist);
   exports["getProcessPath"] = Napi::Function::New(env, getProcessPath);
+  exports["getProcessCommandLine"] = Napi::Function::New(env, getProcessCommandLine);
 
   return exports;
 }

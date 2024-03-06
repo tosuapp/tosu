@@ -43,12 +43,6 @@ importers:
         specifier: ^16.0.3
         version: 16.3.1
 
-  packages/find-process:
-    devDependencies:
-      cargo-cp-artifact:
-        specifier: ^0.1
-        version: 0.1.8
-
   packages/game-overlay:
     dependencies:
       '@tosu/common':
@@ -85,9 +79,6 @@ importers:
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
-      '@tosu/find-process':
-        specifier: workspace:*
-        version: link:../find-process
       '@tosu/game-overlay':
         specifier: workspace:*
         version: link:../game-overlay
@@ -701,6 +692,7 @@ packages:
   /cargo-cp-artifact@0.1.8:
     resolution: {integrity: sha512-3j4DaoTrsCD1MRkTF2Soacii0Nx7UHCce0EwUf4fHnggwiE4fbmF2AbnfzayR36DF8KGadfh7M/Yfy625kgPlA==}
     hasBin: true
+    dev: false
 
   /chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}

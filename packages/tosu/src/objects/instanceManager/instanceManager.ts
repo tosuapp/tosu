@@ -1,5 +1,5 @@
 import { sleep, wLogger } from '@tosu/common';
-import { process_by_name } from '@tosu/find-process';
+import { Process } from 'tsprocess/dist/process';
 
 import { OsuInstance } from './osuInstance';
 
@@ -23,16 +23,17 @@ export class InstanceManager {
 
     private handleProcesses() {
         try {
-            const osuProcesses = process_by_name('osu!.exe');
-            for (const process of osuProcesses || []) {
-                if (process.pid in this.osuInstances) {
+            const osuProcesses = Process.findProcesses('osu!.exe');
+            for (const processId of osuProcesses || []) {
+                if (processId in this.osuInstances) {
                     // dont deploy not needed instances
                     continue;
                 }
 
-                const osuInstance = new OsuInstance(process.pid);
-                if (process.cmd.includes('-spectateclient')) {
-                    const [_, ipcId] = process.cmd.split(' ');
+                const cmdLine = Process.getProcessCommandLine(processId);
+                const osuInstance = new OsuInstance(processId);
+                if (cmdLine.includes('-spectateclient')) {
+                    const [_, __, ipcId] = cmdLine.split(' ');
 
                     osuInstance.setTourneyIpcId(Number(ipcId));
                     osuInstance.setIsTourneySpectator(true);
@@ -47,7 +48,7 @@ export class InstanceManager {
                     this.onProcessDestroy.bind(this)
                 );
 
-                this.osuInstances[process.pid] = osuInstance;
+                this.osuInstances[processId] = osuInstance;
                 osuInstance.start();
             }
         } catch (error) {

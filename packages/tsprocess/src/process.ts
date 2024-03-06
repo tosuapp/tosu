@@ -159,4 +159,8 @@ export class Process {
     static getProcesses(): Array<ProcessInfo> {
         return ProcessUtils.getProcesses();
     }
+
+    static getProcessCommandLine(pid: number): string {
+        return ProcessUtils.getProcessCommandLine(pid);
+    }
 }
