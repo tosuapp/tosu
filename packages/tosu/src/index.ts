@@ -10,6 +10,7 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
+    httpServer.start();
     watchConfigFile({ httpServer });
 
     const { update } = argumetsParser(process.argv);
@@ -23,5 +24,4 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     wLogger.info('Searching for osu!');
 
     instanceManager.runWatcher();
-    httpServer.start();
 })();

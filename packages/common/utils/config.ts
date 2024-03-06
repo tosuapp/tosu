@@ -62,6 +62,8 @@ export const config = {
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true'
 };
 
+let HTTPServer: any;
+
 export const updateConfigFile = () => {
     let newOptions = '';
 
@@ -115,15 +117,17 @@ export const updateConfigFile = () => {
 };
 
 export const watchConfigFile = ({ httpServer }: { httpServer: any }) => {
-    refreshConfig(httpServer, false);
+    HTTPServer = httpServer;
+
+    refreshConfig(false);
     updateConfigFile();
 
-    fs.watchFile(configPath, (current, previous) => {
-        refreshConfig(httpServer, true);
+    fs.watchFile(configPath, () => {
+        refreshConfig(true);
     });
 };
 
-export const refreshConfig = (httpServer: any, refresh: boolean) => {
+export const refreshConfig = (refresh: boolean) => {
     let updated = false;
     const status = refresh == true ? 'reload' : 'load';
 
@@ -159,7 +163,18 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.serverIP = serverIP;
         config.serverPort = serverPort;
 
-        httpServer.restart();
+        HTTPServer.restart();
+    }
+
+    const osuInstances: any = Object.values(
+        HTTPServer.instanceManager.osuInstances || {}
+    );
+    if (
+        osuInstances.length == 1 &&
+        enableGosuOverlay == true &&
+        updated == true
+    ) {
+        osuInstances[0].injectGameOverlay();
     }
 
     config.debugLogging = debugLogging;
@@ -181,7 +196,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     if (updated) wLogger.info(`Config ${status}ed`);
 };
 
-export const writeConfig = (httpServer: any, text: string) => {
+export const writeConfig = (text: string) => {
     fs.writeFileSync(configPath, text, 'utf8');
-    refreshConfig(httpServer, true);
+    refreshConfig(true);
 };

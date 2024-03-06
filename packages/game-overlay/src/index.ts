@@ -1,21 +1,20 @@
-import { downloadFile, wLogger } from '@tosu/common';
-import decompress from 'decompress';
+import { downloadFile, unzip, wLogger } from '@tosu/common';
 import { execFile } from 'node:child_process';
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Process } from 'tsprocess/dist/process';
 
+const configPath = path.join(process.cwd(), 'config.ini');
 const checkGameOverlayConfig = () => {
-    const configPath = path.join(process.cwd(), 'config.ini');
     if (!existsSync(configPath)) {
         writeFileSync(
             configPath,
             `[GameOverlay]; https://github.com/l3lackShark/gosumemory/wiki/GameOverlay
-enabled = false
+enabled = true
 gameWidth = 1920
 gameHeight = 1080
-overlayURL = http://127.0.0.1:24050/InGame2/index.html
+overlayURL = 
 overlayWidth = 380
 overlayHeight = 110
 overlayOffsetX = 0
@@ -25,11 +24,28 @@ overlayScale = 10`
     }
 };
 
+const checkGosuConfig = (p: Process, checking?: boolean) => {
+    if (!existsSync(configPath)) return null;
+
+    const read = readFileSync(configPath, 'utf8');
+    const parseURL = /overlayURL[ ]*=[ ]*(.*)/.exec(read);
+    if (!parseURL || !parseURL?.[1]) {
+        setTimeout(() => {
+            checkGosuConfig(p, true);
+        }, 1000);
+        return 'empty';
+    }
+
+    if (checking == true) injectGameOverlay(p);
+    return 'specified';
+};
+
 export const injectGameOverlay = async (p: Process) => {
     if (process.platform !== 'win32') {
-        throw new Error(
-            'Gameoverlay can run only under windows, sorry linux/darwin user!'
+        wLogger.error(
+            `[gosu-overlay] Ingame overlay can run only under windows, sorry linux/darwin user!`
         );
+        return;
     }
 
     // Check for DEPRECATED GOSU CONFIG, due its needed to read [GameOverlay] section from original configuration
@@ -44,7 +60,8 @@ export const injectGameOverlay = async (p: Process) => {
             'https://dl.kotworks.cyou/gosu-gameoverlay.zip',
             archivePath
         );
-        await decompress(archivePath, gameOverlayPath);
+
+        await unzip(archivePath, gameOverlayPath);
         await rm(archivePath);
     }
 
@@ -53,8 +70,18 @@ export const injectGameOverlay = async (p: Process) => {
             path.join(process.cwd(), 'gameOverlay', 'gosumemoryoverlay.dll')
         )
     ) {
-        wLogger.info('Please delete gameOverlay folder, and restart program!');
-        process.exit(1);
+        wLogger.info(
+            '[gosu-overlay] Please delete gameOverlay folder, and restart program!'
+        );
+        return;
+    }
+
+    const overlayURLstatus = checkGosuConfig(p);
+    if (overlayURLstatus == 'empty') {
+        wLogger.warn(
+            `[gosu-overlay] Specify overlayURL for gameOverlay in config.ini`
+        );
+        return;
     }
 
     return await new Promise((resolve, reject) => {

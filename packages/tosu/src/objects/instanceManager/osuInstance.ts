@@ -157,7 +157,7 @@ export class OsuInstance {
         this.isTourneySpectator = newVal;
     }
 
-    async start() {
+    start() {
         wLogger.info(
             `Running memory chimera... RESOLVING PATTERNS FOR ${this.pid}`
         );
@@ -208,7 +208,7 @@ export class OsuInstance {
          * ENABLING GOSU OVERLAY
          */
         if (config.enableGosuOverlay) {
-            await injectGameOverlay(this.process);
+            this.injectGameOverlay();
         }
 
         this.update();
@@ -217,6 +217,10 @@ export class OsuInstance {
         }
         this.initMapMetadata();
         this.watchProcessHealth();
+    }
+
+    async injectGameOverlay() {
+        await injectGameOverlay(this.process);
     }
 
     async update() {
@@ -432,9 +436,9 @@ export class OsuInstance {
                 beatmapPpData.updateMapMetadata(currentMods);
             } catch (exc) {
                 wLogger.error(
-                        "OI(updateMapMetadata) Can't update beatmap metadata",
+                    "OI(updateMapMetadata) Can't update beatmap metadata",
                     exc
-                    );
+                );
             }
         }
 
@@ -455,8 +459,8 @@ export class OsuInstance {
         if (!Process.isProcessExist(this.process.handle)) {
             this.isDestroyed = true;
             wLogger.info(
-                    `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed`
-                );
+                `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed`
+            );
             this.emitter.emit('onDestroy', this.pid);
         }
 
