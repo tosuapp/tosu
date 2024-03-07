@@ -99,8 +99,43 @@ export enum ChatStatus {
     VisibleWithFriendsList
 }
 
+export enum ProgressBarType {
+    Off,
+    Pie,
+    TopRight,
+    BottomRight,
+    Bottom
+}
+
+export enum GameState {
+    Menu,
+    Edit,
+    Play,
+    Exit,
+    SelectEdit,
+    SelectPlay,
+    SelectDrawings,
+    ResultScreen,
+    Update,
+    Busy,
+    Unknown,
+    Lobby,
+    MatchSetup,
+    SelectMulti,
+    RankingVs,
+    OnlineSelection,
+    OptionsOffsetWizard,
+    RankingTagCoop,
+    RankingTeam,
+    BeatmapImport,
+    PackageUpdater,
+    Benchmark,
+    Tourney,
+    Charts
+}
+
 export interface ApiV2Answer {
-    state: number;
+    state: NumberName;
     session: Session;
     settings: Settings;
     profile: Profile;
@@ -133,7 +168,7 @@ export interface Settings {
     chatVisibilityStatus: NumberName;
     leaderboard: SettingsLeaderboard;
 
-    progressBarType: boolean;
+    progressBar: NumberName;
     bassDensity: number;
 
     resolution: Resolution;

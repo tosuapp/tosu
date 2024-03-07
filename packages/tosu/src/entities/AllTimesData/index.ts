@@ -89,7 +89,7 @@ export class AllTimesData extends AbstractEntity {
         ScoreMeterScale: {
             type: 'double',
             setValue: (settings, value) => {
-                settings.scoreMeter.size = value;
+                settings.scoreMeter.size = parseFloat((value || 0).toFixed(2));
             }
         },
         Offset: {
@@ -101,13 +101,15 @@ export class AllTimesData extends AbstractEntity {
         CursorSize: {
             type: 'double',
             setValue: (settings, value) => {
-                settings.cursor.size = value;
+                settings.cursor.size = parseFloat((value || 0).toFixed(2));
             }
         },
         MouseSpeed: {
             type: 'double',
             setValue: (settings, value) => {
-                settings.mouse.sensitivity = value;
+                settings.mouse.sensitivity = parseFloat(
+                    (value || 0).toFixed(2)
+                );
             }
         },
         Fullscreen: {
@@ -378,7 +380,7 @@ export class AllTimesData extends AbstractEntity {
                         break;
                 }
 
-                if (value) {
+                if (value != null) {
                     this.configList[key].setValue(settings, value);
                 }
             }

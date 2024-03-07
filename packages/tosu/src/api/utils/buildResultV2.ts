@@ -13,10 +13,12 @@ import {
     BanchoStatusEnum,
     BeatmapStatuses,
     ChatStatus,
+    GameState,
     GroupType,
     Leaderboard,
     LeaderboardType,
     Modes,
+    ProgressBarType,
     ScoreMeterType,
     SortType,
     Tourney,
@@ -100,7 +102,10 @@ export const buildResult = (
             : allTimesData.MenuMods;
 
     return {
-        state: allTimesData.Status,
+        state: {
+            number: allTimesData.Status,
+            name: GameState[allTimesData.Status]
+        },
         session: {
             playTime: allTimesData.GameTime,
             playCount: 0 // need counting
@@ -123,7 +128,10 @@ export const buildResult = (
                 }
             },
 
-            progressBarType: settings.progressBarType,
+            progressBar: {
+                number: settings.progressBarType,
+                name: ProgressBarType[settings.progressBarType]
+            },
             bassDensity: bassDensityData.density,
 
             resolution: settings.resolution,
