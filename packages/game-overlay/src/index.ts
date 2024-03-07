@@ -28,7 +28,7 @@ const checkGosuConfig = (p: Process, checking?: boolean) => {
     if (!existsSync(configPath)) return null;
 
     const read = readFileSync(configPath, 'utf8');
-    const parseURL = /overlayURL[ ]*=[ ]*(.*)/.exec(read);
+    const parseURL = /^overlayURL[ ]*=[ ]*(.*)$/m.exec(read);
     if (!parseURL || !parseURL?.[1]) {
         setTimeout(() => {
             checkGosuConfig(p, true);
