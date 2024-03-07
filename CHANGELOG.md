@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.3](https://github.com/KotRikD/tosu/compare/v2.4.2...v2.4.3) (2024-03-07)
+
+
+### Bug Fixes
+
+* return SongsFolder reading ([8dbfdb5](https://github.com/KotRikD/tosu/commit/8dbfdb5ccd04260c3015fe48eaba864eeccf806f))
+
 ### [2.4.2](https://github.com/KotRikD/tosu/compare/v2.4.1...v2.4.2) (2024-03-07)
 
 
