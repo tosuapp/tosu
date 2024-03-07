@@ -215,7 +215,7 @@ export default function buildBaseApi(app: HttpServer) {
             });
         }
 
-        writeConfig(app, body);
+        writeConfig(app.Server, body);
 
         sendJson(res, {
             status: 'updated'
