@@ -259,14 +259,15 @@ export class BeatmapPPData extends AbstractEntity {
             const decoder = new BeatmapDecoder();
 
             lazerBeatmap = decoder.decodeFromString(beatmapContent, {
+                parseEvents: true,
+                parseTimingPoints: true,
+
                 parseColours: false,
                 parseDifficulty: false,
                 parseEditor: false,
-                parseEvents: true,
                 parseGeneral: false,
                 parseStoryboard: false,
-                parseMetadata: false,
-                parseTimingPoints: false
+                parseMetadata: false
             });
 
             const { bpm, bpmMin, bpmMax } = lazerBeatmap;
