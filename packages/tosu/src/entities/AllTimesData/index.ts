@@ -127,6 +127,7 @@ export class AllTimesData extends AbstractEntity {
             menuModsPtr,
             chatCheckerAddr,
             skinDataAddr,
+            settingsClassAddr,
             configurationAddr,
             bindingsAddr,
             canRunSlowlyAddr,
@@ -137,6 +138,7 @@ export class AllTimesData extends AbstractEntity {
             'menuModsPtr',
             'chatCheckerAddr',
             'skinDataAddr',
+            'settingsClassAddr',
             'configurationAddr',
             'bindingsAddr',
             'canRunSlowlyAddr',
@@ -163,6 +165,13 @@ export class AllTimesData extends AbstractEntity {
         );
         this.IsWatchingReplay = process.readByte(
             process.readInt(canRunSlowlyAddr + 0x46)
+        );
+        this.SongsFolder = process.readSharpString(
+            process.readInt(
+                process.readInt(
+                    process.readInt(settingsClassAddr + 0x8) + 0xb8
+                ) + 0x4
+            )
         );
 
         // this.updateConfigState(
