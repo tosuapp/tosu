@@ -10,7 +10,7 @@
             "request": "launch",
             "args": ["src/index.ts"],
             "outputCapture": "std",
-            "runtimeArgs": ["--nolazy", "--inspect", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
+            "runtimeArgs": ["--nolazy", "--inspect", "--expose-gc", "--inspect", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
             "cwd": "${workspaceRoot}/packages/tosu",
         },
         {
@@ -19,7 +19,7 @@
             "request": "launch",
             "args": ["${relativeFile}"],
             "outputCapture": "std",
-            "runtimeArgs": ["--nolazy", "--inspect", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
+            "runtimeArgs": ["--nolazy", "--inspect", "--expose-gc", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
             "cwd": "${workspaceRoot}/packages/tosu",
         }
     ]

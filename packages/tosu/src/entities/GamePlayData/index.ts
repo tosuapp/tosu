@@ -247,7 +247,7 @@ export class GamePlayData extends AbstractEntity {
         }
 
         const keyOverlayPtr = process.readInt(rulesetAddr + 0xb0);
-        if (keyOverlayPtr === 0) {
+        if (keyOverlayPtr === 0 || keyOverlayPtr < 127) {
             wLogger.debug('GD(updateKeyOverlay) keyOverlayPtr is zero');
             return;
         }
@@ -287,6 +287,20 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
+        const itemsSize = process.readInt(keyOverlayArrayAddr + 0x4);
+        if (itemsSize < 4) {
+            return {
+                K1Pressed: false,
+                K1Count: 0,
+                K2Pressed: false,
+                K2Count: 0,
+                M1Pressed: false,
+                M1Count: 0,
+                M2Pressed: false,
+                M2Count: 0
+            };
+        }
+
         return {
             // [Base + 0x8] + 0x1C
             K1Pressed: Boolean(
