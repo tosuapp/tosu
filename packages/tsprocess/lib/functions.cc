@@ -376,12 +376,9 @@ Napi::Value getProcessCommandLine(const Napi::CallbackInfo &args) {
 
   auto pId = args[0].As<Napi::Number>().Uint32Value();
 
-  // Convert wstring to a wide character array
-  const wchar_t* wstr = memory::get_proc_command_line(pId).c_str();
-
   // Convert wide character array to a UTF-8 encoded string
   std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-  std::string utf8Str = converter.to_bytes(wstr);
+  std::string utf8Str = converter.to_bytes(memory::get_proc_command_line(pId));
 
   return Napi::String::From(env, Napi::String::New(env, utf8Str));
 }
