@@ -30,8 +30,8 @@ export class InstanceManager {
                     continue;
                 }
 
-                const cmdLine = Process.getProcessCommandLine(processId);
                 const osuInstance = new OsuInstance(processId);
+                const cmdLine = osuInstance.process.getProcessCommandLine();
                 if (cmdLine.includes('-spectateclient')) {
                     const [_, ipcId] = cmdLine.split(' ');
 

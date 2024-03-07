@@ -374,11 +374,12 @@ Napi::Value getProcessCommandLine(const Napi::CallbackInfo &args) {
     return env.Null();
   }
 
-  auto pId = args[0].As<Napi::Number>().Uint32Value();
+  auto handle =
+    reinterpret_cast<HANDLE>(args[0].As<Napi::Number>().Uint32Value());
 
   // Convert wide character array to a UTF-8 encoded string
   std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-  std::string utf8Str = converter.to_bytes(memory::get_proc_command_line(pId));
+  std::string utf8Str = converter.to_bytes(memory::get_proc_command_line(handle));
 
   return Napi::String::From(env, Napi::String::New(env, utf8Str));
 }

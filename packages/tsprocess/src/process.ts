@@ -28,6 +28,10 @@ export class Process {
         return ProcessUtils.getProcessPath(this.handle);
     }
 
+    getProcessCommandLine(): string {
+        return ProcessUtils.getProcessCommandLine(this.handle);
+    }
+
     readByte(address: number): number {
         return ProcessUtils.readByte(this.handle, address);
     }
@@ -158,9 +162,5 @@ export class Process {
 
     static getProcesses(): Array<ProcessInfo> {
         return ProcessUtils.getProcesses();
-    }
-
-    static getProcessCommandLine(pid: number): string {
-        return ProcessUtils.getProcessCommandLine(pid);
     }
 }
