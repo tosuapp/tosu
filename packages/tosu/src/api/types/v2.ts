@@ -16,9 +16,20 @@ export enum Modes {
 }
 
 export enum BanchoStatusEnum {
-    Idle = 0,
-    Afk = 1,
-    Playing = 2
+    Idle,
+    Afk,
+    Playing,
+    Editing,
+    Modding,
+    Multiplayer,
+    Watching,
+    Unknown,
+    Testing,
+    Submitting,
+    Paused,
+    Lobby,
+    Multiplaying,
+    OsuDirect
 }
 
 export enum UserLoginStatus {
