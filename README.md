@@ -14,13 +14,11 @@
 <br>
 
 
-<br>
 
 ```text
 Eponymous software for reading osu! memory, accounting for most of gosumemory's issues
 ```
 
-<br>
 
 <div  align="center">
 <a href="https://github.com/KotRikD/tosu/releases/latest"><img src=".github/button-boosty.png" /></a><br>
