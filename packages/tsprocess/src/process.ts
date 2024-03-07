@@ -64,21 +64,8 @@ export class Process {
         return ProcessUtils.readDouble(this.handle, address);
     }
 
-    /* dumbass thing ever... please pr this, if you know, how to deal with that better... */
     readSharpString(address: number): string {
-        // Check for null strings (exists somehow in osu!)
-        if (address === 0) {
-            return '';
-        }
-        const length = this.readInt(address + 0x4);
-        if (length < 0 || length > 4096) {
-            return '';
-        }
-        const endString = this.readBuffer(address + 0x8, length * 2).toString(
-            'utf16le'
-        );
-
-        return endString;
+        return ProcessUtils.readCSharpString(this.handle, address);
     }
 
     readSharpDictionary(address: number): number[] {
