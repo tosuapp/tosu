@@ -1,9 +1,7 @@
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/github/release/KotRikD/tosu.svg?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/node-%3E%3D18.14.2-blue.svg?style=for-the-badge&logo=node.js&logoColor=white" />
-  <a href="https://github.com/KotRikD/tosu#readme" target="_blank"><img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg?style=for-the-badge" /></a>
-  <a href="https://github.com/KotRikD/tosu/graphs/commit-activity" target="_blank"><img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge" /></a>
-  <a href="https://github.com/KotRikD/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/KotRikD/tosu?style=for-the-badge" /></a>
+  <img alt="Version" src="https://img.shields.io/github/release/KotRikD/tosu.svg?style=for-the-badge&color=%235686A2" />
+  <img src="https://img.shields.io/badge/node-%3E%3D18.14.2-45915E.svg?style=for-the-badge&logo=node.js&logoColor=white" />
+  <a href="https://github.com/KotRikD/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/KotRikD/tosu?style=for-the-badge&color=%23A27456" /></a>
   <a href="https://twitter.com/kotrik0" target="_blank"><img alt="Twitter: kotrik0" src="https://img.shields.io/badge/kotrik0-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" /></a>
 </p>
 
@@ -15,9 +13,6 @@
 
 <br>
 
-<div align="center">
-<a href="https://boosty.to/kotrik/donate"><img src=".github/donate-for-project.png" /></a>
-</div>
 
 <br>
 
@@ -28,9 +23,10 @@ Eponymous software for reading osu! memory, accounting for most of gosumemory's 
 <br>
 
 <div  align="center">
-<a href="https://github.com/KotRikD/tosu/releases/latest"><img src=".github/btn-dl.jpg" /></a>
-<a href="https://github.com/cyperdark/osu-counters/tree/master/counters"><img src=".github/btn-pp.jpg" /></a>
-<a href="https://discord.gg/WX7BTs8kwh"><img src=".github/btn-ds.jpg" /></a>
+<a href="https://github.com/KotRikD/tosu/releases/latest"><img src=".github/button-boosty.png" /></a><br>
+<a href="https://github.com/KotRikD/tosu/releases/latest"><img src=".github/button-download.png" /></a>
+<a href="https://discord.gg/WX7BTs8kwh"><img src=".github/button-discord.png" /></a>
+<a href="https://github.com/cyperdark/osu-counters/tree/master/counters"><img src=".github/button-counters.png" /></a>
 </div>
 
 
