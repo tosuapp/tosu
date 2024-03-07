@@ -11,7 +11,6 @@ const checkGameOverlayConfig = () => {
         writeFileSync(
             configPath,
             `[GameOverlay]; https://github.com/l3lackShark/gosumemory/wiki/GameOverlay
-enabled = true
 gameWidth = 1920
 gameHeight = 1080
 overlayURL = 
