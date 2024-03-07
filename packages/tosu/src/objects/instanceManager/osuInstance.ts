@@ -379,16 +379,16 @@ export class OsuInstance {
                 default:
                 // no-default
             }
-
-            setTimeout(() => {
-                this.updateKeyOverlay(allTimesData, gamePlayData);
-            }, config.keyOverlayPollRate);
         } catch (exc) {
             wLogger.error(
                 'OI(updateKeyOverlay) error happend while keyboard overlay attempted to parse'
             );
             console.error(exc);
         }
+
+        setTimeout(() => {
+            this.updateKeyOverlay(allTimesData, gamePlayData);
+        }, config.keyOverlayPollRate);
     }
 
     initMapMetadata() {
