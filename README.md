@@ -15,6 +15,12 @@
 
 <br>
 
+<div align="center">
+<a href="https://boosty.to/kotrik/donate"><img src=".github/donate-for-project.png" /></a>
+</div>
+
+<br>
+
 ```text
 Eponymous software for reading osu! memory, accounting for most of gosumemory's issues
 ```
