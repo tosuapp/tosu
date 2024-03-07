@@ -153,7 +153,7 @@ export class MenuData extends AbstractEntity {
                 wLogger.error(
                     `Unable to parse beatmap mp3 length (you can ignore it)`
                 );
-                console.error(exc);
+                wLogger.debug(exc);
             }
         }
     }

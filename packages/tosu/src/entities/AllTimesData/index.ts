@@ -391,9 +391,9 @@ export class AllTimesData extends AbstractEntity {
 
             if (this.configStateErrorAttempts > 5) {
                 wLogger.error(
-                    "ATD(updateConfigState) Can't update config state",
-                    exc
+                    "ATD(updateConfigState) Can't update config state"
                 );
+                wLogger.debug(exc);
             }
         }
     }
@@ -423,9 +423,9 @@ export class AllTimesData extends AbstractEntity {
 
             if (this.bindingStateErrorAttempts > 5) {
                 wLogger.error(
-                    "ATD(updateBindingState) Can't update binding state",
-                    exc
+                    "ATD(updateBindingState) Can't update binding state"
                 );
+                wLogger.debug(exc);
             }
         }
     }

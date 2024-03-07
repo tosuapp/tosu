@@ -56,7 +56,8 @@ export class TourneyUserProfileData extends AbstractEntity {
             // UserDrawable + 0x70
             this.UserID = process.readInt(spectatingUserDrawable + 0x70);
         } catch (exc) {
-            wLogger.error('TUPD(updateState) signature failed', exc);
+            wLogger.error('TUPD(updateState) signature failed');
+            wLogger.debug(exc);
         }
 
         wLogger.debug(`TUPD(updateState) updated`);

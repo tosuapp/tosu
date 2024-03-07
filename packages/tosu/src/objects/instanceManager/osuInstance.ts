@@ -196,9 +196,9 @@ export class OsuInstance {
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    'PATTERN SCANNING FAILED, TRYING ONE MORE TIME...',
-                    exc
+                    'PATTERN SCANNING FAILED, TRYING ONE MORE TIME...'
                 );
+                wLogger.debug(exc);
                 this.emitter.emit('onResolveFailed', this.pid);
                 return;
             }
@@ -345,7 +345,8 @@ export class OsuInstance {
 
                 userProfile.updateState();
             } catch (exc) {
-                wLogger.error('error happend while another loop executed', exc);
+                wLogger.error('error happend while another loop executed');
+                wLogger.debug(exc);
             }
 
             await sleep(config.pollRate);
@@ -383,7 +384,7 @@ export class OsuInstance {
             wLogger.error(
                 'OI(updateKeyOverlay) error happend while keyboard overlay attempted to parse'
             );
-            console.error(exc);
+            wLogger.debug(exc);
         }
 
         setTimeout(() => {
@@ -436,9 +437,9 @@ export class OsuInstance {
                 beatmapPpData.updateMapMetadata(currentMods);
             } catch (exc) {
                 wLogger.error(
-                    "OI(updateMapMetadata) Can't update beatmap metadata",
-                    exc
+                    "OI(updateMapMetadata) Can't update beatmap metadata"
                 );
+                wLogger.debug(exc);
             }
         }
 

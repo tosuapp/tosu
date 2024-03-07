@@ -294,9 +294,9 @@ export class BeatmapPPData extends AbstractEntity {
             this.updateTimings(firstObj, full);
         } catch (exc) {
             wLogger.error(
-                "BPPD(updateMapMetadata) Something happend, when we're tried to parse beatmap",
-                exc
+                "BPPD(updateMapMetadata) Something happend, when we're tried to parse beatmap"
             );
+            wLogger.debug(exc);
             return;
         }
 
