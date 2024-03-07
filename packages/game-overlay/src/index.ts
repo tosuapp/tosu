@@ -33,11 +33,11 @@ const checkGosuConfig = (p: Process, checking?: boolean) => {
         setTimeout(() => {
             checkGosuConfig(p, true);
         }, 1000);
-        return 'empty';
+        return false;
     }
 
     if (checking == true) injectGameOverlay(p);
-    return 'specified';
+    return true;
 };
 
 export const injectGameOverlay = async (p: Process) => {
@@ -77,7 +77,7 @@ export const injectGameOverlay = async (p: Process) => {
     }
 
     const overlayURLstatus = checkGosuConfig(p);
-    if (overlayURLstatus == 'empty') {
+    if (!overlayURLstatus) {
         wLogger.warn(
             `[gosu-overlay] Specify overlayURL for gameOverlay in config.ini`
         );
