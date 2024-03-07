@@ -5,7 +5,7 @@ import { DataRepo } from '@/entities/DataRepoList';
 import { AbstractEntity } from '../AbstractEntity';
 import { ITourneyManagetChatItem } from './types';
 
-const TOURNAMENT_CHAT_AREA = '33 47 9D FF 5B 7F FF FF';
+const TOURNAMENT_CHAT_ENGINE = '75 08 8D 65 F4 5B 5E 5F 5D C3 85 D2 74 72';
 
 export class TourneyManagerData extends AbstractEntity {
     ChatAreaAddr: number = 0;
@@ -48,7 +48,7 @@ export class TourneyManagerData extends AbstractEntity {
 
         if (this.ChatAreaAddr === 0) {
             this.ChatAreaAddr = await process.scanAsync(
-                TOURNAMENT_CHAT_AREA,
+                TOURNAMENT_CHAT_ENGINE,
                 true
             );
             wLogger.debug('TMD(updateState) Chat area found');
@@ -87,31 +87,23 @@ export class TourneyManagerData extends AbstractEntity {
             process.readInt(process.readInt(rulesetAddr + 0x34) + 0x4) + 0x4
         );
 
-        const chatBase = this.ChatAreaAddr - 0x44;
+        const channelsList = process.readPointer(this.ChatAreaAddr + 0x15);
+        const channelsItems = process.readInt(channelsList + 0x4);
 
-        // [Base + 0x1C] + 0x4
-        let tabsBase = 0;
-        try {
-            tabsBase = process.readInt(process.readInt(chatBase + 0x1c) + 0x4);
-        } catch (_) {
-            wLogger.debug(
-                "TMD(updateState) Can't find tabs, probably they're missing rn"
-            );
-            return;
-        }
-        const tabsLength = process.readInt(tabsBase + 0x4);
+        const channelsLength = process.readInt(channelsItems + 0x4);
+        // Reversing array is needed for make more fast search,
+        // because osu creates 40 channels with language topics, lobby, osu, etc... (bancho announces this to you)
+        // and 41 is commonly for multiplayer in tourney client
+        for (let i = channelsLength - 1; i >= 0; i--) {
+            const current = channelsItems + patterns.getLeaderStart() + 0x4 * i;
 
-        for (let i = 0; i < tabsLength; i++) {
-            const current = tabsBase + patterns.getLeaderStart() + 0x4 * i;
-
-            const slotAddr = process.readInt(current);
-            if (slotAddr === 0) {
+            const channelAddr = process.readInt(current);
+            if (channelAddr === 0) {
                 continue;
             }
 
-            // [[Base + 0xC] + 0x4]
             const chatTag = process.readSharpString(
-                process.readInt(process.readInt(slotAddr + 0xc) + 0x4)
+                process.readInt(channelAddr + 0x4)
             );
             if (chatTag !== '#multiplayer') {
                 continue;
@@ -119,10 +111,7 @@ export class TourneyManagerData extends AbstractEntity {
 
             const result: ITourneyManagetChatItem[] = [];
 
-            // [[Base + 0xC] + 0x10] + 0x4
-            const messagesAddr = process.readInt(
-                process.readInt(slotAddr + 0xc) + 0x10
-            );
+            const messagesAddr = process.readInt(channelAddr + 0x10);
 
             const messagesItems = process.readInt(messagesAddr + 0x4);
             const messagesSize = process.readInt(messagesAddr + 0xc);
