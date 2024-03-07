@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.2](https://github.com/KotRikD/tosu/compare/v2.4.1...v2.4.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* do not open another handle to process ([de7ee37](https://github.com/KotRikD/tosu/commit/de7ee37f581743568430b325611321c0d604cb2e))
+* dont convert to c_str and read correct ipcId param ([c461d24](https://github.com/KotRikD/tosu/commit/c461d245becf035b1342aaa49d916e3b02cd8e44))
+
 ### [2.4.1](https://github.com/KotRikD/tosu/compare/v2.4.0...v2.4.1) (2024-03-06)
 
 
