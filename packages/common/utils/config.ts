@@ -62,8 +62,6 @@ export const config = {
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true'
 };
 
-let HTTPServer: any;
-
 export const updateConfigFile = () => {
     let newOptions = '';
 
@@ -117,17 +115,15 @@ export const updateConfigFile = () => {
 };
 
 export const watchConfigFile = ({ httpServer }: { httpServer: any }) => {
-    HTTPServer = httpServer;
-
-    refreshConfig(false);
+    refreshConfig(httpServer, false);
     updateConfigFile();
 
     fs.watchFile(configPath, () => {
-        refreshConfig(true);
+        refreshConfig(httpServer, true);
     });
 };
 
-export const refreshConfig = (refresh: boolean) => {
+export const refreshConfig = (httpServer: any, refresh: boolean) => {
     let updated = false;
     const status = refresh == true ? 'reload' : 'load';
 
@@ -163,11 +159,11 @@ export const refreshConfig = (refresh: boolean) => {
         config.serverIP = serverIP;
         config.serverPort = serverPort;
 
-        HTTPServer.restart();
+        httpServer.restart();
     }
 
     const osuInstances: any = Object.values(
-        HTTPServer.instanceManager.osuInstances || {}
+        httpServer.instanceManager.osuInstances || {}
     );
     if (
         osuInstances.length == 1 &&
@@ -196,7 +192,7 @@ export const refreshConfig = (refresh: boolean) => {
     if (updated) wLogger.info(`Config ${status}ed`);
 };
 
-export const writeConfig = (text: string) => {
+export const writeConfig = (httpServer: any, text: string) => {
     fs.writeFileSync(configPath, text, 'utf8');
-    refreshConfig(true);
+    refreshConfig(httpServer, true);
 };
