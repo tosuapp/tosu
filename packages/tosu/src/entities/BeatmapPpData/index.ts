@@ -432,6 +432,10 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     updateEditorPP() {
+        if (!this.beatmap) {
+            return;
+        }
+
         const start_time = performance.now();
 
         const { allTimesData, menuData, settings } = this.services.getServices([
@@ -455,14 +459,6 @@ export class BeatmapPPData extends AbstractEntity {
             wLogger.debug(`can't get map: ${mapPath}`);
             return;
         }
-
-        const beatmap = new Beatmap({
-            content: beatmapContent,
-            ar: menuData.AR,
-            od: menuData.OD,
-            cs: menuData.CS,
-            hp: menuData.HP
-        });
 
         const decoder = new BeatmapDecoder().decodeFromString(beatmapContent, {
             parseHitObjects: true,
@@ -490,7 +486,7 @@ export class BeatmapPPData extends AbstractEntity {
 
         const curPerformance = new Calculator({
             passedObjects: passedObjects.length
-        }).performance(beatmap);
+        }).performance(this.beatmap);
 
         const calculate_time = performance.now();
 
