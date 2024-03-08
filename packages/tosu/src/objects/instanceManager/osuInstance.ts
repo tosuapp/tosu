@@ -1,4 +1,4 @@
-import { config, sleep, wLogger } from '@tosu/common';
+import { config, sleep, updateProgressBar, wLogger } from '@tosu/common';
 import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import fs from 'fs';
@@ -158,9 +158,7 @@ export class OsuInstance {
     }
 
     start() {
-        wLogger.info(
-            `Running memory chimera... RESOLVING PATTERNS FOR ${this.pid}`
-        );
+        wLogger.info(`[${this.pid}] Running memory chimera..`);
         while (!this.isReady) {
             const patternsRepo = this.entities.get('patterns');
             if (!patternsRepo) {
@@ -170,12 +168,23 @@ export class OsuInstance {
             }
 
             try {
+                const total = Object.keys(SCAN_PATTERNS).length;
+                let completed = 0;
                 for (const baseKey in SCAN_PATTERNS) {
+                    const s1 = performance.now();
                     const patternValue = this.process.scanSync(
                         SCAN_PATTERNS[baseKey].pattern,
                         true
                     );
+                    completed += 1;
                     if (patternValue === 0) {
+                        updateProgressBar(
+                            `[${this.pid}] Scanning`,
+                            completed / total,
+                            `${(performance.now() - s1).toFixed(
+                                2
+                            )}ms ${baseKey}`
+                        );
                         continue;
                     }
 
@@ -183,20 +192,26 @@ export class OsuInstance {
                         baseKey as never,
                         patternValue + (SCAN_PATTERNS[baseKey].offset || 0)
                     );
+
+                    updateProgressBar(
+                        `[${this.pid}] Scanning`,
+                        completed / total,
+                        `${(performance.now() - s1).toFixed(2)}ms ${baseKey}`
+                    );
                 }
 
+                const s1 = performance.now();
                 if (!patternsRepo.checkIsBasesValid()) {
-                    wLogger.info('PATTERN RESOLVING FAILED, TRYING AGAIN....');
                     throw new Error('Memory resolve failed');
                 }
 
                 wLogger.info(
-                    'ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA'
+                    `[${this.pid}] ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA`
                 );
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    'PATTERN SCANNING FAILED, TRYING ONE MORE TIME...'
+                    `[${this.pid}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
                 );
                 wLogger.debug(exc);
                 this.emitter.emit('onResolveFailed', this.pid);

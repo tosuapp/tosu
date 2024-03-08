@@ -9,25 +9,31 @@ const colors = {
     grey: '\x1b[90m'
 };
 
-function colorText(status: string, ...anything: any) {
+export function colorText(status: string) {
     const colorCode = colors[status] || colors.reset;
     const timestamp = new Date().toISOString().split('T')[1].replace('Z', '');
 
     const time = `${colors.grey}${timestamp}${colors.reset}`;
-    console.log(
-        time,
-        `${colorCode} ${status.toUpperCase()} ${colors.reset}`,
-        ...anything
-    );
+    return `${time} ${colorCode} ${status.toUpperCase()} ${colors.reset}`;
 }
 
 export const wLogger = {
-    info: (...args: any) => colorText('info', ...args),
+    info: (...args: any) => {
+        const colored_text = colorText('info');
+        console.log(colored_text, ...args);
+    },
     debug: (...args: any) => {
         if (config.debugLogging != true) return;
 
-        colorText('debug', ...args);
+        const colored_text = colorText('debug');
+        console.log(colored_text, ...args);
     },
-    error: (...args: any) => colorText('error', ...args),
-    warn: (...args: any) => colorText('warn', ...args)
+    error: (...args: any) => {
+        const colored_text = colorText('error');
+        console.log(colored_text, ...args);
+    },
+    warn: (...args: any) => {
+        const colored_text = colorText('warn');
+        console.log(colored_text, ...args);
+    }
 };
