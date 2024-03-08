@@ -59,11 +59,13 @@ export const autoUpdater = () =>
         if (versionName.includes(currentVersion)) {
             wLogger.info(`You're using latest version [${currentVersion}] `);
 
-            if (fs.existsSync(fileDestination))
+            if (fs.existsSync(fileDestination)) {
                 await deleteNotLocked(fileDestination);
-            await sleep(5 * 1000);
-            if (fs.existsSync(backupExecutablePath))
+            }
+
+            if (fs.existsSync(backupExecutablePath)) {
                 await deleteNotLocked(backupExecutablePath);
+            }
 
             resolve('exact');
             return;

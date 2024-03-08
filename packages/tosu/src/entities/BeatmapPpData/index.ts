@@ -1,5 +1,6 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
+import fs from 'fs';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
@@ -56,6 +57,7 @@ interface BeatmapPPTimings {
 
 export class BeatmapPPData extends AbstractEntity {
     beatmap?: Beatmap;
+    beatmapContent?: string;
     strains: number[];
     strainsAll: BeatmapStrains;
     commonBPM: number;
@@ -186,7 +188,7 @@ export class BeatmapPPData extends AbstractEntity {
         return this.beatmap;
     }
 
-    async updateMapMetadata(currentMods: number) {
+    updateMapMetadata(currentMods: number) {
         const start_time = performance.now();
 
         const { menuData, settings } = this.services.getServices([
@@ -200,18 +202,21 @@ export class BeatmapPPData extends AbstractEntity {
             menuData.Folder,
             menuData.Path
         );
+
         try {
-            this.beatmap = new Beatmap({
-                path: mapPath,
-                ar: menuData.AR,
-                od: menuData.OD,
-                cs: menuData.CS,
-                hp: menuData.HP
-            });
-        } catch (_) {
+            this.beatmapContent = fs.readFileSync(mapPath, 'utf8');
+        } catch (error) {
             wLogger.debug(`BPPD(updateMapMetadata) Can't get map: ${mapPath}`);
             return;
         }
+
+        this.beatmap = new Beatmap({
+            content: this.beatmapContent,
+            ar: menuData.AR,
+            od: menuData.OD,
+            cs: menuData.CS,
+            hp: menuData.HP
+        });
 
         const beatmap_check_time = performance.now();
         wLogger.debug(
@@ -252,12 +257,15 @@ export class BeatmapPPData extends AbstractEntity {
         try {
             const decoder = new BeatmapDecoder();
 
-            lazerBeatmap = await decoder.decodeFromPath(mapPath, {
+            lazerBeatmap = decoder.decodeFromString(this.beatmapContent, {
+                parseEvents: true,
+                parseTimingPoints: true,
+
                 parseColours: false,
                 parseDifficulty: false,
                 parseEditor: false,
-                parseEvents: true,
                 parseGeneral: false,
+                parseStoryboard: false,
                 parseMetadata: false
             });
 
@@ -285,9 +293,9 @@ export class BeatmapPPData extends AbstractEntity {
             this.updateTimings(firstObj, full);
         } catch (exc) {
             wLogger.error(
-                "BPPD(updateMapMetadata) Something happend, when we're tried to parse beatmap",
-                exc
+                "BPPD(updateMapMetadata) Something happend, when we're tried to parse beatmap"
             );
+            wLogger.debug(exc);
             return;
         }
 
@@ -420,5 +428,56 @@ export class BeatmapPPData extends AbstractEntity {
             peak: (fcPerformance.difficulty as any).peak,
             hitWindow: (fcPerformance.difficulty as any).hitWindow
         });
+    }
+
+    updateEditorPP() {
+        if (!this.beatmap || !this.beatmapContent) {
+            return;
+        }
+
+        const start_time = performance.now();
+
+        const { allTimesData } = this.services.getServices(['allTimesData']);
+
+        const decoder = new BeatmapDecoder().decodeFromString(
+            this.beatmapContent,
+            {
+                parseHitObjects: true,
+
+                parseColours: false,
+                parseDifficulty: false,
+                parseEditor: false,
+                parseEvents: true,
+                parseGeneral: false,
+                parseMetadata: false,
+                parseStoryboard: false,
+                parseTimingPoints: false
+            }
+        );
+
+        const beatmap_parse_time = performance.now();
+        wLogger.debug(
+            `(updateEditorPP) Spend:${(beatmap_parse_time - start_time).toFixed(
+                2
+            )}ms on beatmap parsing`
+        );
+
+        const passedObjects = decoder.hitObjects.filter(
+            (r) => r.startTime <= allTimesData.PlayTime
+        );
+
+        const curPerformance = new Calculator({
+            passedObjects: passedObjects.length
+        }).performance(this.beatmap);
+
+        const calculate_time = performance.now();
+
+        this.currAttributes.pp = curPerformance.pp;
+
+        wLogger.debug(
+            `(updateEditorPP) Spend:${(
+                calculate_time - beatmap_parse_time
+            ).toFixed(2)}ms on calculating performance`
+        );
     }
 }

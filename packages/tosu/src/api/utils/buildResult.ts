@@ -76,7 +76,7 @@ export const buildResult = (
 
     return {
         settings: {
-            showInterface: settings.showInterface,
+            showInterface: allTimesData.ShowInterface,
             folders: {
                 game: settings.gameFolder,
                 skin: settings.skinFolder,

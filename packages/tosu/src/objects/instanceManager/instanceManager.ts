@@ -10,6 +10,8 @@ export class InstanceManager {
 
     constructor() {
         this.osuInstances = {};
+
+        this.runWatcher = this.runWatcher.bind(this);
     }
 
     private onProcessDestroy(pid: number) {
@@ -52,15 +54,14 @@ export class InstanceManager {
                 osuInstance.start();
             }
         } catch (error) {
-            wLogger.error(error);
+            wLogger.error('InstanceManager', (error as any).message);
+            wLogger.debug(error);
         }
     }
 
-    async runWatcher() {
-        while (true) {
-            this.handleProcesses();
+    runWatcher() {
+        this.handleProcesses();
 
-            await sleep(5000);
-        }
+        setTimeout(this.runWatcher, 5000);
     }
 }

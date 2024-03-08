@@ -9,7 +9,6 @@
         "build": "tsc"
     },
     "dependencies": {
-        "decompress": "^4.2.1",
         "tsprocess": "workspace:*",
         "@tosu/common": "workspace:*"
     }

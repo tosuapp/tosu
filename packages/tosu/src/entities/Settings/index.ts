@@ -145,7 +145,7 @@ export class Settings {
     sortType: number = 0;
 
     leaderboardType: number = 0;
-    progressBarType: boolean = false;
+    progressBarType: number = 0;
 
     showInterface: boolean = false;
     gameFolder: string = '';

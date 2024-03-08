@@ -10,17 +10,15 @@
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,css}\"",
     "prettier:ci": "prettier --check \"**/*.{js,jsx,ts,tsx,css}\""
   },
-  "dependencies": {
-    "@types/node": "^18.14.6",
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "@types/node": "^18.18.11",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.0",
+    "prettier": "^2.8.5",
     "standard-version": "^9.5.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
-  },
-  "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.0",
-    "prettier": "^2.8.5"
   },
   "lint-staged": {
     "**/*.{js,ts}": [

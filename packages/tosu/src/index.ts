@@ -10,18 +10,17 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
-    watchConfigFile({ httpServer });
-
     const { update } = argumetsParser(process.argv);
-
     if (
         process.env.NODE_ENV != 'development' &&
         ((update != null && update == true) || update == null)
     )
         await autoUpdater();
 
+    watchConfigFile({ httpServer });
+
     wLogger.info('Searching for osu!');
 
-    instanceManager.runWatcher();
     httpServer.start();
+    instanceManager.runWatcher();
 })();

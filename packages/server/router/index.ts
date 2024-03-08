@@ -149,7 +149,7 @@ export default function buildBaseApi(app: HttpServer) {
 
             exec(`start "" "${folderPath}"`, (err, stdout, stderr) => {
                 if (err) {
-                    wLogger.error('Error opening file explorer:', err);
+                    wLogger.error('Error opening file explorer:');
                     return sendJson(res, {
                         error: `Error opening file explorer: ${err.message}`
                     });
@@ -236,7 +236,6 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route('/homepage.min.css', 'GET', (req, res) => {
-        // FIXME: REMOVE THAT SHIT
         fs.readFile(
             path.join(pkgAssetsPath, 'homepage.min.css'),
             'utf8',
@@ -304,8 +303,6 @@ export default function buildBaseApi(app: HttpServer) {
                 performance: calculator.performance(parseBeatmap)
             });
         } catch (error) {
-            wLogger.error(error);
-
             return sendJson(res, {
                 error: (error as any).message
             });

@@ -1,4 +1,4 @@
-import { config, sleep, wLogger } from '@tosu/common';
+import { config, sleep, updateProgressBar, wLogger } from '@tosu/common';
 import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import fs from 'fs';
@@ -105,6 +105,9 @@ export class OsuInstance {
 
     ipcId: number = 0;
 
+    previousState: string = '';
+    previousTime: number = 0;
+
     emitter: EventEmitter;
 
     constructor(pid: number) {
@@ -140,6 +143,10 @@ export class OsuInstance {
             new TourneyManagerData(this.entities)
         );
         this.entities.set('userProfile', new UserProfile(this.entities));
+
+        this.watchProcessHealth = this.watchProcessHealth.bind(this);
+        this.updateMapMetadata = this.updateMapMetadata.bind(this);
+        this.updateKeyOverlay = this.updateKeyOverlay.bind(this);
     }
 
     setTourneyIpcId(ipcId: number) {
@@ -150,10 +157,8 @@ export class OsuInstance {
         this.isTourneySpectator = newVal;
     }
 
-    async start() {
-        wLogger.info(
-            `Running memory chimera... RESOLVING PATTERNS FOR ${this.pid}`
-        );
+    start() {
+        wLogger.info(`[${this.pid}] Running memory chimera..`);
         while (!this.isReady) {
             const patternsRepo = this.entities.get('patterns');
             if (!patternsRepo) {
@@ -163,12 +168,23 @@ export class OsuInstance {
             }
 
             try {
+                const total = Object.keys(SCAN_PATTERNS).length;
+                let completed = 0;
                 for (const baseKey in SCAN_PATTERNS) {
+                    const s1 = performance.now();
                     const patternValue = this.process.scanSync(
                         SCAN_PATTERNS[baseKey].pattern,
                         true
                     );
+                    completed += 1;
                     if (patternValue === 0) {
+                        updateProgressBar(
+                            `[${this.pid}] Scanning`,
+                            completed / total,
+                            `${(performance.now() - s1).toFixed(
+                                2
+                            )}ms ${baseKey}`
+                        );
                         continue;
                     }
 
@@ -176,22 +192,27 @@ export class OsuInstance {
                         baseKey as never,
                         patternValue + (SCAN_PATTERNS[baseKey].offset || 0)
                     );
+
+                    updateProgressBar(
+                        `[${this.pid}] Scanning`,
+                        completed / total,
+                        `${(performance.now() - s1).toFixed(2)}ms ${baseKey}`
+                    );
                 }
 
                 if (!patternsRepo.checkIsBasesValid()) {
-                    wLogger.info('PATTERN RESOLVING FAILED, TRYING AGAIN....');
                     throw new Error('Memory resolve failed');
                 }
 
                 wLogger.info(
-                    'ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA'
+                    `[${this.pid}] ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA`
                 );
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    'PATTERN SCANNING FAILED, TRYING ONE MORE TIME...',
-                    exc
+                    `[${this.pid}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
                 );
+                wLogger.debug(exc);
                 this.emitter.emit('onResolveFailed', this.pid);
                 return;
             }
@@ -201,15 +222,19 @@ export class OsuInstance {
          * ENABLING GOSU OVERLAY
          */
         if (config.enableGosuOverlay) {
-            await injectGameOverlay(this.process);
+            this.injectGameOverlay();
         }
 
         this.update();
         if (config.enableKeyOverlay) {
-            this.updateKeyOverlay();
+            this.initKeyOverlay();
         }
-        this.updateMapMetadata();
+        this.initMapMetadata();
         this.watchProcessHealth();
+    }
+
+    async injectGameOverlay() {
+        await injectGameOverlay(this.process);
     }
 
     async update() {
@@ -239,13 +264,10 @@ export class OsuInstance {
             'userProfile'
         ]);
 
-        let prevTime = 0;
         while (!this.isDestroyed) {
             try {
-                await Promise.all([
-                    allTimesData.updateState(),
-                    menuData.updateState()
-                ]);
+                allTimesData.updateState();
+                menuData.updateState();
 
                 // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
                 if (menuData.Folder != '' && menuData.Folder != null)
@@ -272,8 +294,19 @@ export class OsuInstance {
 
                 switch (allTimesData.Status) {
                     case 0:
-                        await bassDensityData.updateState();
+                        bassDensityData.updateState();
                         break;
+
+                    // skip editor, to prevent constant data reset
+                    case 1:
+                        if (this.previousTime == allTimesData.PlayTime) break;
+
+                        this.previousTime = allTimesData.PlayTime;
+                        beatmapPpData.updateEditorPP();
+                        break;
+
+                    // EditorSongSElect and SongSelect
+                    case 4:
                     case 5:
                         // Reset Gameplay/ResultScreen data on joining to songSelect
                         if (!gamePlayData.isDefaultState) {
@@ -282,34 +315,38 @@ export class OsuInstance {
                             beatmapPpData.resetCurrentAttributes();
                         }
                         break;
+
                     case 2:
                         // Reset gameplay data on retry
-                        if (prevTime > allTimesData.PlayTime) {
+                        if (this.previousTime > allTimesData.PlayTime) {
                             gamePlayData.init(true);
                             beatmapPpData.resetCurrentAttributes();
                         }
 
-                        prevTime = allTimesData.PlayTime;
+                        this.previousTime = allTimesData.PlayTime;
 
                         if (
-                            allTimesData.PlayTime < 150 &&
+                            allTimesData.PlayTime < 0 &&
                             !gamePlayData.isDefaultState
                         ) {
                             gamePlayData.init(true);
                             break;
                         }
 
-                        await gamePlayData.updateState();
+                        gamePlayData.updateState();
                         break;
+
                     case 7:
-                        await resultsScreenData.updateState();
+                        resultsScreenData.updateState();
                         break;
+
                     case 22:
                         if (!this.isTourneyManager) {
                             this.isTourneyManager = true;
                         }
                         await tourneyManagerData.updateState();
                         break;
+
                     default:
                         gamePlayData.init();
                         resultsScreenData.init();
@@ -317,19 +354,20 @@ export class OsuInstance {
                 }
 
                 if (this.isTourneySpectator) {
-                    await tourneyUserProfileData.updateState();
+                    tourneyUserProfileData.updateState();
                 }
 
-                await userProfile.updateState();
+                userProfile.updateState();
             } catch (exc) {
                 wLogger.error('error happend while another loop executed', exc);
+                wLogger.debug(exc);
             }
 
             await sleep(config.pollRate);
         }
     }
 
-    async updateKeyOverlay() {
+    initKeyOverlay() {
         wLogger.debug(`OI(updateKeyOverlay) starting`);
 
         const { allTimesData, gamePlayData } = this.entities.getServices([
@@ -337,91 +375,105 @@ export class OsuInstance {
             'gamePlayData'
         ]);
 
-        while (!this.isDestroyed) {
-            try {
-                switch (allTimesData.Status) {
-                    case 2:
-                        if (allTimesData.PlayTime < 150) {
-                            break;
-                        }
-
-                        await gamePlayData.updateKeyOverlay();
-                        // await
-                        break;
-                    default:
-                    // no-default
-                }
-
-                await sleep(config.keyOverlayPollRate);
-            } catch (exc) {
-                wLogger.error(
-                    'OI(updateKeyOverlay) error happend while keyboard overlay attempted to parse',
-                    exc
-                );
-            }
-        }
+        this.updateKeyOverlay(allTimesData, gamePlayData);
     }
 
-    async updateMapMetadata() {
+    updateKeyOverlay(allTimesData: AllTimesData, gamePlayData: GamePlayData) {
+        if (this.isDestroyed == true) return;
+
+        try {
+            switch (allTimesData.Status) {
+                case 2:
+                    if (allTimesData.PlayTime < 150) {
+                        break;
+                    }
+
+                    gamePlayData.updateKeyOverlay();
+                    break;
+                default:
+                // no-default
+            }
+        } catch (exc) {
+            wLogger.error(
+                'OI(updateKeyOverlay) error happend while keyboard overlay attempted to parse'
+            );
+            wLogger.debug(exc);
+        }
+
+        setTimeout(() => {
+            this.updateKeyOverlay(allTimesData, gamePlayData);
+        }, config.keyOverlayPollRate);
+    }
+
+    initMapMetadata() {
         wLogger.debug(`OI(updateMapMetadata) Starting`);
 
-        let previousState = '';
+        const entities = this.entities.getServices([
+            'menuData',
+            'allTimesData',
+            'settings',
+            'gamePlayData',
+            'beatmapPpData'
+        ]);
 
-        while (true) {
-            const {
-                menuData,
-                allTimesData,
-                settings,
-                gamePlayData,
-                beatmapPpData
-            } = this.entities.getServices([
-                'menuData',
-                'allTimesData',
-                'settings',
-                'gamePlayData',
-                'beatmapPpData'
-            ]);
-
-            const currentMods =
-                allTimesData.Status === 2 || allTimesData.Status === 7
-                    ? gamePlayData.Mods
-                    : allTimesData.MenuMods;
-
-            const currentTimeMD5 = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
-
-            if (
-                menuData.Path?.endsWith('.osu') &&
-                settings.gameFolder &&
-                previousState !== currentTimeMD5
-            ) {
-                previousState = currentTimeMD5;
-
-                try {
-                    await beatmapPpData.updateMapMetadata(currentMods);
-                } catch (exc) {
-                    wLogger.error(
-                        "OI(updateMapMetadata) Can't update beatmap metadata",
-                        exc
-                    );
-                }
-            }
-
-            await sleep(config.pollRate);
-        }
+        this.updateMapMetadata(entities);
     }
 
-    async watchProcessHealth() {
-        while (!this.isDestroyed) {
-            if (!Process.isProcessExist(this.process.handle)) {
-                this.isDestroyed = true;
-                wLogger.info(
-                    `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed`
-                );
-                this.emitter.emit('onDestroy', this.pid);
-            }
+    updateMapMetadata(entries: {
+        menuData: MenuData;
+        allTimesData: AllTimesData;
+        settings: Settings;
+        gamePlayData: GamePlayData;
+        beatmapPpData: BeatmapPPData;
+    }) {
+        const {
+            menuData,
+            allTimesData,
+            settings,
+            gamePlayData,
+            beatmapPpData
+        } = entries;
+        const currentMods =
+            allTimesData.Status === 2 || allTimesData.Status === 7
+                ? gamePlayData.Mods
+                : allTimesData.MenuMods;
 
-            await sleep(config.pollRate);
+        const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
+
+        if (
+            menuData.Path?.endsWith('.osu') &&
+            settings.gameFolder &&
+            this.previousState !== currentState
+        ) {
+            this.previousState = currentState;
+
+            try {
+                beatmapPpData.updateMapMetadata(currentMods);
+            } catch (exc) {
+                wLogger.error(
+                    "OI(updateMapMetadata) Can't update beatmap metadata"
+                );
+                wLogger.debug(exc);
+            }
         }
+
+        setTimeout(() => {
+            this.updateMapMetadata(entries);
+        }, config.pollRate);
+    }
+
+    watchProcessHealth() {
+        if (this.isDestroyed == true) return;
+
+        if (!Process.isProcessExist(this.process.handle)) {
+            this.isDestroyed = true;
+            wLogger.info(
+                `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed`
+            );
+            this.emitter.emit('onDestroy', this.pid);
+        }
+
+        setTimeout(this.watchProcessHealth, config.pollRate);
     }
 
     getState(instanceManager: InstanceManager) {
