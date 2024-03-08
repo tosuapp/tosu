@@ -385,7 +385,8 @@ export class AllTimesData extends AbstractEntity {
                 }
             }
 
-            this.configStateErrorAttempts = 0;
+            if (this.configStateErrorAttempts != 0)
+                this.configStateErrorAttempts = 0;
         } catch (exc) {
             this.configStateErrorAttempts += 1;
 
@@ -417,7 +418,8 @@ export class AllTimesData extends AbstractEntity {
                 }
             }
 
-            this.bindingStateErrorAttempts = 0;
+            if (this.bindingStateErrorAttempts != 0)
+                this.bindingStateErrorAttempts = 0;
         } catch (exc) {
             this.bindingStateErrorAttempts += 1;
 
@@ -431,75 +433,81 @@ export class AllTimesData extends AbstractEntity {
     }
 
     updateState() {
-        const { process, patterns, settings } = this.services.getServices([
-            'process',
-            'patterns',
-            'settings'
-        ]);
+        try {
+            const { process, patterns, settings } = this.services.getServices([
+                'process',
+                'patterns',
+                'settings'
+            ]);
 
-        const {
-            statusPtr,
-            playTimeAddr,
-            menuModsPtr,
-            chatCheckerAddr,
-            skinDataAddr,
-            settingsClassAddr,
-            configurationAddr,
-            bindingsAddr,
-            canRunSlowlyAddr,
-            gameTimePtr
-        } = patterns.getPatterns([
-            'statusPtr',
-            'playTimeAddr',
-            'menuModsPtr',
-            'chatCheckerAddr',
-            'skinDataAddr',
-            'settingsClassAddr',
-            'configurationAddr',
-            'bindingsAddr',
-            'canRunSlowlyAddr',
-            'gameTimePtr'
-        ]);
+            const {
+                statusPtr,
+                playTimeAddr,
+                menuModsPtr,
+                chatCheckerAddr,
+                skinDataAddr,
+                settingsClassAddr,
+                configurationAddr,
+                bindingsAddr,
+                canRunSlowlyAddr,
+                gameTimePtr
+            } = patterns.getPatterns([
+                'statusPtr',
+                'playTimeAddr',
+                'menuModsPtr',
+                'chatCheckerAddr',
+                'skinDataAddr',
+                'settingsClassAddr',
+                'configurationAddr',
+                'bindingsAddr',
+                'canRunSlowlyAddr',
+                'gameTimePtr'
+            ]);
 
-        const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
-        if (skinOsuAddr === 0) {
-            return;
-        }
-        const skinOsuBase = process.readInt(skinOsuAddr);
+            const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
+            if (skinOsuAddr === 0) {
+                return;
+            }
+            const skinOsuBase = process.readInt(skinOsuAddr);
 
-        // [Status - 0x4]
-        this.Status = process.readPointer(statusPtr);
-        // [PlayTime + 0x5]
-        this.PlayTime = process.readInt(process.readInt(playTimeAddr + 0x5));
-        this.GameTime = process.readPointer(gameTimePtr);
-        // [MenuMods + 0x9]
-        this.MenuMods = process.readPointer(menuModsPtr);
-        // ChatChecker - 0x20
-        this.ChatStatus = process.readByte(chatCheckerAddr - 0x20);
-        this.SkinFolder = process.readSharpString(
-            process.readInt(skinOsuBase + 0x44)
-        );
-        this.IsWatchingReplay = process.readByte(
-            process.readInt(canRunSlowlyAddr + 0x46)
-        );
-        this.SongsFolder = process.readSharpString(
-            process.readInt(
+            // [Status - 0x4]
+            this.Status = process.readPointer(statusPtr);
+            // [PlayTime + 0x5]
+            this.PlayTime = process.readInt(
+                process.readInt(playTimeAddr + 0x5)
+            );
+            this.GameTime = process.readPointer(gameTimePtr);
+            // [MenuMods + 0x9]
+            this.MenuMods = process.readPointer(menuModsPtr);
+            // ChatChecker - 0x20
+            this.ChatStatus = process.readByte(chatCheckerAddr - 0x20);
+            this.SkinFolder = process.readSharpString(
+                process.readInt(skinOsuBase + 0x44)
+            );
+            this.IsWatchingReplay = process.readByte(
+                process.readInt(canRunSlowlyAddr + 0x46)
+            );
+            this.SongsFolder = process.readSharpString(
                 process.readInt(
-                    process.readInt(settingsClassAddr + 0x8) + 0xb8
-                ) + 0x4
-            )
-        );
+                    process.readInt(
+                        process.readInt(settingsClassAddr + 0x8) + 0xb8
+                    ) + 0x4
+                )
+            );
 
-        // this.updateConfigState(
-        //     process,
-        //     settings,
-        //     process.readPointer(configurationAddr)
-        // );
+            // this.updateConfigState(
+            //     process,
+            //     settings,
+            //     process.readPointer(configurationAddr)
+            // );
 
-        this.updateBindingState(
-            process,
-            settings,
-            process.readPointer(bindingsAddr)
-        );
+            // this.updateBindingState(
+            //     process,
+            //     settings,
+            //     process.readPointer(bindingsAddr)
+            // );
+        } catch (exc) {
+            wLogger.error(`ATD(updateState) ${(exc as any).message}`, exc);
+        }
     }
 }
