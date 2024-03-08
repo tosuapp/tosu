@@ -9,6 +9,8 @@ export class BassDensityData extends AbstractEntity {
     currentAudioVelocity: number = 0.0;
     density: number = 0.0;
 
+    updateStateErrorAttempts: number = 0;
+
     constructor(services: DataRepo) {
         super(services);
     }
@@ -76,8 +78,15 @@ export class BassDensityData extends AbstractEntity {
 
             this.currentAudioVelocity = currentAudioVelocity;
             this.density = (1 + currentAudioVelocity) * 0.5;
+
+            if (this.updateStateErrorAttempts != 0)
+                this.updateStateErrorAttempts = 0;
         } catch (exc) {
-            wLogger.error(`BDD(updateState) ${(exc as any).message}`, exc);
+            this.updateStateErrorAttempts += 1;
+
+            if (this.updateStateErrorAttempts > 5) {
+                wLogger.error(`BDD(updateState) ${(exc as any).message}`, exc);
+            }
         }
     }
 }
