@@ -57,6 +57,7 @@ interface BeatmapPPTimings {
 
 export class BeatmapPPData extends AbstractEntity {
     beatmap?: Beatmap;
+    beatmapContent?: string;
     strains: number[];
     strainsAll: BeatmapStrains;
     commonBPM: number;
@@ -202,17 +203,15 @@ export class BeatmapPPData extends AbstractEntity {
             menuData.Path
         );
 
-        let beatmapContent: string;
-
         try {
-            beatmapContent = fs.readFileSync(mapPath, 'utf8');
+            this.beatmapContent = fs.readFileSync(mapPath, 'utf8');
         } catch (error) {
             wLogger.debug(`BPPD(updateMapMetadata) Can't get map: ${mapPath}`);
             return;
         }
 
         this.beatmap = new Beatmap({
-            content: beatmapContent,
+            content: this.beatmapContent,
             ar: menuData.AR,
             od: menuData.OD,
             cs: menuData.CS,
@@ -258,7 +257,7 @@ export class BeatmapPPData extends AbstractEntity {
         try {
             const decoder = new BeatmapDecoder();
 
-            lazerBeatmap = decoder.decodeFromString(beatmapContent, {
+            lazerBeatmap = decoder.decodeFromString(this.beatmapContent, {
                 parseEvents: true,
                 parseTimingPoints: true,
 
@@ -432,46 +431,29 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     updateEditorPP() {
-        if (!this.beatmap) {
+        if (!this.beatmap || !this.beatmapContent) {
             return;
         }
 
         const start_time = performance.now();
 
-        const { allTimesData, menuData, settings } = this.services.getServices([
-            'allTimesData',
-            'menuData',
-            'settings',
-            'beatmapPpData'
-        ]);
+        const { allTimesData } = this.services.getServices(['allTimesData']);
 
-        const mapPath = path.join(
-            settings.songsFolder,
-            menuData.Folder,
-            menuData.Path
+        const decoder = new BeatmapDecoder().decodeFromString(
+            this.beatmapContent,
+            {
+                parseHitObjects: true,
+
+                parseColours: false,
+                parseDifficulty: false,
+                parseEditor: false,
+                parseEvents: true,
+                parseGeneral: false,
+                parseMetadata: false,
+                parseStoryboard: false,
+                parseTimingPoints: false
+            }
         );
-
-        let beatmapContent: string;
-
-        try {
-            beatmapContent = fs.readFileSync(mapPath, 'utf8');
-        } catch (error) {
-            wLogger.debug(`can't get map: ${mapPath}`);
-            return;
-        }
-
-        const decoder = new BeatmapDecoder().decodeFromString(beatmapContent, {
-            parseHitObjects: true,
-
-            parseColours: false,
-            parseDifficulty: false,
-            parseEditor: false,
-            parseEvents: true,
-            parseGeneral: false,
-            parseMetadata: false,
-            parseStoryboard: false,
-            parseTimingPoints: false
-        });
 
         const beatmap_parse_time = performance.now();
         wLogger.debug(
