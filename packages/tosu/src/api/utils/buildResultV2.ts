@@ -111,7 +111,7 @@ export const buildResult = (
             playCount: 0 // need counting
         },
         settings: {
-            interfaceVisible: settings.showInterface,
+            interfaceVisible: allTimesData.ShowInterface,
             replayUIVisible: gamePlayData.isReplayUiHidden == false,
             chatVisibilityStatus: {
                 number: allTimesData.ChatStatus,

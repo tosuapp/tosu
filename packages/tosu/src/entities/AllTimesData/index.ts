@@ -495,6 +495,15 @@ export class AllTimesData extends AbstractEntity {
                 )
             );
 
+            // [[SettingsClass + 0x8] + 0x4] + 0xC
+            this.ShowInterface = Boolean(
+                process.readByte(
+                    process.readInt(
+                        process.readInt(settingsClassAddr + 0x8) + 0x4
+                    ) + 0xc
+                )
+            );
+
             // this.updateConfigState(
             //     process,
             //     settings,
