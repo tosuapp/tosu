@@ -345,7 +345,7 @@ export class OsuInstance {
 
                 userProfile.updateState();
             } catch (exc) {
-                wLogger.error('error happend while another loop executed');
+                wLogger.error('error happend while another loop executed', exc);
                 wLogger.debug(exc);
             }
 

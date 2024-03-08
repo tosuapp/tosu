@@ -54,7 +54,7 @@ export class InstanceManager {
                 osuInstance.start();
             }
         } catch (error) {
-            wLogger.error((error as any).message);
+            wLogger.error('InstanceManager', (error as any).message);
             wLogger.debug(error);
         }
     }

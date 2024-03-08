@@ -150,7 +150,6 @@ export default function buildBaseApi(app: HttpServer) {
             exec(`start "" "${folderPath}"`, (err, stdout, stderr) => {
                 if (err) {
                     wLogger.error('Error opening file explorer:');
-                    wLogger.debug(err);
                     return sendJson(res, {
                         error: `Error opening file explorer: ${err.message}`
                     });
@@ -305,9 +304,6 @@ export default function buildBaseApi(app: HttpServer) {
                 performance: calculator.performance(parseBeatmap)
             });
         } catch (error) {
-            wLogger.error((error as any).message);
-            wLogger.debug(error);
-
             return sendJson(res, {
                 error: (error as any).message
             });
