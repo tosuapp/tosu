@@ -390,7 +390,6 @@ export class OsuInstance {
                     }
 
                     gamePlayData.updateKeyOverlay();
-                    // await
                     break;
                 default:
                 // no-default
@@ -421,19 +420,20 @@ export class OsuInstance {
         this.updateMapMetadata(entities);
     }
 
-    updateMapMetadata({
-        menuData,
-        allTimesData,
-        settings,
-        gamePlayData,
-        beatmapPpData
-    }: {
+    updateMapMetadata(entries: {
         menuData: MenuData;
         allTimesData: AllTimesData;
         settings: Settings;
         gamePlayData: GamePlayData;
         beatmapPpData: BeatmapPPData;
     }) {
+        const {
+            menuData,
+            allTimesData,
+            settings,
+            gamePlayData,
+            beatmapPpData
+        } = entries;
         const currentMods =
             allTimesData.Status === 2 || allTimesData.Status === 7
                 ? gamePlayData.Mods
@@ -459,13 +459,7 @@ export class OsuInstance {
         }
 
         setTimeout(() => {
-            this.updateMapMetadata({
-                menuData,
-                allTimesData,
-                settings,
-                gamePlayData,
-                beatmapPpData
-            });
+            this.updateMapMetadata(entries);
         }, config.pollRate);
     }
 
