@@ -108,128 +108,144 @@ export class GamePlayData extends AbstractEntity {
     }
 
     updateState() {
-        const { process, patterns, allTimesData, menuData } =
-            this.services.getServices([
-                'process',
-                'patterns',
-                'allTimesData',
-                'menuData'
+        try {
+            const { process, patterns, allTimesData, menuData } =
+                this.services.getServices([
+                    'process',
+                    'patterns',
+                    'allTimesData',
+                    'menuData'
+                ]);
+
+            const { baseAddr, rulesetsAddr } = patterns.getPatterns([
+                'baseAddr',
+                'rulesetsAddr'
             ]);
 
-        const { baseAddr, rulesetsAddr } = patterns.getPatterns([
-            'baseAddr',
-            'rulesetsAddr'
-        ]);
-
-        const rulesetAddr = process.readInt(
-            process.readInt(rulesetsAddr - 0xb) + 0x4
-        );
-        if (rulesetAddr === 0) {
-            wLogger.debug('GD(updateState) RulesetAddr is 0');
-            return;
-        }
-
-        const gameplayBase = process.readInt(rulesetAddr + 0x68);
-        if (gameplayBase === 0) {
-            wLogger.debug('GD(updateState) gameplayBase is zero');
-            return;
-        }
-
-        const scoreBase = process.readInt(gameplayBase + 0x38);
-        if (scoreBase === 0) {
-            wLogger.debug('GD(updateState) scoreBase is zero');
-            return;
-        }
-
-        let hpBarBase = process.readInt(gameplayBase + 0x40);
-        if (hpBarBase === 0) {
-            wLogger.debug('GD(updateState) hpBar is zero');
-            return;
-        }
-
-        // Resetting default state value, to define other componenets that we have touched gamePlayData
-        // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
-        this.isDefaultState = false;
-
-        if (allTimesData.IsWatchingReplay) {
-            // rulesetAddr mean ReplayWatcher... Sooo....
-            // Ruleset + 0x1d8
-            this.isReplayUiHidden = Boolean(
-                process.readByte(rulesetAddr + 0x1d8)
+            const rulesetAddr = process.readInt(
+                process.readInt(rulesetsAddr - 0xb) + 0x4
             );
-        } else {
-            this.isReplayUiHidden = false;
-        }
-
-        // [Base - 0x33] + 0x8
-        this.Retries = process.readInt(process.readInt(baseAddr - 0x33) + 0x8);
-        // [[[Ruleset + 0x68] + 0x38] + 0x28]
-        this.PlayerName = process.readSharpString(
-            process.readInt(scoreBase + 0x28)
-        );
-        // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
-        this.Mods =
-            process.readInt(process.readInt(scoreBase + 0x1c) + 0xc) ^
-            process.readInt(process.readInt(scoreBase + 0x1c) + 0x8);
-        // [[Ruleset + 0x68] + 0x38] + 0x64
-        this.Mode = process.readInt(scoreBase + 0x64);
-        // [[Ruleset + 0x68] + 0x38] + 0x68
-        this.MaxCombo = process.readShort(scoreBase + 0x68);
-        // [[Ruleset + 0x68] + 0x38] + 0x78
-        this.Score = process.readInt(rulesetAddr + 0x100);
-        // [[Ruleset + 0x68] + 0x38] + 0x88
-        this.Hit100 = process.readShort(scoreBase + 0x88);
-        // [[Ruleset + 0x68] + 0x38] + 0x8A
-        this.Hit300 = process.readShort(scoreBase + 0x8a);
-        // [[Ruleset + 0x68] + 0x38] + 0x8C
-        this.Hit50 = process.readShort(scoreBase + 0x8c);
-        // [[Ruleset + 0x68] + 0x38] + 0x8E
-        this.HitGeki = process.readShort(scoreBase + 0x8e);
-        // [[Ruleset + 0x68] + 0x38] + 0x90
-        this.HitKatu = process.readShort(scoreBase + 0x90);
-        // [[Ruleset + 0x68] + 0x38] + 0x92
-        this.HitMiss = process.readShort(scoreBase + 0x92);
-        // [[Ruleset + 0x68] + 0x38] + 0x94
-        this.Combo = process.readShort(scoreBase + 0x94);
-        // [[Ruleset + 0x68] + 0x40] + 0x14
-        this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14) || 0;
-        // [[Ruleset + 0x68] + 0x40] + 0x1C
-        this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
-        // [[Ruleset + 0x68] + 0x48] + 0xC
-        this.Accuracy = process.readDouble(
-            process.readInt(gameplayBase + 0x48) + 0xc
-        );
-
-        if (this.MaxCombo > 0) {
-            const baseUR = this.calculateUR();
-            if ((this.Mods & OsuMods.DoubleTime) === OsuMods.DoubleTime) {
-                this.UnstableRate = baseUR / 1.5;
-            } else if ((this.Mods & OsuMods.HalfTime) === OsuMods.HalfTime) {
-                this.UnstableRate = baseUR * 1.33;
-            } else {
-                this.UnstableRate = baseUR;
+            if (rulesetAddr === 0) {
+                wLogger.debug('GD(updateState) RulesetAddr is 0');
+                return;
             }
-        }
 
-        if (this.ComboPrev > this.MaxCombo) {
-            this.ComboPrev = 0;
-        }
-        if (this.Combo < this.ComboPrev && this.HitMiss === this.HitMissPrev) {
-            this.HitSB += 1;
-        }
-        this.HitMissPrev = this.HitMiss;
-        this.ComboPrev = this.Combo;
+            const gameplayBase = process.readInt(rulesetAddr + 0x68);
+            if (gameplayBase === 0) {
+                wLogger.debug('GD(updateState) gameplayBase is zero');
+                return;
+            }
 
-        // [[[Ruleset + 0x68] + 0x38] + 0x38]
-        this.HitErrors = this.getHitErrors(
-            process,
-            patterns.getLeaderStart(),
-            scoreBase
-        );
+            const scoreBase = process.readInt(gameplayBase + 0x38);
+            if (scoreBase === 0) {
+                wLogger.debug('GD(updateState) scoreBase is zero');
+                return;
+            }
 
-        this.updateLeaderboard(process, patterns.getLeaderStart(), rulesetAddr);
-        this.updateGrade(menuData);
-        this.updateStarsAndPerformance();
+            let hpBarBase = process.readInt(gameplayBase + 0x40);
+            if (hpBarBase === 0) {
+                wLogger.debug('GD(updateState) hpBar is zero');
+                return;
+            }
+
+            // Resetting default state value, to define other componenets that we have touched gamePlayData
+            // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
+            this.isDefaultState = false;
+
+            if (allTimesData.IsWatchingReplay) {
+                // rulesetAddr mean ReplayWatcher... Sooo....
+                // Ruleset + 0x1d8
+                this.isReplayUiHidden = Boolean(
+                    process.readByte(rulesetAddr + 0x1d8)
+                );
+            } else {
+                this.isReplayUiHidden = false;
+            }
+
+            // [Base - 0x33] + 0x8
+            this.Retries = process.readInt(
+                process.readInt(baseAddr - 0x33) + 0x8
+            );
+            // [[[Ruleset + 0x68] + 0x38] + 0x28]
+            this.PlayerName = process.readSharpString(
+                process.readInt(scoreBase + 0x28)
+            );
+            // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
+            this.Mods =
+                process.readInt(process.readInt(scoreBase + 0x1c) + 0xc) ^
+                process.readInt(process.readInt(scoreBase + 0x1c) + 0x8);
+            // [[Ruleset + 0x68] + 0x38] + 0x64
+            this.Mode = process.readInt(scoreBase + 0x64);
+            // [[Ruleset + 0x68] + 0x38] + 0x68
+            this.MaxCombo = process.readShort(scoreBase + 0x68);
+            // [[Ruleset + 0x68] + 0x38] + 0x78
+            this.Score = process.readInt(rulesetAddr + 0x100);
+            // [[Ruleset + 0x68] + 0x38] + 0x88
+            this.Hit100 = process.readShort(scoreBase + 0x88);
+            // [[Ruleset + 0x68] + 0x38] + 0x8A
+            this.Hit300 = process.readShort(scoreBase + 0x8a);
+            // [[Ruleset + 0x68] + 0x38] + 0x8C
+            this.Hit50 = process.readShort(scoreBase + 0x8c);
+            // [[Ruleset + 0x68] + 0x38] + 0x8E
+            this.HitGeki = process.readShort(scoreBase + 0x8e);
+            // [[Ruleset + 0x68] + 0x38] + 0x90
+            this.HitKatu = process.readShort(scoreBase + 0x90);
+            // [[Ruleset + 0x68] + 0x38] + 0x92
+            this.HitMiss = process.readShort(scoreBase + 0x92);
+            // [[Ruleset + 0x68] + 0x38] + 0x94
+            this.Combo = process.readShort(scoreBase + 0x94);
+            // [[Ruleset + 0x68] + 0x40] + 0x14
+            this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14) || 0;
+            // [[Ruleset + 0x68] + 0x40] + 0x1C
+            this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
+            // [[Ruleset + 0x68] + 0x48] + 0xC
+            this.Accuracy = process.readDouble(
+                process.readInt(gameplayBase + 0x48) + 0xc
+            );
+
+            if (this.MaxCombo > 0) {
+                const baseUR = this.calculateUR();
+                if ((this.Mods & OsuMods.DoubleTime) === OsuMods.DoubleTime) {
+                    this.UnstableRate = baseUR / 1.5;
+                } else if (
+                    (this.Mods & OsuMods.HalfTime) ===
+                    OsuMods.HalfTime
+                ) {
+                    this.UnstableRate = baseUR * 1.33;
+                } else {
+                    this.UnstableRate = baseUR;
+                }
+            }
+
+            if (this.ComboPrev > this.MaxCombo) {
+                this.ComboPrev = 0;
+            }
+            if (
+                this.Combo < this.ComboPrev &&
+                this.HitMiss === this.HitMissPrev
+            ) {
+                this.HitSB += 1;
+            }
+            this.HitMissPrev = this.HitMiss;
+            this.ComboPrev = this.Combo;
+
+            // [[[Ruleset + 0x68] + 0x38] + 0x38]
+            this.HitErrors = this.getHitErrors(
+                process,
+                patterns.getLeaderStart(),
+                scoreBase
+            );
+
+            this.updateLeaderboard(
+                process,
+                patterns.getLeaderStart(),
+                rulesetAddr
+            );
+            this.updateGrade(menuData);
+            this.updateStarsAndPerformance();
+        } catch (exc) {
+            wLogger.error(`GPD(updateState) ${(exc as any).message}`, exc);
+        }
     }
 
     updateKeyOverlay() {
