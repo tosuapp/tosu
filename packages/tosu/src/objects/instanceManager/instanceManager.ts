@@ -33,7 +33,7 @@ export class InstanceManager {
                 const osuInstance = new OsuInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
                 if (cmdLine.includes('-spectateclient')) {
-                    const [_, ipcId] = cmdLine.split(' ');
+                    const [_, __, ipcId] = cmdLine.split(' ');
 
                     osuInstance.setTourneyIpcId(Number(ipcId));
                     osuInstance.setIsTourneySpectator(true);

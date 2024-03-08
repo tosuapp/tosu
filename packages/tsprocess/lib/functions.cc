@@ -377,7 +377,7 @@ Napi::Value getProcessCommandLine(const Napi::CallbackInfo &args) {
 
   std::wstring commandLine = memory::get_proc_command_line(handle);
 
-  return Napi::String::New(env, reinterpret_cast<const char16_t*>(commandLine.c_str()), sizeof(commandLine));
+  return Napi::String::New(env, reinterpret_cast<const char16_t*>(commandLine.c_str()));
 }
 
 Napi::Value readCSharpString(const Napi::CallbackInfo &args) {
