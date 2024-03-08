@@ -118,7 +118,7 @@ export const watchConfigFile = ({ httpServer }: { httpServer: any }) => {
     refreshConfig(httpServer, false);
     updateConfigFile();
 
-    fs.watchFile(configPath, (current, previous) => {
+    fs.watchFile(configPath, () => {
         refreshConfig(httpServer, true);
     });
 };
@@ -160,6 +160,17 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.serverPort = serverPort;
 
         httpServer.restart();
+    }
+
+    const osuInstances: any = Object.values(
+        httpServer.instanceManager.osuInstances || {}
+    );
+    if (
+        osuInstances.length == 1 &&
+        enableGosuOverlay == true &&
+        updated == true
+    ) {
+        osuInstances[0].injectGameOverlay();
     }
 
     config.debugLogging = debugLogging;

@@ -1,4 +1,4 @@
-import { config, recursiveFilesSearch } from '@tosu/common';
+import { config, recursiveFilesSearch, wLogger } from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -217,37 +217,43 @@ function rebuildJSON({
 }
 
 function getLocalCounters() {
-    const staticPath =
-        config.staticFolderPath || path.join(pkgRunningFolder, 'static');
+    try {
+        const staticPath =
+            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
 
-    const countersListTXT = recursiveFilesSearch({
-        dir: staticPath,
-        fileList: [],
-        filename: 'metadata.txt'
-    });
+        const countersListTXT = recursiveFilesSearch({
+            dir: staticPath,
+            fileList: [],
+            filename: 'metadata.txt'
+        });
 
-    const countersListHTML = recursiveFilesSearch({
-        dir: staticPath,
-        fileList: [],
-        filename: 'index.html'
-    });
+        const countersListHTML = recursiveFilesSearch({
+            dir: staticPath,
+            fileList: [],
+            filename: 'index.html'
+        });
 
-    const arrayOfLocal = countersListHTML
-        .filter((r) => {
-            const folder = path.dirname(r);
-            return (
-                countersListTXT.find((s) => path.dirname(s) == folder) == null
-            );
-        })
-        .map((r) => ({
-            name: path.basename(path.dirname(r)),
-            author: 'local',
-            resolution: [-2, '400'],
-            authorlinks: []
-        }));
+        const arrayOfLocal = countersListHTML
+            .filter((r) => {
+                const folder = path.dirname(r);
+                return (
+                    countersListTXT.find((s) => path.dirname(s) == folder) ==
+                    null
+                );
+            })
+            .map((r) => ({
+                name: path.basename(path.dirname(r)),
+                author: 'local',
+                resolution: [-2, '400'],
+                authorlinks: []
+            }));
 
-    const array = countersListTXT.map((r) => parseTXT(r));
-    return array.concat(arrayOfLocal).filter((r) => r.name != '');
+        const array = countersListTXT.map((r) => parseTXT(r));
+        return array.concat(arrayOfLocal).filter((r) => r.name != '');
+    } catch (error) {
+        wLogger.error((error as any).message);
+        return [];
+    }
 }
 
 export function buildLocalCounters(res: http.ServerResponse, query?: string) {

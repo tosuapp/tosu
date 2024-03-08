@@ -1,14 +1,26 @@
 import fs from 'fs';
 import https from 'https';
 
+import { colorText } from './logger';
+
 const progressBarWidth = 40;
 
-const updateProgressBar = (progress: number): void => {
+export const updateProgressBar = (
+    title: string,
+    progress: number,
+    message: string = ''
+): void => {
+    const colored_text = colorText('info');
+    if (message) message = ` - ${message}`;
+
     const filledWidth = Math.round(progressBarWidth * progress);
     const emptyWidth = progressBarWidth - filledWidth;
     const progressBar = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
+
     process.stdout.write(
-        `Downloading: [${progressBar}] ${(progress * 100).toFixed(2)}%\r`
+        `${colored_text} ${title}: [${progressBar}] ${(progress * 100).toFixed(
+            2
+        )}%${message}\r`
     );
 
     if (progress === 1) {
@@ -66,7 +78,7 @@ export const downloadFile = (
                 response.on('data', (data) => {
                     downloadedSize += data.length;
                     const progress = downloadedSize / totalSize;
-                    updateProgressBar(progress);
+                    updateProgressBar('Downloading', progress);
                 });
 
                 response.pipe(file);
