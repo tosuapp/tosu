@@ -200,7 +200,6 @@ export class OsuInstance {
                     );
                 }
 
-                const s1 = performance.now();
                 if (!patternsRepo.checkIsBasesValid()) {
                     throw new Error('Memory resolve failed');
                 }
