@@ -28,8 +28,8 @@ export class AllTimesData extends AbstractEntity {
 
     bindingNames = new Map();
 
-    configStateErrorAttempts: number = 0;
-    bindingStateErrorAttempts: number = 0;
+    private configStateErrorAttempts: number = 0;
+    private bindingStateErrorAttempts: number = 0;
 
     private configList: Record<string, IConfigBindable> = {
         VolumeUniversal: {

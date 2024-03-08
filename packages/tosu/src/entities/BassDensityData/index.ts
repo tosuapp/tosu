@@ -9,12 +9,12 @@ export class BassDensityData extends AbstractEntity {
     currentAudioVelocity: number = 0.0;
     density: number = 0.0;
 
-    updateStateErrorAttempts: number = 0;
+    private updateStateErrorAttempts: number = 0;
 
     constructor(services: DataRepo) {
         super(services);
     }
-    // FIXME
+
     updateState() {
         try {
             const { process: osuProcess, patterns } = this.services.getServices(

@@ -32,7 +32,7 @@ export class MenuData extends AbstractEntity {
 
     previousMD5: string = '';
 
-    mp3ErrorAttempts: number = 0;
+    private mp3ErrorAttempts: number = 0;
 
     constructor(services: DataRepo) {
         super(services);
