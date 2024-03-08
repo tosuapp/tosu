@@ -236,7 +236,6 @@ export default function buildBaseApi(app: HttpServer) {
     });
 
     app.route('/homepage.min.css', 'GET', (req, res) => {
-        // FIXME: REMOVE THAT SHIT
         fs.readFile(
             path.join(pkgAssetsPath, 'homepage.min.css'),
             'utf8',
