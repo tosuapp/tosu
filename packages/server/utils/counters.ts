@@ -134,10 +134,12 @@ function rebuildJSON({
             .filter((r) => r != null)
             .join(' ');
 
+        const ip = config.serverIP == '0.0.0.0' ? 'localhost' : config.serverIP;
+
         const iframe = iframeHTML
             .replace(
                 '{URL}',
-                `http://${config.serverIP}:${config.serverPort}/${counterName}/`
+                `http://${ip}:${config.serverPort}/${counterName}/`
             )
             .replace(
                 '{WIDTH}',
