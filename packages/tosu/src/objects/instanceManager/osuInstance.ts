@@ -391,7 +391,8 @@ export class OsuInstance {
                     gamePlayData.updateKeyOverlay();
                     break;
                 default:
-                // no-default
+                    gamePlayData.resetKeyOverlay();
+                    break;
             }
         } catch (exc) {
             wLogger.error(
