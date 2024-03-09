@@ -39,8 +39,9 @@ export class TourneyUserProfileData extends AbstractEntity {
     updateState() {
         wLogger.debug(`TUPD(updateState) Starting`);
 
-        const { process, patterns } = this.services.getServices([
+        const { process, gamePlayData, patterns } = this.services.getServices([
             'process',
+            'gamePlayData',
             'patterns'
         ]);
 
@@ -50,6 +51,7 @@ export class TourneyUserProfileData extends AbstractEntity {
         if (!spectatingUserDrawable) {
             wLogger.debug('TUPD(updateState) Slot is not equiped');
             this.resetState();
+            gamePlayData.init();
             return;
         }
 
