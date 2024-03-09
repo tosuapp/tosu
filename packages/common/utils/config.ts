@@ -59,7 +59,8 @@ export const config = {
     serverIP: process.env.SERVER_IP || '127.0.0.1',
     serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
-    enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true'
+    enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
+    timestamp: 0
 };
 
 export const updateConfigFile = () => {
@@ -114,13 +115,27 @@ export const updateConfigFile = () => {
         wLogger.warn(`New options available in config: ${newOptions}\n`);
 };
 
-export const watchConfigFile = ({ httpServer }: { httpServer: any }) => {
-    refreshConfig(httpServer, false);
-    updateConfigFile();
+export const watchConfigFile = ({
+    httpServer,
+    initial
+}: {
+    httpServer: any;
+    initial?: boolean;
+}) => {
+    if (initial == true) {
+        refreshConfig(httpServer, false);
+        updateConfigFile();
+    }
 
-    fs.watchFile(configPath, () => {
+    const stat = fs.statSync(configPath);
+    if (config.timestamp != stat.mtimeMs) {
         refreshConfig(httpServer, true);
-    });
+        config.timestamp = stat.mtimeMs;
+    }
+
+    setTimeout(() => {
+        watchConfigFile({ httpServer });
+    }, 1000);
 };
 
 export const refreshConfig = (httpServer: any, refresh: boolean) => {

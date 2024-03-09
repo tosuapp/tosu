@@ -10,7 +10,7 @@ import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-import { HttpServer, getContentType, sendJson } from '../index';
+import { Server, getContentType, sendJson } from '../index';
 import {
     buildExternalCounters,
     buildInstructionLocal,
@@ -27,8 +27,8 @@ const pkgAssetsPath =
 const pkgRunningFolder =
     'pkg' in process ? path.dirname(process.execPath) : process.cwd();
 
-export default function buildBaseApi(app: HttpServer) {
-    app.route('/json', 'GET', (req, res) => {
+export default function buildBaseApi(server: Server) {
+    server.app.route('/json', 'GET', (req, res) => {
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}
         );
@@ -41,165 +41,184 @@ export default function buildBaseApi(app: HttpServer) {
         sendJson(res, json);
     });
 
-    app.route(/^\/api\/counters\/search\/(?<query>.*)/, 'GET', (req, res) => {
-        try {
-            const query = decodeURI(req.params.query)
-                .replace(/[^a-z0-9A-Z]/, '')
-                .toLowerCase();
+    server.app.route(
+        /^\/api\/counters\/search\/(?<query>.*)/,
+        'GET',
+        (req, res) => {
+            try {
+                const query = decodeURI(req.params.query)
+                    .replace(/[^a-z0-9A-Z]/, '')
+                    .toLowerCase();
 
-            if (req.query?.tab == '1') {
-                return buildExternalCounters(res, query);
+                if (req.query?.tab == '1') {
+                    return buildExternalCounters(res, query);
+                }
+
+                return buildLocalCounters(res, query);
+            } catch (error) {
+                wLogger.error((error as any).message);
+
+                return sendJson(res, {
+                    error: (error as any).message
+                });
+            }
+        }
+    );
+
+    server.app.route(
+        /^\/api\/counters\/download\/(?<url>.*)/,
+        'GET',
+        (req, res) => {
+            const folderName = req.query.name;
+            if (!folderName) {
+                return sendJson(res, {
+                    error: 'no folder name'
+                });
             }
 
-            return buildLocalCounters(res, query);
-        } catch (error) {
-            wLogger.error((error as any).message);
+            const cacheFolder = path.join(pkgRunningFolder, '.cache');
+            const staticPath =
+                config.staticFolderPath ||
+                path.join(pkgRunningFolder, 'static');
+            const folderPath = path.join(staticPath, decodeURI(folderName));
 
-            return sendJson(res, {
-                error: (error as any).message
-            });
-        }
-    });
+            const tempPath = path.join(cacheFolder, `${Date.now()}.zip`);
 
-    app.route(/^\/api\/counters\/download\/(?<url>.*)/, 'GET', (req, res) => {
-        const folderName = req.query.name;
-        if (!folderName) {
-            return sendJson(res, {
-                error: 'no folder name'
-            });
-        }
+            if (fs.existsSync(folderPath)) {
+                return sendJson(res, {
+                    error: 'Folder already exist'
+                });
+            }
 
-        const cacheFolder = path.join(pkgRunningFolder, '.cache');
-        const staticPath =
-            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
-        const folderPath = path.join(staticPath, decodeURI(folderName));
+            if (!fs.existsSync(cacheFolder)) fs.mkdirSync(cacheFolder);
 
-        const tempPath = path.join(cacheFolder, `${Date.now()}.zip`);
+            try {
+                const startUnzip = (result) => {
+                    unzip(result, folderPath)
+                        .then(() => {
+                            wLogger.info(
+                                `PP Counter downloaded: ${folderName}`
+                            );
+                            fs.unlinkSync(tempPath);
 
-        if (fs.existsSync(folderPath)) {
-            return sendJson(res, {
-                error: 'Folder already exist'
-            });
-        }
+                            sendJson(res, {
+                                status: 'Finished',
+                                path: result
+                            });
+                        })
+                        .catch((reason) => {
+                            fs.unlinkSync(tempPath);
 
-        if (!fs.existsSync(cacheFolder)) fs.mkdirSync(cacheFolder);
-
-        try {
-            const startUnzip = (result) => {
-                unzip(result, folderPath)
-                    .then(() => {
-                        wLogger.info(`PP Counter downloaded: ${folderName}`);
-                        fs.unlinkSync(tempPath);
-
-                        sendJson(res, {
-                            status: 'Finished',
-                            path: result
+                            sendJson(res, {
+                                error: reason
+                            });
                         });
-                    })
-                    .catch((reason) => {
-                        fs.unlinkSync(tempPath);
+                };
 
+                downloadFile(req.params.url, tempPath)
+                    .then(startUnzip)
+                    .catch((reason) => {
                         sendJson(res, {
                             error: reason
                         });
                     });
-            };
+            } catch (error) {
+                wLogger.error((error as any).message);
 
-            downloadFile(req.params.url, tempPath)
-                .then(startUnzip)
-                .catch((reason) => {
-                    sendJson(res, {
-                        error: reason
-                    });
+                sendJson(res, {
+                    error: (error as any).message
                 });
-        } catch (error) {
-            wLogger.error((error as any).message);
-
-            sendJson(res, {
-                error: (error as any).message
-            });
+            }
         }
-    });
+    );
 
-    app.route(/^\/api\/counters\/open\/(?<name>.*)/, 'GET', (req, res) => {
-        try {
-            const folderName = req.params.name;
-            if (!folderName) {
-                return sendJson(res, {
-                    error: 'no folder name'
-                });
-            }
-
-            const staticPath =
-                config.staticFolderPath ||
-                path.join(pkgRunningFolder, 'static');
-            const folderPath = path.join(staticPath, decodeURI(folderName));
-
-            if (!fs.existsSync(folderPath)) {
-                return sendJson(res, {
-                    error: `Folder doesn't exists`
-                });
-            }
-
-            // ADDED MULTI PLATFORM SUPPORT
-            // mac exec(`open "${path}"`, (err, stdout, stderr) => {
-            // linux exec(`xdg-open "${path}"`, (err, stdout, stderr) => {
-
-            wLogger.info(`PP Counter opened: ${folderName}`);
-
-            exec(`start "" "${folderPath}"`, (err, stdout, stderr) => {
-                if (err) {
-                    wLogger.error('Error opening file explorer:');
+    server.app.route(
+        /^\/api\/counters\/open\/(?<name>.*)/,
+        'GET',
+        (req, res) => {
+            try {
+                const folderName = req.params.name;
+                if (!folderName) {
                     return sendJson(res, {
-                        error: `Error opening file explorer: ${err.message}`
+                        error: 'no folder name'
                     });
                 }
 
-                return sendJson(res, {
-                    status: 'opened'
-                });
-            });
-        } catch (error) {
-            return sendJson(res, {
-                error: (error as any).message
-            });
-        }
-    });
+                const staticPath =
+                    config.staticFolderPath ||
+                    path.join(pkgRunningFolder, 'static');
+                const folderPath = path.join(staticPath, decodeURI(folderName));
 
-    app.route(/^\/api\/counters\/delete\/(?<name>.*)/, 'GET', (req, res) => {
-        try {
-            const folderName = req.params.name;
-            if (!folderName) {
+                if (!fs.existsSync(folderPath)) {
+                    return sendJson(res, {
+                        error: `Folder doesn't exists`
+                    });
+                }
+
+                // ADDED MULTI PLATFORM SUPPORT
+                // mac exec(`open "${path}"`, (err, stdout, stderr) => {
+                // linux exec(`xdg-open "${path}"`, (err, stdout, stderr) => {
+
+                wLogger.info(`PP Counter opened: ${folderName}`);
+
+                exec(`start "" "${folderPath}"`, (err, stdout, stderr) => {
+                    if (err) {
+                        wLogger.error('Error opening file explorer:');
+                        return sendJson(res, {
+                            error: `Error opening file explorer: ${err.message}`
+                        });
+                    }
+
+                    return sendJson(res, {
+                        status: 'opened'
+                    });
+                });
+            } catch (error) {
                 return sendJson(res, {
-                    error: 'no folder name'
+                    error: (error as any).message
                 });
             }
+        }
+    );
 
-            const staticPath =
-                config.staticFolderPath ||
-                path.join(pkgRunningFolder, 'static');
-            const folderPath = path.join(staticPath, decodeURI(folderName));
+    server.app.route(
+        /^\/api\/counters\/delete\/(?<name>.*)/,
+        'GET',
+        (req, res) => {
+            try {
+                const folderName = req.params.name;
+                if (!folderName) {
+                    return sendJson(res, {
+                        error: 'no folder name'
+                    });
+                }
 
-            if (!fs.existsSync(folderPath)) {
+                const staticPath =
+                    config.staticFolderPath ||
+                    path.join(pkgRunningFolder, 'static');
+                const folderPath = path.join(staticPath, decodeURI(folderName));
+
+                if (!fs.existsSync(folderPath)) {
+                    return sendJson(res, {
+                        error: `Folder doesn't exists`
+                    });
+                }
+
+                wLogger.info(`PP Counter removed: ${folderName}`);
+
+                fs.rmSync(folderPath, { recursive: true, force: true });
                 return sendJson(res, {
-                    error: `Folder doesn't exists`
+                    status: 'deleted'
+                });
+            } catch (error) {
+                return sendJson(res, {
+                    error: (error as any).message
                 });
             }
-
-            wLogger.info(`PP Counter removed: ${folderName}`);
-
-            fs.rmSync(folderPath, { recursive: true, force: true });
-            return sendJson(res, {
-                status: 'deleted'
-            });
-        } catch (error) {
-            return sendJson(res, {
-                error: (error as any).message
-            });
         }
-    });
+    );
 
-    app.route('/api/settingsSave', 'POST', (req, res) => {
+    server.app.route('/api/settingsSave', 'POST', (req, res) => {
         const body = req.body;
         // try {
         //     body = JSON.parse(req.body);
@@ -215,14 +234,14 @@ export default function buildBaseApi(app: HttpServer) {
             });
         }
 
-        writeConfig(app.Server, body);
+        writeConfig(server, body);
 
         sendJson(res, {
             status: 'updated'
         });
     });
 
-    app.route(/^\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
+    server.app.route(/^\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
         fs.readFile(
             path.join(pkgAssetsPath, 'images', req.params.filePath),
             (err, content) => {
@@ -235,7 +254,7 @@ export default function buildBaseApi(app: HttpServer) {
         );
     });
 
-    app.route('/homepage.min.css', 'GET', (req, res) => {
+    server.app.route('/homepage.min.css', 'GET', (req, res) => {
         fs.readFile(
             path.join(pkgAssetsPath, 'homepage.min.css'),
             'utf8',
@@ -248,7 +267,7 @@ export default function buildBaseApi(app: HttpServer) {
         );
     });
 
-    app.route('/homepage.js', 'GET', (req, res) => {
+    server.app.route('/homepage.js', 'GET', (req, res) => {
         fs.readFile(
             path.join(pkgAssetsPath, 'homepage.js'),
             'utf8',
@@ -261,7 +280,7 @@ export default function buildBaseApi(app: HttpServer) {
         );
     });
 
-    app.route('/api/calculate/pp', 'GET', (req, res) => {
+    server.app.route('/api/calculate/pp', 'GET', (req, res) => {
         try {
             const query: any = req.query;
 
@@ -309,7 +328,7 @@ export default function buildBaseApi(app: HttpServer) {
         }
     });
 
-    app.route(/.*/, 'GET', (req, res) => {
+    server.app.route(/.*/, 'GET', (req, res) => {
         try {
             const url = req.pathname || '/';
             const folderPath =
