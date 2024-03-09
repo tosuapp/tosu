@@ -107,6 +107,33 @@ export class GamePlayData extends AbstractEntity {
         this.Leaderboard = undefined;
     }
 
+    resetKeyOverlay() {
+        if (
+            this.KeyOverlay.K1Pressed == false &&
+            this.KeyOverlay.K2Pressed == false &&
+            this.KeyOverlay.M1Pressed == false &&
+            this.KeyOverlay.M2Pressed == false &&
+            this.KeyOverlay.K1Count == 0 &&
+            this.KeyOverlay.K2Count == 0 &&
+            this.KeyOverlay.M1Count == 0 &&
+            this.KeyOverlay.M2Count == 0
+        ) {
+            return;
+        }
+
+        wLogger.debug(`GD(resetKeyOverlay) Reset`);
+
+        this.KeyOverlay.K1Pressed = false;
+        this.KeyOverlay.K2Pressed = false;
+        this.KeyOverlay.M1Pressed = false;
+        this.KeyOverlay.M2Pressed = false;
+
+        this.KeyOverlay.K1Count = 0;
+        this.KeyOverlay.K2Count = 0;
+        this.KeyOverlay.M1Count = 0;
+        this.KeyOverlay.M2Count = 0;
+    }
+
     updateState() {
         try {
             const { process, patterns, allTimesData, menuData } =
