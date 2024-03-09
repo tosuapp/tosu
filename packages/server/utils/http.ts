@@ -1,8 +1,6 @@
 import { wLogger } from '@tosu/common';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
-import { Server } from '../index';
-
 export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     body: string;
@@ -29,7 +27,6 @@ type RouteHandler = {
 export class HttpServer {
     private middlewares: RequestHandler[] = [];
     server: http.Server;
-    Server: Server;
     private routes: {
         [method: string]: {
             path: string | RegExp;
@@ -37,10 +34,19 @@ export class HttpServer {
         }[];
     } = {};
 
-    constructor(hold: any) {
-        this.Server = hold;
+    constructor() {
         // @ts-ignore
         this.server = http.createServer(this.handleRequest.bind(this));
+
+        this.server.on('error', (err) => {
+            if (err.message.includes('getaddrinfo')) {
+                wLogger.warn(`Incorrect server ip or url`);
+                return;
+            }
+
+            wLogger.error(`[server] ${err.message}`);
+            wLogger.debug(err);
+        });
     }
 
     use(middleware: RequestHandler) {
@@ -166,7 +172,8 @@ export class HttpServer {
 
     listen(port: number, hostname: string) {
         this.server.listen(port, hostname, () => {
-            wLogger.info(`Web server started on http://${hostname}:${port}`);
+            const ip = hostname == '0.0.0.0' ? 'localhost' : hostname;
+            wLogger.info(`Web server started on http://${ip}:${port}`);
         });
     }
 }

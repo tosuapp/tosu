@@ -133,7 +133,8 @@ export class MenuData extends AbstractEntity {
 
             this.previousMD5 = this.MD5;
         } catch (exc) {
-            wLogger.error(`MB(updateState) ${(exc as any).message}`, exc);
+            wLogger.error(`MB(updateState) ${(exc as any).message}`);
+            wLogger.debug(exc);
         }
     }
 
@@ -161,8 +162,8 @@ export class MenuData extends AbstractEntity {
                 wLogger.error(
                     `Unable to parse beatmap mp3 length (you can ignore it)`
                 );
-                wLogger.debug(exc);
             }
+            wLogger.debug(exc);
         }
     }
 }

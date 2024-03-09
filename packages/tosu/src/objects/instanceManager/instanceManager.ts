@@ -53,9 +53,9 @@ export class InstanceManager {
                 this.osuInstances[processId] = osuInstance;
                 osuInstance.start();
             }
-        } catch (error) {
-            wLogger.error('InstanceManager', (error as any).message);
-            wLogger.debug(error);
+        } catch (exc) {
+            wLogger.error('InstanceManager', (exc as any).message);
+            wLogger.debug(exc);
         }
     }
 

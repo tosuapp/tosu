@@ -244,7 +244,8 @@ export class GamePlayData extends AbstractEntity {
             this.updateGrade(menuData);
             this.updateStarsAndPerformance();
         } catch (exc) {
-            wLogger.error(`GPD(updateState) ${(exc as any).message}`, exc);
+            wLogger.error(`GPD(updateState) ${(exc as any).message}`);
+            wLogger.debug(exc);
         }
     }
 
