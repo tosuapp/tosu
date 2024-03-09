@@ -17,7 +17,7 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     )
         await autoUpdater();
 
-    watchConfigFile({ httpServer });
+    watchConfigFile({ httpServer, initial: true });
 
     wLogger.info('Searching for osu!');
 

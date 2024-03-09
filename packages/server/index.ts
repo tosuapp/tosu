@@ -8,7 +8,7 @@ import { Websocket } from './utils/socket';
 
 export class Server {
     instanceManager: any;
-    app = new HttpServer(this);
+    app = new HttpServer();
 
     constructor({ instanceManager }: { instanceManager: any }) {
         this.instanceManager = instanceManager;
@@ -33,7 +33,7 @@ export class Server {
             stateFunctionName: 'getKeyOverlay'
         });
 
-        buildBaseApi(this.app);
+        buildBaseApi(this);
         buildV1Api({
             app: this.app,
             websocket: WS_V1
