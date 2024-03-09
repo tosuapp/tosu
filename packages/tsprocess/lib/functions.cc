@@ -212,6 +212,7 @@ Napi::Value readBuffer(const Napi::CallbackInfo &args) {
 
   if (!result) {
     free(data);
+    delete[] buffer;
     Napi::TypeError::New(env,
                          string_format("Couldn't read buffer at %x", address))
         .ThrowAsJavaScriptException();
@@ -221,6 +222,7 @@ Napi::Value readBuffer(const Napi::CallbackInfo &args) {
 
   auto out = Napi::Buffer<char>::Copy(env, data, size);
   free(data);
+  delete[] buffer;
 
   return out;
 }
@@ -256,8 +258,9 @@ Napi::Value scan(const Napi::CallbackInfo &args) {
 
           auto res = memory::find_pattern(handle, vec, refresh, baseAddress);
           scanning = false;
-          tsfn.BlockingCall([res](Napi::Env env, Napi::Function jsCallback) {
+          tsfn.BlockingCall([res, tsfn](Napi::Env env, Napi::Function jsCallback) {
             jsCallback.Call({Napi::Number::From(env, res)});
+            tsfn.Release(); // Release the callback after usage
           });
         },
         callback)
