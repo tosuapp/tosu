@@ -155,7 +155,8 @@ export class TourneyManagerData extends AbstractEntity {
 
             wLogger.debug(`TMD(updateState) updated`);
         } catch (exc) {
-            wLogger.error(`TMD(updateState) ${(exc as any).message}`, exc);
+            wLogger.error(`TMD(updateState) ${(exc as any).message}`);
+            wLogger.debug(exc);
         }
     }
 }

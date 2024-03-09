@@ -20,7 +20,16 @@ export function directoryWalker({
     pathname: string;
     folderPath: string;
 }) {
-    const cleanedUrl = decodeURI(pathname);
+    let cleanedUrl;
+    try {
+        cleanedUrl = decodeURI(pathname);
+    } catch (error) {
+        res.writeHead(404, {
+            'Content-Type': getContentType('file.txt')
+        });
+        res.end('');
+        return;
+    }
     const contentType = getContentType(cleanedUrl);
 
     const filePath = path.join(folderPath, cleanedUrl);

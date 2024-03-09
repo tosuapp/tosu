@@ -53,7 +53,8 @@ export class UserProfile extends AbstractEntity {
             // ARGB, to convert use UserProfile.backgroundColour.toString(16)
             this.backgroundColour = process.readUInt(profileBase + 0xac);
         } catch (exc) {
-            wLogger.error(`UP(updateState) ${(exc as any).message}`, exc);
+            wLogger.error(`UP(updateState) ${(exc as any).message}`);
+            wLogger.debug(exc);
         }
     }
 }

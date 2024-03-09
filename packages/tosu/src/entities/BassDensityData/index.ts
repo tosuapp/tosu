@@ -85,8 +85,9 @@ export class BassDensityData extends AbstractEntity {
             this.updateStateErrorAttempts += 1;
 
             if (this.updateStateErrorAttempts > 5) {
-                wLogger.error(`BDD(updateState) ${(exc as any).message}`, exc);
+                wLogger.error(`BDD(updateState) ${(exc as any).message}`);
             }
+            wLogger.debug(exc);
         }
     }
 }
