@@ -219,18 +219,12 @@ export default function buildBaseApi(server: Server) {
     );
 
     server.app.route('/api/settingsSave', 'POST', (req, res) => {
-        const body = req.body;
-        // try {
-        //     body = JSON.parse(req.body);
-        // } catch (error) {
-        //     return sendJson(res, {
-        //         error: (error as any).message,
-        //     });
-        // };
-
-        if (body == '') {
+        let body: object;
+        try {
+            body = JSON.parse(req.body);
+        } catch (error) {
             return sendJson(res, {
-                error: 'No settings'
+                error: (error as any).message
             });
         }
 
