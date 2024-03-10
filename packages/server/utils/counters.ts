@@ -64,6 +64,14 @@ export function parseTXT(filePath: string) {
         else object[key.toLowerCase()] = value.trim();
     }
 
+    filePath = path.resolve(filePath);
+    const staticPath = path.resolve(config.staticFolderPath);
+
+    object['folderName'] = path
+        .dirname(filePath.replace(staticPath, ''))
+        .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
+        .replace(/\\/gm, '/');
+
     if (object.resolution)
         object.resolution = object.resolution.map((r) => r.trim());
     if (object.authorlinks) object.authorlinks = object.authorlinks.split(',');
@@ -80,6 +88,7 @@ function rebuildJSON({
     query
 }: {
     array: {
+        folderName: string;
         name: string;
         author: string;
         resolution: number[];
@@ -139,7 +148,7 @@ function rebuildJSON({
         const iframe = iframeHTML
             .replace(
                 '{URL}',
-                `http://${ip}:${config.serverPort}/${counterName}/`
+                `http://${ip}:${config.serverPort}/${item.folderName}/`
             )
             .replace(
                 '{WIDTH}',
@@ -157,9 +166,9 @@ function rebuildJSON({
         const metadata = metadataHTML
             .replace(
                 '{COPY_URL}',
-                `http://${config.serverIP}:${config.serverPort}/${counterName}/`
+                `http://${config.serverIP}:${config.serverPort}/${item.folderName}/`
             )
-            .replace('{TEXT_URL}', `/${counterName}/`)
+            .replace('{TEXT_URL}', `/${item.folderName}/`)
             .replace(
                 '{COPY_X}',
                 item.resolution[0] == -1 || item.resolution[0] == -2
@@ -243,12 +252,22 @@ function getLocalCounters() {
                     null
                 );
             })
-            .map((r) => ({
-                name: path.basename(path.dirname(r)),
-                author: 'local',
-                resolution: [-2, '400'],
-                authorlinks: []
-            }));
+            .map((r) => {
+                const staticPath = path.resolve(config.staticFolderPath);
+                const nestedFolderPath = path.dirname(
+                    r.replace(staticPath, '')
+                );
+
+                return {
+                    folderName: nestedFolderPath
+                        .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
+                        .replace(/\\/gm, '/'),
+                    name: path.basename(path.dirname(r)),
+                    author: 'local',
+                    resolution: [-2, '400'],
+                    authorlinks: []
+                };
+            });
 
         const array = countersListTXT.map((r) => parseTXT(r));
         return array.concat(arrayOfLocal).filter((r) => r.name != '');
