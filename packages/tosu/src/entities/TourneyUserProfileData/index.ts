@@ -5,6 +5,8 @@ import { DataRepo } from '@/entities/DataRepoList';
 import { AbstractEntity } from '../AbstractEntity';
 
 export class TourneyUserProfileData extends AbstractEntity {
+    isDefaultState: boolean = true;
+
     Accuracy: number = 0.0;
     RankedScore: number = 0;
     PlayCount: number = 0;
@@ -18,11 +20,28 @@ export class TourneyUserProfileData extends AbstractEntity {
         super(services);
     }
 
+    resetState() {
+        if (this.isDefaultState) {
+            return;
+        }
+
+        this.isDefaultState = true;
+        this.Accuracy = 0.0;
+        this.RankedScore = 0;
+        this.PlayCount = 0;
+        this.GlobalRank = 0;
+        this.PP = 0;
+        this.Name = '';
+        this.Country = '';
+        this.UserID = 0;
+    }
+
     updateState() {
         wLogger.debug(`TUPD(updateState) Starting`);
 
-        const { process, patterns } = this.services.getServices([
+        const { process, gamePlayData, patterns } = this.services.getServices([
             'process',
+            'gamePlayData',
             'patterns'
         ]);
 
@@ -31,6 +50,8 @@ export class TourneyUserProfileData extends AbstractEntity {
         );
         if (!spectatingUserDrawable) {
             wLogger.debug('TUPD(updateState) Slot is not equiped');
+            this.resetState();
+            gamePlayData.init();
             return;
         }
 
@@ -55,6 +76,8 @@ export class TourneyUserProfileData extends AbstractEntity {
             );
             // UserDrawable + 0x70
             this.UserID = process.readInt(spectatingUserDrawable + 0x70);
+
+            this.isDefaultState = false;
         } catch (exc) {
             wLogger.error('TUPD(updateState) signature failed');
             wLogger.debug(exc);
