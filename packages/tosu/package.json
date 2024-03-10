@@ -1,6 +1,6 @@
 {
     "name": "tosu",
-    "version": "2.4.4",
+    "version": "2.5.0",
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {

@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/KotRikD/tosu/compare/v2.4.3...v2.5.0) (2024-03-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* v2 `state` & `progressBar` updated
+
+* fix: Updating keyoverlay until process is dead
+
+* fix: reuse cached beatmap
+
+* fix order
+
+* fix: Move detailed errors to debug
+
+* update error messages
+
+* fix you
+
+* Feat: Add process id and patterns scan progress
+
+* fix: More detailed errors
+
+* fix: cache beatmap for editor
+
+* hide updateBindingState too
+
+* cleanup
+
+* cleanup
+
+* fix: return reading interface visible from settingsClassAddr
+
+* reduce error spam
+
+* to private
+
+### Features
+
+* Moved `v2/keys` to `v2/precise` ([5daec8d](https://github.com/KotRikD/tosu/commit/5daec8d07bedc4fed849f8037496fa1d45ff1e49))
+* remove some `Async` & `While loops` + editor pp ([#88](https://github.com/KotRikD/tosu/issues/88)) ([2c6f601](https://github.com/KotRikD/tosu/commit/2c6f6015e130026915addd9411b5e53c59f5603c))
+* Renamed `KEYOVERLAY_POLL_RATE` to `PRECISE_DATA_POLL_RATE` ([bc9dadd](https://github.com/KotRikD/tosu/commit/bc9daddfd2519eaa7ca7872af6a98eda4e7911b5))
+
+
+### Bug Fixes
+
+* don't use sizeof on wstring ([db3dbd8](https://github.com/KotRikD/tosu/commit/db3dbd8c1881e4089378e81440d79e135803ca9f))
+* FIx recursive counters path ([90c3faa](https://github.com/KotRikD/tosu/commit/90c3faa846c9fa95026b68af1271b394f4c31b01))
+* Move full error messages to debug ([63c440c](https://github.com/KotRikD/tosu/commit/63c440c520a4dd3d1c8bd459ade0fed0d52d68e8))
+* reset all gameplayData if TUPD doesn't in slot ([d3e72dd](https://github.com/KotRikD/tosu/commit/d3e72dde4c97301c19dc73f4fc7d9baea2ce5367))
+* Reset keyOverlay data ([251834f](https://github.com/KotRikD/tosu/commit/251834f6ecdc50b2545d6a6047987b70a1137e95))
+* reset TUPD on slot swap ([cfb75cb](https://github.com/KotRikD/tosu/commit/cfb75cb2a56fbd72bb176d9b254fb9ac3eb140ce))
+* Switch from `fs.watchfile` to `setTimeout` ([77a441b](https://github.com/KotRikD/tosu/commit/77a441b328d9b4191b00f7a363eb5619d47fd30f))
+* Update fields instead of entire file ([a77f737](https://github.com/KotRikD/tosu/commit/a77f737d7609f0c87133e674848b14082ea8c7cd))
+
 ### [2.4.4](https://github.com/KotRikD/tosu/compare/v2.4.3...v2.4.4) (2024-03-08)
 
 
