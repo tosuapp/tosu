@@ -22,7 +22,7 @@ export class Websocket {
     }: {
         instanceManager: any;
         pollRateFieldName: string;
-        stateFunctionName: string;
+        stateFunctionName: 'getState' | 'getStateV2' | 'getPreciseData';
     }) {
         this.socket = new WebSocket.Server({ noServer: true });
 

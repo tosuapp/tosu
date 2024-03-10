@@ -8,10 +8,12 @@ const configPath = path.join(
     'pkg' in process ? path.dirname(process.execPath) : process.cwd(),
     'tsosu.env'
 );
-if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(
-        configPath,
-        `# The config implies a set of key-values to enable/disable tosu functionality
+
+const createConfig = () => {
+    if (!fs.existsSync(configPath)) {
+        fs.writeFileSync(
+            configPath,
+            `# The config implies a set of key-values to enable/disable tosu functionality
 # Below you can see that there is EVERY_THE_FUNCTION=true/false,
 # true = on
 # false = off
@@ -23,9 +25,9 @@ ENABLE_KEY_OVERLAY=true
 
 # Reference: 1 second = 1000 milliseconds
 # Once in what value, the programme should read the game values (in milliseconds)
-POLL_RATE=150
+POLL_RATE=100
 # Once per value, the programme should read the values of keys K1/K2/M1/M2 (in milliseconds)
-KEYOVERLAY_POLL_RATE=150
+PRECISE_DATA_POLL_RATE=100
 
 # Enables/disables the in-game gosumemory overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
 ENABLE_GOSU_OVERLAY=false
@@ -44,9 +46,10 @@ SERVER_IP=127.0.0.1
 SERVER_PORT=24050
 # The folder from which the overlays will be taken.
 STATIC_FOLDER_PATH=./static`,
-        'utf8'
-    );
-}
+            'utf8'
+        );
+    }
+};
 
 dotenv.config({ path: configPath });
 
@@ -55,7 +58,11 @@ export const config = {
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
     enableKeyOverlay: (process.env.ENABLE_KEY_OVERLAY || '') === 'true',
     pollRate: Number(process.env.POLL_RATE || '500'),
-    keyOverlayPollRate: Number(process.env.KEYOVERLAY_POLL_RATE || '100'),
+    preciseDataPollRate: Number(
+        process.env.PRECISE_DATA_POLL_RATE ||
+            process.env.KEYOVERLAY_POLL_RATE ||
+            '100'
+    ),
     serverIP: process.env.SERVER_IP || '127.0.0.1',
     serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
@@ -83,12 +90,12 @@ export const updateConfigFile = () => {
 
     if (!process.env.POLL_RATE) {
         newOptions += 'POLL_RATE, ';
-        fs.appendFileSync(configPath, '\nPOLL_RATE=150', 'utf8');
+        fs.appendFileSync(configPath, '\nPOLL_RATE=100', 'utf8');
     }
 
-    if (!process.env.KEYOVERLAY_POLL_RATE) {
-        newOptions += 'KEYOVERLAY_POLL_RATE, ';
-        fs.appendFileSync(configPath, '\nKEYOVERLAY_POLL_RATE=150', 'utf8');
+    if (!process.env.PRECISE_DATA_POLL_RATE) {
+        newOptions += 'PRECISE_DATA_POLL_RATE, ';
+        fs.appendFileSync(configPath, '\n\nPRECISE_DATA_POLL_RATE=100', 'utf8');
     }
 
     if (!process.env.SERVER_IP) {
@@ -127,6 +134,10 @@ export const watchConfigFile = ({
         updateConfigFile();
     }
 
+    if (!fs.existsSync(configPath)) {
+        createConfig();
+    }
+
     const stat = fs.statSync(configPath);
     if (config.timestamp != stat.mtimeMs) {
         refreshConfig(httpServer, true);
@@ -153,8 +164,10 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const serverPort = Number(parsed.SERVER_PORT || '24050');
     const calculatePP = (parsed.CALCULATE_PP || '') === 'true';
     const enableKeyOverlay = (parsed.ENABLE_KEY_OVERLAY || '') === 'true';
-    const pollRate = Number(parsed.POLL_RATE || '500');
-    const keyOverlayPollRate = Number(parsed.KEYOVERLAY_POLL_RATE || '100');
+    const pollRate = Number(parsed.POLL_RATE || '100');
+    const preciseDataPollRate = Number(
+        parsed.PRECISE_DATA_POLL_RATE || parsed.KEYOVERLAY_POLL_RATE || '100'
+    );
     const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
     const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
 
@@ -164,7 +177,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.calculatePP != calculatePP ||
         config.enableKeyOverlay != enableKeyOverlay ||
         config.pollRate != pollRate ||
-        config.keyOverlayPollRate != keyOverlayPollRate ||
+        config.preciseDataPollRate != preciseDataPollRate ||
         config.staticFolderPath != staticFolderPath ||
         config.enableGosuOverlay != enableGosuOverlay ||
         config.serverIP != serverIP ||
@@ -192,8 +205,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.calculatePP = calculatePP;
     config.enableKeyOverlay = enableKeyOverlay;
     config.pollRate = pollRate >= 0 ? pollRate : 100;
-    config.keyOverlayPollRate =
-        keyOverlayPollRate >= 0 ? keyOverlayPollRate : 100;
+    config.preciseDataPollRate =
+        preciseDataPollRate >= 0 ? preciseDataPollRate : 100;
     config.staticFolderPath = staticFolderPath;
     config.enableGosuOverlay = enableGosuOverlay;
 

@@ -361,7 +361,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', `ENABLE_KEY_OVERLAY`)
         .replace(
             '{DESCRIPTION}',
-            `Enables/disables reading K1/K2/M1/M2 keys on the keyboard`
+            `Enables/disable reading of K1/K2/M1/M2 keys from osu`
         )
         .replace(
             '{INPUT}',
@@ -378,7 +378,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', `ENABLE_GOSU_OVERLAY`)
         .replace(
             '{DESCRIPTION}',
-            `Enables/disables the in-game gosumemory overlay<br>(!!!I AM NOT RESPONSIBLE FOR USING IT!!!)`
+            `Enables/disable in-game <b>gosumemory</b> overlay<br />(!!!I AM NOT RESPONSIBLE FOR USING IT!!!)`
         )
         .replace(
             '{INPUT}',
@@ -395,7 +395,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', `POLL_RATE`)
         .replace(
             '{DESCRIPTION}',
-            `Once in what value, the programme should read the game values (in milliseconds)`
+            `Frequency in milliseconds for updating information.`
         )
         .replace(
             '{INPUT}',
@@ -406,27 +406,24 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.pollRate}`)
         );
 
-    const keyOverlayPollRateHTML = settingsItemHTML
-        .replace('{NAME}', `KEYOVERLAY_POLL_RATE`)
+    const preciseDataPollRateHTML = settingsItemHTML
+        .replace('{NAME}', `PRECISE_DATA_POLL_RATE`)
         .replace(
             '{DESCRIPTION}',
-            `Once per value, the programme should read the values of keys K1/K2/M1/M2 (in milliseconds)`
+            `Frequency in milliseconds for updating precise information. (Key overlay and HitErrorData)`
         )
         .replace(
             '{INPUT}',
             inputHTML
                 .replace('{TYPE}', 'number')
-                .replace(/{NAME}/gm, 'KEYOVERLAY_POLL_RATE')
-                .replace('{ADDON}', config.keyOverlayPollRate ? 'min="0"' : '')
-                .replace('{VALUE}', `${config.keyOverlayPollRate}`)
+                .replace(/{NAME}/gm, 'PRECISE_DATA_POLL_RATE')
+                .replace('{ADDON}', config.preciseDataPollRate ? 'min="0"' : '')
+                .replace('{VALUE}', `${config.preciseDataPollRate}`)
         );
 
     const serverIPHTML = settingsItemHTML
         .replace('{NAME}', `SERVER_IP`)
-        .replace(
-            '{DESCRIPTION}',
-            `IP address where the websocket api server will be registered`
-        )
+        .replace('{DESCRIPTION}', `The IP address for the API and WebSocket.`)
         .replace(
             '{INPUT}',
             inputHTML
@@ -438,10 +435,7 @@ export function buildSettings(res: http.ServerResponse) {
 
     const serverPortHTML = settingsItemHTML
         .replace('{NAME}', `SERVER_PORT`)
-        .replace(
-            '{DESCRIPTION}',
-            `The port on which the websocket api server will run`
-        )
+        .replace('{DESCRIPTION}', `The port for the API and WebSocket.`)
         .replace(
             '{INPUT}',
             inputHTML
@@ -453,10 +447,7 @@ export function buildSettings(res: http.ServerResponse) {
 
     const staticFolderPathtHTML = settingsItemHTML
         .replace('{NAME}', `STATIC_FOLDER_PATH`)
-        .replace(
-            '{DESCRIPTION}',
-            `The folder from which the overlays will be taken.`
-        )
+        .replace('{DESCRIPTION}', `The directory path containing PP counters.`)
         .replace(
             '{INPUT}',
             inputHTML
@@ -472,7 +463,7 @@ export function buildSettings(res: http.ServerResponse) {
     ${enableKeyOverlayHTML}
     ${enableGosuOverlayHTML}
     ${pollRateHTML}
-    ${keyOverlayPollRateHTML}
+    ${preciseDataPollRateHTML}
     ${serverIPHTML}
     ${serverPortHTML}
     ${staticFolderPathtHTML}

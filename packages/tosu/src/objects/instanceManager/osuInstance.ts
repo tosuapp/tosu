@@ -7,7 +7,7 @@ import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/api/utils/buildResult';
 import {
-    buildKeyOverlay,
+    buildPreciseResult,
     buildResult as buildResultV2
 } from '@/api/utils/buildResultV2';
 import { AllTimesData } from '@/entities/AllTimesData';
@@ -146,7 +146,7 @@ export class OsuInstance {
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
         this.updateMapMetadata = this.updateMapMetadata.bind(this);
-        this.updateKeyOverlay = this.updateKeyOverlay.bind(this);
+        this.updatePreciseData = this.updatePreciseData.bind(this);
     }
 
     setTourneyIpcId(ipcId: number) {
@@ -226,9 +226,7 @@ export class OsuInstance {
         }
 
         this.update();
-        if (config.enableKeyOverlay) {
-            this.initKeyOverlay();
-        }
+        this.initHighRateData();
         this.initMapMetadata();
         this.watchProcessHealth();
     }
@@ -367,18 +365,18 @@ export class OsuInstance {
         }
     }
 
-    initKeyOverlay() {
-        wLogger.debug(`OI(updateKeyOverlay) starting`);
+    initHighRateData() {
+        wLogger.debug(`OI(updatePreciseData) starting`);
 
         const { allTimesData, gamePlayData } = this.entities.getServices([
             'allTimesData',
             'gamePlayData'
         ]);
 
-        this.updateKeyOverlay(allTimesData, gamePlayData);
+        this.updatePreciseData(allTimesData, gamePlayData);
     }
 
-    updateKeyOverlay(allTimesData: AllTimesData, gamePlayData: GamePlayData) {
+    updatePreciseData(allTimesData: AllTimesData, gamePlayData: GamePlayData) {
         if (this.isDestroyed == true) return;
 
         try {
@@ -388,7 +386,10 @@ export class OsuInstance {
                         break;
                     }
 
-                    gamePlayData.updateKeyOverlay();
+                    if (config.enableKeyOverlay) {
+                        gamePlayData.updateKeyOverlay();
+                    }
+                    gamePlayData.updateHitErrors();
                     break;
                 default:
                     gamePlayData.resetKeyOverlay();
@@ -396,14 +397,14 @@ export class OsuInstance {
             }
         } catch (exc) {
             wLogger.error(
-                'OI(updateKeyOverlay) error happend while keyboard overlay attempted to parse'
+                'OI(updatePreciseData) error happend while keyboard overlay attempted to parse'
             );
             wLogger.debug(exc);
         }
 
         setTimeout(() => {
-            this.updateKeyOverlay(allTimesData, gamePlayData);
-        }, config.keyOverlayPollRate);
+            this.updatePreciseData(allTimesData, gamePlayData);
+        }, config.preciseDataPollRate);
     }
 
     initMapMetadata() {
@@ -485,7 +486,7 @@ export class OsuInstance {
         return buildResultV2(this.entities, instanceManager);
     }
 
-    getKeyOverlay() {
-        return buildKeyOverlay(this.entities);
+    getPreciseData() {
+        return buildPreciseResult(this.entities);
     }
 }

@@ -53,6 +53,8 @@ export class GamePlayData extends AbstractEntity {
     KeyOverlay: KeyOverlay;
     isReplayUiHidden: boolean;
 
+    private scoreBase: number = 0;
+
     constructor(services: DataRepo) {
         super(services);
 
@@ -169,6 +171,8 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
+            this.scoreBase = scoreBase;
+
             let hpBarBase = process.readInt(gameplayBase + 0x40);
             if (hpBarBase === 0) {
                 wLogger.debug('GD(updateState) hpBar is zero');
@@ -257,11 +261,6 @@ export class GamePlayData extends AbstractEntity {
             this.ComboPrev = this.Combo;
 
             // [[[Ruleset + 0x68] + 0x38] + 0x38]
-            this.HitErrors = this.getHitErrors(
-                process,
-                patterns.getLeaderStart(),
-                scoreBase
-            );
 
             this.updateLeaderboard(
                 process,
@@ -389,16 +388,21 @@ export class GamePlayData extends AbstractEntity {
         };
     }
 
-    private getHitErrors(
-        process: Process,
-        leaderStart: number,
-        scoreBase: number = 0
-    ): Array<number> {
-        if (scoreBase === 0) return [];
+    updateHitErrors() {
+        if (this.scoreBase === 0) return [];
+
+        const { process, patterns } = this.services.getServices([
+            'process',
+            'patterns',
+            'allTimesData',
+            'menuData'
+        ]);
+
+        const leaderStart = patterns.getLeaderStart();
 
         const errors: Array<number> = [];
 
-        const base = process.readInt(scoreBase + 0x38);
+        const base = process.readInt(this.scoreBase + 0x38);
         const items = process.readInt(base + 0x4);
         const size = process.readInt(base + 0xc);
 
@@ -409,7 +413,7 @@ export class GamePlayData extends AbstractEntity {
             errors.push(error);
         }
 
-        return errors;
+        this.HitErrors = errors;
     }
 
     private calculateUR(): number {
