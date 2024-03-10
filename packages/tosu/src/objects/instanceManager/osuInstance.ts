@@ -157,7 +157,7 @@ export class OsuInstance {
         this.isTourneySpectator = newVal;
     }
 
-    start() {
+    async start() {
         wLogger.info(`[${this.pid}] Running memory chimera..`);
         while (!this.isReady) {
             const patternsRepo = this.entities.get('patterns');
@@ -222,7 +222,7 @@ export class OsuInstance {
          * ENABLING GOSU OVERLAY
          */
         if (config.enableGosuOverlay) {
-            this.injectGameOverlay();
+            await this.injectGameOverlay();
         }
 
         this.update();
@@ -327,7 +327,7 @@ export class OsuInstance {
                             allTimesData.PlayTime < 0 &&
                             !gamePlayData.isDefaultState
                         ) {
-                            gamePlayData.init(true);
+                            gamePlayData.init(true, 'not-default');
                             break;
                         }
 
@@ -379,27 +379,20 @@ export class OsuInstance {
     updatePreciseData(allTimesData: AllTimesData, gamePlayData: GamePlayData) {
         if (this.isDestroyed == true) return;
 
-        try {
-            switch (allTimesData.Status) {
-                case 2:
-                    if (allTimesData.PlayTime < 150) {
-                        break;
-                    }
+        switch (allTimesData.Status) {
+            case 2:
+                if (allTimesData.PlayTime < 150) {
+                    break;
+                }
 
-                    if (config.enableKeyOverlay) {
-                        gamePlayData.updateKeyOverlay();
-                    }
-                    gamePlayData.updateHitErrors();
-                    break;
-                default:
-                    gamePlayData.resetKeyOverlay();
-                    break;
-            }
-        } catch (exc) {
-            wLogger.error(
-                'OI(updatePreciseData) error happend while keyboard overlay attempted to parse'
-            );
-            wLogger.debug(exc);
+                if (config.enableKeyOverlay) {
+                    gamePlayData.updateKeyOverlay();
+                }
+                gamePlayData.updateHitErrors();
+                break;
+            default:
+                gamePlayData.resetKeyOverlay();
+                break;
         }
 
         setTimeout(() => {

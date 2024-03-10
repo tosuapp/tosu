@@ -130,6 +130,7 @@ export const watchConfigFile = ({
     initial?: boolean;
 }) => {
     if (initial == true) {
+        createConfig();
         refreshConfig(httpServer, false);
         updateConfigFile();
     }

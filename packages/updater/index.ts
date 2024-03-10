@@ -55,6 +55,12 @@ export const autoUpdater = () =>
             name: string;
             assets: { name: string; browser_download_url: string }[];
         } = json;
+        if (versionName == null) {
+            wLogger.info(`Failed to check updates [${currentVersion}] `);
+
+            resolve('exact');
+            return;
+        }
 
         if (versionName.includes(currentVersion)) {
             wLogger.info(`You're using latest version [${currentVersion}] `);
