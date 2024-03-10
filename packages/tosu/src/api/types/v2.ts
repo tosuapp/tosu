@@ -457,29 +457,19 @@ export interface Combo2 {
     max: number;
 }
 
-export interface ApiKeysAnswer {
-    k1: K1;
-    k2: K2;
-    m1: M1;
-    m2: M2;
+export interface PreciseApiAnswer {
+    keys: KeyOverlay;
+    hitErrors: number[];
 }
 
-export interface K1 {
-    isPressed: boolean;
-    count: number;
+interface KeyOverlay {
+    k1: KeyOverlayButton;
+    k2: KeyOverlayButton;
+    m1: KeyOverlayButton;
+    m2: KeyOverlayButton;
 }
 
-export interface K2 {
-    isPressed: boolean;
-    count: number;
-}
-
-export interface M1 {
-    isPressed: boolean;
-    count: number;
-}
-
-export interface M2 {
+interface KeyOverlayButton {
     isPressed: boolean;
     count: number;
 }

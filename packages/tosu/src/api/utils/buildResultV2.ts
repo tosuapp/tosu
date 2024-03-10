@@ -8,7 +8,6 @@ import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
 
 import {
-    ApiKeysAnswer,
     ApiV2Answer,
     BanchoStatusEnum,
     BeatmapStatuses,
@@ -18,6 +17,7 @@ import {
     Leaderboard,
     LeaderboardType,
     Modes,
+    PreciseApiAnswer,
     ProgressBarType,
     ScoreMeterType,
     SortType,
@@ -455,7 +455,7 @@ export const buildResult = (
     };
 };
 
-export const buildKeyOverlay = (service: DataRepo): ApiKeysAnswer => {
+export const buildPreciseResult = (service: DataRepo): PreciseApiAnswer => {
     const { gamePlayData } = service.getServices(['gamePlayData']);
 
     return {

@@ -27,10 +27,10 @@ export class Server {
             pollRateFieldName: 'pollRate',
             stateFunctionName: 'getStateV2'
         });
-        const WS_V2_KEYS = new Websocket({
+        const WS_V2_PRECISE = new Websocket({
             instanceManager: this.instanceManager,
-            pollRateFieldName: 'keyOverlayPollRate',
-            stateFunctionName: 'getKeyOverlay'
+            pollRateFieldName: 'preciseDataPollRate',
+            stateFunctionName: 'getPreciseData'
         });
 
         buildBaseApi(this);
@@ -41,7 +41,7 @@ export class Server {
         buildV2Api({
             app: this.app,
             websocket: WS_V2,
-            keysWebsocket: WS_V2_KEYS
+            preciseWebsocket: WS_V2_PRECISE
         });
 
         this.app.listen(config.serverPort, config.serverIP);

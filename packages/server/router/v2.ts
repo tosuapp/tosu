@@ -6,11 +6,11 @@ import { directoryWalker } from '../utils/directories';
 export default function buildV2Api({
     app,
     websocket,
-    keysWebsocket
+    preciseWebsocket
 }: {
     app: HttpServer;
     websocket: Websocket;
-    keysWebsocket: Websocket;
+    preciseWebsocket: Websocket;
 }) {
     app.server.on('upgrade', function (request, socket, head) {
         if (request.url == '/websocket/v2') {
@@ -25,12 +25,12 @@ export default function buildV2Api({
         }
 
         if (request.url == '/websocket/v2/keys') {
-            keysWebsocket.socket.handleUpgrade(
+            preciseWebsocket.socket.handleUpgrade(
                 request,
                 socket,
                 head,
                 function (ws) {
-                    keysWebsocket.socket.emit('connection', ws, request);
+                    preciseWebsocket.socket.emit('connection', ws, request);
                 }
             );
         }
@@ -58,7 +58,7 @@ export default function buildV2Api({
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const json = osuInstances[0].getKeyOverlay();
+        const json = osuInstances[0].getPreciseData();
         sendJson(res, json);
     });
 
