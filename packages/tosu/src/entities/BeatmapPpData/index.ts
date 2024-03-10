@@ -140,11 +140,12 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     updateCurrentAttributes(stars: number, pp: number) {
-        wLogger.debug(
-            `BPPD(updateCurrentAttributes) maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(
-                2
-            )} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
-        );
+        if (this.currAttributes.pp.toFixed(2) != pp.toFixed(2))
+            wLogger.debug(
+                `BPPD(updateCurrentAttributes) maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(
+                    2
+                )} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
+            );
         const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
         this.currAttributes = {

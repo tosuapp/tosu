@@ -61,8 +61,8 @@ export class GamePlayData extends AbstractEntity {
         this.init();
     }
 
-    init(isRetry?: boolean) {
-        wLogger.debug(`GD(init) Reset (isRetry:${isRetry})`);
+    init(isRetry?: boolean, from?: string) {
+        wLogger.debug(`GD(init) Reset (${isRetry} - ${from})`);
 
         this.HitErrors = [];
         this.MaxCombo = 0;
@@ -107,6 +107,8 @@ export class GamePlayData extends AbstractEntity {
         this.Mode = 0;
         this.Mods = 0;
         this.Leaderboard = undefined;
+
+        this.scoreBase = 0;
     }
 
     resetKeyOverlay() {
@@ -276,57 +278,70 @@ export class GamePlayData extends AbstractEntity {
     }
 
     updateKeyOverlay() {
-        const { process, patterns } = this.services.getServices([
-            'process',
-            'patterns'
-        ]);
+        try {
+            const { process, patterns } = this.services.getServices([
+                'process',
+                'patterns'
+            ]);
 
-        const rulesetAddr = process.readInt(
-            process.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
-        );
-        if (rulesetAddr === 0) {
-            wLogger.debug('GD(updateKeyOverlay) rulesetAddr is zero');
-            return;
-        }
+            const rulesetAddr = process.readInt(
+                process.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) {
+                wLogger.debug('GD(updateKeyOverlay) rulesetAddr is zero');
+                return;
+            }
 
-        const keyOverlayPtr = process.readInt(rulesetAddr + 0xb0);
-        if (keyOverlayPtr === 0 || keyOverlayPtr < 127) {
-            wLogger.debug('GD(updateKeyOverlay) keyOverlayPtr is zero');
-            return;
-        }
+            const keyOverlayPtr = process.readInt(rulesetAddr + 0xb0);
+            if (keyOverlayPtr === 0 || keyOverlayPtr < 127) {
+                wLogger.debug(
+                    `GD(updateKeyOverlay) keyOverlayPtr is zero ${keyOverlayPtr} (${rulesetAddr}  -  ${patterns.getPattern(
+                        'rulesetsAddr'
+                    )})`
+                );
+                return;
+            }
 
-        // [[Ruleset + 0xB0] + 0x10] + 0x4
-        const keyOverlayArrayAddr = process.readInt(
-            process.readInt(keyOverlayPtr + 0x10) + 0x4
-        );
-        if (keyOverlayArrayAddr === 0) {
-            wLogger.debug('GD(updateKeyOverlay) keyOverlayArrayAddr is zero');
-            return;
-        }
+            // [[Ruleset + 0xB0] + 0x10] + 0x4
+            const keyOverlayArrayAddr = process.readInt(
+                process.readInt(keyOverlayPtr + 0x10) + 0x4
+            );
+            if (keyOverlayArrayAddr === 0) {
+                wLogger.debug(
+                    'GD(updateKeyOverlay) keyOverlayArrayAddr is zero'
+                );
+                return;
+            }
 
-        const keys = this.getKeyOverlay(process, keyOverlayArrayAddr);
-        if (keys.K1Count < 0 || keys.K1Count > 1_000_000) {
-            keys.K1Pressed = false;
-            keys.K1Count = 0;
-        }
-        if (keys.K2Count < 0 || keys.K2Count > 1_000_000) {
-            keys.K2Pressed = false;
-            keys.K2Count = 0;
-        }
-        if (keys.M1Count < 0 || keys.M1Count > 1_000_000) {
-            keys.M1Pressed = false;
-            keys.M1Count = 0;
-        }
-        if (keys.M2Count < 0 || keys.M2Count > 1_000_000) {
-            keys.M2Pressed = false;
-            keys.M2Count = 0;
-        }
+            const keys = this.getKeyOverlay(process, keyOverlayArrayAddr);
+            if (keys.K1Count < 0 || keys.K1Count > 1_000_000) {
+                keys.K1Pressed = false;
+                keys.K1Count = 0;
+            }
+            if (keys.K2Count < 0 || keys.K2Count > 1_000_000) {
+                keys.K2Pressed = false;
+                keys.K2Count = 0;
+            }
+            if (keys.M1Count < 0 || keys.M1Count > 1_000_000) {
+                keys.M1Pressed = false;
+                keys.M1Count = 0;
+            }
+            if (keys.M2Count < 0 || keys.M2Count > 1_000_000) {
+                keys.M2Pressed = false;
+                keys.M2Count = 0;
+            }
 
-        this.KeyOverlay = keys;
+            this.KeyOverlay = keys;
 
-        wLogger.debug(
-            `GD(updateKeyOverlay) updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`
-        );
+            wLogger.debug(
+                `GD(updateKeyOverlay) updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`
+            );
+        } catch (exc) {
+            wLogger.error(
+                'GD(updateKeyOverlay) error happend while keyboard overlay attempted to parse'
+            );
+            wLogger.debug(exc);
+        }
     }
 
     private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
@@ -389,31 +404,36 @@ export class GamePlayData extends AbstractEntity {
     }
 
     updateHitErrors() {
-        if (this.scoreBase === 0) return [];
+        try {
+            if (this.scoreBase === 0 || !this.scoreBase) return [];
 
-        const { process, patterns } = this.services.getServices([
-            'process',
-            'patterns',
-            'allTimesData',
-            'menuData'
-        ]);
+            const { process, patterns } = this.services.getServices([
+                'process',
+                'patterns',
+                'allTimesData',
+                'menuData'
+            ]);
 
-        const leaderStart = patterns.getLeaderStart();
+            const leaderStart = patterns.getLeaderStart();
 
-        const errors: Array<number> = [];
+            const errors: Array<number> = [];
 
-        const base = process.readInt(this.scoreBase + 0x38);
-        const items = process.readInt(base + 0x4);
-        const size = process.readInt(base + 0xc);
+            const base = process.readInt(this.scoreBase + 0x38);
+            const items = process.readInt(base + 0x4);
+            const size = process.readInt(base + 0xc);
 
-        for (let i = 0; i < size; i++) {
-            let current = items + leaderStart + 0x4 * i;
-            let error = process.readInt(current);
+            for (let i = 0; i < size; i++) {
+                let current = items + leaderStart + 0x4 * i;
+                let error = process.readInt(current);
 
-            errors.push(error);
+                errors.push(error);
+            }
+
+            this.HitErrors = errors;
+        } catch (exc) {
+            wLogger.error('GD(updateHitErrors) failed to parse hitErrors');
+            wLogger.debug(exc);
         }
-
-        this.HitErrors = errors;
     }
 
     private calculateUR(): number {
