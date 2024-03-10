@@ -50,7 +50,7 @@ export default function buildBaseApi(server: Server) {
                     .replace(/[^a-z0-9A-Z]/, '')
                     .toLowerCase();
 
-                if (req.query?.tab == '1') {
+                if (req.query?.tab === '1') {
                     return buildExternalCounters(res, query);
                 }
 
@@ -151,7 +151,7 @@ export default function buildBaseApi(server: Server) {
 
                 if (!fs.existsSync(folderPath)) {
                     return sendJson(res, {
-                        error: `Folder doesn't exists`
+                        error: "Folder doesn't exists"
                     });
                 }
 
@@ -161,7 +161,7 @@ export default function buildBaseApi(server: Server) {
 
                 wLogger.info(`PP Counter opened: ${folderName}`);
 
-                exec(`start "" "${folderPath}"`, (err, stdout, stderr) => {
+                exec(`start "" "${folderPath}"`, (err) => {
                     if (err) {
                         wLogger.error('Error opening file explorer:');
                         return sendJson(res, {
@@ -200,7 +200,7 @@ export default function buildBaseApi(server: Server) {
 
                 if (!fs.existsSync(folderPath)) {
                     return sendJson(res, {
-                        error: `Folder doesn't exists`
+                        error: "Folder doesn't exists"
                     });
                 }
 
@@ -239,6 +239,13 @@ export default function buildBaseApi(server: Server) {
         fs.readFile(
             path.join(pkgAssetsPath, 'images', req.params.filePath),
             (err, content) => {
+                if (err) {
+                    wLogger.debug(err);
+                    res.writeHead(404, {
+                        'Content-Type': 'text/html'
+                    });
+                    res.end('<html>page not found</html>');
+                }
                 res.writeHead(200, {
                     'Content-Type': getContentType(req.params.filePath)
                 });
@@ -253,6 +260,13 @@ export default function buildBaseApi(server: Server) {
             path.join(pkgAssetsPath, 'homepage.min.css'),
             'utf8',
             (err, content) => {
+                if (err) {
+                    wLogger.debug(err);
+                    res.writeHead(404, {
+                        'Content-Type': 'text/html'
+                    });
+                    res.end('<html>page not found</html>');
+                }
                 res.writeHead(200, {
                     'Content-Type': getContentType('homepage.min.css')
                 });
@@ -266,6 +280,13 @@ export default function buildBaseApi(server: Server) {
             path.join(pkgAssetsPath, 'homepage.js'),
             'utf8',
             (err, content) => {
+                if (err) {
+                    wLogger.debug(err);
+                    res.writeHead(404, {
+                        'Content-Type': 'text/html'
+                    });
+                    res.end('<html>page not found</html>');
+                }
                 res.writeHead(200, {
                     'Content-Type': getContentType('homepage.js')
                 });
@@ -307,8 +328,9 @@ export default function buildBaseApi(server: Server) {
                 const key = array[i];
                 const value = query[key];
 
-                if (key in calculator && isFinite(+value))
+                if (key in calculator && isFinite(+value)) {
                     calculator[key](+value);
+                }
             }
 
             return sendJson(res, {
@@ -329,16 +351,16 @@ export default function buildBaseApi(server: Server) {
                 config.staticFolderPath ||
                 path.join(pkgRunningFolder, 'static');
 
-            if (url == '/') {
-                if (req.query?.tab == '1') {
+            if (url === '/') {
+                if (req.query?.tab === '1') {
                     return buildExternalCounters(res);
                 }
 
-                if (req.query?.tab == '2') {
+                if (req.query?.tab === '2') {
                     return buildSettings(res);
                 }
 
-                if (req.query?.tab == '3') {
+                if (req.query?.tab === '3') {
                     return buildInstructionLocal(res);
                 }
 
@@ -346,7 +368,7 @@ export default function buildBaseApi(server: Server) {
             }
 
             const extension = path.extname(url);
-            if (extension == '' && !url.endsWith('/')) {
+            if (extension === '' && !url.endsWith('/')) {
                 res.writeHead(301, { Location: url + '/' });
                 return res.end();
             }

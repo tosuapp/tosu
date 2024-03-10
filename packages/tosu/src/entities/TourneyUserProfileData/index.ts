@@ -1,7 +1,5 @@
 import { wLogger } from '@tosu/common';
 
-import { DataRepo } from '@/entities/DataRepoList';
-
 import { AbstractEntity } from '../AbstractEntity';
 
 export class TourneyUserProfileData extends AbstractEntity {
@@ -15,10 +13,6 @@ export class TourneyUserProfileData extends AbstractEntity {
     Name: string = '';
     Country: string = '';
     UserID: number = 0;
-
-    constructor(services: DataRepo) {
-        super(services);
-    }
 
     resetState() {
         if (this.isDefaultState) {
@@ -37,7 +31,7 @@ export class TourneyUserProfileData extends AbstractEntity {
     }
 
     updateState() {
-        wLogger.debug(`TUPD(updateState) Starting`);
+        wLogger.debug('TUPD(updateState) Starting');
 
         const { process, gamePlayData, patterns } = this.services.getServices([
             'process',
@@ -83,6 +77,6 @@ export class TourneyUserProfileData extends AbstractEntity {
             wLogger.debug(exc);
         }
 
-        wLogger.debug(`TUPD(updateState) updated`);
+        wLogger.debug('TUPD(updateState) updated');
     }
 }

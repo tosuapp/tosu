@@ -40,7 +40,7 @@ export class HttpServer {
 
         this.server.on('error', (err) => {
             if (err.message.includes('getaddrinfo')) {
-                wLogger.warn(`Incorrect server ip or url`);
+                wLogger.warn('Incorrect server ip or url');
                 return;
             }
 
@@ -69,7 +69,7 @@ export class HttpServer {
     ) {
         if (this.routes[method] == null) this.routes[method] = [];
 
-        const find = this.routes[method].find((r) => r.path == path);
+        const find = this.routes[method].find((r) => r.path === path);
         if (!find) this.routes[method].push({ path, handler });
     }
 
@@ -158,8 +158,9 @@ export class HttpServer {
                     if (key == null || value == null) continue;
                     req.params[key] = value;
                 }
-            } else if (typeof route.path == 'string')
-                routeExists = route.path == parsedURL.pathname;
+            } else if (typeof route.path === 'string') {
+                routeExists = route.path === parsedURL.pathname;
+            }
 
             if (!routeExists) continue;
             return route.handler(req, res);
@@ -167,12 +168,11 @@ export class HttpServer {
 
         res.statusCode = 404;
         res.end('Not Found');
-        return;
     }
 
     listen(port: number, hostname: string) {
         this.server.listen(port, hostname, () => {
-            const ip = hostname == '0.0.0.0' ? 'localhost' : hostname;
+            const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
             wLogger.info(`Web server started on http://${ip}:${port}`);
         });
     }

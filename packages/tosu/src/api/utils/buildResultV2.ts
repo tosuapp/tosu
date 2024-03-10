@@ -44,7 +44,7 @@ const convertMemoryPlayerToResult = (
     const modsName = getOsuModsString(memoryPlayer.Mods);
 
     return {
-        isFailed: memoryPlayer.IsPassing == false,
+        isFailed: memoryPlayer.IsPassing === false,
 
         position: memoryPlayer.Position,
         team: memoryPlayer.Team,
@@ -54,7 +54,7 @@ const convertMemoryPlayerToResult = (
         score: memoryPlayer.Score,
         accuracy: calculateAccuracy({ hits, mode: gameMode }),
 
-        hits: hits,
+        hits,
 
         combo: {
             current: memoryPlayer.Combo,
@@ -67,7 +67,7 @@ const convertMemoryPlayerToResult = (
         rank: calculateGrade({
             mods: modsName,
             mode: gameMode,
-            hits: hits
+            hits
         })
     };
 };
@@ -112,7 +112,7 @@ export const buildResult = (
         },
         settings: {
             interfaceVisible: allTimesData.ShowInterface,
-            replayUIVisible: gamePlayData.isReplayUiHidden == false,
+            replayUIVisible: gamePlayData.isReplayUiHidden === false,
             chatVisibilityStatus: {
                 number: allTimesData.ChatStatus,
                 name: ChatStatus[allTimesData.ChatStatus]
@@ -596,8 +596,8 @@ const buildTourneyData = (
                 team: ipcClient
                     ? ipcClient.team
                     : message.name === 'BanchoBot'
-                    ? 'bot'
-                    : 'unknown',
+                      ? 'bot'
+                      : 'unknown',
                 name: message.name,
                 message: message.content,
                 timestamp: message.time

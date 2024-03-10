@@ -13,7 +13,7 @@ export default function buildV2Api({
     preciseWebsocket: Websocket;
 }) {
     app.server.on('upgrade', function (request, socket, head) {
-        if (request.url == '/websocket/v2') {
+        if (request.url === '/websocket/v2') {
             websocket.socket.handleUpgrade(
                 request,
                 socket,
@@ -24,7 +24,7 @@ export default function buildV2Api({
             );
         }
 
-        if (request.url == '/websocket/v2/precise') {
+        if (request.url === '/websocket/v2/precise') {
             preciseWebsocket.socket.handleUpgrade(
                 request,
                 socket,

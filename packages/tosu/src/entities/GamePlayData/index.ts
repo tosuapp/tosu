@@ -1,6 +1,5 @@
-import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
+import { Calculator } from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
-import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 
 import { DataRepo } from '@/entities/DataRepoList';
@@ -98,7 +97,7 @@ export class GamePlayData extends AbstractEntity {
         this.isReplayUiHidden = false;
 
         // below is gata that shouldn't be reseted on retry
-        if (isRetry == true) {
+        if (isRetry === true) {
             return;
         }
 
@@ -117,7 +116,7 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        wLogger.debug(`GD(resetKeyOverlay) Reset`);
+        wLogger.debug('GD(resetKeyOverlay) Reset');
 
         this.KeyOverlay.K1Pressed = false;
         this.KeyOverlay.K2Pressed = false;
@@ -169,7 +168,7 @@ export class GamePlayData extends AbstractEntity {
 
             this.scoreBase = scoreBase;
 
-            let hpBarBase = process.readInt(gameplayBase + 0x40);
+            const hpBarBase = process.readInt(gameplayBase + 0x40);
             if (hpBarBase === 0) {
                 wLogger.debug('GD(updateState) hpBar is zero');
                 return;
@@ -418,8 +417,8 @@ export class GamePlayData extends AbstractEntity {
             const size = process.readInt(base + 0xc);
 
             for (let i = 0; i < size; i++) {
-                let current = items + leaderStart + 0x4 * i;
-                let error = process.readInt(current);
+                const current = items + leaderStart + 0x4 * i;
+                const error = process.readInt(current);
 
                 errors.push(error);
             }
@@ -508,7 +507,7 @@ export class GamePlayData extends AbstractEntity {
     private updateStarsAndPerformance() {
         if (!config.calculatePP) {
             wLogger.debug(
-                `GD(updateStarsAndPerformance) pp calculation disabled`
+                'GD(updateStarsAndPerformance) pp calculation disabled'
             );
             return;
         }
@@ -520,7 +519,7 @@ export class GamePlayData extends AbstractEntity {
 
         if (!settings.gameFolder) {
             wLogger.debug(
-                `GD(updateStarsAndPerformance) game folder not found`
+                'GD(updateStarsAndPerformance) game folder not found'
             );
             return;
         }
@@ -528,7 +527,7 @@ export class GamePlayData extends AbstractEntity {
         const currentBeatmap = beatmapPpData.getCurrentBeatmap();
         if (!currentBeatmap) {
             wLogger.debug(
-                `GD(updateStarsAndPerformance) can't get current map`
+                "GD(updateStarsAndPerformance) can't get current map"
             );
             return;
         }

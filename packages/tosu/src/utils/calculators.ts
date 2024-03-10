@@ -77,14 +77,14 @@ export const calculateGrade = ({
 }): string => {
     let silver = false;
 
-    if (typeof mods == 'string') {
+    if (typeof mods === 'string') {
         silver =
             mods.toLowerCase().indexOf('hd') > -1
                 ? true
-                : mods.toLowerCase().indexOf('fl') > -1
-                ? true
-                : false;
-    } else if (typeof mods == 'string') {
+                : mods.toLowerCase().indexOf('fl') > -1;
+    }
+
+    if (typeof mods === 'number') {
         silver =
             (mods & OsuMods.Hidden) === OsuMods.Hidden ||
             (mods & OsuMods.Flashlight) === OsuMods.Flashlight;
@@ -111,9 +111,9 @@ export const calculateGrade = ({
             r50 = hits[50] / total;
 
             if (r300 === 1) rank = silver ? 'XH' : 'X';
-            else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0)
+            else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0) {
                 rank = silver ? 'SH' : 'S';
-            else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) rank = 'A';
+            } else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) rank = 'A';
             else if ((r300 > 0.7 && hits[0] === 0) || r300 > 0.8) rank = 'B';
             else if (r300 > 0.6) rank = 'C';
             else rank = 'D';
@@ -131,9 +131,9 @@ export const calculateGrade = ({
             r50 = hits[50] / total;
 
             if (r300 === 1) rank = silver ? 'XH' : 'X';
-            else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0)
+            else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0) {
                 rank = silver ? 'SH' : 'S';
-            else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) rank = 'A';
+            } else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) rank = 'A';
             else if ((r300 > 0.7 && hits[0] === 0) || r300 > 0.8) rank = 'B';
             else if (r300 > 0.6) rank = 'C';
             else rank = 'D';

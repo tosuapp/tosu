@@ -171,12 +171,12 @@ export const buildResult = (
                 smooth: gamePlayData.PlayerHPSmooth
             },
             hits: {
-                '300': gamePlayData.Hit300,
+                300: gamePlayData.Hit300,
                 geki: gamePlayData.HitGeki,
-                '100': gamePlayData.Hit100,
+                100: gamePlayData.Hit100,
                 katu: gamePlayData.HitKatu,
-                '50': gamePlayData.Hit50,
-                '0': gamePlayData.HitMiss,
+                50: gamePlayData.Hit50,
+                0: gamePlayData.HitMiss,
                 sliderBreaks: gamePlayData.HitSB,
                 grade: {
                     current: gamePlayData.GradeCurrent,
@@ -238,12 +238,12 @@ export const buildResult = (
                 num: resultsScreenData.Mods,
                 str: getOsuModsString(resultsScreenData.Mods)
             },
-            '300': resultsScreenData.Hit300,
+            300: resultsScreenData.Hit300,
             geki: resultsScreenData.HitGeki,
-            '100': resultsScreenData.Hit100,
+            100: resultsScreenData.Hit100,
             katu: resultsScreenData.HitKatu,
-            '50': resultsScreenData.Hit50,
-            '0': resultsScreenData.HitMiss,
+            50: resultsScreenData.Hit50,
+            0: resultsScreenData.HitMiss,
             grade: resultsScreenData.Grade,
             createdAt: resultsScreenData.Date
         },
@@ -324,12 +324,12 @@ const buildTourneyData = (
                         smooth: gamePlayData.PlayerHPSmooth
                     },
                     hits: {
-                        '300': gamePlayData.Hit300,
+                        300: gamePlayData.Hit300,
                         geki: gamePlayData.HitGeki,
-                        '100': gamePlayData.Hit100,
+                        100: gamePlayData.Hit100,
                         katu: gamePlayData.HitKatu,
-                        '50': gamePlayData.Hit50,
-                        '0': gamePlayData.HitMiss,
+                        50: gamePlayData.Hit50,
+                        0: gamePlayData.HitMiss,
                         sliderBreaks: gamePlayData.HitSB,
                         grade: {
                             current: gamePlayData.GradeCurrent,
@@ -359,8 +359,8 @@ const buildTourneyData = (
             team: ipcClient
                 ? ipcClient.team
                 : message.name === 'BanchoBot'
-                ? 'bot'
-                : 'unknown',
+                  ? 'bot'
+                  : 'unknown',
             time: message.time,
             name: message.name,
             messageBody: message.content

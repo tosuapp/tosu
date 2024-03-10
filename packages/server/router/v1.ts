@@ -9,7 +9,7 @@ export default function buildV1Api({
     websocket: Websocket;
 }) {
     app.server.on('upgrade', function (request, socket, head) {
-        if (request.url == '/ws') {
+        if (request.url === '/ws') {
             websocket.socket.handleUpgrade(
                 request,
                 socket,

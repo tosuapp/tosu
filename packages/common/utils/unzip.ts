@@ -13,7 +13,7 @@ export const unzip = (zipPath: string, extractPath: string): Promise<string> =>
 
         try {
             // Extract all contents of the zip file to the specified destination
-            zip.extractAllTo(extractPath, /*overwrite*/ true);
+            zip.extractAllTo(extractPath, /* overwrite */ true);
             resolve(extractPath);
         } catch (error) {
             wLogger.error((error as any).message);

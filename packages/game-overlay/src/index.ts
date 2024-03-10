@@ -35,14 +35,14 @@ const checkGosuConfig = (p: Process, checking?: boolean) => {
         return false;
     }
 
-    if (checking == true) injectGameOverlay(p);
+    if (checking) injectGameOverlay(p);
     return true;
 };
 
 export const injectGameOverlay = async (p: Process) => {
     if (process.platform !== 'win32') {
         wLogger.error(
-            `[gosu-overlay] Ingame overlay can run only under windows, sorry linux/darwin user!`
+            '[gosu-overlay] Ingame overlay can run only under windows, sorry linux/darwin user!'
         );
         return;
     }
@@ -78,7 +78,7 @@ export const injectGameOverlay = async (p: Process) => {
     const overlayURLstatus = checkGosuConfig(p);
     if (!overlayURLstatus) {
         wLogger.warn(
-            `[gosu-overlay] Specify overlayURL for gameOverlay in config.ini`
+            '[gosu-overlay] Specify overlayURL for gameOverlay in config.ini'
         );
         return;
     }

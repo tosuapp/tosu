@@ -118,8 +118,9 @@ export const updateConfigFile = () => {
         fs.appendFileSync(configPath, '\nENABLE_GOSU_OVERLAY=false', 'utf8');
     }
 
-    if (newOptions !== '')
+    if (newOptions !== '') {
         wLogger.warn(`New options available in config: ${newOptions}\n`);
+    }
 };
 
 export const watchConfigFile = ({
@@ -129,7 +130,7 @@ export const watchConfigFile = ({
     httpServer: any;
     initial?: boolean;
 }) => {
-    if (initial == true) {
+    if (initial === true) {
         createConfig();
         refreshConfig(httpServer, false);
         updateConfigFile();
@@ -140,7 +141,7 @@ export const watchConfigFile = ({
     }
 
     const stat = fs.statSync(configPath);
-    if (config.timestamp != stat.mtimeMs) {
+    if (config.timestamp !== stat.mtimeMs) {
         refreshConfig(httpServer, true);
         config.timestamp = stat.mtimeMs;
     }
@@ -152,7 +153,7 @@ export const watchConfigFile = ({
 
 export const refreshConfig = (httpServer: any, refresh: boolean) => {
     let updated = false;
-    const status = refresh == true ? 'reload' : 'load';
+    const status = refresh === true ? 'reload' : 'load';
 
     const { parsed, error } = dotenv.config({ path: configPath });
     if (error != null || parsed == null) {
@@ -174,17 +175,17 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 
     // determine whether config actually was updated or not
     updated =
-        config.debugLogging != debugLogging ||
-        config.calculatePP != calculatePP ||
-        config.enableKeyOverlay != enableKeyOverlay ||
-        config.pollRate != pollRate ||
-        config.preciseDataPollRate != preciseDataPollRate ||
-        config.staticFolderPath != staticFolderPath ||
-        config.enableGosuOverlay != enableGosuOverlay ||
-        config.serverIP != serverIP ||
-        config.serverPort != serverPort;
+        config.debugLogging !== debugLogging ||
+        config.calculatePP !== calculatePP ||
+        config.enableKeyOverlay !== enableKeyOverlay ||
+        config.pollRate !== pollRate ||
+        config.preciseDataPollRate !== preciseDataPollRate ||
+        config.staticFolderPath !== staticFolderPath ||
+        config.enableGosuOverlay !== enableGosuOverlay ||
+        config.serverIP !== serverIP ||
+        config.serverPort !== serverPort;
 
-    if (config.serverIP != serverIP || config.serverPort != serverPort) {
+    if (config.serverIP !== serverIP || config.serverPort !== serverPort) {
         config.serverIP = serverIP;
         config.serverPort = serverPort;
 
@@ -194,11 +195,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const osuInstances: any = Object.values(
         httpServer.instanceManager.osuInstances || {}
     );
-    if (
-        osuInstances.length == 1 &&
-        enableGosuOverlay == true &&
-        updated == true
-    ) {
+    if (osuInstances.length === 1 && enableGosuOverlay && updated) {
         osuInstances[0].injectGameOverlay();
     }
 
@@ -212,7 +209,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.enableGosuOverlay = enableGosuOverlay;
 
     if (
-        config.staticFolderPath == './static' &&
+        config.staticFolderPath === './static' &&
         !fs.existsSync(path.join(process.cwd(), 'static'))
     ) {
         fs.mkdirSync(path.join(process.cwd(), 'static'));

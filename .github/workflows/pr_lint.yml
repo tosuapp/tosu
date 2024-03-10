@@ -31,6 +31,10 @@ jobs:
           npm install -g pnpm@^8
           pnpm install --frozen-lockfile
 
-      - name: Lint PR
+      - name: Lint PR (prettier)
         run: |
           pnpm run prettier:ci
+
+      - name: Lint PR (eslint)
+        run: |
+          pnpm run lint:ci

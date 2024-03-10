@@ -1,7 +1,6 @@
 import { wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
-import { DataRepo } from '@/entities/DataRepoList';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 
 import { AbstractEntity } from '../AbstractEntity';
@@ -323,10 +322,6 @@ export class AllTimesData extends AbstractEntity {
         }
     };
 
-    constructor(services: DataRepo) {
-        super(services);
-    }
-
     updateConfigState(
         process: Process,
         settings: Settings,
@@ -385,8 +380,9 @@ export class AllTimesData extends AbstractEntity {
                 }
             }
 
-            if (this.configStateErrorAttempts != 0)
+            if (this.configStateErrorAttempts !== 0) {
                 this.configStateErrorAttempts = 0;
+            }
         } catch (exc) {
             this.configStateErrorAttempts += 1;
 
@@ -418,8 +414,9 @@ export class AllTimesData extends AbstractEntity {
                 }
             }
 
-            if (this.bindingStateErrorAttempts != 0)
+            if (this.bindingStateErrorAttempts !== 0) {
                 this.bindingStateErrorAttempts = 0;
+            }
         } catch (exc) {
             this.bindingStateErrorAttempts += 1;
 
@@ -434,10 +431,9 @@ export class AllTimesData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns, settings } = this.services.getServices([
+            const { process, patterns } = this.services.getServices([
                 'process',
-                'patterns',
-                'settings'
+                'patterns'
             ]);
 
             const {
@@ -447,8 +443,6 @@ export class AllTimesData extends AbstractEntity {
                 chatCheckerAddr,
                 skinDataAddr,
                 settingsClassAddr,
-                configurationAddr,
-                bindingsAddr,
                 canRunSlowlyAddr,
                 gameTimePtr
             } = patterns.getPatterns([
@@ -458,8 +452,6 @@ export class AllTimesData extends AbstractEntity {
                 'chatCheckerAddr',
                 'skinDataAddr',
                 'settingsClassAddr',
-                'configurationAddr',
-                'bindingsAddr',
                 'canRunSlowlyAddr',
                 'gameTimePtr'
             ]);

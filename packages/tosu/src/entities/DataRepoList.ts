@@ -49,7 +49,7 @@ export class DataRepo {
     get<TName extends keyof DataRepoList>(
         serviceName: TName
     ): DataRepoList[TName] | null {
-        let instance = this.list[serviceName];
+        const instance = this.list[serviceName];
         if (!instance) {
             return null;
         }

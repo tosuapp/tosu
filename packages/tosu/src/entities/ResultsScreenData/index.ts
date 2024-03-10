@@ -29,7 +29,7 @@ export class ResultsScreenData extends AbstractEntity {
     }
 
     init() {
-        wLogger.debug(`RSD(init) Reset`);
+        wLogger.debug('RSD(init) Reset');
 
         this.PlayerName = '';
         this.Mods = 0;

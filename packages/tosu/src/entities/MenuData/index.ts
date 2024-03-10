@@ -1,7 +1,5 @@
 import { wLogger } from '@tosu/common';
 
-import { DataRepo } from '@/entities/DataRepoList';
-
 import { AbstractEntity } from '../AbstractEntity';
 
 export class MenuData extends AbstractEntity {
@@ -33,10 +31,6 @@ export class MenuData extends AbstractEntity {
     previousMD5: string = '';
 
     private mp3ErrorAttempts: number = 0;
-
-    constructor(services: DataRepo) {
-        super(services);
-    }
 
     updateState() {
         try {
@@ -160,7 +154,7 @@ export class MenuData extends AbstractEntity {
 
             if (this.mp3ErrorAttempts > 5) {
                 wLogger.error(
-                    `Unable to parse beatmap mp3 length (you can ignore it)`
+                    'Unable to parse beatmap mp3 length (you can ignore it)'
                 );
             }
             wLogger.debug(exc);

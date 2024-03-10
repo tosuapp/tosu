@@ -1,7 +1,5 @@
 import { wLogger } from '@tosu/common';
 
-import { DataRepo } from '@/entities/DataRepoList';
-
 import { AbstractEntity } from '../AbstractEntity';
 
 // yep each dto should have class!
@@ -10,10 +8,6 @@ export class BassDensityData extends AbstractEntity {
     density: number = 0.0;
 
     private updateStateErrorAttempts: number = 0;
-
-    constructor(services: DataRepo) {
-        super(services);
-    }
 
     updateState() {
         try {
@@ -79,8 +73,9 @@ export class BassDensityData extends AbstractEntity {
             this.currentAudioVelocity = currentAudioVelocity;
             this.density = (1 + currentAudioVelocity) * 0.5;
 
-            if (this.updateStateErrorAttempts != 0)
+            if (this.updateStateErrorAttempts !== 0) {
                 this.updateStateErrorAttempts = 0;
+            }
         } catch (exc) {
             this.updateStateErrorAttempts += 1;
 
