@@ -24,7 +24,7 @@ export default function buildV2Api({
             );
         }
 
-        if (request.url == '/websocket/v2/keys') {
+        if (request.url == '/websocket/v2/precise') {
             preciseWebsocket.socket.handleUpgrade(
                 request,
                 socket,
@@ -49,7 +49,7 @@ export default function buildV2Api({
         sendJson(res, json);
     });
 
-    app.route('/json/v2/keys', 'GET', (req, res) => {
+    app.route('/json/v2/precise', 'GET', (req, res) => {
         const osuInstances: any = Object.values(
             req.instanceManager.osuInstances || {}
         );

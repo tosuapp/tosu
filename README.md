@@ -83,6 +83,7 @@ gosu compatible api
 v2 _**(tosu own api)**_
 - `/json/v2` - Example of `/websocket/v2` response
 - `/websocket/v2` - [response example](https://github.com/KotRikD/tosu/wiki/v2-websocket-api-response)
+- `/websocket/v2/precise` - [response example](https://github.com/KotRikD/tosu/wiki/v2-precise-websocket-api-response)
 - `/files/beatmap/{path}` - same as `/Songs/{path}`
 - `/files/skin/{path}` - similar as `/files/beatmap/{path}`, but for a skin
 
