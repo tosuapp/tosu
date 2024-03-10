@@ -24,6 +24,7 @@ export interface KeyOverlay {
 
 export class GamePlayData extends AbstractEntity {
     isDefaultState: boolean = true;
+    isKeyOverlayDefaultState: boolean = true;
 
     Retries: number;
     PlayerName: string;
@@ -112,16 +113,7 @@ export class GamePlayData extends AbstractEntity {
     }
 
     resetKeyOverlay() {
-        if (
-            this.KeyOverlay.K1Pressed == false &&
-            this.KeyOverlay.K2Pressed == false &&
-            this.KeyOverlay.M1Pressed == false &&
-            this.KeyOverlay.M2Pressed == false &&
-            this.KeyOverlay.K1Count == 0 &&
-            this.KeyOverlay.K2Count == 0 &&
-            this.KeyOverlay.M1Count == 0 &&
-            this.KeyOverlay.M2Count == 0
-        ) {
+        if (this.isKeyOverlayDefaultState) {
             return;
         }
 
@@ -136,6 +128,8 @@ export class GamePlayData extends AbstractEntity {
         this.KeyOverlay.K2Count = 0;
         this.KeyOverlay.M1Count = 0;
         this.KeyOverlay.M2Count = 0;
+
+        this.isKeyOverlayDefaultState = true;
     }
 
     updateState() {
@@ -332,6 +326,7 @@ export class GamePlayData extends AbstractEntity {
             }
 
             this.KeyOverlay = keys;
+            this.isKeyOverlayDefaultState = false;
 
             wLogger.debug(
                 `GD(updateKeyOverlay) updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`
