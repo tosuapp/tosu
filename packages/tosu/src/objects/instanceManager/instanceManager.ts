@@ -1,4 +1,4 @@
-import { sleep, wLogger } from '@tosu/common';
+import { wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
 import { OsuInstance } from './osuInstance';
@@ -35,6 +35,7 @@ export class InstanceManager {
                 const osuInstance = new OsuInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
                 if (cmdLine.includes('-spectateclient')) {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const [_, __, ipcId] = cmdLine.split(' ');
 
                     osuInstance.setTourneyIpcId(Number(ipcId));

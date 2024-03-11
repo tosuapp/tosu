@@ -20,7 +20,7 @@ const deleteNotLocked = async (filePath: string) => {
     try {
         await fs.promises.unlink(filePath);
     } catch (err: any) {
-        if (err.code == 'EPERM') {
+        if (err.code === 'EPERM') {
             await sleep(1000);
             deleteNotLocked(filePath);
             return;
@@ -30,85 +30,80 @@ const deleteNotLocked = async (filePath: string) => {
     }
 };
 
-export const autoUpdater = () =>
-    new Promise(async (resolve) => {
-        wLogger.info('Checking updates');
+export const autoUpdater = async () => {
+    wLogger.info('Checking updates');
 
-        const { platformType } = platformResolver(process.platform);
+    const { platformType } = platformResolver(process.platform);
 
-        if (platformType === '') {
-            wLogger.warn(
-                `Unsupported platform (${process.platform}). Unable to run updater`
-            );
-
-            return;
-        }
-
-        const request = await fetch(
-            `https://api.github.com/repos/KotRikD/${repositoryName}/releases/latest`
-        );
-        const json = (await request.json()) as any;
-        const {
-            assets,
-            name: versionName
-        }: {
-            name: string;
-            assets: { name: string; browser_download_url: string }[];
-        } = json;
-        if (versionName == null) {
-            wLogger.info(`Failed to check updates [${currentVersion}] `);
-
-            resolve('exact');
-            return;
-        }
-
-        if (versionName.includes(currentVersion)) {
-            wLogger.info(`You're using latest version [${currentVersion}] `);
-
-            if (fs.existsSync(fileDestination)) {
-                await deleteNotLocked(fileDestination);
-            }
-
-            if (fs.existsSync(backupExecutablePath)) {
-                await deleteNotLocked(backupExecutablePath);
-            }
-
-            resolve('exact');
-            return;
-        }
-
-        const findAsset = assets.find(
-            (r) => r.name.includes(platformType) && r.name.endsWith('.zip')
-        );
-        if (!findAsset) {
-            wLogger.info('Files to update not found');
-
-            resolve('noFiles');
-            return;
-        }
-
-        const downloadAsset = await downloadFile(
-            findAsset.browser_download_url,
-            fileDestination
+    if (platformType === '') {
+        wLogger.warn(
+            `Unsupported platform (${process.platform}). Unable to run updater`
         );
 
-        const currentExecutablePath = process.argv[0]; // Path to the current executable
+        return;
+    }
 
-        await fs.promises.rename(currentExecutablePath, backupExecutablePath);
+    const request = await fetch(
+        `https://api.github.com/repos/KotRikD/${repositoryName}/releases/latest`
+    );
+    const json = (await request.json()) as any;
+    const {
+        assets,
+        name: versionName
+    }: {
+        name: string;
+        assets: { name: string; browser_download_url: string }[];
+    } = json;
+    if (versionName === null) {
+        wLogger.info(`Failed to check updates [${currentVersion}] `);
 
-        await unzip(downloadAsset, process.cwd());
+        return 'exact';
+    }
 
-        wLogger.info('Restarting program');
+    if (versionName.includes(currentVersion)) {
+        wLogger.info(`You're using latest version [${currentVersion}] `);
 
-        spawn(process.argv[0], process.argv.slice(1), {
-            detached: true,
-            shell: true,
-            stdio: 'ignore'
-        }).unref();
+        if (fs.existsSync(fileDestination)) {
+            await deleteNotLocked(fileDestination);
+        }
 
-        wLogger.info('Closing program');
+        if (fs.existsSync(backupExecutablePath)) {
+            await deleteNotLocked(backupExecutablePath);
+        }
 
-        await sleep(1000);
+        return 'exact';
+    }
 
-        process.exit();
-    });
+    const findAsset = assets.find(
+        (r) => r.name.includes(platformType) && r.name.endsWith('.zip')
+    );
+    if (!findAsset) {
+        wLogger.info('Files to update not found');
+        return 'noFiles';
+    }
+
+    const downloadAsset = await downloadFile(
+        findAsset.browser_download_url,
+        fileDestination
+    );
+
+    const currentExecutablePath = process.argv[0]; // Path to the current executable
+
+    await fs.promises.rename(currentExecutablePath, backupExecutablePath);
+
+    await unzip(downloadAsset, process.cwd());
+
+    wLogger.info('Restarting program');
+
+    spawn(process.argv[0], process.argv.slice(1), {
+        detached: true,
+        shell: true,
+        stdio: 'ignore'
+    }).unref();
+
+    wLogger.info('Closing program');
+
+    await sleep(1000);
+
+    process.exit();
+};

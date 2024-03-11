@@ -35,7 +35,7 @@ async function windowsPostBuild(output) {
             ProductName: 'tosu',
             FileDescription: 'osu! memory reader, built in typescript',
             CompanyName: 'KotRik',
-            LegalCopyright: `© KotRik. All rights reserved.`
+            LegalCopyright: '© KotRik. All rights reserved.'
         }
     );
     vi.setFileVersion(

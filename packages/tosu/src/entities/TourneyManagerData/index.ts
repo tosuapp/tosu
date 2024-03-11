@@ -1,7 +1,5 @@
 import { wLogger } from '@tosu/common';
 
-import { DataRepo } from '@/entities/DataRepoList';
-
 import { AbstractEntity } from '../AbstractEntity';
 import { ITourneyManagetChatItem } from './types';
 
@@ -24,13 +22,9 @@ export class TourneyManagerData extends AbstractEntity {
 
     Messages: ITourneyManagetChatItem[] = [];
 
-    constructor(services: DataRepo) {
-        super(services);
-    }
-
     async updateState() {
         try {
-            wLogger.debug(`TMD(updateState) Starting`);
+            wLogger.debug('TMD(updateState) Starting');
 
             const { process, patterns } = this.services.getServices([
                 'process',
@@ -153,7 +147,7 @@ export class TourneyManagerData extends AbstractEntity {
                 wLogger.debug('TMD(updateState) Chat Updated');
             }
 
-            wLogger.debug(`TMD(updateState) updated`);
+            wLogger.debug('TMD(updateState) updated');
         } catch (exc) {
             wLogger.error(`TMD(updateState) ${(exc as any).message}`);
             wLogger.debug(exc);

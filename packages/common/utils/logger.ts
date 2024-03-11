@@ -19,21 +19,21 @@ export function colorText(status: string) {
 
 export const wLogger = {
     info: (...args: any) => {
-        const colored_text = colorText('info');
-        console.log(colored_text, ...args);
+        const coloredText = colorText('info');
+        console.log(coloredText, ...args);
     },
     debug: (...args: any) => {
-        if (config.debugLogging != true) return;
+        if (config.debugLogging !== true) return;
 
-        const colored_text = colorText('debug');
-        console.log(colored_text, ...args);
+        const coloredText = colorText('debug');
+        console.log(coloredText, ...args);
     },
     error: (...args: any) => {
-        const colored_text = colorText('error');
-        console.log(colored_text, ...args);
+        const coloredText = colorText('error');
+        console.log(coloredText, ...args);
     },
     warn: (...args: any) => {
-        const colored_text = colorText('warn');
-        console.log(colored_text, ...args);
+        const coloredText = colorText('warn');
+        console.log(coloredText, ...args);
     }
 };

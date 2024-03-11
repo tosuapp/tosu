@@ -53,7 +53,7 @@ export class Server {
     }
 
     middlrewares() {
-        const that = this;
+        const instanceManager = this.instanceManager;
 
         this.app.use((_, res, next) => {
             res.setHeader('Access-Control-Allow-Origin', '*');
@@ -69,7 +69,7 @@ export class Server {
         });
 
         this.app.use((req, _, next) => {
-            req.instanceManager = that.instanceManager;
+            req.instanceManager = instanceManager;
             next();
         });
     }

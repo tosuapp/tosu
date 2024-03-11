@@ -1,7 +1,6 @@
 import { wLogger } from '@tosu/common';
 
 import { AbstractEntity } from '../AbstractEntity';
-import { DataRepo } from '../DataRepoList';
 
 export class UserProfile extends AbstractEntity {
     name: string;
@@ -17,10 +16,6 @@ export class UserProfile extends AbstractEntity {
     rawBanchoStatus: number;
     backgroundColour: number;
     rawLoginStatus: number;
-
-    constructor(services: DataRepo) {
-        super(services);
-    }
 
     updateState() {
         try {

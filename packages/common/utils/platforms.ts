@@ -1,6 +1,6 @@
 export const platformResolver = (platform: string) => {
-    let platformType = '',
-        platformFileType = '';
+    let platformType = '';
+    let platformFileType = '';
 
     switch (platform) {
         case 'win32':

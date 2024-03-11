@@ -268,8 +268,9 @@ export class OsuInstance {
                 menuData.updateState();
 
                 // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
-                if (menuData.Folder != '' && menuData.Folder != null)
+                if (menuData.Folder !== '' && menuData.Folder !== null) {
                     menuData.updateMP3Length();
+                }
 
                 if (!settings.gameFolder) {
                     settings.setGameFolder(path.join(this.path, '..'));
@@ -297,7 +298,7 @@ export class OsuInstance {
 
                     // skip editor, to prevent constant data reset
                     case 1:
-                        if (this.previousTime == allTimesData.PlayTime) break;
+                        if (this.previousTime === allTimesData.PlayTime) break;
 
                         this.previousTime = allTimesData.PlayTime;
                         beatmapPpData.updateEditorPP();
@@ -366,7 +367,7 @@ export class OsuInstance {
     }
 
     initHighRateData() {
-        wLogger.debug(`OI(updatePreciseData) starting`);
+        wLogger.debug('OI(updatePreciseData) starting');
 
         const { allTimesData, gamePlayData } = this.entities.getServices([
             'allTimesData',
@@ -377,7 +378,7 @@ export class OsuInstance {
     }
 
     updatePreciseData(allTimesData: AllTimesData, gamePlayData: GamePlayData) {
-        if (this.isDestroyed == true) return;
+        if (this.isDestroyed === true) return;
 
         switch (allTimesData.Status) {
             case 2:
@@ -401,7 +402,7 @@ export class OsuInstance {
     }
 
     initMapMetadata() {
-        wLogger.debug(`OI(updateMapMetadata) Starting`);
+        wLogger.debug('OI(updateMapMetadata) Starting');
 
         const entities = this.entities.getServices([
             'menuData',
@@ -458,7 +459,7 @@ export class OsuInstance {
     }
 
     watchProcessHealth() {
-        if (this.isDestroyed == true) return;
+        if (this.isDestroyed === true) return;
 
         if (!Process.isProcessExist(this.process.handle)) {
             this.isDestroyed = true;

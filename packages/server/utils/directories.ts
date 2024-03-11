@@ -33,7 +33,7 @@ export function directoryWalker({
     const contentType = getContentType(cleanedUrl);
 
     const filePath = path.join(folderPath, cleanedUrl);
-    const isDirectory = path.extname(filePath) == '';
+    const isDirectory = path.extname(filePath) === '';
     if (isDirectory) {
         return readDirectory(filePath, baseUrl, (html: string) => {
             res.writeHead(200, {
@@ -44,7 +44,7 @@ export function directoryWalker({
     }
 
     return fs.readFile(filePath, (err, content) => {
-        if (err?.code === 'ENOENT' && _htmlRedirect == true) {
+        if (err?.code === 'ENOENT' && _htmlRedirect === true) {
             return readDirectory(
                 filePath.replace('index.html', ''),
                 baseUrl,
@@ -59,7 +59,7 @@ export function directoryWalker({
 
         if (err?.code === 'ENOENT') {
             res.writeHead(404, { 'Content-Type': 'text/html' });
-            res.end(`404 Not Found`);
+            res.end('404 Not Found');
             return;
         }
 
@@ -81,13 +81,13 @@ export function readDirectory(
 ) {
     fs.readdir(folderPath, (err, folders) => {
         if (err) {
-            return callback(`Files not found: ${folderPath}`);
+            return callback(new Error(`Files not found: ${folderPath}`));
         }
 
-        let html = folders.map((r) => {
-            const slashAtTheEnd = getContentType(r) == '' ? '/' : '';
+        const html = folders.map((r) => {
+            const slashAtTheEnd = getContentType(r) === '' ? '/' : '';
             return `<li><a href="${
-                url == '/' ? '' : url
+                url === '/' ? '' : url
             }${r}${slashAtTheEnd}">${r}</a></li>`;
         });
 

@@ -82,7 +82,7 @@ export class Websocket {
                         )
                     );
 
-                    this.clients.forEach((client, key) => client.send(message));
+                    this.clients.forEach((client) => client.send(message));
                 } catch (error) {}
             }
 
@@ -91,7 +91,6 @@ export class Websocket {
             wLogger.error((error as any).message);
 
             setTimeout(this.loop, 1000);
-            return;
         }
     }
 }

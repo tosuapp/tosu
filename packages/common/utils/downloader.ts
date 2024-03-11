@@ -10,7 +10,7 @@ export const updateProgressBar = (
     progress: number,
     message: string = ''
 ): void => {
-    const colored_text = colorText('info');
+    const coloredText = colorText('info');
     if (message) message = ` - ${message}`;
 
     const filledWidth = Math.round(progressBarWidth * progress);
@@ -18,7 +18,7 @@ export const updateProgressBar = (
     const progressBar = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
 
     process.stdout.write(
-        `${colored_text} ${title}: [${progressBar}] ${(progress * 100).toFixed(
+        `${coloredText} ${title}: [${progressBar}] ${(progress * 100).toFixed(
             2
         )}%${message}\r`
     );

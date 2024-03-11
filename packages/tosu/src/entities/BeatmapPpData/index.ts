@@ -84,12 +84,12 @@ export class BeatmapPPData extends AbstractEntity {
         this.minBPM = 0.0;
         this.maxBPM = 0.0;
         this.ppAcc = {
-            '100': 0.0,
-            '99': 0.0,
-            '98': 0.0,
-            '97': 0.0,
-            '96': 0.0,
-            '95': 0.0
+            100: 0.0,
+            99: 0.0,
+            98: 0.0,
+            97: 0.0,
+            96: 0.0,
+            95: 0.0
         };
         this.calculatedMapAttributes = {
             ar: 0.0,
@@ -140,12 +140,13 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     updateCurrentAttributes(stars: number, pp: number) {
-        if (this.currAttributes.pp.toFixed(2) != pp.toFixed(2))
+        if (this.currAttributes.pp.toFixed(2) !== pp.toFixed(2)) {
             wLogger.debug(
                 `BPPD(updateCurrentAttributes) maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(
                     2
                 )} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
             );
+        }
         const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
         this.currAttributes = {
@@ -159,7 +160,7 @@ export class BeatmapPPData extends AbstractEntity {
     updateFcPP(fcPP: number) {
         this.currAttributes = {
             ...this.currAttributes,
-            fcPP: fcPP
+            fcPP
         };
     }
 
@@ -190,7 +191,7 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     updateMapMetadata(currentMods: number) {
-        const start_time = performance.now();
+        const startTime = performance.now();
 
         const { menuData, settings } = this.services.getServices([
             'menuData',
@@ -219,11 +220,11 @@ export class BeatmapPPData extends AbstractEntity {
             hp: menuData.HP
         });
 
-        const beatmap_check_time = performance.now();
+        const beatmapCheckTime = performance.now();
         wLogger.debug(
-            `BPPD(updateMapMetadata) [${(
-                beatmap_check_time - start_time
-            ).toFixed(2)}ms] Spend on opening beatmap`
+            `BPPD(updateMapMetadata) [${(beatmapCheckTime - startTime).toFixed(
+                2
+            )}ms] Spend on opening beatmap`
         );
 
         const calc = new Calculator();
@@ -240,10 +241,10 @@ export class BeatmapPPData extends AbstractEntity {
             ppAcc[acc] = fixDecimals(performance.pp);
         }
 
-        const calculation_time = performance.now();
+        const calculationTime = performance.now();
         wLogger.debug(
             `BPPD(updateMapMetadata) [${(
-                calculation_time - beatmap_check_time
+                calculationTime - beatmapCheckTime
             ).toFixed(2)}ms] Spend on attributes & strains calculation`
         );
 
@@ -273,7 +274,7 @@ export class BeatmapPPData extends AbstractEntity {
             const { bpm, bpmMin, bpmMax } = lazerBeatmap;
 
             if (
-                lazerBeatmap.events.backgroundPath !=
+                lazerBeatmap.events.backgroundPath !==
                 menuData.BackgroundFilename
             ) {
                 menuData.BackgroundFilename =
@@ -306,10 +307,10 @@ export class BeatmapPPData extends AbstractEntity {
         const graphLength = lastObj - firstObj;
         const mp3Length = menuData.MP3Length / mapAttributes.clockRate;
 
-        const beatmap_parse_time = performance.now();
+        const beatmapParseTime = performance.now();
         wLogger.debug(
             `BPPD(updateMapMetadata) [${(
-                beatmap_parse_time - calculation_time
+                beatmapParseTime - calculationTime
             ).toFixed(2)}ms] Spend on parsing beatmap`
         );
 
@@ -321,23 +322,26 @@ export class BeatmapPPData extends AbstractEntity {
 
         const updateWithOffset = (name: string, values: number[]) => {
             let data: number[] = [];
-            let approximateTime =
+            const approximateTime =
                 LEFT_OFFSET * offset +
                 values.length * offset +
                 RIGHT_OFFSET * offset;
 
-            if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0)
+            if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
                 data = Array(LEFT_OFFSET).fill(-100);
+            }
             data = data.concat(values);
-            if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0)
+            if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
                 data = data.concat(Array(RIGHT_OFFSET).fill(-100));
+            }
 
             const missingPoints =
                 mp3Length >= approximateTime
                     ? Math.ceil((mp3Length - approximateTime) / offset)
                     : 0;
-            if (missingPoints > 0)
+            if (missingPoints > 0) {
                 data = data.concat(Array(missingPoints).fill(-100));
+            }
 
             resultStrains.series.push({ name, data });
         };
@@ -380,10 +384,10 @@ export class BeatmapPPData extends AbstractEntity {
             oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
         }
 
-        const graph_process_time = performance.now();
+        const graphProcessTime = performance.now();
         wLogger.debug(
             `BPPD(updateMapMetadata) [${(
-                graph_process_time - beatmap_parse_time
+                graphProcessTime - beatmapParseTime
             ).toFixed(2)}ms] Spend on prcoessing graph strains`
         );
 
@@ -400,9 +404,9 @@ export class BeatmapPPData extends AbstractEntity {
             resultStrains.xaxis.push(lastObj + i * offset);
         }
 
-        const end_time = performance.now();
+        const endTime = performance.now();
         wLogger.debug(
-            `BPPD(updateMapMetadata) [${(end_time - start_time).toFixed(
+            `BPPD(updateMapMetadata) [${(endTime - startTime).toFixed(
                 2
             )}ms] Total spent time`
         );
@@ -436,7 +440,7 @@ export class BeatmapPPData extends AbstractEntity {
             return;
         }
 
-        const start_time = performance.now();
+        const startTime = performance.now();
 
         const { allTimesData } = this.services.getServices(['allTimesData']);
 
@@ -456,9 +460,9 @@ export class BeatmapPPData extends AbstractEntity {
             }
         );
 
-        const beatmap_parse_time = performance.now();
+        const beatmapParseTime = performance.now();
         wLogger.debug(
-            `(updateEditorPP) Spend:${(beatmap_parse_time - start_time).toFixed(
+            `(updateEditorPP) Spend:${(beatmapParseTime - startTime).toFixed(
                 2
             )}ms on beatmap parsing`
         );
@@ -471,13 +475,13 @@ export class BeatmapPPData extends AbstractEntity {
             passedObjects: passedObjects.length
         }).performance(this.beatmap);
 
-        const calculate_time = performance.now();
+        const calculateTime = performance.now();
 
         this.currAttributes.pp = curPerformance.pp;
 
         wLogger.debug(
             `(updateEditorPP) Spend:${(
-                calculate_time - beatmap_parse_time
+                calculateTime - beatmapParseTime
             ).toFixed(2)}ms on calculating performance`
         );
     }

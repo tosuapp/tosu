@@ -7,11 +7,12 @@ export const argumetsParser = (argumentsArray: string[]) => {
         const arg = argumentsArray[i];
 
         if (!regex.test(arg)) continue;
+        // eslint-disable-next-lint no-non-null-asserted-optional-chain
         const { name, value }: any = regex.exec(arg)?.groups!;
 
         if (isFinite(value)) args[name] = parseFloat(value);
-        else if (value == 'true') args[name] = true;
-        else if (value == 'false') args[name] = false;
+        else if (value === 'true') args[name] = true;
+        else if (value === 'false') args[name] = false;
         else args[name] = value;
     }
 

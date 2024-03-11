@@ -11,7 +11,7 @@ import {
     emptyCounters,
     emptyNotice,
     galleryImageHTML,
-    icons_images,
+    iconsImages,
     iframeHTML,
     inputHTML,
     metadataHTML,
@@ -59,21 +59,22 @@ export function parseTXT(filePath: string) {
         if (key == null || value == null) continue;
         value = value.split('##')[0].replace(/\r/, '').replace(':', '');
 
-        if (/[0-9-]+x[0-9-]+/.test(value))
+        if (/[0-9-]+x[0-9-]+/.test(value)) {
             object[key.toLowerCase()] = value.split('x');
-        else object[key.toLowerCase()] = value.trim();
+        } else object[key.toLowerCase()] = value.trim();
     }
 
     filePath = path.resolve(filePath);
     const staticPath = path.resolve(config.staticFolderPath);
 
-    object['folderName'] = path
+    object.folderName = path
         .dirname(filePath.replace(staticPath, ''))
         .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
         .replace(/\\/gm, '/');
 
-    if (object.resolution)
+    if (object.resolution) {
         object.resolution = object.resolution.map((r) => r.trim());
+    }
     if (object.authorlinks) object.authorlinks = object.authorlinks.split(',');
 
     delete object.compatiblewith;
@@ -115,17 +116,13 @@ function rebuildJSON({
                     item.name.toLowerCase().includes(query) ||
                     item.name.toLowerCase().includes(query)
                 )
-            )
+            ) {
                 continue;
+            }
         }
 
         const name = nameHTML.replace('{NAME}', item.name);
         const author = authorHTML.replace('{AUTHOR}', item.author);
-
-        const counterName =
-            (item.author || '').toLowerCase() == 'local'
-                ? item.name
-                : `${item.name} by ${item.author}`;
 
         const links = item.authorlinks
             .map((r) => {
@@ -133,17 +130,18 @@ function rebuildJSON({
                     /:\/\/(?<domain>\S+)\//.exec(r)?.groups?.domain || '';
                 if (!domain) return null;
 
-                const icon_url = icons_images[domain.toLowerCase()];
-                if (!icon_url) return null;
+                const iconUrl = iconsImages[domain.toLowerCase()];
+                if (!iconUrl) return null;
 
                 return authorLinksHTML
                     .replace('{LINK}', r)
-                    .replace('{ICON_URL}', icon_url);
+                    .replace('{ICON_URL}', iconUrl);
             })
             .filter((r) => r != null)
             .join(' ');
 
-        const ip = config.serverIP == '0.0.0.0' ? 'localhost' : config.serverIP;
+        const ip =
+            config.serverIP === '0.0.0.0' ? 'localhost' : config.serverIP;
 
         const iframe = iframeHTML
             .replace(
@@ -152,15 +150,15 @@ function rebuildJSON({
             )
             .replace(
                 '{WIDTH}',
-                item.resolution[0] == -1
+                item.resolution[0] === -1
                     ? '500px'
-                    : item.resolution[0] == -2
-                    ? '100%'
-                    : `${item.resolution[0]}px`
+                    : item.resolution[0] === -2
+                      ? '100%'
+                      : `${item.resolution[0]}px`
             )
             .replace(
                 '{HEIGHT}',
-                item.resolution[1] == -1 ? '500px' : `${item.resolution[1]}px`
+                item.resolution[1] === -1 ? '500px' : `${item.resolution[1]}px`
             );
 
         const metadata = metadataHTML
@@ -171,25 +169,25 @@ function rebuildJSON({
             .replace('{TEXT_URL}', `/${item.folderName}/`)
             .replace(
                 '{COPY_X}',
-                item.resolution[0] == -1 || item.resolution[0] == -2
+                item.resolution[0] === -1 || item.resolution[0] === -2
                     ? 'ANY'
                     : item.resolution[0].toString()
             )
             .replace(
                 '{X}',
-                item.resolution[0] == -1 || item.resolution[0] == -2
+                item.resolution[0] === -1 || item.resolution[0] === -2
                     ? 'ANY'
                     : item.resolution[0].toString()
             )
             .replace(
                 '{COPY_Y}',
-                item.resolution[1] == -1 || item.resolution[1] == -2
+                item.resolution[1] === -1 || item.resolution[1] === -2
                     ? 'ANY'
                     : item.resolution[1].toString()
             )
             .replace(
                 '{Y}',
-                item.resolution[1] == -1 || item.resolution[1] == -2
+                item.resolution[1] === -1 || item.resolution[1] === -2
                     ? 'ANY'
                     : item.resolution[1].toString()
             );
@@ -211,7 +209,7 @@ function rebuildJSON({
         const gallery = item.assets ? assets : iframe;
 
         const footer =
-            external != true
+            external !== true
                 ? `<div class="ri-footer flexer">${metadata}</div>`
                 : '';
 
@@ -248,7 +246,7 @@ function getLocalCounters() {
             .filter((r) => {
                 const folder = path.dirname(r);
                 return (
-                    countersListTXT.find((s) => path.dirname(s) == folder) ==
+                    countersListTXT.find((s) => path.dirname(s) === folder) ==
                     null
                 );
             })
@@ -270,7 +268,7 @@ function getLocalCounters() {
             });
 
         const array = countersListTXT.map((r) => parseTXT(r));
-        return array.concat(arrayOfLocal).filter((r) => r.name != '');
+        return array.concat(arrayOfLocal).filter((r) => r.name !== '');
     } catch (error) {
         wLogger.error((error as any).message);
         return [];
@@ -296,6 +294,13 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
         path.join(pkgAssetsPath, 'homepage.html'),
         'utf8',
         (err, content) => {
+            if (err) {
+                wLogger.debug(err);
+                res.writeHead(404, {
+                    'Content-Type': 'text/html'
+                });
+                res.end('<html>page not found</html>');
+            }
             const html = content.replace('{{LIST}}', build || emptyNotice);
 
             res.writeHead(200, {
@@ -311,13 +316,13 @@ export async function buildExternalCounters(
     query?: string
 ) {
     const request = await fetch(
-        `https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json`
+        'https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json'
     );
     const json: any = await request.json();
 
     const exists = getLocalCounters();
     const array = json.filter(
-        (r) => !exists.find((s) => s.name == r.name && s.author == r.author)
+        (r) => !exists.find((s) => s.name === r.name && s.author === r.author)
     );
 
     const build = rebuildJSON({
@@ -337,6 +342,13 @@ export async function buildExternalCounters(
         path.join(pkgAssetsPath, 'homepage.html'),
         'utf8',
         (err, content) => {
+            if (err) {
+                wLogger.debug(err);
+                res.writeHead(404, {
+                    'Content-Type': 'text/html'
+                });
+                res.end('<html>page not found</html>');
+            }
             const html = content.replace('{{LIST}}', build || noMoreCounters);
 
             res.writeHead(200, {
@@ -349,10 +361,10 @@ export async function buildExternalCounters(
 
 export function buildSettings(res: http.ServerResponse) {
     const debugHTML = settingsItemHTML
-        .replace('{NAME}', `DEBUG_LOG`)
+        .replace('{NAME}', 'DEBUG_LOG')
         .replace(
             '{DESCRIPTION}',
-            `Enables logs for tosu developers, not very intuitive for you, the end user.<br />best not to include without developer's request.`
+            "Enables logs for tosu developers, not very intuitive for you, the end user.<br />best not to include without developer's request."
         )
         .replace(
             '{INPUT}',
@@ -363,10 +375,10 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const calculatePPHTML = settingsItemHTML
-        .replace('{NAME}', `CALCULATE_PP`)
+        .replace('{NAME}', 'CALCULATE_PP')
         .replace(
             '{DESCRIPTION}',
-            `Turns PP counting on/off. Very useful for tournament client, you only care about scoring and map stats for example`
+            'Turns PP counting on/off. Very useful for tournament client, you only care about scoring and map stats for example'
         )
         .replace(
             '{INPUT}',
@@ -377,10 +389,10 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const enableKeyOverlayHTML = settingsItemHTML
-        .replace('{NAME}', `ENABLE_KEY_OVERLAY`)
+        .replace('{NAME}', 'ENABLE_KEY_OVERLAY')
         .replace(
             '{DESCRIPTION}',
-            `Enables/disable reading of K1/K2/M1/M2 keys from osu`
+            'Enables/disable reading of K1/K2/M1/M2 keys from osu'
         )
         .replace(
             '{INPUT}',
@@ -394,10 +406,10 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const enableGosuOverlayHTML = settingsItemHTML
-        .replace('{NAME}', `ENABLE_GOSU_OVERLAY`)
+        .replace('{NAME}', 'ENABLE_GOSU_OVERLAY')
         .replace(
             '{DESCRIPTION}',
-            `Enables/disable in-game <b>gosumemory</b> overlay<br />(!!!I AM NOT RESPONSIBLE FOR USING IT!!!)`
+            'Enables/disable in-game <b>gosumemory</b> overlay<br />(!!!I AM NOT RESPONSIBLE FOR USING IT!!!)'
         )
         .replace(
             '{INPUT}',
@@ -411,10 +423,10 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const pollRateHTML = settingsItemHTML
-        .replace('{NAME}', `POLL_RATE`)
+        .replace('{NAME}', 'POLL_RATE')
         .replace(
             '{DESCRIPTION}',
-            `Frequency in milliseconds for updating information.`
+            'Frequency in milliseconds for updating information.'
         )
         .replace(
             '{INPUT}',
@@ -426,10 +438,10 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const preciseDataPollRateHTML = settingsItemHTML
-        .replace('{NAME}', `PRECISE_DATA_POLL_RATE`)
+        .replace('{NAME}', 'PRECISE_DATA_POLL_RATE')
         .replace(
             '{DESCRIPTION}',
-            `Frequency in milliseconds for updating precise information. (Key overlay and HitErrorData)`
+            'Frequency in milliseconds for updating precise information. (Key overlay and HitErrorData)'
         )
         .replace(
             '{INPUT}',
@@ -441,8 +453,8 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const serverIPHTML = settingsItemHTML
-        .replace('{NAME}', `SERVER_IP`)
-        .replace('{DESCRIPTION}', `The IP address for the API and WebSocket.`)
+        .replace('{NAME}', 'SERVER_IP')
+        .replace('{DESCRIPTION}', 'The IP address for the API and WebSocket.')
         .replace(
             '{INPUT}',
             inputHTML
@@ -453,8 +465,8 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const serverPortHTML = settingsItemHTML
-        .replace('{NAME}', `SERVER_PORT`)
-        .replace('{DESCRIPTION}', `The port for the API and WebSocket.`)
+        .replace('{NAME}', 'SERVER_PORT')
+        .replace('{DESCRIPTION}', 'The port for the API and WebSocket.')
         .replace(
             '{INPUT}',
             inputHTML
@@ -465,8 +477,8 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const staticFolderPathtHTML = settingsItemHTML
-        .replace('{NAME}', `STATIC_FOLDER_PATH`)
-        .replace('{DESCRIPTION}', `The directory path containing PP counters.`)
+        .replace('{NAME}', 'STATIC_FOLDER_PATH')
+        .replace('{DESCRIPTION}', 'The directory path containing PP counters.')
         .replace(
             '{INPUT}',
             inputHTML
@@ -494,6 +506,13 @@ export function buildSettings(res: http.ServerResponse) {
         // '../assets/homepage.html',
         'utf8',
         (err, content) => {
+            if (err) {
+                wLogger.debug(err);
+                res.writeHead(404, {
+                    'Content-Type': 'text/html'
+                });
+                res.end('<html>page not found</html>');
+            }
             const html = content.replace('{{LIST}}', settings);
 
             res.writeHead(200, {
@@ -520,6 +539,13 @@ export function buildInstructionLocal(res: http.ServerResponse) {
         path.join(pkgAssetsPath, 'homepage.html'),
         'utf8',
         (err, content) => {
+            if (err) {
+                wLogger.debug(err);
+                res.writeHead(404, {
+                    'Content-Type': 'text/html'
+                });
+                res.end('<html>page not found</html>');
+            }
             const html = content.replace('{{LIST}}', pageContent);
 
             res.writeHead(200, {

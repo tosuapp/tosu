@@ -93,6 +93,7 @@ export class Settings {
             effect: 0
         }
     };
+
     background: Background = { dim: 0, video: false, storyboard: false };
     client: Client = { updateAvailable: false, branch: 0, version: '' };
     resolution: Resolution = {
@@ -102,6 +103,7 @@ export class Settings {
         widthFullscreen: 0,
         heightFullscreen: 0
     };
+
     scoreMeter: ScoreMeter = { type: 0, size: 0 };
     offset: Offset = { universal: 0 };
     cursor: Cursor = { useSkinCursor: false, autoSize: false, size: 0 };
@@ -111,6 +113,7 @@ export class Settings {
         disableWheel: false,
         sensitivity: 0
     };
+
     mania: Mania = { speedBPMScale: false, usePerBeatmapSpeedScale: false };
 
     skin = {
