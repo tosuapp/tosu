@@ -60,8 +60,8 @@ export const config = {
     pollRate: Number(process.env.POLL_RATE || '500'),
     preciseDataPollRate: Number(
         process.env.PRECISE_DATA_POLL_RATE ||
-            process.env.KEYOVERLAY_POLL_RATE ||
-            '100'
+        process.env.KEYOVERLAY_POLL_RATE ||
+        '100'
     ),
     serverIP: process.env.SERVER_IP || '127.0.0.1',
     serverPort: Number(process.env.SERVER_PORT || '24050'),
@@ -195,7 +195,11 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const osuInstances: any = Object.values(
         httpServer.instanceManager.osuInstances || {}
     );
-    if (osuInstances.length === 1 && enableGosuOverlay && updated) {
+    if (
+        osuInstances.length === 1 &&
+        enableGosuOverlay == true &&
+        updated == true
+    ) {
         osuInstances[0].injectGameOverlay();
     }
 
@@ -221,23 +225,32 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 export const writeConfig = (httpServer: any, options: any) => {
     let text = '';
 
-    text += `DEBUG_LOG=${options.DEBUG_LOG || config.debugLogging}\n\n`;
-    text += `CALCULATE_PP=${options.CALCULATE_PP || config.calculatePP}\n\n`;
-    text += `ENABLE_GOSU_OVERLAY=${
-        options.ENABLE_GOSU_OVERLAY || config.enableGosuOverlay
-    }\n`;
-    text += `ENABLE_KEY_OVERLAY=${
-        options.ENABLE_KEY_OVERLAY || config.enableKeyOverlay
-    }\n\n`;
-    text += `POLL_RATE=${options.POLL_RATE || config.pollRate}\n`;
-    text += `PRECISE_DATA_POLL_RATE=${
-        options.PRECISE_DATA_POLL_RATE || config.preciseDataPollRate
-    }\n\n`;
-    text += `SERVER_IP=${options.SERVER_IP || config.serverIP}\n`;
-    text += `SERVER_PORT=${options.SERVER_PORT || config.serverPort}\n\n`;
-    text += `STATIC_FOLDER_PATH=${
-        options.STATIC_FOLDER_PATH || config.staticFolderPath
-    }\n`;
+    text += `DEBUG_LOG=${options.DEBUG_LOG != null ? options.DEBUG_LOG : config.debugLogging
+        }\n\n`;
+    text += `CALCULATE_PP=${options.CALCULATE_PP != null ? options.CALCULATE_PP : config.calculatePP
+        }\n\n`;
+    text += `ENABLE_GOSU_OVERLAY=${options.ENABLE_GOSU_OVERLAY != null
+            ? options.ENABLE_GOSU_OVERLAY
+            : config.enableGosuOverlay
+        }\n`;
+    text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY != null
+            ? options.ENABLE_KEY_OVERLAY
+            : config.enableKeyOverlay
+        }\n\n`;
+    text += `POLL_RATE=${options.POLL_RATE != null ? options.POLL_RATE : config.pollRate
+        }\n`;
+    text += `PRECISE_DATA_POLL_RATE=${options.PRECISE_DATA_POLL_RATE != null
+            ? options.PRECISE_DATA_POLL_RATE
+            : config.preciseDataPollRate
+        }\n\n`;
+    text += `SERVER_IP=${options.SERVER_IP != null ? options.SERVER_IP : config.serverIP
+        }\n`;
+    text += `SERVER_PORT=${options.SERVER_PORT != null ? options.SERVER_PORT : config.serverPort
+        }\n\n`;
+    text += `STATIC_FOLDER_PATH=${options.STATIC_FOLDER_PATH != null
+            ? options.STATIC_FOLDER_PATH
+            : config.staticFolderPath
+        }\n`;
 
     fs.writeFileSync(configPath, text, 'utf8');
     refreshConfig(httpServer, true);
