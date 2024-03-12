@@ -228,7 +228,8 @@ function rebuildJSON({
 function getLocalCounters() {
     try {
         const staticPath =
-            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
+            path.resolve(config.staticFolderPath) ||
+            path.join(pkgRunningFolder, 'static');
 
         const countersListTXT = recursiveFilesSearch({
             dir: staticPath,
@@ -251,7 +252,6 @@ function getLocalCounters() {
                 );
             })
             .map((r) => {
-                const staticPath = path.resolve(config.staticFolderPath);
                 const nestedFolderPath = path.dirname(
                     r.replace(staticPath, '')
                 );
