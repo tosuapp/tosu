@@ -195,8 +195,8 @@ function rebuildJSON({
         const button = item.downloadLink
             ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
             : `<div class="buttons-group flexer indent-left">
-                <button class="button open-button flexer" n="${item.name}" a="${item.author}"><span>Open Folder</span></button>
-                <button class="button delete-button flexer" n="${item.name}" a="${item.author}"><span>Delete</span></button>
+                <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
+                <button class="button delete-button flexer" n="${item.folderName}"><span>Delete</span></button>
             </div>`;
 
         const assets = (item.assets || [])
