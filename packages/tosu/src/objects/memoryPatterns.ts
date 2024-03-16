@@ -6,8 +6,8 @@ export interface PatternData {
     chatCheckerAddr: number;
     skinDataAddr: number;
     settingsClassAddr: number;
-    configurationAddr: number;
-    bindingsAddr: number;
+    // configurationAddr: number;
+    // bindingsAddr: number;
     rulesetsAddr: number;
     canRunSlowlyAddr: number;
     statusPtr: number;
@@ -15,7 +15,7 @@ export interface PatternData {
     getAudioLengthPtr: number;
     userProfilePtr: number;
     rawLoginStatusPtr: number;
-    gameTimePtr: number;
+    // gameTimePtr: number;
     spectatingUserPtr: number;
 }
 
@@ -32,8 +32,8 @@ export class MemoryPatterns {
             chatCheckerAddr: 0,
             skinDataAddr: 0,
             settingsClassAddr: 0,
-            configurationAddr: 0,
-            bindingsAddr: 0,
+            // configurationAddr: 0,
+            // bindingsAddr: 0,
             rulesetsAddr: 0,
             canRunSlowlyAddr: 0,
             statusPtr: 0,
@@ -41,7 +41,7 @@ export class MemoryPatterns {
             getAudioLengthPtr: 0,
             userProfilePtr: 0,
             rawLoginStatusPtr: 0,
-            gameTimePtr: 0,
+            // gameTimePtr: 0,
             spectatingUserPtr: 0
         };
 
