@@ -242,8 +242,11 @@ export default function buildBaseApi(server: Server) {
                     res.writeHead(404, {
                         'Content-Type': 'text/html'
                     });
+
                     res.end('<html>page not found</html>');
+                    return;
                 }
+
                 res.writeHead(200, {
                     'Content-Type': getContentType(req.params.filePath)
                 });
@@ -263,8 +266,11 @@ export default function buildBaseApi(server: Server) {
                     res.writeHead(404, {
                         'Content-Type': 'text/html'
                     });
+
                     res.end('<html>page not found</html>');
+                    return;
                 }
+
                 res.writeHead(200, {
                     'Content-Type': getContentType('homepage.min.css')
                 });
@@ -283,8 +289,11 @@ export default function buildBaseApi(server: Server) {
                     res.writeHead(404, {
                         'Content-Type': 'text/html'
                     });
+
                     res.end('<html>page not found</html>');
+                    return;
                 }
+
                 res.writeHead(200, {
                     'Content-Type': getContentType('homepage.js')
                 });

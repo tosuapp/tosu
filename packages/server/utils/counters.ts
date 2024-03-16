@@ -299,8 +299,11 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
                 res.writeHead(404, {
                     'Content-Type': 'text/html'
                 });
+
                 res.end('<html>page not found</html>');
+                return;
             }
+
             const html = content.replace('{{LIST}}', build || emptyNotice);
 
             res.writeHead(200, {
@@ -347,8 +350,11 @@ export async function buildExternalCounters(
                 res.writeHead(404, {
                     'Content-Type': 'text/html'
                 });
+
                 res.end('<html>page not found</html>');
+                return;
             }
+
             const html = content.replace('{{LIST}}', build || noMoreCounters);
 
             res.writeHead(200, {
@@ -503,7 +509,6 @@ export function buildSettings(res: http.ServerResponse) {
 
     fs.readFile(
         path.join(pkgAssetsPath, 'homepage.html'),
-        // '../assets/homepage.html',
         'utf8',
         (err, content) => {
             if (err) {
@@ -511,8 +516,11 @@ export function buildSettings(res: http.ServerResponse) {
                 res.writeHead(404, {
                     'Content-Type': 'text/html'
                 });
+
                 res.end('<html>page not found</html>');
+                return;
             }
+
             const html = content.replace('{{LIST}}', settings);
 
             res.writeHead(200, {
@@ -544,8 +552,11 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 res.writeHead(404, {
                     'Content-Type': 'text/html'
                 });
+
                 res.end('<html>page not found</html>');
+                return;
             }
+
             const html = content.replace('{{LIST}}', pageContent);
 
             res.writeHead(200, {
