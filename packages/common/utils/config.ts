@@ -192,6 +192,13 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         httpServer.restart();
     }
 
+    if (
+        config.pollRate !== pollRate ||
+        config.preciseDataPollRate !== preciseDataPollRate
+    ) {
+        httpServer.restartWS();
+    }
+
     const osuInstances: any = Object.values(
         httpServer.instanceManager.osuInstances || {}
     );

@@ -11,6 +11,7 @@ export class Websocket {
     private instanceManager: any;
     private pollRateFieldName: string;
     private stateFunctionName: string;
+    loopInterval: NodeJS.Timeout;
 
     socket: WebSocket.Server;
     clients = new Map<string, ModifiedWebsocket>();
@@ -31,7 +32,8 @@ export class Websocket {
         this.stateFunctionName = stateFunctionName;
 
         this.handle = this.handle.bind(this);
-        this.loop = this.loop.bind(this);
+        this.startLoop = this.startLoop.bind(this);
+        this.stopLoop = this.stopLoop.bind(this);
 
         this.handle();
     }
@@ -61,34 +63,32 @@ export class Websocket {
             this.clients.set(ws.id, ws);
         });
 
-        this.loop();
+        this.startLoop();
     }
 
-    loop() {
-        try {
-            const osuInstance: any = this.instanceManager.getInstance();
-            if (!osuInstance) {
-                setTimeout(this.loop, 500);
-                return;
+    startLoop() {
+        this.loopInterval = setInterval(() => {
+            try {
+                const osuInstance: any = this.instanceManager.getInstance();
+                if (!osuInstance || this.clients.size === 0) {
+                    return; // Exit the loop if conditions are not met
+                }
+
+                const message = JSON.stringify(
+                    osuInstance[this.stateFunctionName](
+                        this.instanceManager
+                    )
+                );
+
+                this.clients.forEach((client) => client.send(message));
+            } catch (error) {
+                wLogger.error((error as any).message);
+                wLogger.debug(error);
             }
+        }, config[this.pollRateFieldName]);
+    }
 
-            if (this.clients.size > 0) {
-                try {
-                    const message = JSON.stringify(
-                        osuInstance[this.stateFunctionName](
-                            this.instanceManager
-                        )
-                    );
-
-                    this.clients.forEach((client) => client.send(message));
-                } catch (error) {}
-            }
-
-            setTimeout(this.loop, config[this.pollRateFieldName]);
-        } catch (error) {
-            wLogger.error((error as any).message);
-
-            setTimeout(this.loop, 1000);
-        }
+    stopLoop() {
+        clearInterval(this.loopInterval);
     }
 }
