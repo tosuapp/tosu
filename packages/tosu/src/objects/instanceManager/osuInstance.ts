@@ -6,10 +6,8 @@ import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/api/utils/buildResult';
-import {
-    buildPreciseResult,
-    buildResult as buildResultV2
-} from '@/api/utils/buildResultV2';
+import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
+import { buildResult as buildResultV2Precise } from '@/api/utils/buildResultV2Precise';
 import { AllTimesData } from '@/entities/AllTimesData';
 import { BassDensityData } from '@/entities/BassDensityData';
 import { BeatmapPPData } from '@/entities/BeatmapPpData';
@@ -481,6 +479,6 @@ export class OsuInstance {
     }
 
     getPreciseData() {
-        return buildPreciseResult(this.entities);
+        return buildResultV2Precise(this.entities);
     }
 }

@@ -457,7 +457,7 @@ export interface Combo2 {
     max: number;
 }
 
-export interface PreciseApiAnswer {
+export interface PreciseAnswer {
     keys: KeyOverlay;
     hitErrors: number[];
 }
