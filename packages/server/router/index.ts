@@ -29,15 +29,13 @@ const pkgRunningFolder =
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
-        const osuInstances: any = Object.values(
-            req.instanceManager.osuInstances || {}
-        );
-        if (osuInstances.length < 1) {
+        const osuInstance: any = req.instanceManager.getInstance();
+        if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const json = osuInstances[0].getState(req.instanceManager);
+        const json = osuInstance.getState(req.instanceManager);
         sendJson(res, json);
     });
 
@@ -299,17 +297,16 @@ export default function buildBaseApi(server: Server) {
         try {
             const query: any = req.query;
 
-            const osuInstances: any = Object.values(
-                req.instanceManager.osuInstances || {}
-            );
-            if (osuInstances.length < 1) {
+            const osuInstance: any = req.instanceManager.getInstance();
+            if (!osuInstance) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { settings, menuData } = osuInstances[0].entities.getServices(
-                ['settings', 'menuData']
-            );
+            const { settings, menuData } = osuInstance.entities.getServices([
+                'settings',
+                'menuData'
+            ]);
 
             const beatmapFilePath =
                 query.path ||

@@ -37,43 +37,37 @@ export default function buildV2Api({
     });
 
     app.route('/json/v2', 'GET', (req, res) => {
-        const osuInstances: any = Object.values(
-            req.instanceManager.osuInstances || {}
-        );
-        if (osuInstances.length < 1) {
+        const osuInstance: any = req.instanceManager.getInstance();
+        if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const json = osuInstances[0].getStateV2(req.instanceManager);
+        const json = osuInstance.getStateV2(req.instanceManager);
         sendJson(res, json);
     });
 
     app.route('/json/v2/precise', 'GET', (req, res) => {
-        const osuInstances: any = Object.values(
-            req.instanceManager.osuInstances || {}
-        );
-        if (osuInstances.length < 1) {
+        const osuInstance: any = req.instanceManager.getInstance();
+        if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const json = osuInstances[0].getPreciseData();
+        const json = osuInstance.getPreciseData();
         sendJson(res, json);
     });
 
     app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
 
-        const osuInstances: any = Object.values(
-            req.instanceManager.osuInstances || {}
-        );
-        if (osuInstances.length < 1) {
+        const osuInstance: any = req.instanceManager.getInstance();
+        if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const { settings } = osuInstances[0].entities.getServices(['settings']);
+        const { settings } = osuInstance.entities.getServices(['settings']);
         if (settings.songsFolder === '') {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
@@ -90,15 +84,13 @@ export default function buildV2Api({
     app.route(/^\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
 
-        const osuInstances: any = Object.values(
-            req.instanceManager.osuInstances || {}
-        );
-        if (osuInstances.length < 1) {
+        const osuInstance: any = req.instanceManager.getInstance();
+        if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const { settings } = osuInstances[0].entities.getServices(['settings']);
+        const { settings } = osuInstance.entities.getServices(['settings']);
         if (
             (settings.gameFolder === '' && settings.skinFolder === '') ||
             (settings.gameFolder == null && settings.skinFolder == null)
