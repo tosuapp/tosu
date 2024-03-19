@@ -248,8 +248,7 @@ export class OsuInstance {
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    `[${this.pid}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`,
-                    exc
+                    `[${this.pid}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
                 );
                 wLogger.debug(exc);
                 this.emitter.emit('onResolveFailed', this.pid);
