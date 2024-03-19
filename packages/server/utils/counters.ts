@@ -271,6 +271,7 @@ function getLocalCounters() {
         return array.concat(arrayOfLocal).filter((r) => r.name !== '');
     } catch (error) {
         wLogger.error((error as any).message);
+        wLogger.debug(error);
         return [];
     }
 }

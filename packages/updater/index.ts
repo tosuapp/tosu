@@ -26,7 +26,8 @@ const deleteNotLocked = async (filePath: string) => {
             return;
         }
 
-        wLogger.error(err);
+        wLogger.error(err.message);
+        wLogger.debug(err);
     }
 };
 
