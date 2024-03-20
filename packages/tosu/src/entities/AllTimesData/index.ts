@@ -444,7 +444,7 @@ export class AllTimesData extends AbstractEntity {
                 skinDataAddr,
                 settingsClassAddr,
                 canRunSlowlyAddr
-                // gameTimePtr
+                // gameTimePtr,
             } = patterns.getPatterns([
                 'statusPtr',
                 'playTimeAddr',
@@ -453,7 +453,7 @@ export class AllTimesData extends AbstractEntity {
                 'skinDataAddr',
                 'settingsClassAddr',
                 'canRunSlowlyAddr'
-                // 'gameTimePtr'
+                // 'gameTimePtr',
             ]);
 
             const skinOsuAddr = process.readInt(skinDataAddr + 0x7);

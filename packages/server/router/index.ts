@@ -393,6 +393,8 @@ export default function buildBaseApi(server: Server) {
                 folderPath
             });
         } catch (error) {
+            wLogger.debug(error);
+
             return sendJson(res, {
                 error: (error as any).message
             });

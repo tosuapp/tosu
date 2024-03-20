@@ -1,3 +1,5 @@
+import { wLogger } from '@tosu/common';
+
 import { HttpServer, Websocket, sendJson } from '../index';
 import { directoryWalker } from '../utils/directories';
 
@@ -22,25 +24,34 @@ export default function buildV1Api({
     });
 
     app.route(/^\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
-        const url = req.pathname || '/';
+        try {
+            const url = req.pathname || '/';
 
-        const osuInstance: any = req.instanceManager.getInstance();
-        if (!osuInstance) {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
+            const osuInstance: any = req.instanceManager.getInstance();
+            if (!osuInstance) {
+                res.statusCode = 500;
+                return sendJson(res, { error: 'not_ready' });
+            }
+
+            const { settings } = osuInstance.entities.getServices(['settings']);
+            if (settings.songsFolder === '') {
+                res.statusCode = 500;
+                return sendJson(res, { error: 'not_ready' });
+            }
+
+            directoryWalker({
+                res,
+                baseUrl: url,
+                pathname: req.params.filePath,
+                folderPath: settings.songsFolder
+            });
+        } catch (error) {
+            wLogger.error((error as any).message);
+            wLogger.debug(error);
+
+            return sendJson(res, {
+                error: (error as any).message
+            });
         }
-
-        const { settings } = osuInstance.entities.getServices(['settings']);
-        if (settings.songsFolder === '') {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
-        }
-
-        directoryWalker({
-            res,
-            baseUrl: url,
-            pathname: req.params.filePath,
-            folderPath: settings.songsFolder
-        });
     });
 }
