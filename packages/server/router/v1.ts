@@ -24,15 +24,13 @@ export default function buildV1Api({
     app.route(/^\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
 
-        const osuInstances: any = Object.values(
-            req.instanceManager.osuInstances || {}
-        );
-        if (osuInstances.length < 1) {
+        const osuInstance: any = req.instanceManager.getInstance();
+        if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const { settings } = osuInstances[0].entities.getServices(['settings']);
+        const { settings } = osuInstance.entities.getServices(['settings']);
         if (settings.songsFolder === '') {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });

@@ -66,10 +66,8 @@ export class Websocket {
 
     loop() {
         try {
-            const osuInstances: any = Object.values(
-                this.instanceManager.osuInstances || {}
-            );
-            if (osuInstances.length < 1) {
+            const osuInstance: any = this.instanceManager.getInstance();
+            if (!osuInstance) {
                 setTimeout(this.loop, 500);
                 return;
             }
@@ -77,7 +75,7 @@ export class Websocket {
             if (this.clients.size > 0) {
                 try {
                     const message = JSON.stringify(
-                        osuInstances[0][this.stateFunctionName](
+                        osuInstance[this.stateFunctionName](
                             this.instanceManager
                         )
                     );
