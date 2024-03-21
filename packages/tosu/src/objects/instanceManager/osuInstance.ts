@@ -6,10 +6,8 @@ import path from 'path';
 import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/api/utils/buildResult';
-import {
-    buildPreciseResult,
-    buildResult as buildResultV2
-} from '@/api/utils/buildResultV2';
+import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
+import { buildResult as buildResultV2Precise } from '@/api/utils/buildResultV2Precise';
 import { AllTimesData } from '@/entities/AllTimesData';
 import { BassDensityData } from '@/entities/BassDensityData';
 import { BeatmapPPData } from '@/entities/BeatmapPpData';
@@ -47,14 +45,14 @@ const SCAN_PATTERNS: {
     settingsClassAddr: {
         pattern: '83 E0 20 85 C0 7E 2F'
     },
-    configurationAddr: {
-        pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
-        offset: -0xd
-    },
-    bindingsAddr: {
-        pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
-        offset: 0x2a
-    },
+    // configurationAddr: {
+    //     pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
+    //     offset: -0xd
+    // },
+    // bindingsAddr: {
+    //     pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
+    //     offset: 0x2a
+    // },
     rulesetsAddr: {
         pattern: '7D 15 A1 ?? ?? ?? ?? 85 C0'
     },
@@ -81,10 +79,10 @@ const SCAN_PATTERNS: {
         pattern: 'B8 0B 00 00 8B 35',
         offset: -0xb
     },
-    gameTimePtr: {
-        pattern: 'FF 15 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 3B',
-        offset: 0x7
-    },
+    // gameTimePtr: {
+    //     pattern: 'FF 15 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 3B',
+    //     offset: 0x7
+    // },
     spectatingUserPtr: {
         pattern: '8B 0D ?? ?? ?? ?? 85 C0 74 05 8B 50 30',
         offset: -0x4
@@ -481,6 +479,6 @@ export class OsuInstance {
     }
 
     getPreciseData() {
-        return buildPreciseResult(this.entities);
+        return buildResultV2Precise(this.entities);
     }
 }

@@ -5,7 +5,7 @@
  * @returns float number with two digits after
  */
 export const fixDecimals = (decimalNumber: number) =>
-    parseFloat(decimalNumber.toFixed(2));
+    parseFloat((decimalNumber || 0).toFixed(2));
 
 /**
  * Converts raw .NET's dateData to Date object

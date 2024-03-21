@@ -1,3 +1,4 @@
+import { wLogger } from '@tosu/common';
 import path from 'path';
 
 import { HttpServer, Websocket, sendJson } from '../index';
@@ -59,56 +60,74 @@ export default function buildV2Api({
     });
 
     app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
-        const url = req.pathname || '/';
+        try {
+            const url = req.pathname || '/';
 
-        const osuInstance: any = req.instanceManager.getInstance();
-        if (!osuInstance) {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
+            const osuInstance: any = req.instanceManager.getInstance();
+            if (!osuInstance) {
+                res.statusCode = 500;
+                return sendJson(res, { error: 'not_ready' });
+            }
+
+            const { settings } = osuInstance.entities.getServices(['settings']);
+            if (settings.songsFolder === '') {
+                res.statusCode = 500;
+                return sendJson(res, { error: 'not_ready' });
+            }
+
+            directoryWalker({
+                res,
+                baseUrl: url,
+                pathname: req.params.filePath,
+                folderPath: settings.songsFolder
+            });
+        } catch (error) {
+            wLogger.error((error as any).message);
+            wLogger.debug(error);
+
+            return sendJson(res, {
+                error: (error as any).message
+            });
         }
-
-        const { settings } = osuInstance.entities.getServices(['settings']);
-        if (settings.songsFolder === '') {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
-        }
-
-        directoryWalker({
-            res,
-            baseUrl: url,
-            pathname: req.params.filePath,
-            folderPath: settings.songsFolder
-        });
     });
 
     app.route(/^\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
-        const url = req.pathname || '/';
+        try {
+            const url = req.pathname || '/';
 
-        const osuInstance: any = req.instanceManager.getInstance();
-        if (!osuInstance) {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
+            const osuInstance: any = req.instanceManager.getInstance();
+            if (!osuInstance) {
+                res.statusCode = 500;
+                return sendJson(res, { error: 'not_ready' });
+            }
+
+            const { settings } = osuInstance.entities.getServices(['settings']);
+            if (
+                (settings.gameFolder === '' && settings.skinFolder === '') ||
+                (settings.gameFolder == null && settings.skinFolder == null)
+            ) {
+                res.statusCode = 500;
+                return sendJson(res, { error: 'not_ready' });
+            }
+
+            const folder = path.join(
+                settings.gameFolder,
+                'Skins',
+                settings.skinFolder
+            );
+            directoryWalker({
+                res,
+                baseUrl: url,
+                pathname: req.params.filePath,
+                folderPath: folder
+            });
+        } catch (error) {
+            wLogger.error((error as any).message);
+            wLogger.debug(error);
+
+            return sendJson(res, {
+                error: (error as any).message
+            });
         }
-
-        const { settings } = osuInstance.entities.getServices(['settings']);
-        if (
-            (settings.gameFolder === '' && settings.skinFolder === '') ||
-            (settings.gameFolder == null && settings.skinFolder == null)
-        ) {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
-        }
-
-        const folder = path.join(
-            settings.gameFolder,
-            'Skins',
-            settings.skinFolder
-        );
-        directoryWalker({
-            res,
-            baseUrl: url,
-            pathname: req.params.filePath,
-            folderPath: folder
-        });
     });
 }

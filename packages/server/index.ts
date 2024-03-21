@@ -10,6 +10,10 @@ export class Server {
     instanceManager: any;
     app = new HttpServer();
 
+    WS_V1: Websocket;
+    WS_V2: Websocket;
+    WS_V2_PRECISE: Websocket;
+
     constructor({ instanceManager }: { instanceManager: any }) {
         this.instanceManager = instanceManager;
 
@@ -17,17 +21,17 @@ export class Server {
     }
 
     start() {
-        const WS_V1 = new Websocket({
+        this.WS_V1 = new Websocket({
             instanceManager: this.instanceManager,
             pollRateFieldName: 'pollRate',
             stateFunctionName: 'getState'
         });
-        const WS_V2 = new Websocket({
+        this.WS_V2 = new Websocket({
             instanceManager: this.instanceManager,
             pollRateFieldName: 'pollRate',
             stateFunctionName: 'getStateV2'
         });
-        const WS_V2_PRECISE = new Websocket({
+        this.WS_V2_PRECISE = new Websocket({
             instanceManager: this.instanceManager,
             pollRateFieldName: 'preciseDataPollRate',
             stateFunctionName: 'getPreciseData'
@@ -36,12 +40,12 @@ export class Server {
         buildBaseApi(this);
         buildV1Api({
             app: this.app,
-            websocket: WS_V1
+            websocket: this.WS_V1
         });
         buildV2Api({
             app: this.app,
-            websocket: WS_V2,
-            preciseWebsocket: WS_V2_PRECISE
+            websocket: this.WS_V2,
+            preciseWebsocket: this.WS_V2_PRECISE
         });
 
         this.app.listen(config.serverPort, config.serverIP);
@@ -50,6 +54,16 @@ export class Server {
     restart() {
         this.app.server.close();
         this.app.listen(config.serverPort, config.serverIP);
+    }
+
+    restartWS() {
+        this.WS_V1.stopLoop();
+        this.WS_V2.stopLoop();
+        this.WS_V2_PRECISE.stopLoop();
+
+        this.WS_V1.startLoop();
+        this.WS_V2.startLoop();
+        this.WS_V2_PRECISE.startLoop();
     }
 
     middlrewares() {

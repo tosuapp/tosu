@@ -192,21 +192,32 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         httpServer.restart();
     }
 
+    if (
+        config.pollRate !== pollRate ||
+        config.preciseDataPollRate !== preciseDataPollRate
+    ) {
+        config.pollRate = pollRate >= 0 ? pollRate : 100;
+        config.preciseDataPollRate =
+            preciseDataPollRate >= 0 ? preciseDataPollRate : 100;
+        httpServer.restartWS();
+    }
+
     const osuInstances: any = Object.values(
         httpServer.instanceManager.osuInstances || {}
     );
-    if (osuInstances.length === 1 && enableGosuOverlay && updated) {
+    if (
+        osuInstances.length === 1 &&
+        enableGosuOverlay === true &&
+        updated === true
+    ) {
+        config.enableGosuOverlay = enableGosuOverlay;
         osuInstances[0].injectGameOverlay();
     }
 
     config.debugLogging = debugLogging;
     config.calculatePP = calculatePP;
     config.enableKeyOverlay = enableKeyOverlay;
-    config.pollRate = pollRate >= 0 ? pollRate : 100;
-    config.preciseDataPollRate =
-        preciseDataPollRate >= 0 ? preciseDataPollRate : 100;
     config.staticFolderPath = staticFolderPath;
-    config.enableGosuOverlay = enableGosuOverlay;
 
     if (
         config.staticFolderPath === './static' &&
@@ -221,22 +232,40 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 export const writeConfig = (httpServer: any, options: any) => {
     let text = '';
 
-    text += `DEBUG_LOG=${options.DEBUG_LOG || config.debugLogging}\n\n`;
-    text += `CALCULATE_PP=${options.CALCULATE_PP || config.calculatePP}\n\n`;
+    text += `DEBUG_LOG=${
+        options.DEBUG_LOG != null ? options.DEBUG_LOG : config.debugLogging
+    }\n\n`;
+    text += `CALCULATE_PP=${
+        options.CALCULATE_PP != null ? options.CALCULATE_PP : config.calculatePP
+    }\n\n`;
     text += `ENABLE_GOSU_OVERLAY=${
-        options.ENABLE_GOSU_OVERLAY || config.enableGosuOverlay
+        options.ENABLE_GOSU_OVERLAY != null
+            ? options.ENABLE_GOSU_OVERLAY
+            : config.enableGosuOverlay
     }\n`;
     text += `ENABLE_KEY_OVERLAY=${
-        options.ENABLE_KEY_OVERLAY || config.enableKeyOverlay
+        options.ENABLE_KEY_OVERLAY != null
+            ? options.ENABLE_KEY_OVERLAY
+            : config.enableKeyOverlay
     }\n\n`;
-    text += `POLL_RATE=${options.POLL_RATE || config.pollRate}\n`;
+    text += `POLL_RATE=${
+        options.POLL_RATE != null ? options.POLL_RATE : config.pollRate
+    }\n`;
     text += `PRECISE_DATA_POLL_RATE=${
-        options.PRECISE_DATA_POLL_RATE || config.preciseDataPollRate
+        options.PRECISE_DATA_POLL_RATE != null
+            ? options.PRECISE_DATA_POLL_RATE
+            : config.preciseDataPollRate
     }\n\n`;
-    text += `SERVER_IP=${options.SERVER_IP || config.serverIP}\n`;
-    text += `SERVER_PORT=${options.SERVER_PORT || config.serverPort}\n\n`;
+    text += `SERVER_IP=${
+        options.SERVER_IP != null ? options.SERVER_IP : config.serverIP
+    }\n`;
+    text += `SERVER_PORT=${
+        options.SERVER_PORT != null ? options.SERVER_PORT : config.serverPort
+    }\n\n`;
     text += `STATIC_FOLDER_PATH=${
-        options.STATIC_FOLDER_PATH || config.staticFolderPath
+        options.STATIC_FOLDER_PATH != null
+            ? options.STATIC_FOLDER_PATH
+            : config.staticFolderPath
     }\n`;
 
     fs.writeFileSync(configPath, text, 'utf8');

@@ -35,7 +35,13 @@ export function directoryWalker({
     const filePath = path.join(folderPath, cleanedUrl);
     const isDirectory = path.extname(filePath) === '';
     if (isDirectory) {
-        return readDirectory(filePath, baseUrl, (html: string) => {
+        return readDirectory(filePath, baseUrl, (html: Error | string) => {
+            if (html instanceof Error) {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.end('404 Not Found');
+                return;
+            }
+
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
             });
@@ -48,7 +54,13 @@ export function directoryWalker({
             return readDirectory(
                 filePath.replace('index.html', ''),
                 baseUrl,
-                (html: string) => {
+                (html: Error | string) => {
+                    if (html instanceof Error) {
+                        res.writeHead(404, { 'Content-Type': 'text/html' });
+                        res.end('404 Not Found');
+                        return;
+                    }
+
                     res.writeHead(200, {
                         'Content-Type': getContentType('file.html')
                     });

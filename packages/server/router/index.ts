@@ -55,6 +55,7 @@ export default function buildBaseApi(server: Server) {
                 return buildLocalCounters(res, query);
             } catch (error) {
                 wLogger.error((error as any).message);
+                wLogger.debug(error);
 
                 return sendJson(res, {
                     error: (error as any).message
@@ -122,6 +123,7 @@ export default function buildBaseApi(server: Server) {
                     });
             } catch (error) {
                 wLogger.error((error as any).message);
+                wLogger.debug(error);
 
                 sendJson(res, {
                     error: (error as any).message
@@ -162,6 +164,7 @@ export default function buildBaseApi(server: Server) {
                 exec(`start "" "${folderPath}"`, (err) => {
                     if (err) {
                         wLogger.error('Error opening file explorer:');
+                        wLogger.debug(err);
                         return sendJson(res, {
                             error: `Error opening file explorer: ${err.message}`
                         });
@@ -242,8 +245,11 @@ export default function buildBaseApi(server: Server) {
                     res.writeHead(404, {
                         'Content-Type': 'text/html'
                     });
+
                     res.end('<html>page not found</html>');
+                    return;
                 }
+
                 res.writeHead(200, {
                     'Content-Type': getContentType(req.params.filePath)
                 });
@@ -263,8 +269,11 @@ export default function buildBaseApi(server: Server) {
                     res.writeHead(404, {
                         'Content-Type': 'text/html'
                     });
+
                     res.end('<html>page not found</html>');
+                    return;
                 }
+
                 res.writeHead(200, {
                     'Content-Type': getContentType('homepage.min.css')
                 });
@@ -283,8 +292,11 @@ export default function buildBaseApi(server: Server) {
                     res.writeHead(404, {
                         'Content-Type': 'text/html'
                     });
+
                     res.end('<html>page not found</html>');
+                    return;
                 }
+
                 res.writeHead(200, {
                     'Content-Type': getContentType('homepage.js')
                 });
@@ -381,6 +393,8 @@ export default function buildBaseApi(server: Server) {
                 folderPath
             });
         } catch (error) {
+            wLogger.debug(error);
+
             return sendJson(res, {
                 error: (error as any).message
             });

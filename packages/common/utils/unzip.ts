@@ -17,6 +17,7 @@ export const unzip = (zipPath: string, extractPath: string): Promise<string> =>
             resolve(extractPath);
         } catch (error) {
             wLogger.error((error as any).message);
+            wLogger.debug(error);
             reject(error);
         }
     });
