@@ -75,9 +75,7 @@ export class Websocket {
                 }
 
                 const message = JSON.stringify(
-                    osuInstance[this.stateFunctionName](
-                        this.instanceManager
-                    )
+                    osuInstance[this.stateFunctionName](this.instanceManager)
                 );
 
                 this.clients.forEach((client) => client.send(message));
