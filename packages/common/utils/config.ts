@@ -196,6 +196,9 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.pollRate !== pollRate ||
         config.preciseDataPollRate !== preciseDataPollRate
     ) {
+        config.pollRate = pollRate >= 0 ? pollRate : 100;
+        config.preciseDataPollRate =
+            preciseDataPollRate >= 0 ? preciseDataPollRate : 100;
         httpServer.restartWS();
     }
 
@@ -207,17 +210,14 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         enableGosuOverlay === true &&
         updated === true
     ) {
+        config.enableGosuOverlay = enableGosuOverlay;
         osuInstances[0].injectGameOverlay();
     }
 
     config.debugLogging = debugLogging;
     config.calculatePP = calculatePP;
     config.enableKeyOverlay = enableKeyOverlay;
-    config.pollRate = pollRate >= 0 ? pollRate : 100;
-    config.preciseDataPollRate =
-        preciseDataPollRate >= 0 ? preciseDataPollRate : 100;
     config.staticFolderPath = staticFolderPath;
-    config.enableGosuOverlay = enableGosuOverlay;
 
     if (
         config.staticFolderPath === './static' &&
