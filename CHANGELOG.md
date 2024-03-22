@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.1](https://github.com/KotRikD/tosu/compare/v2.5.0...v2.5.1) (2024-03-22)
+
+
+### Bug Fixes
+
+* Fix local counters path ([#104](https://github.com/KotRikD/tosu/issues/104)) ([cf32255](https://github.com/KotRikD/tosu/commit/cf322550915ae06662a3c3b873de26506142016f))
+* fix tournament manager process order ([70808b5](https://github.com/KotRikD/tosu/commit/70808b5eeca6f842338f2ea7d0f6648a74322f74))
+* format player name correctly ([d99b4da](https://github.com/KotRikD/tosu/commit/d99b4da286a83f72a5f4c854c6cecdbbd6fcbd16))
+* tournament ipcId wrong reading and potentional fix for chat ([3e8aee4](https://github.com/KotRikD/tosu/commit/3e8aee4d7d5e48a65569215ea0c6cbe969e683ff))
+
 ## [2.5.0](https://github.com/KotRikD/tosu/compare/v2.4.3...v2.5.0) (2024-03-10)
 
 
