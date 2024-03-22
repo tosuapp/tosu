@@ -138,7 +138,10 @@ export class TourneyManagerData extends AbstractEntity {
 
                     result.push({
                         time: time.trim(),
-                        name: timeName.replace(time, ''),
+                        name: timeName
+                            .replace(time, '')
+                            .replace(/:$/, '')
+                            .trimStart(),
                         content
                     });
                 }
