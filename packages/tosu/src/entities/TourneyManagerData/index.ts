@@ -134,11 +134,14 @@ export class TourneyManagerData extends AbstractEntity {
                     const timeName = process.readSharpString(
                         process.readInt(currentItem + 0x8)
                     );
-                    const [time, name] = timeName.split(' ');
+                    const [time] = timeName.split(' ');
 
                     result.push({
                         time: time.trim(),
-                        name: name.substring(0, name.length - 1),
+                        name: timeName
+                            .replace(time, '')
+                            .replace(/:$/, '')
+                            .trimStart(),
                         content
                     });
                 }
