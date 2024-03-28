@@ -555,10 +555,8 @@ export class GamePlayData extends AbstractEntity {
         );
         const fcPerformance = new Calculator({
             mods: this.Mods,
-            nMisses: this.HitMiss,
-            n50: this.Hit50,
-            n100: this.Hit100,
-            n300: this.Hit300
+            nMisses: 0,
+            acc: this.Accuracy
         }).performance(currentBeatmap);
 
         beatmapPpData.updateCurrentAttributes(
