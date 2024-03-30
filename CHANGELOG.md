@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.2](https://github.com/KotRikD/tosu/compare/v2.5.1...v2.5.2) (2024-03-30)
+
+
+### Bug Fixes
+
+* Fix incorrect pp if fc ([8c50e00](https://github.com/KotRikD/tosu/commit/8c50e0022d0276cb08b575e07c99d19112cb905f))
+* Fix undefined which may crash program ([0872879](https://github.com/KotRikD/tosu/commit/0872879b0e3b8c22982433737cfb00675c739b06))
+
 ### [2.5.1](https://github.com/KotRikD/tosu/compare/v2.5.0...v2.5.1) (2024-03-22)
 
 
