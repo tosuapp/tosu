@@ -1,6 +1,6 @@
 <p align="center">
   <img alt="Version" src="https://img.shields.io/github/release/KotRikD/tosu.svg?style=for-the-badge&color=%235686A2" />
-  <img src="https://img.shields.io/badge/node-%3E%3D18.14.2-45915E.svg?style=for-the-badge&logo=node.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/node-%3E%3D20.11.1-45915E.svg?style=for-the-badge&logo=node.js&logoColor=white" />
   <a href="https://github.com/KotRikD/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/KotRikD/tosu?style=for-the-badge&color=%23A27456" /></a>
   <a href="https://twitter.com/kotrik0" target="_blank"><img alt="Twitter: kotrik0" src="https://img.shields.io/badge/kotrik0-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" /></a>
 </p>
