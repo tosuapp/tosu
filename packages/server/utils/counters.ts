@@ -7,6 +7,7 @@ import {
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
+import semver from 'semver';
 
 import { getContentType } from '../utils';
 import {
@@ -62,7 +63,13 @@ export function parseTXT(filePath: string) {
         const line = content[i];
         const result = splitTextByIndex(line, ':');
         let [key, value] = result;
-        if (key == null || value == null) continue;
+        if (
+            key === null ||
+            value === null ||
+            key === undefined ||
+            value === undefined
+        )
+            continue;
         value = value.split('##')[0].replace(/\r/, '').replace(':', '');
 
         if (/[0-9 ]+x[ 0-9-]+/.test(value)) {
@@ -551,7 +558,13 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
                 return;
             }
 
-            const html = content.replace('{{LIST}}', build || emptyNotice);
+            let html = content.replace('{{LIST}}', build || emptyNotice);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
@@ -602,7 +615,13 @@ export async function buildExternalCounters(
                 return;
             }
 
-            const html = content.replace('{{LIST}}', build || noMoreCounters);
+            let html = content.replace('{{LIST}}', build || noMoreCounters);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
@@ -705,6 +724,37 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.preciseDataPollRate}`)
         );
 
+    const enableAutoUpdateHtml = settingsItemHTML
+        .replace('{NAME}', 'ENABLE_AUTOUPDATE')
+        .replace(
+            '{DESCRIPTION}',
+            'Enable checking and updating tosu on startup'
+        )
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{NAME}/gm, 'ENABLE_AUTOUPDATE')
+                .replace(
+                    '{ADDON}',
+                    config.enableAutoUpdate ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.enableAutoUpdate}`)
+        );
+
+    const openDashboardOnStartupHtml = settingsItemHTML
+        .replace('{NAME}', 'OPEN_DASHBOARD_ON_STARTUP')
+        .replace('{DESCRIPTION}', 'Open dashboard in browser on startup')
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{NAME}/gm, 'OPEN_DASHBOARD_ON_STARTUP')
+                .replace(
+                    '{ADDON}',
+                    config.openDashboardOnStartup ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.openDashboardOnStartup}`)
+        );
+
     const serverIPHTML = settingsItemHTML
         .replace('{NAME}', 'SERVER_IP')
         .replace('{DESCRIPTION}', 'The IP address for the API and WebSocket.')
@@ -742,6 +792,8 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const settings = `<div class="settings">
+    ${openDashboardOnStartupHtml}
+    ${enableAutoUpdateHtml}
     ${debugHTML}
     ${calculatePPHTML}
     ${enableKeyOverlayHTML}
@@ -768,7 +820,13 @@ export function buildSettings(res: http.ServerResponse) {
                 return;
             }
 
-            const html = content.replace('{{LIST}}', settings);
+            let html = content.replace('{{LIST}}', settings);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
@@ -804,7 +862,13 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 return;
             }
 
-            const html = content.replace('{{LIST}}', pageContent);
+            let html = content.replace('{{LIST}}', pageContent);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')

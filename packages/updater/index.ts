@@ -1,4 +1,5 @@
 import {
+    config,
     downloadFile,
     platformResolver,
     sleep,
@@ -31,7 +32,7 @@ const deleteNotLocked = async (filePath: string) => {
     }
 };
 
-export const autoUpdater = async () => {
+export const checkUpdates = async () => {
     wLogger.info('Checking updates');
 
     const { platformType } = platformResolver(process.platform);
@@ -41,7 +42,9 @@ export const autoUpdater = async () => {
             `Unsupported platform (${process.platform}). Unable to run updater`
         );
 
-        return;
+        return new Error(
+            `Unsupported platform (${process.platform}). Unable to run updater`
+        );
     }
 
     const request = await fetch(
@@ -58,9 +61,22 @@ export const autoUpdater = async () => {
     if (versionName === null) {
         wLogger.info(`Failed to check updates [${currentVersion}] `);
 
-        return 'exact';
+        return new Error('Version the same');
     }
 
+    config.currentVersion = currentVersion;
+    config.updateVersion = versionName;
+
+    return { assets, versionName, platformType };
+};
+
+export const autoUpdater = async () => {
+    const check = await checkUpdates();
+    if (check instanceof Error) {
+        return;
+    }
+
+    const { assets, versionName, platformType } = check;
     if (versionName.includes(currentVersion)) {
         wLogger.info(`You're using latest version [${currentVersion}] `);
 
@@ -72,7 +88,7 @@ export const autoUpdater = async () => {
             await deleteNotLocked(backupExecutablePath);
         }
 
-        return 'exact';
+        return;
     }
 
     const findAsset = assets.find(
@@ -91,7 +107,6 @@ export const autoUpdater = async () => {
     const currentExecutablePath = process.argv[0]; // Path to the current executable
 
     await fs.promises.rename(currentExecutablePath, backupExecutablePath);
-
     await unzip(downloadAsset, process.cwd());
 
     wLogger.info('Restarting program');

@@ -6,6 +6,7 @@ import {
     wLogger,
     writeConfig
 } from '@tosu/common';
+import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -337,6 +338,18 @@ export default function buildBaseApi(server: Server) {
             }
         }
     );
+
+    server.app.route('/api/runUpdates', 'GET', async (req, res) => {
+        try {
+            await autoUpdater();
+
+            sendJson(res, { result: 'updated' });
+        } catch (error) {
+            return sendJson(res, {
+                error: (error as any).message
+            });
+        }
+    });
 
     server.app.route('/api/settingsSave', 'POST', (req, res) => {
         let body: object;

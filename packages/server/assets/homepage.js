@@ -320,6 +320,8 @@ async function saveSettings(element) {
   const SERVER_IP = document.querySelector('#SERVER_IP');
   const SERVER_PORT = document.querySelector('#SERVER_PORT');
   const STATIC_FOLDER_PATH = document.querySelector('#STATIC_FOLDER_PATH');
+  const ENABLE_AUTOUPDATE = document.querySelector('#ENABLE_AUTOUPDATE');
+  const OPEN_DASHBOARD_ON_STARTUP = document.querySelector('#OPEN_DASHBOARD_ON_STARTUP');
 
   if (BACKUP_SERVER_IP != SERVER_IP.value || BACKUP_SERVER_PORT != SERVER_PORT.value)
     redirect = true;
@@ -329,6 +331,8 @@ async function saveSettings(element) {
     method: 'POST',
     body: JSON.stringify({
       DEBUG_LOG: DEBUG_LOG.checked,
+      ENABLE_AUTOUPDATE: ENABLE_AUTOUPDATE.checked,
+      OPEN_DASHBOARD_ON_STARTUP: OPEN_DASHBOARD_ON_STARTUP.checked,
       CALCULATE_PP: CALCULATE_PP.checked,
       ENABLE_KEY_OVERLAY: ENABLE_KEY_OVERLAY.checked,
       ENABLE_GOSU_OVERLAY: ENABLE_GOSU_OVERLAY.checked,
@@ -517,6 +521,49 @@ async function updateCounterSettings(element) {
   }, 300);
 };
 
+async function startUpdate(element) {
+  if (downloading.includes('updating-tosu')) return;
+  downloading.push('updating-tosu');
+  element.classList.add('loadong');
+
+  try {
+    const request = await fetch(`/api/runUpdates`, { method: "GET" });
+    const json = await request.json();
+    if (json.error != null) {
+      displayNotification({
+        element: element,
+        text: `Error while updating: ${json.error}`,
+        classes: ['red'],
+        delay: 3000,
+      });
+
+      element.classList.remove('loadong');
+      return;
+    };
+
+
+    displayNotification({
+      element: element,
+      text: `Update finished`,
+      classes: ['green'],
+      delay: 3000,
+    });
+
+
+    const find = downloading.indexOf('updating-tosu');
+    if (find >= -1) downloading.splice(find, 1);
+
+    element.classList.remove('loadong');
+    element.classList.add('fold');
+    
+    setTimeout(() => {
+      document.body.removeChild(element);
+    }, 400);
+  } catch (error) {
+    console.log(error);
+  };
+};
+
 
 
 search_bar.addEventListener('input', handleInput);
@@ -525,7 +572,6 @@ search_bar.addEventListener('keydown', handleInput);
 
 window.addEventListener('click', (event) => {
   const t = event.target;
-
 
   if (t?.classList.value.includes('dl-button')) {
     const id = t.attributes.l?.value;
@@ -555,6 +601,11 @@ window.addEventListener('click', (event) => {
   if (t?.classList.value.includes(' update-settings-button')) {
     startDownload(t);
     return updateCounterSettings(t);
+  };
+
+  if (t?.classList.value.includes('update-available')) {
+    startUpdate(t);
+    return;
   };
 
   if (t?.attributes.nf) return copyText(t);
