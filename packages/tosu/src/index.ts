@@ -1,6 +1,6 @@
-import { argumetsParser, wLogger, watchConfigFile } from '@tosu/common';
+import { argumetsParser, config, wLogger, watchConfigFile } from '@tosu/common';
 import { Server } from '@tosu/server';
-import { autoUpdater } from '@tosu/updater';
+import { autoUpdater, checkUpdates } from '@tosu/updater';
 
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
@@ -13,9 +13,13 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     const { update } = argumetsParser(process.argv);
     if (
         process.env.NODE_ENV !== 'development' &&
-        ((update !== null && update === true) || update === null)
+        ((update !== null && update === true) ||
+            update === null ||
+            config.enableAutoUpdate === true)
     ) {
         await autoUpdater();
+    } else {
+        await checkUpdates();
     }
 
     watchConfigFile({ httpServer, initial: true });

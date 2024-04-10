@@ -1,4 +1,5 @@
-import { wLogger } from '@tosu/common';
+import { config, wLogger } from '@tosu/common';
+import { exec } from 'child_process';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
 export interface ExtendedIncomingMessage extends IncomingMessage {
@@ -174,6 +175,26 @@ export class HttpServer {
         this.server.listen(port, hostname, () => {
             const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
             wLogger.info(`Web server started on http://${ip}:${port}`);
+
+            if (config.openDashboardOnStartup === true) {
+                const command =
+                    process.platform === 'win32'
+                        ? 'start'
+                        : process.platform === 'darwin'
+                          ? 'open'
+                          : 'xdg-open';
+
+                exec(
+                    `${command} http://${ip}:${port}`,
+                    (error, stdout, stderr) => {
+                        if (error || stderr) {
+                            return;
+                        }
+
+                        wLogger.info(`Web dashboard opened`);
+                    }
+                );
+            }
         });
     }
 }

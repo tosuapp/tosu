@@ -54,6 +54,9 @@ STATIC_FOLDER_PATH=./static`,
 dotenv.config({ path: configPath });
 
 export const config = {
+    enableAutoUpdate: (process.env.ENABLE_AUTOUPDATE || '') === 'true',
+    openDashboardOnStartup:
+        (process.env.OPEN_DASHBOARD_ON_STARTUP || '') === 'true',
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
     enableKeyOverlay: (process.env.ENABLE_KEY_OVERLAY || '') === 'true',
@@ -67,7 +70,9 @@ export const config = {
     serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
-    timestamp: 0
+    timestamp: 0,
+    currentVersion: '',
+    updateVersion: ''
 };
 
 export const updateConfigFile = () => {
@@ -118,6 +123,20 @@ export const updateConfigFile = () => {
         fs.appendFileSync(configPath, '\nENABLE_GOSU_OVERLAY=false', 'utf8');
     }
 
+    if (!process.env.ENABLE_AUTOUPDATE) {
+        newOptions += 'ENABLE_AUTOUPDATE, ';
+        fs.appendFileSync(configPath, '\nENABLE_AUTOUPDATE=true', 'utf8');
+    }
+
+    if (!process.env.OPEN_DASHBOARD_ON_STARTUP) {
+        newOptions += 'OPEN_DASHBOARD_ON_STARTUP, ';
+        fs.appendFileSync(
+            configPath,
+            '\nOPEN_DASHBOARD_ON_STARTUP=false',
+            'utf8'
+        );
+    }
+
     if (newOptions !== '') {
         wLogger.warn(`New options available in config: ${newOptions}\n`);
     }
@@ -161,6 +180,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         return;
     }
 
+    const enableAutoUpdate = (parsed.ENABLE_AUTOUPDATE || '') === 'true';
+    const openDashboard = (parsed.OPEN_DASHBOARD || '') === 'true';
     const debugLogging = (parsed.DEBUG_LOG || '') === 'true';
     const serverIP = parsed.SERVER_IP || '127.0.0.1';
     const serverPort = Number(parsed.SERVER_PORT || '24050');
@@ -175,6 +196,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 
     // determine whether config actually was updated or not
     updated =
+        config.enableAutoUpdate !== enableAutoUpdate ||
+        config.openDashboardOnStartup !== openDashboard ||
         config.debugLogging !== debugLogging ||
         config.calculatePP !== calculatePP ||
         config.enableKeyOverlay !== enableKeyOverlay ||
@@ -237,6 +260,16 @@ export const writeConfig = (httpServer: any, options: any) => {
     }\n\n`;
     text += `CALCULATE_PP=${
         options.CALCULATE_PP != null ? options.CALCULATE_PP : config.calculatePP
+    }\n\n`;
+    text += `ENABLE_AUTOUPDATE=${
+        options.ENABLE_AUTOUPDATE != null
+            ? options.ENABLE_AUTOUPDATE
+            : config.enableAutoUpdate
+    }\n`;
+    text += `OPEN_DASHBOARD_ON_STARTUP=${
+        options.OPEN_DASHBOARD_ON_STARTUP != null
+            ? options.OPEN_DASHBOARD_ON_STARTUP
+            : config.openDashboardOnStartup
     }\n\n`;
     text += `ENABLE_GOSU_OVERLAY=${
         options.ENABLE_GOSU_OVERLAY != null
