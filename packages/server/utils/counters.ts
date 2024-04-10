@@ -1,4 +1,9 @@
-import { config, recursiveFilesSearch, wLogger } from '@tosu/common';
+import {
+    JsonSaveParse,
+    config,
+    recursiveFilesSearch,
+    wLogger
+} from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -19,6 +24,7 @@ import {
     noMoreCounters,
     resultItemHTML,
     saveSettingsButtonHTML,
+    selectHTML,
     settingsItemHTML
 } from './htmls';
 
@@ -65,22 +71,239 @@ export function parseTXT(filePath: string) {
     }
 
     filePath = path.resolve(filePath);
-    const staticPath = path.resolve(config.staticFolderPath);
 
+    const staticPath = path.resolve(config.staticFolderPath);
     object.folderName = path
         .dirname(filePath.replace(staticPath, ''))
         .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
         .replace(/\\/gm, '/');
 
-    if (object.resolution) {
+    const settingsPath = path.join(
+        staticPath,
+        object.folderName,
+        'settings.json'
+    );
+    const settings = fs.existsSync(settingsPath)
+        ? JsonSaveParse(fs.readFileSync(settingsPath, 'utf8'), [])
+        : [];
+
+    if (object.resolution)
         object.resolution = object.resolution.map((r) => r.trim());
-    }
     if (object.authorlinks) object.authorlinks = object.authorlinks.split(',');
+
+    object.settings = Array.isArray(settings) ? settings : [];
 
     delete object.compatiblewith;
     delete object.usecase;
 
     return object;
+}
+
+export function parseSettings(
+    settingsPath: string,
+    settingsValuesPath: string,
+    folderName: string
+): string | Error {
+    const array:
+        | {
+              type:
+                  | 'text'
+                  | 'number'
+                  | 'checkbox'
+                  | 'options'
+                  | 'color'
+                  | 'note';
+              title: string;
+              description: string;
+              value: any;
+          }[]
+        | Error = JsonSaveParse(
+        fs.readFileSync(settingsPath, 'utf8'),
+        new Error('nothing')
+    );
+    if (array instanceof Error) {
+        return array;
+    }
+
+    if (!Array.isArray(array)) {
+        return new Error('settings.json is not array of objects');
+    }
+
+    const arrayValues: {
+        title: string;
+        value: any;
+    }[] = JsonSaveParse(fs.readFileSync(settingsValuesPath, 'utf8'), []);
+
+    let html = `<h2 class="ms-title"><span>Settings</span><span>«${folderName}»</span></h2><div class="m-scroll">`;
+    for (let i = 0; i < array.length; i++) {
+        const setting = array[i];
+
+        if (setting.title === undefined || setting.title === null) {
+            continue;
+        }
+
+        const value =
+            arrayValues.find((r) => r.title === setting.title)?.value ||
+            setting.value;
+
+        switch (setting.type) {
+            case 'text': {
+                html += settingsItemHTML
+                    .replace('{NAME}', setting.title)
+                    .replace('{DESCRIPTION}', setting.description)
+                    .replace(
+                        '{INPUT}',
+                        inputHTML
+                            .replace('{TYPE}', 'text')
+                            .replace(/{NAME}/gm, setting.title)
+                            .replace('{ADDON}', `ucs t="${setting.type}"`)
+                            .replace('{VALUE}', value)
+                    );
+
+                break;
+            }
+
+            case 'number': {
+                html += settingsItemHTML
+                    .replace('{NAME}', setting.title)
+                    .replace('{DESCRIPTION}', setting.description)
+                    .replace(
+                        '{INPUT}',
+                        inputHTML
+                            .replace('{TYPE}', 'number')
+                            .replace(/{NAME}/gm, setting.title)
+                            .replace('{ADDON}', `ucs t="${setting.type}"`)
+                            .replace('{VALUE}', value)
+                    );
+
+                break;
+            }
+
+            case 'checkbox': {
+                html += settingsItemHTML
+                    .replace('{NAME}', setting.title)
+                    .replace('{DESCRIPTION}', setting.description)
+                    .replace(
+                        '{INPUT}',
+                        checkboxHTML
+                            .replace('{TYPE}', 'text')
+                            .replace(/{NAME}/gm, setting.title)
+                            .replace(
+                                '{ADDON}',
+                                value
+                                    ? `ucs t="${setting.type}" checked="true"`
+                                    : `ucs t="${setting.type}"`
+                            )
+                            .replace('{VALUE}', `${value}`)
+                    );
+
+                break;
+            }
+
+            case 'color': {
+                html += settingsItemHTML
+                    .replace('{NAME}', setting.title)
+                    .replace('{DESCRIPTION}', setting.description)
+                    .replace(
+                        '{INPUT}',
+                        inputHTML
+                            .replace('{TYPE}', 'color')
+                            .replace(/{NAME}/gm, setting.title)
+                            .replace('{ADDON}', `ucs t="${setting.type}"`)
+                            .replace('{VALUE}', value)
+                    );
+
+                break;
+            }
+
+            case 'options': {
+                const options = Array.isArray(setting.value)
+                    ? setting.value
+                          .map((r) => `<option value="${r}">${r}</option>`)
+                          .join('\n')
+                    : '';
+                html += settingsItemHTML
+                    .replace('{NAME}', setting.title)
+                    .replace('{DESCRIPTION}', setting.description)
+                    .replace(
+                        '{INPUT}',
+                        selectHTML
+                            .replace(/{NAME}/gm, setting.title)
+                            .replace('{ADDON}', ``)
+                            .replace('{OPTIONS}', options)
+                    );
+                break;
+            }
+        }
+    }
+
+    html += '</div>'; // close scroll div
+
+    html += `<div class="ms-btns flexer si-btn">
+        <button class="button update-settings-button flexer" n="${folderName}"><span>Update settings</span></button>
+        <button class="button cancel-button flexer"><span>Cancel</span></button>
+    </div>`;
+    return html;
+}
+
+export function saveSettings(
+    settingsPath: string,
+    settingsValuesPath: string,
+    result: {
+        title: string;
+        value: any;
+    }[]
+) {
+    const array:
+        | {
+              uniqueID: number;
+              type: 'input' | 'checkbox' | 'options' | 'note';
+              title: string;
+              description: string;
+              value: any;
+          }[]
+        | Error = JsonSaveParse(
+        fs.readFileSync(settingsPath, 'utf8'),
+        new Error('nothing')
+    );
+    if (array instanceof Error) {
+        return array;
+    }
+
+    if (!Array.isArray(array)) {
+        return new Error('settings.json is not array of objects');
+    }
+
+    for (let i = 0; i < result.length; i++) {
+        const setting = result[i];
+
+        const find = array.findIndex((r) => r.title === setting.title);
+        if (find === -1) continue;
+
+        switch (array[find].type) {
+            case 'input': {
+                array[find].value = setting.value;
+                break;
+            }
+
+            case 'checkbox': {
+                array[find].value = Boolean(setting.value);
+                break;
+            }
+
+            default: {
+                array[find].value = setting.value;
+                break;
+            }
+        }
+    }
+
+    const values = array.map((r) => ({
+        title: r.title,
+        value: r.value
+    }));
+    fs.writeFileSync(settingsValuesPath, JSON.stringify(values), 'utf8');
+    return true;
 }
 
 function rebuildJSON({
@@ -94,6 +317,7 @@ function rebuildJSON({
         author: string;
         resolution: number[];
         authorlinks: string[];
+        settings: [];
 
         usecase?: string;
         compatiblewith?: string;
@@ -159,7 +383,8 @@ function rebuildJSON({
             .replace(
                 '{HEIGHT}',
                 item.resolution[1] === -1 ? '500px' : `${item.resolution[1]}px`
-            );
+            )
+            .replace('{NAME}', item.folderName);
 
         const metadata = metadataHTML
             .replace(
@@ -192,9 +417,15 @@ function rebuildJSON({
                     : item.resolution[1].toString()
             );
 
+        const settingsBtn =
+            item.settings.length > 0
+                ? `<button class="button settings-button flexer" n="${item.folderName}"><span>Settings</span></button>`
+                : '';
+
         const button = item.downloadLink
             ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
             : `<div class="buttons-group flexer indent-left">
+                ${settingsBtn}
                 <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
                 <button class="button delete-button flexer" n="${item.folderName}"><span>Delete</span></button>
             </div>`;
@@ -232,12 +463,14 @@ function getLocalCounters() {
             path.join(pkgRunningFolder, 'static');
 
         const countersListTXT = recursiveFilesSearch({
+            _ignoreFileName: 'ignore.txt',
             dir: staticPath,
             fileList: [],
             filename: 'metadata.txt'
         });
 
         const countersListHTML = recursiveFilesSearch({
+            _ignoreFileName: 'ignore.txt',
             dir: staticPath,
             fileList: [],
             filename: 'index.html'
@@ -255,6 +488,18 @@ function getLocalCounters() {
                 const nestedFolderPath = path.dirname(
                     r.replace(staticPath, '')
                 );
+                const folderName = nestedFolderPath
+                    .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
+                    .replace(/\\/gm, '/');
+
+                const settingsPath = path.join(
+                    staticPath,
+                    folderName,
+                    'settings.json'
+                );
+                const settings = fs.existsSync(settingsPath)
+                    ? JsonSaveParse(fs.readFileSync(settingsPath, 'utf8'), [])
+                    : [];
 
                 return {
                     folderName: nestedFolderPath
@@ -263,7 +508,8 @@ function getLocalCounters() {
                     name: path.basename(path.dirname(r)),
                     author: 'local',
                     resolution: [-2, '400'],
-                    authorlinks: []
+                    authorlinks: [],
+                    settings: Array.isArray(settings) ? settings : []
                 };
             });
 

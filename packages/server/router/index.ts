@@ -15,7 +15,9 @@ import {
     buildExternalCounters,
     buildInstructionLocal,
     buildLocalCounters,
-    buildSettings
+    buildSettings,
+    parseSettings,
+    saveSettings
 } from '../utils/counters';
 import { directoryWalker } from '../utils/directories';
 
@@ -211,6 +213,123 @@ export default function buildBaseApi(server: Server) {
                 return sendJson(res, {
                     status: 'deleted'
                 });
+            } catch (error) {
+                return sendJson(res, {
+                    error: (error as any).message
+                });
+            }
+        }
+    );
+
+    server.app.route(
+        /^\/api\/counters\/settings\/(?<name>.*)/,
+        'GET',
+        (req, res) => {
+            try {
+                const folderName = req.params.name;
+                if (!folderName) {
+                    return sendJson(res, {
+                        error: 'No folder name'
+                    });
+                }
+
+                const staticPath =
+                    config.staticFolderPath ||
+                    path.join(pkgRunningFolder, 'static');
+                const settingsPath = path.join(
+                    staticPath,
+                    decodeURI(folderName),
+                    'settings.json'
+                );
+                const settingsValuesPath = path.join(
+                    staticPath,
+                    decodeURI(folderName),
+                    'settings.values.json'
+                );
+
+                if (!fs.existsSync(settingsPath)) {
+                    return sendJson(res, {
+                        error: 'No settings.json'
+                    });
+                }
+
+                wLogger.info(`Settings accessed: ${folderName}`);
+
+                const html = parseSettings(
+                    settingsPath,
+                    settingsValuesPath,
+                    folderName
+                );
+                if (html instanceof Error) {
+                    return sendJson(res, {
+                        error: html
+                    });
+                }
+
+                return sendJson(res, { result: html });
+            } catch (error) {
+                return sendJson(res, {
+                    error: (error as any).message
+                });
+            }
+        }
+    );
+
+    server.app.route(
+        /^\/api\/counters\/settings\/(?<name>.*)/,
+        'POST',
+        (req, res) => {
+            let body: object;
+            try {
+                body = JSON.parse(req.body);
+            } catch (error) {
+                return sendJson(res, {
+                    error: (error as any).message
+                });
+            }
+
+            try {
+                const folderName = req.params.name;
+                if (!folderName) {
+                    return sendJson(res, {
+                        error: 'no folder name'
+                    });
+                }
+
+                const staticPath =
+                    config.staticFolderPath ||
+                    path.join(pkgRunningFolder, 'static');
+                const settingsPath = path.join(
+                    staticPath,
+                    decodeURI(folderName),
+                    'settings.json'
+                );
+                const settingsValuesPath = path.join(
+                    staticPath,
+                    decodeURI(folderName),
+                    'settings.values.json'
+                );
+
+                if (!fs.existsSync(settingsPath)) {
+                    return sendJson(res, {
+                        error: "Folder doesn't exists"
+                    });
+                }
+
+                wLogger.info(`Settings saved: ${folderName}`);
+
+                const html = saveSettings(
+                    settingsPath,
+                    settingsValuesPath,
+                    body as any
+                );
+                if (html instanceof Error) {
+                    return sendJson(res, {
+                        error: html
+                    });
+                }
+
+                return sendJson(res, { result: 'success' });
             } catch (error) {
                 return sendJson(res, {
                     error: (error as any).message

@@ -9,7 +9,9 @@ const tab = +(queryParams.get('tab') || 0);
 
 
 const search_bar = document.querySelector('.search-bar');
-let timer, isSearching = false;
+let timer;
+let isSearching = false;
+let isClosingModal = false;
 
 
 document.querySelector(`.tabs>.tab-item:nth-child(${+tab + 1})`)?.classList.add('active');
@@ -162,14 +164,14 @@ function displayNotification({ element, text, classes, delay }) {
   const size = div.getBoundingClientRect();
   div.classList.add('notification');
   div.classList.add('hidden');
-  div.classList.add(...classes);
+  if (Array.isArray(classes)) div.classList.add(...classes);
 
-  var targetRect = element.getBoundingClientRect();
-  var bodyRect = document.querySelector('main').getBoundingClientRect();
-  var leftOffset = targetRect.left - bodyRect.left;
-  var topOffset = targetRect.top - bodyRect.top;
-  var rightOffset = bodyRect.right - targetRect.right;
-  var bottomOffset = bodyRect.bottom - targetRect.bottom;
+  const targetRect = element.getBoundingClientRect();
+  const bodyRect = document.querySelector('main').getBoundingClientRect();
+  const leftOffset = targetRect.left - bodyRect.left;
+  const topOffset = targetRect.top - bodyRect.top;
+  const rightOffset = bodyRect.right - targetRect.right;
+  const bottomOffset = bodyRect.bottom - targetRect.bottom;
 
   const divSize = getSizeOfElement(div);
 
@@ -377,6 +379,145 @@ async function saveSettings(element) {
   }, 300);
 };
 
+function displayModal({ content, classes }) {
+  const div = document.createElement('div');
+  if (Array.isArray(classes)) div.classList.add(...classes);
+
+  div.classList.add('modal');
+  div.classList.add('hidden');
+
+
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('m-content');
+  wrapper.innerHTML = content;
+
+  div.appendChild(wrapper);
+
+  document.body.appendChild(div);
+
+  setTimeout(() => {
+    div.classList.remove('hidden');
+  }, 10);
+};
+
+function closeModal(event) {
+  const block = document.querySelector('.m-content');
+  if (!block || isClosingModal) return;
+
+  // Check if the clicked element is not inside the block
+  if (!block.contains(event?.target) || event == null) {
+    isClosingModal = true;
+
+    const modal = document.querySelector('.modal');
+    modal.classList.add('hidden');
+
+    setTimeout(() => {
+      document.body.removeChild(modal);
+      isClosingModal = false;
+    }, 601);
+  };
+};
+
+
+async function loadCounterSettings(element) {
+  const folderName = element.attributes.n?.value;
+
+  const download = await fetch(`/api/counters/settings/${folderName}`);
+  const json = await download.json();
+
+  if (json.error != null) {
+    displayNotification({
+      element: document.querySelector('.tab-item.active'),
+      text: `Error while loading settings: ${json.error}`,
+      classes: ['red'],
+      delay: 3000,
+    });
+
+    return;
+  };
+
+
+  displayModal({ content: json.result });
+};
+
+async function updateCounterSettings(element) {
+  if (downloading.includes('update-settings')) return;
+  downloading.push('update-settings');
+
+  const result = [];
+  const folderName = element.attributes.n?.value;
+
+  document.querySelectorAll('[ucs]').forEach((value, key) => {
+    const type = value.attributes.getNamedItem('t').value;
+    const obj = {
+      title: value.id,
+      value: value.value,
+    };
+
+    if (type == 'checkbox') obj.value = value.checked;
+
+    result.push(obj);
+  });
+
+  if (result.length == 0) {
+    displayNotification({
+      element: element,
+      text: `Nothing to save`,
+      classes: ['yellow'],
+      delay: 3000,
+    });
+
+
+    setTimeout(() => {
+      endDownload(element, 'update-settings', 'Update settings');
+      element.classList.remove('disable');
+    }, 300);
+    return;
+  };
+
+  const request = await fetch(`/api/counters/settings/${folderName}`, {
+    method: "POST",
+    body: JSON.stringify(result),
+  });
+  const json = await request.json();
+  if (json.error != null) {
+    displayNotification({
+      element: element,
+      text: `Error while saving: ${json.error}`,
+      classes: ['red'],
+      delay: 3000,
+    });
+
+    setTimeout(() => {
+      endDownload(element, 'save-settings', 'Save settings');
+      element.classList.remove('disable');
+    }, 300);
+    return;
+  };
+
+
+  displayNotification({
+    element: element,
+    text: `Settings updated: ${folderName}`,
+    classes: ['green'],
+    delay: 3000,
+  });
+
+  const iframe = document.querySelector(`iframe[n=${folderName}]`);
+  const url = iframe.src;
+
+  iframe.src = '';
+
+  setTimeout(() => {
+    endDownload(element, 'update-settings', 'Update settings');
+    element.classList.remove('disable');
+    iframe.src = url;
+
+    closeModal();
+  }, 300);
+};
+
+
 
 search_bar.addEventListener('input', handleInput);
 search_bar.addEventListener('keydown', handleInput);
@@ -384,7 +525,8 @@ search_bar.addEventListener('keydown', handleInput);
 
 window.addEventListener('click', (event) => {
   const t = event.target;
-  // if (t.classList.value.includes('tab-item')) return tabSwitch(t);
+
+
   if (t?.classList.value.includes('dl-button')) {
     const id = t.attributes.l?.value;
 
@@ -392,11 +534,44 @@ window.addEventListener('click', (event) => {
     downloadCounter(t, id);
     return
   };
-  if (t?.classList.value.includes('delete-button')) return deleteCounter(t);
-  if (t?.classList.value.includes('open-button')) return openCounter(t);
-  if (t?.classList.value.includes('save-button')) {
+  if (t?.classList.value.includes(' delete-button')) return deleteCounter(t);
+  if (t?.classList.value.includes(' open-button')) return openCounter(t);
+
+  if (t?.classList.value.includes(' save-button')) {
     startDownload(t);
     return saveSettings(t);
   };
+
+  if (t?.classList.value.includes(' settings-button')) {
+    loadCounterSettings(t);
+    return;
+  };
+
+  if (t?.classList.value.includes(' cancel-button')) {
+    closeModal(null);
+    return;
+  };
+
+  if (t?.classList.value.includes(' update-settings-button')) {
+    startDownload(t);
+    return updateCounterSettings(t);
+  };
+
   if (t?.attributes.nf) return copyText(t);
+});
+
+
+document.addEventListener('mousedown', function (event) {
+  if (event.button !== 0) return;
+  closeModal(event);
+});
+
+
+document.addEventListener('keydown', (event) => {
+  const key = event.code;
+
+  if (key == 'Escape') {
+    closeModal(null);
+    return;
+  };
 });
