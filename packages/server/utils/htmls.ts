@@ -13,7 +13,7 @@ export const noMoreCounters =
     '<div class="no-results">Nice job!<br />You downloaded all available pp counters</div>';
 
 export const iframeHTML =
-    '<iframe src="{URL}" width="{WIDTH}" height="{HEIGHT}" scrolling="no" frameborder="0"></iframe>';
+    '<iframe src="{URL}" width="{WIDTH}" height="{HEIGHT}" n="{NAME}" scrolling="no" frameborder="0"></iframe>';
 
 export const metadataHTML = `
 <div>URL: <span nf nft="url" nfv="{COPY_URL}" class="copyable">{TEXT_URL}</span></div>
@@ -59,6 +59,8 @@ export const checkboxHTML = `
 
 export const inputHTML =
     '<input type="{TYPE}" id="{NAME}" {ADDON} value="{VALUE}">';
+
+export const selectHTML = `<select id="{NAME}" {ADDON}>{OPTIONS}</select>`;
 
 export const saveSettingsButtonHTML =
     '<div class="flexer si-btn"><button class="button save-button flexer"><span>Save settings</span></button></div>';

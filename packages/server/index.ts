@@ -57,13 +57,13 @@ export class Server {
     }
 
     restartWS() {
-        this.WS_V1.stopLoop();
-        this.WS_V2.stopLoop();
-        this.WS_V2_PRECISE.stopLoop();
+        if (this.WS_V1) this.WS_V1.stopLoop();
+        if (this.WS_V2) this.WS_V2.stopLoop();
+        if (this.WS_V2_PRECISE) this.WS_V2_PRECISE.stopLoop();
 
-        this.WS_V1.startLoop();
-        this.WS_V2.startLoop();
-        this.WS_V2_PRECISE.startLoop();
+        if (this.WS_V1) this.WS_V1.startLoop();
+        if (this.WS_V2) this.WS_V2.startLoop();
+        if (this.WS_V2_PRECISE) this.WS_V2_PRECISE.startLoop();
     }
 
     middlrewares() {
