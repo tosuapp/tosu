@@ -46,8 +46,8 @@ jobs:
         with: { node-version: 20.11.1 }
 
       - name: 🛠️ - Install Rust
-        uses: ATiltedTree/setup-rust@v1
-        with: { rust-version: stable, components: clippy }
+        uses: moonrepo/setup-rust@v1
+        with: { components: clippy }
 
       - name: 🛠️ - Install Deps
         run: npm install -g pnpm@^8 && pnpm install --frozen-lockfile
