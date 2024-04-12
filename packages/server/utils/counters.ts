@@ -73,7 +73,7 @@ export function parseTXT(filePath: string) {
         value = value.split('##')[0].replace(/\r/, '').replace(':', '');
 
         if (/[0-9 ]+x[ 0-9-]+/.test(value)) {
-            object[key.toLowerCase()] = value.split('x');
+            object[key.toLowerCase()] = value.split(/x/i);
         } else object[key.toLowerCase()] = value.trim();
     }
 
