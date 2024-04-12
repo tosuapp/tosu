@@ -96,6 +96,7 @@ export function parseTXT(filePath: string) {
 
     if (object.resolution)
         object.resolution = object.resolution.map((r) => r.trim());
+    else object.resolution = ['Any', 'Any'];
     if (object.authorlinks) object.authorlinks = object.authorlinks.split(',');
 
     object.settings = Array.isArray(settings) ? settings : [];
@@ -403,25 +404,25 @@ function rebuildJSON({
                 '{COPY_X}',
                 item.resolution[0] === -1 || item.resolution[0] === -2
                     ? 'ANY'
-                    : item.resolution[0].toString()
+                    : item.resolution?.[0]?.toString()
             )
             .replace(
                 '{X}',
                 item.resolution[0] === -1 || item.resolution[0] === -2
                     ? 'ANY'
-                    : item.resolution[0].toString()
+                    : item.resolution?.[0]?.toString()
             )
             .replace(
                 '{COPY_Y}',
                 item.resolution[1] === -1 || item.resolution[1] === -2
                     ? 'ANY'
-                    : item.resolution[1].toString()
+                    : item.resolution?.[1]?.toString()
             )
             .replace(
                 '{Y}',
                 item.resolution[1] === -1 || item.resolution[1] === -2
                     ? 'ANY'
-                    : item.resolution[1].toString()
+                    : item.resolution?.[1]?.toString()
             );
 
         const settingsBtn =
