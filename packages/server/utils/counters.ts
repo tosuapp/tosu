@@ -548,27 +548,43 @@ export async function buildExternalCounters(
     res: http.ServerResponse,
     query?: string
 ) {
-    const request = await fetch(
-        'https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json'
-    );
-    const json: any = await request.json();
+    let text = '';
 
-    const exists = getLocalCounters();
-    const array = json.filter(
-        (r) => !exists.find((s) => s.name === r.name && s.author === r.author)
-    );
+    try {
+        const request = await fetch(
+            'https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json'
+        );
+        const json: any = await request.json();
 
-    const build = rebuildJSON({
-        array,
-        external: true,
-        query
-    });
+        const exists = getLocalCounters();
+        const array = json.filter(
+            (r) =>
+                !exists.find((s) => s.name === r.name && s.author === r.author)
+        );
 
-    if (query != null) {
-        res.writeHead(200, {
-            'Content-Type': getContentType('file.html')
+        const build = rebuildJSON({
+            array,
+            external: true,
+            query
         });
-        return res.end(build || emptyCounters);
+
+        if (query != null) {
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            return res.end(build || emptyCounters);
+        }
+
+        text = build;
+    } catch (error) {
+        if (query != null) {
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            return res.end((error as any).message || emptyCounters);
+        }
+
+        text = `Error: ${(error as any).message}`;
     }
 
     fs.readFile(
@@ -585,7 +601,7 @@ export async function buildExternalCounters(
                 return;
             }
 
-            let html = content.replace('{{LIST}}', build || noMoreCounters);
+            let html = content.replace('{{LIST}}', text || noMoreCounters);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
