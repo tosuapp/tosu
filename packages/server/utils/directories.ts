@@ -1,9 +1,13 @@
+import { config, wLogger } from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
 
 import { getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
+
+const pkgRunningFolder =
+    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
 
 export function directoryWalker({
     _htmlRedirect,
@@ -31,9 +35,11 @@ export function directoryWalker({
         return;
     }
     const contentType = getContentType(cleanedUrl);
-
     const filePath = path.join(folderPath, cleanedUrl);
+
     const isDirectory = path.extname(filePath) === '';
+    const isHTML = filePath.endsWith('.html');
+
     if (isDirectory) {
         return readDirectory(filePath, baseUrl, (html: Error | string) => {
             if (html instanceof Error) {
@@ -49,7 +55,7 @@ export function directoryWalker({
         });
     }
 
-    return fs.readFile(filePath, (err, content) => {
+    return fs.readFile(filePath, 'utf8', (err, content) => {
         if (err?.code === 'ENOENT' && _htmlRedirect === true) {
             return readDirectory(
                 filePath.replace('index.html', ''),
@@ -59,6 +65,10 @@ export function directoryWalker({
                         res.writeHead(404, { 'Content-Type': 'text/html' });
                         res.end('404 Not Found');
                         return;
+                    }
+
+                    if (isHTML === true) {
+                        html = addCounterMetadata(html, filePath);
                     }
 
                     res.writeHead(200, {
@@ -79,6 +89,10 @@ export function directoryWalker({
             res.writeHead(500);
             res.end(`Server Error: ${err.code}`);
             return;
+        }
+
+        if (isHTML === true) {
+            content = addCounterMetadata(content, filePath);
         }
 
         res.writeHead(200, { 'Content-Type': contentType });
@@ -110,4 +124,25 @@ export function readDirectory(
             )
         );
     });
+}
+
+export function addCounterMetadata(html: string, filePath: string) {
+    try {
+        const staticPath =
+            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
+
+        const counterPath = path
+            .dirname(filePath.replace(staticPath, ''))
+            .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
+            .replace(/\\/gm, '/');
+
+        html += `\n\n\n<script>\rwindow.COUNTER_PATH=\`${counterPath}\`\r</script>\n`;
+
+        return html;
+    } catch (error) {
+        wLogger.error((error as any).message);
+        wLogger.debug(error);
+
+        return '';
+    }
 }
