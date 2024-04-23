@@ -68,7 +68,9 @@ Features
 In-game overlay
 ---
 - To enable it, you need to edit `tosu.env`, and turn on `ENABLE_GOSU_OVERLAY=true` (make it equal `true`)
+- Tutorial: [link](https://github.com/KotRikD/tosu/wiki/How-to-enable-ingame-overlay)
 ---
+
 
 <br>
 
