@@ -10,6 +10,7 @@ import path from 'path';
 import semver from 'semver';
 
 import { getContentType } from '../utils';
+import { ICounter, ISettings } from './counters.types';
 import {
     authorHTML,
     authorLinksHTML,
@@ -95,8 +96,12 @@ export function parseTXT(filePath: string) {
         : [];
 
     if (object.resolution)
-        object.resolution = object.resolution.map((r) => r.trim());
+        object.resolution = object.resolution.map((r) => r.trim()) || [
+            'Any',
+            'Any'
+        ];
     else object.resolution = ['Any', 'Any'];
+
     if (object.authorlinks) object.authorlinks = object.authorlinks.split(',');
 
     object.settings = Array.isArray(settings) ? settings : [];
@@ -112,20 +117,7 @@ export function parseSettings(
     settingsValuesPath: string,
     folderName: string
 ): string | Error {
-    const array:
-        | {
-              type:
-                  | 'text'
-                  | 'number'
-                  | 'checkbox'
-                  | 'options'
-                  | 'color'
-                  | 'note';
-              title: string;
-              description: string;
-              value: any;
-          }[]
-        | Error = JsonSaveParse(
+    const array: ISettings[] | Error = JsonSaveParse(
         fs.readFileSync(settingsPath, 'utf8'),
         new Error('nothing')
     );
@@ -262,15 +254,7 @@ export function saveSettings(
         value: any;
     }[]
 ) {
-    const array:
-        | {
-              uniqueID: number;
-              type: 'input' | 'checkbox' | 'options' | 'note';
-              title: string;
-              description: string;
-              value: any;
-          }[]
-        | Error = JsonSaveParse(
+    const array: ISettings[] | Error = JsonSaveParse(
         fs.readFileSync(settingsPath, 'utf8'),
         new Error('nothing')
     );
@@ -289,8 +273,8 @@ export function saveSettings(
         if (find === -1) continue;
 
         switch (array[find].type) {
-            case 'input': {
-                array[find].value = setting.value;
+            case 'number': {
+                array[find].value = isNaN(setting.value) ? 0 : +setting.value;
                 break;
             }
 
@@ -319,22 +303,7 @@ function rebuildJSON({
     external,
     query
 }: {
-    array: {
-        folderName: string;
-        name: string;
-        author: string;
-        resolution: number[];
-        authorlinks: string[];
-        settings: [];
-
-        usecase?: string;
-        compatiblewith?: string;
-        assets?: {
-            type: string;
-            url: string;
-        }[];
-        downloadLink?: string;
-    }[];
+    array: ICounter[];
     external?: boolean;
     query?: string;
 }) {
@@ -404,25 +373,25 @@ function rebuildJSON({
                 '{COPY_X}',
                 item.resolution[0] === -1 || item.resolution[0] === -2
                     ? 'ANY'
-                    : item.resolution?.[0]?.toString()
+                    : item.resolution[0].toString()
             )
             .replace(
                 '{X}',
                 item.resolution[0] === -1 || item.resolution[0] === -2
                     ? 'ANY'
-                    : item.resolution?.[0]?.toString()
+                    : item.resolution[0].toString()
             )
             .replace(
                 '{COPY_Y}',
                 item.resolution[1] === -1 || item.resolution[1] === -2
                     ? 'ANY'
-                    : item.resolution?.[1]?.toString()
+                    : item.resolution[1].toString()
             )
             .replace(
                 '{Y}',
                 item.resolution[1] === -1 || item.resolution[1] === -2
                     ? 'ANY'
-                    : item.resolution?.[1]?.toString()
+                    : item.resolution[1].toString()
             );
 
         const settingsBtn =
@@ -518,7 +487,7 @@ function getLocalCounters() {
                     resolution: [-2, '400'],
                     authorlinks: [],
                     settings: Array.isArray(settings) ? settings : []
-                };
+                } as ICounter;
             });
 
         const array = countersListTXT.map((r) => parseTXT(r));

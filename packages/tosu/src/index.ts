@@ -11,12 +11,11 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     const httpServer = new Server({ instanceManager });
 
     const { update } = argumetsParser(process.argv);
-    if (
-        process.env.NODE_ENV !== 'development' &&
-        ((update !== null && update === true) ||
-            update === null ||
-            config.enableAutoUpdate === true)
-    ) {
+
+    const isDev = process.env.NODE_ENV !== 'development';
+    const isUpdateArg = (update !== null && update === true) || update === null;
+    const isConfigUpdate = config.enableAutoUpdate === true;
+    if (isDev && isUpdateArg && isConfigUpdate) {
         await autoUpdater();
     } else {
         await checkUpdates();

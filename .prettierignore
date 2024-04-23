@@ -2,5 +2,4 @@
 node_modules/
 dist/
 static/
-packages/server/assets/homepage.js
-packages/server/assets/homepage.min.css
+packages/server/assets/*
