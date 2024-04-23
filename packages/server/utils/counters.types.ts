@@ -1,6 +1,13 @@
 export interface ISettings {
     uniqueID?: number;
-    type: 'text' | 'number' | 'checkbox' | 'options' | 'color' | 'note';
+    type:
+        | 'text'
+        | 'number'
+        | 'password'
+        | 'checkbox'
+        | 'options'
+        | 'color'
+        | 'note';
     title: string;
     description: string;
     value: any;

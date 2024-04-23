@@ -179,6 +179,22 @@ export function parseSettings(
                 break;
             }
 
+            case 'password': {
+                html += settingsItemHTML
+                    .replace('{NAME}', setting.title)
+                    .replace('{DESCRIPTION}', setting.description)
+                    .replace(
+                        '{INPUT}',
+                        inputHTML
+                            .replace('{TYPE}', 'password')
+                            .replace(/{NAME}/gm, setting.title)
+                            .replace('{ADDON}', `ucs t="${setting.type}"`)
+                            .replace('{VALUE}', value)
+                    );
+
+                break;
+            }
+
             case 'checkbox': {
                 html += settingsItemHTML
                     .replace('{NAME}', setting.title)
