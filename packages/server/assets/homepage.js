@@ -116,7 +116,7 @@ async function downloadCounter(element, id) {
   const author = element.attributes.a?.value;
 
   const download = await fetch(`/api/counters/download/${url}?name=${name} by ${author}`);
-  let json = await download.json();
+  const json = await download.json();
 
   if (json.error != null) {
     if (typeof json.error == 'object') {
@@ -220,7 +220,7 @@ async function deleteCounter(element) {
 
 
   const download = await fetch(`/api/counters/delete/${folderName}`);
-  let json = await download.json();
+  const json = await download.json();
 
   if (json.error != null) {
     if (typeof json.error == 'object') {
@@ -264,7 +264,7 @@ async function openCounter(element) {
   const folderName = element.attributes.n?.value;
 
   const download = await fetch(`/api/counters/open/${folderName}`);
-  let json = await download.json();
+  const json = await download.json();
 
   if (json.error != null) {
     if (typeof json.error == 'object') {
@@ -361,7 +361,7 @@ async function saveSettings(element) {
       STATIC_FOLDER_PATH: STATIC_FOLDER_PATH.value,
     }),
   });
-  let json = await download.json();
+  const json = await download.json();
 
   if (json.error != null) {
     if (typeof json.error == 'object') {
@@ -452,7 +452,7 @@ async function loadCounterSettings(element) {
   const folderName = element.attributes.n?.value;
 
   const download = await fetch(`/api/counters/settings/${folderName}`);
-  let json = await download.json();
+  const json = await download.json();
 
   if (json.error != null) {
     if (typeof json.error == 'object') {
@@ -514,7 +514,7 @@ async function updateCounterSettings(element) {
     method: "POST",
     body: JSON.stringify(result),
   });
-  let json = await request.json();
+  const json = await request.json();
 
   if (json.error != null) {
     if (typeof json.error == 'object') {
@@ -566,7 +566,7 @@ async function startUpdate(element) {
 
   try {
     const request = await fetch(`/api/runUpdates`, { method: "GET" });
-    let json = await request.json();
+    const json = await request.json();
 
     if (json.error != null) {
       if (typeof json.error == 'object') {
