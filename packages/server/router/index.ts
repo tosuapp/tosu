@@ -1,7 +1,8 @@
 import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
 import {
-    config,
     downloadFile,
+    getCachePath,
+    getStaticPath,
     unzip,
     wLogger,
     writeConfig
@@ -26,9 +27,6 @@ const pkgAssetsPath =
     'pkg' in process
         ? path.join(__dirname, 'assets')
         : path.join(__filename, '../../../assets');
-
-const pkgRunningFolder =
-    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
@@ -78,10 +76,8 @@ export default function buildBaseApi(server: Server) {
                 });
             }
 
-            const cacheFolder = path.join(pkgRunningFolder, '.cache');
-            const staticPath =
-                config.staticFolderPath ||
-                path.join(pkgRunningFolder, 'static');
+            const cacheFolder = getCachePath();
+            const staticPath = getStaticPath();
             const folderPath = path.join(staticPath, decodeURI(folderName));
 
             const tempPath = path.join(cacheFolder, `${Date.now()}.zip`);
@@ -147,9 +143,7 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                const staticPath =
-                    config.staticFolderPath ||
-                    path.join(pkgRunningFolder, 'static');
+                const staticPath = getStaticPath();
                 const folderPath = path.join(staticPath, decodeURI(folderName));
 
                 if (!fs.existsSync(folderPath)) {
@@ -197,9 +191,7 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                const staticPath =
-                    config.staticFolderPath ||
-                    path.join(pkgRunningFolder, 'static');
+                const staticPath = getStaticPath();
                 const folderPath = path.join(staticPath, decodeURI(folderName));
 
                 if (!fs.existsSync(folderPath)) {
@@ -234,9 +226,7 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                const staticPath =
-                    config.staticFolderPath ||
-                    path.join(pkgRunningFolder, 'static');
+                const staticPath = getStaticPath();
                 const settingsPath = path.join(
                     staticPath,
                     decodeURI(folderName),
@@ -297,9 +287,7 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                const staticPath =
-                    config.staticFolderPath ||
-                    path.join(pkgRunningFolder, 'static');
+                const staticPath = getStaticPath();
                 const settingsPath = path.join(
                     staticPath,
                     decodeURI(folderName),
@@ -488,9 +476,7 @@ export default function buildBaseApi(server: Server) {
     server.app.route(/.*/, 'GET', (req, res) => {
         try {
             const url = req.pathname || '/';
-            const folderPath =
-                config.staticFolderPath ||
-                path.join(pkgRunningFolder, 'static');
+            const staticPath = getStaticPath();
 
             if (url === '/') {
                 if (req.query?.tab === '1') {
@@ -522,7 +508,7 @@ export default function buildBaseApi(server: Server) {
                 res,
                 baseUrl: url,
                 pathname: selectIndexHTML,
-                folderPath
+                folderPath: staticPath
             });
         } catch (error) {
             wLogger.debug(error);

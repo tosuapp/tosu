@@ -1,6 +1,7 @@
 import {
     JsonSaveParse,
     config,
+    getStaticPath,
     recursiveFilesSearch,
     wLogger
 } from '@tosu/common';
@@ -40,9 +41,6 @@ const pkgAssetsPath =
     'pkg' in process
         ? path.join(__dirname, 'assets')
         : path.join(__filename, '../../../assets');
-
-const pkgRunningFolder =
-    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
 
 function splitTextByIndex(text, letter) {
     const index = text.indexOf(letter);
@@ -453,9 +451,7 @@ function rebuildJSON({
 
 function getLocalCounters() {
     try {
-        const staticPath =
-            path.resolve(config.staticFolderPath) ||
-            path.join(pkgRunningFolder, 'static');
+        const staticPath = getStaticPath();
 
         const countersListTXT = recursiveFilesSearch({
             _ignoreFileName: 'ignore.txt',

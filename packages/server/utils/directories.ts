@@ -1,13 +1,10 @@
-import { config, wLogger } from '@tosu/common';
+import { getStaticPath, wLogger } from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
 
 import { getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
-
-const pkgRunningFolder =
-    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
 
 export function directoryWalker({
     _htmlRedirect,
@@ -128,8 +125,7 @@ export function readDirectory(
 
 export function addCounterMetadata(html: string, filePath: string) {
     try {
-        const staticPath =
-            config.staticFolderPath || path.join(pkgRunningFolder, 'static');
+        const staticPath = getStaticPath();
 
         const counterPath = path
             .dirname(filePath.replace(staticPath, ''))
