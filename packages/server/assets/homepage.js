@@ -116,9 +116,15 @@ async function downloadCounter(element, id) {
   const author = element.attributes.a?.value;
 
   const download = await fetch(`/api/counters/download/${url}?name=${name} by ${author}`);
-  const json = await download.json();
+  let json = await download.json();
 
   if (json.error != null) {
+    if (typeof json.error == 'object') {
+      try {
+        json.error = JSON.stringify(json.error);
+      } catch (error) { }
+    };
+
     displayNotification({
       element: element.parentElement.parentElement.parentElement,
       text: `Error while downloading: ${json.error}`,
@@ -214,9 +220,15 @@ async function deleteCounter(element) {
 
 
   const download = await fetch(`/api/counters/delete/${folderName}`);
-  const json = await download.json();
+  let json = await download.json();
 
   if (json.error != null) {
+    if (typeof json.error == 'object') {
+      try {
+        json.error = JSON.stringify(json.error);
+      } catch (error) { };
+    };
+
     displayNotification({
       element: element.parentElement.parentElement.parentElement,
       text: `Error while downloading: ${json.error}`,
@@ -252,9 +264,15 @@ async function openCounter(element) {
   const folderName = element.attributes.n?.value;
 
   const download = await fetch(`/api/counters/open/${folderName}`);
-  const json = await download.json();
+  let json = await download.json();
 
   if (json.error != null) {
+    if (typeof json.error == 'object') {
+      try {
+        json.error = JSON.stringify(json.error);
+      } catch (error) { };
+    };
+
     displayNotification({
       element: element.parentElement.parentElement.parentElement,
       text: `Error while opening: ${json.error}`,
@@ -343,8 +361,15 @@ async function saveSettings(element) {
       STATIC_FOLDER_PATH: STATIC_FOLDER_PATH.value,
     }),
   });
-  const json = await download.json();
+  let json = await download.json();
+
   if (json.error != null) {
+    if (typeof json.error == 'object') {
+      try {
+        json.error = JSON.stringify(json.error);
+      } catch (error) { };
+    };
+
     displayNotification({
       element: element.parentElement.parentElement.parentElement,
       text: `Error while opening: ${json.error}`,
@@ -427,9 +452,15 @@ async function loadCounterSettings(element) {
   const folderName = element.attributes.n?.value;
 
   const download = await fetch(`/api/counters/settings/${folderName}`);
-  const json = await download.json();
+  let json = await download.json();
 
   if (json.error != null) {
+    if (typeof json.error == 'object') {
+      try {
+        json.error = JSON.stringify(json.error);
+      } catch (error) { };
+    };
+
     displayNotification({
       element: document.querySelector('.tab-item.active'),
       text: `Error while loading settings: ${json.error}`,
@@ -483,8 +514,15 @@ async function updateCounterSettings(element) {
     method: "POST",
     body: JSON.stringify(result),
   });
-  const json = await request.json();
+  let json = await request.json();
+
   if (json.error != null) {
+    if (typeof json.error == 'object') {
+      try {
+        json.error = JSON.stringify(json.error);
+      } catch (error) { };
+    };
+
     displayNotification({
       element: element,
       text: `Error while saving: ${json.error}`,
@@ -528,8 +566,15 @@ async function startUpdate(element) {
 
   try {
     const request = await fetch(`/api/runUpdates`, { method: "GET" });
-    const json = await request.json();
+    let json = await request.json();
+
     if (json.error != null) {
+      if (typeof json.error == 'object') {
+        try {
+          json.error = JSON.stringify(json.error);
+        } catch (error) { };
+      };
+
       displayNotification({
         element: element,
         text: `Error while updating: ${json.error}`,
@@ -555,7 +600,7 @@ async function startUpdate(element) {
 
     element.classList.remove('loadong');
     element.classList.add('fold');
-    
+
     setTimeout(() => {
       document.body.removeChild(element);
     }, 400);

@@ -322,6 +322,8 @@ function rebuildJSON({
             }
         }
 
+        if (!Array.isArray(item.settings)) item.settings = [];
+
         const name = nameHTML.replace('{NAME}', item.name);
         const author = authorHTML.replace('{AUTHOR}', item.author);
 
@@ -577,6 +579,9 @@ export async function buildExternalCounters(
 
         text = build;
     } catch (error) {
+        wLogger.error((error as any).message);
+        wLogger.debug(error);
+
         if (query != null) {
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
