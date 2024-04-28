@@ -233,9 +233,10 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         enableGosuOverlay === true &&
         updated === true
     ) {
-        config.enableGosuOverlay = enableGosuOverlay;
         osuInstances[0].injectGameOverlay();
     }
+
+    config.enableGosuOverlay = enableGosuOverlay;
 
     config.debugLogging = debugLogging;
     config.calculatePP = calculatePP;
@@ -301,6 +302,7 @@ export const writeConfig = (httpServer: any, options: any) => {
             : config.staticFolderPath
     }\n`;
 
-    fs.writeFileSync(configPath, text, 'utf8');
-    refreshConfig(httpServer, true);
+    fs.writeFile(configPath, text, 'utf8', () => {
+        refreshConfig(httpServer, true);
+    });
 };

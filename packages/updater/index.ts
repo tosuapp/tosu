@@ -58,14 +58,15 @@ export const checkUpdates = async () => {
         name: string;
         assets: { name: string; browser_download_url: string }[];
     } = json;
+
+    config.currentVersion = currentVersion;
+    config.updateVersion = versionName || currentVersion;
+
     if (versionName === null) {
         wLogger.info(`Failed to check updates [${currentVersion}] `);
 
         return new Error('Version the same');
     }
-
-    config.currentVersion = currentVersion;
-    config.updateVersion = versionName;
 
     return { assets, versionName, platformType };
 };
