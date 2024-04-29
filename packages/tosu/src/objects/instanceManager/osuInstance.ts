@@ -45,14 +45,14 @@ const SCAN_PATTERNS: {
     settingsClassAddr: {
         pattern: '83 E0 20 85 C0 7E 2F'
     },
-    // configurationAddr: {
-    //     pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
-    //     offset: -0xd
-    // },
-    // bindingsAddr: {
-    //     pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
-    //     offset: 0x2a
-    // },
+    configurationAddr: {
+        pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
+        offset: -0xd
+    },
+    bindingsAddr: {
+        pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
+        offset: 0x2a
+    },
     rulesetsAddr: {
         pattern: '7D 15 A1 ?? ?? ?? ?? 85 C0'
     },

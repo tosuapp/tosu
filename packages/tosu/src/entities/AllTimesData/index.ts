@@ -25,8 +25,6 @@ export class AllTimesData extends AbstractEntity {
     ShowInterface: boolean = false;
     IsWatchingReplay: number = 0;
 
-    bindingNames = new Map();
-
     private configStateErrorAttempts: number = 0;
     private bindingStateErrorAttempts: number = 0;
 
@@ -322,63 +320,122 @@ export class AllTimesData extends AbstractEntity {
         }
     };
 
+    setConfigValue(
+        process: Process,
+        settings: Settings,
+        address: number,
+        position: number = 0
+    ) {
+        try {
+            const current =
+                process.readInt(address + 0x8) + 0x8 + 0x10 * position;
+            const keyAddress = process.readInt(current);
+
+            const key = process.readSharpString(keyAddress);
+            const bindable = process.readInt(current + 0x4);
+
+            let value: any;
+            switch (this.configList[key].type) {
+                case 'byte':
+                    value = process.readByte(bindable + 0xc);
+                    break;
+                case 'bool':
+                    value = Boolean(process.readByte(bindable + 0xc));
+                    break;
+                case 'int':
+                case 'double':
+                    value = process.readDouble(bindable + 0x4);
+                    break;
+                case 'string':
+                    value = process.readSharpString(
+                        process.readInt(current + 0x4)
+                    );
+                    break;
+                case 'bstring':
+                    value = process.readSharpString(
+                        process.readInt(bindable + 0x4)
+                    );
+                    break;
+                case 'enum':
+                    value = process.readInt(bindable + 0xc);
+                    break;
+                default:
+                    break;
+            }
+
+            if (value != null) {
+                // console.log(position, key, value);
+
+                this.configList[key].setValue(settings, value);
+            }
+        } catch (exc) {
+            wLogger.error("ATD(setConfigValue) Can't update config state");
+            wLogger.debug(exc);
+        }
+    }
+
+    setBindingValue(
+        process: Process,
+        settings: Settings,
+        address: number,
+        position: number = 0
+    ) {
+        try {
+            const current =
+                process.readInt(address + 0x8) + 0x8 + 0x10 * position;
+
+            const key = process.readInt(current);
+            const value = process.readInt(current + 0xc);
+
+            const bindable = this.bindingList[key];
+            if (bindable) {
+                // console.log(position, Bindings[key], VirtualKeyCode[value]);
+
+                bindable.setValue(settings, value);
+            }
+        } catch (exc) {
+            wLogger.error("ATD(setBindingValue) Can't update config state");
+            wLogger.debug(exc);
+        }
+    }
+
+    // preventSpamArray: (number | string)[] = [];
+
     updateConfigState(
         process: Process,
         settings: Settings,
         configurationAddr: number
     ) {
         try {
-            const rawSharpDictionary =
-                process.readSharpDictionary(configurationAddr);
-            for (let i = 0; i < rawSharpDictionary.length; i++) {
-                const current = rawSharpDictionary[i];
-                const keyAddress = process.readInt(current);
-                let key;
-                if (this.bindingNames.has(keyAddress)) {
-                    key = this.bindingNames.get(keyAddress);
-                } else {
-                    key = process.readSharpString(keyAddress);
-                    this.bindingNames.set(keyAddress, key);
-                }
-                const bindable = process.readInt(current + 0x4);
-
-                if (!(key in this.configList)) {
-                    continue;
-                }
-                let value: any;
-
-                switch (this.configList[key].type) {
-                    case 'byte':
-                        value = process.readByte(bindable + 0xc);
-                        break;
-                    case 'bool':
-                        value = Boolean(process.readByte(bindable + 0xc));
-                        break;
-                    case 'int':
-                    case 'double':
-                        value = process.readDouble(bindable + 0x4);
-                        break;
-                    case 'string':
-                        value = process.readSharpString(
-                            process.readInt(current + 0x4)
-                        );
-                        break;
-                    case 'bstring':
-                        value = process.readSharpString(
-                            process.readInt(bindable + 0x4)
-                        );
-                        break;
-                    case 'enum':
-                        value = process.readInt(bindable + 0xc);
-                        break;
-                    default:
-                        break;
-                }
-
-                if (value != null) {
-                    this.configList[key].setValue(settings, value);
-                }
+            const values = [
+                0, 18, 20, 21, 43, 44, 45, 53, 67, 68, 74, 78, 88, 89, 91, 92,
+                93, 94, 95, 100, 101, 102, 104, 110, 111, 116, 124, 125, 126,
+                130, 132, 134, 140, 144, 149, 158, 159, 233
+            ];
+            for (const position of values) {
+                this.setConfigValue(
+                    process,
+                    settings,
+                    configurationAddr,
+                    position
+                );
             }
+
+            // // KEEP AS THE REFERENCE TO POSITION OF THE VALUES
+            // const rawSharpDictionary = process.readSharpDictionary(configurationAddr);
+            // for (let i = 0; i < rawSharpDictionary.length; i++) {
+            //     const current = rawSharpDictionary[i];
+            //     const keyAddress = process.readInt(current);
+
+            //     const key = process.readSharpString(keyAddress);
+
+            //     if (key in this.configList || this.preventSpamArray.includes(key)) {
+            //         continue;
+            //     }
+
+            //     console.log(i, current, key);
+            //     this.preventSpamArray.push(key);
+            // }
 
             if (this.configStateErrorAttempts !== 0) {
                 this.configStateErrorAttempts = 0;
@@ -401,18 +458,31 @@ export class AllTimesData extends AbstractEntity {
         bindingConfigAddr: number
     ) {
         try {
-            const rawSharpDictionary =
-                process.readSharpDictionary(bindingConfigAddr);
-            for (let i = 0; i < rawSharpDictionary.length; i++) {
-                const current = rawSharpDictionary[i];
-                const key = process.readInt(current);
-                const value = process.readInt(current + 0xc);
-
-                const bindable = this.bindingList[key];
-                if (bindable) {
-                    bindable.setValue(settings, value);
-                }
+            const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 18];
+            for (const position of values) {
+                this.setBindingValue(
+                    process,
+                    settings,
+                    bindingConfigAddr,
+                    position
+                );
             }
+
+            // // KEEP AS THE REFERENCE TO POSITION OF VALUES
+            // const rawSharpDictionary = process.readSharpDictionary(bindingConfigAddr);
+            // for (let i = 0; i < rawSharpDictionary.length; i++) {
+            //     const current = rawSharpDictionary[i];
+            //     const key = process.readInt(current);
+            //     const value = process.readInt(current + 0xc);
+
+            //     if (key in this.bindingList || this.preventSpamArray.includes(key)) {
+            //         continue;
+            //     }
+            //     const bindable = Bindings[key];
+            //     console.log(i, current, bindable, key, value);
+
+            //     this.preventSpamArray.push(key);
+            // }
 
             if (this.bindingStateErrorAttempts !== 0) {
                 this.bindingStateErrorAttempts = 0;
@@ -431,9 +501,10 @@ export class AllTimesData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns } = this.services.getServices([
+            const { process, patterns, settings } = this.services.getServices([
                 'process',
-                'patterns'
+                'patterns',
+                'settings'
             ]);
 
             const {
@@ -443,7 +514,9 @@ export class AllTimesData extends AbstractEntity {
                 chatCheckerAddr,
                 skinDataAddr,
                 settingsClassAddr,
-                canRunSlowlyAddr
+                canRunSlowlyAddr,
+                configurationAddr,
+                bindingsAddr
                 // gameTimePtr,
             } = patterns.getPatterns([
                 'statusPtr',
@@ -452,7 +525,9 @@ export class AllTimesData extends AbstractEntity {
                 'chatCheckerAddr',
                 'skinDataAddr',
                 'settingsClassAddr',
-                'canRunSlowlyAddr'
+                'canRunSlowlyAddr',
+                'configurationAddr',
+                'bindingsAddr'
                 // 'gameTimePtr',
             ]);
 
@@ -496,17 +571,17 @@ export class AllTimesData extends AbstractEntity {
                 )
             );
 
-            // this.updateConfigState(
-            //     process,
-            //     settings,
-            //     process.readPointer(configurationAddr)
-            // );
+            this.updateConfigState(
+                process,
+                settings,
+                process.readPointer(configurationAddr)
+            );
 
-            // this.updateBindingState(
-            //     process,
-            //     settings,
-            //     process.readPointer(bindingsAddr)
-            // );
+            this.updateBindingState(
+                process,
+                settings,
+                process.readPointer(bindingsAddr)
+            );
         } catch (exc) {
             wLogger.error(`ATD(updateState) ${(exc as any).message}`);
             wLogger.debug(exc);
