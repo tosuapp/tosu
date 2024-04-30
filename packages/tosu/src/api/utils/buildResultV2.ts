@@ -161,10 +161,7 @@ export const buildResult = (
                 number: menuData.MenuGameMode,
                 name: Modes[menuData.MenuGameMode] || ''
             },
-            audio: {
-                ...settings.audio,
-                offset: settings.offset
-            },
+            audio: settings.audio,
             background: settings.background,
 
             keybinds: settings.keybinds
@@ -405,9 +402,9 @@ export const buildResult = (
             createdAt: resultsScreenData.Date
         },
         folders: {
-            game: settings.gameFolder,
-            skin: settings.skinFolder,
-            songs: settings.songsFolder,
+            game: allTimesData.GameFolder,
+            skin: allTimesData.SkinFolder,
+            songs: allTimesData.SongsFolder,
             beatmap: menuData.Folder
         },
         files: {
@@ -416,38 +413,14 @@ export const buildResult = (
             audio: menuData.AudioFilename
         },
         directPath: {
-            beatmapFile: path.join(
-                settings.gameFolder,
-                'Songs',
-                menuData.Folder,
-                menuData.Path
-            ),
+            beatmapFile: path.join(menuData.Folder, menuData.Path),
             beatmapBackground: path.join(
-                settings.gameFolder,
-                'Songs',
                 menuData.Folder,
                 menuData.BackgroundFilename
             ),
-            beatmapAudio: path.join(
-                settings.gameFolder,
-                'Songs',
-                menuData.Folder,
-                menuData.AudioFilename
-            ),
-            beatmapFolder: path.join(
-                settings.gameFolder,
-                'Songs',
-                menuData.Folder
-            ),
-            skinFolder: path.join(
-                settings.gameFolder,
-                'Skins',
-                settings.skinFolder
-            ),
-
-            collections: path.join(settings.gameFolder, 'collection.db'),
-            osudb: path.join(settings.gameFolder, 'osu!.db'),
-            scoresdb: path.join(settings.gameFolder, 'scores.db')
+            beatmapAudio: path.join(menuData.Folder, menuData.AudioFilename),
+            beatmapFolder: menuData.Folder,
+            skinFolder: allTimesData.SkinFolder
         },
 
         tourney: buildTourneyData(instanceManager)

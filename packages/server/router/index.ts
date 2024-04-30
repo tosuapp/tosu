@@ -435,15 +435,14 @@ export default function buildBaseApi(server: Server) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { settings, menuData } = osuInstance.entities.getServices([
-                'settings',
-                'menuData'
-            ]);
+            const { allTimesData, menuData } = osuInstance.entities.getServices(
+                ['allTimesData', 'menuData']
+            );
 
             const beatmapFilePath =
                 query.path ||
                 path.join(
-                    settings.gameFolder,
+                    allTimesData.GameFolder,
                     'Songs',
                     menuData.Folder,
                     menuData.Path

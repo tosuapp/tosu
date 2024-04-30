@@ -50,7 +50,6 @@ export const buildResult = (
     instanceManager: InstanceManager
 ): ApiAnswer => {
     const {
-        settings,
         bassDensityData,
         allTimesData,
         menuData,
@@ -59,7 +58,6 @@ export const buildResult = (
         beatmapPpData,
         userProfile
     } = service.getServices([
-        'settings',
         'bassDensityData',
         'allTimesData',
         'menuData',
@@ -78,9 +76,9 @@ export const buildResult = (
         settings: {
             showInterface: allTimesData.ShowInterface,
             folders: {
-                game: settings.gameFolder,
-                skin: settings.skinFolder,
-                songs: settings.songsFolder
+                game: allTimesData.GameFolder,
+                skin: allTimesData.SkinFolder,
+                songs: allTimesData.SongsFolder
             }
         },
         menu: {

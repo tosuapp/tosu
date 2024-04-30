@@ -1,3 +1,14 @@
+import {
+    Audio,
+    Background,
+    Client,
+    Cursor,
+    Keybinds,
+    Mania,
+    Mouse,
+    Resolution
+} from '@/utils/settings.types';
+
 export enum BeatmapStatuses {
     Graveyard = '-2',
     Wip = '-1',
@@ -198,41 +209,9 @@ export interface Skin {
     name: string;
 }
 
-export interface Cursor {
-    useSkinCursor: boolean;
-    autoSize: boolean;
-    size: number;
-}
-
-export interface Mouse {
-    rawInput: boolean;
-    disableButtons: boolean;
-    disableWheel: boolean;
-    sensitivity: number;
-}
-
-export interface Mania {
-    speedBPMScale: boolean;
-    usePerBeatmapSpeedScale: boolean;
-}
-
 export interface SettingsLeaderboard {
     visible: boolean;
     type: NumberName;
-}
-
-export interface Resolution {
-    fullscreen: boolean;
-    width: number;
-    height: number;
-    widthFullscreen: number;
-    heightFullscreen: number;
-}
-
-export interface Client {
-    updateAvailable: boolean;
-    branch: number;
-    version: string;
 }
 
 export interface ScoreMeter {
@@ -240,53 +219,10 @@ export interface ScoreMeter {
     size: number;
 }
 
-export interface Background {
-    storyboard: boolean;
-    video: boolean;
-    dim: number;
-}
-
-export interface Audio {
-    ignoreBeatmapSounds: boolean;
-    useSkinSamples: boolean;
-    volume: Volume;
-    offset: Offset;
-}
-
-export interface Offset {
-    universal: number;
-}
-
 export interface Volume {
     master: number;
     music: number;
     effect: number;
-}
-
-export interface Keybinds {
-    osu: Osu;
-    fruits: Fruits;
-    taiko: Taiko;
-    quickRetry: string;
-}
-
-export interface Osu {
-    k1: string;
-    k2: string;
-    smokeKey: string;
-}
-
-export interface Fruits {
-    k1: string;
-    k2: string;
-    Dash: string;
-}
-
-export interface Taiko {
-    innerLeft: string;
-    innerRight: string;
-    outerLeft: string;
-    outerRight: string;
 }
 
 export interface NumberName {
@@ -537,9 +473,6 @@ export interface DirectPath {
     beatmapAudio: string;
     beatmapFolder: string;
     skinFolder: string;
-    collections: string;
-    osudb: string;
-    scoresdb: string;
 }
 
 export interface Tourney {

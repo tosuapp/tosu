@@ -508,12 +508,12 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        const { settings, beatmapPpData } = this.services.getServices([
-            'settings',
+        const { allTimesData, beatmapPpData } = this.services.getServices([
+            'allTimesData',
             'beatmapPpData'
         ]);
 
-        if (!settings.gameFolder) {
+        if (!allTimesData.GameFolder) {
             wLogger.debug(
                 'GD(updateStarsAndPerformance) game folder not found'
             );

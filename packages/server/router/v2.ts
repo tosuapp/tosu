@@ -69,8 +69,10 @@ export default function buildV2Api({
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { settings } = osuInstance.entities.getServices(['settings']);
-            if (settings.songsFolder === '') {
+            const { allTimesData } = osuInstance.entities.getServices([
+                'allTimesData'
+            ]);
+            if (allTimesData.SongsFolder === '') {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
@@ -79,7 +81,7 @@ export default function buildV2Api({
                 res,
                 baseUrl: url,
                 pathname: req.params.filePath,
-                folderPath: settings.songsFolder
+                folderPath: allTimesData.SongsFolder
             });
         } catch (error) {
             wLogger.error((error as any).message);
@@ -101,19 +103,23 @@ export default function buildV2Api({
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { settings } = osuInstance.entities.getServices(['settings']);
+            const { allTimesData } = osuInstance.entities.getServices([
+                'allTimesData'
+            ]);
             if (
-                (settings.gameFolder === '' && settings.skinFolder === '') ||
-                (settings.gameFolder == null && settings.skinFolder == null)
+                (allTimesData.GameFolder === '' &&
+                    allTimesData.SkinFolder === '') ||
+                (allTimesData.GameFolder == null &&
+                    allTimesData.SkinFolder == null)
             ) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
 
             const folder = path.join(
-                settings.gameFolder,
+                allTimesData.GameFolder,
                 'Skins',
-                settings.skinFolder
+                allTimesData.SkinFolder
             );
             directoryWalker({
                 res,

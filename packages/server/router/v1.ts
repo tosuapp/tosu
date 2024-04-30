@@ -33,8 +33,10 @@ export default function buildV1Api({
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { settings } = osuInstance.entities.getServices(['settings']);
-            if (settings.songsFolder === '') {
+            const { allTimesData } = osuInstance.entities.getServices([
+                'allTimesData'
+            ]);
+            if (allTimesData.SongsFolder === '') {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
@@ -43,7 +45,7 @@ export default function buildV1Api({
                 res,
                 baseUrl: url,
                 pathname: req.params.filePath,
-                folderPath: settings.songsFolder
+                folderPath: allTimesData.SongsFolder
             });
         } catch (error) {
             wLogger.error((error as any).message);

@@ -193,14 +193,14 @@ export class BeatmapPPData extends AbstractEntity {
     updateMapMetadata(currentMods: number) {
         const startTime = performance.now();
 
-        const { menuData, settings } = this.services.getServices([
+        const { menuData, allTimesData } = this.services.getServices([
             'menuData',
-            'settings',
+            'allTimesData',
             'beatmapPpData'
         ]);
 
         const mapPath = path.join(
-            settings.songsFolder,
+            allTimesData.SongsFolder,
             menuData.Folder,
             menuData.Path
         );
