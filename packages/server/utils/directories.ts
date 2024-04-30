@@ -52,49 +52,53 @@ export function directoryWalker({
         });
     }
 
-    return fs.readFile(filePath, 'utf8', (err, content) => {
-        if (err?.code === 'ENOENT' && _htmlRedirect === true) {
-            return readDirectory(
-                filePath.replace('index.html', ''),
-                baseUrl,
-                (html: Error | string) => {
-                    if (html instanceof Error) {
-                        res.writeHead(404, { 'Content-Type': 'text/html' });
-                        res.end('404 Not Found');
-                        return;
+    return fs.readFile(
+        filePath,
+        isHTML === true ? 'utf8' : null,
+        (err, content) => {
+            if (err?.code === 'ENOENT' && _htmlRedirect === true) {
+                return readDirectory(
+                    filePath.replace('index.html', ''),
+                    baseUrl,
+                    (html: Error | string) => {
+                        if (html instanceof Error) {
+                            res.writeHead(404, { 'Content-Type': 'text/html' });
+                            res.end('404 Not Found');
+                            return;
+                        }
+
+                        if (isHTML === true) {
+                            html = addCounterMetadata(html, filePath);
+                        }
+
+                        res.writeHead(200, {
+                            'Content-Type': getContentType('file.html')
+                        });
+                        res.end(html);
                     }
+                );
+            }
 
-                    if (isHTML === true) {
-                        html = addCounterMetadata(html, filePath);
-                    }
+            if (err?.code === 'ENOENT') {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.end('404 Not Found');
+                return;
+            }
 
-                    res.writeHead(200, {
-                        'Content-Type': getContentType('file.html')
-                    });
-                    res.end(html);
-                }
-            );
+            if (err) {
+                res.writeHead(500);
+                res.end(`Server Error: ${err.code}`);
+                return;
+            }
+
+            if (isHTML === true) {
+                content = addCounterMetadata(content.toString(), filePath);
+            }
+
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content, 'utf-8');
         }
-
-        if (err?.code === 'ENOENT') {
-            res.writeHead(404, { 'Content-Type': 'text/html' });
-            res.end('404 Not Found');
-            return;
-        }
-
-        if (err) {
-            res.writeHead(500);
-            res.end(`Server Error: ${err.code}`);
-            return;
-        }
-
-        if (isHTML === true) {
-            content = addCounterMetadata(content, filePath);
-        }
-
-        res.writeHead(200, { 'Content-Type': contentType });
-        res.end(content, 'utf-8');
-    });
+    );
 }
 
 export function readDirectory(
