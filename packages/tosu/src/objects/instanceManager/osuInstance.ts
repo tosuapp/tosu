@@ -72,8 +72,8 @@ const SCAN_PATTERNS: {
         offset: 0x7
     },
     userProfilePtr: {
-        pattern: 'A1 ?? ?? ?? ?? 89 85 ?? ?? ?? ?? 6A 00 6A 00 8D 8D',
-        offset: 0x1
+        pattern: 'FF 15 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 48 54 33 D2',
+        offset: 0x7
     },
     rawLoginStatusPtr: {
         pattern: 'B8 0B 00 00 8B 35',
