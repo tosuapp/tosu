@@ -6,7 +6,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         rel="stylesheet">
 
-  <link rel="stylesheet" href="/homepage.min.css">
+  <link rel="stylesheet" href="/assets/homepage.min.css">
+  <link rel="stylesheet" href="/assets/icons/style.css">
   <title>tosu dashboard</title>
   <style>
 
@@ -15,15 +16,18 @@
 
 <body>
   <header class="flexer">
-    <a href="https://osuck.link/tosu" target="_blank" class="flexer github">
+    <a href="https://osuck.link/tosu" target="_blank" class="flexer">
+      <i class="icon-github"></i>
       github
     </a>
     <div>‧</div>
-    <a href="https://osuck.link/tosu-discord" target="_blank" class="flexer discord">
+    <a href="https://osuck.link/tosu-discord" target="_blank" class="flexer">
+      <i class="icon-discord"></i>
       discord
     </a>
     <a href="https://osuck.link/tosu-counter-submit" target="_blank" class="flexer indent-left sbmt">
       submit pp counter
+      <i class="icon-link"></i>
     </a>
   </header>
   <div class="update-available hidden">
@@ -32,9 +36,12 @@
   </div>
   <main>
     <div class="tabs flexer">
-      <a href="/?tab=0" class="tab-item">Installed</a>
+      <a href="/?tab=2" class="tab-item">
+        <i class="icon-settings"></i>
+        Settings
+      </a>
+      <a href="/?tab=0" class="indent-left tab-item">Installed</a>
       <a href="/?tab=1" class="tab-item">Available</a>
-      <a href="/?tab=2" class="tab-item">Settings</a>
       <a href="/?tab=3" class="tab-item">How to add counter</a>
       <div class="indent-left">
         <input class="search-bar" type="text" placeholder="search">
@@ -48,7 +55,7 @@
   <footer>
     <span>created by </span><a href="https://osuck.net/" target="_blank">cyperdark</a>
   </footer>
-  <script src="/homepage.js" defer></script>
+  <script src="/assets/homepage.js" defer></script>
 </body>
 
 
