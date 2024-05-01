@@ -12,7 +12,7 @@ import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-import { Server, getContentType, sendJson } from '../index';
+import { Server, sendJson } from '../index';
 import {
     buildExternalCounters,
     buildInstructionLocal,
@@ -22,11 +22,6 @@ import {
     saveSettings
 } from '../utils/counters';
 import { directoryWalker } from '../utils/directories';
-
-const pkgAssetsPath =
-    'pkg' in process
-        ? path.join(__dirname, 'assets')
-        : path.join(__filename, '../../../assets');
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
@@ -95,7 +90,7 @@ export default function buildBaseApi(server: Server) {
                     unzip(result, folderPath)
                         .then(() => {
                             wLogger.info(
-                                `PP Counter downloaded: ${folderName}`
+                                `PP Counter downloaded: ${folderName} (${req.headers.referer})`
                             );
                             fs.unlinkSync(tempPath);
 
@@ -156,7 +151,9 @@ export default function buildBaseApi(server: Server) {
                 // mac exec(`open "${path}"`, (err, stdout, stderr) => {
                 // linux exec(`xdg-open "${path}"`, (err, stdout, stderr) => {
 
-                wLogger.info(`PP Counter opened: ${folderName}`);
+                wLogger.info(
+                    `PP Counter opened: ${folderName} (${req.headers.referer})`
+                );
 
                 exec(`start "" "${folderPath}"`, (err) => {
                     if (err) {
@@ -200,7 +197,9 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                wLogger.info(`PP Counter removed: ${folderName}`);
+                wLogger.info(
+                    `PP Counter removed: ${folderName} (${req.headers.referer})`
+                );
 
                 fs.rmSync(folderPath, { recursive: true, force: true });
                 return sendJson(res, {
@@ -244,7 +243,9 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                wLogger.info(`Settings accessed: ${folderName}`);
+                wLogger.info(
+                    `Settings accessed: ${folderName} (${req.headers.referer})`
+                );
 
                 const html = parseSettings(
                     settingsPath,
@@ -299,13 +300,27 @@ export default function buildBaseApi(server: Server) {
                     'settings.values.json'
                 );
 
+                if (req.query.update === 'yes') {
+                    wLogger.info(
+                        `Settings updated: ${folderName} (${req.headers.referer})`
+                    );
+
+                    fs.writeFileSync(
+                        settingsPath,
+                        JSON.stringify(body),
+                        'utf8'
+                    );
+                }
+
                 if (!fs.existsSync(settingsPath)) {
                     return sendJson(res, {
-                        error: "Folder doesn't exists"
+                        error: "Settings doesn't exists"
                     });
                 }
 
-                wLogger.info(`Settings saved: ${folderName}`);
+                wLogger.info(
+                    `Settings saved: ${folderName} (${req.headers.referer})`
+                );
 
                 const html = saveSettings(
                     settingsPath,
@@ -354,75 +369,6 @@ export default function buildBaseApi(server: Server) {
         sendJson(res, {
             status: 'updated'
         });
-    });
-
-    server.app.route(/^\/images\/(?<filePath>.*)/, 'GET', (req, res) => {
-        fs.readFile(
-            path.join(pkgAssetsPath, 'images', req.params.filePath),
-            (err, content) => {
-                if (err) {
-                    wLogger.debug(err);
-                    res.writeHead(404, {
-                        'Content-Type': 'text/html'
-                    });
-
-                    res.end('<html>page not found</html>');
-                    return;
-                }
-
-                res.writeHead(200, {
-                    'Content-Type': getContentType(req.params.filePath)
-                });
-
-                res.end(content);
-            }
-        );
-    });
-
-    server.app.route('/homepage.min.css', 'GET', (req, res) => {
-        fs.readFile(
-            path.join(pkgAssetsPath, 'homepage.min.css'),
-            'utf8',
-            (err, content) => {
-                if (err) {
-                    wLogger.debug(err);
-                    res.writeHead(404, {
-                        'Content-Type': 'text/html'
-                    });
-
-                    res.end('<html>page not found</html>');
-                    return;
-                }
-
-                res.writeHead(200, {
-                    'Content-Type': getContentType('homepage.min.css')
-                });
-                res.end(content);
-            }
-        );
-    });
-
-    server.app.route('/homepage.js', 'GET', (req, res) => {
-        fs.readFile(
-            path.join(pkgAssetsPath, 'homepage.js'),
-            'utf8',
-            (err, content) => {
-                if (err) {
-                    wLogger.debug(err);
-                    res.writeHead(404, {
-                        'Content-Type': 'text/html'
-                    });
-
-                    res.end('<html>page not found</html>');
-                    return;
-                }
-
-                res.writeHead(200, {
-                    'Content-Type': getContentType('homepage.js')
-                });
-                res.end(content);
-            }
-        );
     });
 
     server.app.route('/api/calculate/pp', 'GET', (req, res) => {

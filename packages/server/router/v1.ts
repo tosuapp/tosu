@@ -1,28 +1,9 @@
 import { wLogger } from '@tosu/common';
 
-import { HttpServer, Websocket, sendJson } from '../index';
+import { HttpServer, sendJson } from '../index';
 import { directoryWalker } from '../utils/directories';
 
-export default function buildV1Api({
-    app,
-    websocket
-}: {
-    app: HttpServer;
-    websocket: Websocket;
-}) {
-    app.server.on('upgrade', function (request, socket, head) {
-        if (request.url === '/ws') {
-            websocket.socket.handleUpgrade(
-                request,
-                socket,
-                head,
-                function (ws) {
-                    websocket.socket.emit('connection', ws, request);
-                }
-            );
-        }
-    });
-
+export default function buildV1Api(app: HttpServer) {
     app.route(/^\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
         try {
             const url = req.pathname || '/';

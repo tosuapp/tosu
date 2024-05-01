@@ -1,17 +1,21 @@
 export interface ISettings {
-    uniqueID?: number;
-    type:
-        | 'text'
-        | 'number'
-        | 'password'
-        | 'checkbox'
-        | 'options'
-        | 'color'
-        | 'note';
+    type: ISettingsType;
     title: string;
+    options?: any[];
     description: string;
     value: any;
 }
+
+export type ISettingsCompact = { [key: string]: any };
+
+export type ISettingsType =
+    | 'text'
+    | 'number'
+    | 'password'
+    | 'checkbox'
+    | 'options'
+    | 'color'
+    | 'note';
 
 export interface ICounter {
     folderName: string;

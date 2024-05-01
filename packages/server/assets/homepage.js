@@ -9,12 +9,20 @@ const tab = +(queryParams.get('tab') || 0);
 
 
 const search_bar = document.querySelector('.search-bar');
+
+let selectedCounter = '';
 let timer;
+
 let isSearching = false;
 let isClosingModal = false;
+let isBuilderModal = false;
 
 
-document.querySelector(`.tabs>.tab-item:nth-child(${+tab + 1})`)?.classList.add('active');
+document.querySelectorAll(`.tabs>.tab-item`).forEach(r => {
+  if (!r.href.includes(`?tab=${tab}`)) return;
+
+  r.classList.add('active');
+});
 
 
 function getSizeOfElement(div) {
@@ -213,7 +221,7 @@ function copyText(element) {
 }
 
 async function deleteCounter(element) {
-  const folderName = element.attributes.n?.value;
+  const folderName = decodeURI(element.attributes.n?.value || '');
 
   let isDelete = confirm(`Do you want to delete?: ${folderName}`);
   if (isDelete != true) return;
@@ -261,7 +269,7 @@ async function deleteCounter(element) {
 };
 
 async function openCounter(element) {
-  const folderName = element.attributes.n?.value;
+  const folderName = decodeURI(element.attributes.n?.value || '');
 
   const download = await fetch(`/api/counters/open/${folderName}`);
   const json = await download.json();
@@ -301,7 +309,7 @@ function handleInput() {
 
 function handleKeyDown(event) {
   if (event.keyCode === 13) {
-    startSearch();
+    startSearch(event);
   };
 }
 
@@ -317,6 +325,12 @@ async function startSearch(search) {
     document.querySelector('.results').innerHTML = response;
   } catch (error) {
     console.error(error);
+    displayNotification({
+      element: search,
+      text: `Error while search: ${error.name}`,
+      classes: ['red'],
+      delay: 3000,
+    });
   };
 
   search_bar.classList.remove('disable');
@@ -433,8 +447,21 @@ function closeModal(event) {
   const block = document.querySelector('.m-content');
   if (!block || isClosingModal) return;
 
+
   // Check if the clicked element is not inside the block
   if (!block.contains(event?.target) || event == null) {
+    if (isBuilderModal == true) {
+      const modal = document.querySelector('.modal');
+      modal.classList.add('-expand');
+
+      setTimeout(() => {
+
+        modal.classList.remove('-expand');
+      }, 150);
+      return;
+    };
+
+
     isClosingModal = true;
 
     const modal = document.querySelector('.modal');
@@ -449,7 +476,7 @@ function closeModal(event) {
 
 
 async function loadCounterSettings(element) {
-  const folderName = element.attributes.n?.value;
+  const folderName = decodeURI(element.attributes.n?.value || '');
 
   const download = await fetch(`/api/counters/settings/${folderName}`);
   const json = await download.json();
@@ -480,7 +507,7 @@ async function updateCounterSettings(element) {
   downloading.push('update-settings');
 
   const result = [];
-  const folderName = element.attributes.n?.value;
+  const folderName = decodeURI(element.attributes.n?.value || '');
 
   document.querySelectorAll('[ucs]').forEach((value, key) => {
     const type = value.attributes.getNamedItem('t').value;
@@ -545,17 +572,17 @@ async function updateCounterSettings(element) {
     delay: 3000,
   });
 
-  const iframe = document.querySelector(`iframe[n=${folderName}]`);
-  const url = iframe.src;
+  // const iframe = document.querySelector(`iframe[n="${folderName}"]`);
+  // const url = iframe.src;
 
-  iframe.src = '';
+  // iframe.src = '';
 
   setTimeout(() => {
     endDownload(element, 'update-settings', 'Update settings');
     element.classList.remove('disable');
-    iframe.src = url;
+    // iframe.src = url;
 
-    closeModal();
+    // closeModal();
   }, 300);
 };
 
@@ -606,7 +633,407 @@ async function startUpdate(element) {
     }, 400);
   } catch (error) {
     console.log(error);
+    displayNotification({
+      element: element,
+      text: `Error while updating: ${error.name}`,
+      classes: ['red'],
+      delay: 3000,
+    });
   };
+};
+
+
+// {/* <div class="si flexer">
+//   <div>
+//     <h4>Unique id</h4>
+//     <p>it's shouldn't repeat</p>
+//   </div>
+//   <input type="text" id="{ID}_unique_id" value="{VALUE}">
+// </div> */}
+const optionHTML = `
+<div id="{ID}" class="sbi">
+  <div class="si flexer">
+    <div{as}>
+      <h4>Type</h4>
+    </div>
+    <select class="{class}" id="{ID}___type">
+      <option {text_SELECTED} value="text">Text</option>
+      <option {number_SELECTED} value="number">Number</option>
+      <option {password_SELECTED} value="password">Password</option>
+      <option {checkbox_SELECTED} value="checkbox">Checkbox</option>
+      <option {options_SELECTED} value="options">Options list</option>
+    </select>
+  </div>
+  <div class="si flexer">
+    <div{as}>
+      <h4>Title</h4>
+    </div>
+    <input type="text" class="{class}" id="{ID}___title" value="{TITLE_VALUE}">
+  </div>
+  <div class="si flexer">
+    <div{as}>
+      <h4>Description</h4>
+      <p></p>
+    </div>
+    <input type="text" class="{class}" id="{ID}___description" value="{DESCRIPTION_VALUE}">
+  </div>
+  <div class="si flexer" {OPTIONS}>
+    <div{as}>
+      <h4>Options</h4>
+      <p>List of options separated by comma</p>
+    </div>
+    <input type="text" class="{class}" id="{ID}___options" value="{OPTIONS_VALUE}">
+  </div>
+  <div class="si flexer">
+    <div{as}>
+      <h4>Default value</h4>
+    </div>
+    <input type="text" class="{class}" id="{ID}___value" value="{VALUE}">
+  </div>
+  {BUTTONS}
+</div>
+`
+
+async function startBuilderModal(element) {
+  console.log('startBuilderModal', element);
+  const folderName = decodeURI(element.attributes.n?.value || '');
+
+  let html = '';
+  let json = '';
+
+  selectedCounter = folderName;
+
+  try {
+    const download = await fetch(`${window.location.origin}/${folderName}/settings.json`);
+    json = await download.json();
+  } catch (error) { };
+
+
+  const header = `<h2 class="ms-title"><span>Settings Builder</span><span>«${folderName}»</span></h2>`;
+  const buttons = `<div class="ms-btns flexer si-btn">
+        <button class="button update-x2-settings-button flexer" n="${folderName}"><span>Update settings</span></button>
+        <button class="button cancel-button flexer"><span>Cancel</span></button>
+    </div>`;
+
+
+  const new_item = optionHTML
+    .replace(/{BUTTONS}/gm, '')
+    .replace(/{class}/gm, '')
+    .replace(/{as}/gm, '')
+    .replace(/{ID}/gm, 'new')
+    .replace("{TITLE_VALUE}", '')
+    .replace("{DESCRIPTION_VALUE}", '')
+    .replace("{OPTIONS}", 'style="display:none;"')
+    .replace("{OPTIONS_VALUE}", '')
+    .replace("{VALUE}", '')
+    .replace(/{text_SELECTED}/gm, '')
+    .replace(/{number_SELECTED}/gm, '')
+    .replace(/{password_SELECTED}/gm, '')
+    .replace(/{checkbox_SELECTED}/gm, '')
+    .replace(/{options_SELECTED}/gm, '');
+
+  if (json.error == null) {
+    for (let i = 0; i < json.length; i++) {
+      const option = json[i];
+
+      html += optionHTML
+        .replace(/{BUTTONS}/gm, `
+        <div class="oab flexer">
+          <button id="${option.title}" class="button remove-option-button flexer"><span>Remove option</span></button>
+        </div>`)
+        .replace(/{class}/gm, 'OPTION')
+        .replace(/{as}/gm, ' style="width: 10em"')
+        .replace(/{ID}/gm, option.title)
+        .replace("{TITLE_VALUE}", option.title)
+        .replace("{DESCRIPTION_VALUE}", option.description)
+        .replace("{OPTIONS}", option.type == 'options' ? '' : 'style="display:none;"')
+        .replace("{OPTIONS_VALUE}", Array.isArray(option.options) ? option.options.join(',') : option.options)
+        .replace("{VALUE}", option.value)
+        .replace(/{text_SELECTED}/gm, option.type == 'text' ? `selected="selected"` : '')
+        .replace(/{number_SELECTED}/gm, option.type == 'number' ? `selected="selected"` : '')
+        .replace(/{password_SELECTED}/gm, option.type == 'password' ? `selected="selected"` : '')
+        .replace(/{checkbox_SELECTED}/gm, option.type == 'checkbox' ? `selected="selected"` : '')
+        .replace(/{options_SELECTED}/gm, option.type == 'options' ? `selected="selected"` : '');
+
+      // if (i != json.length - 1)
+      //   html += '\n<hr class="modal-space">\n'
+    };
+  };
+
+
+  const scroll = `
+  <div class="m-scroll">
+    <div class="new-item">
+      ${new_item}
+      <div class="ms-btns flexer si-btn">
+        <button class="button add-option-button flexer" n="${folderName}"><span>Add new option</span></button>
+      </div>
+    </div>
+    ${html}
+  </div>`;
+
+  isBuilderModal = true;
+  displayModal({ content: `${header}${scroll}${buttons}` });
+  return;
+};
+
+
+async function builderNewOption(element) {
+  const content = document.querySelector('.m-scroll');
+  if (!content) {
+    return;
+  };
+
+  if (downloading.includes('add-option')) return;
+  downloading.push('add-option');
+
+  const button_text = element.innerText;
+  startDownload(element);
+
+
+  const type = document.getElementById('new___type');
+  const title = document.getElementById('new___title');
+  const description = document.getElementById('new___description');
+  const options = document.getElementById('new___options');
+  const default_value = document.getElementById('new___value');
+
+  const payload = {
+    setting: {
+      type: type.value,
+      title: title.value,
+      description: description.value,
+      options: options.value,
+      value: default_value.value,
+    },
+    value: default_value.value,
+  };
+
+
+  try {
+    if (payload.setting.title == '') {
+      displayNotification({
+        element: element,
+        text: `Specify title`,
+        classes: ['red'],
+        delay: 3000,
+      });
+      return;
+    };
+
+    if (payload.value == '') {
+      displayNotification({
+        element: element,
+        text: `Specify default value`,
+        classes: ['red'],
+        delay: 3000,
+      });
+      return;
+    };
+
+    if (payload.setting.type == 'options') {
+      const toArray = (payload.setting.options || '')
+        .split(',')
+        .filter(r => r);
+
+      if (toArray.length <= 1) {
+        displayNotification({
+          element: element,
+          text: `Specify at least two options to choose`,
+          classes: ['red'],
+          delay: 3000,
+        });
+        return;
+      };
+    };
+
+    let isExists = document.querySelector(`#${payload.setting.title}___title`);
+    if (isExists) {
+      displayNotification({
+        element: element,
+        text: `Option with this title already exists`,
+        classes: ['red'],
+        delay: 3000,
+      });
+      return;
+    };
+
+    const html = optionHTML
+      .replace(/{BUTTONS}/gm, `
+        <div class="oab flexer">
+          <button id="${payload.setting.title}" class="button remove-option-button flexer"><span>Remove option</span></button>
+        </div>`)
+      .replace(/{class}/gm, 'OPTION')
+      .replace(/{as}/gm, ' style="width: 10em"')
+      .replace(/{ID}/gm, payload.setting.title)
+      .replace("{TITLE_VALUE}", payload.setting.title)
+      .replace("{DESCRIPTION_VALUE}", payload.setting.description)
+      .replace("{OPTIONS}", payload.setting.type == 'options' ? '' : 'style="display:none;"')
+      .replace("{OPTIONS_VALUE}", Array.isArray(payload.setting.options) ? payload.setting.options.join(',') : payload.setting.options)
+      .replace("{VALUE}", payload.value)
+      .replace(/{text_SELECTED}/gm, payload.setting.type == 'text' ? `selected="selected"` : '')
+      .replace(/{number_SELECTED}/gm, payload.setting.type == 'number' ? `selected="selected"` : '')
+      .replace(/{password_SELECTED}/gm, payload.setting.type == 'password' ? `selected="selected"` : '')
+      .replace(/{checkbox_SELECTED}/gm, payload.setting.type == 'checkbox' ? `selected="selected"` : '')
+      .replace(/{options_SELECTED}/gm, payload.setting.type == 'options' ? `selected="selected"` : '')
+
+    displayNotification({
+      element: element,
+      text: `Option added`,
+      classes: ['green'],
+      delay: 3000,
+    });
+
+    if (type) type.value = '';
+    if (title) title.value = '';
+    if (description) description.value = '';
+    if (default_value) default_value.value = '';
+
+    // if (content.innerHTML.includes('width: 10em')) content.innerHTML += '\n<hr class="modal-space">\n';
+    content.innerHTML += html;
+  } catch (error) {
+    displayNotification({
+      element: content,
+      text: `Error while adding option: ${error.name}`,
+      classes: ['red'],
+      delay: 3000,
+    });
+  } finally {
+    setTimeout(() => {
+      endDownload(element, 'add-option', button_text);
+      element.classList.remove('disable');
+    }, 400);
+  };
+};
+
+
+async function builderSaveSettings(element) {
+  if (downloading.includes('update-x2-settings')) return;
+  downloading.push('update-x2-settings');
+
+  const button_text = element.innerText;
+  startDownload(element);
+
+  const title = document.getElementById('new___title');
+  const description = document.getElementById('new___description');
+  const default_value = document.getElementById('new___value');
+
+
+  try {
+    // check if new option fields are not empty
+    if (
+      title.value ||
+      description.value ||
+      default_value.value
+    ) {
+      displayNotification({
+        element: element,
+        text: `«New Option» is not added to the list`,
+        classes: ['yellow'],
+        delay: 3000,
+      });
+      return;
+    };
+
+
+    // get all options values
+    const array = [];
+    document.querySelectorAll('.OPTION').forEach(r => {
+      const [id, field] = r.id.split('___');
+
+      const obj = { title: id };
+      obj[field] = r.value;
+
+
+      const find = array.find(r => r.title == id);
+      if (find) {
+        if (find.type == 'options' && field == 'options') {
+          find[field] = r.value.split(',').filter(r => r);
+          return;
+        };
+
+
+        find[field] = r.value;
+        return;
+      };
+
+      array.push(obj);
+    });
+
+    // if (array.length == 0) {
+    //   displayNotification({
+    //     element: element,
+    //     text: `Add at least one option`,
+    //     classes: ['yellow'],
+    //     delay: 3000,
+    //   });
+    //   return;
+    // };
+
+
+    // update settings in file
+    const request = await fetch(`/api/counters/settings/${selectedCounter}?update=yes`, {
+      method: "POST",
+      body: JSON.stringify(array),
+    });
+    const json = await request.json();
+
+    if (json.error != null) {
+      if (typeof json.error == 'object') {
+        try {
+          json.error = JSON.stringify(json.error);
+        } catch (error) { };
+      };
+
+      displayNotification({
+        element: element,
+        text: `Error while updating settings: ${json.error}`,
+        classes: ['red'],
+        delay: 3000,
+      });
+
+      setTimeout(() => {
+        endDownload(element, 'update-x2-settings', button_text);
+        element.classList.remove('disable');
+      }, 300);
+      return;
+    };
+
+
+    displayNotification({
+      element: element,
+      text: `Settings saved`,
+      classes: ['green'],
+      delay: 3000,
+    });
+
+
+    isBuilderModal = false;
+    closeModal(null);
+  } catch (error) {
+    console.log(error);
+    displayNotification({
+      element: element,
+      text: `Error while saving builder settings: ${error.name}`,
+      classes: ['red'],
+      delay: 3000,
+    });
+  } finally {
+    setTimeout(() => {
+      endDownload(element, 'update-x2-settings', button_text);
+      element.classList.remove('disable');
+    }, 400);
+  };
+};
+
+function removeOption(element) {
+  const id = element.id;
+
+  const elm = document.querySelector(`#${id}`);
+  if (!elm) return;
+
+
+
+  elm.remove();
 };
 
 
@@ -617,6 +1044,14 @@ search_bar.addEventListener('keydown', handleInput);
 
 window.addEventListener('click', (event) => {
   const t = event.target;
+
+
+
+  if (t.id == 'new___type') {
+    document.getElementById('new___options').parentElement.style.display = t.value == 'options' ? '' : 'none';
+    console.log(12313, event);
+  };
+
 
   if (t?.classList.value.includes('dl-button')) {
     const id = t.attributes.l?.value;
@@ -638,7 +1073,18 @@ window.addEventListener('click', (event) => {
     return;
   };
 
+  if (t?.classList.value.includes(' settings-builder-button')) {
+    startBuilderModal(t);
+    return;
+  };
+
+  if (t?.classList.value.includes(' add-option-button')) {
+    builderNewOption(t);
+    return;
+  };
+
   if (t?.classList.value.includes(' cancel-button')) {
+    isBuilderModal = false;
     closeModal(null);
     return;
   };
@@ -648,12 +1094,23 @@ window.addEventListener('click', (event) => {
     return updateCounterSettings(t);
   };
 
+  if (t?.classList.value.includes(' update-x2-settings-button')) {
+    return builderSaveSettings(t);
+  };
+
   if (t?.classList.value.includes('update-available')) {
     startUpdate(t);
     return;
   };
 
+  if (t?.classList.value.includes('remove-option-button')) {
+    removeOption(t);
+    return;
+  };
+
   if (t?.attributes.nf) return copyText(t);
+
+  console.log(t?.classList.value);
 });
 
 

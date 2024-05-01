@@ -1,8 +1,8 @@
 export const iconsImages = {
-    'github.com': '/images/github-000000.svg',
-    'twitter.com': '/images/twitter-1DA1F2.svg',
-    'discord.gg': '/images/discord-5865f2.svg',
-    'discord.com': '/images/discord-5865f2.svg'
+    'github.com': '/assets/images/github-000000.svg',
+    'twitter.com': '/assets/images/twitter-1DA1F2.svg',
+    'discord.gg': '/assets/images/discord-5865f2.svg',
+    'discord.com': '/assets/images/discord-5865f2.svg'
 };
 
 export const emptyNotice =

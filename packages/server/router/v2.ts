@@ -1,42 +1,10 @@
 import { wLogger } from '@tosu/common';
 import path from 'path';
 
-import { HttpServer, Websocket, sendJson } from '../index';
+import { HttpServer, sendJson } from '../index';
 import { directoryWalker } from '../utils/directories';
 
-export default function buildV2Api({
-    app,
-    websocket,
-    preciseWebsocket
-}: {
-    app: HttpServer;
-    websocket: Websocket;
-    preciseWebsocket: Websocket;
-}) {
-    app.server.on('upgrade', function (request, socket, head) {
-        if (request.url === '/websocket/v2') {
-            websocket.socket.handleUpgrade(
-                request,
-                socket,
-                head,
-                function (ws) {
-                    websocket.socket.emit('connection', ws, request);
-                }
-            );
-        }
-
-        if (request.url === '/websocket/v2/precise') {
-            preciseWebsocket.socket.handleUpgrade(
-                request,
-                socket,
-                head,
-                function (ws) {
-                    preciseWebsocket.socket.emit('connection', ws, request);
-                }
-            );
-        }
-    });
-
+export default function buildV2Api(app: HttpServer) {
     app.route('/json/v2', 'GET', (req, res) => {
         const osuInstance: any = req.instanceManager.getInstance();
         if (!osuInstance) {

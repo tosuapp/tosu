@@ -11,7 +11,7 @@ import path from 'path';
 import semver from 'semver';
 
 import { getContentType } from '../utils';
-import { ICounter, ISettings } from './counters.types';
+import { ICounter, ISettings, ISettingsCompact } from './counters.types';
 import {
     authorHTML,
     authorLinksHTML,
@@ -110,6 +110,109 @@ export function parseTXT(filePath: string) {
     return object;
 }
 
+export function createSetting(setting: ISettings, value: any) {
+    switch (setting.type) {
+        case 'text': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'text')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'number': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'number')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'password': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'password')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'checkbox': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    checkboxHTML
+                        .replace('{TYPE}', 'text')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace(
+                            '{ADDON}',
+                            value
+                                ? `ucs t="${setting.type}" checked="true"`
+                                : `ucs t="${setting.type}"`
+                        )
+                        .replace('{VALUE}', `${value}`)
+                );
+        }
+
+        case 'color': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'color')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'options': {
+            const options = Array.isArray(setting.options)
+                ? setting.options
+                      .filter((r) => r)
+                      .map(
+                          (r) =>
+                              `<option ${(value || setting.value) === r ? 'selected="selected"' : ''} value="${r}">${r}</option>`
+                      )
+                      .join('\n')
+                : '';
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    selectHTML
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{OPTIONS}', options)
+                );
+        }
+    }
+
+    return '';
+}
+
 export function parseSettings(
     settingsPath: string,
     settingsValuesPath: string,
@@ -127,12 +230,12 @@ export function parseSettings(
         return new Error('settings.json is not array of objects');
     }
 
-    const arrayValues: {
-        title: string;
-        value: any;
-    }[] = JsonSaveParse(fs.readFileSync(settingsValuesPath, 'utf8'), []);
+    const arrayValues: ISettingsCompact = JsonSaveParse(
+        fs.readFileSync(settingsValuesPath, 'utf8'),
+        {}
+    );
 
-    let html = `<h2 class="ms-title"><span>Settings</span><span>«${folderName}»</span></h2><div class="m-scroll">`;
+    let html = `<h2 class="ms-title"><span>Settings</span><span>«${decodeURI(folderName)}»</span></h2><div class="m-scroll">`;
     for (let i = 0; i < array.length; i++) {
         const setting = array[i];
 
@@ -140,121 +243,14 @@ export function parseSettings(
             continue;
         }
 
-        const value =
-            arrayValues.find((r) => r.title === setting.title)?.value ||
-            setting.value;
-
-        switch (setting.type) {
-            case 'text': {
-                html += settingsItemHTML
-                    .replace('{NAME}', setting.title)
-                    .replace('{DESCRIPTION}', setting.description)
-                    .replace(
-                        '{INPUT}',
-                        inputHTML
-                            .replace('{TYPE}', 'text')
-                            .replace(/{NAME}/gm, setting.title)
-                            .replace('{ADDON}', `ucs t="${setting.type}"`)
-                            .replace('{VALUE}', value)
-                    );
-
-                break;
-            }
-
-            case 'number': {
-                html += settingsItemHTML
-                    .replace('{NAME}', setting.title)
-                    .replace('{DESCRIPTION}', setting.description)
-                    .replace(
-                        '{INPUT}',
-                        inputHTML
-                            .replace('{TYPE}', 'number')
-                            .replace(/{NAME}/gm, setting.title)
-                            .replace('{ADDON}', `ucs t="${setting.type}"`)
-                            .replace('{VALUE}', value)
-                    );
-
-                break;
-            }
-
-            case 'password': {
-                html += settingsItemHTML
-                    .replace('{NAME}', setting.title)
-                    .replace('{DESCRIPTION}', setting.description)
-                    .replace(
-                        '{INPUT}',
-                        inputHTML
-                            .replace('{TYPE}', 'password')
-                            .replace(/{NAME}/gm, setting.title)
-                            .replace('{ADDON}', `ucs t="${setting.type}"`)
-                            .replace('{VALUE}', value)
-                    );
-
-                break;
-            }
-
-            case 'checkbox': {
-                html += settingsItemHTML
-                    .replace('{NAME}', setting.title)
-                    .replace('{DESCRIPTION}', setting.description)
-                    .replace(
-                        '{INPUT}',
-                        checkboxHTML
-                            .replace('{TYPE}', 'text')
-                            .replace(/{NAME}/gm, setting.title)
-                            .replace(
-                                '{ADDON}',
-                                value
-                                    ? `ucs t="${setting.type}" checked="true"`
-                                    : `ucs t="${setting.type}"`
-                            )
-                            .replace('{VALUE}', `${value}`)
-                    );
-
-                break;
-            }
-
-            case 'color': {
-                html += settingsItemHTML
-                    .replace('{NAME}', setting.title)
-                    .replace('{DESCRIPTION}', setting.description)
-                    .replace(
-                        '{INPUT}',
-                        inputHTML
-                            .replace('{TYPE}', 'color')
-                            .replace(/{NAME}/gm, setting.title)
-                            .replace('{ADDON}', `ucs t="${setting.type}"`)
-                            .replace('{VALUE}', value)
-                    );
-
-                break;
-            }
-
-            case 'options': {
-                const options = Array.isArray(setting.value)
-                    ? setting.value
-                          .map((r) => `<option value="${r}">${r}</option>`)
-                          .join('\n')
-                    : '';
-                html += settingsItemHTML
-                    .replace('{NAME}', setting.title)
-                    .replace('{DESCRIPTION}', setting.description)
-                    .replace(
-                        '{INPUT}',
-                        selectHTML
-                            .replace(/{NAME}/gm, setting.title)
-                            .replace('{ADDON}', ``)
-                            .replace('{OPTIONS}', options)
-                    );
-                break;
-            }
-        }
+        const value = arrayValues[setting.title] || setting.value;
+        html += createSetting(setting, value);
     }
 
     html += '</div>'; // close scroll div
 
     html += `<div class="ms-btns flexer si-btn">
-        <button class="button update-settings-button flexer" n="${folderName}"><span>Update settings</span></button>
+        <button class="button update-settings-button flexer" n="${decodeURI(folderName)}"><span>Update settings</span></button>
         <button class="button cancel-button flexer"><span>Cancel</span></button>
     </div>`;
     return html;
@@ -280,6 +276,7 @@ export function saveSettings(
         return new Error('settings.json is not array of objects');
     }
 
+    const obj: ISettingsCompact = {};
     for (let i = 0; i < result.length; i++) {
         const setting = result[i];
 
@@ -302,13 +299,11 @@ export function saveSettings(
                 break;
             }
         }
+
+        obj[setting.title] = array[find].value;
     }
 
-    const values = array.map((r) => ({
-        title: r.title,
-        value: r.value
-    }));
-    fs.writeFileSync(settingsValuesPath, JSON.stringify(values), 'utf8');
+    fs.writeFileSync(settingsValuesPath, JSON.stringify(obj), 'utf8');
     return true;
 }
 
@@ -410,6 +405,8 @@ function rebuildJSON({
                     : item.resolution[1].toString()
             );
 
+        const settingsBuilderBtn = `<button class="button settings-builder-button flexer" n="${item.folderName}"><i class="icon-builder"></i></button>`;
+
         const settingsBtn =
             item.settings.length > 0
                 ? `<button class="button settings-button flexer" n="${item.folderName}"><span>Settings</span></button>`
@@ -418,6 +415,7 @@ function rebuildJSON({
         const button = item.downloadLink
             ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
             : `<div class="buttons-group flexer indent-left">
+                ${settingsBuilderBtn}
                 ${settingsBtn}
                 <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
                 <button class="button delete-button flexer" n="${item.folderName}"><span>Delete</span></button>
@@ -795,16 +793,26 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const settings = `<div class="settings">
-    ${openDashboardOnStartupHtml}
-    ${enableAutoUpdateHtml}
     ${debugHTML}
-    ${calculatePPHTML}
+    <div></div>
+    <div></div>
+    ${enableAutoUpdateHtml}
     ${enableKeyOverlayHTML}
     ${enableGosuOverlayHTML}
+    <div></div>
+    <div></div>
+    ${calculatePPHTML}
+    ${openDashboardOnStartupHtml}
+    <div></div>
+    <div></div>
     ${pollRateHTML}
     ${preciseDataPollRateHTML}
+    <div></div>
+    <div></div>
     ${serverIPHTML}
     ${serverPortHTML}
+    <div></div>
+    <div></div>
     ${staticFolderPathtHTML}
     ${saveSettingsButtonHTML}
     </div>`;
