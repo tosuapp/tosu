@@ -695,7 +695,6 @@ const optionHTML = `
 `
 
 async function startBuilderModal(element) {
-  console.log('startBuilderModal', element);
   const folderName = decodeURI(element.attributes.n?.value || '');
 
   let html = '';
@@ -1046,10 +1045,8 @@ window.addEventListener('click', (event) => {
   const t = event.target;
 
 
-
   if (t.id == 'new___type') {
     document.getElementById('new___options').parentElement.style.display = t.value == 'options' ? '' : 'none';
-    console.log(12313, event);
   };
 
 
@@ -1109,8 +1106,6 @@ window.addEventListener('click', (event) => {
   };
 
   if (t?.attributes.nf) return copyText(t);
-
-  console.log(t?.classList.value);
 });
 
 

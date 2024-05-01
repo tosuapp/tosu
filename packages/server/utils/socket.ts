@@ -96,6 +96,11 @@ export class Websocket {
             this.clients.set(ws.id, ws);
         });
 
+        // resend commands internally "this.socket.emit"
+        this.socket.on('message', (data) => {
+            this.clients.forEach((client) => client.emit('message', data));
+        });
+
         if (this.pollRateFieldName !== '') {
             this.startLoop();
         }

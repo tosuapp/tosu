@@ -322,6 +322,11 @@ export default function buildBaseApi(server: Server) {
                     `Settings saved: ${folderName} (${req.headers.referer})`
                 );
 
+                server.WS_COMMANDS.socket.emit(
+                    'message',
+                    `getSettings:${folderName}`
+                );
+
                 const html = saveSettings(
                     settingsPath,
                     settingsValuesPath,

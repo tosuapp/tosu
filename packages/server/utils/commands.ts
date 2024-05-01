@@ -6,7 +6,7 @@ import { ISettings, ISettingsCompact } from './counters.types';
 import { ModifiedWebsocket } from './socket';
 
 export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
-    wLogger.info(`WS_COMMANDS >>>`, data);
+    wLogger.debug(`WS_COMMANDS >>>`, data);
     if (!data.includes(':')) {
         return;
     }
