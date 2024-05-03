@@ -45,14 +45,14 @@ const SCAN_PATTERNS: {
     settingsClassAddr: {
         pattern: '83 E0 20 85 C0 7E 2F'
     },
-    // configurationAddr: {
-    //     pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
-    //     offset: -0xd
-    // },
-    // bindingsAddr: {
-    //     pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
-    //     offset: 0x2a
-    // },
+    configurationAddr: {
+        pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
+        offset: -0xd
+    },
+    bindingsAddr: {
+        pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
+        offset: 0x2a
+    },
     rulesetsAddr: {
         pattern: '7D 15 A1 ?? ?? ?? ?? 85 C0'
     },
@@ -119,7 +119,7 @@ export class OsuInstance {
 
         this.entities.set('process', this.process);
         this.entities.set('patterns', new MemoryPatterns());
-        this.entities.set('settings', new Settings());
+        this.entities.set('settings', new Settings(this.entities));
         this.entities.set('allTimesData', new AllTimesData(this.entities));
         this.entities.set('beatmapPpData', new BeatmapPPData(this.entities));
         this.entities.set('menuData', new MenuData(this.entities));
@@ -263,6 +263,7 @@ export class OsuInstance {
         while (!this.isDestroyed) {
             try {
                 allTimesData.updateState();
+                settings.updateState();
                 menuData.updateState();
 
                 // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
@@ -270,24 +271,24 @@ export class OsuInstance {
                     menuData.updateMP3Length();
                 }
 
-                if (!settings.gameFolder) {
-                    settings.setGameFolder(path.join(this.path, '..'));
+                if (!allTimesData.GameFolder) {
+                    allTimesData.setGameFolder(path.join(this.path, '..'));
 
                     // condition when user have different BeatmapDirectory in osu! config
-                    if (fs.existsSync(allTimesData.SongsFolder)) {
-                        settings.setSongsFolder(allTimesData.SongsFolder);
+                    if (fs.existsSync(allTimesData.MemorySongsFolder)) {
+                        allTimesData.setSongsFolder(
+                            allTimesData.MemorySongsFolder
+                        );
                     } else {
-                        settings.setSongsFolder(
+                        allTimesData.setSongsFolder(
                             path.join(
                                 this.path,
                                 '../',
-                                allTimesData.SongsFolder
+                                allTimesData.MemorySongsFolder
                             )
                         );
                     }
                 }
-
-                settings.setSkinFolder(path.join(allTimesData.SkinFolder));
 
                 switch (allTimesData.Status) {
                     case 0:
@@ -405,7 +406,6 @@ export class OsuInstance {
         const entities = this.entities.getServices([
             'menuData',
             'allTimesData',
-            'settings',
             'gamePlayData',
             'beatmapPpData'
         ]);
@@ -416,17 +416,10 @@ export class OsuInstance {
     updateMapMetadata(entries: {
         menuData: MenuData;
         allTimesData: AllTimesData;
-        settings: Settings;
         gamePlayData: GamePlayData;
         beatmapPpData: BeatmapPPData;
     }) {
-        const {
-            menuData,
-            allTimesData,
-            settings,
-            gamePlayData,
-            beatmapPpData
-        } = entries;
+        const { menuData, allTimesData, gamePlayData, beatmapPpData } = entries;
         const currentMods =
             allTimesData.Status === 2 || allTimesData.Status === 7
                 ? gamePlayData.Mods
@@ -436,7 +429,7 @@ export class OsuInstance {
 
         if (
             menuData.Path?.endsWith('.osu') &&
-            settings.gameFolder &&
+            allTimesData.GameFolder &&
             this.previousState !== currentState
         ) {
             this.previousState = currentState;

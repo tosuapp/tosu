@@ -77,6 +77,12 @@ importers:
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
+      '@tosu/updater':
+        specifier: workspace:*
+        version: link:../updater
+      semver:
+        specifier: ^7.5.4
+        version: 7.5.4
       ws:
         specifier: ^8.16.0
         version: 8.16.0

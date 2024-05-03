@@ -410,20 +410,16 @@ export class GamePlayData extends AbstractEntity {
 
             const leaderStart = patterns.getLeaderStart();
 
-            const errors: Array<number> = [];
-
             const base = process.readInt(this.scoreBase + 0x38);
             const items = process.readInt(base + 0x4);
             const size = process.readInt(base + 0xc);
 
-            for (let i = 0; i < size; i++) {
+            for (let i = this.HitErrors.length - 1; i < size; i++) {
                 const current = items + leaderStart + 0x4 * i;
                 const error = process.readInt(current);
 
-                errors.push(error);
+                this.HitErrors.push(error);
             }
-
-            this.HitErrors = errors;
         } catch (exc) {
             wLogger.error('GD(updateHitErrors) failed to parse hitErrors');
             wLogger.debug(exc);
@@ -512,12 +508,12 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        const { settings, beatmapPpData } = this.services.getServices([
-            'settings',
+        const { allTimesData, beatmapPpData } = this.services.getServices([
+            'allTimesData',
             'beatmapPpData'
         ]);
 
-        if (!settings.gameFolder) {
+        if (!allTimesData.GameFolder) {
             wLogger.debug(
                 'GD(updateStarsAndPerformance) game folder not found'
             );

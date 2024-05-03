@@ -1,9 +1,17 @@
-import { config, recursiveFilesSearch, wLogger } from '@tosu/common';
+import {
+    JsonSaveParse,
+    config,
+    getStaticPath,
+    recursiveFilesSearch,
+    wLogger
+} from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
+import semver from 'semver';
 
 import { getContentType } from '../utils';
+import { ICounter, ISettings, ISettingsCompact } from './counters.types';
 import {
     authorHTML,
     authorLinksHTML,
@@ -19,6 +27,7 @@ import {
     noMoreCounters,
     resultItemHTML,
     saveSettingsButtonHTML,
+    selectHTML,
     settingsItemHTML
 } from './htmls';
 
@@ -32,9 +41,6 @@ const pkgAssetsPath =
     'pkg' in process
         ? path.join(__dirname, 'assets')
         : path.join(__filename, '../../../assets');
-
-const pkgRunningFolder =
-    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
 
 function splitTextByIndex(text, letter) {
     const index = text.indexOf(letter);
@@ -56,26 +62,47 @@ export function parseTXT(filePath: string) {
         const line = content[i];
         const result = splitTextByIndex(line, ':');
         let [key, value] = result;
-        if (key == null || value == null) continue;
+        if (
+            key === null ||
+            value === null ||
+            key === undefined ||
+            value === undefined
+        )
+            continue;
         value = value.split('##')[0].replace(/\r/, '').replace(':', '');
 
         if (/[0-9 ]+x[ 0-9-]+/.test(value)) {
-            object[key.toLowerCase()] = value.split('x');
+            object[key.toLowerCase()] = value.split(/x/i);
         } else object[key.toLowerCase()] = value.trim();
     }
 
     filePath = path.resolve(filePath);
-    const staticPath = path.resolve(config.staticFolderPath);
 
+    const staticPath = path.resolve(config.staticFolderPath);
     object.folderName = path
         .dirname(filePath.replace(staticPath, ''))
         .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
         .replace(/\\/gm, '/');
 
-    if (object.resolution) {
-        object.resolution = object.resolution.map((r) => r.trim());
-    }
+    const settingsPath = path.join(
+        staticPath,
+        object.folderName,
+        'settings.json'
+    );
+    const settings = fs.existsSync(settingsPath)
+        ? JsonSaveParse(fs.readFileSync(settingsPath, 'utf8'), [])
+        : [];
+
+    if (object.resolution)
+        object.resolution = object.resolution.map((r) => r.trim()) || [
+            'Any',
+            'Any'
+        ];
+    else object.resolution = ['Any', 'Any'];
+
     if (object.authorlinks) object.authorlinks = object.authorlinks.split(',');
+
+    object.settings = Array.isArray(settings) ? settings : [];
 
     delete object.compatiblewith;
     delete object.usecase;
@@ -83,26 +110,209 @@ export function parseTXT(filePath: string) {
     return object;
 }
 
+export function createSetting(setting: ISettings, value: any) {
+    switch (setting.type) {
+        case 'text': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'text')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'number': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'number')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'password': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'password')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'checkbox': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    checkboxHTML
+                        .replace('{TYPE}', 'text')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace(
+                            '{ADDON}',
+                            value
+                                ? `ucs t="${setting.type}" checked="true"`
+                                : `ucs t="${setting.type}"`
+                        )
+                        .replace('{VALUE}', `${value}`)
+                );
+        }
+
+        case 'color': {
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    inputHTML
+                        .replace('{TYPE}', 'color')
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{VALUE}', value)
+                );
+        }
+
+        case 'options': {
+            const options = Array.isArray(setting.options)
+                ? setting.options
+                      .filter((r) => r)
+                      .map(
+                          (r) =>
+                              `<option ${(value || setting.value) === r ? 'selected="selected"' : ''} value="${r}">${r}</option>`
+                      )
+                      .join('\n')
+                : '';
+            return settingsItemHTML
+                .replace('{NAME}', setting.title)
+                .replace('{DESCRIPTION}', setting.description)
+                .replace(
+                    '{INPUT}',
+                    selectHTML
+                        .replace(/{NAME}/gm, setting.title)
+                        .replace('{ADDON}', `ucs t="${setting.type}"`)
+                        .replace('{OPTIONS}', options)
+                );
+        }
+    }
+
+    return '';
+}
+
+export function parseSettings(
+    settingsPath: string,
+    settingsValuesPath: string,
+    folderName: string
+): string | Error {
+    const array: ISettings[] | Error = JsonSaveParse(
+        fs.readFileSync(settingsPath, 'utf8'),
+        new Error('nothing')
+    );
+    if (array instanceof Error) {
+        return array;
+    }
+
+    if (!Array.isArray(array)) {
+        return new Error('settings.json is not array of objects');
+    }
+
+    const arrayValues: ISettingsCompact = JsonSaveParse(
+        fs.readFileSync(settingsValuesPath, 'utf8'),
+        {}
+    );
+
+    let html = `<h2 class="ms-title"><span>Settings</span><span>«${decodeURI(folderName)}»</span></h2><div class="m-scroll">`;
+    for (let i = 0; i < array.length; i++) {
+        const setting = array[i];
+
+        if (setting.title === undefined || setting.title === null) {
+            continue;
+        }
+
+        const value = arrayValues[setting.title] || setting.value;
+        html += createSetting(setting, value);
+    }
+
+    html += '</div>'; // close scroll div
+
+    html += `<div class="ms-btns flexer si-btn">
+        <button class="button update-settings-button flexer" n="${decodeURI(folderName)}"><span>Update settings</span></button>
+        <button class="button cancel-button flexer"><span>Cancel</span></button>
+    </div>`;
+    return html;
+}
+
+export function saveSettings(
+    settingsPath: string,
+    settingsValuesPath: string,
+    result: {
+        title: string;
+        value: any;
+    }[]
+) {
+    const array: ISettings[] | Error = JsonSaveParse(
+        fs.readFileSync(settingsPath, 'utf8'),
+        new Error('nothing')
+    );
+    if (array instanceof Error) {
+        return array;
+    }
+
+    if (!Array.isArray(array)) {
+        return new Error('settings.json is not array of objects');
+    }
+
+    const obj: ISettingsCompact = {};
+    for (let i = 0; i < result.length; i++) {
+        const setting = result[i];
+
+        const find = array.findIndex((r) => r.title === setting.title);
+        if (find === -1) continue;
+
+        switch (array[find].type) {
+            case 'number': {
+                array[find].value = isNaN(setting.value) ? 0 : +setting.value;
+                break;
+            }
+
+            case 'checkbox': {
+                array[find].value = Boolean(setting.value);
+                break;
+            }
+
+            default: {
+                array[find].value = setting.value;
+                break;
+            }
+        }
+
+        obj[setting.title] = array[find].value;
+    }
+
+    fs.writeFileSync(settingsValuesPath, JSON.stringify(obj), 'utf8');
+    return true;
+}
+
 function rebuildJSON({
     array,
     external,
     query
 }: {
-    array: {
-        folderName: string;
-        name: string;
-        author: string;
-        resolution: number[];
-        authorlinks: string[];
-
-        usecase?: string;
-        compatiblewith?: string;
-        assets?: {
-            type: string;
-            url: string;
-        }[];
-        downloadLink?: string;
-    }[];
+    array: ICounter[];
     external?: boolean;
     query?: string;
 }) {
@@ -120,6 +330,8 @@ function rebuildJSON({
                 continue;
             }
         }
+
+        if (!Array.isArray(item.settings)) item.settings = [];
 
         const name = nameHTML.replace('{NAME}', item.name);
         const author = authorHTML.replace('{AUTHOR}', item.author);
@@ -159,7 +371,8 @@ function rebuildJSON({
             .replace(
                 '{HEIGHT}',
                 item.resolution[1] === -1 ? '500px' : `${item.resolution[1]}px`
-            );
+            )
+            .replace('{NAME}', item.folderName);
 
         const metadata = metadataHTML
             .replace(
@@ -192,9 +405,18 @@ function rebuildJSON({
                     : item.resolution[1].toString()
             );
 
+        const settingsBuilderBtn = `<button class="button settings-builder-button flexer" n="${item.folderName}"><i class="icon-builder"></i></button>`;
+
+        const settingsBtn =
+            item.settings.length > 0
+                ? `<button class="button settings-button flexer" n="${item.folderName}"><span>Settings</span></button>`
+                : '';
+
         const button = item.downloadLink
             ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
             : `<div class="buttons-group flexer indent-left">
+                ${settingsBuilderBtn}
+                ${settingsBtn}
                 <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
                 <button class="button delete-button flexer" n="${item.folderName}"><span>Delete</span></button>
             </div>`;
@@ -227,17 +449,17 @@ function rebuildJSON({
 
 function getLocalCounters() {
     try {
-        const staticPath =
-            path.resolve(config.staticFolderPath) ||
-            path.join(pkgRunningFolder, 'static');
+        const staticPath = getStaticPath();
 
         const countersListTXT = recursiveFilesSearch({
+            _ignoreFileName: 'ignore.txt',
             dir: staticPath,
             fileList: [],
             filename: 'metadata.txt'
         });
 
         const countersListHTML = recursiveFilesSearch({
+            _ignoreFileName: 'ignore.txt',
             dir: staticPath,
             fileList: [],
             filename: 'index.html'
@@ -255,6 +477,18 @@ function getLocalCounters() {
                 const nestedFolderPath = path.dirname(
                     r.replace(staticPath, '')
                 );
+                const folderName = nestedFolderPath
+                    .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
+                    .replace(/\\/gm, '/');
+
+                const settingsPath = path.join(
+                    staticPath,
+                    folderName,
+                    'settings.json'
+                );
+                const settings = fs.existsSync(settingsPath)
+                    ? JsonSaveParse(fs.readFileSync(settingsPath, 'utf8'), [])
+                    : [];
 
                 return {
                     folderName: nestedFolderPath
@@ -263,8 +497,9 @@ function getLocalCounters() {
                     name: path.basename(path.dirname(r)),
                     author: 'local',
                     resolution: [-2, '400'],
-                    authorlinks: []
-                };
+                    authorlinks: [],
+                    settings: Array.isArray(settings) ? settings : []
+                } as ICounter;
             });
 
         const array = countersListTXT.map((r) => parseTXT(r));
@@ -305,7 +540,13 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
                 return;
             }
 
-            const html = content.replace('{{LIST}}', build || emptyNotice);
+            let html = content.replace('{{LIST}}', build || emptyNotice);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
@@ -319,27 +560,46 @@ export async function buildExternalCounters(
     res: http.ServerResponse,
     query?: string
 ) {
-    const request = await fetch(
-        'https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json'
-    );
-    const json: any = await request.json();
+    let text = '';
 
-    const exists = getLocalCounters();
-    const array = json.filter(
-        (r) => !exists.find((s) => s.name === r.name && s.author === r.author)
-    );
+    try {
+        const request = await fetch(
+            'https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json'
+        );
+        const json: any = await request.json();
 
-    const build = rebuildJSON({
-        array,
-        external: true,
-        query
-    });
+        const exists = getLocalCounters();
+        const array = json.filter(
+            (r) =>
+                !exists.find((s) => s.name === r.name && s.author === r.author)
+        );
 
-    if (query != null) {
-        res.writeHead(200, {
-            'Content-Type': getContentType('file.html')
+        const build = rebuildJSON({
+            array,
+            external: true,
+            query
         });
-        return res.end(build || emptyCounters);
+
+        if (query != null) {
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            return res.end(build || emptyCounters);
+        }
+
+        text = build;
+    } catch (error) {
+        wLogger.error((error as any).message);
+        wLogger.debug(error);
+
+        if (query != null) {
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            return res.end((error as any).message || emptyCounters);
+        }
+
+        text = `Error: ${(error as any).message}`;
     }
 
     fs.readFile(
@@ -356,7 +616,13 @@ export async function buildExternalCounters(
                 return;
             }
 
-            const html = content.replace('{{LIST}}', build || noMoreCounters);
+            let html = content.replace('{{LIST}}', text || noMoreCounters);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
@@ -459,6 +725,37 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.preciseDataPollRate}`)
         );
 
+    const enableAutoUpdateHtml = settingsItemHTML
+        .replace('{NAME}', 'ENABLE_AUTOUPDATE')
+        .replace(
+            '{DESCRIPTION}',
+            'Enable checking and updating tosu on startup'
+        )
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{NAME}/gm, 'ENABLE_AUTOUPDATE')
+                .replace(
+                    '{ADDON}',
+                    config.enableAutoUpdate ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.enableAutoUpdate}`)
+        );
+
+    const openDashboardOnStartupHtml = settingsItemHTML
+        .replace('{NAME}', 'OPEN_DASHBOARD_ON_STARTUP')
+        .replace('{DESCRIPTION}', 'Open dashboard in browser on startup')
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{NAME}/gm, 'OPEN_DASHBOARD_ON_STARTUP')
+                .replace(
+                    '{ADDON}',
+                    config.openDashboardOnStartup ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.openDashboardOnStartup}`)
+        );
+
     const serverIPHTML = settingsItemHTML
         .replace('{NAME}', 'SERVER_IP')
         .replace('{DESCRIPTION}', 'The IP address for the API and WebSocket.')
@@ -497,13 +794,25 @@ export function buildSettings(res: http.ServerResponse) {
 
     const settings = `<div class="settings">
     ${debugHTML}
-    ${calculatePPHTML}
+    <div></div>
+    <div></div>
+    ${enableAutoUpdateHtml}
     ${enableKeyOverlayHTML}
     ${enableGosuOverlayHTML}
+    <div></div>
+    <div></div>
+    ${calculatePPHTML}
+    ${openDashboardOnStartupHtml}
+    <div></div>
+    <div></div>
     ${pollRateHTML}
     ${preciseDataPollRateHTML}
+    <div></div>
+    <div></div>
     ${serverIPHTML}
     ${serverPortHTML}
+    <div></div>
+    <div></div>
     ${staticFolderPathtHTML}
     ${saveSettingsButtonHTML}
     </div>`;
@@ -522,7 +831,13 @@ export function buildSettings(res: http.ServerResponse) {
                 return;
             }
 
-            const html = content.replace('{{LIST}}', settings);
+            let html = content.replace('{{LIST}}', settings);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')
@@ -558,7 +873,13 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 return;
             }
 
-            const html = content.replace('{{LIST}}', pageContent);
+            let html = content.replace('{{LIST}}', pageContent);
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
 
             res.writeHead(200, {
                 'Content-Type': getContentType('file.html')

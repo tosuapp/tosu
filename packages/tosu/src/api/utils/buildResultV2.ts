@@ -103,7 +103,7 @@ export const buildResult = (
     return {
         state: {
             number: allTimesData.Status,
-            name: GameState[allTimesData.Status]
+            name: GameState[allTimesData.Status] || ''
         },
         session: {
             playTime: allTimesData.GameTime,
@@ -114,7 +114,7 @@ export const buildResult = (
             replayUIVisible: gamePlayData.isReplayUiHidden === false,
             chatVisibilityStatus: {
                 number: allTimesData.ChatStatus,
-                name: ChatStatus[allTimesData.ChatStatus]
+                name: ChatStatus[allTimesData.ChatStatus] || ''
             },
 
             leaderboard: {
@@ -123,13 +123,13 @@ export const buildResult = (
                     : false,
                 type: {
                     number: settings.leaderboardType,
-                    name: LeaderboardType[settings.leaderboardType]
+                    name: LeaderboardType[settings.leaderboardType] || ''
                 }
             },
 
             progressBar: {
                 number: settings.progressBarType,
-                name: ProgressBarType[settings.progressBarType]
+                name: ProgressBarType[settings.progressBarType] || ''
             },
             bassDensity: bassDensityData.density,
 
@@ -139,7 +139,7 @@ export const buildResult = (
             scoreMeter: {
                 type: {
                     number: settings.scoreMeter.type,
-                    name: ScoreMeterType[settings.scoreMeter.type]
+                    name: ScoreMeterType[settings.scoreMeter.type] || ''
                 },
                 size: settings.scoreMeter.size
             },
@@ -149,22 +149,19 @@ export const buildResult = (
 
             sort: {
                 number: settings.sortType,
-                name: SortType[settings.sortType]
+                name: SortType[settings.sortType] || ''
             },
             group: {
                 number: settings.groupType,
-                name: GroupType[settings.groupType]
+                name: GroupType[settings.groupType] || ''
             },
 
             skin: settings.skin,
             mode: {
                 number: menuData.MenuGameMode,
-                name: Modes[menuData.MenuGameMode]
+                name: Modes[menuData.MenuGameMode] || ''
             },
-            audio: {
-                ...settings.audio,
-                offset: settings.offset
-            },
+            audio: settings.audio,
             background: settings.background,
 
             keybinds: settings.keybinds
@@ -172,17 +169,17 @@ export const buildResult = (
         profile: {
             userStatus: {
                 number: userProfile.rawLoginStatus,
-                name: UserLoginStatus[userProfile.rawLoginStatus]
+                name: UserLoginStatus[userProfile.rawLoginStatus] || ''
             },
             banchoStatus: {
                 number: userProfile.rawBanchoStatus,
-                name: BanchoStatusEnum[userProfile.rawBanchoStatus]
+                name: BanchoStatusEnum[userProfile.rawBanchoStatus] || ''
             },
             id: userProfile.id,
             name: userProfile.name,
             mode: {
                 number: userProfile.playMode,
-                name: Modes[userProfile.playMode]
+                name: Modes[userProfile.playMode] || ''
             },
 
             rankedScore: userProfile.rankedScore,
@@ -209,7 +206,7 @@ export const buildResult = (
             },
             status: {
                 number: menuData.RankedStatus,
-                name: BeatmapStatuses[menuData.RankedStatus || -1]
+                name: BeatmapStatuses[menuData.RankedStatus || -1] || ''
             },
             checksum: menuData.MD5,
 
@@ -328,7 +325,7 @@ export const buildResult = (
 
             mode: {
                 number: gamePlayData.Mode,
-                name: Modes[gamePlayData.Mode]
+                name: Modes[gamePlayData.Mode] || ''
             },
 
             score: gamePlayData.Score,
@@ -384,7 +381,7 @@ export const buildResult = (
         resultsScreen: {
             mode: {
                 number: gamePlayData.Mode,
-                name: Modes[gamePlayData.Mode]
+                name: Modes[gamePlayData.Mode] || ''
             },
             score: resultsScreenData.Score,
             name: resultsScreenData.PlayerName,
@@ -405,9 +402,9 @@ export const buildResult = (
             createdAt: resultsScreenData.Date
         },
         folders: {
-            game: settings.gameFolder,
-            skin: settings.skinFolder,
-            songs: settings.songsFolder,
+            game: allTimesData.GameFolder,
+            skin: allTimesData.SkinFolder,
+            songs: allTimesData.SongsFolder,
             beatmap: menuData.Folder
         },
         files: {
@@ -416,38 +413,14 @@ export const buildResult = (
             audio: menuData.AudioFilename
         },
         directPath: {
-            beatmapFile: path.join(
-                settings.gameFolder,
-                'Songs',
-                menuData.Folder,
-                menuData.Path
-            ),
+            beatmapFile: path.join(menuData.Folder, menuData.Path),
             beatmapBackground: path.join(
-                settings.gameFolder,
-                'Songs',
                 menuData.Folder,
                 menuData.BackgroundFilename
             ),
-            beatmapAudio: path.join(
-                settings.gameFolder,
-                'Songs',
-                menuData.Folder,
-                menuData.AudioFilename
-            ),
-            beatmapFolder: path.join(
-                settings.gameFolder,
-                'Songs',
-                menuData.Folder
-            ),
-            skinFolder: path.join(
-                settings.gameFolder,
-                'Skins',
-                settings.skinFolder
-            ),
-
-            collections: path.join(settings.gameFolder, 'collection.db'),
-            osudb: path.join(settings.gameFolder, 'osu!.db'),
-            scoresdb: path.join(settings.gameFolder, 'scores.db')
+            beatmapAudio: path.join(menuData.Folder, menuData.AudioFilename),
+            beatmapFolder: menuData.Folder,
+            skinFolder: allTimesData.SkinFolder
         },
 
         tourney: buildTourneyData(instanceManager)
@@ -508,7 +481,7 @@ const buildTourneyData = (
 
                     mode: {
                         number: gamePlayData.Mode,
-                        name: Modes[gamePlayData.Mode]
+                        name: Modes[gamePlayData.Mode] || ''
                     },
 
                     score: gamePlayData.Score,

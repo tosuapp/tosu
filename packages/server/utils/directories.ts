@@ -1,3 +1,4 @@
+import { getStaticPath, wLogger } from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -31,9 +32,11 @@ export function directoryWalker({
         return;
     }
     const contentType = getContentType(cleanedUrl);
-
     const filePath = path.join(folderPath, cleanedUrl);
+
     const isDirectory = path.extname(filePath) === '';
+    const isHTML = filePath.endsWith('.html');
+
     if (isDirectory) {
         return readDirectory(filePath, baseUrl, (html: Error | string) => {
             if (html instanceof Error) {
@@ -49,41 +52,53 @@ export function directoryWalker({
         });
     }
 
-    return fs.readFile(filePath, (err, content) => {
-        if (err?.code === 'ENOENT' && _htmlRedirect === true) {
-            return readDirectory(
-                filePath.replace('index.html', ''),
-                baseUrl,
-                (html: Error | string) => {
-                    if (html instanceof Error) {
-                        res.writeHead(404, { 'Content-Type': 'text/html' });
-                        res.end('404 Not Found');
-                        return;
+    return fs.readFile(
+        filePath,
+        isHTML === true ? 'utf8' : null,
+        (err, content) => {
+            if (err?.code === 'ENOENT' && _htmlRedirect === true) {
+                return readDirectory(
+                    filePath.replace('index.html', ''),
+                    baseUrl,
+                    (html: Error | string) => {
+                        if (html instanceof Error) {
+                            res.writeHead(404, { 'Content-Type': 'text/html' });
+                            res.end('404 Not Found');
+                            return;
+                        }
+
+                        if (isHTML === true) {
+                            html = addCounterMetadata(html, filePath);
+                        }
+
+                        res.writeHead(200, {
+                            'Content-Type': getContentType('file.html')
+                        });
+                        res.end(html);
                     }
+                );
+            }
 
-                    res.writeHead(200, {
-                        'Content-Type': getContentType('file.html')
-                    });
-                    res.end(html);
-                }
-            );
+            if (err?.code === 'ENOENT') {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.end('404 Not Found');
+                return;
+            }
+
+            if (err) {
+                res.writeHead(500);
+                res.end(`Server Error: ${err.code}`);
+                return;
+            }
+
+            if (isHTML === true) {
+                content = addCounterMetadata(content.toString(), filePath);
+            }
+
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content, 'utf-8');
         }
-
-        if (err?.code === 'ENOENT') {
-            res.writeHead(404, { 'Content-Type': 'text/html' });
-            res.end('404 Not Found');
-            return;
-        }
-
-        if (err) {
-            res.writeHead(500);
-            res.end(`Server Error: ${err.code}`);
-            return;
-        }
-
-        res.writeHead(200, { 'Content-Type': contentType });
-        res.end(content, 'utf-8');
-    });
+    );
 }
 
 export function readDirectory(
@@ -110,4 +125,24 @@ export function readDirectory(
             )
         );
     });
+}
+
+export function addCounterMetadata(html: string, filePath: string) {
+    try {
+        const staticPath = getStaticPath();
+
+        const counterPath = path
+            .dirname(filePath.replace(staticPath, ''))
+            .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
+            .replace(/\\/gm, '/');
+
+        html += `\n\n\n<script>\rwindow.COUNTER_PATH=\`${counterPath}\`\r</script>\n`;
+
+        return html;
+    } catch (error) {
+        wLogger.error((error as any).message);
+        wLogger.debug(error);
+
+        return '';
+    }
 }
