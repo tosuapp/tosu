@@ -1,9 +1,13 @@
-import { DataRepo } from '@/entities/DataRepoList';
+import { ApiAnswerPrecise as ApiAnswer } from '@/api/types/v2';
+import { InstanceManager } from '@/objects/instanceManager/instanceManager';
 
-import { PreciseAnswer } from '../types/v2';
+export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
+    const osuInstance = instanceManager.getInstance();
+    if (!osuInstance) {
+        return { error: 'not_ready' };
+    }
 
-export const buildResult = (service: DataRepo): PreciseAnswer => {
-    const { gamePlayData } = service.getServices(['gamePlayData']);
+    const { gamePlayData } = osuInstance.getServices(['gamePlayData']);
 
     return {
         keys: {

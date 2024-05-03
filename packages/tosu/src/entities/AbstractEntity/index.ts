@@ -1,10 +1,10 @@
-import { DataRepo } from '../DataRepoList';
+import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 
 export abstract class AbstractEntity {
-    services: DataRepo;
+    osuInstance: OsuInstance;
 
-    constructor(services: DataRepo) {
-        this.services = services;
+    constructor(osuInstance: OsuInstance) {
+        this.osuInstance = osuInstance;
     }
 
     updateState() {

@@ -22,12 +22,14 @@ import {
     saveSettings
 } from '../utils/counters';
 import { directoryWalker } from '../utils/directories';
+import { parseCounterSettings } from '../utils/parseSettings';
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
         const osuInstance: any = req.instanceManager.getInstance();
         if (!osuInstance) {
             res.statusCode = 500;
+            wLogger.debug('/json', 'not_ready');
             return sendJson(res, { error: 'not_ready' });
         }
 
@@ -101,6 +103,10 @@ export default function buildBaseApi(server: Server) {
                         })
                         .catch((reason) => {
                             fs.unlinkSync(tempPath);
+                            wLogger.debug(
+                                `counter-${folderName}-unzip`,
+                                reason
+                            );
 
                             sendJson(res, {
                                 error: reason
@@ -111,6 +117,8 @@ export default function buildBaseApi(server: Server) {
                 downloadFile(req.params.url, tempPath)
                     .then(startUnzip)
                     .catch((reason) => {
+                        wLogger.debug(`counter-${folderName}-download`, reason);
+
                         sendJson(res, {
                             error: reason
                         });
@@ -159,6 +167,7 @@ export default function buildBaseApi(server: Server) {
                     if (err) {
                         wLogger.error('Error opening file explorer:');
                         wLogger.debug(err);
+
                         return sendJson(res, {
                             error: `Error opening file explorer: ${err.message}`
                         });
@@ -225,21 +234,15 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                const staticPath = getStaticPath();
-                const settingsPath = path.join(
-                    staticPath,
-                    decodeURI(folderName),
-                    'settings.json'
-                );
-                const settingsValuesPath = path.join(
-                    staticPath,
-                    decodeURI(folderName),
-                    'settings.values.json'
-                );
+                const settings = parseCounterSettings(folderName, 'parse');
+                if (settings instanceof Error) {
+                    wLogger.debug(
+                        `counter-${folderName}-settings-get`,
+                        settings
+                    );
 
-                if (!fs.existsSync(settingsPath)) {
                     return sendJson(res, {
-                        error: 'No settings.json'
+                        error: settings.name
                     });
                 }
 
@@ -247,12 +250,10 @@ export default function buildBaseApi(server: Server) {
                     `Settings accessed: ${folderName} (${req.headers.referer})`
                 );
 
-                const html = parseSettings(
-                    settingsPath,
-                    settingsValuesPath,
-                    folderName
-                );
+                const html = parseSettings(settings.settings, folderName);
                 if (html instanceof Error) {
+                    wLogger.debug(`counter-${folderName}-settings-html`, html);
+
                     return sendJson(res, {
                         error: html
                     });
@@ -288,21 +289,16 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                const staticPath = getStaticPath();
-                const settingsPath = path.join(
-                    staticPath,
-                    decodeURI(folderName),
-                    'settings.json'
-                );
-                const settingsValuesPath = path.join(
-                    staticPath,
-                    decodeURI(folderName),
-                    'settings.values.json'
-                );
-
                 if (req.query.update === 'yes') {
+                    const staticPath = getStaticPath();
+                    const settingsPath = path.join(
+                        staticPath,
+                        decodeURI(folderName),
+                        'settings.json'
+                    );
+
                     wLogger.info(
-                        `Settings updated: ${folderName} (${req.headers.referer})`
+                        `Settings re:created: ${folderName} (${req.headers.referer})`
                     );
 
                     fs.writeFileSync(
@@ -312,31 +308,23 @@ export default function buildBaseApi(server: Server) {
                     );
                 }
 
-                if (!fs.existsSync(settingsPath)) {
-                    return sendJson(res, {
-                        error: "Settings doesn't exists"
-                    });
-                }
-
                 wLogger.info(
                     `Settings saved: ${folderName} (${req.headers.referer})`
                 );
+
+                const html = saveSettings(folderName, body as any);
+                if (html instanceof Error) {
+                    wLogger.debug(`counter-${folderName}-settings-save`, html);
+
+                    return sendJson(res, {
+                        error: html
+                    });
+                }
 
                 server.WS_COMMANDS.socket.emit(
                     'message',
                     `getSettings:${folderName}`
                 );
-
-                const html = saveSettings(
-                    settingsPath,
-                    settingsValuesPath,
-                    body as any
-                );
-                if (html instanceof Error) {
-                    return sendJson(res, {
-                        error: html
-                    });
-                }
 
                 return sendJson(res, { result: 'success' });
             } catch (error) {
@@ -352,9 +340,12 @@ export default function buildBaseApi(server: Server) {
             await autoUpdater();
 
             sendJson(res, { result: 'updated' });
-        } catch (error) {
+        } catch (exc) {
+            wLogger.error('runUpdates', (exc as any).message);
+            wLogger.debug('runUpdates', exc);
+
             return sendJson(res, {
-                error: (error as any).message
+                error: (exc as any).message
             });
         }
     });
@@ -386,9 +377,10 @@ export default function buildBaseApi(server: Server) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData, menuData } = osuInstance.entities.getServices(
-                ['allTimesData', 'menuData']
-            );
+            const { allTimesData, menuData } = osuInstance.getServices([
+                'allTimesData',
+                'menuData'
+            ]);
 
             const beatmapFilePath =
                 query.path ||
@@ -416,9 +408,12 @@ export default function buildBaseApi(server: Server) {
                 attributes: calculator.mapAttributes(parseBeatmap),
                 performance: calculator.performance(parseBeatmap)
             });
-        } catch (error) {
+        } catch (exc) {
+            wLogger.error('calculate/pp', (exc as any).message);
+            wLogger.debug('calculate/pp', exc);
+
             return sendJson(res, {
-                error: (error as any).message
+                error: (exc as any).message
             });
         }
     });

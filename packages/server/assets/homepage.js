@@ -512,7 +512,7 @@ async function updateCounterSettings(element) {
   document.querySelectorAll('[ucs]').forEach((value, key) => {
     const type = value.attributes.getNamedItem('t').value;
     const obj = {
-      title: value.id,
+      uniqueID: value.id,
       value: value.value,
     };
 
@@ -654,11 +654,18 @@ const optionHTML = `
 <div id="{ID}" class="sbi">
   <div class="si flexer">
     <div{as}>
+      <h4>Unique ID</h4>
+    </div>
+    <input type="text" class="{class}" id="{ID}___uniqueID" value="{UNIQUEID_VALUE}" {ADDON}>
+  </div>
+  <div class="si flexer">
+    <div{as}>
       <h4>Type</h4>
     </div>
     <select class="{class}" id="{ID}___type">
       <option {text_SELECTED} value="text">Text</option>
       <option {number_SELECTED} value="number">Number</option>
+      <option {color_SELECTED} value="color">Color</option>
       <option {password_SELECTED} value="password">Password</option>
       <option {checkbox_SELECTED} value="checkbox">Checkbox</option>
       <option {options_SELECTED} value="options">Options list</option>
@@ -720,11 +727,13 @@ async function startBuilderModal(element) {
     .replace(/{class}/gm, '')
     .replace(/{as}/gm, '')
     .replace(/{ID}/gm, 'new')
+    .replace("{UNIQUEID_VALUE}", '')
     .replace("{TITLE_VALUE}", '')
     .replace("{DESCRIPTION_VALUE}", '')
     .replace("{OPTIONS}", 'style="display:none;"')
     .replace("{OPTIONS_VALUE}", '')
     .replace("{VALUE}", '')
+    .replace("{ADDON}", '')
     .replace(/{text_SELECTED}/gm, '')
     .replace(/{number_SELECTED}/gm, '')
     .replace(/{password_SELECTED}/gm, '')
@@ -738,18 +747,21 @@ async function startBuilderModal(element) {
       html += optionHTML
         .replace(/{BUTTONS}/gm, `
         <div class="oab flexer">
-          <button id="${option.title}" class="button remove-option-button flexer"><span>Remove option</span></button>
+          <button did="${option.uniqueID}" class="button remove-option-button flexer"><span>Remove option</span></button>
         </div>`)
         .replace(/{class}/gm, 'OPTION')
         .replace(/{as}/gm, ' style="width: 10em"')
-        .replace(/{ID}/gm, option.title)
+        .replace(/{ID}/gm, option.uniqueID)
+        .replace("{UNIQUEID_VALUE}", option.uniqueID)
         .replace("{TITLE_VALUE}", option.title)
         .replace("{DESCRIPTION_VALUE}", option.description)
         .replace("{OPTIONS}", option.type == 'options' ? '' : 'style="display:none;"')
         .replace("{OPTIONS_VALUE}", Array.isArray(option.options) ? option.options.join(',') : option.options)
         .replace("{VALUE}", option.value)
+        .replace("{ADDON}", `onchange="renamer(this)"`)
         .replace(/{text_SELECTED}/gm, option.type == 'text' ? `selected="selected"` : '')
         .replace(/{number_SELECTED}/gm, option.type == 'number' ? `selected="selected"` : '')
+        .replace(/{color_SELECTED}/gm, option.type == 'color' ? `selected="selected"` : '')
         .replace(/{password_SELECTED}/gm, option.type == 'password' ? `selected="selected"` : '')
         .replace(/{checkbox_SELECTED}/gm, option.type == 'checkbox' ? `selected="selected"` : '')
         .replace(/{options_SELECTED}/gm, option.type == 'options' ? `selected="selected"` : '');
@@ -762,7 +774,7 @@ async function startBuilderModal(element) {
 
   const scroll = `
   <div class="m-scroll">
-    <div class="new-item">
+    <div class="new-item" style="position: sticky; top: 0; z-index: 1;">
       ${new_item}
       <div class="ms-btns flexer si-btn">
         <button class="button add-option-button flexer" n="${folderName}"><span>Add new option</span></button>
@@ -790,6 +802,7 @@ async function builderNewOption(element) {
   startDownload(element);
 
 
+  const uniqueID = document.getElementById('new___uniqueID');
   const type = document.getElementById('new___type');
   const title = document.getElementById('new___title');
   const description = document.getElementById('new___description');
@@ -798,6 +811,7 @@ async function builderNewOption(element) {
 
   const payload = {
     setting: {
+      uniqueID: uniqueID.value,
       type: type.value,
       title: title.value,
       description: description.value,
@@ -863,14 +877,17 @@ async function builderNewOption(element) {
         </div>`)
       .replace(/{class}/gm, 'OPTION')
       .replace(/{as}/gm, ' style="width: 10em"')
-      .replace(/{ID}/gm, payload.setting.title)
+      .replace(/{ID}/gm, payload.setting.uniqueID)
+      .replace("{UNIQUEID_VALUE}", payload.setting.uniqueID)
       .replace("{TITLE_VALUE}", payload.setting.title)
       .replace("{DESCRIPTION_VALUE}", payload.setting.description)
       .replace("{OPTIONS}", payload.setting.type == 'options' ? '' : 'style="display:none;"')
       .replace("{OPTIONS_VALUE}", Array.isArray(payload.setting.options) ? payload.setting.options.join(',') : payload.setting.options)
       .replace("{VALUE}", payload.value)
+      .replace("{ADDON}", `onchange="renamer(this)"`)
       .replace(/{text_SELECTED}/gm, payload.setting.type == 'text' ? `selected="selected"` : '')
       .replace(/{number_SELECTED}/gm, payload.setting.type == 'number' ? `selected="selected"` : '')
+      .replace(/{color_SELECTED}/gm, payload.setting.type == 'color' ? `selected="selected"` : '')
       .replace(/{password_SELECTED}/gm, payload.setting.type == 'password' ? `selected="selected"` : '')
       .replace(/{checkbox_SELECTED}/gm, payload.setting.type == 'checkbox' ? `selected="selected"` : '')
       .replace(/{options_SELECTED}/gm, payload.setting.type == 'options' ? `selected="selected"` : '')
@@ -882,13 +899,13 @@ async function builderNewOption(element) {
       delay: 3000,
     });
 
-    if (type) type.value = '';
+    if (uniqueID) uniqueID.value = '';
     if (title) title.value = '';
     if (description) description.value = '';
     if (default_value) default_value.value = '';
 
     // if (content.innerHTML.includes('width: 10em')) content.innerHTML += '\n<hr class="modal-space">\n';
-    content.innerHTML += html;
+    content.insertAdjacentHTML('beforeend', html);
   } catch (error) {
     displayNotification({
       element: content,
@@ -912,6 +929,7 @@ async function builderSaveSettings(element) {
   const button_text = element.innerText;
   startDownload(element);
 
+  const uniqueID = document.getElementById('new___uniqueID');
   const title = document.getElementById('new___title');
   const description = document.getElementById('new___description');
   const default_value = document.getElementById('new___value');
@@ -920,6 +938,7 @@ async function builderSaveSettings(element) {
   try {
     // check if new option fields are not empty
     if (
+      uniqueID.value ||
       title.value ||
       description.value ||
       default_value.value
@@ -939,11 +958,13 @@ async function builderSaveSettings(element) {
     document.querySelectorAll('.OPTION').forEach(r => {
       const [id, field] = r.id.split('___');
 
-      const obj = { title: id };
+      const obj = {};
       obj[field] = r.value;
 
+      console.log({ field, id }, r.value);
 
-      const find = array.find(r => r.title == id);
+
+      const find = array.find(r => r.uniqueID == id);
       if (find) {
         if (find.type == 'options' && field == 'options') {
           find[field] = r.value.split(',').filter(r => r);
@@ -958,6 +979,7 @@ async function builderSaveSettings(element) {
       array.push(obj);
     });
 
+    console.log(array);
     // if (array.length == 0) {
     //   displayNotification({
     //     element: element,
@@ -1025,9 +1047,10 @@ async function builderSaveSettings(element) {
 };
 
 function removeOption(element) {
-  const id = element.id;
+  const id = element.attributes.did?.value;
 
-  const elm = document.querySelector(`#${id}`);
+
+  const elm = document.getElementById(id);
   if (!elm) return;
 
 
@@ -1123,3 +1146,20 @@ document.addEventListener('keydown', (event) => {
     return;
   };
 });
+
+
+function renamer(element) {
+  const [id, field] = element.id.split('___');
+
+  const newID = (element.value || '').replace(/[^a-z0-9]/gmi, '');
+
+
+  if (document.getElementById(id)) document.getElementById(id).id = newID;
+  if (document.getElementById(`${id}___uniqueID`)) document.getElementById(`${id}___uniqueID`).id = `${newID}___uniqueID`;
+  if (document.getElementById(`${id}___type`)) document.getElementById(`${id}___type`).id = `${newID}___type`;
+  if (document.getElementById(`${id}___title`)) document.getElementById(`${id}___title`).id = `${newID}___title`;
+  if (document.getElementById(`${id}___description`)) document.getElementById(`${id}___description`).id = `${newID}___description`;
+  if (document.getElementById(`${id}___options`)) document.getElementById(`${id}___options`).id = `${newID}___options`;
+  if (document.getElementById(`${id}___value`)) document.getElementById(`${id}___value`).id = `${newID}___value`;
+  if (document.querySelector(`[did=${id}`)) document.querySelector(`[did=${id}`).setAttribute("did", newID);
+}

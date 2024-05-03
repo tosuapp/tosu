@@ -56,26 +56,4 @@ export class DataRepo {
 
         return instance;
     }
-
-    /**
-     * Returns map of requested services\
-     * Throws if any of requested services is not currently present
-     */
-    getServices<T extends (keyof DataRepoList)[]>(
-        services: T
-    ): Pick<DataRepoList, T[number]> | never {
-        return services.reduce(
-            (acc, item: keyof Pick<DataRepoList, T[number]>) => {
-                const instance = this.get(item);
-                if (!instance || instance === null) {
-                    throw new Error(
-                        `Service "${item}" was not set in DataRepo list`
-                    );
-                }
-                acc[item] = instance as never;
-                return acc;
-            },
-            {} as Pick<DataRepoList, T[number]>
-        );
-    }
 }

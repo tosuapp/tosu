@@ -1,6 +1,6 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '../AbstractEntity';
+import { AbstractEntity } from '@/entities/AbstractEntity';
 
 export class UserProfile extends AbstractEntity {
     name: string;
@@ -19,7 +19,7 @@ export class UserProfile extends AbstractEntity {
 
     updateState() {
         try {
-            const { patterns, process } = this.services.getServices([
+            const { patterns, process } = this.osuInstance.getServices([
                 'patterns',
                 'process'
             ]);

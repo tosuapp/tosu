@@ -1,6 +1,6 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '../AbstractEntity';
+import { AbstractEntity } from '@/entities/AbstractEntity';
 
 export class AllTimesData extends AbstractEntity {
     IsWatchingReplay: number = 0;
@@ -28,7 +28,7 @@ export class AllTimesData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns } = this.services.getServices([
+            const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns'
             ]);
@@ -40,8 +40,8 @@ export class AllTimesData extends AbstractEntity {
                 chatCheckerAddr,
                 skinDataAddr,
                 settingsClassAddr,
-                canRunSlowlyAddr
-                // gameTimePtr,
+                canRunSlowlyAddr,
+                gameTimePtr
             } = patterns.getPatterns([
                 'statusPtr',
                 'playTimeAddr',
@@ -49,8 +49,8 @@ export class AllTimesData extends AbstractEntity {
                 'chatCheckerAddr',
                 'skinDataAddr',
                 'settingsClassAddr',
-                'canRunSlowlyAddr'
-                // 'gameTimePtr',
+                'canRunSlowlyAddr',
+                'gameTimePtr'
             ]);
 
             const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
@@ -65,7 +65,7 @@ export class AllTimesData extends AbstractEntity {
             this.PlayTime = process.readInt(
                 process.readInt(playTimeAddr + 0x5)
             );
-            // this.GameTime = process.readPointer(gameTimePtr);
+            this.GameTime = process.readPointer(gameTimePtr);
             // [MenuMods + 0x9]
             this.MenuMods = process.readPointer(menuModsPtr);
             // ChatChecker - 0x20

@@ -11,7 +11,7 @@ import { buildResult as buildResultV2Precise } from '@/api/utils/buildResultV2Pr
 import { AllTimesData } from '@/entities/AllTimesData';
 import { BassDensityData } from '@/entities/BassDensityData';
 import { BeatmapPPData } from '@/entities/BeatmapPpData';
-import { DataRepo } from '@/entities/DataRepoList';
+import { DataRepo, DataRepoList } from '@/entities/DataRepoList';
 import { GamePlayData } from '@/entities/GamePlayData';
 import { MenuData } from '@/entities/MenuData';
 import { ResultsScreenData } from '@/entities/ResultsScreenData';
@@ -79,10 +79,10 @@ const SCAN_PATTERNS: {
         pattern: 'B8 0B 00 00 8B 35',
         offset: -0xb
     },
-    // gameTimePtr: {
-    //     pattern: 'FF 15 ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 15 ?? ?? ?? ?? 3B',
-    //     offset: 0x7
-    // },
+    gameTimePtr: {
+        pattern: '8B 35 ?? ?? ?? ?? 8B C6 B9',
+        offset: 0x2
+    },
     spectatingUserPtr: {
         pattern: '8B 0D ?? ?? ?? ?? 85 C0 74 05 8B 50 30',
         offset: -0x4
@@ -119,28 +119,19 @@ export class OsuInstance {
 
         this.entities.set('process', this.process);
         this.entities.set('patterns', new MemoryPatterns());
-        this.entities.set('settings', new Settings(this.entities));
-        this.entities.set('allTimesData', new AllTimesData(this.entities));
-        this.entities.set('beatmapPpData', new BeatmapPPData(this.entities));
-        this.entities.set('menuData', new MenuData(this.entities));
-        this.entities.set(
-            'bassDensityData',
-            new BassDensityData(this.entities)
-        );
-        this.entities.set('gamePlayData', new GamePlayData(this.entities));
-        this.entities.set(
-            'resultsScreenData',
-            new ResultsScreenData(this.entities)
-        );
+        this.entities.set('settings', new Settings(this));
+        this.entities.set('allTimesData', new AllTimesData(this));
+        this.entities.set('beatmapPpData', new BeatmapPPData(this));
+        this.entities.set('menuData', new MenuData(this));
+        this.entities.set('bassDensityData', new BassDensityData(this));
+        this.entities.set('gamePlayData', new GamePlayData(this));
+        this.entities.set('resultsScreenData', new ResultsScreenData(this));
         this.entities.set(
             'tourneyUserProfileData',
-            new TourneyUserProfileData(this.entities)
+            new TourneyUserProfileData(this)
         );
-        this.entities.set(
-            'tourneyManagerData',
-            new TourneyManagerData(this.entities)
-        );
-        this.entities.set('userProfile', new UserProfile(this.entities));
+        this.entities.set('tourneyManagerData', new TourneyManagerData(this));
+        this.entities.set('userProfile', new UserProfile(this));
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
         this.updateMapMetadata = this.updateMapMetadata.bind(this);
@@ -247,7 +238,7 @@ export class OsuInstance {
             tourneyUserProfileData,
             tourneyManagerData,
             userProfile
-        } = this.entities.getServices([
+        } = this.getServices([
             'allTimesData',
             'menuData',
             'bassDensityData',
@@ -368,7 +359,7 @@ export class OsuInstance {
     initHighRateData() {
         wLogger.debug('OI(updatePreciseData) starting');
 
-        const { allTimesData, gamePlayData } = this.entities.getServices([
+        const { allTimesData, gamePlayData } = this.getServices([
             'allTimesData',
             'gamePlayData'
         ]);
@@ -403,7 +394,7 @@ export class OsuInstance {
     initMapMetadata() {
         wLogger.debug('OI(updateMapMetadata) Starting');
 
-        const entities = this.entities.getServices([
+        const entities = this.getServices([
             'menuData',
             'allTimesData',
             'gamePlayData',
@@ -464,14 +455,36 @@ export class OsuInstance {
     }
 
     getState(instanceManager: InstanceManager) {
-        return buildResult(this.entities, instanceManager);
+        return buildResult(instanceManager);
     }
 
     getStateV2(instanceManager: InstanceManager) {
-        return buildResultV2(this.entities, instanceManager);
+        return buildResultV2(instanceManager);
     }
 
-    getPreciseData() {
-        return buildResultV2Precise(this.entities);
+    getPreciseData(instanceManager: InstanceManager) {
+        return buildResultV2Precise(instanceManager);
+    }
+
+    /**
+     * Returns map of requested services\
+     * Throws if any of requested services is not currently present
+     */
+    getServices<T extends (keyof DataRepoList)[]>(
+        services: T
+    ): Pick<DataRepoList, T[number]> | never {
+        return services.reduce(
+            (acc, item: keyof Pick<DataRepoList, T[number]>) => {
+                const instance = this.entities.get(item);
+                if (!instance || instance === null) {
+                    throw new Error(
+                        `Service "${item}" was not set in DataRepo list`
+                    );
+                }
+                acc[item] = instance as never;
+                return acc;
+            },
+            {} as Pick<DataRepoList, T[number]>
+        );
     }
 }

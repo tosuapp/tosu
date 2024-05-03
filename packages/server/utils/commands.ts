@@ -1,8 +1,6 @@
-import { JsonSaveParse, getStaticPath, wLogger } from '@tosu/common';
-import fs from 'fs';
-import path from 'path';
+import { wLogger } from '@tosu/common';
 
-import { ISettings, ISettingsCompact } from './counters.types';
+import { parseCounterSettings } from './parseSettings';
 import { ModifiedWebsocket } from './socket';
 
 export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
@@ -24,35 +22,15 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             }
 
             try {
-                const staticPath = getStaticPath();
-                const settingsPath = path.join(
-                    staticPath,
-                    decodeURI(payload),
-                    'settings.json'
-                );
-                const settingsValuesPath = path.join(
-                    staticPath,
-                    decodeURI(payload),
-                    'settings.values.json'
-                );
-
-                const settings: ISettings[] = JsonSaveParse(
-                    fs.readFileSync(settingsPath, 'utf8'),
-                    []
-                );
-
-                const values: ISettingsCompact = JsonSaveParse(
-                    fs.readFileSync(settingsValuesPath, 'utf8'),
-                    {}
-                );
-
-                for (let i = 0; i < settings.length; i++) {
-                    const setting = settings[i];
-                    if (!values[setting.title])
-                        values[setting.title] = setting.value;
+                const result = parseCounterSettings(payload, 'counter/get');
+                if (result instanceof Error) {
+                    message = {
+                        error: result.name
+                    };
+                    break;
                 }
 
-                message = values;
+                message = result.values;
             } catch (exc) {
                 wLogger.error(
                     `WS_COMMANDS(getSettings) >>>`,

@@ -1,6 +1,6 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '../AbstractEntity';
+import { AbstractEntity } from '@/entities/AbstractEntity';
 
 // yep each dto should have class!
 export class BassDensityData extends AbstractEntity {
@@ -11,9 +11,8 @@ export class BassDensityData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process: osuProcess, patterns } = this.services.getServices(
-                ['process', 'patterns']
-            );
+            const { process: osuProcess, patterns } =
+                this.osuInstance.getServices(['process', 'patterns']);
             if (osuProcess === null) {
                 throw new Error('Process not found');
             }

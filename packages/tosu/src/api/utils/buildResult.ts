@@ -1,17 +1,15 @@
 import path from 'path';
 
-import { DataRepo } from '@/entities/DataRepoList';
-import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
-import { InstanceManager } from '@/objects/instanceManager/instanceManager';
-import { fixDecimals } from '@/utils/converters';
-import { getOsuModsString } from '@/utils/osuMods';
-
 import {
     ApiAnswer,
     LeaderboardPlayer,
     TourneyIpcClient,
     TourneyValues
-} from '../types/v1';
+} from '@/api/types/v1';
+import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
+import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { fixDecimals } from '@/utils/converters';
+import { getOsuModsString } from '@/utils/osuMods';
 
 const defaultLBPlayer = {
     name: '',
@@ -45,10 +43,12 @@ const convertMemoryPlayerToResult = (
     isPassing: Number(memoryPlayer.IsPassing)
 });
 
-export const buildResult = (
-    service: DataRepo,
-    instanceManager: InstanceManager
-): ApiAnswer => {
+export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
+    const osuInstance = instanceManager.getInstance();
+    if (!osuInstance) {
+        return { error: 'not_ready' };
+    }
+
     const {
         bassDensityData,
         allTimesData,
@@ -57,7 +57,7 @@ export const buildResult = (
         resultsScreenData,
         beatmapPpData,
         userProfile
-    } = service.getServices([
+    } = osuInstance.getServices([
         'bassDensityData',
         'allTimesData',
         'menuData',
@@ -282,7 +282,7 @@ const buildTourneyData = (
         .sort((a, b) => a.ipcId - b.ipcId)
         .map<TourneyIpcClient>((instance, iterator) => {
             const { allTimesData, gamePlayData, tourneyUserProfileData } =
-                instance.entities.getServices([
+                instance.getServices([
                     'allTimesData',
                     'gamePlayData',
                     'tourneyUserProfileData'
@@ -344,7 +344,7 @@ const buildTourneyData = (
             };
         });
 
-    const { tourneyManagerData } = osuTourneyManager[0].entities.getServices([
+    const { tourneyManagerData } = osuTourneyManager[0].getServices([
         'tourneyManagerData'
     ]);
 

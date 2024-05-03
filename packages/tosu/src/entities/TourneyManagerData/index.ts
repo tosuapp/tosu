@@ -1,6 +1,7 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '../AbstractEntity';
+import { AbstractEntity } from '@/entities/AbstractEntity';
+
 import { ITourneyManagetChatItem } from './types';
 
 const TOURNAMENT_CHAT_ENGINE = '75 08 8D 65 F4 5B 5E 5F 5D C3 85 D2 74 72';
@@ -26,7 +27,7 @@ export class TourneyManagerData extends AbstractEntity {
         try {
             wLogger.debug('TMD(updateState) Starting');
 
-            const { process, patterns } = this.services.getServices([
+            const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns'
             ]);
