@@ -11,7 +11,7 @@ import path from 'path';
 import semver from 'semver';
 
 import { getContentType } from '../utils';
-import { ICounter, ISettings, ISettingsCompact } from './counters.types';
+import { ICounter, ISettings, bodyPayload } from './counters.types';
 import {
     authorHTML,
     authorLinksHTML,
@@ -30,6 +30,7 @@ import {
     selectHTML,
     settingsItemHTML
 } from './htmls';
+import { parseCounterSettings } from './parseSettings';
 
 /**
  * ТАК КАК БЛЯТЬ У НАС В ЖЫЭСЕ
@@ -120,7 +121,7 @@ export function createSetting(setting: ISettings, value: any) {
                     '{INPUT}',
                     inputHTML
                         .replace('{TYPE}', 'text')
-                        .replace(/{NAME}/gm, setting.title)
+                        .replace(/{ID}/gm, setting.uniqueID)
                         .replace('{ADDON}', `ucs t="${setting.type}"`)
                         .replace('{VALUE}', value)
                 );
@@ -134,7 +135,7 @@ export function createSetting(setting: ISettings, value: any) {
                     '{INPUT}',
                     inputHTML
                         .replace('{TYPE}', 'number')
-                        .replace(/{NAME}/gm, setting.title)
+                        .replace(/{ID}/gm, setting.uniqueID)
                         .replace('{ADDON}', `ucs t="${setting.type}"`)
                         .replace('{VALUE}', value)
                 );
@@ -148,7 +149,7 @@ export function createSetting(setting: ISettings, value: any) {
                     '{INPUT}',
                     inputHTML
                         .replace('{TYPE}', 'password')
-                        .replace(/{NAME}/gm, setting.title)
+                        .replace(/{ID}/gm, setting.uniqueID)
                         .replace('{ADDON}', `ucs t="${setting.type}"`)
                         .replace('{VALUE}', value)
                 );
@@ -162,7 +163,7 @@ export function createSetting(setting: ISettings, value: any) {
                     '{INPUT}',
                     checkboxHTML
                         .replace('{TYPE}', 'text')
-                        .replace(/{NAME}/gm, setting.title)
+                        .replace(/{ID}/gm, setting.uniqueID)
                         .replace(
                             '{ADDON}',
                             value
@@ -181,7 +182,7 @@ export function createSetting(setting: ISettings, value: any) {
                     '{INPUT}',
                     inputHTML
                         .replace('{TYPE}', 'color')
-                        .replace(/{NAME}/gm, setting.title)
+                        .replace(/{ID}/gm, setting.uniqueID)
                         .replace('{ADDON}', `ucs t="${setting.type}"`)
                         .replace('{VALUE}', value)
                 );
@@ -203,7 +204,7 @@ export function createSetting(setting: ISettings, value: any) {
                 .replace(
                     '{INPUT}',
                     selectHTML
-                        .replace(/{NAME}/gm, setting.title)
+                        .replace(/{ID}/gm, setting.uniqueID)
                         .replace('{ADDON}', `ucs t="${setting.type}"`)
                         .replace('{OPTIONS}', options)
                 );
@@ -214,37 +215,18 @@ export function createSetting(setting: ISettings, value: any) {
 }
 
 export function parseSettings(
-    settingsPath: string,
-    settingsValuesPath: string,
+    settings: ISettings[],
     folderName: string
 ): string | Error {
-    const array: ISettings[] | Error = JsonSaveParse(
-        fs.readFileSync(settingsPath, 'utf8'),
-        new Error('nothing')
-    );
-    if (array instanceof Error) {
-        return array;
-    }
-
-    if (!Array.isArray(array)) {
-        return new Error('settings.json is not array of objects');
-    }
-
-    const arrayValues: ISettingsCompact = JsonSaveParse(
-        fs.readFileSync(settingsValuesPath, 'utf8'),
-        {}
-    );
-
     let html = `<h2 class="ms-title"><span>Settings</span><span>«${decodeURI(folderName)}»</span></h2><div class="m-scroll">`;
-    for (let i = 0; i < array.length; i++) {
-        const setting = array[i];
+    for (let i = 0; i < settings.length; i++) {
+        const setting = settings[i];
 
-        if (setting.title === undefined || setting.title === null) {
+        if (setting.uniqueID === undefined || setting.uniqueID === null) {
             continue;
         }
 
-        const value = arrayValues[setting.title] || setting.value;
-        html += createSetting(setting, value);
+        html += createSetting(setting, setting.value);
     }
 
     html += '</div>'; // close scroll div
@@ -256,54 +238,17 @@ export function parseSettings(
     return html;
 }
 
-export function saveSettings(
-    settingsPath: string,
-    settingsValuesPath: string,
-    result: {
-        title: string;
-        value: any;
-    }[]
-) {
-    const array: ISettings[] | Error = JsonSaveParse(
-        fs.readFileSync(settingsPath, 'utf8'),
-        new Error('nothing')
+export function saveSettings(folderName: string, payload: bodyPayload[]) {
+    const result = parseCounterSettings(folderName, 'user/save', payload);
+    if (result instanceof Error) {
+        return result;
+    }
+
+    fs.writeFileSync(
+        result.settingsValuesPath,
+        JSON.stringify(result.values),
+        'utf8'
     );
-    if (array instanceof Error) {
-        return array;
-    }
-
-    if (!Array.isArray(array)) {
-        return new Error('settings.json is not array of objects');
-    }
-
-    const obj: ISettingsCompact = {};
-    for (let i = 0; i < result.length; i++) {
-        const setting = result[i];
-
-        const find = array.findIndex((r) => r.title === setting.title);
-        if (find === -1) continue;
-
-        switch (array[find].type) {
-            case 'number': {
-                array[find].value = isNaN(setting.value) ? 0 : +setting.value;
-                break;
-            }
-
-            case 'checkbox': {
-                array[find].value = Boolean(setting.value);
-                break;
-            }
-
-            default: {
-                array[find].value = setting.value;
-                break;
-            }
-        }
-
-        obj[setting.title] = array[find].value;
-    }
-
-    fs.writeFileSync(settingsValuesPath, JSON.stringify(obj), 'utf8');
     return true;
 }
 
@@ -642,7 +587,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{NAME}/gm, 'DEBUG_LOG')
+                .replace(/{ID}/gm, 'DEBUG_LOG')
                 .replace('{ADDON}', config.debugLogging ? 'checked="true"' : '')
                 .replace('{VALUE}', `${config.debugLogging}`)
         );
@@ -656,7 +601,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{NAME}/gm, 'CALCULATE_PP')
+                .replace(/{ID}/gm, 'CALCULATE_PP')
                 .replace('{ADDON}', config.calculatePP ? 'checked="true"' : '')
                 .replace('{VALUE}', `${config.calculatePP}`)
         );
@@ -670,7 +615,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{NAME}/gm, 'ENABLE_KEY_OVERLAY')
+                .replace(/{ID}/gm, 'ENABLE_KEY_OVERLAY')
                 .replace(
                     '{ADDON}',
                     config.enableKeyOverlay ? 'checked="true"' : ''
@@ -687,7 +632,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{NAME}/gm, 'ENABLE_GOSU_OVERLAY')
+                .replace(/{ID}/gm, 'ENABLE_GOSU_OVERLAY')
                 .replace(
                     '{ADDON}',
                     config.enableGosuOverlay ? 'checked="true"' : ''
@@ -705,7 +650,7 @@ export function buildSettings(res: http.ServerResponse) {
             '{INPUT}',
             inputHTML
                 .replace('{TYPE}', 'number')
-                .replace(/{NAME}/gm, 'POLL_RATE')
+                .replace(/{ID}/gm, 'POLL_RATE')
                 .replace('{ADDON}', config.pollRate ? 'min="0"' : '')
                 .replace('{VALUE}', `${config.pollRate}`)
         );
@@ -720,7 +665,7 @@ export function buildSettings(res: http.ServerResponse) {
             '{INPUT}',
             inputHTML
                 .replace('{TYPE}', 'number')
-                .replace(/{NAME}/gm, 'PRECISE_DATA_POLL_RATE')
+                .replace(/{ID}/gm, 'PRECISE_DATA_POLL_RATE')
                 .replace('{ADDON}', config.preciseDataPollRate ? 'min="0"' : '')
                 .replace('{VALUE}', `${config.preciseDataPollRate}`)
         );
@@ -734,7 +679,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{NAME}/gm, 'ENABLE_AUTOUPDATE')
+                .replace(/{ID}/gm, 'ENABLE_AUTOUPDATE')
                 .replace(
                     '{ADDON}',
                     config.enableAutoUpdate ? 'checked="true"' : ''
@@ -748,7 +693,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{NAME}/gm, 'OPEN_DASHBOARD_ON_STARTUP')
+                .replace(/{ID}/gm, 'OPEN_DASHBOARD_ON_STARTUP')
                 .replace(
                     '{ADDON}',
                     config.openDashboardOnStartup ? 'checked="true"' : ''
@@ -763,7 +708,7 @@ export function buildSettings(res: http.ServerResponse) {
             '{INPUT}',
             inputHTML
                 .replace('{TYPE}', 'text')
-                .replace(/{NAME}/gm, 'SERVER_IP')
+                .replace(/{ID}/gm, 'SERVER_IP')
                 .replace('{ADDON}', config.serverIP ? 'min="0"' : '')
                 .replace('{VALUE}', `${config.serverIP}`)
         );
@@ -775,7 +720,7 @@ export function buildSettings(res: http.ServerResponse) {
             '{INPUT}',
             inputHTML
                 .replace('{TYPE}', 'number')
-                .replace(/{NAME}/gm, 'SERVER_PORT')
+                .replace(/{ID}/gm, 'SERVER_PORT')
                 .replace('{ADDON}', config.serverPort ? 'min="0"' : '')
                 .replace('{VALUE}', `${config.serverPort}`)
         );
@@ -787,7 +732,7 @@ export function buildSettings(res: http.ServerResponse) {
             '{INPUT}',
             inputHTML
                 .replace('{TYPE}', 'text')
-                .replace(/{NAME}/gm, 'STATIC_FOLDER_PATH')
+                .replace(/{ID}/gm, 'STATIC_FOLDER_PATH')
                 .replace('{ADDON}', config.staticFolderPath ? 'min="0"' : '')
                 .replace('{VALUE}', `${config.staticFolderPath}`)
         );

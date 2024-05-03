@@ -1,4 +1,5 @@
 export interface ISettings {
+    uniqueID: string;
     type: ISettingsType;
     title: string;
     options?: any[];
@@ -32,4 +33,9 @@ export interface ICounter {
         url: string;
     }[];
     downloadLink?: string;
+}
+
+export interface bodyPayload {
+    uniqueID: string;
+    value: any;
 }

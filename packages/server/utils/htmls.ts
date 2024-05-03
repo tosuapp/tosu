@@ -52,15 +52,15 @@ export const settingsItemHTML = `
 
 export const checkboxHTML = `
 <label class="si-checkbox">
-  <input type="checkbox" name="{NAME}" id="{NAME}" {ADDON} value="{VALUE}" />
+  <input type="checkbox" name="{NAME}" id="{ID}" {ADDON} value="{VALUE}" />
   <span class="checkmark"></span>
   <span class="status"></span>
 </label>`;
 
 export const inputHTML =
-    '<input type="{TYPE}" id="{NAME}" {ADDON} value="{VALUE}">';
+    '<input type="{TYPE}" id="{ID}" {ADDON} value="{VALUE}">';
 
-export const selectHTML = `<select id="{NAME}" {ADDON}>{OPTIONS}</select>`;
+export const selectHTML = `<select id="{ID}" {ADDON}>{OPTIONS}</select>`;
 
 export const saveSettingsButtonHTML =
     '<div class="flexer si-btn"><button class="button save-button flexer"><span>Save settings</span></button></div>';
