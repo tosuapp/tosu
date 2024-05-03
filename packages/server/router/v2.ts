@@ -37,9 +37,7 @@ export default function buildV2Api(app: HttpServer) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData } = osuInstance.entities.getServices([
-                'allTimesData'
-            ]);
+            const { allTimesData } = osuInstance.getServices(['allTimesData']);
             if (allTimesData.SongsFolder === '') {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
@@ -71,9 +69,7 @@ export default function buildV2Api(app: HttpServer) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData } = osuInstance.entities.getServices([
-                'allTimesData'
-            ]);
+            const { allTimesData } = osuInstance.getServices(['allTimesData']);
             if (
                 (allTimesData.GameFolder === '' &&
                     allTimesData.SkinFolder === '') ||

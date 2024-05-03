@@ -1,6 +1,6 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '../AbstractEntity';
+import { AbstractEntity } from '@/entities/AbstractEntity';
 
 export class AllTimesData extends AbstractEntity {
     IsWatchingReplay: number = 0;
@@ -28,7 +28,7 @@ export class AllTimesData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns } = this.services.getServices([
+            const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns'
             ]);

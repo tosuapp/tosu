@@ -1,14 +1,7 @@
 import path from 'path';
 
-import { DataRepo } from '@/entities/DataRepoList';
-import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
-import { InstanceManager } from '@/objects/instanceManager/instanceManager';
-import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
-import { fixDecimals } from '@/utils/converters';
-import { getOsuModsString } from '@/utils/osuMods';
-
 import {
-    ApiV2Answer,
+    ApiAnswer,
     BanchoStatusEnum,
     BeatmapStatuses,
     ChatStatus,
@@ -24,7 +17,13 @@ import {
     TourneyChatMessages,
     TourneyClients,
     UserLoginStatus
-} from '../types/v2';
+} from '@/api/types/v2';
+import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
+import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
+import { fixDecimals } from '@/utils/converters';
+import { getOsuModsString } from '@/utils/osuMods';
+
 import { CountryCodes } from './countryCodes';
 
 const convertMemoryPlayerToResult = (
@@ -71,10 +70,12 @@ const convertMemoryPlayerToResult = (
     };
 };
 
-export const buildResult = (
-    service: DataRepo,
-    instanceManager: InstanceManager
-): ApiV2Answer => {
+export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
+    const osuInstance = instanceManager.getInstance();
+    if (!osuInstance) {
+        return { error: 'not_ready' };
+    }
+
     const {
         settings,
         bassDensityData,
@@ -84,7 +85,7 @@ export const buildResult = (
         resultsScreenData,
         beatmapPpData,
         userProfile
-    } = service.getServices([
+    } = osuInstance.getServices([
         'settings',
         'bassDensityData',
         'allTimesData',
@@ -449,7 +450,7 @@ const buildTourneyData = (
                 gamePlayData,
                 tourneyUserProfileData,
                 beatmapPpData
-            } = instance.entities.getServices([
+            } = instance.getServices([
                 'allTimesData',
                 'gamePlayData',
                 'tourneyUserProfileData',
@@ -528,7 +529,7 @@ const buildTourneyData = (
             };
         });
 
-    const { tourneyManagerData } = osuTourneyManager[0].entities.getServices([
+    const { tourneyManagerData } = osuTourneyManager[0].getServices([
         'tourneyManagerData'
     ]);
 

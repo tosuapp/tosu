@@ -1,11 +1,10 @@
 import { wLogger } from '@tosu/common';
 
-import { DataRepo } from '@/entities/DataRepoList';
+import { AbstractEntity } from '@/entities/AbstractEntity';
+import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { calculateGrade } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { OsuMods } from '@/utils/osuMods.types';
-
-import { AbstractEntity } from '../AbstractEntity';
 
 export class ResultsScreenData extends AbstractEntity {
     PlayerName: string;
@@ -22,8 +21,8 @@ export class ResultsScreenData extends AbstractEntity {
     Grade: string;
     Date: string;
 
-    constructor(services: DataRepo) {
-        super(services);
+    constructor(osuInstance: OsuInstance) {
+        super(osuInstance);
 
         this.init();
     }
@@ -48,7 +47,7 @@ export class ResultsScreenData extends AbstractEntity {
     updateState() {
         try {
             const { process, patterns, allTimesData } =
-                this.services.getServices([
+                this.osuInstance.getServices([
                     'process',
                     'patterns',
                     'allTimesData'

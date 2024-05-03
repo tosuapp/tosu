@@ -559,7 +559,7 @@ export class Settings extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns } = this.services.getServices([
+            const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns'
             ]);

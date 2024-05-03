@@ -6,10 +6,9 @@ import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 
 import { BeatmapStrains } from '@/api/types/v1';
-import { DataRepo } from '@/entities/DataRepoList';
+import { AbstractEntity } from '@/entities/AbstractEntity';
+import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { fixDecimals } from '@/utils/converters';
-
-import { AbstractEntity } from '../AbstractEntity';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -68,8 +67,8 @@ export class BeatmapPPData extends AbstractEntity {
     currAttributes: BeatmapPPCurrentAttributes;
     timings: BeatmapPPTimings;
 
-    constructor(services: DataRepo) {
-        super(services);
+    constructor(osuInstance: OsuInstance) {
+        super(osuInstance);
 
         this.init();
     }
@@ -193,7 +192,7 @@ export class BeatmapPPData extends AbstractEntity {
     updateMapMetadata(currentMods: number) {
         const startTime = performance.now();
 
-        const { menuData, allTimesData } = this.services.getServices([
+        const { menuData, allTimesData } = this.osuInstance.getServices([
             'menuData',
             'allTimesData',
             'beatmapPpData'
@@ -442,7 +441,7 @@ export class BeatmapPPData extends AbstractEntity {
 
         const startTime = performance.now();
 
-        const { allTimesData } = this.services.getServices(['allTimesData']);
+        const { allTimesData } = this.osuInstance.getServices(['allTimesData']);
 
         const decoder = new BeatmapDecoder().decodeFromString(
             this.beatmapContent,

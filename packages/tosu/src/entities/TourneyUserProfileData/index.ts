@@ -1,6 +1,6 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '../AbstractEntity';
+import { AbstractEntity } from '@/entities/AbstractEntity';
 
 export class TourneyUserProfileData extends AbstractEntity {
     isDefaultState: boolean = true;
@@ -33,11 +33,12 @@ export class TourneyUserProfileData extends AbstractEntity {
     updateState() {
         wLogger.debug('TUPD(updateState) Starting');
 
-        const { process, gamePlayData, patterns } = this.services.getServices([
-            'process',
-            'gamePlayData',
-            'patterns'
-        ]);
+        const { process, gamePlayData, patterns } =
+            this.osuInstance.getServices([
+                'process',
+                'gamePlayData',
+                'patterns'
+            ]);
 
         const spectatingUserDrawable = process.readPointer(
             patterns.getPattern('spectatingUserPtr')

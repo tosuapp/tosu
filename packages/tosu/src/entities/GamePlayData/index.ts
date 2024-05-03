@@ -2,13 +2,12 @@ import { Calculator } from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
-import { DataRepo } from '@/entities/DataRepoList';
+import { AbstractEntity } from '@/entities/AbstractEntity';
 import { Leaderboard } from '@/entities/GamePlayData/Leaderboard';
+import { MenuData } from '@/entities/MenuData';
+import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { OsuMods } from '@/utils/osuMods.types';
-
-import { AbstractEntity } from '../AbstractEntity';
-import { MenuData } from '../MenuData';
 
 export interface KeyOverlay {
     K1Pressed: boolean;
@@ -55,8 +54,8 @@ export class GamePlayData extends AbstractEntity {
 
     private scoreBase: number = 0;
 
-    constructor(services: DataRepo) {
-        super(services);
+    constructor(osuInstance: OsuInstance) {
+        super(osuInstance);
 
         this.init();
     }
@@ -134,7 +133,7 @@ export class GamePlayData extends AbstractEntity {
     updateState() {
         try {
             const { process, patterns, allTimesData, menuData } =
-                this.services.getServices([
+                this.osuInstance.getServices([
                     'process',
                     'patterns',
                     'allTimesData',
@@ -272,7 +271,7 @@ export class GamePlayData extends AbstractEntity {
 
     updateKeyOverlay() {
         try {
-            const { process, patterns } = this.services.getServices([
+            const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns'
             ]);
@@ -401,7 +400,7 @@ export class GamePlayData extends AbstractEntity {
         try {
             if (this.scoreBase === 0 || !this.scoreBase) return [];
 
-            const { process, patterns } = this.services.getServices([
+            const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns',
                 'allTimesData',
@@ -508,7 +507,7 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        const { allTimesData, beatmapPpData } = this.services.getServices([
+        const { allTimesData, beatmapPpData } = this.osuInstance.getServices([
             'allTimesData',
             'beatmapPpData'
         ]);

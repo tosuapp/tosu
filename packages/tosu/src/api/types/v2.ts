@@ -145,7 +145,10 @@ export enum GameState {
     Charts
 }
 
-export interface ApiV2Answer {
+export type ApiAnswer = TosuAPi | { error?: string };
+export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
+
+export interface TosuAPi {
     state: NumberName;
     session: Session;
     settings: Settings;
@@ -393,7 +396,7 @@ export interface Combo2 {
     max: number;
 }
 
-export interface PreciseAnswer {
+export interface TosuPreciseAnswer {
     keys: KeyOverlay;
     hitErrors: number[];
 }

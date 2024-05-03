@@ -313,7 +313,7 @@ export interface UserProfileAnswer {
     backgroundColour: string;
 }
 
-export interface ApiAnswer {
+export interface GosuCompatibleApi {
     settings: InSettingsValues;
     menu: InMenuValues;
     gameplay: GameplayValues;
@@ -321,3 +321,5 @@ export interface ApiAnswer {
     userProfile: UserProfileAnswer;
     tourney?: TourneyValues;
 }
+
+export type ApiAnswer = GosuCompatibleApi | { error?: string };
