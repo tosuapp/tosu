@@ -859,7 +859,7 @@ async function builderNewOption(element) {
       };
     };
 
-    let isExists = document.querySelector(`#${payload.setting.title}___title`);
+    let isExists = document.querySelector(`#${payload.setting.uniqueID}___uniqueID`);
     if (isExists) {
       displayNotification({
         element: element,
@@ -907,6 +907,7 @@ async function builderNewOption(element) {
     // if (content.innerHTML.includes('width: 10em')) content.innerHTML += '\n<hr class="modal-space">\n';
     content.insertAdjacentHTML('beforeend', html);
   } catch (error) {
+    console.error(error);
     displayNotification({
       element: content,
       text: `Error while adding option: ${error.name}`,
@@ -1031,7 +1032,7 @@ async function builderSaveSettings(element) {
     isBuilderModal = false;
     closeModal(null);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     displayNotification({
       element: element,
       text: `Error while saving builder settings: ${error.name}`,

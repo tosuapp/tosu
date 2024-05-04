@@ -54,7 +54,7 @@ STATIC_FOLDER_PATH=./static`,
 dotenv.config({ path: configPath });
 
 export const config = {
-    enableAutoUpdate: (process.env.ENABLE_AUTOUPDATE || '') === 'true',
+    enableAutoUpdate: (process.env.ENABLE_AUTOUPDATE || 'true') === 'true',
     openDashboardOnStartup:
         (process.env.OPEN_DASHBOARD_ON_STARTUP || '') === 'true',
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
