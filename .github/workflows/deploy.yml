@@ -6,6 +6,7 @@ on:
     tags:
       - "v*"
     paths:
+      - ".github/workflows/**/*"
       - "packages/**/*"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -57,7 +58,7 @@ jobs:
 
       - name: 🚀 - Upload artifacts for windows
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with: {
           name: "tosu-${{ matrix.os }}-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/tosu/dist/tosu.exe
