@@ -25,10 +25,12 @@
       <i class="icon-discord"></i>
       discord
     </a>
-    <a href="https://osuck.link/tosu-counter-submit" target="_blank" class="flexer indent-left sbmt">
-      submit pp counter
-      <i class="icon-link"></i>
-    </a>
+    <label class="flexer devmode si-checkbox indent-left">
+      <input type="checkbox" name="devMode" id="devMode" value="false" />
+      <div>DevMode</div>
+      <span class="status"></span>
+      <span class="checkmark"></span>
+    </label>
   </header>
   <div class="update-available hidden">
     <div>New version available. {OLD} => {NEW}</div>
@@ -42,7 +44,7 @@
       </a>
       <a href="/?tab=0" class="indent-left tab-item">Installed</a>
       <a href="/?tab=1" class="tab-item">Available</a>
-      <a href="/?tab=3" class="tab-item">How to add counter</a>
+      <!-- <a href="/?tab=3" class="tab-item">How to add counter</a> -->
       <div class="indent-left">
         <input class="search-bar" type="text" placeholder="search">
         <!-- <a href="https://github.com/cyperdark/osu-counters/?tab=readme-ov-file#how-to-submit-pp-counter" target="_blank" class="button submit-button">Submit</a> -->
