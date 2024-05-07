@@ -44,6 +44,6 @@
     "url": "https://github.com/KotRikD/tosu/issues"
   },
   "engines": {
-    "node": ">=18.14.2"
+    "node": ">=20.11.1"
   }
 }
