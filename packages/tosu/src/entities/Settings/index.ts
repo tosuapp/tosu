@@ -90,6 +90,9 @@ export class Settings extends AbstractEntity {
     private configStateErrorAttempts: number = 0;
     private bindingStateErrorAttempts: number = 0;
 
+    private scvErrorAttempts: number = 0;
+    private sbvErrorAttempts: number = 0;
+
     private configList: Record<string, IConfigBindable> = {
         VolumeUniversal: {
             type: 'int',
@@ -428,8 +431,17 @@ export class Settings extends AbstractEntity {
 
                 this.configList[key].setValue(value);
             }
+
+            this.scvErrorAttempts = 0;
         } catch (exc) {
-            wLogger.error("ATD(setConfigValue) Can't update config state");
+            this.scvErrorAttempts += 1;
+
+            if (this.scvErrorAttempts > 10) {
+                wLogger.error(
+                    "ATD(setConfigValue) Can't set config value",
+                    position
+                );
+            }
             wLogger.debug(exc);
         }
     }
@@ -450,8 +462,17 @@ export class Settings extends AbstractEntity {
             } else {
                 // console.log('binding', key);
             }
+
+            this.sbvErrorAttempts = 0;
         } catch (exc) {
-            wLogger.error("ATD(setBindingValue) Can't update config state");
+            this.sbvErrorAttempts += 1;
+
+            if (this.sbvErrorAttempts > 10) {
+                wLogger.error(
+                    "ATD(setBindingValue) Can't set binding value",
+                    position
+                );
+            }
             wLogger.debug(exc);
         }
     }
@@ -476,7 +497,7 @@ export class Settings extends AbstractEntity {
                 this.configPositions.push(i);
             }
         } catch (exc) {
-            wLogger.error("ATD(updateConfigState) Can't update config state");
+            wLogger.error("ATD(updateConfigState) Can't find config offset");
             wLogger.debug(exc);
         }
     }
@@ -500,7 +521,7 @@ export class Settings extends AbstractEntity {
                 this.bindingPositions.push(i);
             }
         } catch (exc) {
-            wLogger.error("ATD(updateConfigState) Can't update config state");
+            wLogger.error("ATD(updateConfigState) Can't find binding offset");
             wLogger.debug(exc);
         }
     }
