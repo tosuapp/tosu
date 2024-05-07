@@ -3,6 +3,7 @@ import {
     config,
     getStaticPath,
     recursiveFilesSearch,
+    sanitizeText,
     wLogger
 } from '@tosu/common';
 import fs from 'fs';
@@ -112,11 +113,14 @@ export function parseTXT(filePath: string) {
 }
 
 export function createSetting(setting: ISettings, value: any) {
+    const title = sanitizeText(setting.title);
+    const description = sanitizeText(setting.description);
+
     switch (setting.type) {
         case 'text': {
             return settingsItemHTML
-                .replace('{NAME}', setting.title)
-                .replace('{DESCRIPTION}', setting.description)
+                .replace('{NAME}', title)
+                .replace('{DESCRIPTION}', description)
                 .replace(
                     '{INPUT}',
                     inputHTML
@@ -129,8 +133,8 @@ export function createSetting(setting: ISettings, value: any) {
 
         case 'number': {
             return settingsItemHTML
-                .replace('{NAME}', setting.title)
-                .replace('{DESCRIPTION}', setting.description)
+                .replace('{NAME}', title)
+                .replace('{DESCRIPTION}', description)
                 .replace(
                     '{INPUT}',
                     inputHTML
@@ -143,8 +147,8 @@ export function createSetting(setting: ISettings, value: any) {
 
         case 'password': {
             return settingsItemHTML
-                .replace('{NAME}', setting.title)
-                .replace('{DESCRIPTION}', setting.description)
+                .replace('{NAME}', title)
+                .replace('{DESCRIPTION}', description)
                 .replace(
                     '{INPUT}',
                     inputHTML
@@ -157,8 +161,8 @@ export function createSetting(setting: ISettings, value: any) {
 
         case 'checkbox': {
             return settingsItemHTML
-                .replace('{NAME}', setting.title)
-                .replace('{DESCRIPTION}', setting.description)
+                .replace('{NAME}', title)
+                .replace('{DESCRIPTION}', description)
                 .replace(
                     '{INPUT}',
                     checkboxHTML
@@ -176,8 +180,8 @@ export function createSetting(setting: ISettings, value: any) {
 
         case 'color': {
             return settingsItemHTML
-                .replace('{NAME}', setting.title)
-                .replace('{DESCRIPTION}', setting.description)
+                .replace('{NAME}', title)
+                .replace('{DESCRIPTION}', description)
                 .replace(
                     '{INPUT}',
                     inputHTML
@@ -199,8 +203,8 @@ export function createSetting(setting: ISettings, value: any) {
                       .join('\n')
                 : '';
             return settingsItemHTML
-                .replace('{NAME}', setting.title)
-                .replace('{DESCRIPTION}', setting.description)
+                .replace('{NAME}', title)
+                .replace('{DESCRIPTION}', description)
                 .replace(
                     '{INPUT}',
                     selectHTML
@@ -239,7 +243,11 @@ export function parseSettings(
 }
 
 export function saveSettings(folderName: string, payload: bodyPayload[]) {
-    const result = parseCounterSettings(folderName, 'user/save', payload);
+    const result = parseCounterSettings(
+        folderName,
+        'user/save',
+        payload as any
+    );
     if (result instanceof Error) {
         return result;
     }
@@ -315,7 +323,9 @@ function rebuildJSON({
             )
             .replace(
                 '{HEIGHT}',
-                item.resolution[1] === -1 ? '500px' : `${item.resolution[1]}px`
+                    item.resolution[1] === -1
+                        ? '500px'
+                        : `${item.resolution[1]}px`
             )
             .replace('{NAME}', item.folderName);
 
@@ -432,7 +442,7 @@ function getLocalCounters() {
                     'settings.json'
                 );
                 const settings = fs.existsSync(settingsPath)
-                    ? JsonSaveParse(fs.readFileSync(settingsPath, 'utf8'), [])
+                    ? JsonSafeParse(fs.readFileSync(settingsPath, 'utf8'), [])
                     : [];
 
                 return {
