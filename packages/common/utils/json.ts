@@ -1,4 +1,4 @@
-export const JsonSaveParse = (str: string, errorReturn: any) => {
+export const JsonSafeParse = (str: string, errorReturn: any) => {
     try {
         return JSON.parse(str);
     } catch (e) {

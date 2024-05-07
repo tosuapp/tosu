@@ -21,6 +21,7 @@ import {
     parseSettings,
     saveSettings
 } from '../utils/counters';
+import { ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
 
@@ -272,7 +273,7 @@ export default function buildBaseApi(server: Server) {
         /^\/api\/counters\/settings\/(?<name>.*)/,
         'POST',
         (req, res) => {
-            let body: object;
+            let body: ISettings[];
             try {
                 body = JSON.parse(req.body);
             } catch (error) {
@@ -290,22 +291,23 @@ export default function buildBaseApi(server: Server) {
                 }
 
                 if (req.query.update === 'yes') {
-                    const staticPath = getStaticPath();
-                    const settingsPath = path.join(
-                        staticPath,
-                        decodeURI(folderName),
-                        'settings.json'
+                    const result = parseCounterSettings(
+                        folderName,
+                        'dev/save',
+                        body as any
                     );
 
-                    wLogger.info(
-                        `Settings re:created: ${folderName} (${req.headers.referer})`
-                    );
+                    if (!(result instanceof Error)) {
+                        wLogger.info(
+                            `Settings re:created: ${folderName} (${req.headers.referer})`
+                        );
 
-                    fs.writeFileSync(
-                        settingsPath,
-                        JSON.stringify(body),
-                        'utf8'
-                    );
+                        fs.writeFileSync(
+                            result.settingsPath,
+                            JSON.stringify(result.settings),
+                            'utf8'
+                        );
+                    }
                 }
 
                 wLogger.info(
@@ -317,7 +319,7 @@ export default function buildBaseApi(server: Server) {
                     wLogger.debug(`counter-${folderName}-settings-save`, html);
 
                     return sendJson(res, {
-                        error: html
+                        error: html.name
                     });
                 }
 

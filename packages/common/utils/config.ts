@@ -54,7 +54,7 @@ STATIC_FOLDER_PATH=./static`,
 dotenv.config({ path: configPath });
 
 export const config = {
-    enableAutoUpdate: (process.env.ENABLE_AUTOUPDATE || '') === 'true',
+    enableAutoUpdate: (process.env.ENABLE_AUTOUPDATE || 'true') === 'true',
     openDashboardOnStartup:
         (process.env.OPEN_DASHBOARD_ON_STARTUP || '') === 'true',
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
@@ -256,51 +256,17 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 export const writeConfig = (httpServer: any, options: any) => {
     let text = '';
 
-    text += `DEBUG_LOG=${
-        options.DEBUG_LOG != null ? options.DEBUG_LOG : config.debugLogging
-    }\n\n`;
-    text += `CALCULATE_PP=${
-        options.CALCULATE_PP != null ? options.CALCULATE_PP : config.calculatePP
-    }\n\n`;
-    text += `ENABLE_AUTOUPDATE=${
-        options.ENABLE_AUTOUPDATE != null
-            ? options.ENABLE_AUTOUPDATE
-            : config.enableAutoUpdate
-    }\n`;
-    text += `OPEN_DASHBOARD_ON_STARTUP=${
-        options.OPEN_DASHBOARD_ON_STARTUP != null
-            ? options.OPEN_DASHBOARD_ON_STARTUP
-            : config.openDashboardOnStartup
-    }\n\n`;
-    text += `ENABLE_GOSU_OVERLAY=${
-        options.ENABLE_GOSU_OVERLAY != null
-            ? options.ENABLE_GOSU_OVERLAY
-            : config.enableGosuOverlay
-    }\n`;
-    text += `ENABLE_KEY_OVERLAY=${
-        options.ENABLE_KEY_OVERLAY != null
-            ? options.ENABLE_KEY_OVERLAY
-            : config.enableKeyOverlay
-    }\n\n`;
-    text += `POLL_RATE=${
-        options.POLL_RATE != null ? options.POLL_RATE : config.pollRate
-    }\n`;
-    text += `PRECISE_DATA_POLL_RATE=${
-        options.PRECISE_DATA_POLL_RATE != null
-            ? options.PRECISE_DATA_POLL_RATE
-            : config.preciseDataPollRate
-    }\n\n`;
-    text += `SERVER_IP=${
-        options.SERVER_IP != null ? options.SERVER_IP : config.serverIP
-    }\n`;
-    text += `SERVER_PORT=${
-        options.SERVER_PORT != null ? options.SERVER_PORT : config.serverPort
-    }\n\n`;
-    text += `STATIC_FOLDER_PATH=${
-        options.STATIC_FOLDER_PATH != null
-            ? options.STATIC_FOLDER_PATH
-            : config.staticFolderPath
-    }\n`;
+    text += `DEBUG_LOG=${options.DEBUG_LOG ?? config.debugLogging}\n\n`;
+    text += `CALCULATE_PP = ${options.CALCULATE_PP ?? config.calculatePP} \n\n`;
+    text += `ENABLE_AUTOUPDATE = ${options.ENABLE_AUTOUPDATE ?? config.enableAutoUpdate} \n`;
+    text += `OPEN_DASHBOARD_ON_STARTUP = ${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup} \n\n`;
+    text += `ENABLE_GOSU_OVERLAY = ${options.ENABLE_GOSU_OVERLAY ?? config.enableGosuOverlay} \n`;
+    text += `ENABLE_KEY_OVERLAY = ${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay} \n\n`;
+    text += `POLL_RATE = ${options.POLL_RATE ?? config.pollRate} \n`;
+    text += `PRECISE_DATA_POLL_RATE = ${options.PRECISE_DATA_POLL_RATE ?? config.preciseDataPollRate} \n\n`;
+    text += `SERVER_IP = ${options.SERVER_IP ?? config.serverIP} \n`;
+    text += `SERVER_PORT = ${options.SERVER_PORT ?? config.serverPort} \n\n`;
+    text += `STATIC_FOLDER_PATH = ${options.STATIC_FOLDER_PATH ?? config.staticFolderPath} \n`;
 
     fs.writeFile(configPath, text, 'utf8', () => {
         refreshConfig(httpServer, true);

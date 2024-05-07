@@ -54,6 +54,8 @@ export class GamePlayData extends AbstractEntity {
 
     private scoreBase: number = 0;
 
+    uheErrorAttempts: number = 0;
+
     constructor(osuInstance: OsuInstance) {
         super(osuInstance);
 
@@ -419,8 +421,14 @@ export class GamePlayData extends AbstractEntity {
 
                 this.HitErrors.push(error);
             }
+
+            this.uheErrorAttempts = 0;
         } catch (exc) {
-            wLogger.error('GD(updateHitErrors) failed to parse hitErrors');
+            this.uheErrorAttempts += 1;
+
+            if (this.uheErrorAttempts > 10) {
+                wLogger.error('GD(updateHitErrors) failed to parse hitErrors');
+            }
             wLogger.debug(exc);
         }
     }
