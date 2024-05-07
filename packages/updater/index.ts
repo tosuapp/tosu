@@ -35,40 +35,50 @@ const deleteNotLocked = async (filePath: string) => {
 export const checkUpdates = async () => {
     wLogger.info('Checking updates');
 
-    const { platformType } = platformResolver(process.platform);
+    try {
+        const { platformType } = platformResolver(process.platform);
 
-    if (platformType === '') {
-        wLogger.warn(
-            `Unsupported platform (${process.platform}). Unable to run updater`
+        if (platformType === '') {
+            wLogger.warn(
+                `Unsupported platform (${process.platform}). Unable to run updater`
+            );
+
+            return new Error(
+                `Unsupported platform (${process.platform}). Unable to run updater`
+            );
+        }
+
+        const request = await fetch(
+            `https://api.github.com/repos/KotRikD/${repositoryName}/releases/latest`
         );
+        const json = (await request.json()) as any;
+        const {
+            assets,
+            name: versionName
+        }: {
+            name: string;
+            assets: { name: string; browser_download_url: string }[];
+        } = json;
 
-        return new Error(
-            `Unsupported platform (${process.platform}). Unable to run updater`
-        );
+        config.currentVersion = currentVersion;
+        config.updateVersion = versionName || currentVersion;
+
+        if (versionName === null) {
+            wLogger.info(`Failed to check updates [${currentVersion}] `);
+
+            return new Error('Version the same');
+        }
+
+        return { assets, versionName, platformType };
+    } catch (exc) {
+        wLogger.error(`checkUpdates`, (exc as any).message);
+        wLogger.debug(exc);
+
+        config.currentVersion = currentVersion;
+        config.updateVersion = currentVersion;
+
+        return exc as Error;
     }
-
-    const request = await fetch(
-        `https://api.github.com/repos/KotRikD/${repositoryName}/releases/latest`
-    );
-    const json = (await request.json()) as any;
-    const {
-        assets,
-        name: versionName
-    }: {
-        name: string;
-        assets: { name: string; browser_download_url: string }[];
-    } = json;
-
-    config.currentVersion = currentVersion;
-    config.updateVersion = versionName || currentVersion;
-
-    if (versionName === null) {
-        wLogger.info(`Failed to check updates [${currentVersion}] `);
-
-        return new Error('Version the same');
-    }
-
-    return { assets, versionName, platformType };
 };
 
 export const autoUpdater = async () => {

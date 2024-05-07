@@ -19,6 +19,7 @@ export type ISettingsType =
     | 'note';
 
 export interface ICounter {
+    _settings?: boolean;
     folderName: string;
     name: string;
     author: string;

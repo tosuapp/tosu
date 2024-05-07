@@ -23,7 +23,7 @@ export default function buildV2Api(app: HttpServer) {
             return sendJson(res, { error: 'not_ready' });
         }
 
-        const json = osuInstance.getPreciseData();
+        const json = osuInstance.getPreciseData(req.instanceManager);
         sendJson(res, json);
     });
 

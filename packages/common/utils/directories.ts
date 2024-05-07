@@ -45,7 +45,8 @@ export function recursiveFilesSearch({
 export function getStaticPath() {
     const staticPath =
         config.staticFolderPath || path.join(pkgRunningFolder, 'static');
-    return staticPath;
+
+    return path.resolve(staticPath);
 }
 
 export function getCachePath() {

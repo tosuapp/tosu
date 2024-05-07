@@ -12,9 +12,11 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
     const [command, payload] = data.split(':');
     let message: any;
 
+    const requestedFrom = decodeURI(socket.query?.l || '');
+    const requestedName = decodeURI(payload || '');
     switch (command) {
         case 'getSettings': {
-            if (payload !== socket.query?.l) {
+            if (requestedName !== requestedFrom) {
                 message = {
                     error: 'Wrong overlay'
                 };
@@ -22,7 +24,10 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             }
 
             try {
-                const result = parseCounterSettings(payload, 'counter/get');
+                const result = parseCounterSettings(
+                    requestedName,
+                    'counter/get'
+                );
                 if (result instanceof Error) {
                     message = {
                         error: result.name

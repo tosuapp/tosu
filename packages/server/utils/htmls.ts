@@ -20,7 +20,7 @@ export const metadataHTML = `
 <div>Resolution: <span nf nft="width" nfv="{COPY_X}" class="copyable">{X}</span> x <span nf nft="height" nfv="{COPY_Y}" class="copyable">{Y}</span></div>
 `;
 
-export const nameHTML = '<h4>{NAME}</h4>';
+export const nameHTML = '<h4 class="{CLASS}">{NAME}</h4>';
 export const authorHTML = '<span>by {AUTHOR}</span>';
 export const authorLinksHTML =
     '<a href="{LINK}" target="_blank"><img src="{ICON_URL}" /></a>';
@@ -64,3 +64,8 @@ export const selectHTML = `<select id="{ID}" {ADDON}>{OPTIONS}</select>`;
 
 export const saveSettingsButtonHTML =
     '<div class="flexer si-btn"><button class="button save-button flexer"><span>Save settings</span></button></div>';
+
+export const submitCounterHTML = `<a class="submit-counter flexer" href="https://osuck.link/tosu-counter-submit" target="_blank">
+  <i class="icon-link"></i>
+  <span>Submit your pp counter here</span>
+</a>`;
