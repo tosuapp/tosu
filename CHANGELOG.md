@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/KotRikD/tosu/compare/v2.5.2...v2.6.0) (2024-05-07)
+
+
+### Features
+
+* Added live update for counter settings (only from dashboard) ([56c477c](https://github.com/KotRikD/tosu/commit/56c477c48a33d6d7a1cbdf666862cf0afd83079c))
+* Added open dashboard & changed behaviour of autoupdate, added manual update (sort of) ([45850d5](https://github.com/KotRikD/tosu/commit/45850d5ec2cd829abf4e5e1f068dd2823d635724))
+* Added open dashboard & changed behaviour of autoupdate, added manual update (sort of) ([8ee0c30](https://github.com/KotRikD/tosu/commit/8ee0c30f0747df1a994983dfedeb6b983b9dff8d))
+* move to yao-pkg and bump node version ([3d6eb32](https://github.com/KotRikD/tosu/commit/3d6eb322aa3e99faa0e593f30813bfe936748bc1))
+* Sanitize Settings Title and Description ([ce747c9](https://github.com/KotRikD/tosu/commit/ce747c922114c704ac3bd46699d5cdda825923a2))
+* Settings builder for counters ([04106e7](https://github.com/KotRikD/tosu/commit/04106e79011e63c70a852029fd5833703236e62e))
+* Settings for a pp counter ([7c3c795](https://github.com/KotRikD/tosu/commit/7c3c795d24b04b24b3d4c3c589376b4580d3b461))
+* Settings for a pp counter ([d30db94](https://github.com/KotRikD/tosu/commit/d30db94fb797d4bd215b4ea55daed3c09c8d234b))
+* source of dashboard script ([#118](https://github.com/KotRikD/tosu/issues/118)) ([52f7b55](https://github.com/KotRikD/tosu/commit/52f7b55de8db59929ed68edc33c2e00fedbedc8f))
+
+
+### Bug Fixes
+
+* bump workflow node ([58c1fab](https://github.com/KotRikD/tosu/commit/58c1fab73b826a6e2ea9962bff1fbb5096ee5799))
+* change user profile pattern ([271be94](https://github.com/KotRikD/tosu/commit/271be941f23eb2d6fe9d19d2093e57ecd2b24fcf))
+* Config issues ([bfe7d82](https://github.com/KotRikD/tosu/commit/bfe7d82c011af452d845796be6a7789ff802fc7d))
+* dashboard design adjust ([3f5d01b](https://github.com/KotRikD/tosu/commit/3f5d01b38f11a968bdc4abeabbd41492746311fd))
+* Dashboard improvements ([d4f6613](https://github.com/KotRikD/tosu/commit/d4f6613ddab334cce4d75a39d868b682755808d1))
+* Dont crash on fetch error ([6762ec3](https://github.com/KotRikD/tosu/commit/6762ec39d3ccaeb0559e9f2d7436fcb1545b7303))
+* fix incorrectly returned images ([9eb93dc](https://github.com/KotRikD/tosu/commit/9eb93dcc468e879e93b8e44db42ea95efdbcf027))
+* Fix issue with counter settings flow ([d34ce62](https://github.com/KotRikD/tosu/commit/d34ce621d4762102507e04bba97f2b4c4ac35f7c))
+* Fix session playTime ([f286ef9](https://github.com/KotRikD/tosu/commit/f286ef9fd01eaa0c15e743fc87f7d40d82f13260))
+* Fix several counter settings issues ([04e242d](https://github.com/KotRikD/tosu/commit/04e242d326ae619c19fe41d59e11d8c4fc7b3cab))
+* Fix undefined properties in api v2 ([6598271](https://github.com/KotRikD/tosu/commit/6598271abfda67cdbb6a8fe22e8073a4858bc059))
+* Improve performance for precise data ([df19be7](https://github.com/KotRikD/tosu/commit/df19be701cbbb360e11ff589d5debd595f739f31))
+* Improve performance for precise data ([75f9eef](https://github.com/KotRikD/tosu/commit/75f9eef34b80d8d93b19a8eea18e810c7b85015a))
+* Move settings code to `Settings` Class instead of `allTimeData` Class ([cf8c5f2](https://github.com/KotRikD/tosu/commit/cf8c5f2e49f04919a4152f80f6edc63c1f50e6b8))
+* Return keybinds (hopefully no memory leak this time) ([507d75a](https://github.com/KotRikD/tosu/commit/507d75a716ad4e96fc18f7c85624b20cb344bd9b))
+* Use function to get statis folder path ([e118da7](https://github.com/KotRikD/tosu/commit/e118da74f218e36420e9105c25c0a26cae070683))
+
 ### [2.5.2](https://github.com/KotRikD/tosu/compare/v2.5.1...v2.5.2) (2024-03-30)
 
 
