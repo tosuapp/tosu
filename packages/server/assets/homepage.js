@@ -429,6 +429,7 @@ function displayModal({ content, classes }) {
   div.classList.add('modal');
   div.classList.add('hidden');
 
+  document.body.style.overflow = 'hidden';
 
   const wrapper = document.createElement('div');
   wrapper.classList.add('m-content');
@@ -463,6 +464,8 @@ function closeModal(event) {
 
 
     isClosingModal = true;
+    document.body.style.overflow = '';
+
 
     const modal = document.querySelector('.modal');
     modal.classList.add('hidden');
@@ -733,7 +736,7 @@ async function startBuilderModal(element) {
     .replace("{OPTIONS}", 'style="display:none;"')
     .replace("{OPTIONS_VALUE}", '')
     .replace("{VALUE}", '')
-    .replace("{ADDON}", '')
+    .replace("{ADDON}", `onchange="sanitize(this);"`)
     .replace(/{text_SELECTED}/gm, '')
     .replace(/{number_SELECTED}/gm, '')
     .replace(/{password_SELECTED}/gm, '')
@@ -811,7 +814,7 @@ async function builderNewOption(element) {
 
   const payload = {
     setting: {
-      uniqueID: uniqueID.value,
+      uniqueID: (uniqueID.value || '').replace(/[^a-z0-9]/gim, ''),
       type: type.value,
       title: title.value,
       description: description.value,
@@ -833,7 +836,7 @@ async function builderNewOption(element) {
       return;
     };
 
-    if (payload.value == '') {
+    if (payload.value == '' && payload.setting.type != 'password') {
       displayNotification({
         element: element,
         text: `Specify default value`,
@@ -873,7 +876,7 @@ async function builderNewOption(element) {
     const html = optionHTML
       .replace(/{BUTTONS}/gm, `
         <div class="oab flexer">
-          <button id="${payload.setting.title}" class="button remove-option-button flexer"><span>Remove option</span></button>
+          <button did="${payload.setting.uniqueID}" class="button remove-option-button flexer"><span>Remove option</span></button>
         </div>`)
       .replace(/{class}/gm, 'OPTION')
       .replace(/{as}/gm, ' style="width: 10em"')
@@ -960,27 +963,27 @@ async function builderSaveSettings(element) {
       const [id, field] = r.id.split('___');
 
       const obj = {};
-      obj[field] = r.value;
+      let value = r.value;
+      if (field.toLowerCase() == 'uniqueid') value = value.replace(/[^a-z0-9]/gim, '');
 
-      console.log({ field, id }, r.value);
+      obj[field] = value;
 
 
       const find = array.find(r => r.uniqueID == id);
       if (find) {
         if (find.type == 'options' && field == 'options') {
-          find[field] = r.value.split(',').filter(r => r);
+          find[field] = value.split(',').filter(r => r);
           return;
         };
 
 
-        find[field] = r.value;
+        find[field] = value;
         return;
       };
 
       array.push(obj);
     });
 
-    console.log(array);
     // if (array.length == 0) {
     //   displayNotification({
     //     element: element,
@@ -1052,7 +1055,10 @@ function removeOption(element) {
 
 
   const elm = document.getElementById(id);
-  if (!elm) return;
+  if (!elm) {
+    console.log(id, { element }, elm);
+    return;
+  };
 
 
 
@@ -1130,6 +1136,12 @@ window.addEventListener('click', (event) => {
   };
 
   if (t?.attributes.nf) return copyText(t);
+
+
+  if (t?.id == 'devMode') {
+    document.querySelectorAll('.settings-builder-button').forEach(r => r.classList.toggle('active'));
+    return;
+  };
 });
 
 
@@ -1163,4 +1175,12 @@ function renamer(element) {
   if (document.getElementById(`${id}___options`)) document.getElementById(`${id}___options`).id = `${newID}___options`;
   if (document.getElementById(`${id}___value`)) document.getElementById(`${id}___value`).id = `${newID}___value`;
   if (document.querySelector(`[did=${id}`)) document.querySelector(`[did=${id}`).setAttribute("did", newID);
-}
+
+  element.value = newID;
+};
+
+function sanitize(element) {
+  const value = (element.value || '').replace(/[^a-z0-9]/gmi, '');
+
+  element.value = value;
+};

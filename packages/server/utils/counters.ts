@@ -1,5 +1,5 @@
 import {
-    JsonSaveParse,
+    JsonSafeParse,
     config,
     getStaticPath,
     recursiveFilesSearch,
@@ -29,7 +29,8 @@ import {
     resultItemHTML,
     saveSettingsButtonHTML,
     selectHTML,
-    settingsItemHTML
+    settingsItemHTML,
+    submitCounterHTML
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
 
@@ -92,7 +93,7 @@ export function parseTXT(filePath: string) {
         'settings.json'
     );
     const settings = fs.existsSync(settingsPath)
-        ? JsonSaveParse(fs.readFileSync(settingsPath, 'utf8'), [])
+        ? JsonSafeParse(fs.readFileSync(settingsPath, 'utf8'), [])
         : [];
 
     if (object.resolution)
@@ -273,130 +274,146 @@ function rebuildJSON({
     for (let i = 0; i < array.length; i++) {
         const item = array[i];
 
-        if (query != null) {
-            if (
-                !(
-                    item.name.toLowerCase().includes(query) ||
-                    item.name.toLowerCase().includes(query)
-                )
-            ) {
-                continue;
+        try {
+            if (query != null) {
+                if (
+                    !(
+                        item.name.toLowerCase().includes(query) ||
+                        item.name.toLowerCase().includes(query)
+                    )
+                ) {
+                    continue;
+                }
             }
-        }
 
-        if (!Array.isArray(item.settings)) item.settings = [];
+            if (!Array.isArray(item.settings)) item.settings = [];
 
-        const name = nameHTML.replace('{NAME}', item.name);
-        const author = authorHTML.replace('{AUTHOR}', item.author);
+            const externalHasSettings =
+                item._settings === true && external === true
+                    ? '<div class="external-exists flexer"><i class="icon-settings"></i> customisable</div>'
+                    : '';
 
-        const links = item.authorlinks
-            .map((r) => {
-                const domain =
-                    /:\/\/(?<domain>\S+)\//.exec(r)?.groups?.domain || '';
-                if (!domain) return null;
+            const name = nameHTML
+                .replace('{NAME}', `${item.name}${externalHasSettings}`)
+                .replace('{CLASS}', 'flexer');
+            const author = authorHTML.replace('{AUTHOR}', item.author);
 
-                const iconUrl = iconsImages[domain.toLowerCase()];
-                if (!iconUrl) return null;
+            const authorlinks = Array.isArray(item.authorlinks)
+                ? item.authorlinks
+                : [];
 
-                return authorLinksHTML
-                    .replace('{LINK}', r)
-                    .replace('{ICON_URL}', iconUrl);
-            })
-            .filter((r) => r != null)
-            .join(' ');
+            const links = authorlinks
+                .map((r) => {
+                    const domain =
+                        /:\/\/(?<domain>\S+)\//.exec(r)?.groups?.domain || '';
+                    if (!domain) return null;
 
-        const ip =
-            config.serverIP === '0.0.0.0' ? 'localhost' : config.serverIP;
+                    const iconUrl = iconsImages[domain.toLowerCase()];
+                    if (!iconUrl) return null;
 
-        const iframe = iframeHTML
-            .replace(
-                '{URL}',
-                `http://${ip}:${config.serverPort}/${item.folderName}/`
-            )
-            .replace(
-                '{WIDTH}',
-                item.resolution[0] === -1
-                    ? '500px'
-                    : item.resolution[0] === -2
-                      ? '100%'
-                      : `${item.resolution[0]}px`
-            )
-            .replace(
-                '{HEIGHT}',
+                    return authorLinksHTML
+                        .replace('{LINK}', r)
+                        .replace('{ICON_URL}', iconUrl);
+                })
+                .filter((r) => r != null)
+                .join(' ');
+
+            const ip =
+                config.serverIP === '0.0.0.0' ? 'localhost' : config.serverIP;
+
+            const iframe = iframeHTML
+                .replace(
+                    '{URL}',
+                    `http://${ip}:${config.serverPort}/${item.folderName}/`
+                )
+                .replace(
+                    '{WIDTH}',
+                    item.resolution[0] === -1
+                        ? '500px'
+                        : item.resolution[0] === -2
+                          ? '100%'
+                          : `${item.resolution[0]}px`
+                )
+                .replace(
+                    '{HEIGHT}',
                     item.resolution[1] === -1
                         ? '500px'
                         : `${item.resolution[1]}px`
-            )
-            .replace('{NAME}', item.folderName);
+                )
+                .replace('{NAME}', item.folderName);
 
-        const metadata = metadataHTML
-            .replace(
-                '{COPY_URL}',
-                `http://${config.serverIP}:${config.serverPort}/${item.folderName}/`
-            )
-            .replace('{TEXT_URL}', `/${item.folderName}/`)
-            .replace(
-                '{COPY_X}',
-                item.resolution[0] === -1 || item.resolution[0] === -2
-                    ? 'ANY'
-                    : item.resolution[0].toString()
-            )
-            .replace(
-                '{X}',
-                item.resolution[0] === -1 || item.resolution[0] === -2
-                    ? 'ANY'
-                    : item.resolution[0].toString()
-            )
-            .replace(
-                '{COPY_Y}',
-                item.resolution[1] === -1 || item.resolution[1] === -2
-                    ? 'ANY'
-                    : item.resolution[1].toString()
-            )
-            .replace(
-                '{Y}',
-                item.resolution[1] === -1 || item.resolution[1] === -2
-                    ? 'ANY'
-                    : item.resolution[1].toString()
-            );
+            const metadata = metadataHTML
+                .replace(
+                    '{COPY_URL}',
+                    `http://${config.serverIP}:${config.serverPort}/${item.folderName}/`
+                )
+                .replace('{TEXT_URL}', `/${item.folderName}/`)
+                .replace(
+                    '{COPY_X}',
+                    item.resolution[0] === -1 || item.resolution[0] === -2
+                        ? 'ANY'
+                        : item.resolution[0].toString()
+                )
+                .replace(
+                    '{X}',
+                    item.resolution[0] === -1 || item.resolution[0] === -2
+                        ? 'ANY'
+                        : item.resolution[0].toString()
+                )
+                .replace(
+                    '{COPY_Y}',
+                    item.resolution[1] === -1 || item.resolution[1] === -2
+                        ? 'ANY'
+                        : item.resolution[1].toString()
+                )
+                .replace(
+                    '{Y}',
+                    item.resolution[1] === -1 || item.resolution[1] === -2
+                        ? 'ANY'
+                        : item.resolution[1].toString()
+                );
 
-        const settingsBuilderBtn = `<button class="button settings-builder-button flexer" n="${item.folderName}"><i class="icon-builder"></i></button>`;
+            const settingsBuilderBtn = `<button class="button settings-builder-button flexer" n="${item.folderName}"><i class="icon-builder"></i></button>`;
 
-        const settingsBtn =
-            item.settings.length > 0
-                ? `<button class="button settings-button flexer" n="${item.folderName}"><span>Settings</span></button>`
-                : '';
+            const settingsBtn =
+                item.settings.length > 0
+                    ? `<button class="button settings-button flexer" n="${item.folderName}"><span>Settings</span></button>`
+                    : '';
 
-        const button = item.downloadLink
-            ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
-            : `<div class="buttons-group flexer indent-left">
+            const button = item.downloadLink
+                ? `<div class="buttons-group indent-left"><button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button></div>`
+                : `<div class="buttons-group flexer indent-left">
                 ${settingsBuilderBtn}
                 ${settingsBtn}
                 <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
                 <button class="button delete-button flexer" n="${item.folderName}"><span>Delete</span></button>
             </div>`;
 
-        const assets = (item.assets || [])
-            .map((r) => {
-                return galleryImageHTML.replace('{LINK}', r.url);
-            })
-            .filter((r) => r != null)
-            .join(' ');
+            const assets = (item.assets || [])
+                .map((r) => {
+                    return galleryImageHTML.replace('{LINK}', r.url);
+                })
+                .filter((r) => r != null)
+                .join(' ');
 
-        const gallery = item.assets ? assets : iframe;
+            const gallery = item.assets ? assets : iframe;
 
-        const footer =
-            external !== true
-                ? `<div class="ri-footer flexer">${metadata}</div>`
-                : '';
+            const footer =
+                external !== true
+                    ? `<div class="ri-footer flexer">${metadata}</div>`
+                    : '';
 
-        items += resultItemHTML
-            .replace('{NAME}', name)
-            .replace('{AUTHOR}', author)
-            .replace('{AUTHOR_LINKS}', links)
-            .replace('{BUTTONS}', button)
-            .replace('{GALLERY}', gallery)
-            .replace('{FOOTER}', footer);
+            items += resultItemHTML
+                .replace('{NAME}', name)
+                .replace('{AUTHOR}', author)
+                .replace('{AUTHOR_LINKS}', links)
+                .replace('{BUTTONS}', button)
+                .replace('{GALLERY}', gallery)
+                .replace('{FOOTER}', footer);
+        } catch (error) {
+            wLogger.error(`rebuild(${item.name})`, (error as any).message);
+            wLogger.debug(error);
+        }
     }
 
     return items;
@@ -518,9 +535,7 @@ export async function buildExternalCounters(
     let text = '';
 
     try {
-        const request = await fetch(
-            'https://raw.githubusercontent.com/cyperdark/osu-counters/master/.github/api.json'
-        );
+        const request = await fetch('https://osuck.net/tosu/api.json');
         const json: any = await request.json();
 
         const exists = getLocalCounters();
@@ -571,7 +586,10 @@ export async function buildExternalCounters(
                 return;
             }
 
-            let html = content.replace('{{LIST}}', text || noMoreCounters);
+            let responseHTML = submitCounterHTML;
+            responseHTML += text || noMoreCounters;
+
+            let html = content.replace('{{LIST}}', responseHTML);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -752,12 +770,14 @@ export function buildSettings(res: http.ServerResponse) {
     <div></div>
     <div></div>
     ${enableAutoUpdateHtml}
-    ${enableKeyOverlayHTML}
+    ${openDashboardOnStartupHtml}
+    <div></div>
+    <div></div>
     ${enableGosuOverlayHTML}
+    ${enableKeyOverlayHTML}
     <div></div>
     <div></div>
     ${calculatePPHTML}
-    ${openDashboardOnStartupHtml}
     <div></div>
     <div></div>
     ${pollRateHTML}
