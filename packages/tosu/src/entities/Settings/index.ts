@@ -96,37 +96,43 @@ export class Settings extends AbstractEntity {
     private configList: Record<string, IConfigBindable> = {
         VolumeUniversal: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.volume.master = value;
             }
         },
         VolumeEffect: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.volume.effect = value;
             }
         },
         VolumeMusic: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.volume.music = value;
             }
         },
         _ReleaseStream: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.client.branch = value;
             }
         },
         DimLevel: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.background.dim = value;
             }
         },
         ShowStoryboard: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.background.storyboard = value;
             }
         },
@@ -144,182 +150,212 @@ export class Settings extends AbstractEntity {
         // },
         ScoreMeter: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.scoreMeter.type = value;
             }
         },
         ScoreMeterScale: {
             type: 'double',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.scoreMeter.size = parseFloat((value || 0).toFixed(2));
             }
         },
         Offset: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.offset.universal = value;
             }
         },
         CursorSize: {
             type: 'double',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.cursor.size = parseFloat((value || 0).toFixed(2));
             }
         },
         MouseSpeed: {
             type: 'double',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.mouse.sensitivity = parseFloat((value || 0).toFixed(2));
             }
         },
         Fullscreen: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.resolution.fullscreen = value;
             }
         },
         Width: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.width = value;
             }
         },
         Height: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.height = value;
             }
         },
         WidthFullscreen: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.widthFullscreen = value;
             }
         },
         HeightFullscreen: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.heightFullscreen = value;
             }
         },
         AutomaticCursorSizing: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.cursor.autoSize = value;
             }
         },
         IgnoreBeatmapSamples: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.audio.ignoreBeatmapSounds = value;
             }
         },
         SkinSamples: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.audio.useSkinSamples = value;
             }
         },
         LastVersion: {
             type: 'bstring',
-            setValue: (value) => {
+            setValue: (value: string) => {
+                if (!(typeof value === 'string' && value.length <= 15)) return;
                 this.client.version = value;
             }
         },
         ManiaSpeedBPMScale: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mania.speedBPMScale = value;
             }
         },
         UsePerBeatmapManiaSpeed: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mania.usePerBeatmapSpeedScale = value;
             }
         },
         MouseDisableButtons: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mouse.disableButtons = value;
             }
         },
         MouseDisableWheel: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mouse.disableWheel = value;
             }
         },
         ProgressBarType: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.progressBarType = value;
             }
         },
         RankType: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.leaderboardType = value;
             }
         },
         UpdatePending: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.client.updateAvailable = value;
             }
         },
 
         UseSkinCursor: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.cursor.useSkinCursor = value;
             }
         },
         RawInput: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mouse.rawInput = value;
             }
         },
         TreeSortMode: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.groupType = value;
             }
         },
         TreeSortMode2: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.sortType = value;
             }
         },
         EditorDefaultSkin: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.useDefaultSkinInEditor = value;
             }
         },
         ComboColourSliderBall: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.tintSliderBall = value;
             }
         },
         IgnoreBeatmapSkins: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.ignoreBeatmapSkins = value;
             }
         },
         Skin: {
             type: 'bstring',
-            setValue: (value) => {
+            setValue: (value: string) => {
+                if (!(typeof value === 'string' && value.length <= 256)) return;
                 this.skin.name = value;
             }
         },
         UseTaikoSkin: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.useTaikoSkin = value;
             }
         }
@@ -328,60 +364,75 @@ export class Settings extends AbstractEntity {
     private bindingList: Record<number, IBindable> = {
         [Bindings.OsuLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.osu.k1 = VirtualKeyCode[value];
             }
         },
         [Bindings.OsuRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.osu.k2 = VirtualKeyCode[value];
             }
         },
         [Bindings.OsuSmoke]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.osu.smokeKey = VirtualKeyCode[value];
             }
         },
         [Bindings.FruitsDash]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.fruits.Dash = VirtualKeyCode[value];
             }
         },
         [Bindings.FruitsLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.fruits.k1 = VirtualKeyCode[value];
             }
         },
         [Bindings.FruitsRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.fruits.k2 = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoInnerLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.innerLeft = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoInnerRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.innerRight = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoOuterLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.outerLeft = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoOuterRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.outerRight = VirtualKeyCode[value];
             }
         },
         [Bindings.QuickRetry]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.quickRetry = VirtualKeyCode[value];
             }
         }
     };
+
+    isRealNumber(value: any) {
+        return typeof value === 'number' && !isNaN(value) && isFinite(value);
+    }
 
     setConfigValue(process: Process, address: number, position: number = 0) {
         try {
