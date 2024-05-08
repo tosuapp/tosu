@@ -286,8 +286,8 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
-            const keyOverlayPtr = process.readInt(rulesetAddr + 0xb0);
-            if (keyOverlayPtr === 0 || keyOverlayPtr < 127) {
+            const keyOverlayPtr = process.readUInt(rulesetAddr + 0xb0);
+            if (keyOverlayPtr === 0) {
                 wLogger.debug(
                     `GD(updateKeyOverlay) keyOverlayPtr is zero ${keyOverlayPtr} (${rulesetAddr}  -  ${patterns.getPattern(
                         'rulesetsAddr'
