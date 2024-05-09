@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.1](https://github.com/KotRikD/tosu/compare/v2.6.0...v2.6.1) (2024-05-09)
+
+
+### Features
+
+* Functions print out errors when they repeat more than `x` time ([ad484df](https://github.com/KotRikD/tosu/commit/ad484dfe099dec4e450a642848c36eb73e04f3d2))
+
+
+### Bug Fixes
+
+* allow negative memory addresses ([88bda3d](https://github.com/KotRikD/tosu/commit/88bda3d64c237ee19e57229de267fef086143e1a))
+* Another attempt at fixing memory leak ([ba53d04](https://github.com/KotRikD/tosu/commit/ba53d046d3e58201e3e12d61b25ed4fa4c3c3fd5))
+* **entities:** Improve errors handling ([9b0707b](https://github.com/KotRikD/tosu/commit/9b0707b52ac75d834ca8251de371056d446fc2ee))
+* Favicon for dashboard ([9105692](https://github.com/KotRikD/tosu/commit/910569286e120bbe205f9c73c91b79da760c2c1d))
+* Fix Auto Updater ([ebea523](https://github.com/KotRikD/tosu/commit/ebea523bec71f4d2fead8f48b5a18b187865a94b))
+* Handle `undefined` in `path.join` ([836d36b](https://github.com/KotRikD/tosu/commit/836d36b96e678764d5dc8893eed2cd0243c2e32f))
+* Incorrect startup order ([367d7ba](https://github.com/KotRikD/tosu/commit/367d7ba6cc66e335e3243fc8cf55b020bb8457e7))
+
 ## [2.6.0](https://github.com/KotRikD/tosu/compare/v2.5.2...v2.6.0) (2024-05-07)
 
 
