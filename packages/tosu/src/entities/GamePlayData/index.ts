@@ -53,8 +53,7 @@ export class GamePlayData extends AbstractEntity {
     isReplayUiHidden: boolean;
 
     private scoreBase: number = 0;
-
-    uheErrorAttempts: number = 0;
+    private cachedkeys: string = '';
 
     constructor(osuInstance: OsuInstance) {
         super(osuInstance);
@@ -257,7 +256,6 @@ export class GamePlayData extends AbstractEntity {
             this.ComboPrev = this.Combo;
 
             // [[[Ruleset + 0x68] + 0x38] + 0x38]
-
             this.updateLeaderboard(
                 process,
                 patterns.getLeaderStart(),
@@ -265,8 +263,14 @@ export class GamePlayData extends AbstractEntity {
             );
             this.updateGrade(menuData);
             this.updateStarsAndPerformance();
+
+            this.resetReportCount('GD(updateState)');
         } catch (exc) {
-            wLogger.error(`GPD(updateState) ${(exc as any).message}`);
+            this.reportError(
+                'GD(updateState)',
+                10,
+                `GD(updateState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -289,7 +293,7 @@ export class GamePlayData extends AbstractEntity {
             const keyOverlayPtr = process.readUInt(rulesetAddr + 0xb0);
             if (keyOverlayPtr === 0) {
                 wLogger.debug(
-                    `GD(updateKeyOverlay) keyOverlayPtr is zero ${keyOverlayPtr} (${rulesetAddr}  -  ${patterns.getPattern(
+                    `GD(updateKeyOverlay) keyOverlayPtr is zero [${keyOverlayPtr}] (${rulesetAddr}  -  ${patterns.getPattern(
                         'rulesetsAddr'
                     )})`
                 );
@@ -301,9 +305,7 @@ export class GamePlayData extends AbstractEntity {
                 process.readInt(keyOverlayPtr + 0x10) + 0x4
             );
             if (keyOverlayArrayAddr === 0) {
-                wLogger.debug(
-                    'GD(updateKeyOverlay) keyOverlayArrayAddr is zero'
-                );
+                wLogger.debug('GD(updateKeyOverlay) keyOverlayAddr[] is zero');
                 return;
             }
 
@@ -328,12 +330,20 @@ export class GamePlayData extends AbstractEntity {
             this.KeyOverlay = keys;
             this.isKeyOverlayDefaultState = false;
 
-            wLogger.debug(
-                `GD(updateKeyOverlay) updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`
-            );
+            const keysLine = `${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`;
+            if (this.cachedkeys !== keysLine) {
+                wLogger.debug(
+                    `GD(updateKeyOverlay) updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keysLine}`
+                );
+                this.cachedkeys = keysLine;
+            }
+
+            this.resetReportCount('GD(updateKeyOverlay)');
         } catch (exc) {
-            wLogger.error(
-                'GD(updateKeyOverlay) error happend while keyboard overlay attempted to parse'
+            this.reportError(
+                'GD(updateKeyOverlay)',
+                10,
+                `GD(updateKeyOverlay) ${(exc as any).message}`
             );
             wLogger.debug(exc);
         }
@@ -422,17 +432,18 @@ export class GamePlayData extends AbstractEntity {
                 this.HitErrors.push(error);
             }
 
-            this.uheErrorAttempts = 0;
+            this.resetReportCount('GD(updateHitErrors)');
         } catch (exc) {
-            this.uheErrorAttempts += 1;
-
-            if (this.uheErrorAttempts > 10) {
-                wLogger.error('GD(updateHitErrors) failed to parse hitErrors');
-            }
+            this.reportError(
+                'GD(updateHitErrors)',
+                10,
+                `GD(updateHitErrors) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
 
+    // IMPROVE, WE DONT NEED TO SUM EVERY HITERROR EACH TIME (for future)
     private calculateUR(): number {
         if (this.HitErrors.length < 1) {
             return 0;
@@ -493,18 +504,31 @@ export class GamePlayData extends AbstractEntity {
         leaderStart: number,
         rulesetAddr: number
     ) {
-        // [Ruleset + 0x7C]
-        const leaderBoardBase = process.readInt(rulesetAddr + 0x7c);
+        try {
+            // [Ruleset + 0x7C]
+            const leaderBoardBase = process.readInt(rulesetAddr + 0x7c);
 
-        // [Ruleset + 0x7C] + 0x24
-        const leaderBoardAddr =
-            leaderBoardBase > 0 ? process.readInt(leaderBoardBase + 0x24) : 0;
-        if (!this.Leaderboard) {
-            this.Leaderboard = new Leaderboard(process, leaderBoardAddr);
-        } else {
-            this.Leaderboard.updateBase(leaderBoardAddr);
+            // [Ruleset + 0x7C] + 0x24
+            const leaderBoardAddr =
+                leaderBoardBase > 0
+                    ? process.readInt(leaderBoardBase + 0x24)
+                    : 0;
+            if (!this.Leaderboard) {
+                this.Leaderboard = new Leaderboard(process, leaderBoardAddr);
+            } else {
+                this.Leaderboard.updateBase(leaderBoardAddr);
+            }
+            this.Leaderboard.readLeaderboard(leaderStart);
+
+            this.resetReportCount('GD(updateLeaderboard)');
+        } catch (exc) {
+            this.reportError(
+                'GD(updateLeaderboard)',
+                10,
+                `GD(updateLeaderboard) ${(exc as any).message}`
+            );
+            wLogger.debug(exc);
         }
-        this.Leaderboard.readLeaderboard(leaderStart);
     }
 
     private updateStarsAndPerformance() {

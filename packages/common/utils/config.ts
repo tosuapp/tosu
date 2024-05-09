@@ -22,6 +22,7 @@ const createConfig = () => {
 CALCULATE_PP=true
 # Enables/disables reading K1/K2/M1/M2 keys on the keyboard
 ENABLE_KEY_OVERLAY=true
+ENABLE_AUTOUPDATE=true
 
 # Reference: 1 second = 1000 milliseconds
 # Once in what value, the programme should read the game values (in milliseconds)
@@ -37,6 +38,7 @@ ENABLE_GOSU_OVERLAY=false
 # Enables logs for tosu developers, not very intuitive for you, the end user.
 # best not to include without developer's request.
 DEBUG_LOG=false
+OPEN_DASHBOARD_ON_STARTUP=false
 
 # IP address where the websocket api server will be registered
 # 127.0.0.1 = localhost
@@ -257,16 +259,16 @@ export const writeConfig = (httpServer: any, options: any) => {
     let text = '';
 
     text += `DEBUG_LOG=${options.DEBUG_LOG ?? config.debugLogging}\n\n`;
-    text += `CALCULATE_PP = ${options.CALCULATE_PP ?? config.calculatePP} \n\n`;
-    text += `ENABLE_AUTOUPDATE = ${options.ENABLE_AUTOUPDATE ?? config.enableAutoUpdate} \n`;
-    text += `OPEN_DASHBOARD_ON_STARTUP = ${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup} \n\n`;
-    text += `ENABLE_GOSU_OVERLAY = ${options.ENABLE_GOSU_OVERLAY ?? config.enableGosuOverlay} \n`;
-    text += `ENABLE_KEY_OVERLAY = ${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay} \n\n`;
-    text += `POLL_RATE = ${options.POLL_RATE ?? config.pollRate} \n`;
-    text += `PRECISE_DATA_POLL_RATE = ${options.PRECISE_DATA_POLL_RATE ?? config.preciseDataPollRate} \n\n`;
-    text += `SERVER_IP = ${options.SERVER_IP ?? config.serverIP} \n`;
-    text += `SERVER_PORT = ${options.SERVER_PORT ?? config.serverPort} \n\n`;
-    text += `STATIC_FOLDER_PATH = ${options.STATIC_FOLDER_PATH ?? config.staticFolderPath} \n`;
+    text += `CALCULATE_PP=${options.CALCULATE_PP ?? config.calculatePP}\n\n`;
+    text += `ENABLE_AUTOUPDATE=${options.ENABLE_AUTOUPDATE ?? config.enableAutoUpdate}\n`;
+    text += `OPEN_DASHBOARD_ON_STARTUP=${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup}\n\n`;
+    text += `ENABLE_GOSU_OVERLAY=${options.ENABLE_GOSU_OVERLAY ?? config.enableGosuOverlay}\n`;
+    text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay}\n\n`;
+    text += `POLL_RATE=${options.POLL_RATE ?? config.pollRate}\n`;
+    text += `PRECISE_DATA_POLL_RATE=${options.PRECISE_DATA_POLL_RATE ?? config.preciseDataPollRate}\n\n`;
+    text += `SERVER_IP=${options.SERVER_IP ?? config.serverIP}\n`;
+    text += `SERVER_PORT=${options.SERVER_PORT ?? config.serverPort}\n\n`;
+    text += `STATIC_FOLDER_PATH=${options.STATIC_FOLDER_PATH ?? config.staticFolderPath}\n`;
 
     fs.writeFile(configPath, text, 'utf8', () => {
         refreshConfig(httpServer, true);

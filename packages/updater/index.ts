@@ -122,7 +122,7 @@ export const autoUpdater = async () => {
 
     wLogger.info('Restarting program');
 
-    spawn(process.argv[0], process.argv.slice(1), {
+    spawn(`"${process.argv[0]}"`, process.argv.slice(1), {
         detached: true,
         shell: true,
         stdio: 'ignore'

@@ -19,10 +19,14 @@ export class AllTimesData extends AbstractEntity {
     MemorySongsFolder: string = '';
 
     setGameFolder(value: string) {
+        if (typeof value !== 'string') return;
+
         this.GameFolder = value;
     }
 
     setSongsFolder(value: string) {
+        if (typeof value !== 'string') return;
+
         this.SongsFolder = value;
     }
 
@@ -92,8 +96,14 @@ export class AllTimesData extends AbstractEntity {
                     ) + 0xc
                 )
             );
+
+            this.resetReportCount('ATD(updateState)');
         } catch (exc) {
-            wLogger.error(`ATD(updateState) ${(exc as any).message}`);
+            this.reportError(
+                'ATD(updateState)',
+                10,
+                `ATD(updateState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }

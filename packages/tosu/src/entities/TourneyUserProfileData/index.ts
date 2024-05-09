@@ -45,10 +45,18 @@ export class TourneyUserProfileData extends AbstractEntity {
         );
         if (!spectatingUserDrawable) {
             wLogger.debug('TUPD(updateState) Slot is not equiped');
+            this.reportError(
+                'TUPD(updateState) Slot',
+                20,
+                `TUPD(updateState) Slot is not equiped`
+            );
+
             this.resetState();
             gamePlayData.init();
             return;
         }
+
+        this.resetReportCount('TUPD(updateState) Slot');
 
         try {
             // UserDrawable + 0x4
@@ -73,8 +81,14 @@ export class TourneyUserProfileData extends AbstractEntity {
             this.UserID = process.readInt(spectatingUserDrawable + 0x70);
 
             this.isDefaultState = false;
+
+            this.resetReportCount('TUPD(updateState)');
         } catch (exc) {
-            wLogger.error('TUPD(updateState) signature failed');
+            this.reportError(
+                'TUPD(updateState)',
+                10,
+                `TUPD(updateState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
 

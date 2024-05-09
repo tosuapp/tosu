@@ -96,37 +96,43 @@ export class Settings extends AbstractEntity {
     private configList: Record<string, IConfigBindable> = {
         VolumeUniversal: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.volume.master = value;
             }
         },
         VolumeEffect: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.volume.effect = value;
             }
         },
         VolumeMusic: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.volume.music = value;
             }
         },
         _ReleaseStream: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.client.branch = value;
             }
         },
         DimLevel: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.background.dim = value;
             }
         },
         ShowStoryboard: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.background.storyboard = value;
             }
         },
@@ -144,182 +150,212 @@ export class Settings extends AbstractEntity {
         // },
         ScoreMeter: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.scoreMeter.type = value;
             }
         },
         ScoreMeterScale: {
             type: 'double',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.scoreMeter.size = parseFloat((value || 0).toFixed(2));
             }
         },
         Offset: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.audio.offset.universal = value;
             }
         },
         CursorSize: {
             type: 'double',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.cursor.size = parseFloat((value || 0).toFixed(2));
             }
         },
         MouseSpeed: {
             type: 'double',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.mouse.sensitivity = parseFloat((value || 0).toFixed(2));
             }
         },
         Fullscreen: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.resolution.fullscreen = value;
             }
         },
         Width: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.width = value;
             }
         },
         Height: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.height = value;
             }
         },
         WidthFullscreen: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.widthFullscreen = value;
             }
         },
         HeightFullscreen: {
             type: 'int',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.resolution.heightFullscreen = value;
             }
         },
         AutomaticCursorSizing: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.cursor.autoSize = value;
             }
         },
         IgnoreBeatmapSamples: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.audio.ignoreBeatmapSounds = value;
             }
         },
         SkinSamples: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.audio.useSkinSamples = value;
             }
         },
         LastVersion: {
             type: 'bstring',
-            setValue: (value) => {
+            setValue: (value: string) => {
+                if (!(typeof value === 'string' && value.length <= 15)) return;
                 this.client.version = value;
             }
         },
         ManiaSpeedBPMScale: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mania.speedBPMScale = value;
             }
         },
         UsePerBeatmapManiaSpeed: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mania.usePerBeatmapSpeedScale = value;
             }
         },
         MouseDisableButtons: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mouse.disableButtons = value;
             }
         },
         MouseDisableWheel: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mouse.disableWheel = value;
             }
         },
         ProgressBarType: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.progressBarType = value;
             }
         },
         RankType: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.leaderboardType = value;
             }
         },
         UpdatePending: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.client.updateAvailable = value;
             }
         },
 
         UseSkinCursor: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.cursor.useSkinCursor = value;
             }
         },
         RawInput: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.mouse.rawInput = value;
             }
         },
         TreeSortMode: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.groupType = value;
             }
         },
         TreeSortMode2: {
             type: 'enum',
-            setValue: (value) => {
+            setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.sortType = value;
             }
         },
         EditorDefaultSkin: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.useDefaultSkinInEditor = value;
             }
         },
         ComboColourSliderBall: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.tintSliderBall = value;
             }
         },
         IgnoreBeatmapSkins: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.ignoreBeatmapSkins = value;
             }
         },
         Skin: {
             type: 'bstring',
-            setValue: (value) => {
+            setValue: (value: string) => {
+                if (!(typeof value === 'string' && value.length <= 256)) return;
                 this.skin.name = value;
             }
         },
         UseTaikoSkin: {
             type: 'bool',
-            setValue: (value) => {
+            setValue: (value: boolean) => {
+                if (typeof value !== 'boolean') return;
                 this.skin.useTaikoSkin = value;
             }
         }
@@ -328,60 +364,75 @@ export class Settings extends AbstractEntity {
     private bindingList: Record<number, IBindable> = {
         [Bindings.OsuLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.osu.k1 = VirtualKeyCode[value];
             }
         },
         [Bindings.OsuRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.osu.k2 = VirtualKeyCode[value];
             }
         },
         [Bindings.OsuSmoke]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.osu.smokeKey = VirtualKeyCode[value];
             }
         },
         [Bindings.FruitsDash]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.fruits.Dash = VirtualKeyCode[value];
             }
         },
         [Bindings.FruitsLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.fruits.k1 = VirtualKeyCode[value];
             }
         },
         [Bindings.FruitsRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.fruits.k2 = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoInnerLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.innerLeft = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoInnerRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.innerRight = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoOuterLeft]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.outerLeft = VirtualKeyCode[value];
             }
         },
         [Bindings.TaikoOuterRight]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.taiko.outerRight = VirtualKeyCode[value];
             }
         },
         [Bindings.QuickRetry]: {
             setValue: (value: number) => {
+                if (!this.isRealNumber(value)) return;
                 this.keybinds.quickRetry = VirtualKeyCode[value];
             }
         }
     };
+
+    isRealNumber(value: any) {
+        return typeof value === 'number' && !isNaN(value) && isFinite(value);
+    }
 
     setConfigValue(process: Process, address: number, position: number = 0) {
         try {
@@ -426,22 +477,20 @@ export class Settings extends AbstractEntity {
                     break;
             }
 
-            if (value != null) {
-                // console.log(position, key, value);
-
-                this.configList[key].setValue(value);
+            if (value === null || value === undefined) {
+                return;
             }
 
-            this.scvErrorAttempts = 0;
+            // console.log(position, key, value);
+            this.configList[key].setValue(value);
+
+            this.resetReportCount(`ATD(setConfigValue)[${position}]`);
         } catch (exc) {
-            this.scvErrorAttempts += 1;
-
-            if (this.scvErrorAttempts > 10) {
-                wLogger.error(
-                    "ATD(setConfigValue) Can't set config value",
-                    position
-                );
-            }
+            this.reportError(
+                `ATD(setConfigValue)[${position}]`,
+                10,
+                `ATD(setConfigValue)[${position}] ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -455,24 +504,21 @@ export class Settings extends AbstractEntity {
             const value = process.readInt(current + 0xc);
 
             const bindable = this.bindingList[key];
-            if (bindable) {
-                // console.log(position, Bindings[key], VirtualKeyCode[value]);
-
-                bindable.setValue(value);
-            } else {
+            if (bindable === null || bindable === undefined) {
                 // console.log('binding', key);
+                return;
             }
 
-            this.sbvErrorAttempts = 0;
+            // console.log(position, Bindings[key], VirtualKeyCode[value]);
+            bindable.setValue(value);
+
+            this.resetReportCount(`ATD(setBindingValue)[${position}]`);
         } catch (exc) {
-            this.sbvErrorAttempts += 1;
-
-            if (this.sbvErrorAttempts > 10) {
-                wLogger.error(
-                    "ATD(setBindingValue) Can't set binding value",
-                    position
-                );
-            }
+            this.reportError(
+                `ATD(setBindingValue)[${position}]`,
+                10,
+                `ATD(setBindingValue)[${position}] ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -485,19 +531,36 @@ export class Settings extends AbstractEntity {
                 process.readSharpDictionary(configurationAddr);
             for (let i = 0; i < rawSharpDictionary.length; i++) {
                 const current = rawSharpDictionary[i];
-                const keyAddress = process.readInt(current);
 
-                const key = process.readSharpString(keyAddress);
+                try {
+                    const keyAddress = process.readInt(current);
+                    const key = process.readSharpString(keyAddress);
 
-                if (!(key in this.configList)) {
-                    continue;
+                    if (!(key in this.configList)) {
+                        continue;
+                    }
+
+                    // console.log(i, current, key);
+                    this.configPositions.push(i);
+
+                    this.resetReportCount(`ATD(configOffset)[${i}]`);
+                } catch (exc) {
+                    this.reportError(
+                        `ATD(configOffset)[${i}]`,
+                        10,
+                        `ATD(configOffset)[${i}] ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
                 }
-
-                // console.log(i, current, key);
-                this.configPositions.push(i);
             }
+
+            this.resetReportCount('ATD(findConfigOffsets)');
         } catch (exc) {
-            wLogger.error("ATD(updateConfigState) Can't find config offset");
+            this.reportError(
+                'ATD(findConfigOffsets)',
+                10,
+                `ATD(findConfigOffsets) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -509,19 +572,36 @@ export class Settings extends AbstractEntity {
                 process.readSharpDictionary(bindingConfigAddr);
             for (let i = 0; i < rawSharpDictionary.length; i++) {
                 const current = rawSharpDictionary[i];
-                const key = process.readInt(current);
-                // const value = process.readInt(current + 0xc);
+                try {
+                    const key = process.readInt(current);
+                    // const value = process.readInt(current + 0xc);
 
-                if (!(key in this.bindingList)) {
-                    continue;
+                    if (!(key in this.bindingList)) {
+                        continue;
+                    }
+
+                    // const bindable = Bindings[key];
+                    // console.log(i, current, bindable, key, value);
+                    this.bindingPositions.push(i);
+
+                    this.resetReportCount(`ATD(bindingOffset)[${i}]`);
+                } catch (exc) {
+                    this.reportError(
+                        `ATD(bindingOffset)[${i}]`,
+                        10,
+                        `ATD(bindingOffset)[${i}] ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
                 }
-
-                // const bindable = Bindings[key];
-                // console.log(i, current, bindable, key, value);
-                this.bindingPositions.push(i);
             }
+
+            this.resetReportCount('ATD(findBindingOffsets)');
         } catch (exc) {
-            wLogger.error("ATD(updateConfigState) Can't find binding offset");
+            this.reportError(
+                'ATD(findBindingOffsets)',
+                10,
+                `ATD(findBindingOffsets) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -537,17 +617,13 @@ export class Settings extends AbstractEntity {
                 this.setConfigValue(process, configurationAddr, position);
             }
 
-            if (this.configStateErrorAttempts !== 0) {
-                this.configStateErrorAttempts = 0;
-            }
+            this.resetReportCount('ATD(updateConfigState)');
         } catch (exc) {
-            this.configStateErrorAttempts += 1;
-
-            if (this.configStateErrorAttempts > 5) {
-                wLogger.error(
-                    "ATD(updateConfigState) Can't update config state"
-                );
-            }
+            this.reportError(
+                'ATD(updateConfigState)',
+                10,
+                `ATD(updateConfigState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -563,17 +639,13 @@ export class Settings extends AbstractEntity {
                 this.setBindingValue(process, bindingConfigAddr, position);
             }
 
-            if (this.bindingStateErrorAttempts !== 0) {
-                this.bindingStateErrorAttempts = 0;
-            }
+            this.resetReportCount('ATD(updateBindingState)');
         } catch (exc) {
-            this.bindingStateErrorAttempts += 1;
-
-            if (this.bindingStateErrorAttempts > 5) {
-                wLogger.error(
-                    "ATD(updateBindingState) Can't update binding state"
-                );
-            }
+            this.reportError(
+                'ATD(updateBindingState)',
+                10,
+                `ATD(updateBindingState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -596,8 +668,14 @@ export class Settings extends AbstractEntity {
             );
 
             this.updateBindingState(process, process.readPointer(bindingsAddr));
+
+            this.resetReportCount('SETTINGS(updatestate)');
         } catch (exc) {
-            wLogger.error(`S(updateState) ${(exc as any).message}`);
+            this.reportError(
+                'SETTINGS(updatestate)',
+                10,
+                `SETTINGS(updatestate) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }

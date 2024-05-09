@@ -4,6 +4,7 @@ const colors = {
     info: '\x1b[1m\x1b[40m\x1b[42m',
     error: '\x1b[1m\x1b[37m\x1b[41m',
     debug: '\x1b[1m\x1b[37m\x1b[44m',
+    debugError: '\x1b[1m\x1b[37m\x1b[45m',
     warn: '\x1b[1m\x1b[40m\x1b[43m',
     reset: '\x1b[0m',
     grey: '\x1b[90m'
@@ -26,6 +27,12 @@ export const wLogger = {
         if (config.debugLogging !== true) return;
 
         const coloredText = colorText('debug');
+        console.log(coloredText, ...args);
+    },
+    debugError: (...args: any) => {
+        if (config.debugLogging !== true) return;
+
+        const coloredText = colorText('debugError');
         console.log(coloredText, ...args);
     },
     error: (...args: any) => {
