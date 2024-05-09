@@ -10,6 +10,8 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
+    watchConfigFile({ httpServer, initial: true });
+
     const { update } = argumetsParser(process.argv);
 
     const isDev = process.env.NODE_ENV !== 'development';
@@ -20,8 +22,6 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
     } else {
         await checkUpdates();
     }
-
-    watchConfigFile({ httpServer, initial: true });
 
     wLogger.info('Searching for osu!');
 
