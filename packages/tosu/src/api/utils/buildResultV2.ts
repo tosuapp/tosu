@@ -414,12 +414,15 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             audio: menuData.AudioFilename
         },
         directPath: {
-            beatmapFile: path.join(menuData.Folder, menuData.Path),
+            beatmapFile: path.join(menuData.Folder || '', menuData.Path || ''),
             beatmapBackground: path.join(
-                menuData.Folder,
-                menuData.BackgroundFilename
+                menuData.Folder || '',
+                menuData.BackgroundFilename || ''
             ),
-            beatmapAudio: path.join(menuData.Folder, menuData.AudioFilename),
+            beatmapAudio: path.join(
+                menuData.Folder || '',
+                menuData.AudioFilename || ''
+            ),
             beatmapFolder: menuData.Folder,
             skinFolder: allTimesData.SkinFolder
         },
