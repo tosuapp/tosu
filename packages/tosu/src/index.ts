@@ -14,10 +14,10 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
 
     const { update } = argumetsParser(process.argv);
 
-    const isDev = process.env.NODE_ENV !== 'development';
+    const isDev = process.env.NODE_ENV === 'development';
     const isUpdateArg = (update !== null && update === true) || update === null;
     const isConfigUpdate = config.enableAutoUpdate === true;
-    if (isDev && isUpdateArg && isConfigUpdate) {
+    if ((isDev === false && isConfigUpdate) || isUpdateArg) {
         await autoUpdater();
     } else {
         await checkUpdates();
