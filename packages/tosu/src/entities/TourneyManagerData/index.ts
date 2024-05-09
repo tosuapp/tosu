@@ -91,69 +91,99 @@ export class TourneyManagerData extends AbstractEntity {
             // because osu creates 40 channels with language topics, lobby, osu, etc... (bancho announces this to you)
             // and 41 is commonly for multiplayer in tourney client
             for (let i = channelsLength - 1; i >= 0; i--) {
-                const current =
-                    channelsItems + patterns.getLeaderStart() + 0x4 * i;
-
-                const channelAddr = process.readInt(current);
-                if (channelAddr === 0) {
-                    continue;
-                }
-
-                const chatTag = process.readSharpString(
-                    process.readInt(channelAddr + 0x4)
-                );
-                if (chatTag !== '#multiplayer') {
-                    continue;
-                }
-
-                const result: ITourneyManagetChatItem[] = [];
-
-                const messagesAddr = process.readInt(channelAddr + 0x10);
-
-                const messagesItems = process.readInt(messagesAddr + 0x4);
-                const messagesSize = process.readInt(messagesAddr + 0xc);
-
-                if (this.Messages.length === messagesSize) {
-                    // Not needed an update
-                    continue;
-                }
-
-                for (let i = 0; i < messagesSize; i++) {
+                try {
                     const current =
-                        messagesItems + patterns.getLeaderStart() + 0x4 * i;
-                    const currentItem = process.readInt(current);
+                        channelsItems + patterns.getLeaderStart() + 0x4 * i;
 
-                    // [Base + 0x4]
-                    const content = process.readSharpString(
-                        process.readInt(currentItem + 0x4)
-                    );
-                    // NOTE: Check for empty, and !mp commands
-                    if (content === '' || content.startsWith('!mp')) {
+                    const channelAddr = process.readInt(current);
+                    if (channelAddr === 0) {
                         continue;
                     }
-                    // [Base + 0x8]
-                    const timeName = process.readSharpString(
-                        process.readInt(currentItem + 0x8)
+
+                    const chatTag = process.readSharpString(
+                        process.readInt(channelAddr + 0x4)
                     );
-                    const [time] = timeName.split(' ');
+                    if (chatTag !== '#multiplayer') {
+                        continue;
+                    }
 
-                    result.push({
-                        time: time.trim(),
-                        name: timeName
-                            .replace(time, '')
-                            .replace(/:$/, '')
-                            .trimStart(),
-                        content
-                    });
+                    const result: ITourneyManagetChatItem[] = [];
+
+                    const messagesAddr = process.readInt(channelAddr + 0x10);
+
+                    const messagesItems = process.readInt(messagesAddr + 0x4);
+                    const messagesSize = process.readInt(messagesAddr + 0xc);
+
+                    if (this.Messages.length === messagesSize) {
+                        // Not needed an update
+                        continue;
+                    }
+
+                    for (let i = 0; i < messagesSize; i++) {
+                        try {
+                            const current =
+                                messagesItems +
+                                patterns.getLeaderStart() +
+                                0x4 * i;
+                            const currentItem = process.readInt(current);
+
+                            // [Base + 0x4]
+                            const content = process.readSharpString(
+                                process.readInt(currentItem + 0x4)
+                            );
+                            // NOTE: Check for empty, and !mp commands
+                            if (content === '' || content.startsWith('!mp')) {
+                                continue;
+                            }
+                            // [Base + 0x8]
+                            const timeName = process.readSharpString(
+                                process.readInt(currentItem + 0x8)
+                            );
+                            const [time] = timeName.split(' ');
+
+                            result.push({
+                                time: time.trim(),
+                                name: timeName
+                                    .replace(time, '')
+                                    .replace(/:$/, '')
+                                    .trimStart(),
+                                content
+                            });
+
+                            this.resetReportCount('TMD(chatMessage)');
+                        } catch (exc) {
+                            this.reportError(
+                                'TMD(chatMessage)',
+                                10,
+                                `TMD(chatMessage) ${(exc as any).message}`
+                            );
+                            wLogger.debug(exc);
+                        }
+                    }
+
+                    this.Messages = result;
+                    wLogger.debug('TMD(updateState) Chat Updated');
+
+                    this.resetReportCount('TMD(channelUpdate)');
+                } catch (exc) {
+                    this.reportError(
+                        'TMD(channelUpdate)',
+                        10,
+                        `TMD(channelUpdate) ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
                 }
-
-                this.Messages = result;
-                wLogger.debug('TMD(updateState) Chat Updated');
             }
 
             wLogger.debug('TMD(updateState) updated');
+
+            this.resetReportCount('TMD(updateState)');
         } catch (exc) {
-            wLogger.error(`TMD(updateState) ${(exc as any).message}`);
+            this.reportError(
+                'TMD(updateState)',
+                10,
+                `TMD(updateState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }

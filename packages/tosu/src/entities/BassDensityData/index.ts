@@ -7,8 +7,6 @@ export class BassDensityData extends AbstractEntity {
     currentAudioVelocity: number = 0.0;
     density: number = 0.0;
 
-    private updateStateErrorAttempts: number = 0;
-
     updateState() {
         try {
             const { process: osuProcess, patterns } =
@@ -72,15 +70,13 @@ export class BassDensityData extends AbstractEntity {
             this.currentAudioVelocity = currentAudioVelocity;
             this.density = (1 + currentAudioVelocity) * 0.5;
 
-            if (this.updateStateErrorAttempts !== 0) {
-                this.updateStateErrorAttempts = 0;
-            }
+            this.resetReportCount('BDD(updateState)');
         } catch (exc) {
-            this.updateStateErrorAttempts += 1;
-
-            if (this.updateStateErrorAttempts > 5) {
-                wLogger.error(`BDD(updateState) ${(exc as any).message}`);
-            }
+            this.reportError(
+                'BDD(updateState)',
+                10,
+                `BDD(updateState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }

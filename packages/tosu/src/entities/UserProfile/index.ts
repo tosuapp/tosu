@@ -47,8 +47,14 @@ export class UserProfile extends AbstractEntity {
             this.performancePoints = process.readShort(profileBase + 0x9c);
             // ARGB, to convert use UserProfile.backgroundColour.toString(16)
             this.backgroundColour = process.readUInt(profileBase + 0xac);
+
+            this.resetReportCount('UP(updateState)');
         } catch (exc) {
-            wLogger.error(`UP(updateState) ${(exc as any).message}`);
+            this.reportError(
+                'UP(updateState)',
+                10,
+                `UP(updateState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }

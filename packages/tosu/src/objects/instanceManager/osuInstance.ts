@@ -424,15 +424,7 @@ export class OsuInstance {
             this.previousState !== currentState
         ) {
             this.previousState = currentState;
-
-            try {
-                beatmapPpData.updateMapMetadata(currentMods);
-            } catch (exc) {
-                wLogger.error(
-                    "OI(updateMapMetadata) Can't update beatmap metadata"
-                );
-                wLogger.debug(exc);
-            }
+            beatmapPpData.updateMapMetadata(currentMods);
         }
 
         setTimeout(() => {

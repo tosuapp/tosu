@@ -123,8 +123,14 @@ export class ResultsScreenData extends AbstractEntity {
                 process.readInt(resultScreenBase + 0xa4),
                 process.readInt(resultScreenBase + 0xa0)
             ).toISOString();
+
+            this.resetReportCount('RSD(updateState)');
         } catch (exc) {
-            wLogger.error(`RSD(updateState) ${(exc as any).message}`);
+            this.reportError(
+                'RSD(updateState)',
+                10,
+                `RSD(updateState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }

@@ -477,22 +477,20 @@ export class Settings extends AbstractEntity {
                     break;
             }
 
-            if (value != null) {
-                // console.log(position, key, value);
-
-                this.configList[key].setValue(value);
+            if (value === null || value === undefined) {
+                return;
             }
 
-            this.scvErrorAttempts = 0;
+            // console.log(position, key, value);
+            this.configList[key].setValue(value);
+
+            this.resetReportCount(`ATD(setConfigValue)[${position}]`);
         } catch (exc) {
-            this.scvErrorAttempts += 1;
-
-            if (this.scvErrorAttempts > 10) {
-                wLogger.error(
-                    "ATD(setConfigValue) Can't set config value",
-                    position
-                );
-            }
+            this.reportError(
+                `ATD(setConfigValue)[${position}]`,
+                10,
+                `ATD(setConfigValue)[${position}] ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -506,24 +504,21 @@ export class Settings extends AbstractEntity {
             const value = process.readInt(current + 0xc);
 
             const bindable = this.bindingList[key];
-            if (bindable) {
-                // console.log(position, Bindings[key], VirtualKeyCode[value]);
-
-                bindable.setValue(value);
-            } else {
+            if (bindable === null || bindable === undefined) {
                 // console.log('binding', key);
+                return;
             }
 
-            this.sbvErrorAttempts = 0;
+            // console.log(position, Bindings[key], VirtualKeyCode[value]);
+            bindable.setValue(value);
+
+            this.resetReportCount(`ATD(setBindingValue)[${position}]`);
         } catch (exc) {
-            this.sbvErrorAttempts += 1;
-
-            if (this.sbvErrorAttempts > 10) {
-                wLogger.error(
-                    "ATD(setBindingValue) Can't set binding value",
-                    position
-                );
-            }
+            this.reportError(
+                `ATD(setBindingValue)[${position}]`,
+                10,
+                `ATD(setBindingValue)[${position}] ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -536,19 +531,36 @@ export class Settings extends AbstractEntity {
                 process.readSharpDictionary(configurationAddr);
             for (let i = 0; i < rawSharpDictionary.length; i++) {
                 const current = rawSharpDictionary[i];
-                const keyAddress = process.readInt(current);
 
-                const key = process.readSharpString(keyAddress);
+                try {
+                    const keyAddress = process.readInt(current);
+                    const key = process.readSharpString(keyAddress);
 
-                if (!(key in this.configList)) {
-                    continue;
+                    if (!(key in this.configList)) {
+                        continue;
+                    }
+
+                    // console.log(i, current, key);
+                    this.configPositions.push(i);
+
+                    this.resetReportCount(`ATD(configOffset)[${i}]`);
+                } catch (exc) {
+                    this.reportError(
+                        `ATD(configOffset)[${i}]`,
+                        10,
+                        `ATD(configOffset)[${i}] ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
                 }
-
-                // console.log(i, current, key);
-                this.configPositions.push(i);
             }
+
+            this.resetReportCount('ATD(findConfigOffsets)');
         } catch (exc) {
-            wLogger.error("ATD(updateConfigState) Can't find config offset");
+            this.reportError(
+                'ATD(findConfigOffsets)',
+                10,
+                `ATD(findConfigOffsets) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -560,19 +572,36 @@ export class Settings extends AbstractEntity {
                 process.readSharpDictionary(bindingConfigAddr);
             for (let i = 0; i < rawSharpDictionary.length; i++) {
                 const current = rawSharpDictionary[i];
-                const key = process.readInt(current);
-                // const value = process.readInt(current + 0xc);
+                try {
+                    const key = process.readInt(current);
+                    // const value = process.readInt(current + 0xc);
 
-                if (!(key in this.bindingList)) {
-                    continue;
+                    if (!(key in this.bindingList)) {
+                        continue;
+                    }
+
+                    // const bindable = Bindings[key];
+                    // console.log(i, current, bindable, key, value);
+                    this.bindingPositions.push(i);
+
+                    this.resetReportCount(`ATD(bindingOffset)[${i}]`);
+                } catch (exc) {
+                    this.reportError(
+                        `ATD(bindingOffset)[${i}]`,
+                        10,
+                        `ATD(bindingOffset)[${i}] ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
                 }
-
-                // const bindable = Bindings[key];
-                // console.log(i, current, bindable, key, value);
-                this.bindingPositions.push(i);
             }
+
+            this.resetReportCount('ATD(findBindingOffsets)');
         } catch (exc) {
-            wLogger.error("ATD(updateConfigState) Can't find binding offset");
+            this.reportError(
+                'ATD(findBindingOffsets)',
+                10,
+                `ATD(findBindingOffsets) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -588,17 +617,13 @@ export class Settings extends AbstractEntity {
                 this.setConfigValue(process, configurationAddr, position);
             }
 
-            if (this.configStateErrorAttempts !== 0) {
-                this.configStateErrorAttempts = 0;
-            }
+            this.resetReportCount('ATD(updateConfigState)');
         } catch (exc) {
-            this.configStateErrorAttempts += 1;
-
-            if (this.configStateErrorAttempts > 5) {
-                wLogger.error(
-                    "ATD(updateConfigState) Can't update config state"
-                );
-            }
+            this.reportError(
+                'ATD(updateConfigState)',
+                10,
+                `ATD(updateConfigState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -614,17 +639,13 @@ export class Settings extends AbstractEntity {
                 this.setBindingValue(process, bindingConfigAddr, position);
             }
 
-            if (this.bindingStateErrorAttempts !== 0) {
-                this.bindingStateErrorAttempts = 0;
-            }
+            this.resetReportCount('ATD(updateBindingState)');
         } catch (exc) {
-            this.bindingStateErrorAttempts += 1;
-
-            if (this.bindingStateErrorAttempts > 5) {
-                wLogger.error(
-                    "ATD(updateBindingState) Can't update binding state"
-                );
-            }
+            this.reportError(
+                'ATD(updateBindingState)',
+                10,
+                `ATD(updateBindingState) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
@@ -647,8 +668,14 @@ export class Settings extends AbstractEntity {
             );
 
             this.updateBindingState(process, process.readPointer(bindingsAddr));
+
+            this.resetReportCount('SETTINGS(updatestate)');
         } catch (exc) {
-            wLogger.error(`S(updateState) ${(exc as any).message}`);
+            this.reportError(
+                'SETTINGS(updatestate)',
+                10,
+                `SETTINGS(updatestate) ${(exc as any).message}`
+            );
             wLogger.debug(exc);
         }
     }
