@@ -437,7 +437,7 @@ export class OsuInstance {
 
         if (!Process.isProcessExist(this.process.handle)) {
             this.isDestroyed = true;
-            wLogger.info(
+            wLogger.warn(
                 `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed`
             );
             this.emitter.emit('onDestroy', this.pid);

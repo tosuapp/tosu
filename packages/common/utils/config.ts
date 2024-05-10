@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
+import { checkGameOverlayConfig } from './gosu';
 import { wLogger } from './logger';
 
 const configPath = path.join(
@@ -226,6 +227,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
             preciseDataPollRate >= 0 ? preciseDataPollRate : 100;
         httpServer.restartWS();
     }
+
+    checkGameOverlayConfig();
 
     const osuInstances: any = Object.values(
         httpServer.instanceManager.osuInstances || {}
