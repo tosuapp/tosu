@@ -1,28 +1,16 @@
-import { downloadFile, unzip, wLogger } from '@tosu/common';
+import {
+    checkGameOverlayConfig,
+    downloadFile,
+    unzip,
+    wLogger
+} from '@tosu/common';
 import { execFile } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Process } from 'tsprocess/dist/process';
 
 const configPath = path.join(process.cwd(), 'config.ini');
-const checkGameOverlayConfig = () => {
-    if (!existsSync(configPath)) {
-        writeFileSync(
-            configPath,
-            `[GameOverlay]; https://github.com/l3lackShark/gosumemory/wiki/GameOverlay
-gameWidth = 1920
-gameHeight = 1080
-overlayURL = 
-overlayWidth = 380
-overlayHeight = 110
-overlayOffsetX = 0
-overlayOffsetY = 0
-overlayScale = 10`
-        );
-    }
-};
-
 const checkGosuConfig = (p: Process, checking?: boolean) => {
     if (!existsSync(configPath)) return null;
 
