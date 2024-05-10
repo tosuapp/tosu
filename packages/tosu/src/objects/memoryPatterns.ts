@@ -15,7 +15,6 @@ export interface PatternData {
     getAudioLengthPtr: number;
     userProfilePtr: number;
     rawLoginStatusPtr: number;
-    gameTimePtr: number;
     spectatingUserPtr: number;
 }
 
@@ -41,7 +40,6 @@ export class MemoryPatterns {
             getAudioLengthPtr: 0,
             userProfilePtr: 0,
             rawLoginStatusPtr: 0,
-            gameTimePtr: 0,
             spectatingUserPtr: 0
         };
 
