@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.2](https://github.com/KotRikD/tosu/compare/v2.6.1...v2.6.2) (2024-05-10)
+
+
+### Bug Fixes
+
+* Create `config.ini` on startup ([a5c1fe0](https://github.com/KotRikD/tosu/commit/a5c1fe0dcdb64a1c19f2bddd08c9298c1b0a7192))
+* gameTimePtr isn't available in tournament mode ([e71ddda](https://github.com/KotRikD/tosu/commit/e71ddda0ad789d15f6b72b5752723c23ad7858e3))
+
 ### [2.6.1](https://github.com/KotRikD/tosu/compare/v2.6.0...v2.6.1) (2024-05-09)
 
 
