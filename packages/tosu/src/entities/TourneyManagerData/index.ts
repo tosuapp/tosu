@@ -4,7 +4,7 @@ import { AbstractEntity } from '@/entities/AbstractEntity';
 
 import { ITourneyManagetChatItem } from './types';
 
-const TOURNAMENT_CHAT_ENGINE = '75 08 8D 65 F4 5B 5E 5F 5D C3 85 D2 74 72';
+const TOURNAMENT_CHAT_ENGINE = 'A1 ?? ?? ?? ?? 89 45 F0 8B D1 85 C9 75';
 
 export class TourneyManagerData extends AbstractEntity {
     ChatAreaAddr: number = 0;
@@ -43,7 +43,7 @@ export class TourneyManagerData extends AbstractEntity {
             }
 
             if (this.ChatAreaAddr === 0) {
-                this.ChatAreaAddr = await process.scanAsync(
+                this.ChatAreaAddr = process.scanSync(
                     TOURNAMENT_CHAT_ENGINE,
                     true
                 );
@@ -83,7 +83,7 @@ export class TourneyManagerData extends AbstractEntity {
                 process.readInt(process.readInt(rulesetAddr + 0x34) + 0x4) + 0x4
             );
 
-            const channelsList = process.readPointer(this.ChatAreaAddr + 0x15);
+            const channelsList = process.readPointer(this.ChatAreaAddr + 0x1);
             const channelsItems = process.readInt(channelsList + 0x4);
 
             const channelsLength = process.readInt(channelsItems + 0x4);
