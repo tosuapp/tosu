@@ -115,7 +115,7 @@ export class AllTimesData extends AbstractEntity {
                     return;
                 } else {
                     this.GameTime = process.readPointer(
-                        this.gameTimePtr - GAME_TIME_PTR.offset
+                        this.gameTimePtr + GAME_TIME_PTR.offset
                     );
                 }
             }
