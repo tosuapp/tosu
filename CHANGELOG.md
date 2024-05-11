@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.3](https://github.com/KotRikD/tosu/compare/v2.6.2...v2.6.3) (2024-05-11)
+
+
+### Bug Fixes
+
+* (ATD)can't read int at x ([81b5575](https://github.com/KotRikD/tosu/commit/81b55751ca19e1d07d0a603fc1a7945583311137))
+* fixing that 3221226505 error code ([6eb6018](https://github.com/KotRikD/tosu/commit/6eb60181ed893885411c3bf8b96773fa16a94f29))
+
 ### [2.6.2](https://github.com/KotRikD/tosu/compare/v2.6.1...v2.6.2) (2024-05-10)
 
 
