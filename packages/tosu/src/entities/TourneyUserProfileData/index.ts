@@ -45,11 +45,6 @@ export class TourneyUserProfileData extends AbstractEntity {
         );
         if (!spectatingUserDrawable) {
             wLogger.debug('TUPD(updateState) Slot is not equiped');
-            this.reportError(
-                'TUPD(updateState) Slot',
-                20,
-                `TUPD(updateState) Slot is not equiped`
-            );
 
             this.resetState();
             gamePlayData.init();

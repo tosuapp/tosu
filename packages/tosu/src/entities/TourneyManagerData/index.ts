@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { sleep, wLogger } from '@tosu/common';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 
@@ -43,6 +43,7 @@ export class TourneyManagerData extends AbstractEntity {
             }
 
             if (this.ChatAreaAddr === 0) {
+                await sleep(1000);
                 this.ChatAreaAddr = process.scanSync(
                     TOURNAMENT_CHAT_ENGINE,
                     true
