@@ -31,6 +31,9 @@ POLL_RATE=100
 # Once per value, the programme should read the values of keys K1/K2/M1/M2 (in milliseconds)
 PRECISE_DATA_POLL_RATE=100
 
+# Shows !mp commands (messages starting with '!mp') in tournament manager chat (hidden by default)
+SHOW_MP_COMMANDS=false
+
 # Enables/disables the in-game gosumemory overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
 ENABLE_GOSU_OVERLAY=false
 
@@ -69,6 +72,7 @@ export const config = {
             process.env.KEYOVERLAY_POLL_RATE ||
             '100'
     ),
+    showMpCommands: (process.env.SHOW_MP_COMMANDS || '') === 'true',
     serverIP: process.env.SERVER_IP || '127.0.0.1',
     serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
@@ -104,6 +108,11 @@ export const updateConfigFile = () => {
     if (!process.env.PRECISE_DATA_POLL_RATE) {
         newOptions += 'PRECISE_DATA_POLL_RATE, ';
         fs.appendFileSync(configPath, '\n\nPRECISE_DATA_POLL_RATE=100', 'utf8');
+    }
+
+    if (!process.env.SHOW_MP_COMMANDS) {
+        newOptions += 'SHOW_MP_COMMANDS, ';
+        fs.appendFileSync(configPath, '\nSHOW_MP_COMMANDS=false', 'utf8');
     }
 
     if (!process.env.SERVER_IP) {
@@ -194,6 +203,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const preciseDataPollRate = Number(
         parsed.PRECISE_DATA_POLL_RATE || parsed.KEYOVERLAY_POLL_RATE || '100'
     );
+    const showMpCommands = (parsed.SHOW_MP_COMMANDS || '') === 'true';
     const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
     const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
 
@@ -206,6 +216,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.enableKeyOverlay !== enableKeyOverlay ||
         config.pollRate !== pollRate ||
         config.preciseDataPollRate !== preciseDataPollRate ||
+        config.showMpCommands !== showMpCommands ||
         config.staticFolderPath !== staticFolderPath ||
         config.enableGosuOverlay !== enableGosuOverlay ||
         config.serverIP !== serverIP ||
@@ -246,6 +257,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.debugLogging = debugLogging;
     config.calculatePP = calculatePP;
     config.enableKeyOverlay = enableKeyOverlay;
+    config.showMpCommands = showMpCommands;
     config.staticFolderPath = staticFolderPath;
 
     if (
@@ -269,6 +281,7 @@ export const writeConfig = (httpServer: any, options: any) => {
     text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay}\n\n`;
     text += `POLL_RATE=${options.POLL_RATE ?? config.pollRate}\n`;
     text += `PRECISE_DATA_POLL_RATE=${options.PRECISE_DATA_POLL_RATE ?? config.preciseDataPollRate}\n\n`;
+    text += `SHOW_MP_COMMANDS=${options.SHOW_MP_COMMANDS ?? config.showMpCommands}\n\n`;
     text += `SERVER_IP=${options.SERVER_IP ?? config.serverIP}\n`;
     text += `SERVER_PORT=${options.SERVER_PORT ?? config.serverPort}\n\n`;
     text += `STATIC_FOLDER_PATH=${options.STATIC_FOLDER_PATH ?? config.staticFolderPath}\n`;

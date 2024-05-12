@@ -1,4 +1,4 @@
-import { sleep, wLogger } from '@tosu/common';
+import { config, sleep, wLogger } from '@tosu/common';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 
@@ -133,7 +133,11 @@ export class TourneyManagerData extends AbstractEntity {
                                 process.readInt(currentItem + 0x4)
                             );
                             // NOTE: Check for empty, and !mp commands
-                            if (content === '' || content.startsWith('!mp')) {
+                            if (
+                                content === '' ||
+                                (!config.showMpCommands &&
+                                    content.startsWith('!mp'))
+                            ) {
                                 continue;
                             }
                             // [Base + 0x8]
