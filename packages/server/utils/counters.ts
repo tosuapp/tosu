@@ -765,6 +765,23 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.staticFolderPath}`)
         );
 
+    const showMpCommandsHTML = settingsItemHTML
+        .replace('{NAME}', 'SHOW_MP_COMMANDS')
+        .replace(
+            '{DESCRIPTION}',
+            `Shows !mp commands (messages starting with '!mp') in tournament manager chat (hidden by default)`
+        )
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{ID}/gm, 'SHOW_MP_COMMANDS')
+                .replace(
+                    '{ADDON}',
+                    config.showMpCommands ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.showMpCommands}`)
+        );
+
     const settings = `<div class="settings">
     ${debugHTML}
     <div></div>
@@ -778,6 +795,7 @@ export function buildSettings(res: http.ServerResponse) {
     <div></div>
     <div></div>
     ${calculatePPHTML}
+    ${showMpCommandsHTML}
     <div></div>
     <div></div>
     ${pollRateHTML}

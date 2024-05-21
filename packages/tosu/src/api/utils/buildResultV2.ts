@@ -101,6 +101,15 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             ? gamePlayData.Mods
             : allTimesData.MenuMods;
 
+    const resultScreenHits = {
+        300: resultsScreenData.Hit300,
+        geki: resultsScreenData.HitGeki,
+        100: resultsScreenData.Hit100,
+        katu: resultsScreenData.HitKatu,
+        50: resultsScreenData.Hit50,
+        0: resultsScreenData.HitMiss
+    };
+
     return {
         state: {
             number: allTimesData.Status,
@@ -384,16 +393,15 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 number: gamePlayData.Mode,
                 name: Modes[gamePlayData.Mode] || ''
             },
+
             score: resultsScreenData.Score,
+            accuracy: calculateAccuracy({
+                hits: resultScreenHits,
+                mode: gamePlayData.Mode
+            }),
+
             name: resultsScreenData.PlayerName,
-            hits: {
-                300: resultsScreenData.Hit300,
-                geki: resultsScreenData.HitGeki,
-                100: resultsScreenData.Hit100,
-                katu: resultsScreenData.HitKatu,
-                50: resultsScreenData.Hit50,
-                0: resultsScreenData.HitMiss
-            },
+            hits: resultScreenHits,
             mods: {
                 number: resultsScreenData.Mods,
                 name: getOsuModsString(resultsScreenData.Mods)

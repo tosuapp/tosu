@@ -354,6 +354,7 @@ async function saveSettings(element) {
   const STATIC_FOLDER_PATH = document.querySelector('#STATIC_FOLDER_PATH');
   const ENABLE_AUTOUPDATE = document.querySelector('#ENABLE_AUTOUPDATE');
   const OPEN_DASHBOARD_ON_STARTUP = document.querySelector('#OPEN_DASHBOARD_ON_STARTUP');
+  const SHOW_MP_COMMANDS = document.querySelector('#SHOW_MP_COMMANDS');
 
   if (BACKUP_SERVER_IP != SERVER_IP.value || BACKUP_SERVER_PORT != SERVER_PORT.value)
     redirect = true;
@@ -366,6 +367,7 @@ async function saveSettings(element) {
       ENABLE_AUTOUPDATE: ENABLE_AUTOUPDATE.checked,
       OPEN_DASHBOARD_ON_STARTUP: OPEN_DASHBOARD_ON_STARTUP.checked,
       CALCULATE_PP: CALCULATE_PP.checked,
+      SHOW_MP_COMMANDS: SHOW_MP_COMMANDS.checked,
       ENABLE_KEY_OVERLAY: ENABLE_KEY_OVERLAY.checked,
       ENABLE_GOSU_OVERLAY: ENABLE_GOSU_OVERLAY.checked,
       POLL_RATE: POLL_RATE.value,

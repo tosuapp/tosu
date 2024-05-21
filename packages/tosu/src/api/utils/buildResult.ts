@@ -8,6 +8,7 @@ import {
 } from '@/api/types/v1';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { calculateAccuracy } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
 
@@ -71,6 +72,15 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         allTimesData.Status === 2 || allTimesData.Status === 7
             ? gamePlayData.Mods
             : allTimesData.MenuMods;
+
+    const resultScreenHits = {
+        300: resultsScreenData.Hit300,
+        geki: resultsScreenData.HitGeki,
+        100: resultsScreenData.Hit100,
+        katu: resultsScreenData.HitKatu,
+        50: resultsScreenData.Hit50,
+        0: resultsScreenData.HitMiss
+    };
 
     return {
         settings: {
@@ -231,6 +241,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             mode: gamePlayData.Mode,
             name: resultsScreenData.PlayerName,
             score: resultsScreenData.Score,
+            accuracy: calculateAccuracy({
+                hits: resultScreenHits,
+                mode: gamePlayData.Mode
+            }),
             maxCombo: resultsScreenData.MaxCombo,
             mods: {
                 num: resultsScreenData.Mods,

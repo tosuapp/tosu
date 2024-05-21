@@ -10,13 +10,13 @@ import {
 } from '@/utils/settings.types';
 
 export enum BeatmapStatuses {
-    Graveyard = '-2',
-    Wip = '-1',
-    Pending = 0,
-    Ranked = 1,
-    Approved = 2,
-    Qualified = 3,
-    Loved = 4
+    Unknown,
+    NotSubmitted = 1,
+    Pending = 2,
+    Ranked = 4,
+    Approved = 5,
+    Qualified = 6,
+    Loved = 7
 }
 
 export enum Modes {
@@ -440,6 +440,7 @@ export interface Series {
 export interface ResultsScreen {
     mode: NumberName;
     score: number;
+    accuracy: number;
     name: string;
     hits: Hits3;
     mods: NumberName;
