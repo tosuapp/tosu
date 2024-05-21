@@ -440,6 +440,7 @@ export interface Series {
 export interface ResultsScreen {
     mode: NumberName;
     score: number;
+    accuracy: number;
     name: string;
     hits: Hits3;
     mods: NumberName;

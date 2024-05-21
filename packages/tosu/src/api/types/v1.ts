@@ -209,6 +209,7 @@ export interface ResultsScreenValues {
     mode: number;
     name: string;
     score: number;
+    accuracy: number;
     maxCombo: number;
     mods: SelectedMods;
     '300': number;
