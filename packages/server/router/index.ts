@@ -339,7 +339,11 @@ export default function buildBaseApi(server: Server) {
 
     server.app.route('/api/runUpdates', 'GET', async (req, res) => {
         try {
-            await autoUpdater();
+            const result = await autoUpdater();
+            if (result instanceof Error) {
+                sendJson(res, { result: result.name });
+                return;
+            }
 
             sendJson(res, { result: 'updated' });
         } catch (exc) {

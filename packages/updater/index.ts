@@ -82,55 +82,62 @@ export const checkUpdates = async () => {
 };
 
 export const autoUpdater = async () => {
-    const check = await checkUpdates();
-    if (check instanceof Error) {
-        return;
-    }
-
-    const { assets, versionName, platformType } = check;
-    if (versionName.includes(currentVersion)) {
-        wLogger.info(`You're using latest version [${currentVersion}] `);
-
-        if (fs.existsSync(fileDestination)) {
-            await deleteNotLocked(fileDestination);
+    try {
+        const check = await checkUpdates();
+        if (check instanceof Error) {
+            return check;
         }
 
-        if (fs.existsSync(backupExecutablePath)) {
-            await deleteNotLocked(backupExecutablePath);
+        const { assets, versionName, platformType } = check;
+        if (versionName.includes(currentVersion)) {
+            wLogger.info(`You're using latest version [${currentVersion}] `);
+
+            if (fs.existsSync(fileDestination)) {
+                await deleteNotLocked(fileDestination);
+            }
+
+            if (fs.existsSync(backupExecutablePath)) {
+                await deleteNotLocked(backupExecutablePath);
+            }
+
+            return;
         }
 
-        return;
+        const findAsset = assets.find(
+            (r) => r.name.includes(platformType) && r.name.endsWith('.zip')
+        );
+        if (!findAsset) {
+            wLogger.info('Files to update not found');
+            return 'noFiles';
+        }
+
+        const downloadAsset = await downloadFile(
+            findAsset.browser_download_url,
+            fileDestination
+        );
+
+        const currentExecutablePath = process.argv[0]; // Path to the current executable
+
+        await fs.promises.rename(currentExecutablePath, backupExecutablePath);
+        await unzip(downloadAsset, process.cwd());
+
+        wLogger.info('Restarting program');
+
+        spawn(`"${process.argv[0]}"`, process.argv.slice(1), {
+            detached: true,
+            shell: true,
+            stdio: 'ignore'
+        }).unref();
+
+        wLogger.info('Closing program');
+
+        await sleep(1000);
+
+        process.exit();
+    } catch (exc) {
+        wLogger.error('autoUpdater', (exc as any).message);
+        wLogger.debug('autoUpdater', exc);
+
+        return exc;
     }
-
-    const findAsset = assets.find(
-        (r) => r.name.includes(platformType) && r.name.endsWith('.zip')
-    );
-    if (!findAsset) {
-        wLogger.info('Files to update not found');
-        return 'noFiles';
-    }
-
-    const downloadAsset = await downloadFile(
-        findAsset.browser_download_url,
-        fileDestination
-    );
-
-    const currentExecutablePath = process.argv[0]; // Path to the current executable
-
-    await fs.promises.rename(currentExecutablePath, backupExecutablePath);
-    await unzip(downloadAsset, process.cwd());
-
-    wLogger.info('Restarting program');
-
-    spawn(`"${process.argv[0]}"`, process.argv.slice(1), {
-        detached: true,
-        shell: true,
-        stdio: 'ignore'
-    }).unref();
-
-    wLogger.info('Closing program');
-
-    await sleep(1000);
-
-    process.exit();
 };
