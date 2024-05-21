@@ -64,7 +64,7 @@ export const checkUpdates = async () => {
         config.updateVersion = versionName || currentVersion;
 
         if (versionName === null) {
-            wLogger.info(`Failed to check updates [${currentVersion}] `);
+            wLogger.info(`Failed to check updates v${currentVersion}`);
 
             return new Error('Version the same');
         }
@@ -90,7 +90,7 @@ export const autoUpdater = async () => {
 
         const { assets, versionName, platformType } = check;
         if (versionName.includes(currentVersion)) {
-            wLogger.info(`You're using latest version [${currentVersion}] `);
+            wLogger.info(`You're using latest version v${currentVersion}`);
 
             if (fs.existsSync(fileDestination)) {
                 await deleteNotLocked(fileDestination);
@@ -107,7 +107,7 @@ export const autoUpdater = async () => {
             (r) => r.name.includes(platformType) && r.name.endsWith('.zip')
         );
         if (!findAsset) {
-            wLogger.info('Files to update not found');
+            wLogger.info(`Files to update not found (${platformType})`);
             return 'noFiles';
         }
 
