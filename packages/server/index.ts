@@ -21,7 +21,7 @@ export class Server {
     constructor({ instanceManager }: { instanceManager: any }) {
         this.instanceManager = instanceManager;
 
-        this.middlrewares();
+        this.middlewares();
     }
 
     start() {
@@ -79,7 +79,7 @@ export class Server {
         if (this.WS_V2_PRECISE) this.WS_V2_PRECISE.startLoop();
     }
 
-    middlrewares() {
+    middlewares() {
         const instanceManager = this.instanceManager;
 
         this.app.use((_, res, next) => {
