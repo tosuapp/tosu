@@ -186,6 +186,10 @@ export const calculateGrade = ({
             break;
     }
 
+    if (total === 0) {
+        rank = silver ? 'XH' : 'X';
+    }
+
     return rank;
 };
 
