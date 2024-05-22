@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/KotRikD/tosu/compare/v2.6.3...v2.7.0) (2024-05-22)
+
+
+### Features
+
+* Add `SHOW_MP_COMMANDS` in dashboard ([943c111](https://github.com/KotRikD/tosu/commit/943c1116c6d04254005f73baf6aed88656c59aa3))
+* Add accuracy to `v1` & `v2` api ([49d5472](https://github.com/KotRikD/tosu/commit/49d547267d7349733cce76fc334409fb786c198f))
+
+
+### Bug Fixes
+
+* Fix beatmap status ([3d02ce7](https://github.com/KotRikD/tosu/commit/3d02ce774100958f5dd436f114264e9ee8e56e25))
+* prevent crash on autoupdater ([8b507db](https://github.com/KotRikD/tosu/commit/8b507dbab49c03c7e17103086648ecbeb8136b6d))
+
 ### [2.6.3](https://github.com/KotRikD/tosu/compare/v2.6.2...v2.6.3) (2024-05-11)
 
 
