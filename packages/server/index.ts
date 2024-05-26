@@ -28,17 +28,20 @@ export class Server {
         this.WS_V1 = new Websocket({
             instanceManager: this.instanceManager,
             pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getState'
+            stateFunctionName: 'getState',
+            onMessageCallback: handleSocketCommands
         });
         this.WS_V2 = new Websocket({
             instanceManager: this.instanceManager,
             pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getStateV2'
+            stateFunctionName: 'getStateV2',
+            onMessageCallback: handleSocketCommands
         });
         this.WS_V2_PRECISE = new Websocket({
             instanceManager: this.instanceManager,
             pollRateFieldName: 'preciseDataPollRate',
-            stateFunctionName: 'getPreciseData'
+            stateFunctionName: 'getPreciseData',
+            onMessageCallback: handleSocketCommands
         });
         this.WS_COMMANDS = new Websocket({
             instanceManager: '',
