@@ -29,6 +29,8 @@ export class MenuData extends AbstractEntity {
     MP3Length: number;
 
     previousMD5: string = '';
+    pendingMD5: string = '';
+    waitOnBg: number = 0;
 
     updateState() {
         try {
@@ -44,20 +46,57 @@ export class MenuData extends AbstractEntity {
                 wLogger.debug('MD(updateState) beatmapAddr is 0');
                 return;
             }
+
             // [[Beatmap] + 0x6C]
-            this.MD5 = process.readSharpString(
+            const newMD5 = process.readSharpString(
                 process.readInt(beatmapAddr + 0x6c)
             );
+            this.pendingMD5 = newMD5;
+
             // [[Beatmap] + 0x90]
-            this.Path = process.readSharpString(
+            const newPath = process.readSharpString(
                 process.readInt(beatmapAddr + 0x90)
             );
-            // [Base - 0x33]
-            this.MenuGameMode = process.readPointer(baseAddr - 0x33);
 
-            if (this.MD5 === this.previousMD5 || !this.Path.endsWith('.osu')) {
+            // //  [[Beatmap] + 0x68]
+            const newBackgroundFilename = process.readSharpString(
+                process.readInt(beatmapAddr + 0x68)
+            );
+
+            if (newMD5 === this.previousMD5 || !newPath.endsWith('.osu')) {
                 return;
             }
+
+            if (this.pendingMD5 !== newMD5) {
+                this.waitOnBg = performance.now();
+                this.pendingMD5 = newMD5;
+            }
+
+            // if background filename is empty, it probably means bm data hasn't fully settled yet in memory
+            // wait up to 500ms before giving up and continue reading normally
+            if (newBackgroundFilename === '') {
+                wLogger.info('background filename empty');
+
+                if (performance.now() - this.waitOnBg <= 500) {
+                    return;
+                }
+            }
+
+            this.MD5 = newMD5;
+            this.Path = newPath;
+            this.BackgroundFilename = newBackgroundFilename;
+
+            //  [Beatmap] + 0xC8
+            this.MapID = process.readInt(beatmapAddr + 0xc8);
+            //  [Beatmap] + 0xCC
+            this.SetID = process.readInt(beatmapAddr + 0xcc);
+
+            wLogger.info(
+                `[MenuData ${process.id}] current map id updated: ${this.MapID}`
+            );
+
+            // [Base - 0x33]
+            this.MenuGameMode = process.readPointer(baseAddr - 0x33);
 
             // [Base - 0x33] + 0xC
             this.Plays = process.readInt(
@@ -92,11 +131,6 @@ export class MenuData extends AbstractEntity {
             this.AudioFilename = process.readSharpString(
                 process.readInt(beatmapAddr + 0x64)
             );
-            // //  [[Beatmap] + 0x68]
-            this.BackgroundFilename = process.readSharpString(
-                process.readInt(beatmapAddr + 0x68)
-            );
-            // this.BackgroundFilename = "";
             //  [[Beatmap] + 0x78]
             this.Folder = process.readSharpString(
                 process.readInt(beatmapAddr + 0x78)
@@ -113,10 +147,6 @@ export class MenuData extends AbstractEntity {
             this.Difficulty = process.readSharpString(
                 process.readInt(beatmapAddr + 0xac)
             );
-            //  [Beatmap] + 0xC8
-            this.MapID = process.readInt(beatmapAddr + 0xc8);
-            //  [Beatmap] + 0xCC
-            this.SetID = process.readInt(beatmapAddr + 0xcc);
             // unknown, unsubmitted, pending/wip/graveyard, unused, ranked, approved, qualified
             //  [Beatmap] + 0x12C
             this.RankedStatus = process.readInt(beatmapAddr + 0x12c);
