@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { JsonSafeParse, wLogger } from '@tosu/common';
 
 import { parseCounterSettings } from './parseSettings';
 import { ModifiedWebsocket } from './socket';
@@ -9,7 +9,10 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
         return;
     }
 
-    const [command, payload] = data.split(':');
+    const index = data.indexOf(':');
+    const command = data.substring(0, index);
+    const payload = data.substring(index + 1);
+
     let message: any;
 
     const requestedFrom = decodeURI(socket.query?.l || '');
@@ -45,6 +48,34 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             }
 
             break;
+        }
+
+        case 'applyFilters': {
+            const json = JsonSafeParse(payload, new Error('Broken json'));
+            if (json instanceof Error) {
+                wLogger.error(`applyFilter >>>`, (json as any).message);
+                wLogger.debug(json);
+                return;
+            }
+
+            try {
+                if (!Array.isArray(json)) {
+                    wLogger.error(
+                        `applyFilter(${socket.id})[${socket.pathname}] >>>`,
+                        `Filters should be array of strings (${json})`
+                    );
+                    return;
+                }
+
+                socket.filters = json;
+                return;
+            } catch (exc) {
+                wLogger.error(
+                    `WS_COMMANDS(applyFilter) >>>`,
+                    (exc as any).message
+                );
+                wLogger.debug(exc);
+            }
         }
     }
 

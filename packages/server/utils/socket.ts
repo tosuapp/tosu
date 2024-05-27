@@ -3,9 +3,15 @@ import WebSocket from 'ws';
 
 import { getUniqueID } from './hashing';
 
+type Filter = string | { field: string; keys: Filter[] };
+
 export interface ModifiedWebsocket extends WebSocket {
     id: string;
+    pathname: string;
     query: { [key: string]: any };
+
+    filters: Filter[];
+
     hostAddress: string;
     localAddress: string;
     originAddress: string;
@@ -62,6 +68,8 @@ export class Websocket {
         this.socket.on('connection', (ws: ModifiedWebsocket, request) => {
             ws.id = getUniqueID();
 
+            ws.pathname = request.url as any;
+
             ws.query = (request as any).query;
 
             ws.hostAddress = request.headers.host || '';
@@ -114,11 +122,25 @@ export class Websocket {
                     return; // Exit the loop if conditions are not met
                 }
 
-                const message = JSON.stringify(
-                    osuInstance[this.stateFunctionName](this.instanceManager)
+                const buildedData = osuInstance[this.stateFunctionName](
+                    this.instanceManager
                 );
+                const message = JSON.stringify(buildedData);
 
-                this.clients.forEach((client) => client.send(message));
+                this.clients.forEach((client) => {
+                    if (
+                        Array.isArray(client.filters) &&
+                        client.filters.length > 0
+                    ) {
+                        const values = {};
+                        this.applyFilter(client.filters, buildedData, values);
+
+                        client.send(JSON.stringify(values));
+                        return;
+                    }
+
+                    client.send(message);
+                });
             } catch (error) {
                 wLogger.error((error as any).message);
                 wLogger.debug(error);
@@ -128,5 +150,27 @@ export class Websocket {
 
     stopLoop() {
         clearInterval(this.loopInterval);
+    }
+
+    applyFilter(filters: Filter[], data: any, value: any) {
+        for (let i = 0; i < filters.length; i++) {
+            const filter = filters[i];
+            switch (typeof filter) {
+                case 'string':
+                    value[filter] = data[filter];
+                    break;
+
+                case 'object': {
+                    if (!(filter.field && Array.isArray(filter.keys))) break;
+
+                    value[filter.field] = {};
+                    this.applyFilter(
+                        filter.keys,
+                        data[filter.field],
+                        value[filter.field]
+                    );
+                }
+            }
+        }
     }
 }
