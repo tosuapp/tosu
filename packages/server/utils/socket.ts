@@ -153,6 +153,8 @@ export class Websocket {
     }
 
     applyFilter(filters: Filter[], data: any, value: any) {
+        if (data === null || data === undefined) return;
+
         for (let i = 0; i < filters.length; i++) {
             const filter = filters[i];
             switch (typeof filter) {
@@ -162,6 +164,11 @@ export class Websocket {
 
                 case 'object': {
                     if (!(filter.field && Array.isArray(filter.keys))) break;
+                    if (
+                        data[filter.field] === null ||
+                        data[filter.field] === undefined
+                    )
+                        break;
 
                     value[filter.field] = {};
                     this.applyFilter(
