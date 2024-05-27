@@ -23,7 +23,7 @@ export function directoryWalker({
 }) {
     let cleanedUrl;
     try {
-        cleanedUrl = decodeURI(pathname);
+        cleanedUrl = decodeURIComponent(pathname);
     } catch (error) {
         res.writeHead(404, {
             'Content-Type': getContentType('file.txt')
@@ -113,9 +113,10 @@ export function readDirectory(
 
         const html = folders.map((r) => {
             const slashAtTheEnd = getContentType(r) === '' ? '/' : '';
+
             return `<li><a href="${
                 url === '/' ? '' : url
-            }${r}${slashAtTheEnd}">${r}</a></li>`;
+            }${encodeURIComponent(r)}${slashAtTheEnd}">${r}</a></li>`;
         });
 
         return callback(
