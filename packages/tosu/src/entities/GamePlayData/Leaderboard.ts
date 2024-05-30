@@ -100,7 +100,7 @@ export class Leaderboard {
 
         const playersArray = this.process.readInt(this.leaderboardBase + 0x4);
         const amOfSlots = this.process.readInt(playersArray + 0xc);
-        if (amOfSlots < 1 || amOfSlots > 64) {
+        if (amOfSlots < 1) {
             return;
         }
 
