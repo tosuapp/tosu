@@ -9,7 +9,7 @@ const MODS_MAP: { [K in OsuMods]: string } = {
     [OsuMods.SuddenDeath]: 'SD',
     [OsuMods.DoubleTime]: 'DT',
     [OsuMods.Relax]: 'RX',
-    [OsuMods.HalfTime]: 'HD',
+    [OsuMods.HalfTime]: 'HT',
     [OsuMods.Nightcore]: 'NC',
     [OsuMods.Flashlight]: 'FL',
     [OsuMods.Autoplay]: 'AT',
