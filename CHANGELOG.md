@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.1](https://github.com/KotRikD/tosu/compare/v2.7.0...v2.7.1) (2024-06-03)
+
+
+### Features
+
+* FIlters for incoming ws data ([49b70ed](https://github.com/KotRikD/tosu/commit/49b70edcbdc692de2f046d2bdc43bf270a66ef5b))
+
+
+### Bug Fixes
+
+* friend ranking can provide more than 100 entires (WTF) ([59b4435](https://github.com/KotRikD/tosu/commit/59b44357f4f4da0b52742f570fde282df523341c))
+
 ## [2.7.0](https://github.com/KotRikD/tosu/compare/v2.6.3...v2.7.0) (2024-05-22)
 
 
