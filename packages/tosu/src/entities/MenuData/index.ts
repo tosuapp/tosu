@@ -55,7 +55,6 @@ export class MenuData extends AbstractEntity {
             const newMD5 = process.readSharpString(
                 process.readInt(beatmapAddr + 0x6c)
             );
-            this.pendingMD5 = newMD5;
 
             // [[Beatmap] + 0x90]
             const newPath = process.readSharpString(
