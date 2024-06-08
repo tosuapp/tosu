@@ -2,6 +2,10 @@ import { wLogger } from '@tosu/common';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 
+// delay in milliseconds. 500ms has been enough to eliminate spurious map ID changes in the tournament client
+// over two weeks of testing at 4WC
+const NEW_MAP_COMMIT_DELAY = 500;
+
 export class MenuData extends AbstractEntity {
     Status: number;
     MenuGameMode: number;
@@ -30,7 +34,7 @@ export class MenuData extends AbstractEntity {
 
     previousMD5: string = '';
     pendingMD5: string = '';
-    waitOnBg: number = 0;
+    mapChangeTime: number = 0;
 
     updateState() {
         try {
@@ -68,20 +72,17 @@ export class MenuData extends AbstractEntity {
             }
 
             if (this.pendingMD5 !== newMD5) {
-                this.waitOnBg = performance.now();
+                this.mapChangeTime = performance.now();
                 this.pendingMD5 = newMD5;
+
+                return;
             }
 
-            // if background filename is empty, it probably means bm data hasn't fully settled yet in memory
-            // wait up to 500ms before giving up and continue reading normally
-            if (newBackgroundFilename === '') {
-                wLogger.info('background filename empty');
-
-                if (performance.now() - this.waitOnBg <= 500) {
-                    return;
-                }
+            if (performance.now() - this.mapChangeTime < NEW_MAP_COMMIT_DELAY) {
+                return;
             }
 
+            // MD5 hasn't changed in over NEW_MAP_COMMIT_DELAY, commit to new map
             this.MD5 = newMD5;
             this.Path = newPath;
             this.BackgroundFilename = newBackgroundFilename;
@@ -90,10 +91,6 @@ export class MenuData extends AbstractEntity {
             this.MapID = process.readInt(beatmapAddr + 0xc8);
             //  [Beatmap] + 0xCC
             this.SetID = process.readInt(beatmapAddr + 0xcc);
-
-            wLogger.info(
-                `[MenuData ${process.id}] current map id updated: ${this.MapID}`
-            );
 
             // [Base - 0x33]
             this.MenuGameMode = process.readPointer(baseAddr - 0x33);
