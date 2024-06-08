@@ -61,11 +61,6 @@ export class MenuData extends AbstractEntity {
                 process.readInt(beatmapAddr + 0x90)
             );
 
-            // //  [[Beatmap] + 0x68]
-            const newBackgroundFilename = process.readSharpString(
-                process.readInt(beatmapAddr + 0x68)
-            );
-
             if (newMD5 === this.previousMD5 || !newPath.endsWith('.osu')) {
                 return;
             }
@@ -84,12 +79,6 @@ export class MenuData extends AbstractEntity {
             // MD5 hasn't changed in over NEW_MAP_COMMIT_DELAY, commit to new map
             this.MD5 = newMD5;
             this.Path = newPath;
-            this.BackgroundFilename = newBackgroundFilename;
-
-            //  [Beatmap] + 0xC8
-            this.MapID = process.readInt(beatmapAddr + 0xc8);
-            //  [Beatmap] + 0xCC
-            this.SetID = process.readInt(beatmapAddr + 0xcc);
 
             // [Base - 0x33]
             this.MenuGameMode = process.readPointer(baseAddr - 0x33);
@@ -127,6 +116,10 @@ export class MenuData extends AbstractEntity {
             this.AudioFilename = process.readSharpString(
                 process.readInt(beatmapAddr + 0x64)
             );
+            // //  [[Beatmap] + 0x68]
+            this.BackgroundFilename = process.readSharpString(
+                process.readInt(beatmapAddr + 0x68)
+            );
             //  [[Beatmap] + 0x78]
             this.Folder = process.readSharpString(
                 process.readInt(beatmapAddr + 0x78)
@@ -143,6 +136,10 @@ export class MenuData extends AbstractEntity {
             this.Difficulty = process.readSharpString(
                 process.readInt(beatmapAddr + 0xac)
             );
+            //  [Beatmap] + 0xC8
+            this.MapID = process.readInt(beatmapAddr + 0xc8);
+            //  [Beatmap] + 0xCC
+            this.SetID = process.readInt(beatmapAddr + 0xcc);
             // unknown, unsubmitted, pending/wip/graveyard, unused, ranked, approved, qualified
             //  [Beatmap] + 0x12C
             this.RankedStatus = process.readInt(beatmapAddr + 0x12c);
