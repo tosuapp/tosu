@@ -2,6 +2,10 @@ import { wLogger } from '@tosu/common';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 
+// delay in milliseconds. 500ms has been enough to eliminate spurious map ID changes in the tournament client
+// over two weeks of testing at 4WC
+const NEW_MAP_COMMIT_DELAY = 500;
+
 export class MenuData extends AbstractEntity {
     Status: number;
     MenuGameMode: number;
@@ -29,6 +33,8 @@ export class MenuData extends AbstractEntity {
     MP3Length: number;
 
     previousMD5: string = '';
+    pendingMD5: string = '';
+    mapChangeTime: number = 0;
 
     updateState() {
         try {
@@ -44,20 +50,38 @@ export class MenuData extends AbstractEntity {
                 wLogger.debug('MD(updateState) beatmapAddr is 0');
                 return;
             }
+
             // [[Beatmap] + 0x6C]
-            this.MD5 = process.readSharpString(
+            const newMD5 = process.readSharpString(
                 process.readInt(beatmapAddr + 0x6c)
             );
+
             // [[Beatmap] + 0x90]
-            this.Path = process.readSharpString(
+            const newPath = process.readSharpString(
                 process.readInt(beatmapAddr + 0x90)
             );
-            // [Base - 0x33]
-            this.MenuGameMode = process.readPointer(baseAddr - 0x33);
 
-            if (this.MD5 === this.previousMD5 || !this.Path.endsWith('.osu')) {
+            if (newMD5 === this.previousMD5 || !newPath.endsWith('.osu')) {
                 return;
             }
+
+            if (this.pendingMD5 !== newMD5) {
+                this.mapChangeTime = performance.now();
+                this.pendingMD5 = newMD5;
+
+                return;
+            }
+
+            if (performance.now() - this.mapChangeTime < NEW_MAP_COMMIT_DELAY) {
+                return;
+            }
+
+            // MD5 hasn't changed in over NEW_MAP_COMMIT_DELAY, commit to new map
+            this.MD5 = newMD5;
+            this.Path = newPath;
+
+            // [Base - 0x33]
+            this.MenuGameMode = process.readPointer(baseAddr - 0x33);
 
             // [Base - 0x33] + 0xC
             this.Plays = process.readInt(
@@ -96,7 +120,6 @@ export class MenuData extends AbstractEntity {
             this.BackgroundFilename = process.readSharpString(
                 process.readInt(beatmapAddr + 0x68)
             );
-            // this.BackgroundFilename = "";
             //  [[Beatmap] + 0x78]
             this.Folder = process.readSharpString(
                 process.readInt(beatmapAddr + 0x78)
