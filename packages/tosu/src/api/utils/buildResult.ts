@@ -1,4 +1,3 @@
-import { wLogger } from '@tosu/common/utils/logger';
 import path from 'path';
 
 import {
@@ -82,8 +81,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         50: resultsScreenData.Hit50,
         0: resultsScreenData.HitMiss
     };
-
-    wLogger.info(`[${osuInstance.pid}] current mapid ${menuData.MapID}`);
 
     return {
         settings: {
