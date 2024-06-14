@@ -95,13 +95,7 @@ export class Process {
         refresh: boolean = false,
         baseAddress: number = 0
     ): number {
-        const buffer = Buffer.from(
-            pattern
-                .split(' ')
-                .map((x) => (x === '??' ? '00' : x))
-                .join(''),
-            'hex'
-        );
+        const buffer = this.patternToBuffer(pattern);
 
         return ProcessUtils.scanSync(this.handle, baseAddress, buffer, refresh);
     }
@@ -112,13 +106,7 @@ export class Process {
         refresh: boolean = false,
         baseAddress: number = 0
     ): void {
-        const buffer = Buffer.from(
-            pattern
-                .split(' ')
-                .map((x) => (x === '??' ? '00' : x))
-                .join(''),
-            'hex'
-        );
+        const buffer = this.patternToBuffer(pattern);
 
         ProcessUtils.scan(this.handle, baseAddress, buffer, refresh, callback);
     }
@@ -128,13 +116,7 @@ export class Process {
         refresh: boolean = false,
         baseAddress: number = 0
     ): Promise<number> {
-        const buffer = Buffer.from(
-            pattern
-                .split(' ')
-                .map((x) => (x === '??' ? '00' : x))
-                .join(''),
-            'hex'
-        );
+        const buffer = this.patternToBuffer(pattern);
 
         return new Promise((resolve, reject) => {
             try {
@@ -153,5 +135,15 @@ export class Process {
 
     static getProcesses(): Array<ProcessInfo> {
         return ProcessUtils.getProcesses();
+    }
+
+    private patternToBuffer(pattern: string): Buffer {
+        return Buffer.from(
+            pattern
+                .split(' ')
+                .map((x) => (x === '??' ? '00' : x))
+                .join(''),
+            'hex'
+        );
     }
 }

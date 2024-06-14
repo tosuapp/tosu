@@ -1,5 +1,4 @@
-import { Process } from 'tsprocess/dist/process';
-
+import MemoryReader from '@/memoryReaders';
 import { MemoryPatterns } from '@/objects/memoryPatterns';
 
 import { AllTimesData } from './AllTimesData';
@@ -14,7 +13,7 @@ import { TourneyUserProfileData } from './TourneyUserProfileData';
 import { UserProfile } from './UserProfile';
 
 export interface DataRepoList {
-    process: Process;
+    process: MemoryReader;
     patterns: MemoryPatterns;
 
     settings: Settings;

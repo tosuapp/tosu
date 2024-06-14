@@ -25,7 +25,8 @@
         "resedit": "^2.0.0",
         "rosu-pp-js": "^1.0.2",
         "semver": "^7.5.4",
-        "tsprocess": "workspace:*"
+        "tsprocess": "workspace:*",
+        "tsprocess-rust": "workspace:*"
     },
     "devDependencies": {
         "@vercel/ncc": "^0.38.1",

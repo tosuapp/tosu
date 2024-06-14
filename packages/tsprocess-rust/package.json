@@ -1,0 +1,22 @@
+{
+  "name": "tsprocess-rust",
+  "version": "0.1.0",
+  "description": "",
+  "main": "./native/index.node",
+  "scripts": {
+    "test": "cargo test",
+    "cargo-build": "cargo build --manifest-path ./native/Cargo.toml --message-format=json > ./native/cargo.log",
+    "cross-build": "cross build --manifest-path ./native/Cargo.toml --message-format=json > ./native/cross.log",
+    "postcargo-build": "neon dist < ./native/cargo.log --out ./native/index.node",
+    "postcross-build": "neon dist -m ./native/target < cross.log --out ./native/index.node",
+    "debug": "npm run cargo-build --",
+    "build": "npm run cargo-build -- --release",
+    "cross": "npm run cross-build -- --release",
+    "help": "@neon-rs/cli"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@neon-rs/cli": "0.1.73"
+  }
+}

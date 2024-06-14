@@ -455,7 +455,8 @@ Napi::Value disablePowerThrottling(const Napi::CallbackInfo &args) {
   PROCESS_POWER_THROTTLING_STATE state;
   RtlZeroMemory(&state, sizeof(state));
   state.Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION;
-  state.ControlMask = PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION;
+  // 4 is PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION
+  state.ControlMask = 4;
   state.StateMask = 0;
 
   SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &state,

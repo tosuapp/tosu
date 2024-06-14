@@ -3,7 +3,6 @@ import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import fs from 'fs';
 import path from 'path';
-import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/api/utils/buildResult';
 import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
@@ -19,6 +18,7 @@ import { Settings } from '@/entities/Settings';
 import { TourneyManagerData } from '@/entities/TourneyManagerData';
 import { TourneyUserProfileData } from '@/entities/TourneyUserProfileData';
 import { UserProfile } from '@/entities/UserProfile';
+import MemoryReader from '@/memoryReaders';
 import { MemoryPatterns, PatternData } from '@/objects/memoryPatterns';
 
 import { InstanceManager } from './instanceManager';
@@ -89,7 +89,7 @@ export class OsuInstance {
     entities: DataRepo;
 
     pid: number;
-    process: Process;
+    process: MemoryReader;
     path: string = '';
 
     isReady: boolean;
@@ -108,7 +108,7 @@ export class OsuInstance {
         this.pid = pid;
         this.entities = new DataRepo();
 
-        this.process = new Process(this.pid);
+        this.process = new MemoryReader(this.pid);
         this.emitter = new EventEmitter();
 
         this.path = this.process.path;
@@ -447,7 +447,7 @@ export class OsuInstance {
     watchProcessHealth() {
         if (this.isDestroyed === true) return;
 
-        if (!Process.isProcessExist(this.process.handle)) {
+        if (!MemoryReader.isProcessExist(this.pid)) {
             this.isDestroyed = true;
             wLogger.warn(
                 `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed `
