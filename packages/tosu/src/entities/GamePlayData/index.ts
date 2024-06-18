@@ -80,10 +80,22 @@ export class GamePlayData extends AbstractEntity {
         this.Combo = 0;
         this.PlayerHPSmooth = 0.0;
         this.PlayerHP = 0.0;
-        this.Accuracy = 0.0;
+        this.Accuracy = 100.0;
         this.UnstableRate = 0;
-        this.GradeCurrent = '';
-        this.GradeExpected = '';
+        this.GradeCurrent = calculateGrade({
+            mods: this.Mods,
+            mode: this.Mode,
+            hits: {
+                300: this.Hit300,
+                geki: 0,
+                100: this.Hit100,
+                katu: 0,
+                50: this.Hit50,
+                0: this.HitMiss
+            }
+        });
+
+        this.GradeExpected = this.GradeCurrent;
         this.KeyOverlay = {
             K1Pressed: false,
             K1Count: 0,
