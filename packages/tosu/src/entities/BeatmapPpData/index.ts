@@ -214,13 +214,7 @@ export class BeatmapPPData extends AbstractEntity {
                 return;
             }
 
-            this.beatmap = new Beatmap({
-                content: this.beatmapContent,
-                ar: menuData.AR,
-                od: menuData.OD,
-                cs: menuData.CS,
-                hp: menuData.HP
-            });
+            this.beatmap = new Beatmap({ content: this.beatmapContent });
 
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
@@ -228,23 +222,18 @@ export class BeatmapPPData extends AbstractEntity {
                 `BPPD(updateMapMetadata) [${totalTime}ms] Spend on opening beatmap`
             );
 
-            const calc = new Calculator();
+            const calc = new Calculator({
+                mods: currentMods,
+                mode: menuData.MenuGameMode
+            });
 
-            const currAttrs = calc
-                .mods(currentMods)
-                .mode(menuData.MenuGameMode);
-            const strains = currAttrs.strains(this.beatmap);
-            const mapAttributes = currAttrs
-                .acc(100)
-                .mapAttributes(this.beatmap);
-            const fcPerformance = currAttrs.acc(100).performance(this.beatmap);
+            const strains = calc.strains(this.beatmap);
+            const mapAttributes = calc.mapAttributes(this.beatmap);
+            const fcPerformance = calc.performance(this.beatmap);
 
             const ppAcc = {};
-
             for (const acc of [100, 99, 98, 97, 96, 95]) {
-                const performance = currAttrs
-                    .acc(acc)
-                    .performance(this.beatmap);
+                const performance = calc.acc(acc).performance(this.beatmap);
                 ppAcc[acc] = fixDecimals(performance.pp);
             }
 
@@ -315,7 +304,6 @@ export class BeatmapPPData extends AbstractEntity {
             const offset = strains.sectionLength;
             const firstObj = this.timings.firstObj / mapAttributes.clockRate;
             const lastObj = this.timings.full / mapAttributes.clockRate;
-            const graphLength = lastObj - firstObj;
             const mp3Length = menuData.MP3Length / mapAttributes.clockRate;
 
             const beatmapParseTime = performance.now();
@@ -333,25 +321,15 @@ export class BeatmapPPData extends AbstractEntity {
 
             const updateWithOffset = (name: string, values: number[]) => {
                 let data: number[] = [];
-                const approximateTime =
-                    LEFT_OFFSET * offset +
-                    values.length * offset +
-                    RIGHT_OFFSET * offset;
 
                 if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
                     data = Array(LEFT_OFFSET).fill(-100);
                 }
+
                 data = data.concat(values);
+
                 if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
                     data = data.concat(Array(RIGHT_OFFSET).fill(-100));
-                }
-
-                const missingPoints =
-                    mp3Length >= approximateTime
-                        ? Math.ceil((mp3Length - approximateTime) / offset)
-                        : 0;
-                if (missingPoints > 0) {
-                    data = data.concat(Array(missingPoints).fill(-100));
                 }
 
                 resultStrains.series.push({ name, data });
@@ -406,8 +384,11 @@ export class BeatmapPPData extends AbstractEntity {
                 resultStrains.xaxis.push(i * offset);
             }
 
-            const amount = Math.ceil(graphLength / offset);
-            for (let i = 0; i < amount; i++) {
+            const total =
+                resultStrains.series[0].data.length -
+                LEFT_OFFSET -
+                RIGHT_OFFSET;
+            for (let i = 0; i < total; i++) {
                 resultStrains.xaxis.push(firstObj + i * offset);
             }
 
