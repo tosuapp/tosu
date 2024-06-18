@@ -22,7 +22,10 @@ jobs:
 
       - name: 🛠️ - Install Rust
         uses: moonrepo/setup-rust@v1
-        with: { components: clippy }
+        with: {
+          components: clippy,
+          channel: '1.77.0'
+        }
 
       - name: Install Deps 🔧
         run: |
