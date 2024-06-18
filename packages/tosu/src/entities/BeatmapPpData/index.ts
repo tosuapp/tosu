@@ -56,6 +56,7 @@ interface BeatmapPPTimings {
 
 export class BeatmapPPData extends AbstractEntity {
     beatmap?: Beatmap;
+    Mode: number;
     beatmapContent?: string;
     strains: number[];
     strainsAll: BeatmapStrains;
@@ -79,6 +80,7 @@ export class BeatmapPPData extends AbstractEntity {
             series: [],
             xaxis: []
         };
+        this.Mode = 0;
         this.commonBPM = 0.0;
         this.minBPM = 0.0;
         this.maxBPM = 0.0;
@@ -426,6 +428,8 @@ export class BeatmapPPData extends AbstractEntity {
                 hitWindow: (fcPerformance.difficulty as any).hitWindow
             });
 
+            this.Mode = strains.mode;
+
             this.resetReportCount('BPPD(updateMapMetadata)');
         } catch (exc) {
             this.reportError(
@@ -482,6 +486,10 @@ export class BeatmapPPData extends AbstractEntity {
             const calculateTime = performance.now();
 
             this.currAttributes.pp = curPerformance.pp;
+            this.currAttributes.stars =
+                passedObjects.length === 0
+                    ? 0
+                    : curPerformance.difficulty.stars;
 
             wLogger.debug(
                 `(updateEditorPP) Spend:${(

@@ -223,6 +223,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             id: menuData.MapID,
             set: menuData.SetID,
 
+            mode: {
+                number: beatmapPpData.Mode,
+                name: Modes[beatmapPpData.Mode] || ''
+            },
+
             artist: menuData.Artist,
             artistUnicode: menuData.ArtistOriginal,
             title: menuData.Title,

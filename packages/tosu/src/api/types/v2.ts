@@ -255,6 +255,7 @@ export interface Beatmap {
     checksum: string;
     id: number;
     set: number;
+    mode: NumberName;
     artist: string;
     artistUnicode: string;
     title: string;
