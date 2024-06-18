@@ -368,6 +368,10 @@ export interface Pp {
     fc: number;
     maxAchievedThisPlay: number;
 }
+export interface Pp2 {
+    current: number;
+    fc: number;
+}
 
 export interface Leaderboard {
     isFailed: boolean;
@@ -438,6 +442,7 @@ export interface Series {
 }
 
 export interface ResultsScreen {
+    playerName: string;
     mode: NumberName;
     score: number;
     accuracy: number;
@@ -446,6 +451,7 @@ export interface ResultsScreen {
     mods: NumberName;
     maxCombo: number;
     rank: string;
+    pp: Pp2;
     createdAt: string;
 }
 

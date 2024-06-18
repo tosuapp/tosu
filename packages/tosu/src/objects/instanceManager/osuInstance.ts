@@ -299,6 +299,11 @@ export class OsuInstance {
                             resultsScreenData.init();
                             beatmapPpData.resetCurrentAttributes();
                         }
+
+                        // Reset ResultScreen if we in song select
+                        if (resultsScreenData.PlayerName) {
+                            resultsScreenData.init();
+                        }
                         break;
 
                     case 2:
