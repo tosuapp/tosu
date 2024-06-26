@@ -1,6 +1,7 @@
 import { argumetsParser, config, wLogger, watchConfigFile } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
+import { Process } from 'tsprocess/dist/process';
 
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
@@ -10,6 +11,15 @@ const currentVersion = require(process.cwd() + '/_version.js');
 (async () => {
     wLogger.info(`Starting tosu v${currentVersion}`);
 
+    const currentResolution = Process.disablePowerThrottling();
+
+    if (currentResolution > 0) {
+        wLogger.info(
+            `Successfully disabled power throttling (resolution: ${currentResolution / 10000} ms)`
+        );
+    } else {
+        wLogger.warn(`Failed to disable power throttling`);
+    }
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 

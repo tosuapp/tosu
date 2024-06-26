@@ -24,6 +24,10 @@ export class Process {
         return ProcessUtils.isProcessExist(pid);
     }
 
+    static disablePowerThrottling() {
+        return ProcessUtils.disablePowerThrottling();
+    }
+
     get path(): string {
         return ProcessUtils.getProcessPath(this.handle);
     }
