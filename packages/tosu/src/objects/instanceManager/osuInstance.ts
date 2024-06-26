@@ -211,7 +211,7 @@ export class OsuInstance {
         }
 
         this.update();
-        this.initHighRateData();
+        this.initPreciseData();
         this.initMapMetadata();
         this.watchProcessHealth();
     }
@@ -357,7 +357,7 @@ export class OsuInstance {
         }
     }
 
-    initHighRateData() {
+    initPreciseData() {
         wLogger.debug('OI(updatePreciseData) starting');
 
         const { allTimesData, gamePlayData } = this.getServices([
@@ -370,6 +370,7 @@ export class OsuInstance {
 
     updatePreciseData(allTimesData: AllTimesData, gamePlayData: GamePlayData) {
         if (this.isDestroyed === true) return;
+        allTimesData.updatePreciseState();
 
         switch (allTimesData.Status) {
             case 2:
