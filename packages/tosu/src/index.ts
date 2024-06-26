@@ -11,15 +11,8 @@ const currentVersion = require(process.cwd() + '/_version.js');
 (async () => {
     wLogger.info(`Starting tosu v${currentVersion}`);
 
-    const currentResolution = Process.disablePowerThrottling();
+    Process.disablePowerThrottling();
 
-    if (currentResolution > 0) {
-        wLogger.info(
-            `Successfully disabled power throttling (resolution: ${currentResolution / 10000} ms)`
-        );
-    } else {
-        wLogger.warn(`Failed to disable power throttling`);
-    }
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
