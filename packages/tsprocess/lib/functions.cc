@@ -449,8 +449,7 @@ Napi::Value disablePowerThrottling(const Napi::CallbackInfo &args) {
   }
 
   if (!SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS)) {
-    printf("0\n");
-    return Napi::Boolean::From(env, false);
+    return Napi::Number::From(env, 0);
   }
 
   PROCESS_POWER_THROTTLING_STATE state;
@@ -470,7 +469,7 @@ Napi::Value disablePowerThrottling(const Napi::CallbackInfo &args) {
 
   const auto ntdll = GetModuleHandleA("ntdll.dll");
   if (!ntdll) {
-    return Napi::Boolean::From(env, false);
+    return Napi::Number::From(env, 0);
   }
 
   const auto ntQueryTimerResolution =
@@ -479,7 +478,7 @@ Napi::Value disablePowerThrottling(const Napi::CallbackInfo &args) {
       (NtSetTimerResolution_t)GetProcAddress(ntdll, "NtSetTimerResolution");
 
   if (!ntQueryTimerResolution || !ntSetTimerResolution) {
-    return Napi::Boolean::From(env, false);
+    return Napi::Number::From(env, 0);
   }
 
   ULONG minRes, maxRes, currRes;
