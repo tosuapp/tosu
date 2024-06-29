@@ -401,18 +401,7 @@ export default function buildBaseApi(server: Server) {
             const beatmap = new rosu.Beatmap(beatmapContent);
             if (query.mode !== undefined) beatmap.convert(query.mode);
 
-            const params: { [key: string]: any } = {
-                // ar: ,
-                // arWithMods: ,
-                // cs: ,
-                // csWithMods: ,
-                // hardrockOffsets: ,
-                // hitresultPriority: ,
-                // hp: ,
-                // hpWithMods: ,
-                // od: ,
-                // odWithMods: ,
-            };
+            const params: rosu.PerformanceArgs = {};
 
             if (query.clockRate) params.clockRate = +query.clockRate;
             if (query.passedObjects)
