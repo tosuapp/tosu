@@ -1,5 +1,5 @@
-import { Calculator } from '@kotrikd/rosu-pp';
 import { wLogger } from '@tosu/common';
+import rosu from 'rosu-pp-js';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
@@ -176,18 +176,21 @@ export class ResultsScreenData extends AbstractEntity {
                 n300: this.Hit300
             };
 
-            const curPerformance = new Calculator(scoreParams).performance(
+            const curPerformance = new rosu.Performance(scoreParams).calculate(
                 currentBeatmap
             );
-            const fcPerformance = new Calculator({
+            const fcPerformance = new rosu.Performance({
                 combo: curPerformance.difficulty.maxCombo,
                 mods: this.Mods,
-                nMisses: 0,
-                acc: this.Accuracy
-            }).performance(currentBeatmap);
+                misses: 0,
+                accuracy: this.Accuracy
+            }).calculate(curPerformance);
 
             this.pp = curPerformance.pp;
             this.fcPP = fcPerformance.pp;
+
+            curPerformance.free();
+            fcPerformance.free();
 
             this.previousBeatmap = key;
             this.resetReportCount('RSD(updateState)');

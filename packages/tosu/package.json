@@ -12,7 +12,6 @@
         "compile": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts"
     },
     "dependencies": {
-        "@kotrikd/rosu-pp": "^0.10.0",
         "@tosu/common": "workspace:*",
         "@tosu/game-overlay": "workspace:*",
         "@tosu/server": "workspace:*",
@@ -24,6 +23,7 @@
         "osu-standard-stable": "^5.0.0",
         "osu-taiko-stable": "^5.0.0",
         "resedit": "^2.0.0",
+        "rosu-pp-js": "^1.0.2",
         "semver": "^7.5.4",
         "tsprocess": "workspace:*"
     },
