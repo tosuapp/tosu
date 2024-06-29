@@ -2,6 +2,7 @@
     "scripts": "dist/**/*.js",
     "assets": [
       "dist/**/*.node",
+      "dist/**/*.wasm",
       "dist/target/**/*",
       "dist/_version.js",
       "dist/assets/**/*"

@@ -47,7 +47,6 @@ export class AllTimesData extends AbstractEntity {
 
             const {
                 statusPtr,
-                playTimeAddr,
                 menuModsPtr,
                 chatCheckerAddr,
                 skinDataAddr,
@@ -55,7 +54,6 @@ export class AllTimesData extends AbstractEntity {
                 canRunSlowlyAddr
             } = patterns.getPatterns([
                 'statusPtr',
-                'playTimeAddr',
                 'menuModsPtr',
                 'chatCheckerAddr',
                 'skinDataAddr',
@@ -71,10 +69,6 @@ export class AllTimesData extends AbstractEntity {
 
             // [Status - 0x4]
             this.Status = process.readPointer(statusPtr);
-            // [PlayTime + 0x5]
-            this.PlayTime = process.readInt(
-                process.readInt(playTimeAddr + 0x5)
-            );
             // [MenuMods + 0x9]
             this.MenuMods = process.readPointer(menuModsPtr);
             // ChatChecker - 0x20
@@ -126,6 +120,31 @@ export class AllTimesData extends AbstractEntity {
                 'ATD(updateState)',
                 10,
                 `ATD(updateState) ${(exc as any).message}`
+            );
+            wLogger.debug(exc);
+        }
+    }
+
+    updatePreciseState() {
+        try {
+            const { process, patterns } = this.osuInstance.getServices([
+                'process',
+                'patterns'
+            ]);
+
+            const { playTimeAddr } = patterns.getPatterns(['playTimeAddr']);
+
+            // [PlayTime + 0x5]
+            this.PlayTime = process.readInt(
+                process.readInt(playTimeAddr + 0x5)
+            );
+
+            this.resetReportCount('ATD(updatePreciseState)');
+        } catch (exc) {
+            this.reportError(
+                'ATD(updatePreciseState)',
+                10,
+                `ATD(updatePreciseState) ${(exc as any).message}`
             );
             wLogger.debug(exc);
         }

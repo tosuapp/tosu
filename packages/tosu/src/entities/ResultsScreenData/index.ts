@@ -1,8 +1,13 @@
 import { wLogger } from '@tosu/common';
+import rosu from 'rosu-pp-js';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
-import { calculateGrade } from '@/utils/calculators';
+import {
+    calculateAccuracy,
+    calculateGrade,
+    calculatePassedObjects
+} from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { OsuMods } from '@/utils/osuMods.types';
 
@@ -20,6 +25,11 @@ export class ResultsScreenData extends AbstractEntity {
     HitMiss: number;
     Grade: string;
     Date: string;
+    Accuracy: number;
+    pp: number;
+    fcPP: number;
+
+    previousBeatmap: string;
 
     constructor(osuInstance: OsuInstance) {
         super(osuInstance);
@@ -41,16 +51,22 @@ export class ResultsScreenData extends AbstractEntity {
         this.HitGeki = 0;
         this.HitKatu = 0;
         this.HitMiss = 0;
+        this.Grade = '';
         this.Date = '';
+        this.Accuracy = 0;
+        this.pp = 0;
+        this.fcPP = 0;
     }
 
     updateState() {
         try {
-            const { process, patterns, allTimesData } =
+            const { process, patterns, allTimesData, beatmapPpData, menuData } =
                 this.osuInstance.getServices([
                     'process',
                     'patterns',
-                    'allTimesData'
+                    'allTimesData',
+                    'beatmapPpData',
+                    'menuData'
                 ]);
             if (process === null) {
                 throw new Error('Process not found');
@@ -68,13 +84,13 @@ export class ResultsScreenData extends AbstractEntity {
                 process.readInt(rulesetsAddr - 0xb) + 0x4
             );
             if (rulesetAddr === 0) {
-                wLogger.debug('RSD(init) rulesetAddr is zero');
+                wLogger.debug('RSD(updateState) rulesetAddr is zero');
                 return;
             }
 
             const resultScreenBase = process.readInt(rulesetAddr + 0x38);
             if (resultScreenBase === 0) {
-                wLogger.debug('RSD(init) resultScreenBase is zero');
+                wLogger.debug('RSD(updateState) resultScreenBase is zero');
                 return;
             }
 
@@ -106,17 +122,25 @@ export class ResultsScreenData extends AbstractEntity {
             this.HitKatu = process.readShort(resultScreenBase + 0x90);
             // HitMiss    int16   `mem:"[Ruleset + 0x38] + 0x92"`
             this.HitMiss = process.readShort(resultScreenBase + 0x92);
+
+            const hits = {
+                300: this.Hit300,
+                geki: 0,
+                100: this.Hit100,
+                katu: 0,
+                50: this.Hit50,
+                0: this.HitMiss
+            };
+
             this.Grade = calculateGrade({
                 mods: this.Mods,
                 mode: this.Mode,
-                hits: {
-                    300: this.Hit300,
-                    geki: 0,
-                    100: this.Hit100,
-                    katu: 0,
-                    50: this.Hit50,
-                    0: this.HitMiss
-                }
+                hits
+            });
+
+            this.Accuracy = calculateAccuracy({
+                mode: this.Mode,
+                hits
             });
 
             this.Date = netDateBinaryToDate(
@@ -124,6 +148,52 @@ export class ResultsScreenData extends AbstractEntity {
                 process.readInt(resultScreenBase + 0xa0)
             ).toISOString();
 
+            const key = `${menuData.MD5}${this.Mods}${this.Mode}${this.PlayerName}`;
+            if (this.previousBeatmap === key) {
+                return;
+            }
+
+            const currentBeatmap = beatmapPpData.getCurrentBeatmap();
+            if (!currentBeatmap) {
+                wLogger.debug("RSD(updateState) can't get current map");
+                return;
+            }
+
+            const scoreParams = {
+                passedObjects: calculatePassedObjects(
+                    this.Mode,
+                    this.Hit300,
+                    this.Hit100,
+                    this.Hit50,
+                    this.HitMiss,
+                    this.HitKatu,
+                    this.HitGeki
+                ),
+                combo: this.MaxCombo,
+                mods: this.Mods,
+                nMisses: this.HitMiss,
+                n50: this.Hit50,
+                n100: this.Hit100,
+                n300: this.Hit300
+            };
+
+            const curPerformance = new rosu.Performance(scoreParams).calculate(
+                currentBeatmap
+            );
+            const fcPerformance = new rosu.Performance({
+                combo: curPerformance.difficulty.maxCombo,
+                mods: this.Mods,
+                misses: 0,
+                accuracy: this.Accuracy
+            }).calculate(curPerformance);
+
+            this.pp = curPerformance.pp;
+            this.fcPP = fcPerformance.pp;
+
+            curPerformance.free();
+            fcPerformance.free();
+
+            this.previousBeatmap = key;
             this.resetReportCount('RSD(updateState)');
         } catch (exc) {
             this.reportError(

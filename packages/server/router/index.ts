@@ -1,4 +1,3 @@
-import { Beatmap, Calculator } from '@kotrikd/rosu-pp';
 import {
     downloadFile,
     getCachePath,
@@ -11,6 +10,7 @@ import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import rosu from 'rosu-pp-js';
 
 import { Server, sendJson } from '../index';
 import {
@@ -397,29 +397,33 @@ export default function buildBaseApi(server: Server) {
                     menuData.Path
                 );
 
-            const parseBeatmap = new Beatmap({ path: beatmapFilePath });
-            const calculator = new Calculator();
+            const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
+            const beatmap = new rosu.Beatmap(beatmapContent);
+            if (query.mode !== undefined) beatmap.convert(query.mode);
 
-            const array = Object.keys(query || {});
-            for (let i = 0; i < array.length; i++) {
-                const key = array[i];
-                const value = query[key];
+            const params: rosu.PerformanceArgs = {};
 
-                if (key in calculator && isFinite(+value)) {
-                    calculator[key](+value);
-                }
-            }
+            if (query.clockRate) params.clockRate = +query.clockRate;
+            if (query.passedObjects)
+                params.passedObjects = +query.passedObjects;
+            if (query.combo) params.combo = +query.combo;
+            if (query.nMisses) params.misses = +query.nMisses;
+            if (query.n100) params.n100 = +query.n100;
+            if (query.n300) params.n300 = +query.n300;
+            if (query.n50) params.n50 = +query.n50;
+            if (query.nGeki) params.nGeki = +query.nGeki;
+            if (query.nKatu) params.nKatu = +query.nKatu;
+            if (query.mods) params.mods = +query.mods;
+            if (query.accuracy) params.accuracy = +query.acc;
 
-            return sendJson(res, {
-                attributes: calculator.mapAttributes(parseBeatmap),
-                performance: calculator.performance(parseBeatmap)
-            });
+            const calculate = new rosu.Performance(params).calculate(beatmap);
+            return sendJson(res, calculate);
         } catch (exc) {
             wLogger.error('calculate/pp', (exc as any).message);
             wLogger.debug('calculate/pp', exc);
 
             return sendJson(res, {
-                error: (exc as any).message
+                error: typeof exc === 'string' ? exc : (exc as any).message
             });
         }
     });

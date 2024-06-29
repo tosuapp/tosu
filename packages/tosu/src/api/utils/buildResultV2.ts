@@ -223,6 +223,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             id: menuData.MapID,
             set: menuData.SetID,
 
+            mode: {
+                number: beatmapPpData.Mode,
+                name: Modes[beatmapPpData.Mode] || ''
+            },
+
             artist: menuData.Artist,
             artistUnicode: menuData.ArtistOriginal,
             title: menuData.Title,
@@ -389,18 +394,17 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             graph: beatmapPpData.strainsAll
         },
         resultsScreen: {
+            playerName: resultsScreenData.PlayerName,
+
             mode: {
-                number: gamePlayData.Mode,
-                name: Modes[gamePlayData.Mode] || ''
+                number: resultsScreenData.Mode,
+                name: Modes[resultsScreenData.Mode] || ''
             },
 
             score: resultsScreenData.Score,
-            accuracy: calculateAccuracy({
-                hits: resultScreenHits,
-                mode: gamePlayData.Mode
-            }),
+            accuracy: resultsScreenData.Accuracy,
 
-            name: resultsScreenData.PlayerName,
+            name: resultsScreenData.PlayerName, // legacy, remove it later
             hits: resultScreenHits,
             mods: {
                 number: resultsScreenData.Mods,
@@ -408,6 +412,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             maxCombo: resultsScreenData.MaxCombo,
             rank: resultsScreenData.Grade,
+            pp: {
+                current: resultsScreenData.pp,
+                fc: resultsScreenData.fcPP
+            },
             createdAt: resultsScreenData.Date
         },
         folders: {

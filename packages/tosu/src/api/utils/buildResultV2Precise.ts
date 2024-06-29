@@ -7,9 +7,13 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         return { error: 'not_ready' };
     }
 
-    const { gamePlayData } = osuInstance.getServices(['gamePlayData']);
+    const { allTimesData, gamePlayData } = osuInstance.getServices([
+        'gamePlayData',
+        'allTimesData'
+    ]);
 
     return {
+        currentTime: allTimesData.PlayTime,
         keys: {
             k1: {
                 isPressed: gamePlayData.KeyOverlay.K1Pressed,

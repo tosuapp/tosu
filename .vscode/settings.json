@@ -2,5 +2,7 @@
     "discord.enabled": true,
     "files.associations": {
         "xlocale": "cpp"
-    }
+    },
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
 }

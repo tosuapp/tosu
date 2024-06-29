@@ -211,7 +211,7 @@ export class OsuInstance {
         }
 
         this.update();
-        this.initHighRateData();
+        this.initPreciseData();
         this.initMapMetadata();
         this.watchProcessHealth();
     }
@@ -299,6 +299,11 @@ export class OsuInstance {
                             resultsScreenData.init();
                             beatmapPpData.resetCurrentAttributes();
                         }
+
+                        // Reset ResultScreen if we in song select
+                        if (resultsScreenData.PlayerName) {
+                            resultsScreenData.init();
+                        }
                         break;
 
                     case 2:
@@ -352,7 +357,7 @@ export class OsuInstance {
         }
     }
 
-    initHighRateData() {
+    initPreciseData() {
         wLogger.debug('OI(updatePreciseData) starting');
 
         const { allTimesData, gamePlayData } = this.getServices([
@@ -365,6 +370,7 @@ export class OsuInstance {
 
     updatePreciseData(allTimesData: AllTimesData, gamePlayData: GamePlayData) {
         if (this.isDestroyed === true) return;
+        allTimesData.updatePreciseState();
 
         switch (allTimesData.Status) {
             case 2:
@@ -434,7 +440,7 @@ export class OsuInstance {
         if (!Process.isProcessExist(this.process.handle)) {
             this.isDestroyed = true;
             wLogger.warn(
-                `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed`
+                `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed `
             );
             this.emitter.emit('onDestroy', this.pid);
         }

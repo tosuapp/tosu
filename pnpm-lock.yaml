@@ -71,15 +71,15 @@ importers:
 
   packages/server:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: ^0.10.0
-        version: 0.10.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
+      rosu-pp-js:
+        specifier: ^1.0.2
+        version: 1.0.2
       semver:
         specifier: ^7.5.4
         version: 7.5.4
@@ -93,9 +93,6 @@ importers:
 
   packages/tosu:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: ^0.10.0
-        version: 0.10.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -129,6 +126,9 @@ importers:
       resedit:
         specifier: ^2.0.0
         version: 2.0.0
+      rosu-pp-js:
+        specifier: ^1.0.2
+        version: 1.0.2
       semver:
         specifier: ^7.5.4
         version: 7.5.4
@@ -443,13 +443,6 @@ packages:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
-
-  /@kotrikd/rosu-pp@0.10.0:
-    resolution: {integrity: sha512-WhYjU9P7SSEejgTSUZNpz33ad2MBY1OPHO10pJQvPc6/Z89D5pRKsP/0N5rYXRZhhMwGZSd7VFy9HVjYYynw4w==}
-    requiresBuild: true
-    dependencies:
-      cargo-cp-artifact: 0.1.8
-    dev: false
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1104,11 +1097,6 @@ packages:
     resolution: {integrity: sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==}
     engines: {node: '>=6'}
     dev: true
-
-  /cargo-cp-artifact@0.1.8:
-    resolution: {integrity: sha512-3j4DaoTrsCD1MRkTF2Soacii0Nx7UHCce0EwUf4fHnggwiE4fbmF2AbnfzayR36DF8KGadfh7M/Yfy625kgPlA==}
-    hasBin: true
-    dev: false
 
   /chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -3984,6 +3972,10 @@ packages:
     dependencies:
       glob: 7.2.3
     dev: true
+
+  /rosu-pp-js@1.0.2:
+    resolution: {integrity: sha512-NG7ulJOiNn5s4ZXP2WMOoBwr7fWATsLRJH0LW4EjLtuqVJjKgrwe8g5NCRdbSGgBJVJX2X1X5XplcRXZ3QaInw==}
+    dev: false
 
   /run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}

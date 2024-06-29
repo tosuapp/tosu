@@ -1,5 +1,5 @@
-import { Calculator } from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
+import rosu from 'rosu-pp-js';
 import { Process } from 'tsprocess/dist/process';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
@@ -23,6 +23,8 @@ export interface KeyOverlay {
 export class GamePlayData extends AbstractEntity {
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
+
+    PerformanceAttributes?: rosu.PerformanceAttributes | rosu.Beatmap;
 
     Retries: number;
     PlayerName: string;
@@ -55,6 +57,8 @@ export class GamePlayData extends AbstractEntity {
     private scoreBase: number = 0;
     private cachedkeys: string = '';
 
+    previousState: string = '';
+
     constructor(osuInstance: OsuInstance) {
         super(osuInstance);
 
@@ -80,10 +84,22 @@ export class GamePlayData extends AbstractEntity {
         this.Combo = 0;
         this.PlayerHPSmooth = 0.0;
         this.PlayerHP = 0.0;
-        this.Accuracy = 0.0;
+        this.Accuracy = 100.0;
         this.UnstableRate = 0;
-        this.GradeCurrent = '';
-        this.GradeExpected = '';
+        this.GradeCurrent = calculateGrade({
+            mods: this.Mods,
+            mode: this.Mode,
+            hits: {
+                300: this.Hit300,
+                geki: 0,
+                100: this.Hit100,
+                katu: 0,
+                50: this.Hit50,
+                0: this.HitMiss
+            }
+        });
+
+        this.GradeExpected = this.GradeCurrent;
         this.KeyOverlay = {
             K1Pressed: false,
             K1Count: 0,
@@ -539,10 +555,12 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        const { allTimesData, beatmapPpData } = this.osuInstance.getServices([
-            'allTimesData',
-            'beatmapPpData'
-        ]);
+        const { allTimesData, beatmapPpData, menuData } =
+            this.osuInstance.getServices([
+                'allTimesData',
+                'beatmapPpData',
+                'menuData'
+            ]);
 
         if (!allTimesData.GameFolder) {
             wLogger.debug(
@@ -571,20 +589,35 @@ export class GamePlayData extends AbstractEntity {
             ),
             combo: this.MaxCombo,
             mods: this.Mods,
-            nMisses: this.HitMiss,
+            misses: this.HitMiss,
             n50: this.Hit50,
             n100: this.Hit100,
             n300: this.Hit300
         };
 
-        const curPerformance = new Calculator(scoreParams).performance(
-            currentBeatmap
+        const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${this.Mods}:${menuData.MP3Length}`;
+
+        const isUpdate = this.previousState !== currentState;
+        if (isUpdate) {
+            this.previousState = currentState;
+            if (this.PerformanceAttributes) this.PerformanceAttributes.free();
+
+            const calculate = new rosu.Performance(scoreParams).calculate(
+                currentBeatmap
+            );
+            this.PerformanceAttributes = calculate;
+        }
+
+        const curPerformance = new rosu.Performance(scoreParams).calculate(
+            this.PerformanceAttributes!
         );
-        const fcPerformance = new Calculator({
+        const fcPerformance = new rosu.Performance({
             mods: this.Mods,
-            nMisses: 0,
-            acc: this.Accuracy
-        }).performance(currentBeatmap);
+            misses: 0,
+            accuracy: this.Accuracy
+        }).calculate(this.PerformanceAttributes!);
+
+        this.PerformanceAttributes = curPerformance;
 
         beatmapPpData.updateCurrentAttributes(
             curPerformance.difficulty.stars,
