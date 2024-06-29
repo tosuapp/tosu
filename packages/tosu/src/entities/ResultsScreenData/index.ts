@@ -51,6 +51,7 @@ export class ResultsScreenData extends AbstractEntity {
         this.HitGeki = 0;
         this.HitKatu = 0;
         this.HitMiss = 0;
+        this.Grade = '';
         this.Date = '';
         this.Accuracy = 0;
         this.pp = 0;
