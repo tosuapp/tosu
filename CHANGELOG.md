@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/KotRikD/tosu/compare/v2.7.1...v2.8.0) (2024-06-30)
+
+
+### Features
+
+* Added beatmap Mode, and calculate real time stars in editor ([974321e](https://github.com/KotRikD/tosu/commit/974321e0b53f624e877d6d00acea7614e70b1158))
+* More data for Result screen (api v2) ([67e51dc](https://github.com/KotRikD/tosu/commit/67e51dc6e3c3a4716642c34adf4744b2efdd6616))
+* Move current beatmap time to `v2/precise` ([e799ebe](https://github.com/KotRikD/tosu/commit/e799ebe2152b29582b32a703fea88716066b9639))
+
+
+### Bug Fixes
+
+* Fix default values in gameplay ([ffa2600](https://github.com/KotRikD/tosu/commit/ffa26006492ea151c9d28a8379708d9ec80fae8e))
+* FIx graph X axis (api v2) ([787c0ec](https://github.com/KotRikD/tosu/commit/787c0ec8dd79ae8671cef07701fda1c591663459))
+* switch to new rosu-pp version ([7870d53](https://github.com/KotRikD/tosu/commit/7870d53b22831ea95afa63eb465f959d904b0fc0))
+
 ### [2.7.1](https://github.com/KotRikD/tosu/compare/v2.7.0...v2.7.1) (2024-06-03)
 
 
