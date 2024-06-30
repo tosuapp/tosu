@@ -47,7 +47,7 @@ export class TourneyUserProfileData extends AbstractEntity {
             wLogger.debug('TUPD(updateState) Slot is not equiped');
 
             this.resetState();
-            gamePlayData.init();
+            gamePlayData.init(undefined, 'tourney');
             return;
         }
 

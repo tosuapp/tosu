@@ -295,7 +295,7 @@ export class OsuInstance {
                     case 5:
                         // Reset Gameplay/ResultScreen data on joining to songSelect
                         if (!gamePlayData.isDefaultState) {
-                            gamePlayData.init();
+                            gamePlayData.init(undefined, '4,5');
                             resultsScreenData.init();
                             beatmapPpData.resetCurrentAttributes();
                         }
@@ -316,8 +316,8 @@ export class OsuInstance {
                         this.previousTime = allTimesData.PlayTime;
 
                         if (
-                            allTimesData.PlayTime < 0 &&
-                            !gamePlayData.isDefaultState
+                            allTimesData.PlayTime <
+                            Math.min(50, beatmapPpData.timings.firstObj)
                         ) {
                             gamePlayData.init(true, 'not-default');
                             break;
@@ -338,7 +338,7 @@ export class OsuInstance {
                         break;
 
                     default:
-                        gamePlayData.init();
+                        gamePlayData.init(undefined, 'default');
                         resultsScreenData.init();
                         break;
                 }
