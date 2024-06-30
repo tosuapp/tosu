@@ -24,7 +24,8 @@ export class GamePlayData extends AbstractEntity {
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
 
-    PerformanceAttributes?: rosu.PerformanceAttributes | rosu.Beatmap;
+    PerformanceAttributes: rosu.PerformanceAttributes;
+    GradualPerformance: rosu.GradualPerformance | null;
 
     Retries: number;
     PlayerName: string;
@@ -58,6 +59,7 @@ export class GamePlayData extends AbstractEntity {
     private cachedkeys: string = '';
 
     previousState: string = '';
+    previousPassedObjects = 0;
 
     constructor(osuInstance: OsuInstance) {
         super(osuInstance);
@@ -111,6 +113,9 @@ export class GamePlayData extends AbstractEntity {
             M2Count: 0
         };
         this.isReplayUiHidden = false;
+
+        this.previousPassedObjects = 0;
+        this.GradualPerformance = null;
 
         // below is gata that shouldn't be reseted on retry
         if (isRetry === true) {
@@ -548,6 +553,7 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private updateStarsAndPerformance() {
+        const t1 = performance.now();
         if (!config.calculatePP) {
             wLogger.debug(
                 'GD(updateStarsAndPerformance) pp calculation disabled'
@@ -577,52 +583,83 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
-        const scoreParams = {
-            passedObjects: calculatePassedObjects(
-                this.Mode,
-                this.Hit300,
-                this.Hit100,
-                this.Hit50,
-                this.HitMiss,
-                this.HitKatu,
-                this.HitGeki
-            ),
-            combo: this.MaxCombo,
-            mods: this.Mods,
+        const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${this.Mods}:${menuData.MP3Length}`;
+        const isUpdate = this.previousState !== currentState;
+
+        // update precalculated attributes
+        if (
+            isUpdate ||
+            !this.GradualPerformance ||
+            !this.PerformanceAttributes
+        ) {
+            if (this.GradualPerformance) this.GradualPerformance.free();
+            if (this.PerformanceAttributes) this.PerformanceAttributes.free();
+
+            const difficulty = new rosu.Difficulty({ mods: this.Mods });
+            this.GradualPerformance = new rosu.GradualPerformance(
+                difficulty,
+                currentBeatmap
+            );
+
+            this.PerformanceAttributes = new rosu.Performance({
+                mods: this.Mods
+            }).calculate(currentBeatmap);
+
+            this.previousState = currentState;
+        }
+
+        if (!this.GradualPerformance && !this.PerformanceAttributes) return;
+
+        const passedObjects = calculatePassedObjects(
+            this.Mode,
+            this.Hit300,
+            this.Hit100,
+            this.Hit50,
+            this.HitMiss,
+            this.HitKatu,
+            this.HitGeki
+        );
+
+        const offset = passedObjects - this.previousPassedObjects;
+        if (offset <= 0) return;
+
+        const scoreParams: rosu.ScoreState = {
+            maxCombo: this.MaxCombo,
             misses: this.HitMiss,
             n50: this.Hit50,
             n100: this.Hit100,
-            n300: this.Hit300
+            n300: this.Hit300,
+            nKatu: this.HitKatu,
+            nGeki: this.HitGeki
         };
 
-        const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${this.Mods}:${menuData.MP3Length}`;
+        const curPerformance = this.GradualPerformance.nth(
+            scoreParams,
+            offset - 1
+        )!;
 
-        const isUpdate = this.previousState !== currentState;
-        if (isUpdate) {
-            this.previousState = currentState;
-            if (this.PerformanceAttributes) this.PerformanceAttributes.free();
-
-            const calculate = new rosu.Performance(scoreParams).calculate(
-                currentBeatmap
-            );
-            this.PerformanceAttributes = calculate;
-        }
-
-        const curPerformance = new rosu.Performance(scoreParams).calculate(
-            this.PerformanceAttributes!
-        );
         const fcPerformance = new rosu.Performance({
             mods: this.Mods,
             misses: 0,
             accuracy: this.Accuracy
-        }).calculate(this.PerformanceAttributes!);
+        }).calculate(this.PerformanceAttributes);
+        const t2 = performance.now();
 
-        this.PerformanceAttributes = curPerformance;
+        if (curPerformance) {
+            beatmapPpData.updateCurrentAttributes(
+                curPerformance.difficulty.stars,
+                curPerformance.pp
+            );
+        }
 
-        beatmapPpData.updateCurrentAttributes(
-            curPerformance.difficulty.stars,
-            curPerformance.pp
+        if (fcPerformance) {
+            beatmapPpData.updateFcPP(fcPerformance.pp);
+        }
+
+        this.previousPassedObjects = passedObjects;
+
+        wLogger.debug(
+            `GD(updateStarsAndPerformance) [${(t2 - t1).toFixed(2)}ms] elapsed time`
         );
-        beatmapPpData.updateFcPP(fcPerformance.pp);
     }
 }
