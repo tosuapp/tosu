@@ -400,7 +400,8 @@ export class OsuInstance {
             'menuData',
             'allTimesData',
             'gamePlayData',
-            'beatmapPpData'
+            'beatmapPpData',
+            'resultsScreenData'
         ]);
 
         this.updateMapMetadata(entities);
@@ -411,12 +412,21 @@ export class OsuInstance {
         allTimesData: AllTimesData;
         gamePlayData: GamePlayData;
         beatmapPpData: BeatmapPPData;
+        resultsScreenData: ResultsScreenData;
     }) {
-        const { menuData, allTimesData, gamePlayData, beatmapPpData } = entries;
+        const {
+            menuData,
+            allTimesData,
+            gamePlayData,
+            beatmapPpData,
+            resultsScreenData
+        } = entries;
         const currentMods =
-            allTimesData.Status === 2 || allTimesData.Status === 7
+            allTimesData.Status === 2
                 ? gamePlayData.Mods
-                : allTimesData.MenuMods;
+                : allTimesData.Status === 7
+                  ? resultsScreenData.Mods
+                  : allTimesData.MenuMods;
 
         const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
 
