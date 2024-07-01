@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.1](https://github.com/KotRikD/tosu/compare/v2.8.0...v2.8.1) (2024-07-01)
+
+
+### Bug Fixes
+
+* FIx graph offset on the maps with long sliders at the end ([a027b44](https://github.com/KotRikD/tosu/commit/a027b44b076c0ae5cf3c01ed5039f661830cfa0d))
+* Fix incorrect realtime pp from previous update ([a39dbdb](https://github.com/KotRikD/tosu/commit/a39dbdbefc08b061d92761b030b570ca5a905584))
+* Fix result screen pp ([df7a0aa](https://github.com/KotRikD/tosu/commit/df7a0aaeea02ee64d6a73a7c6bc38da495059088))
+
 ## [2.8.0](https://github.com/KotRikD/tosu/compare/v2.7.1...v2.8.0) (2024-06-30)
 
 
