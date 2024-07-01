@@ -438,10 +438,10 @@ export class BeatmapPPData extends AbstractEntity {
                 resultStrains.series[0].data.length -
                 LEFT_OFFSET -
                 RIGHT_OFFSET;
-            let lastTime = 0;
             for (let i = 0; i < total; i++) {
-                lastTime = firstObjectTime + i * sectionOffsetTime;
-                resultStrains.xaxis.push(lastTime);
+                resultStrains.xaxis.push(
+                    firstObjectTime + i * sectionOffsetTime
+                );
             }
 
             for (let i = 0; i < RIGHT_OFFSET; i++) {
