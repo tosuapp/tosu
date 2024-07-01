@@ -200,8 +200,7 @@ export class BeatmapPPData extends AbstractEntity {
 
             const { menuData, allTimesData } = this.osuInstance.getServices([
                 'menuData',
-                'allTimesData',
-                'beatmapPpData'
+                'allTimesData'
             ]);
 
             const mapPath = path.join(
@@ -280,7 +279,6 @@ export class BeatmapPPData extends AbstractEntity {
                         parseHitObjects: true,
 
                         parseColours: false,
-                        parseDifficulty: false,
                         parseEditor: false,
                         parseGeneral: false,
                         parseStoryboard: false,
@@ -322,11 +320,6 @@ export class BeatmapPPData extends AbstractEntity {
                 return;
             }
 
-            const offset = strains.sectionLength;
-            const firstObj = this.timings.firstObj / attributes.clockRate;
-            const lastObj = this.timings.full / attributes.clockRate;
-            const mp3Length = menuData.MP3Length / attributes.clockRate;
-
             const beatmapParseTime = performance.now();
             wLogger.debug(
                 `BPPD(updateMapMetadata) [${(
@@ -334,10 +327,38 @@ export class BeatmapPPData extends AbstractEntity {
                 ).toFixed(2)}ms] Spend on parsing beatmap`
             );
 
-            const LEFT_OFFSET = Math.floor(firstObj / offset);
+            let strainsAmount = 0;
+            switch (strains.mode) {
+                case 0:
+                    strainsAmount = strains.aim?.length || 0;
+                    break;
+
+                case 1:
+                    strainsAmount = strains.color?.length || 0;
+                    break;
+
+                case 2:
+                    strainsAmount = strains.movement?.length || 0;
+                    break;
+
+                case 3:
+                    strainsAmount = strains.strains?.length || 0;
+                    break;
+            }
+
+            const sectionOffsetTime = strains.sectionLength;
+            const firstObjectTime =
+                this.timings.firstObj / attributes.clockRate;
+            const lastObjectTime =
+                firstObjectTime + strainsAmount * sectionOffsetTime;
+            const mp3LengthTime = menuData.MP3Length / attributes.clockRate;
+
+            const LEFT_OFFSET = Math.floor(firstObjectTime / sectionOffsetTime);
             const RIGHT_OFFSET =
-                mp3Length >= lastObj
-                    ? Math.ceil((mp3Length - lastObj) / offset)
+                mp3LengthTime >= lastObjectTime
+                    ? Math.ceil(
+                          (mp3LengthTime - lastObjectTime) / sectionOffsetTime
+                      )
                     : 0;
 
             const updateWithOffset = (
@@ -410,7 +431,7 @@ export class BeatmapPPData extends AbstractEntity {
             );
 
             for (let i = 0; i < LEFT_OFFSET; i++) {
-                resultStrains.xaxis.push(i * offset);
+                resultStrains.xaxis.push(i * sectionOffsetTime);
             }
 
             const total =
@@ -418,11 +439,15 @@ export class BeatmapPPData extends AbstractEntity {
                 LEFT_OFFSET -
                 RIGHT_OFFSET;
             for (let i = 0; i < total; i++) {
-                resultStrains.xaxis.push(firstObj + i * offset);
+                resultStrains.xaxis.push(
+                    firstObjectTime + i * sectionOffsetTime
+                );
             }
 
             for (let i = 0; i < RIGHT_OFFSET; i++) {
-                resultStrains.xaxis.push(lastObj + i * offset);
+                resultStrains.xaxis.push(
+                    lastObjectTime + i * sectionOffsetTime
+                );
             }
 
             const endTime = performance.now();

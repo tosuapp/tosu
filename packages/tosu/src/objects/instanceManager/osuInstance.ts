@@ -295,7 +295,7 @@ export class OsuInstance {
                     case 5:
                         // Reset Gameplay/ResultScreen data on joining to songSelect
                         if (!gamePlayData.isDefaultState) {
-                            gamePlayData.init();
+                            gamePlayData.init(undefined, '4,5');
                             resultsScreenData.init();
                             beatmapPpData.resetCurrentAttributes();
                         }
@@ -316,8 +316,8 @@ export class OsuInstance {
                         this.previousTime = allTimesData.PlayTime;
 
                         if (
-                            allTimesData.PlayTime < 0 &&
-                            !gamePlayData.isDefaultState
+                            allTimesData.PlayTime <
+                            Math.min(50, beatmapPpData.timings.firstObj)
                         ) {
                             gamePlayData.init(true, 'not-default');
                             break;
@@ -338,7 +338,7 @@ export class OsuInstance {
                         break;
 
                     default:
-                        gamePlayData.init();
+                        gamePlayData.init(undefined, 'default');
                         resultsScreenData.init();
                         break;
                 }
@@ -400,7 +400,8 @@ export class OsuInstance {
             'menuData',
             'allTimesData',
             'gamePlayData',
-            'beatmapPpData'
+            'beatmapPpData',
+            'resultsScreenData'
         ]);
 
         this.updateMapMetadata(entities);
@@ -411,12 +412,21 @@ export class OsuInstance {
         allTimesData: AllTimesData;
         gamePlayData: GamePlayData;
         beatmapPpData: BeatmapPPData;
+        resultsScreenData: ResultsScreenData;
     }) {
-        const { menuData, allTimesData, gamePlayData, beatmapPpData } = entries;
+        const {
+            menuData,
+            allTimesData,
+            gamePlayData,
+            beatmapPpData,
+            resultsScreenData
+        } = entries;
         const currentMods =
-            allTimesData.Status === 2 || allTimesData.Status === 7
+            allTimesData.Status === 2
                 ? gamePlayData.Mods
-                : allTimesData.MenuMods;
+                : allTimesData.Status === 7
+                  ? resultsScreenData.Mods
+                  : allTimesData.MenuMods;
 
         const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
 

@@ -3,11 +3,7 @@ import rosu from 'rosu-pp-js';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
-import {
-    calculateAccuracy,
-    calculateGrade,
-    calculatePassedObjects
-} from '@/utils/calculators';
+import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { OsuMods } from '@/utils/osuMods.types';
 
@@ -159,29 +155,21 @@ export class ResultsScreenData extends AbstractEntity {
                 return;
             }
 
-            const scoreParams = {
-                passedObjects: calculatePassedObjects(
-                    this.Mode,
-                    this.Hit300,
-                    this.Hit100,
-                    this.Hit50,
-                    this.HitMiss,
-                    this.HitKatu,
-                    this.HitGeki
-                ),
+            const scoreParams: rosu.PerformanceArgs = {
                 combo: this.MaxCombo,
                 mods: this.Mods,
-                nMisses: this.HitMiss,
+                misses: this.HitMiss,
                 n50: this.Hit50,
                 n100: this.Hit100,
-                n300: this.Hit300
+                n300: this.Hit300,
+                nKatu: this.HitKatu,
+                nGeki: this.HitGeki
             };
 
             const curPerformance = new rosu.Performance(scoreParams).calculate(
                 currentBeatmap
             );
             const fcPerformance = new rosu.Performance({
-                combo: curPerformance.difficulty.maxCombo,
                 mods: this.Mods,
                 misses: 0,
                 accuracy: this.Accuracy
