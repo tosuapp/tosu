@@ -279,7 +279,6 @@ export class BeatmapPPData extends AbstractEntity {
                         parseHitObjects: true,
 
                         parseColours: false,
-                        parseDifficulty: false,
                         parseEditor: false,
                         parseGeneral: false,
                         parseStoryboard: false,
