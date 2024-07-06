@@ -48,6 +48,12 @@ export class InstanceManager {
 
                 const osuInstance = new OsuInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
+
+                if (cmdLine.includes('--tournament')) {
+                    // skip the lazer tournament client
+                    continue;
+                }
+
                 if (cmdLine.includes('-spectateclient')) {
                     const ipcId = cmdLine.split(' ').at(-2);
 
