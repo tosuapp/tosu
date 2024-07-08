@@ -9,6 +9,7 @@
     "cross-build": "cross build --manifest-path ./native/Cargo.toml --message-format=json > ./native/cross.log",
     "postcargo-build": "neon dist < ./native/cargo.log --out ./native/index.node",
     "postcross-build": "neon dist -m ./native/target < cross.log --out ./native/index.node",
+    "prepare": "npm run build",
     "debug": "npm run cargo-build --",
     "build": "npm run cargo-build -- --release",
     "cross": "npm run cross-build -- --release",
