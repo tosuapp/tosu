@@ -350,6 +350,7 @@ const buildTourneyData = (
                         unstableRate: gamePlayData.UnstableRate,
                         hitErrorArray: gamePlayData.HitErrors
                     },
+                    keyOverlay: gamePlayData.KeyOverlay,
                     mods: {
                         num: currentMods,
                         str: getOsuModsString(currentMods)
