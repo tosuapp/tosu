@@ -1,3 +1,4 @@
+use std::mem;
 use neon::prelude::Finalize;
 use paste::paste;
 
@@ -49,8 +50,9 @@ pub trait MemoryReader {
     address: Address,
   ) -> Result<String, MemoryReaderError> {
     let mut address = address;
-    let len = self.read_u32(address + 0x4)? as usize;
-    address += 0x8;
+    address += mem::size_of::<u32>() as Address; // skip String VTable
+    let len = self.read_u32(address)? as usize;
+    address += mem::size_of::<u32>() as Address; // skip String length
 
     let data = match self.read(address, len * 2) {
       Ok(data) => data,
