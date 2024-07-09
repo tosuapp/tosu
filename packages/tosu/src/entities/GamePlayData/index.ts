@@ -1,10 +1,10 @@
 import { config, wLogger } from '@tosu/common';
 import rosu from 'rosu-pp-js';
-import { Process } from 'tsprocess/dist/process';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { Leaderboard } from '@/entities/GamePlayData/Leaderboard';
 import { MenuData } from '@/entities/MenuData';
+import MemoryReader from '@/memoryReaders';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { OsuMods } from '@/utils/osuMods.types';
@@ -370,7 +370,7 @@ export class GamePlayData extends AbstractEntity {
         }
     }
 
-    private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
+    private getKeyOverlay(process: MemoryReader, keyOverlayArrayAddr: number) {
         const itemsSize = process.readInt(keyOverlayArrayAddr + 0x4);
         if (itemsSize < 4) {
             return {
@@ -521,7 +521,7 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private updateLeaderboard(
-        process: Process,
+        process: MemoryReader,
         leaderStart: number,
         rulesetAddr: number
     ) {

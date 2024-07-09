@@ -1,4 +1,4 @@
-import { Process } from 'tsprocess/dist/process';
+import MemoryReader from '@/memoryReaders';
 
 export interface LeaderboardPlayer {
     Name: string;
@@ -16,7 +16,7 @@ export interface LeaderboardPlayer {
 }
 
 export class Leaderboard {
-    private process: Process;
+    private process: MemoryReader;
 
     private leaderboardBase: number = 0;
 
@@ -26,7 +26,7 @@ export class Leaderboard {
 
     isScoreboardVisible: boolean = false;
 
-    constructor(process: Process, leaderboardBase: number) {
+    constructor(process: MemoryReader, leaderboardBase: number) {
         this.process = process;
         this.leaderboardBase = leaderboardBase;
     }

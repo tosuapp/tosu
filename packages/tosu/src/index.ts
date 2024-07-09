@@ -1,7 +1,8 @@
 import { argumetsParser, config, wLogger, watchConfigFile } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
-import { Process } from 'tsprocess/dist/process';
+
+import MemoryReader from '@/memoryReaders';
 
 import { InstanceManager } from './objects/instanceManager/instanceManager';
 
@@ -11,7 +12,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
 (async () => {
     wLogger.info(`Starting tosu v${currentVersion}`);
 
-    Process.disablePowerThrottling();
+    MemoryReader.disablePowerThrottling();
 
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });

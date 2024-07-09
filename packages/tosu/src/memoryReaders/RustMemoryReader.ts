@@ -76,6 +76,10 @@ export class RustMemoryReader extends AbstractMemoryReader {
     }
 
     public readSharpString(address: number): string {
+        if (address === 0) {
+            return '';
+        }
+
         return this.native.readString(address);
     }
 

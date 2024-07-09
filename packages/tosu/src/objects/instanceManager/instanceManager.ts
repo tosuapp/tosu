@@ -1,5 +1,6 @@
 import { argumetsParser, wLogger } from '@tosu/common';
-import { Process } from 'tsprocess/dist/process';
+
+import MemoryReader from '@/memoryReaders';
 
 import { OsuInstance } from './osuInstance';
 
@@ -39,7 +40,7 @@ export class InstanceManager {
 
     private handleProcesses() {
         try {
-            const osuProcesses = Process.findProcesses('osu!.exe');
+            const osuProcesses = MemoryReader.findProcesses('osu!.exe');
             for (const processId of osuProcesses || []) {
                 if (processId in this.osuInstances) {
                     // dont deploy not needed instances

@@ -1,7 +1,7 @@
 import { wLogger } from '@tosu/common';
-import { Process } from 'tsprocess/dist/process';
 
 import { AbstractEntity } from '@/entities/AbstractEntity/index';
+import MemoryReader from '@/memoryReaders';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import {
     Audio,
@@ -434,7 +434,11 @@ export class Settings extends AbstractEntity {
         return typeof value === 'number' && !isNaN(value) && isFinite(value);
     }
 
-    setConfigValue(process: Process, address: number, position: number = 0) {
+    setConfigValue(
+        process: MemoryReader,
+        address: number,
+        position: number = 0
+    ) {
         try {
             const offset =
                 process.readInt(address + 0x8) + 0x8 + 0x10 * position;
@@ -495,7 +499,11 @@ export class Settings extends AbstractEntity {
         }
     }
 
-    setBindingValue(process: Process, address: number, position: number = 0) {
+    setBindingValue(
+        process: MemoryReader,
+        address: number,
+        position: number = 0
+    ) {
         try {
             const current =
                 process.readInt(address + 0x8) + 0x8 + 0x10 * position;
@@ -525,7 +533,7 @@ export class Settings extends AbstractEntity {
 
     // preventSpamArray: (number | string)[] = [];
 
-    findConfigOffsets(process: Process, configurationAddr: number) {
+    findConfigOffsets(process: MemoryReader, configurationAddr: number) {
         try {
             const rawSharpDictionary =
                 process.readSharpDictionary(configurationAddr);
@@ -565,7 +573,7 @@ export class Settings extends AbstractEntity {
         }
     }
 
-    findBindingOffsets(process: Process, bindingConfigAddr: number) {
+    findBindingOffsets(process: MemoryReader, bindingConfigAddr: number) {
         try {
             // KEEP AS THE REFERENCE TO POSITION OF VALUES
             const rawSharpDictionary =
@@ -606,7 +614,7 @@ export class Settings extends AbstractEntity {
         }
     }
 
-    updateConfigState(process: Process, configurationAddr: number) {
+    updateConfigState(process: MemoryReader, configurationAddr: number) {
         try {
             if (this.configPositions.length === 0) {
                 this.findConfigOffsets(process, configurationAddr);
@@ -628,7 +636,7 @@ export class Settings extends AbstractEntity {
         }
     }
 
-    updateBindingState(process: Process, bindingConfigAddr: number) {
+    updateBindingState(process: MemoryReader, bindingConfigAddr: number) {
         try {
             if (this.bindingPositions.length === 0) {
                 this.findBindingOffsets(process, bindingConfigAddr);
