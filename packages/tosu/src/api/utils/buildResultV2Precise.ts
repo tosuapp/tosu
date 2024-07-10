@@ -21,6 +21,7 @@ const buildTourneyData = (
             const { gamePlayData } = instance.getServices(['gamePlayData']);
 
             return {
+                ipcId: instance.ipcId,
                 keys: {
                     k1: {
                         isPressed: gamePlayData.KeyOverlay.K1Pressed,
