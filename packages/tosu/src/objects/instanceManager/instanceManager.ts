@@ -55,7 +55,7 @@ export class InstanceManager {
                 }
 
                 if (cmdLine.includes('-spectateclient')) {
-                    const ipcId = cmdLine.split(' ').at(-2);
+                    const ipcId = cmdLine.split(' ').at(2);
 
                     osuInstance.setTourneyIpcId(Number(ipcId));
                     osuInstance.setIsTourneySpectator(true);

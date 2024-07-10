@@ -593,6 +593,6 @@ const buildTourneyData = (
             left: tourneyManagerData.FirstTeamScore,
             right: tourneyManagerData.SecondTeamScore
         },
-        clients: [...mappedOsuTourneyClients]
+        clients: mappedOsuTourneyClients
     };
 };
