@@ -36,7 +36,6 @@ export class CppMemoryReader extends AbstractMemoryReader {
     }
 
     readByte(address: number): number {
-        // console.log(address, 'address');
         return this.native.readByte(address);
     }
 
