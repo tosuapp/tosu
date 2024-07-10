@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/KotRikD/tosu/compare/v2.8.1...v2.9.0) (2024-07-10)
+
+
+### Features
+
+* Add `keyOverlay` and `HitErrors` to `v2/precise` ([0be41e7](https://github.com/KotRikD/tosu/commit/0be41e72fb1b2db51f58402f7af6c2958f3a6bbe))
+* Added `ipcId` to tourney clients ([cbda113](https://github.com/KotRikD/tosu/commit/cbda11306b445a6379305ac8b831da52d6648393))
+
+
+### Bug Fixes
+
+* incorrect pp for accuracy in menu ([2939ddb](https://github.com/KotRikD/tosu/commit/2939ddb96140afbba8685d6d2a0c069a62cdcdf6))
+* Use own argument parser to parse osu arguments ([2aa747f](https://github.com/KotRikD/tosu/commit/2aa747f04e312a2b21adc713a3779f49a4e79f27))
+
 ### [2.8.1](https://github.com/KotRikD/tosu/compare/v2.8.0...v2.8.1) (2024-07-01)
 
 
