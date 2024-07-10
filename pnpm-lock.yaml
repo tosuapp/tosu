@@ -59,6 +59,10 @@ importers:
       dotenv:
         specifier: ^16.0.3
         version: 16.4.5
+    devDependencies:
+      '@types/adm-zip':
+        specifier: ^0.5.5
+        version: 0.5.5
 
   packages/game-overlay:
     dependencies:
@@ -609,6 +613,12 @@ packages:
 
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+    dev: true
+
+  /@types/adm-zip@0.5.5:
+    resolution: {integrity: sha512-YCGstVMjc4LTY5uK9/obvxBya93axZOVOyf2GSUulADzmLhYE45u2nAssCs/fWBs1Ifq5Vat75JTPwd5XZoPJw==}
+    dependencies:
+      '@types/node': 18.19.39
     dev: true
 
   /@types/json5@0.0.29:

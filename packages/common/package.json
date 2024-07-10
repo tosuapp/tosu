@@ -12,5 +12,8 @@
   "dependencies": {
     "adm-zip": "^0.5.10",
     "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.5"
   }
 }
