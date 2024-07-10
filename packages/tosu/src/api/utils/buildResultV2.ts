@@ -485,6 +485,7 @@ const buildTourneyData = (
                 iterator < osuTourneyClients.length / 2 ? 'left' : 'right';
 
             return {
+                ipcId: instance.ipcId,
                 team: spectatorTeam,
                 user: {
                     id: tourneyUserProfileData.UserID,
@@ -593,6 +594,6 @@ const buildTourneyData = (
             left: tourneyManagerData.FirstTeamScore,
             right: tourneyManagerData.SecondTeamScore
         },
-        clients: [...mappedOsuTourneyClients]
+        clients: mappedOsuTourneyClients
     };
 };

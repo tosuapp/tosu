@@ -405,6 +405,13 @@ export interface TosuPreciseAnswer {
     currentTime: number;
     keys: KeyOverlay;
     hitErrors: number[];
+    tourney: PreciseTourney[];
+}
+
+export interface PreciseTourney {
+    ipcId: number;
+    keys: KeyOverlay;
+    hitErrors: number[];
 }
 
 interface KeyOverlay {
@@ -519,6 +526,7 @@ export interface TourneyChatMessages {
 }
 
 export interface TourneyClients {
+    ipcId: number;
     team: 'left' | 'right';
     user: {
         id: number;

@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { argumetsParser, wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
 import { OsuInstance } from './osuInstance';
@@ -49,15 +49,14 @@ export class InstanceManager {
                 const osuInstance = new OsuInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
 
-                if (cmdLine.includes('--tournament')) {
+                const args = argumetsParser(cmdLine);
+                if (args.tournament !== null && args.tournament !== undefined) {
                     // skip the lazer tournament client
                     continue;
                 }
 
-                if (cmdLine.includes('-spectateclient')) {
-                    const ipcId = cmdLine.split(' ').at(-2);
-
-                    osuInstance.setTourneyIpcId(Number(ipcId));
+                if (!isNaN(parseFloat(args.spectateclient))) {
+                    osuInstance.setTourneyIpcId(args.spectateclient);
                     osuInstance.setIsTourneySpectator(true);
                 }
 
