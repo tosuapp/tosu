@@ -405,6 +405,12 @@ export interface TosuPreciseAnswer {
     currentTime: number;
     keys: KeyOverlay;
     hitErrors: number[];
+    tourney: PreciseTourney[];
+}
+
+export interface PreciseTourney {
+    keys: KeyOverlay;
+    hitErrors: number[];
 }
 
 interface KeyOverlay {
