@@ -1,16 +1,33 @@
-const regex = /(?:--|-)(?<name>\S+)=(?<value>\S+)/;
+const regex = /(?:--|-)(?<name>[^=\s]+)(?:[= ](?<value>(?!--|-)\S*))?/g;
 
-export const argumetsParser = (argumentsArray: string[]) => {
+export const argumetsParser = (argumentsString: string[] | string) => {
     const args: { [key: string]: any } = {};
 
-    for (let i = 0; i < argumentsArray.length; i++) {
-        const arg = argumentsArray[i];
+    if (typeof argumentsString === 'string') {
+        const matches = [...argumentsString.matchAll(regex)];
+        matches.forEach((match) => {
+            const name = match?.groups?.name || '';
+            const value: any = match?.groups?.value || '';
+
+            if (!isNaN(parseFloat(value))) args[name] = parseFloat(value);
+            else if (value === 'true') args[name] = true;
+            else if (value === 'false') args[name] = false;
+            else args[name] = value;
+        });
+
+        return args;
+    }
+
+    for (let i = 0; i < argumentsString.length; i++) {
+        const arg = argumentsString[i];
 
         if (!regex.test(arg)) continue;
-        // eslint-disable-next-lint no-non-null-asserted-optional-chain
-        const { name, value }: any = regex.exec(arg)?.groups!;
+        const groups = regex.exec(arg)?.groups;
 
-        if (isFinite(value)) args[name] = parseFloat(value);
+        const name = groups?.name || '';
+        const value: any = groups?.value || '';
+
+        if (!isNaN(parseFloat(value))) args[name] = parseFloat(value);
         else if (value === 'true') args[name] = true;
         else if (value === 'false') args[name] = false;
         else args[name] = value;
