@@ -1,13 +1,8 @@
 .idea/
-native/.idea/
-native/target/
-native/cargo.log
-native/cross.log
-native/main.rs
+native/
+dist
 
-**/*.node
-*.js
+NativeMemoryReader.node
 **/node_modules
 **/.DS_Store
 npm-debug.log
-

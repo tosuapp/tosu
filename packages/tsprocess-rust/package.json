@@ -1,23 +1,23 @@
 {
-  "name": "tsprocess-rust",
-  "version": "0.1.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "cargo test",
-    "cargo-build": "cargo build --manifest-path ./native/Cargo.toml --message-format=json > ./native/cargo.log",
-    "cross-build": "cross build --manifest-path ./native/Cargo.toml --message-format=json > ./native/cross.log",
-    "postcargo-build": "neon dist < ./native/cargo.log --out ./dist/native/index.node",
-    "postcross-build": "neon dist -m ./native/target < cross.log --out ./dist/native/index.node",
-    "prepare": "npm run build",
-    "debug": "npm run build",
-    "build": "npm run cargo-build -- --release && tsc",
-    "cross": "npm run cross-build -- --release && tsc",
-    "help": "@neon-rs/cli"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@neon-rs/cli": "0.1.73"
-  }
+    "name": "tsprocess-rust",
+    "version": "0.1.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "test": "cargo test",
+        "cargo-build": "cargo build --manifest-path ./native/Cargo.toml --message-format=json > ./native/cargo.log",
+        "cross-build": "cross build --manifest-path ./native/Cargo.toml --message-format=json > ./native/cross.log",
+        "postcargo-build": "neon dist < ./native/cargo.log --out ./dist/NativeMemoryReader.node",
+        "postcross-build": "neon dist -m ./native/target < cross.log --out ./dist/NativeMemoryReader.node",
+        "prepare": "npm run cargo-build -- --release && tsc",
+        "debug": "npm run build",
+        "build": "",
+        "cross": "npm run cross-build -- --release && tsc",
+        "help": "@neon-rs/cli"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@neon-rs/cli": "0.1.73"
+    }
 }

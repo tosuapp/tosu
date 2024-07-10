@@ -1,14 +1,28 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module":"CommonJS",
-    "sourceMap": true,
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "declarationDir": "dist",
-    "outDir": "dist"
-  },
-  "include": [
-    "./globals.d.ts"
-  ],
+    "compilerOptions": {
+        "lib": [
+            "ES2020"
+        ],
+        "module": "commonjs",
+        "moduleResolution": "Node",
+        "allowJs": true,
+        "esModuleInterop": true,
+        "outDir": "dist",
+        "rootDir": "./",
+        "sourceMap": false,
+        "declaration": false,
+        "strict": true,
+        "noImplicitAny": false,
+        "target": "ES2020",
+        "strictPropertyInitialization": false,
+        "baseUrl": ".",
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "native"
+    ],
+    "include": [
+        "**/*"
+    ],
 }
