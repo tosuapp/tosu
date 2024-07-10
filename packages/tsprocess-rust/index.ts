@@ -1,3 +1,4 @@
+// @ts-ignore
 import { MemoryReader as NativeMemoryReader } from './native/index.node';
 
 export class MemoryReader {

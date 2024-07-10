@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module":"CommonJS",
+    "sourceMap": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "declarationDir": "dist",
+    "outDir": "dist"
+  },
+  "include": [
+    "./globals.d.ts"
+  ],
+}

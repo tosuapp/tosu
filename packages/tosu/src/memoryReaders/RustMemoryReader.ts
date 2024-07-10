@@ -1,4 +1,4 @@
-import { MemoryReader as NativeRustMemoryReader } from 'tsprocess-rust/index.ts';
+import { MemoryReader as NativeRustMemoryReader } from 'tsprocess-rust';
 import { ProcessInfo } from 'tsprocess/dist/process';
 
 import { AbstractMemoryReader } from '@/memoryReaders/AbstractMemoryReader';
