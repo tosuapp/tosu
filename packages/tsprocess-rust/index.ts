@@ -1,85 +1,82 @@
-const {
-    MemoryReader: NativeMemoryReader
-} = require('./NativeMemoryReader.node');
+// @ts-ignore
+import { MemoryReader as NativeMemoryReader } from './NativeRustMemoryReader.node';
 
-class MemoryReader {
-    #nativeReader;
+export class MemoryReader {
+    private nativeReader: NativeMemoryReader;
 
-    constructor(processId) {
+    constructor(processId: number) {
         this.nativeReader = new NativeMemoryReader(processId);
     }
 
-    static isProcessExists(processId) {
+    public static isProcessExists(processId: number): boolean {
         return NativeMemoryReader.isProcessExists(processId);
     }
 
-    static findProcesses(processName) {
+    public static findProcesses(processName: string): number[] {
         return NativeMemoryReader.findProcesses(processName);
     }
 
-    static getProcessPath(processId) {
+    public static getProcessPath(processId: number): string {
         return NativeMemoryReader.getProcessPath(processId);
     }
 
-    static getProcessCommandLine(processId) {
+    public static getProcessCommandLine(processId: number): string {
         return NativeMemoryReader.getProcessCommandLine(processId);
     }
 
-    findSignature(signature) {
+    public findSignature(signature: string): number {
         return this.nativeReader.findSignature(signature);
     }
 
-    readRaw(address, length) {
+    public readRaw(address: number, length: number): number[] {
         return this.nativeReader.readRaw(address, length);
     }
 
-    readPointer(address) {
+    public readPointer(address: number): number {
         return this.nativeReader.readPointer(address);
     }
 
-    readString(address) {
+    public readString(address: number): string {
         return this.nativeReader.readString(address);
     }
 
-    readI8(address) {
+    public readI8(address: number): number {
         return this.nativeReader.read_i8(address);
     }
 
-    readI16(address) {
+    public readI16(address: number): number {
         return this.nativeReader.read_i16(address);
     }
 
-    readI32(address) {
+    public readI32(address: number): number {
         return this.nativeReader.read_i32(address);
     }
 
-    readI64(address) {
+    public readI64(address: number): number {
         return this.nativeReader.read_i64(address);
     }
 
-    readU8(address) {
+    public readU8(address: number): number {
         return this.nativeReader.read_u8(address);
     }
 
-    readU16(address) {
+    public readU16(address: number): number {
         return this.nativeReader.read_u16(address);
     }
 
-    readU32(address) {
+    public readU32(address: number): number {
         return this.nativeReader.read_u32(address);
     }
 
-    readU64(address) {
+    public readU64(address: number): number {
         return this.nativeReader.read_u64(address);
     }
 
-    readF32(address) {
+    public readF32(address: number): number {
         return this.nativeReader.read_f32(address);
     }
 
-    readF64(address) {
+    public readF64(address: number): number {
         return this.nativeReader.read_f64(address);
     }
 }
-
-module.exports = { MemoryReader };
