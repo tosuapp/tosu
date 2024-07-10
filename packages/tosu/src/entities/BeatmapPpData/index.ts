@@ -247,6 +247,7 @@ export class BeatmapPPData extends AbstractEntity {
             const ppAcc = {};
             for (const acc of [100, 99, 98, 97, 96, 95]) {
                 const calculate = new rosu.Performance({
+                    mods: currentMods,
                     accuracy: acc
                 }).calculate(fcPerformance);
                 ppAcc[acc] = fixDecimals(calculate.pp);
