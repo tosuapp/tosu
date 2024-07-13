@@ -8,6 +8,7 @@ import { netDateBinaryToDate } from '@/utils/converters';
 import { OsuMods } from '@/utils/osuMods.types';
 
 export class ResultsScreenData extends AbstractEntity {
+    OnlineId: number;
     PlayerName: string;
     Mods: OsuMods;
     Mode: number;
@@ -90,6 +91,8 @@ export class ResultsScreenData extends AbstractEntity {
                 return;
             }
 
+            // OnlineId   int64   `mem:"[Ruleset + 0x38] + 0x4"`
+            this.OnlineId = process.readLong(resultScreenBase + 0x4);
             // PlayerName string  `mem:"[[Ruleset + 0x38] + 0x28]"`
             this.PlayerName = process.readSharpString(
                 process.readInt(resultScreenBase + 0x28)
