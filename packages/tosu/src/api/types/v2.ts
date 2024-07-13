@@ -451,7 +451,7 @@ export interface Series {
 }
 
 export interface ResultsScreen {
-    onlineId: number;
+    scoreId: number;
     playerName: string;
     mode: NumberName;
     score: number;

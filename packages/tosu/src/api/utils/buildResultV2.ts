@@ -394,7 +394,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             graph: beatmapPpData.strainsAll
         },
         resultsScreen: {
-            onlineId: resultsScreenData.OnlineId,
+            scoreId: resultsScreenData.OnlineId,
 
             playerName: resultsScreenData.PlayerName,
 
