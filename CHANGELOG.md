@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.1](https://github.com/KotRikD/tosu/compare/v2.9.0...v2.9.1) (2024-07-14)
+
+
+### Features
+
+* new field online_id to v2 route ([a1c6d88](https://github.com/KotRikD/tosu/commit/a1c6d886f4e9af3b7d4ebd47b84b4c8dac3b1789))
+
 ## [2.9.0](https://github.com/KotRikD/tosu/compare/v2.8.1...v2.9.0) (2024-07-10)
 
 
