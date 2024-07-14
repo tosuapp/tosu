@@ -290,7 +290,7 @@ export class OsuInstance {
                         beatmapPpData.updateEditorPP();
                         break;
 
-                    // EditorSongSElect and SongSelect
+                    // EditorSongSelect and SongSelect
                     case 4:
                     case 5:
                         // Reset Gameplay/ResultScreen data on joining to songSelect

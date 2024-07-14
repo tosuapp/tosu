@@ -154,6 +154,7 @@ export class GamePlayData extends AbstractEntity {
 
     updateState() {
         try {
+            const s1 = performance.now();
             const { process, patterns, allTimesData, menuData } =
                 this.osuInstance.getServices([
                     'process',
@@ -167,6 +168,7 @@ export class GamePlayData extends AbstractEntity {
                 'rulesetsAddr'
             ]);
 
+            const s2 = performance.now();
             const rulesetAddr = process.readInt(
                 process.readInt(rulesetsAddr - 0xb) + 0x4
             );
@@ -175,12 +177,14 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
+            const s3 = performance.now();
             const gameplayBase = process.readInt(rulesetAddr + 0x68);
             if (gameplayBase === 0) {
                 wLogger.debug('GD(updateState) gameplayBase is zero');
                 return;
             }
 
+            const s4 = performance.now();
             const scoreBase = process.readInt(gameplayBase + 0x38);
             if (scoreBase === 0) {
                 wLogger.debug('GD(updateState) scoreBase is zero');
@@ -189,6 +193,7 @@ export class GamePlayData extends AbstractEntity {
 
             this.scoreBase = scoreBase;
 
+            const s5 = performance.now();
             const hpBarBase = process.readInt(gameplayBase + 0x40);
             if (hpBarBase === 0) {
                 wLogger.debug('GD(updateState) hpBar is zero');
@@ -199,6 +204,7 @@ export class GamePlayData extends AbstractEntity {
             // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
             this.isDefaultState = false;
 
+            const s6 = performance.now();
             if (allTimesData.IsWatchingReplay) {
                 // rulesetAddr mean ReplayWatcher... Sooo....
                 // Ruleset + 0x1d8
@@ -210,42 +216,73 @@ export class GamePlayData extends AbstractEntity {
             }
 
             // [Base - 0x33] + 0x8
+            const s7 = performance.now();
             this.Retries = process.readInt(
                 process.readInt(baseAddr - 0x33) + 0x8
             );
+
             // [[[Ruleset + 0x68] + 0x38] + 0x28]
+            const s8 = performance.now();
             this.PlayerName = process.readSharpString(
                 process.readInt(scoreBase + 0x28)
             );
+
             // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
+            const s9 = performance.now();
             this.Mods =
                 process.readInt(process.readInt(scoreBase + 0x1c) + 0xc) ^
                 process.readInt(process.readInt(scoreBase + 0x1c) + 0x8);
+
             // [[Ruleset + 0x68] + 0x38] + 0x64
+            const s10 = performance.now();
             this.Mode = process.readInt(scoreBase + 0x64);
+
             // [[Ruleset + 0x68] + 0x38] + 0x68
+            const s11 = performance.now();
             this.MaxCombo = process.readShort(scoreBase + 0x68);
+
             // [[Ruleset + 0x68] + 0x38] + 0x78
+            const s12 = performance.now();
             this.Score = process.readInt(rulesetAddr + 0x100);
+
             // [[Ruleset + 0x68] + 0x38] + 0x88
+            const s13 = performance.now();
             this.Hit100 = process.readShort(scoreBase + 0x88);
+
             // [[Ruleset + 0x68] + 0x38] + 0x8A
+            const s14 = performance.now();
             this.Hit300 = process.readShort(scoreBase + 0x8a);
+
             // [[Ruleset + 0x68] + 0x38] + 0x8C
+            const s15 = performance.now();
             this.Hit50 = process.readShort(scoreBase + 0x8c);
+
             // [[Ruleset + 0x68] + 0x38] + 0x8E
+            const s16 = performance.now();
             this.HitGeki = process.readShort(scoreBase + 0x8e);
+
             // [[Ruleset + 0x68] + 0x38] + 0x90
+            const s17 = performance.now();
             this.HitKatu = process.readShort(scoreBase + 0x90);
+
             // [[Ruleset + 0x68] + 0x38] + 0x92
+            const s18 = performance.now();
             this.HitMiss = process.readShort(scoreBase + 0x92);
+
             // [[Ruleset + 0x68] + 0x38] + 0x94
+            const s19 = performance.now();
             this.Combo = process.readShort(scoreBase + 0x94);
+
             // [[Ruleset + 0x68] + 0x40] + 0x14
+            const s20 = performance.now();
             this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14) || 0;
+
             // [[Ruleset + 0x68] + 0x40] + 0x1C
+            const s21 = performance.now();
             this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
+
             // [[Ruleset + 0x68] + 0x48] + 0xC
+            const s22 = performance.now();
             this.Accuracy = process.readDouble(
                 process.readInt(gameplayBase + 0x48) + 0xc
             );
@@ -277,13 +314,52 @@ export class GamePlayData extends AbstractEntity {
             this.ComboPrev = this.Combo;
 
             // [[[Ruleset + 0x68] + 0x38] + 0x38]
+            const s23 = performance.now();
             this.updateLeaderboard(
                 process,
                 patterns.getLeaderStart(),
                 rulesetAddr
             );
+
+            const s24 = performance.now();
             this.updateGrade(menuData);
+
+            const s25 = performance.now();
             this.updateStarsAndPerformance();
+
+            const s26 = performance.now();
+            wLogger.timings(
+                'GamePlayData/updateState',
+                {
+                    total: s26 - s1,
+                    init: s2 - s1,
+                    addr: s3 - s2,
+                    gameplaybase: s4 - s3,
+                    scorebase: s5 - s4,
+                    hpbarbase: s6 - s5,
+                    replayui: s7 - s6,
+                    retries: s8 - s7,
+                    playername: s9 - s8,
+                    mods: s10 - s9,
+                    mode: s11 - s10,
+                    maxcombo: s12 - s11,
+                    score: s13 - s12,
+                    hit100: s14 - s13,
+                    hit300: s15 - s14,
+                    hit50: s16 - s15,
+                    hitgeki: s17 - s16,
+                    hitkatu: s18 - s17,
+                    hitmiss: s19 - s18,
+                    combo: s20 - s19,
+                    hpsmooth: s21 - s20,
+                    hp: s22 - s21,
+                    accuracy: s23 - s22,
+                    updateLeaderboard: s24 - s23,
+                    updateGrade: s25 - s24,
+                    updateStarsAndPerformance: s26 - s25
+                },
+                performance.now()
+            );
 
             this.resetReportCount('GD(updateState)');
         } catch (exc) {
@@ -303,6 +379,7 @@ export class GamePlayData extends AbstractEntity {
                 'patterns'
             ]);
 
+            const s1 = performance.now();
             const rulesetAddr = process.readInt(
                 process.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
             );
@@ -311,6 +388,7 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
+            const s2 = performance.now();
             const keyOverlayPtr = process.readUInt(rulesetAddr + 0xb0);
             if (keyOverlayPtr === 0) {
                 wLogger.debug(
@@ -322,6 +400,7 @@ export class GamePlayData extends AbstractEntity {
             }
 
             // [[Ruleset + 0xB0] + 0x10] + 0x4
+            const s3 = performance.now();
             const keyOverlayArrayAddr = process.readInt(
                 process.readInt(keyOverlayPtr + 0x10) + 0x4
             );
@@ -330,6 +409,7 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
+            const s4 = performance.now();
             const keys = this.getKeyOverlay(process, keyOverlayArrayAddr);
             if (keys.K1Count < 0 || keys.K1Count > 1_000_000) {
                 keys.K1Pressed = false;
@@ -348,6 +428,7 @@ export class GamePlayData extends AbstractEntity {
                 keys.M2Count = 0;
             }
 
+            const s5 = performance.now();
             this.KeyOverlay = keys;
             this.isKeyOverlayDefaultState = false;
 
@@ -358,6 +439,18 @@ export class GamePlayData extends AbstractEntity {
                 );
                 this.cachedkeys = keysLine;
             }
+
+            wLogger.timings(
+                'GamePlayData/updateKeyOverlay',
+                {
+                    total: s5 - s1,
+                    addr: s2 - s1,
+                    ptr: s3 - s2,
+                    array: s4 - s3,
+                    get: s5 - s4
+                },
+                performance.now()
+            );
 
             this.resetReportCount('GD(updateKeyOverlay)');
         } catch (exc) {
@@ -442,16 +535,35 @@ export class GamePlayData extends AbstractEntity {
 
             const leaderStart = patterns.getLeaderStart();
 
+            const s1 = performance.now();
             const base = process.readInt(this.scoreBase + 0x38);
+
+            const s2 = performance.now();
             const items = process.readInt(base + 0x4);
+
+            const s3 = performance.now();
             const size = process.readInt(base + 0xc);
 
+            const s4 = performance.now();
             for (let i = this.HitErrors.length - 1; i < size; i++) {
                 const current = items + leaderStart + 0x4 * i;
                 const error = process.readInt(current);
 
                 this.HitErrors.push(error);
             }
+
+            const s5 = performance.now();
+            wLogger.timings(
+                'GamePlayData/updateHitErrors',
+                {
+                    total: s5 - s1,
+                    base: s2 - s1,
+                    items: s3 - s2,
+                    size: s4 - s3,
+                    loop: s5 - s4
+                },
+                performance.now()
+            );
 
             this.resetReportCount('GD(updateHitErrors)');
         } catch (exc) {
@@ -553,7 +665,7 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private updateStarsAndPerformance() {
-        const t1 = performance.now();
+        const s1 = performance.now();
         if (!config.calculatePP) {
             wLogger.debug(
                 'GD(updateStarsAndPerformance) pp calculation disabled'
@@ -575,6 +687,7 @@ export class GamePlayData extends AbstractEntity {
             return;
         }
 
+        const s2 = performance.now();
         const currentBeatmap = beatmapPpData.getCurrentBeatmap();
         if (!currentBeatmap) {
             wLogger.debug(
@@ -587,6 +700,7 @@ export class GamePlayData extends AbstractEntity {
         const isUpdate = this.previousState !== currentState;
 
         // update precalculated attributes
+        const s3 = performance.now();
         if (
             isUpdate ||
             !this.GradualPerformance ||
@@ -609,6 +723,7 @@ export class GamePlayData extends AbstractEntity {
         }
 
         if (!this.GradualPerformance && !this.PerformanceAttributes) return;
+        const s4 = performance.now();
 
         const passedObjects = calculatePassedObjects(
             this.Mode,
@@ -633,17 +748,19 @@ export class GamePlayData extends AbstractEntity {
             nGeki: this.HitGeki
         };
 
+        const s5 = performance.now();
         const curPerformance = this.GradualPerformance.nth(
             scoreParams,
             offset - 1
         )!;
 
+        const s6 = performance.now();
         const fcPerformance = new rosu.Performance({
             mods: this.Mods,
             misses: 0,
             accuracy: this.Accuracy
         }).calculate(this.PerformanceAttributes);
-        const t2 = performance.now();
+        const s7 = performance.now();
 
         if (curPerformance) {
             beatmapPpData.updateCurrentAttributes(
@@ -658,8 +775,23 @@ export class GamePlayData extends AbstractEntity {
 
         this.previousPassedObjects = passedObjects;
 
+        const s8 = performance.now();
+        wLogger.timings(
+            'gamePlayData/updateStarsAndPerformance',
+            {
+                total: s8 - s1,
+                init: s2 - s1,
+                beatmap: s3 - s2,
+                precalc: s4 - s3,
+                current: s6 - s5,
+                fc: s6 - s5,
+                set: s7 - s6
+            },
+            performance.now()
+        );
+
         wLogger.debug(
-            `GD(updateStarsAndPerformance) [${(t2 - t1).toFixed(2)}ms] elapsed time`
+            `GD(updateStarsAndPerformance) [${(s8 - s1).toFixed(2)}ms] elapsed time`
         );
     }
 }

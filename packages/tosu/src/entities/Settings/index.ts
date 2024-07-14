@@ -535,6 +535,8 @@ export class Settings extends AbstractEntity {
 
     findConfigOffsets(process: MemoryReader, configurationAddr: number) {
         try {
+            const s1 = performance.now();
+
             const rawSharpDictionary =
                 process.readSharpDictionary(configurationAddr);
             for (let i = 0; i < rawSharpDictionary.length; i++) {
@@ -562,6 +564,13 @@ export class Settings extends AbstractEntity {
                 }
             }
 
+            const s2 = performance.now();
+            wLogger.timings(
+                'Settings/findConfigOffsets',
+                { total: s2 - s1 },
+                performance.now()
+            );
+
             this.resetReportCount('ATD(findConfigOffsets)');
         } catch (exc) {
             this.reportError(
@@ -575,6 +584,7 @@ export class Settings extends AbstractEntity {
 
     findBindingOffsets(process: MemoryReader, bindingConfigAddr: number) {
         try {
+            const s1 = performance.now();
             // KEEP AS THE REFERENCE TO POSITION OF VALUES
             const rawSharpDictionary =
                 process.readSharpDictionary(bindingConfigAddr);
@@ -602,6 +612,13 @@ export class Settings extends AbstractEntity {
                     wLogger.debug(exc);
                 }
             }
+
+            const s2 = performance.now();
+            wLogger.timings(
+                'Settings/findBindingOffsets',
+                { total: s2 - s1 },
+                performance.now()
+            );
 
             this.resetReportCount('ATD(findBindingOffsets)');
         } catch (exc) {
@@ -660,6 +677,7 @@ export class Settings extends AbstractEntity {
 
     updateState() {
         try {
+            const s1 = performance.now();
             const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns'
@@ -670,12 +688,26 @@ export class Settings extends AbstractEntity {
                 'bindingsAddr'
             ]);
 
+            const s2 = performance.now();
             this.updateConfigState(
                 process,
                 process.readPointer(configurationAddr)
             );
 
+            const s3 = performance.now();
             this.updateBindingState(process, process.readPointer(bindingsAddr));
+
+            const s4 = performance.now();
+            wLogger.timings(
+                'Settings/updateState',
+                {
+                    total: s4 - s1,
+                    bind: s4 - s3,
+                    confg: s3 - s2,
+                    s: s2 - s1
+                },
+                performance.now()
+            );
 
             this.resetReportCount('SETTINGS(updatestate)');
         } catch (exc) {

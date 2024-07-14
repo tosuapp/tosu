@@ -196,8 +196,7 @@ export class BeatmapPPData extends AbstractEntity {
 
     updateMapMetadata(currentMods: number) {
         try {
-            const startTime = performance.now();
-
+            const s1 = performance.now();
             const { menuData, allTimesData } = this.osuInstance.getServices([
                 'menuData',
                 'allTimesData'
@@ -209,6 +208,7 @@ export class BeatmapPPData extends AbstractEntity {
                 menuData.Path
             );
 
+            const s2 = performance.now();
             try {
                 this.beatmapContent = fs.readFileSync(mapPath, 'utf8');
 
@@ -222,22 +222,28 @@ export class BeatmapPPData extends AbstractEntity {
                 return;
             }
 
+            const s3 = performance.now();
             this.beatmap = new rosu.Beatmap(this.beatmapContent);
 
-            const beatmapCheckTime = performance.now();
-            const totalTime = (beatmapCheckTime - startTime).toFixed(2);
+            const s4 = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${totalTime}ms] Spend on opening beatmap`
+                `BPPD(updateMapMetadata) [${(s4 - s2).toFixed(2)}ms] Spend on opening beatmap`
             );
 
+            const s5 = performance.now();
             const difficulty = new rosu.Difficulty({ mods: currentMods });
+
+            const s6 = performance.now();
             const attributes = new rosu.BeatmapAttributesBuilder({
                 map: this.beatmap,
                 mods: currentMods,
                 mode: menuData.MenuGameMode
             }).build();
 
+            const s7 = performance.now();
             const strains = difficulty.strains(this.beatmap);
+
+            const s8 = performance.now();
             const fcPerformance = new rosu.Performance({
                 mods: currentMods
             }).calculate(this.beatmap);
@@ -245,6 +251,7 @@ export class BeatmapPPData extends AbstractEntity {
             this.PerformanceAttributes = fcPerformance;
 
             const ppAcc = {};
+            const s9 = performance.now();
             for (const acc of [100, 99, 98, 97, 96, 95]) {
                 const calculate = new rosu.Performance({
                     mods: currentMods,
@@ -255,11 +262,9 @@ export class BeatmapPPData extends AbstractEntity {
                 calculate.free();
             }
 
-            const calculationTime = performance.now();
+            const s10 = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${(
-                    calculationTime - beatmapCheckTime
-                ).toFixed(2)}ms] Spend on attributes & strains calculation`
+                `BPPD(updateMapMetadata) [${(s10 - s5).toFixed(2)}ms] Spend on attributes & strains calculation`
             );
 
             const resultStrains: BeatmapStrains = {
@@ -269,6 +274,7 @@ export class BeatmapPPData extends AbstractEntity {
 
             let oldStrains: number[] = [];
 
+            const s11 = performance.now();
             try {
                 const decoder = new BeatmapDecoder();
 
@@ -321,11 +327,9 @@ export class BeatmapPPData extends AbstractEntity {
                 return;
             }
 
-            const beatmapParseTime = performance.now();
+            const s12 = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${(
-                    beatmapParseTime - calculationTime
-                ).toFixed(2)}ms] Spend on parsing beatmap`
+                `BPPD(updateMapMetadata) [${(s12 - s11).toFixed(2)}ms] Spend on parsing beatmap`
             );
 
             let strainsAmount = 0;
@@ -382,6 +386,7 @@ export class BeatmapPPData extends AbstractEntity {
                 resultStrains.series.push({ name, data });
             };
 
+            const s13 = performance.now();
             switch (strains.mode) {
                 case 0:
                     updateWithOffset('aim', strains.aim);
@@ -416,6 +421,7 @@ export class BeatmapPPData extends AbstractEntity {
                 // no-default
             }
 
+            const s14 = performance.now();
             if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
                 oldStrains = Array(LEFT_OFFSET).fill(0).concat(oldStrains);
             }
@@ -424,13 +430,12 @@ export class BeatmapPPData extends AbstractEntity {
                 oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
             }
 
-            const graphProcessTime = performance.now();
+            const s15 = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${(
-                    graphProcessTime - beatmapParseTime
-                ).toFixed(2)}ms] Spend on prcoessing graph strains`
+                `BPPD(updateMapMetadata) [${(s15 - s13).toFixed(2)}ms] Spend on prcoessing graph strains`
             );
 
+            const s16 = performance.now();
             for (let i = 0; i < LEFT_OFFSET; i++) {
                 resultStrains.xaxis.push(i * sectionOffsetTime);
             }
@@ -451,13 +456,7 @@ export class BeatmapPPData extends AbstractEntity {
                 );
             }
 
-            const endTime = performance.now();
-            wLogger.debug(
-                `BPPD(updateMapMetadata) [${(endTime - startTime).toFixed(
-                    2
-                )}ms] Total spent time`
-            );
-
+            const s17 = performance.now();
             this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
                 ar: attributes.ar,
                 cs: attributes.cs,
@@ -487,6 +486,32 @@ export class BeatmapPPData extends AbstractEntity {
             attributes.free();
             strains.free();
 
+            const s18 = performance.now();
+            wLogger.debug(
+                `BPPD(updateMapMetadata) [${(s17 - s1).toFixed(2)}ms] Total spent time`
+            );
+
+            wLogger.timings(
+                'BeatmapPPData/updateMapMetadata',
+                {
+                    total: s18 - s1,
+                    init: s2 - s1,
+                    readFile: s3 - s2,
+                    rosuBeatmap: s4 - s3,
+                    difficulty: s6 - s5,
+                    attributes: s7 - s6,
+                    strains: s8 - s7,
+                    fc: s9 - s8,
+                    ppAcc: s10 - s9,
+                    decode: s12 - s11,
+                    graph: s14 - s13,
+                    oldGraph: s15 - s14,
+                    offset: s17 - s16,
+                    set: s18 - s17
+                },
+                performance.now()
+            );
+
             this.resetReportCount('BPPD(updateMapMetadata)');
         } catch (exc) {
             this.reportError(
@@ -509,27 +534,20 @@ export class BeatmapPPData extends AbstractEntity {
                 return;
             }
 
-            const startTime = performance.now();
-
+            const s1 = performance.now();
             const { allTimesData } = this.osuInstance.getServices([
                 'allTimesData'
             ]);
 
-            const beatmapParseTime = performance.now();
-            const totalTime = (beatmapParseTime - startTime).toFixed(2);
-            wLogger.debug(
-                `(updateEditorPP) Spend:${totalTime}ms on beatmap parsing`
-            );
-
+            const s2 = performance.now();
             const passedObjects = this.lazerBeatmap.hitObjects.filter(
                 (r) => r.startTime <= allTimesData.PlayTime
             );
 
+            const s3 = performance.now();
             const curPerformance = new rosu.Performance({
                 passedObjects: passedObjects.length
             }).calculate(this.PerformanceAttributes);
-
-            const calculateTime = performance.now();
 
             this.currAttributes.pp = curPerformance.pp;
             this.currAttributes.stars =
@@ -537,13 +555,25 @@ export class BeatmapPPData extends AbstractEntity {
                     ? 0
                     : curPerformance.difficulty.stars;
 
+            const s4 = performance.now();
+            curPerformance.free();
+
+            const s5 = performance.now();
             wLogger.debug(
-                `(updateEditorPP) Spend:${(
-                    calculateTime - beatmapParseTime
-                ).toFixed(2)}ms on calculating performance`
+                `(updateEditorPP) Spend:${(s4 - s3).toFixed(2)}ms on calculating performance`
             );
 
-            curPerformance.free();
+            wLogger.timings(
+                'BeatmapPPData/updateEditorPP',
+                {
+                    total: s5 - s1,
+                    get: s2 - s1,
+                    filter: s3 - s2,
+                    calc: s4 - s3,
+                    free: s5 - s4
+                },
+                performance.now()
+            );
 
             this.resetReportCount('BPPD(updateEditorPP)');
         } catch (exc) {
