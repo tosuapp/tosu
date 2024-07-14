@@ -1,4 +1,3 @@
-// import { RustMemoryReader } from './RustMemoryReader';
-import { CppMemoryReader } from './CppMemoryReader';
+import { RustMemoryReader } from './RustMemoryReader';
 
-export default CppMemoryReader;
+export default RustMemoryReader;
