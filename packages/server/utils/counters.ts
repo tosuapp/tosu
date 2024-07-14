@@ -620,6 +620,34 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.debugLogging}`)
         );
 
+    const enableTimingsHTML = settingsItemHTML
+        .replace('{NAME}', 'TIMINGS_LOG')
+        .replace('{DESCRIPTION}', 'Enables logging function timings.')
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{ID}/gm, 'TIMINGS_LOG')
+                .replace(
+                    '{ADDON}',
+                    config.enableTimingsLog ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.enableTimingsLog}`)
+        );
+
+    const saveTimingsHTML = settingsItemHTML
+        .replace('{NAME}', 'SAVE_TIMINGS')
+        .replace('{DESCRIPTION}', 'Save timings to a timings.txt file.')
+        .replace(
+            '{INPUT}',
+            checkboxHTML
+                .replace(/{ID}/gm, 'SAVE_TIMINGS')
+                .replace(
+                    '{ADDON}',
+                    config.saveTimingsToFile ? 'checked="true"' : ''
+                )
+                .replace('{VALUE}', `${config.saveTimingsToFile}`)
+        );
+
     const calculatePPHTML = settingsItemHTML
         .replace('{NAME}', 'CALCULATE_PP')
         .replace(
@@ -784,6 +812,8 @@ export function buildSettings(res: http.ServerResponse) {
 
     const settings = `<div class="settings">
     ${debugHTML}
+    ${enableTimingsHTML}
+    ${saveTimingsHTML}
     <div></div>
     <div></div>
     ${enableAutoUpdateHtml}

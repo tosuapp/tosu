@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 import { config } from './config';
 
 const colors = {
@@ -6,9 +9,15 @@ const colors = {
     debug: '\x1b[1m\x1b[37m\x1b[44m',
     debugError: '\x1b[1m\x1b[37m\x1b[45m',
     warn: '\x1b[1m\x1b[40m\x1b[43m',
+    timings: '\x1b[1m\x1b[40m\x1b[46m',
     reset: '\x1b[0m',
     grey: '\x1b[90m'
 };
+
+const timingsPath = path.join(
+    'pkg' in process ? path.dirname(process.execPath) : process.cwd(),
+    'timings.txt'
+);
 
 export function colorText(status: string) {
     const colorCode = colors[status] || colors.reset;
@@ -42,5 +51,26 @@ export const wLogger = {
     warn: (...args: any) => {
         const coloredText = colorText('warn');
         console.log(coloredText, ...args);
+    },
+    timings: (
+        name: string,
+        timings: { [key: string | number]: number },
+        sendedAt: number
+    ) => {
+        if (config.enableTimingsLog === true) {
+            const coloredText = colorText('timings');
+            console.log(coloredText, name, timings);
+        }
+
+        if (config.saveTimingsToFile === true) {
+            const entries = Object.entries(timings)
+                .map((r) => `${r[0]}:${r[1].toFixed(3)}`)
+                .join('|');
+            fs.appendFileSync(
+                timingsPath,
+                `${Date.now()},${name},${(performance.now() - sendedAt).toFixed(3)},${entries}\n`,
+                'utf8'
+            );
+        }
     }
 };

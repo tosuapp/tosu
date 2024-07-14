@@ -355,6 +355,8 @@ async function saveSettings(element) {
   const ENABLE_AUTOUPDATE = document.querySelector('#ENABLE_AUTOUPDATE');
   const OPEN_DASHBOARD_ON_STARTUP = document.querySelector('#OPEN_DASHBOARD_ON_STARTUP');
   const SHOW_MP_COMMANDS = document.querySelector('#SHOW_MP_COMMANDS');
+  const TIMINGS_LOG = document.querySelector('#TIMINGS_LOG');
+  const SAVE_TIMINGS = document.querySelector('#SAVE_TIMINGS');
 
   if (BACKUP_SERVER_IP != SERVER_IP.value || BACKUP_SERVER_PORT != SERVER_PORT.value)
     redirect = true;
@@ -364,6 +366,8 @@ async function saveSettings(element) {
     method: 'POST',
     body: JSON.stringify({
       DEBUG_LOG: DEBUG_LOG.checked,
+      TIMINGS_LOG: TIMINGS_LOG.checked,
+      SAVE_TIMINGS: SAVE_TIMINGS.checked,
       ENABLE_AUTOUPDATE: ENABLE_AUTOUPDATE.checked,
       OPEN_DASHBOARD_ON_STARTUP: OPEN_DASHBOARD_ON_STARTUP.checked,
       CALCULATE_PP: CALCULATE_PP.checked,

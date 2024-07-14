@@ -44,6 +44,9 @@ ENABLE_GOSU_OVERLAY=false
 DEBUG_LOG=false
 OPEN_DASHBOARD_ON_STARTUP=false
 
+TIMINGS_LOG=false
+SAVE_TIMINGS=false
+
 # IP address where the websocket api server will be registered
 # 127.0.0.1 = localhost
 # 0.0.0.0.0 = all addresses
@@ -77,6 +80,8 @@ export const config = {
     serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
+    enableTimingsLog: (process.env.TIMINGS_LOG || '') === 'true',
+    saveTimingsToFile: (process.env.SAVE_TIMINGS || '') === 'true',
     timestamp: 0,
     currentVersion: '',
     updateVersion: ''
@@ -149,6 +154,16 @@ export const updateConfigFile = () => {
         );
     }
 
+    if (!process.env.TIMINGS_LOG) {
+        newOptions += 'TIMINGS_LOG, ';
+        fs.appendFileSync(configPath, '\nTIMINGS_LOG=false', 'utf8');
+    }
+
+    if (!process.env.SAVE_TIMINGS) {
+        newOptions += 'SAVE_TIMINGS, ';
+        fs.appendFileSync(configPath, '\nSAVE_TIMINGS=false', 'utf8');
+    }
+
     if (newOptions !== '') {
         wLogger.warn(`New options available in config: ${newOptions}\n`);
     }
@@ -206,6 +221,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const showMpCommands = (parsed.SHOW_MP_COMMANDS || '') === 'true';
     const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
     const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
+    const enableTimingsLog = (parsed.TIMINGS_LOG || '') === 'true';
+    const saveTimingsToFile = (parsed.SAVE_TIMINGS || '') === 'true';
 
     // determine whether config actually was updated or not
     updated =
@@ -219,6 +236,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.showMpCommands !== showMpCommands ||
         config.staticFolderPath !== staticFolderPath ||
         config.enableGosuOverlay !== enableGosuOverlay ||
+        config.enableTimingsLog !== enableTimingsLog ||
+        config.saveTimingsToFile !== saveTimingsToFile ||
         config.serverIP !== serverIP ||
         config.serverPort !== serverPort;
 
@@ -260,6 +279,9 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.showMpCommands = showMpCommands;
     config.staticFolderPath = staticFolderPath;
 
+    config.enableTimingsLog = enableTimingsLog;
+    config.saveTimingsToFile = saveTimingsToFile;
+
     if (
         config.staticFolderPath === './static' &&
         !fs.existsSync(path.join(process.cwd(), 'static'))
@@ -285,6 +307,8 @@ export const writeConfig = (httpServer: any, options: any) => {
     text += `SERVER_IP=${options.SERVER_IP ?? config.serverIP}\n`;
     text += `SERVER_PORT=${options.SERVER_PORT ?? config.serverPort}\n\n`;
     text += `STATIC_FOLDER_PATH=${options.STATIC_FOLDER_PATH ?? config.staticFolderPath}\n`;
+    text += `TIMINGS_LOG=${options.TIMINGS_LOG ?? config.enableTimingsLog}\n\n`;
+    text += `SAVE_TIMINGS=${options.SAVE_TIMINGS ?? config.saveTimingsToFile}\n\n`;
 
     fs.writeFile(configPath, text, 'utf8', () => {
         refreshConfig(httpServer, true);
