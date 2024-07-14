@@ -414,7 +414,7 @@ export default function buildBaseApi(server: Server) {
             if (query.nGeki) params.nGeki = +query.nGeki;
             if (query.nKatu) params.nKatu = +query.nKatu;
             if (query.mods) params.mods = +query.mods;
-            if (query.accuracy) params.accuracy = +query.acc;
+            if (query.acc) params.accuracy = +query.acc;
 
             const calculate = new rosu.Performance(params).calculate(beatmap);
             return sendJson(res, calculate);
