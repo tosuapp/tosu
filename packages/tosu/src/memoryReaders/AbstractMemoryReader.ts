@@ -11,6 +11,12 @@ export abstract class AbstractMemoryReader {
         return this.getPath();
     }
 
+    protected abstract getHandle(): number;
+
+    public get handle(): number {
+        return this.getHandle();
+    }
+
     public abstract getProcessCommandLine(): string;
 
     public abstract readByte(address: number): number;

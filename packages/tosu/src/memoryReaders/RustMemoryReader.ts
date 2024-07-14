@@ -8,11 +8,11 @@ export class RustMemoryReader extends AbstractMemoryReader {
     private native: NativeRustMemoryReader;
     private cppMemoryReader: CppMemoryReader;
 
-    constructor(id: number) {
-        super(id);
+    constructor(processId: number) {
+        super(processId);
 
-        this.native = new NativeRustMemoryReader(id);
-        this.cppMemoryReader = new CppMemoryReader(id);
+        this.native = new NativeRustMemoryReader(processId);
+        this.cppMemoryReader = new CppMemoryReader(processId);
     }
 
     public static findProcesses(imageName: string): number[] {
@@ -35,6 +35,10 @@ export class RustMemoryReader extends AbstractMemoryReader {
 
     protected getPath(): string {
         return NativeRustMemoryReader.getProcessPath(this.processId);
+    }
+
+    protected getHandle(): number {
+        return this.cppMemoryReader.handle;
     }
 
     public getProcessCommandLine(): string {

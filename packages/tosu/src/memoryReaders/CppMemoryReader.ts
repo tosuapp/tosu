@@ -5,10 +5,10 @@ import { AbstractMemoryReader } from '@/memoryReaders/AbstractMemoryReader';
 export class CppMemoryReader extends AbstractMemoryReader {
     private native: Process;
 
-    constructor(id: number) {
-        super(id);
+    constructor(processId: number) {
+        super(processId);
 
-        this.native = new Process(id);
+        this.native = new Process(processId);
     }
 
     static findProcesses(imageName: string): number[] {
@@ -29,6 +29,10 @@ export class CppMemoryReader extends AbstractMemoryReader {
 
     protected getPath(): string {
         return this.native.path;
+    }
+
+    protected getHandle(): number {
+        return this.native.handle;
     }
 
     getProcessCommandLine(): string {

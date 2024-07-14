@@ -20,8 +20,8 @@ export class Process {
         return ProcessUtils.findProcesses(imageName);
     }
 
-    static isProcessExist(pid: number): boolean {
-        return ProcessUtils.isProcessExist(pid);
+    static isProcessExist(handle: number): boolean {
+        return ProcessUtils.isProcessExist(handle);
     }
 
     static disablePowerThrottling() {
