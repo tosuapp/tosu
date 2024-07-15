@@ -3,11 +3,13 @@ mod neon_utils;
 mod macros;
 mod platform_utils;
 
+use std::ops::Add;
+
 use neon::prelude::*;
 use paste::paste;
 
 use crate::memory::memory_reader::*;
-use crate::neon_utils::{vec_to_number_array};
+use crate::neon_utils::{vec_to_number_array, parse_i32};
 use crate::platform_utils::utils::{PlatformUtilsMethods, PlatformUtils};
 
 fn is_process_exists(mut cx: FunctionContext) -> JsResult<JsBoolean> {
@@ -77,7 +79,8 @@ fn find_signature(mut cx: FunctionContext) -> JsResult<JsNumber> {
 }
 
 fn read(mut cx: FunctionContext) -> JsResult<JsArray> {
-    let address = cx.argument::<JsNumber>(0)?.value(&mut cx) as Address;
+    let address = cx.argument::<JsNumber>(0)?.value(&mut cx);
+    let address = parse_i32(address) as Address;
     let length = cx.argument::<JsNumber>(1)?.value(&mut cx);
 
     let this: Handle<JsObject> = cx.this()?;
@@ -96,7 +99,8 @@ fn read(mut cx: FunctionContext) -> JsResult<JsArray> {
 }
 
 fn read_pointer(mut cx: FunctionContext) -> JsResult<JsNumber> {
-    let address = cx.argument::<JsNumber>(0)?.value(&mut cx) as Address;
+    let address = cx.argument::<JsNumber>(0)?.value(&mut cx);
+    let address = parse_i32(address) as Address;
 
     let this: Handle<JsObject> = cx.this()?;
     let memory_reader: Handle<JsBox<Box<OsuMemoryReader>>> = this
@@ -110,7 +114,8 @@ fn read_pointer(mut cx: FunctionContext) -> JsResult<JsNumber> {
 }
 
 fn read_string(mut cx: FunctionContext) -> JsResult<JsString> {
-    let address = cx.argument::<JsNumber>(0)?.value(&mut cx) as Address;
+    let address = cx.argument::<JsNumber>(0)?.value(&mut cx);
+    let address = parse_i32(address) as Address;
 
     let this: Handle<JsObject> = cx.this()?;
     let memory_reader: Handle<JsBox<Box<OsuMemoryReader>>> = this
