@@ -249,6 +249,12 @@ export class OsuInstance {
 
         while (!this.isDestroyed) {
             try {
+                wLogger.timings(
+                    'game/state',
+                    { state: allTimesData.Status },
+                    performance.now()
+                );
+
                 allTimesData.updateState();
                 settings.updateState();
                 menuData.updateState();
