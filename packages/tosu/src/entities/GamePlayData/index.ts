@@ -446,12 +446,16 @@ export class GamePlayData extends AbstractEntity {
             const items = process.readInt(base + 0x4);
             const size = process.readInt(base + 0xc);
 
+            const errors: Array<number> = [];
+
             for (let i = this.HitErrors.length - 1; i < size; i++) {
                 const current = items + leaderStart + 0x4 * i;
                 const error = process.readInt(current);
 
-                this.HitErrors.push(error);
+                errors.push(error);
             }
+
+            this.HitErrors = errors;
 
             this.resetReportCount('GD(updateHitErrors)');
         } catch (exc) {
