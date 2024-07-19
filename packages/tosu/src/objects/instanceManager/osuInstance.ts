@@ -346,7 +346,7 @@ export class OsuInstance {
 
                         if (
                             allTimesData.PlayTime <
-                            Math.min(50, beatmapPpData.timings.firstObj)
+                            Math.min(0, beatmapPpData.timings.firstObj)
                         ) {
                             gamePlayData.init(true, 'not-default');
                             break;

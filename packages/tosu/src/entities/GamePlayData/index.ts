@@ -461,7 +461,7 @@ export class GamePlayData extends AbstractEntity {
         } catch (exc) {
             this.reportError(
                 'GD(updateHitErrors)',
-                10,
+                50,
                 `GD(updateHitErrors) ${(exc as any).message}`
             );
             wLogger.debug(exc);
