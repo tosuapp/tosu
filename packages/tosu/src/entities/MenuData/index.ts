@@ -72,7 +72,11 @@ export class MenuData extends AbstractEntity {
                 return;
             }
 
-            if (performance.now() - this.mapChangeTime < NEW_MAP_COMMIT_DELAY) {
+            if (
+                performance.now() - this.mapChangeTime < NEW_MAP_COMMIT_DELAY &&
+                (this.osuInstance.isTourneySpectator ||
+                    this.osuInstance.isTourneyManager)
+            ) {
                 return;
             }
 
