@@ -100,6 +100,7 @@ export class OsuInstance {
     ipcId: number = 0;
 
     previousState: string = '';
+    previousMP3Length: number = 0;
     previousTime: number = 0;
 
     emitter: EventEmitter;
@@ -296,7 +297,10 @@ export class OsuInstance {
                           ? resultsScreenData.Mods
                           : allTimesData.MenuMods;
 
-                const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
+                const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}`;
+                const updateGraph =
+                    this.previousState !== currentState &&
+                    this.previousMP3Length !== menuData.MP3Length;
                 if (
                     menuData.Path?.endsWith('.osu') &&
                     allTimesData.GameFolder &&
@@ -304,6 +308,16 @@ export class OsuInstance {
                 ) {
                     this.previousState = currentState;
                     beatmapPpData.updateMapMetadata(currentMods);
+                    beatmapPpData.updateGraph(currentMods);
+                }
+
+                if (
+                    menuData.Path?.endsWith('.osu') &&
+                    allTimesData.GameFolder &&
+                    updateGraph
+                ) {
+                    beatmapPpData.updateGraph(currentMods);
+                    this.previousMP3Length = menuData.MP3Length;
                 }
 
                 switch (allTimesData.Status) {
@@ -311,7 +325,6 @@ export class OsuInstance {
                         bassDensityData.updateState();
                         break;
 
-                    // skip editor, to prevent constant data reset
                     case 1:
                         if (this.previousTime === allTimesData.PlayTime) break;
 
