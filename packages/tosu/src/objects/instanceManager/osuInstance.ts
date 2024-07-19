@@ -249,7 +249,12 @@ export class OsuInstance {
             try {
                 allTimesData.updateState();
                 settings.updateState();
-                menuData.updateState();
+
+                const menuUpdate = menuData.updateState();
+                if (menuUpdate === 'not-ready') {
+                    await sleep(config.pollRate);
+                    continue;
+                }
 
                 // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
                 if (menuData.Folder !== '' && menuData.Folder !== null) {
@@ -276,7 +281,13 @@ export class OsuInstance {
                 }
 
                 // update important data before doing rest
-                if (allTimesData.Status === 7) resultsScreenData.updateState();
+                if (allTimesData.Status === 7) {
+                    const resultUpdate = resultsScreenData.updateState();
+                    if (resultUpdate === 'not-ready') {
+                        await sleep(config.pollRate);
+                        continue;
+                    }
+                }
 
                 const currentMods =
                     allTimesData.Status === 2

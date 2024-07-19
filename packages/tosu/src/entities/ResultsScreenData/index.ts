@@ -82,13 +82,13 @@ export class ResultsScreenData extends AbstractEntity {
             );
             if (rulesetAddr === 0) {
                 wLogger.debug('RSD(updateState) rulesetAddr is zero');
-                return;
+                return 'not-ready';
             }
 
             const resultScreenBase = process.readInt(rulesetAddr + 0x38);
             if (resultScreenBase === 0) {
                 wLogger.debug('RSD(updateState) resultScreenBase is zero');
-                return;
+                return 'not-ready';
             }
 
             // OnlineId   int64   `mem:"[Ruleset + 0x38] + 0x4"`
