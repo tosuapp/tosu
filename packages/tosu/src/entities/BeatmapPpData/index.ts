@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { config, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
@@ -213,13 +213,17 @@ export class BeatmapPPData extends AbstractEntity {
             this.PerformanceAttributes = fcPerformance;
             this.clockRate = attributes.clockRate;
 
-            const ppAcc = {};
-            for (const acc of [100, 99, 98, 97, 96, 95]) {
-                const calculate = new rosu.Performance({
-                    mods: currentMods,
-                    accuracy: acc
-                }).calculate(fcPerformance);
-                ppAcc[acc] = fixDecimals(calculate.pp);
+            if (config.calculatePP) {
+                const ppAcc = {};
+                for (const acc of [100, 99, 98, 97, 96, 95]) {
+                    const calculate = new rosu.Performance({
+                        mods: currentMods,
+                        accuracy: acc
+                    }).calculate(fcPerformance);
+                    ppAcc[acc] = fixDecimals(calculate.pp);
+
+                    calculate.free();
+                }
 
                 this.ppAcc = ppAcc as any;
             }
