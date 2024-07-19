@@ -1,4 +1,4 @@
-import { config, wLogger } from '@tosu/common';
+import { wLogger } from '@tosu/common';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
@@ -69,8 +69,17 @@ export class BeatmapPPData extends AbstractEntity {
     maxBPM: number;
     ppAcc: BeatmapPPAcc;
     calculatedMapAttributes: BeatmapPPAttributes;
-    currAttributes: BeatmapPPCurrentAttributes;
-    timings: BeatmapPPTimings;
+    currAttributes: BeatmapPPCurrentAttributes = {
+        stars: 0.0,
+        pp: 0.0,
+        maxThisPlayPP: 0.0,
+        fcPP: 0.0
+    };
+
+    timings: BeatmapPPTimings = {
+        firstObj: 0,
+        full: 0
+    };
 
     constructor(osuInstance: OsuInstance) {
         super(osuInstance);
@@ -118,30 +127,14 @@ export class BeatmapPPData extends AbstractEntity {
             peak: 0.0,
             hitWindow: 0.0
         };
-        this.currAttributes = {
-            stars: 0.0,
-            pp: 0.0,
-            maxThisPlayPP: 0.0,
-            fcPP: 0.0
-        };
+        this.currAttributes.stars = 0.0;
+        this.currAttributes.pp = 0.0;
+        this.currAttributes.maxThisPlayPP = 0.0;
+        this.currAttributes.fcPP = 0.0;
         this.timings = {
             firstObj: 0,
             full: 0
         };
-    }
-
-    updatePPData(
-        strains: number[],
-        strainsAll: BeatmapStrains,
-        ppAcc: BeatmapPPAcc,
-        mapAttributes: BeatmapPPAttributes
-    ) {
-        this.strains = strains;
-        this.strainsAll = strainsAll;
-        if (config.calculatePP) {
-            this.ppAcc = ppAcc;
-        }
-        this.calculatedMapAttributes = mapAttributes;
     }
 
     updateCurrentAttributes(stars: number, pp: number) {
@@ -154,41 +147,16 @@ export class BeatmapPPData extends AbstractEntity {
         }
         const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
-        this.currAttributes = {
-            ...this.currAttributes,
-            stars,
-            pp,
-            maxThisPlayPP
-        };
-    }
-
-    updateFcPP(fcPP: number) {
-        this.currAttributes = {
-            ...this.currAttributes,
-            fcPP
-        };
-    }
-
-    updateBPM(commonBPM: number, minBPM: number, maxBPM: number) {
-        this.commonBPM = Math.round(commonBPM);
-        this.minBPM = Math.round(minBPM);
-        this.maxBPM = Math.round(maxBPM);
-    }
-
-    updateTimings(firstObj: number, full: number) {
-        this.timings = {
-            firstObj,
-            full
-        };
+        this.currAttributes.stars = stars;
+        this.currAttributes.pp = pp;
+        this.currAttributes.maxThisPlayPP = maxThisPlayPP;
     }
 
     resetCurrentAttributes() {
-        this.currAttributes = {
-            stars: 0.0,
-            pp: 0.0,
-            maxThisPlayPP: 0.0,
-            fcPP: 0.0
-        };
+        this.currAttributes.stars = 0.0;
+        this.currAttributes.pp = 0.0;
+        this.currAttributes.maxThisPlayPP = 0.0;
+        this.currAttributes.fcPP = 0.0;
     }
 
     getCurrentBeatmap() {
@@ -253,7 +221,7 @@ export class BeatmapPPData extends AbstractEntity {
                 }).calculate(fcPerformance);
                 ppAcc[acc] = fixDecimals(calculate.pp);
 
-                calculate.free();
+                this.ppAcc = ppAcc as any;
             }
 
             const calculationTime = performance.now();
@@ -291,18 +259,17 @@ export class BeatmapPPData extends AbstractEntity {
                         this.lazerBeatmap.events.backgroundPath || '';
                 }
 
-                this.updateBPM(
-                    bpm * attributes.clockRate,
-                    bpmMin * attributes.clockRate,
-                    bpmMax * attributes.clockRate
-                );
+                this.commonBPM = Math.round(bpm * this.clockRate);
+                this.minBPM = Math.round(bpmMin * this.clockRate);
+                this.maxBPM = Math.round(bpmMax * this.clockRate);
 
                 const firstObj = Math.round(
                     this.lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
                 );
                 const full = Math.round(this.lazerBeatmap.totalLength);
 
-                this.updateTimings(firstObj, full);
+                this.timings.firstObj = firstObj;
+                this.timings.full = full;
 
                 this.resetReportCount('BPPD(updateMapMetadataTimings)');
             } catch (exc) {
