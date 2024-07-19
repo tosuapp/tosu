@@ -130,7 +130,6 @@ export class OsuInstance {
         this.entities.set('userProfile', new UserProfile(this));
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
-        this.updateMapMetadata = this.updateMapMetadata.bind(this);
         this.updatePreciseData = this.updatePreciseData.bind(this);
     }
 
@@ -212,7 +211,6 @@ export class OsuInstance {
 
         this.update();
         this.initPreciseData();
-        this.initMapMetadata();
         this.watchProcessHealth();
     }
 
@@ -279,6 +277,23 @@ export class OsuInstance {
 
                 // update important data before doing rest
                 if (allTimesData.Status === 7) resultsScreenData.updateState();
+
+                const currentMods =
+                    allTimesData.Status === 2
+                        ? gamePlayData.Mods
+                        : allTimesData.Status === 7
+                          ? resultsScreenData.Mods
+                          : allTimesData.MenuMods;
+
+                const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
+                if (
+                    menuData.Path?.endsWith('.osu') &&
+                    allTimesData.GameFolder &&
+                    this.previousState !== currentState
+                ) {
+                    this.previousState = currentState;
+                    beatmapPpData.updateMapMetadata(currentMods);
+                }
 
                 switch (allTimesData.Status) {
                     case 0:
@@ -394,57 +409,6 @@ export class OsuInstance {
         setTimeout(() => {
             this.updatePreciseData(allTimesData, gamePlayData);
         }, config.preciseDataPollRate);
-    }
-
-    initMapMetadata() {
-        wLogger.debug('OI(updateMapMetadata) Starting');
-
-        const entities = this.getServices([
-            'menuData',
-            'allTimesData',
-            'gamePlayData',
-            'beatmapPpData',
-            'resultsScreenData'
-        ]);
-
-        this.updateMapMetadata(entities);
-    }
-
-    updateMapMetadata(entries: {
-        menuData: MenuData;
-        allTimesData: AllTimesData;
-        gamePlayData: GamePlayData;
-        beatmapPpData: BeatmapPPData;
-        resultsScreenData: ResultsScreenData;
-    }) {
-        const {
-            menuData,
-            allTimesData,
-            gamePlayData,
-            beatmapPpData,
-            resultsScreenData
-        } = entries;
-        const currentMods =
-            allTimesData.Status === 2
-                ? gamePlayData.Mods
-                : allTimesData.Status === 7
-                  ? resultsScreenData.Mods
-                  : allTimesData.MenuMods;
-
-        const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
-
-        if (
-            menuData.Path?.endsWith('.osu') &&
-            allTimesData.GameFolder &&
-            this.previousState !== currentState
-        ) {
-            this.previousState = currentState;
-            beatmapPpData.updateMapMetadata(currentMods);
-        }
-
-        setTimeout(() => {
-            this.updateMapMetadata(entries);
-        }, config.pollRate);
     }
 
     watchProcessHealth() {
