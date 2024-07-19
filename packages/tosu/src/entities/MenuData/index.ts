@@ -65,7 +65,11 @@ export class MenuData extends AbstractEntity {
                 return;
             }
 
-            if (this.pendingMD5 !== newMD5) {
+            if (
+                this.pendingMD5 !== newMD5 &&
+                (this.osuInstance.isTourneySpectator ||
+                    this.osuInstance.isTourneyManager)
+            ) {
                 this.mapChangeTime = performance.now();
                 this.pendingMD5 = newMD5;
 

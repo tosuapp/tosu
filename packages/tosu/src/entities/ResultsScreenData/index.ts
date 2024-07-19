@@ -187,7 +187,6 @@ export class ResultsScreenData extends AbstractEntity {
                 nGeki: this.HitGeki
             };
 
-            wLogger.debug('result-screen-start');
             const curPerformance = new rosu.Performance(scoreParams).calculate(
                 currentBeatmap
             );
@@ -196,7 +195,6 @@ export class ResultsScreenData extends AbstractEntity {
                 misses: 0,
                 accuracy: this.Accuracy
             }).calculate(curPerformance);
-            wLogger.debug('result-screen-update');
 
             this.pp = curPerformance.pp;
             this.fcPP = fcPerformance.pp;
