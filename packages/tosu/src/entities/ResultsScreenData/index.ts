@@ -53,17 +53,17 @@ export class ResultsScreenData extends AbstractEntity {
         this.Accuracy = 0;
         this.pp = 0;
         this.fcPP = 0;
+
+        this.previousBeatmap = '';
     }
 
     updateState() {
         try {
-            const { process, patterns, allTimesData, beatmapPpData, menuData } =
+            const { process, patterns, allTimesData } =
                 this.osuInstance.getServices([
                     'process',
                     'patterns',
-                    'allTimesData',
-                    'beatmapPpData',
-                    'menuData'
+                    'allTimesData'
                 ]);
             if (process === null) {
                 throw new Error('Process not found');
@@ -147,6 +147,24 @@ export class ResultsScreenData extends AbstractEntity {
                 process.readInt(resultScreenBase + 0xa0)
             ).toISOString();
 
+            this.resetReportCount('RSD(updateState)');
+        } catch (exc) {
+            this.reportError(
+                'RSD(updateState)',
+                10,
+                `RSD(updateState) ${(exc as any).message}`
+            );
+            wLogger.debug(exc);
+        }
+    }
+
+    updatePerformance() {
+        try {
+            const { beatmapPpData, menuData } = this.osuInstance.getServices([
+                'beatmapPpData',
+                'menuData'
+            ]);
+
             const key = `${menuData.MD5}${this.Mods}${this.Mode}${this.PlayerName}`;
             if (this.previousBeatmap === key) {
                 return;
@@ -154,7 +172,7 @@ export class ResultsScreenData extends AbstractEntity {
 
             const currentBeatmap = beatmapPpData.getCurrentBeatmap();
             if (!currentBeatmap) {
-                wLogger.debug("RSD(updateState) can't get current map");
+                wLogger.debug("RSD(updatePerformance) can't get current map");
                 return;
             }
 
@@ -169,6 +187,7 @@ export class ResultsScreenData extends AbstractEntity {
                 nGeki: this.HitGeki
             };
 
+            wLogger.debug('result-screen-start');
             const curPerformance = new rosu.Performance(scoreParams).calculate(
                 currentBeatmap
             );
@@ -177,6 +196,7 @@ export class ResultsScreenData extends AbstractEntity {
                 misses: 0,
                 accuracy: this.Accuracy
             }).calculate(curPerformance);
+            wLogger.debug('result-screen-update');
 
             this.pp = curPerformance.pp;
             this.fcPP = fcPerformance.pp;
@@ -185,12 +205,12 @@ export class ResultsScreenData extends AbstractEntity {
             fcPerformance.free();
 
             this.previousBeatmap = key;
-            this.resetReportCount('RSD(updateState)');
+            this.resetReportCount('RSD(updatePerformance)');
         } catch (exc) {
             this.reportError(
-                'RSD(updateState)',
+                'RSD(updatePerformance)',
                 10,
-                `RSD(updateState) ${(exc as any).message}`
+                `RSD(updatePerformance) ${(exc as any).message}`
             );
             wLogger.debug(exc);
         }

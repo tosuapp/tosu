@@ -277,6 +277,9 @@ export class OsuInstance {
                     }
                 }
 
+                // update important data before doing rest
+                if (allTimesData.Status === 7) resultsScreenData.updateState();
+
                 switch (allTimesData.Status) {
                     case 0:
                         bassDensityData.updateState();
@@ -327,7 +330,7 @@ export class OsuInstance {
                         break;
 
                     case 7:
-                        resultsScreenData.updateState();
+                        resultsScreenData.updatePerformance();
                         break;
 
                     case 22:
