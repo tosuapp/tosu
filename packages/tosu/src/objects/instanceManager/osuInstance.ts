@@ -248,8 +248,6 @@ export class OsuInstance {
         while (!this.isDestroyed) {
             try {
                 allTimesData.updateState();
-                settings.updateState();
-
                 const menuUpdate = menuData.updateState();
                 if (menuUpdate === 'not-ready') {
                     await sleep(config.pollRate);
@@ -288,6 +286,8 @@ export class OsuInstance {
                         continue;
                     }
                 }
+
+                settings.updateState();
 
                 const currentMods =
                     allTimesData.Status === 2
