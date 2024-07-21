@@ -430,8 +430,6 @@ export class GamePlayData extends AbstractEntity {
 
     updateHitErrors() {
         try {
-            if (this.scoreBase === 0 || !this.scoreBase) return [];
-
             const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns',
@@ -439,15 +437,36 @@ export class GamePlayData extends AbstractEntity {
                 'menuData'
             ]);
 
+            const { rulesetsAddr } = patterns.getPatterns(['rulesetsAddr']);
+
+            const rulesetAddr = process.readInt(
+                process.readInt(rulesetsAddr - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) {
+                wLogger.debug('GD(updateHitErrors) RulesetAddr is 0');
+                return;
+            }
+
+            const gameplayBase = process.readInt(rulesetAddr + 0x68);
+            if (gameplayBase === 0) {
+                wLogger.debug('GD(updateHitErrors) gameplayBase is zero');
+                return;
+            }
+
+            const scoreBase = process.readInt(gameplayBase + 0x38);
+            if (scoreBase === 0) {
+                wLogger.debug('GD(updateHitErrors) scoreBase is zero');
+                return;
+            }
+
             const leaderStart = patterns.getLeaderStart();
 
-            const base = process.readInt(this.scoreBase + 0x38);
+            const base = process.readInt(scoreBase + 0x38);
             const items = process.readInt(base + 0x4);
             const size = process.readInt(base + 0xc);
 
             const errors: Array<number> = [];
-
-            for (let i = this.HitErrors.length - 1; i < size; i++) {
+            for (let i = 0; i < size; i++) {
                 const current = items + leaderStart + 0x4 * i;
                 const error = process.readInt(current);
 
