@@ -100,6 +100,7 @@ export class OsuInstance {
     ipcId: number = 0;
 
     previousState: string = '';
+    previousMP3Length: number = 0;
     previousTime: number = 0;
 
     emitter: EventEmitter;
@@ -130,7 +131,6 @@ export class OsuInstance {
         this.entities.set('userProfile', new UserProfile(this));
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
-        this.updateMapMetadata = this.updateMapMetadata.bind(this);
         this.updatePreciseData = this.updatePreciseData.bind(this);
     }
 
@@ -212,7 +212,6 @@ export class OsuInstance {
 
         this.update();
         this.initPreciseData();
-        this.initMapMetadata();
         this.watchProcessHealth();
     }
 
@@ -250,8 +249,11 @@ export class OsuInstance {
         while (!this.isDestroyed) {
             try {
                 allTimesData.updateState();
-                settings.updateState();
-                menuData.updateState();
+                const menuUpdate = menuData.updateState();
+                if (menuUpdate === 'not-ready') {
+                    await sleep(config.pollRate);
+                    continue;
+                }
 
                 // osu! calculates audioTrack length a little bit after updating menuData, sooo.. lets this thing run regardless of menuData updating
                 if (menuData.Folder !== '' && menuData.Folder !== null) {
@@ -277,12 +279,52 @@ export class OsuInstance {
                     }
                 }
 
+                // update important data before doing rest
+                if (allTimesData.Status === 7) {
+                    const resultUpdate = resultsScreenData.updateState();
+                    if (resultUpdate === 'not-ready') {
+                        await sleep(config.pollRate);
+                        continue;
+                    }
+                }
+
+                settings.updateState();
+
+                const currentMods =
+                    allTimesData.Status === 2
+                        ? gamePlayData.Mods
+                        : allTimesData.Status === 7
+                          ? resultsScreenData.Mods
+                          : allTimesData.MenuMods;
+
+                const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}`;
+                const updateGraph =
+                    this.previousState !== currentState &&
+                    this.previousMP3Length !== menuData.MP3Length;
+                if (
+                    menuData.Path?.endsWith('.osu') &&
+                    allTimesData.GameFolder &&
+                    this.previousState !== currentState
+                ) {
+                    this.previousState = currentState;
+                    beatmapPpData.updateMapMetadata(currentMods);
+                    beatmapPpData.updateGraph(currentMods);
+                }
+
+                if (
+                    menuData.Path?.endsWith('.osu') &&
+                    allTimesData.GameFolder &&
+                    updateGraph
+                ) {
+                    beatmapPpData.updateGraph(currentMods);
+                    this.previousMP3Length = menuData.MP3Length;
+                }
+
                 switch (allTimesData.Status) {
                     case 0:
                         bassDensityData.updateState();
                         break;
 
-                    // skip editor, to prevent constant data reset
                     case 1:
                         if (this.previousTime === allTimesData.PlayTime) break;
 
@@ -317,7 +359,7 @@ export class OsuInstance {
 
                         if (
                             allTimesData.PlayTime <
-                            Math.min(50, beatmapPpData.timings.firstObj)
+                            Math.min(0, beatmapPpData.timings.firstObj)
                         ) {
                             gamePlayData.init(true, 'not-default');
                             break;
@@ -327,7 +369,7 @@ export class OsuInstance {
                         break;
 
                     case 7:
-                        resultsScreenData.updateState();
+                        resultsScreenData.updatePerformance();
                         break;
 
                     case 22:
@@ -391,57 +433,6 @@ export class OsuInstance {
         setTimeout(() => {
             this.updatePreciseData(allTimesData, gamePlayData);
         }, config.preciseDataPollRate);
-    }
-
-    initMapMetadata() {
-        wLogger.debug('OI(updateMapMetadata) Starting');
-
-        const entities = this.getServices([
-            'menuData',
-            'allTimesData',
-            'gamePlayData',
-            'beatmapPpData',
-            'resultsScreenData'
-        ]);
-
-        this.updateMapMetadata(entities);
-    }
-
-    updateMapMetadata(entries: {
-        menuData: MenuData;
-        allTimesData: AllTimesData;
-        gamePlayData: GamePlayData;
-        beatmapPpData: BeatmapPPData;
-        resultsScreenData: ResultsScreenData;
-    }) {
-        const {
-            menuData,
-            allTimesData,
-            gamePlayData,
-            beatmapPpData,
-            resultsScreenData
-        } = entries;
-        const currentMods =
-            allTimesData.Status === 2
-                ? gamePlayData.Mods
-                : allTimesData.Status === 7
-                  ? resultsScreenData.Mods
-                  : allTimesData.MenuMods;
-
-        const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}:${menuData.MP3Length}`;
-
-        if (
-            menuData.Path?.endsWith('.osu') &&
-            allTimesData.GameFolder &&
-            this.previousState !== currentState
-        ) {
-            this.previousState = currentState;
-            beatmapPpData.updateMapMetadata(currentMods);
-        }
-
-        setTimeout(() => {
-            this.updateMapMetadata(entries);
-        }, config.pollRate);
     }
 
     watchProcessHealth() {

@@ -24,8 +24,8 @@ export class GamePlayData extends AbstractEntity {
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
 
-    PerformanceAttributes: rosu.PerformanceAttributes;
-    GradualPerformance: rosu.GradualPerformance | null;
+    PerformanceAttributes: rosu.PerformanceAttributes | undefined;
+    GradualPerformance: rosu.GradualPerformance | undefined;
 
     Retries: number;
     PlayerName: string;
@@ -115,7 +115,6 @@ export class GamePlayData extends AbstractEntity {
         this.isReplayUiHidden = false;
 
         this.previousPassedObjects = 0;
-        this.GradualPerformance = null;
 
         // below is gata that shouldn't be reseted on retry
         if (isRetry === true) {
@@ -431,8 +430,6 @@ export class GamePlayData extends AbstractEntity {
 
     updateHitErrors() {
         try {
-            if (this.scoreBase === 0 || !this.scoreBase) return [];
-
             const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns',
@@ -440,24 +437,49 @@ export class GamePlayData extends AbstractEntity {
                 'menuData'
             ]);
 
+            const { rulesetsAddr } = patterns.getPatterns(['rulesetsAddr']);
+
+            const rulesetAddr = process.readInt(
+                process.readInt(rulesetsAddr - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) {
+                wLogger.debug('GD(updateHitErrors) RulesetAddr is 0');
+                return;
+            }
+
+            const gameplayBase = process.readInt(rulesetAddr + 0x68);
+            if (gameplayBase === 0) {
+                wLogger.debug('GD(updateHitErrors) gameplayBase is zero');
+                return;
+            }
+
+            const scoreBase = process.readInt(gameplayBase + 0x38);
+            if (scoreBase === 0) {
+                wLogger.debug('GD(updateHitErrors) scoreBase is zero');
+                return;
+            }
+
             const leaderStart = patterns.getLeaderStart();
 
-            const base = process.readInt(this.scoreBase + 0x38);
+            const base = process.readInt(scoreBase + 0x38);
             const items = process.readInt(base + 0x4);
             const size = process.readInt(base + 0xc);
 
-            for (let i = this.HitErrors.length - 1; i < size; i++) {
+            const errors: Array<number> = [];
+            for (let i = 0; i < size; i++) {
                 const current = items + leaderStart + 0x4 * i;
                 const error = process.readInt(current);
 
-                this.HitErrors.push(error);
+                errors.push(error);
             }
+
+            this.HitErrors = errors;
 
             this.resetReportCount('GD(updateHitErrors)');
         } catch (exc) {
             this.reportError(
                 'GD(updateHitErrors)',
-                10,
+                50,
                 `GD(updateHitErrors) ${(exc as any).message}`
             );
             wLogger.debug(exc);
@@ -553,113 +575,125 @@ export class GamePlayData extends AbstractEntity {
     }
 
     private updateStarsAndPerformance() {
-        const t1 = performance.now();
-        if (!config.calculatePP) {
+        try {
+            const t1 = performance.now();
+            if (!config.calculatePP) {
+                wLogger.debug(
+                    'GD(updateStarsAndPerformance) pp calculation disabled'
+                );
+                return;
+            }
+
+            const { allTimesData, beatmapPpData, menuData } =
+                this.osuInstance.getServices([
+                    'allTimesData',
+                    'beatmapPpData',
+                    'menuData'
+                ]);
+
+            if (!allTimesData.GameFolder) {
+                wLogger.debug(
+                    'GD(updateStarsAndPerformance) game folder not found'
+                );
+                return;
+            }
+
+            const currentBeatmap = beatmapPpData.getCurrentBeatmap();
+            if (!currentBeatmap) {
+                wLogger.debug(
+                    "GD(updateStarsAndPerformance) can't get current map"
+                );
+                return;
+            }
+
+            const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${this.Mods}:${menuData.MP3Length}`;
+            const isUpdate = this.previousState !== currentState;
+
+            // update precalculated attributes
+            if (
+                isUpdate ||
+                !this.GradualPerformance ||
+                !this.PerformanceAttributes
+            ) {
+                if (this.GradualPerformance) this.GradualPerformance.free();
+                if (this.PerformanceAttributes)
+                    this.PerformanceAttributes.free();
+
+                const difficulty = new rosu.Difficulty({ mods: this.Mods });
+                this.GradualPerformance = new rosu.GradualPerformance(
+                    difficulty,
+                    currentBeatmap
+                );
+
+                this.PerformanceAttributes = new rosu.Performance({
+                    mods: this.Mods
+                }).calculate(currentBeatmap);
+
+                this.previousState = currentState;
+            }
+
+            if (!this.GradualPerformance && !this.PerformanceAttributes) return;
+
+            const passedObjects = calculatePassedObjects(
+                this.Mode,
+                this.Hit300,
+                this.Hit100,
+                this.Hit50,
+                this.HitMiss,
+                this.HitKatu,
+                this.HitGeki
+            );
+
+            const offset = passedObjects - this.previousPassedObjects;
+            if (offset <= 0) return;
+
+            const scoreParams: rosu.ScoreState = {
+                maxCombo: this.MaxCombo,
+                misses: this.HitMiss,
+                n50: this.Hit50,
+                n100: this.Hit100,
+                n300: this.Hit300,
+                nKatu: this.HitKatu,
+                nGeki: this.HitGeki
+            };
+
+            const curPerformance = this.GradualPerformance.nth(
+                scoreParams,
+                offset - 1
+            )!;
+
+            const fcPerformance = new rosu.Performance({
+                mods: this.Mods,
+                misses: 0,
+                accuracy: this.Accuracy
+            }).calculate(this.PerformanceAttributes);
+            const t2 = performance.now();
+
+            if (curPerformance) {
+                beatmapPpData.updateCurrentAttributes(
+                    curPerformance.difficulty.stars,
+                    curPerformance.pp
+                );
+            }
+
+            if (fcPerformance) {
+                beatmapPpData.currAttributes.fcPP = fcPerformance.pp;
+            }
+
+            this.previousPassedObjects = passedObjects;
+
             wLogger.debug(
-                'GD(updateStarsAndPerformance) pp calculation disabled'
-            );
-            return;
-        }
-
-        const { allTimesData, beatmapPpData, menuData } =
-            this.osuInstance.getServices([
-                'allTimesData',
-                'beatmapPpData',
-                'menuData'
-            ]);
-
-        if (!allTimesData.GameFolder) {
-            wLogger.debug(
-                'GD(updateStarsAndPerformance) game folder not found'
-            );
-            return;
-        }
-
-        const currentBeatmap = beatmapPpData.getCurrentBeatmap();
-        if (!currentBeatmap) {
-            wLogger.debug(
-                "GD(updateStarsAndPerformance) can't get current map"
-            );
-            return;
-        }
-
-        const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${this.Mods}:${menuData.MP3Length}`;
-        const isUpdate = this.previousState !== currentState;
-
-        // update precalculated attributes
-        if (
-            isUpdate ||
-            !this.GradualPerformance ||
-            !this.PerformanceAttributes
-        ) {
-            if (this.GradualPerformance) this.GradualPerformance.free();
-            if (this.PerformanceAttributes) this.PerformanceAttributes.free();
-
-            const difficulty = new rosu.Difficulty({ mods: this.Mods });
-            this.GradualPerformance = new rosu.GradualPerformance(
-                difficulty,
-                currentBeatmap
+                `GD(updateStarsAndPerformance) [${(t2 - t1).toFixed(2)}ms] elapsed time`
             );
 
-            this.PerformanceAttributes = new rosu.Performance({
-                mods: this.Mods
-            }).calculate(currentBeatmap);
-
-            this.previousState = currentState;
-        }
-
-        if (!this.GradualPerformance && !this.PerformanceAttributes) return;
-
-        const passedObjects = calculatePassedObjects(
-            this.Mode,
-            this.Hit300,
-            this.Hit100,
-            this.Hit50,
-            this.HitMiss,
-            this.HitKatu,
-            this.HitGeki
-        );
-
-        const offset = passedObjects - this.previousPassedObjects;
-        if (offset <= 0) return;
-
-        const scoreParams: rosu.ScoreState = {
-            maxCombo: this.MaxCombo,
-            misses: this.HitMiss,
-            n50: this.Hit50,
-            n100: this.Hit100,
-            n300: this.Hit300,
-            nKatu: this.HitKatu,
-            nGeki: this.HitGeki
-        };
-
-        const curPerformance = this.GradualPerformance.nth(
-            scoreParams,
-            offset - 1
-        )!;
-
-        const fcPerformance = new rosu.Performance({
-            mods: this.Mods,
-            misses: 0,
-            accuracy: this.Accuracy
-        }).calculate(this.PerformanceAttributes);
-        const t2 = performance.now();
-
-        if (curPerformance) {
-            beatmapPpData.updateCurrentAttributes(
-                curPerformance.difficulty.stars,
-                curPerformance.pp
+            this.resetReportCount('GD(updateStarsAndPerformance)');
+        } catch (exc) {
+            this.reportError(
+                'GD(updateStarsAndPerformance)',
+                10,
+                `GD(updateStarsAndPerformance) ${(exc as any).message}`
             );
+            wLogger.debug(exc);
         }
-
-        if (fcPerformance) {
-            beatmapPpData.updateFcPP(fcPerformance.pp);
-        }
-
-        this.previousPassedObjects = passedObjects;
-
-        wLogger.debug(
-            `GD(updateStarsAndPerformance) [${(t2 - t1).toFixed(2)}ms] elapsed time`
-        );
     }
 }

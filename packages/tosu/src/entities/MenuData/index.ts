@@ -48,7 +48,7 @@ export class MenuData extends AbstractEntity {
             const beatmapAddr = process.readPointer(baseAddr - 0xc);
             if (beatmapAddr === 0) {
                 wLogger.debug('MD(updateState) beatmapAddr is 0');
-                return;
+                return 'not-ready';
             }
 
             // [[Beatmap] + 0x6C]
@@ -65,14 +65,22 @@ export class MenuData extends AbstractEntity {
                 return;
             }
 
-            if (this.pendingMD5 !== newMD5) {
+            if (
+                this.pendingMD5 !== newMD5 &&
+                (this.osuInstance.isTourneySpectator ||
+                    this.osuInstance.isTourneyManager)
+            ) {
                 this.mapChangeTime = performance.now();
                 this.pendingMD5 = newMD5;
 
                 return;
             }
 
-            if (performance.now() - this.mapChangeTime < NEW_MAP_COMMIT_DELAY) {
+            if (
+                performance.now() - this.mapChangeTime < NEW_MAP_COMMIT_DELAY &&
+                (this.osuInstance.isTourneySpectator ||
+                    this.osuInstance.isTourneyManager)
+            ) {
                 return;
             }
 

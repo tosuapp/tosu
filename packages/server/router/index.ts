@@ -383,22 +383,29 @@ export default function buildBaseApi(server: Server) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData, menuData } = osuInstance.getServices([
-                'allTimesData',
-                'menuData'
-            ]);
+            const { allTimesData, menuData, beatmapPpData } =
+                osuInstance.getServices([
+                    'allTimesData',
+                    'menuData',
+                    'beatmapPpData'
+                ]);
 
-            const beatmapFilePath =
-                query.path ||
-                path.join(
+            let beatmap: rosu.Beatmap;
+            const exists = fs.existsSync(query.path);
+            if (exists) {
+                const beatmapFilePath = path.join(
                     allTimesData.GameFolder,
                     'Songs',
                     menuData.Folder,
                     menuData.Path
                 );
 
-            const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
-            const beatmap = new rosu.Beatmap(beatmapContent);
+                const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
+                beatmap = new rosu.Beatmap(beatmapContent);
+            } else {
+                beatmap = beatmapPpData.getCurrentBeatmap();
+            }
+
             if (query.mode !== undefined) beatmap.convert(query.mode);
 
             const params: rosu.PerformanceArgs = {};
@@ -417,7 +424,11 @@ export default function buildBaseApi(server: Server) {
             if (query.acc) params.accuracy = +query.acc;
 
             const calculate = new rosu.Performance(params).calculate(beatmap);
-            return sendJson(res, calculate);
+            sendJson(res, calculate);
+
+            // free beatmap only when map path specified
+            if (query.path) beatmap.free();
+            calculate.free();
         } catch (exc) {
             wLogger.error('calculate/pp', (exc as any).message);
             wLogger.debug('calculate/pp', exc);

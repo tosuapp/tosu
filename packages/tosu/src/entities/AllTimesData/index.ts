@@ -61,21 +61,12 @@ export class AllTimesData extends AbstractEntity {
                 'canRunSlowlyAddr'
             ]);
 
-            const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
-            if (skinOsuAddr === 0) {
-                return;
-            }
-            const skinOsuBase = process.readInt(skinOsuAddr);
-
             // [Status - 0x4]
             this.Status = process.readPointer(statusPtr);
             // [MenuMods + 0x9]
             this.MenuMods = process.readPointer(menuModsPtr);
             // ChatChecker - 0x20
             this.ChatStatus = process.readByte(chatCheckerAddr - 0x20);
-            this.SkinFolder = process.readSharpString(
-                process.readInt(skinOsuBase + 0x44)
-            );
             this.IsWatchingReplay = process.readByte(
                 process.readInt(canRunSlowlyAddr + 0x46)
             );
@@ -95,6 +86,16 @@ export class AllTimesData extends AbstractEntity {
                     ) + 0xc
                 )
             );
+
+            const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
+            if (skinOsuAddr !== 0) {
+                const skinOsuBase = process.readInt(skinOsuAddr);
+
+                this.SkinFolder = process.readSharpString(
+                    process.readInt(skinOsuBase + 0x44)
+                );
+                return;
+            }
 
             if (
                 !this.osuInstance.isTourneyManager &&

@@ -60,6 +60,7 @@ export class BeatmapPPData extends AbstractEntity {
     PerformanceAttributes?: rosu.PerformanceAttributes;
 
     Mode: number;
+    clockRate: number = 1;
     beatmapContent?: string;
     strains: number[];
     strainsAll: BeatmapStrains;
@@ -68,8 +69,17 @@ export class BeatmapPPData extends AbstractEntity {
     maxBPM: number;
     ppAcc: BeatmapPPAcc;
     calculatedMapAttributes: BeatmapPPAttributes;
-    currAttributes: BeatmapPPCurrentAttributes;
-    timings: BeatmapPPTimings;
+    currAttributes: BeatmapPPCurrentAttributes = {
+        stars: 0.0,
+        pp: 0.0,
+        maxThisPlayPP: 0.0,
+        fcPP: 0.0
+    };
+
+    timings: BeatmapPPTimings = {
+        firstObj: 0,
+        full: 0
+    };
 
     constructor(osuInstance: OsuInstance) {
         super(osuInstance);
@@ -129,20 +139,6 @@ export class BeatmapPPData extends AbstractEntity {
         };
     }
 
-    updatePPData(
-        strains: number[],
-        strainsAll: BeatmapStrains,
-        ppAcc: BeatmapPPAcc,
-        mapAttributes: BeatmapPPAttributes
-    ) {
-        this.strains = strains;
-        this.strainsAll = strainsAll;
-        if (config.calculatePP) {
-            this.ppAcc = ppAcc;
-        }
-        this.calculatedMapAttributes = mapAttributes;
-    }
-
     updateCurrentAttributes(stars: number, pp: number) {
         if (this.currAttributes.pp.toFixed(2) !== pp.toFixed(2)) {
             wLogger.debug(
@@ -153,32 +149,9 @@ export class BeatmapPPData extends AbstractEntity {
         }
         const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
-        this.currAttributes = {
-            ...this.currAttributes,
-            stars,
-            pp,
-            maxThisPlayPP
-        };
-    }
-
-    updateFcPP(fcPP: number) {
-        this.currAttributes = {
-            ...this.currAttributes,
-            fcPP
-        };
-    }
-
-    updateBPM(commonBPM: number, minBPM: number, maxBPM: number) {
-        this.commonBPM = Math.round(commonBPM);
-        this.minBPM = Math.round(minBPM);
-        this.maxBPM = Math.round(maxBPM);
-    }
-
-    updateTimings(firstObj: number, full: number) {
-        this.timings = {
-            firstObj,
-            full
-        };
+        this.currAttributes.stars = stars;
+        this.currAttributes.pp = pp;
+        this.currAttributes.maxThisPlayPP = maxThisPlayPP;
     }
 
     resetCurrentAttributes() {
@@ -237,22 +210,26 @@ export class BeatmapPPData extends AbstractEntity {
                 mode: menuData.MenuGameMode
             }).build();
 
-            const strains = difficulty.strains(this.beatmap);
             const fcPerformance = new rosu.Performance({
                 mods: currentMods
             }).calculate(this.beatmap);
 
             this.PerformanceAttributes = fcPerformance;
+            this.clockRate = attributes.clockRate;
 
-            const ppAcc = {};
-            for (const acc of [100, 99, 98, 97, 96, 95]) {
-                const calculate = new rosu.Performance({
-                    mods: currentMods,
-                    accuracy: acc
-                }).calculate(fcPerformance);
-                ppAcc[acc] = fixDecimals(calculate.pp);
+            if (config.calculatePP) {
+                const ppAcc = {};
+                for (const acc of [100, 99, 98, 97, 96, 95]) {
+                    const calculate = new rosu.Performance({
+                        mods: currentMods,
+                        accuracy: acc
+                    }).calculate(fcPerformance);
+                    ppAcc[acc] = fixDecimals(calculate.pp);
 
-                calculate.free();
+                    calculate.free();
+                }
+
+                this.ppAcc = ppAcc as any;
             }
 
             const calculationTime = performance.now();
@@ -261,13 +238,6 @@ export class BeatmapPPData extends AbstractEntity {
                     calculationTime - beatmapCheckTime
                 ).toFixed(2)}ms] Spend on attributes & strains calculation`
             );
-
-            const resultStrains: BeatmapStrains = {
-                series: [],
-                xaxis: []
-            };
-
-            let oldStrains: number[] = [];
 
             try {
                 const decoder = new BeatmapDecoder();
@@ -297,18 +267,17 @@ export class BeatmapPPData extends AbstractEntity {
                         this.lazerBeatmap.events.backgroundPath || '';
                 }
 
-                this.updateBPM(
-                    bpm * attributes.clockRate,
-                    bpmMin * attributes.clockRate,
-                    bpmMax * attributes.clockRate
-                );
+                this.commonBPM = Math.round(bpm * this.clockRate);
+                this.minBPM = Math.round(bpmMin * this.clockRate);
+                this.maxBPM = Math.round(bpmMax * this.clockRate);
 
                 const firstObj = Math.round(
                     this.lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
                 );
                 const full = Math.round(this.lazerBeatmap.totalLength);
 
-                this.updateTimings(firstObj, full);
+                this.timings.firstObj = firstObj;
+                this.timings.full = full;
 
                 this.resetReportCount('BPPD(updateMapMetadataTimings)');
             } catch (exc) {
@@ -327,6 +296,66 @@ export class BeatmapPPData extends AbstractEntity {
                     beatmapParseTime - calculationTime
                 ).toFixed(2)}ms] Spend on parsing beatmap`
             );
+
+            const endTime = performance.now();
+            wLogger.debug(
+                `BPPD(updateMapMetadata) [${(endTime - startTime).toFixed(
+                    2
+                )}ms] Total spent time`
+            );
+
+            this.calculatedMapAttributes = {
+                ar: attributes.ar,
+                cs: attributes.cs,
+                od: attributes.od,
+                hp: attributes.hp,
+                circles: this.lazerBeatmap.hittable,
+                sliders: this.lazerBeatmap.slidable,
+                spinners: this.lazerBeatmap.spinnable,
+                holds: this.lazerBeatmap.holdable,
+                maxCombo: fcPerformance.difficulty.maxCombo,
+                fullStars: fcPerformance.difficulty.stars,
+                stars: fcPerformance.difficulty.stars,
+                aim: fcPerformance.difficulty.aim,
+                speed: fcPerformance.difficulty.speed,
+                flashlight: fcPerformance.difficulty.flashlight,
+                sliderFactor: fcPerformance.difficulty.sliderFactor,
+                stamina: fcPerformance.difficulty.stamina,
+                rhythm: fcPerformance.difficulty.rhythm,
+                color: fcPerformance.difficulty.color,
+                peak: fcPerformance.difficulty.peak,
+                hitWindow: fcPerformance.difficulty.hitWindow
+            };
+
+            difficulty.free();
+            attributes.free();
+
+            this.resetReportCount('BPPD(updateMapMetadata)');
+        } catch (exc) {
+            this.reportError(
+                'BPPD(updateMapMetadata)',
+                10,
+                `BPPD(updateMapMetadata) ${(exc as any).message}`
+            );
+            wLogger.debug(exc);
+        }
+    }
+
+    updateGraph(currentMods: number) {
+        if (this.beatmap === undefined) return;
+        try {
+            const startTime = performance.now();
+            const { menuData } = this.osuInstance.getServices(['menuData']);
+
+            const resultStrains: BeatmapStrains = {
+                series: [],
+                xaxis: []
+            };
+
+            const difficulty = new rosu.Difficulty({ mods: currentMods });
+            const strains = difficulty.strains(this.beatmap);
+
+            let oldStrains: number[] = [];
 
             let strainsAmount = 0;
             switch (strains.mode) {
@@ -348,11 +377,10 @@ export class BeatmapPPData extends AbstractEntity {
             }
 
             const sectionOffsetTime = strains.sectionLength;
-            const firstObjectTime =
-                this.timings.firstObj / attributes.clockRate;
+            const firstObjectTime = this.timings.firstObj / this.clockRate;
             const lastObjectTime =
                 firstObjectTime + strainsAmount * sectionOffsetTime;
-            const mp3LengthTime = menuData.MP3Length / attributes.clockRate;
+            const mp3LengthTime = menuData.MP3Length / this.clockRate;
 
             const LEFT_OFFSET = Math.floor(firstObjectTime / sectionOffsetTime);
             const RIGHT_OFFSET =
@@ -424,11 +452,9 @@ export class BeatmapPPData extends AbstractEntity {
                 oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
             }
 
-            const graphProcessTime = performance.now();
+            const endTIme = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${(
-                    graphProcessTime - beatmapParseTime
-                ).toFixed(2)}ms] Spend on prcoessing graph strains`
+                `BPPD(updateGraph) [${(endTIme - startTime).toFixed(2)}ms] Spend on processing graph strains`
             );
 
             for (let i = 0; i < LEFT_OFFSET; i++) {
@@ -451,48 +477,18 @@ export class BeatmapPPData extends AbstractEntity {
                 );
             }
 
-            const endTime = performance.now();
-            wLogger.debug(
-                `BPPD(updateMapMetadata) [${(endTime - startTime).toFixed(
-                    2
-                )}ms] Total spent time`
-            );
-
-            this.updatePPData(oldStrains, resultStrains, ppAcc as never, {
-                ar: attributes.ar,
-                cs: attributes.cs,
-                od: attributes.od,
-                hp: attributes.hp,
-                circles: this.lazerBeatmap.hittable,
-                sliders: this.lazerBeatmap.slidable,
-                spinners: this.lazerBeatmap.spinnable,
-                holds: this.lazerBeatmap.holdable,
-                maxCombo: fcPerformance.difficulty.maxCombo,
-                fullStars: fcPerformance.difficulty.stars,
-                stars: fcPerformance.difficulty.stars,
-                aim: fcPerformance.difficulty.aim,
-                speed: fcPerformance.difficulty.speed,
-                flashlight: fcPerformance.difficulty.flashlight,
-                sliderFactor: fcPerformance.difficulty.sliderFactor,
-                stamina: fcPerformance.difficulty.stamina,
-                rhythm: fcPerformance.difficulty.rhythm,
-                color: fcPerformance.difficulty.color,
-                peak: fcPerformance.difficulty.peak,
-                hitWindow: fcPerformance.difficulty.hitWindow
-            });
-
+            this.strains = oldStrains;
+            this.strainsAll = resultStrains;
             this.Mode = strains.mode;
 
-            difficulty.free();
-            attributes.free();
             strains.free();
 
-            this.resetReportCount('BPPD(updateMapMetadata)');
+            this.resetReportCount('BPPD(updateGraph)');
         } catch (exc) {
             this.reportError(
-                'BPPD(updateMapMetadata)',
+                'BPPD(updateGraph)',
                 10,
-                `BPPD(updateMapMetadata) ${(exc as any).message}`
+                `BPPD(updateGraph) ${(exc as any).message}`
             );
             wLogger.debug(exc);
         }
