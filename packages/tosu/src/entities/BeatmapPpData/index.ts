@@ -127,10 +127,12 @@ export class BeatmapPPData extends AbstractEntity {
             peak: 0.0,
             hitWindow: 0.0
         };
-        this.currAttributes.stars = 0.0;
-        this.currAttributes.pp = 0.0;
-        this.currAttributes.maxThisPlayPP = 0.0;
-        this.currAttributes.fcPP = 0.0;
+        this.currAttributes = {
+            stars: 0.0,
+            pp: 0.0,
+            maxThisPlayPP: 0.0,
+            fcPP: 0.0
+        };
         this.timings = {
             firstObj: 0,
             full: 0
@@ -153,10 +155,12 @@ export class BeatmapPPData extends AbstractEntity {
     }
 
     resetCurrentAttributes() {
-        this.currAttributes.stars = 0.0;
-        this.currAttributes.pp = 0.0;
-        this.currAttributes.maxThisPlayPP = 0.0;
-        this.currAttributes.fcPP = 0.0;
+        this.currAttributes = {
+            stars: 0.0,
+            pp: 0.0,
+            maxThisPlayPP: 0.0,
+            fcPP: 0.0
+        };
     }
 
     getCurrentBeatmap() {
