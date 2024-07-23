@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.2](https://github.com/KotRikD/tosu/compare/v2.9.1...v2.9.2) (2024-07-23)
+
+
+### Bug Fixes
+
+* `AllTimesData` update logic ([2ab498f](https://github.com/KotRikD/tosu/commit/2ab498f69abd20d1822f854cf4876af72a84ddd2))
+* Add update delay only to tournaments ([a6d1bb0](https://github.com/KotRikD/tosu/commit/a6d1bb08ffdcbd401af9b93ab9fe642a462419ee))
+* Added proper credits ([04a9710](https://github.com/KotRikD/tosu/commit/04a9710b6af0c2ea1454fdfdac1a9e75856388ae))
+* Attempt to fix `null pointer passed to rust` ([a369786](https://github.com/KotRikD/tosu/commit/a3697868400fc554ab79732fa6272b6fd0f214d8))
+* Fix `calculatePP` option ([c3f6918](https://github.com/KotRikD/tosu/commit/c3f69182a827a224f68aa029be34f3e10e13a146))
+* Optimize `calculate/pp` api and fix memory leak ([402d7f5](https://github.com/KotRikD/tosu/commit/402d7f53730d3196a98fcb7a48fd51f3064edd1f))
+* Set values directly, instead of using functions ([401fb6f](https://github.com/KotRikD/tosu/commit/401fb6f061d1db4c737802bcbda4fa560996d8e8))
+* Split result screen performance calculation ([37fefb4](https://github.com/KotRikD/tosu/commit/37fefb43fa9af73230ccc971ebd12dfe5636a54b))
+* stop updating if `not-ready` ([da0216a](https://github.com/KotRikD/tosu/commit/da0216abd191268a7888dba41a404cf6cab3bcc1))
+* Update beatmap metadata before everything ([802250a](https://github.com/KotRikD/tosu/commit/802250ad930ab910d7b668e5d258914a94d816be))
+* Update graph separately on `mp3Length` change ([1810ab2](https://github.com/KotRikD/tosu/commit/1810ab2b54d3a97c144d30af4be66793d66971ae))
+* Update scoreBase directly inside `updateHitErrors` ([fb254de](https://github.com/KotRikD/tosu/commit/fb254de8049ddda2bcf7859898ee7d0a80b44c05))
+* Use UTC+0 date on result screen ([5c072b5](https://github.com/KotRikD/tosu/commit/5c072b5856f81f2f68de1ab6da48a91b44a9140e))
+
 ### [2.9.1](https://github.com/KotRikD/tosu/compare/v2.9.0...v2.9.1) (2024-07-14)
 
 
