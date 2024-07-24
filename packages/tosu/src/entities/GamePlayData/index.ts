@@ -115,7 +115,7 @@ export class GamePlayData extends AbstractEntity {
         this.isReplayUiHidden = false;
 
         this.previousPassedObjects = 0;
-
+        this.GradualPerformance = undefined;
         // below is gata that shouldn't be reseted on retry
         if (isRetry === true) {
             return;
