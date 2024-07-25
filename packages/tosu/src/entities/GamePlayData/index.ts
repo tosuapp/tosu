@@ -116,6 +116,7 @@ export class GamePlayData extends AbstractEntity {
 
         this.previousPassedObjects = 0;
         this.GradualPerformance = undefined;
+        this.PerformanceAttributes = undefined;
         // below is gata that shouldn't be reseted on retry
         if (isRetry === true) {
             return;
@@ -632,7 +633,12 @@ export class GamePlayData extends AbstractEntity {
                 this.previousState = currentState;
             }
 
-            if (!this.GradualPerformance && !this.PerformanceAttributes) return;
+            if (!this.GradualPerformance || !this.PerformanceAttributes) {
+                wLogger.debug(
+                    `GD(updateStarsAndPerformance) One of things not ready. GP:${this.GradualPerformance === undefined} - PA:${this.PerformanceAttributes === undefined}`
+                );
+                return;
+            }
 
             const passedObjects = calculatePassedObjects(
                 this.Mode,
