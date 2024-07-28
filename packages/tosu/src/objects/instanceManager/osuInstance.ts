@@ -357,14 +357,6 @@ export class OsuInstance {
 
                         this.previousTime = allTimesData.PlayTime;
 
-                        if (
-                            allTimesData.PlayTime <
-                            Math.min(0, beatmapPpData.timings.firstObj)
-                        ) {
-                            gamePlayData.init(true, 'not-default');
-                            break;
-                        }
-
                         gamePlayData.updateState();
                         break;
 
