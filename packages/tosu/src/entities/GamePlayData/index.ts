@@ -4,7 +4,6 @@ import { Process } from 'tsprocess/dist/process';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { Leaderboard } from '@/entities/GamePlayData/Leaderboard';
-import { MenuData } from '@/entities/MenuData';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { OsuMods } from '@/utils/osuMods.types';
@@ -272,7 +271,7 @@ export class GamePlayData extends AbstractEntity {
                 patterns.getLeaderStart(),
                 rulesetAddr
             );
-            this.updateGrade(menuData);
+            this.updateGrade(menuData.ObjectCount);
             this.updateStarsAndPerformance();
 
             this.resetReportCount('GD(updateState)');
@@ -424,8 +423,7 @@ export class GamePlayData extends AbstractEntity {
             const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns',
-                'allTimesData',
-                'menuData'
+                'allTimesData'
             ]);
 
             const { rulesetsAddr } = patterns.getPatterns(['rulesetsAddr']);
@@ -498,13 +496,9 @@ export class GamePlayData extends AbstractEntity {
         return Math.sqrt(variance) * 10;
     }
 
-    private updateGrade(menuData: MenuData) {
+    private updateGrade(objectCount: number) {
         const remaining =
-            menuData.ObjectCount -
-            this.Hit300 -
-            this.Hit100 -
-            this.Hit50 -
-            this.HitMiss;
+            objectCount - this.Hit300 - this.Hit100 - this.Hit50 - this.HitMiss;
 
         this.GradeCurrent = calculateGrade({
             mods: this.Mods,
