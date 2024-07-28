@@ -54,7 +54,6 @@ export class GamePlayData extends AbstractEntity {
     KeyOverlay: KeyOverlay;
     isReplayUiHidden: boolean;
 
-    private scoreBase: number = 0;
     private cachedkeys: string = '';
 
     previousState: string = '';
@@ -127,8 +126,6 @@ export class GamePlayData extends AbstractEntity {
         this.Mode = 0;
         this.Mods = 0;
         this.Leaderboard = undefined;
-
-        this.scoreBase = 0;
     }
 
     resetKeyOverlay() {
@@ -185,8 +182,6 @@ export class GamePlayData extends AbstractEntity {
                 wLogger.debug('GD(updateState) scoreBase is zero');
                 return;
             }
-
-            this.scoreBase = scoreBase;
 
             const hpBarBase = process.readInt(gameplayBase + 0x40);
             if (hpBarBase === 0) {
@@ -265,14 +260,14 @@ export class GamePlayData extends AbstractEntity {
             this.HitMissPrev = this.HitMiss;
             this.ComboPrev = this.Combo;
 
+            this.updateGrade(menuData.ObjectCount);
+            this.updateStarsAndPerformance();
             // [[[Ruleset + 0x68] + 0x38] + 0x38]
             this.updateLeaderboard(
                 process,
                 patterns.getLeaderStart(),
                 rulesetAddr
             );
-            this.updateGrade(menuData.ObjectCount);
-            this.updateStarsAndPerformance();
 
             this.resetReportCount('GD(updateState)');
         } catch (exc) {
