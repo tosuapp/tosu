@@ -376,6 +376,12 @@ export class OsuInstance {
                         await tourneyManagerData.updateState();
                         break;
 
+                    // do not spam reset on multiplayer and direct
+                    case 11:
+                    case 12:
+                    case 15:
+                        break;
+
                     default:
                         gamePlayData.init(undefined, 'default');
                         resultsScreenData.init();
