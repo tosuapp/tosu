@@ -159,7 +159,7 @@ export class BeatmapPPData extends AbstractEntity {
             stars: 0.0,
             pp: 0.0,
             maxThisPlayPP: 0.0,
-            fcPP: 0.0
+            fcPP: this.ppAcc[100] || 0.0
         };
     }
 
