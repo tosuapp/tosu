@@ -12,6 +12,7 @@ export class AllTimesData extends AbstractEntity {
     gameTimePtr: number = 0;
 
     IsWatchingReplay: number = 0;
+    isReplayUiHidden: boolean = false;
     ShowInterface: boolean = false;
 
     ChatStatus: number = 0;
@@ -51,14 +52,16 @@ export class AllTimesData extends AbstractEntity {
                 chatCheckerAddr,
                 skinDataAddr,
                 settingsClassAddr,
-                canRunSlowlyAddr
+                canRunSlowlyAddr,
+                rulesetsAddr
             } = patterns.getPatterns([
                 'statusPtr',
                 'menuModsPtr',
                 'chatCheckerAddr',
                 'skinDataAddr',
                 'settingsClassAddr',
-                'canRunSlowlyAddr'
+                'canRunSlowlyAddr',
+                'rulesetsAddr'
             ]);
 
             // [Status - 0x4]
@@ -86,6 +89,23 @@ export class AllTimesData extends AbstractEntity {
                     ) + 0xc
                 )
             );
+
+            if (this.IsWatchingReplay) {
+                const rulesetAddr = process.readInt(
+                    process.readInt(rulesetsAddr - 0xb) + 0x4
+                );
+                if (rulesetAddr !== 0) {
+                    // rulesetAddr mean ReplayWatcher... Sooo....
+                    // Ruleset + 0x1d8
+                    this.isReplayUiHidden = Boolean(
+                        process.readByte(rulesetAddr + 0x1d8)
+                    );
+                } else {
+                    this.isReplayUiHidden = false;
+                }
+            } else {
+                this.isReplayUiHidden = false;
+            }
 
             const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
             if (skinOsuAddr !== 0) {

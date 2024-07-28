@@ -154,7 +154,7 @@ export class GamePlayData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns, allTimesData, menuData } =
+            const { process, patterns, menuData } =
                 this.osuInstance.getServices([
                     'process',
                     'patterns',
@@ -198,16 +198,6 @@ export class GamePlayData extends AbstractEntity {
             // Resetting default state value, to define other componenets that we have touched gamePlayData
             // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
             this.isDefaultState = false;
-
-            if (allTimesData.IsWatchingReplay) {
-                // rulesetAddr mean ReplayWatcher... Sooo....
-                // Ruleset + 0x1d8
-                this.isReplayUiHidden = Boolean(
-                    process.readByte(rulesetAddr + 0x1d8)
-                );
-            } else {
-                this.isReplayUiHidden = false;
-            }
 
             // [Base - 0x33] + 0x8
             this.Retries = process.readInt(

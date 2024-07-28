@@ -121,7 +121,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         },
         settings: {
             interfaceVisible: allTimesData.ShowInterface,
-            replayUIVisible: gamePlayData.isReplayUiHidden === false,
+            replayUIVisible: allTimesData.isReplayUiHidden === false,
             chatVisibilityStatus: {
                 number: allTimesData.ChatStatus,
                 name: ChatStatus[allTimesData.ChatStatus] || ''
