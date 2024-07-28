@@ -176,6 +176,18 @@ export class BeatmapPPData extends AbstractEntity {
                 'allTimesData'
             ]);
 
+            if (menuData.Folder === '') {
+                wLogger.debug(
+                    `BPPD(updateMapMetadata) Skip osu! music theme file`,
+                    {
+                        SongsFolder: allTimesData.SongsFolder,
+                        Folder: menuData.Folder,
+                        Path: menuData.Path
+                    }
+                );
+                return;
+            }
+
             const mapPath = path.join(
                 allTimesData.SongsFolder,
                 menuData.Folder,
@@ -192,7 +204,7 @@ export class BeatmapPPData extends AbstractEntity {
                 wLogger.debug(
                     `BPPD(updateMapMetadata) Can't get map: ${mapPath}`
                 );
-                return;
+                return 'not-ready';
             }
 
             this.beatmap = new rosu.Beatmap(this.beatmapContent);
