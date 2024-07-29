@@ -159,7 +159,7 @@ export class BeatmapPPData extends AbstractEntity {
             stars: 0.0,
             pp: 0.0,
             maxThisPlayPP: 0.0,
-            fcPP: 0.0
+            fcPP: this.ppAcc[100] || 0.0
         };
     }
 
@@ -175,6 +175,18 @@ export class BeatmapPPData extends AbstractEntity {
                 'menuData',
                 'allTimesData'
             ]);
+
+            if (menuData.Folder === '') {
+                wLogger.debug(
+                    `BPPD(updateMapMetadata) Skip osu! music theme file`,
+                    {
+                        SongsFolder: allTimesData.SongsFolder,
+                        Folder: menuData.Folder,
+                        Path: menuData.Path
+                    }
+                );
+                return;
+            }
 
             const mapPath = path.join(
                 allTimesData.SongsFolder,
@@ -192,7 +204,7 @@ export class BeatmapPPData extends AbstractEntity {
                 wLogger.debug(
                     `BPPD(updateMapMetadata) Can't get map: ${mapPath}`
                 );
-                return;
+                return 'not-ready';
             }
 
             this.beatmap = new rosu.Beatmap(this.beatmapContent);

@@ -306,9 +306,14 @@ export class OsuInstance {
                     allTimesData.GameFolder &&
                     this.previousState !== currentState
                 ) {
-                    this.previousState = currentState;
-                    beatmapPpData.updateMapMetadata(currentMods);
+                    const metadataUpdate =
+                        beatmapPpData.updateMapMetadata(currentMods);
+                    if (metadataUpdate === 'not-ready') {
+                        await sleep(config.pollRate);
+                        continue;
+                    }
                     beatmapPpData.updateGraph(currentMods);
+                    this.previousState = currentState;
                 }
 
                 if (
@@ -357,14 +362,6 @@ export class OsuInstance {
 
                         this.previousTime = allTimesData.PlayTime;
 
-                        if (
-                            allTimesData.PlayTime <
-                            Math.min(0, beatmapPpData.timings.firstObj)
-                        ) {
-                            gamePlayData.init(true, 'not-default');
-                            break;
-                        }
-
                         gamePlayData.updateState();
                         break;
 
@@ -377,6 +374,12 @@ export class OsuInstance {
                             this.isTourneyManager = true;
                         }
                         await tourneyManagerData.updateState();
+                        break;
+
+                    // do not spam reset on multiplayer and direct
+                    case 11:
+                    case 12:
+                    case 15:
                         break;
 
                     default:

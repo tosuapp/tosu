@@ -4,7 +4,6 @@ import { Process } from 'tsprocess/dist/process';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { Leaderboard } from '@/entities/GamePlayData/Leaderboard';
-import { MenuData } from '@/entities/MenuData';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { OsuMods } from '@/utils/osuMods.types';
@@ -55,7 +54,6 @@ export class GamePlayData extends AbstractEntity {
     KeyOverlay: KeyOverlay;
     isReplayUiHidden: boolean;
 
-    private scoreBase: number = 0;
     private cachedkeys: string = '';
 
     previousState: string = '';
@@ -116,6 +114,7 @@ export class GamePlayData extends AbstractEntity {
 
         this.previousPassedObjects = 0;
         this.GradualPerformance = undefined;
+        this.PerformanceAttributes = undefined;
         // below is gata that shouldn't be reseted on retry
         if (isRetry === true) {
             return;
@@ -127,8 +126,6 @@ export class GamePlayData extends AbstractEntity {
         this.Mode = 0;
         this.Mods = 0;
         this.Leaderboard = undefined;
-
-        this.scoreBase = 0;
     }
 
     resetKeyOverlay() {
@@ -153,7 +150,7 @@ export class GamePlayData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns, allTimesData, menuData } =
+            const { process, patterns, menuData } =
                 this.osuInstance.getServices([
                     'process',
                     'patterns',
@@ -186,8 +183,6 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
-            this.scoreBase = scoreBase;
-
             const hpBarBase = process.readInt(gameplayBase + 0x40);
             if (hpBarBase === 0) {
                 wLogger.debug('GD(updateState) hpBar is zero');
@@ -197,16 +192,6 @@ export class GamePlayData extends AbstractEntity {
             // Resetting default state value, to define other componenets that we have touched gamePlayData
             // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
             this.isDefaultState = false;
-
-            if (allTimesData.IsWatchingReplay) {
-                // rulesetAddr mean ReplayWatcher... Sooo....
-                // Ruleset + 0x1d8
-                this.isReplayUiHidden = Boolean(
-                    process.readByte(rulesetAddr + 0x1d8)
-                );
-            } else {
-                this.isReplayUiHidden = false;
-            }
 
             // [Base - 0x33] + 0x8
             this.Retries = process.readInt(
@@ -275,14 +260,14 @@ export class GamePlayData extends AbstractEntity {
             this.HitMissPrev = this.HitMiss;
             this.ComboPrev = this.Combo;
 
+            this.updateGrade(menuData.ObjectCount);
+            this.updateStarsAndPerformance();
             // [[[Ruleset + 0x68] + 0x38] + 0x38]
             this.updateLeaderboard(
                 process,
                 patterns.getLeaderStart(),
                 rulesetAddr
             );
-            this.updateGrade(menuData);
-            this.updateStarsAndPerformance();
 
             this.resetReportCount('GD(updateState)');
         } catch (exc) {
@@ -433,8 +418,7 @@ export class GamePlayData extends AbstractEntity {
             const { process, patterns } = this.osuInstance.getServices([
                 'process',
                 'patterns',
-                'allTimesData',
-                'menuData'
+                'allTimesData'
             ]);
 
             const { rulesetsAddr } = patterns.getPatterns(['rulesetsAddr']);
@@ -507,13 +491,9 @@ export class GamePlayData extends AbstractEntity {
         return Math.sqrt(variance) * 10;
     }
 
-    private updateGrade(menuData: MenuData) {
+    private updateGrade(objectCount: number) {
         const remaining =
-            menuData.ObjectCount -
-            this.Hit300 -
-            this.Hit100 -
-            this.Hit50 -
-            this.HitMiss;
+            objectCount - this.Hit300 - this.Hit100 - this.Hit50 - this.HitMiss;
 
         this.GradeCurrent = calculateGrade({
             mods: this.Mods,
@@ -632,7 +612,12 @@ export class GamePlayData extends AbstractEntity {
                 this.previousState = currentState;
             }
 
-            if (!this.GradualPerformance && !this.PerformanceAttributes) return;
+            if (!this.GradualPerformance || !this.PerformanceAttributes) {
+                wLogger.debug(
+                    `GD(updateStarsAndPerformance) One of things not ready. GP:${this.GradualPerformance === undefined} - PA:${this.PerformanceAttributes === undefined}`
+                );
+                return;
+            }
 
             const passedObjects = calculatePassedObjects(
                 this.Mode,
