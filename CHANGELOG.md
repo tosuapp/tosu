@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/KotRikD/tosu/compare/v2.9.2...v2.10.0) (2024-07-29)
+
+
+### Bug Fixes
+
+* Attempt to fix `null pointer` once again ([e056d7f](https://github.com/KotRikD/tosu/commit/e056d7fd0e9a6580bb9657811eee7ce506818dd7))
+* FIx 0pp after retry ([bf3cac7](https://github.com/KotRikD/tosu/commit/bf3cac7a43d6e6cd717834715660f0eb62d911cb))
+* Move `isReplayUiHidden` toi `AllTimesData` ([3043837](https://github.com/KotRikD/tosu/commit/304383714e31914ab7c3befc5d9ec4bc376c4f0c))
+* Re:run `updateMapMetadata` if unable to get beatmap ([57c8fcf](https://github.com/KotRikD/tosu/commit/57c8fcfe132bc9c87d3b8a72e5be9ae708138d8d))
+* Use SS pp in `resetCurrentAttributes` instead of 0.0 ([74867bf](https://github.com/KotRikD/tosu/commit/74867bf6e7d75ece3c79057f15dc1c334b3a05aa))
+
 ### [2.9.2](https://github.com/KotRikD/tosu/compare/v2.9.1...v2.9.2) (2024-07-23)
 
 
