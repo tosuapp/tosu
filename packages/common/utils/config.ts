@@ -2,13 +2,11 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
+import { getProgramPath } from './directories';
 import { checkGameOverlayConfig } from './gosu';
 import { wLogger } from './logger';
 
-const configPath = path.join(
-    'pkg' in process ? path.dirname(process.execPath) : process.cwd(),
-    'tsosu.env'
-);
+const configPath = path.join(getProgramPath(), 'tsosu.env');
 
 const createConfig = () => {
     if (!fs.existsSync(configPath)) {
@@ -260,11 +258,9 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.showMpCommands = showMpCommands;
     config.staticFolderPath = staticFolderPath;
 
-    if (
-        config.staticFolderPath === './static' &&
-        !fs.existsSync(path.join(process.cwd(), 'static'))
-    ) {
-        fs.mkdirSync(path.join(process.cwd(), 'static'));
+    const staticPath = path.join(getProgramPath(), 'static');
+    if (config.staticFolderPath === './static' && !fs.existsSync(staticPath)) {
+        fs.mkdirSync(staticPath);
     }
 
     if (updated) wLogger.info(`Config ${status}ed`);

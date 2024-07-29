@@ -3,9 +3,6 @@ import path from 'path';
 
 import { config } from './config';
 
-const pkgRunningFolder =
-    'pkg' in process ? path.dirname(process.execPath) : process.cwd();
-
 export function recursiveFilesSearch({
     _ignoreFileName,
     dir,
@@ -43,12 +40,24 @@ export function recursiveFilesSearch({
 }
 
 export function getStaticPath() {
-    const staticPath =
-        config.staticFolderPath || path.join(pkgRunningFolder, 'static');
+    let staticPath =
+        config.staticFolderPath || path.join(getProgramPath(), 'static');
+
+    // replace ./static with normal path to the static with program path
+    if (
+        staticPath.toLowerCase() === './static' ||
+        staticPath.toLowerCase() === '.\\static'
+    )
+        staticPath = path.join(getProgramPath(), 'static');
 
     return path.resolve(staticPath);
 }
 
 export function getCachePath() {
-    return path.join(pkgRunningFolder, '.cache');
+    return path.join(getProgramPath(), '.cache');
+}
+
+export function getProgramPath() {
+    if ('pkg' in process) return path.dirname(process.execPath);
+    return process.cwd();
 }

@@ -81,7 +81,7 @@ export function parseTXT(filePath: string) {
 
     filePath = path.resolve(filePath);
 
-    const staticPath = path.resolve(config.staticFolderPath);
+    const staticPath = getStaticPath();
     object.folderName = path
         .dirname(filePath.replace(staticPath, ''))
         .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')

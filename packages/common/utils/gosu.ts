@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
-export const checkGameOverlayConfig = () => {
-    const configPath = path.join(process.cwd(), 'config.ini');
+import { getProgramPath } from './directories';
 
+export const checkGameOverlayConfig = () => {
+    const configPath = path.join(getProgramPath(), 'config.ini');
     if (fs.existsSync(configPath)) return;
     fs.writeFileSync(
         configPath,

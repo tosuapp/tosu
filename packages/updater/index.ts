@@ -1,6 +1,7 @@
 import {
     config,
     downloadFile,
+    getProgramPath,
     platformResolver,
     sleep,
     unzip,
@@ -14,8 +15,8 @@ import path from 'path';
 const currentVersion = require(process.cwd() + '/_version.js');
 
 const repositoryName = 'tosu';
-const fileDestination = path.join(process.cwd(), 'update.zip');
-const backupExecutablePath = path.join(process.cwd(), 'tosu_old.exe');
+const fileDestination = path.join(getProgramPath(), 'update.zip');
+const backupExecutablePath = path.join(getProgramPath(), 'tosu_old.exe');
 
 const deleteNotLocked = async (filePath: string) => {
     try {
@@ -119,7 +120,7 @@ export const autoUpdater = async () => {
         const currentExecutablePath = process.argv[0]; // Path to the current executable
 
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
-        await unzip(downloadAsset, process.cwd());
+        await unzip(downloadAsset, getProgramPath());
 
         wLogger.info('Restarting program');
 
