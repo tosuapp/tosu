@@ -1,6 +1,7 @@
 import {
     checkGameOverlayConfig,
     downloadFile,
+    getProgramPath,
     unzip,
     wLogger
 } from '@tosu/common';
@@ -10,7 +11,7 @@ import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Process } from 'tsprocess/dist/process';
 
-const configPath = path.join(process.cwd(), 'config.ini');
+const configPath = path.join(getProgramPath(), 'config.ini');
 const checkGosuConfig = (p: Process, checking?: boolean) => {
     if (!existsSync(configPath)) return null;
 
@@ -39,8 +40,8 @@ export const injectGameOverlay = async (p: Process) => {
         // Check for DEPRECATED GOSU CONFIG, due its needed to read [GameOverlay] section from original configuration
         checkGameOverlayConfig();
 
-        if (!existsSync(path.join(process.cwd(), 'gameOverlay'))) {
-            const gameOverlayPath = path.join(process.cwd(), 'gameOverlay');
+        const gameOverlayPath = path.join(getProgramPath(), 'gameOverlay');
+        if (!existsSync(gameOverlayPath)) {
             const archivePath = path.join(
                 gameOverlayPath,
                 'gosu-gameoverlay.zip'
@@ -56,11 +57,7 @@ export const injectGameOverlay = async (p: Process) => {
             await rm(archivePath);
         }
 
-        if (
-            !existsSync(
-                path.join(process.cwd(), 'gameOverlay', 'gosumemoryoverlay.dll')
-            )
-        ) {
+        if (!existsSync(path.join(gameOverlayPath, 'gosumemoryoverlay.dll'))) {
             wLogger.info(
                 '[gosu-overlay] Please delete gameOverlay folder, and restart program!'
             );
@@ -77,14 +74,10 @@ export const injectGameOverlay = async (p: Process) => {
 
         return await new Promise((resolve, reject) => {
             const child = execFile(
-                path.join(process.cwd(), 'gameOverlay', 'a.exe'),
+                path.join(gameOverlayPath, 'a.exe'),
                 [
                     p.id.toString(),
-                    path.join(
-                        process.cwd(),
-                        'gameOverlay',
-                        'gosumemoryoverlay.dll'
-                    )
+                    path.join(gameOverlayPath, 'gosumemoryoverlay.dll')
                 ],
                 {
                     windowsHide: true
