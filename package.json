@@ -6,7 +6,8 @@
   "scripts": {
     "prepare": "husky install",
     "start": "pnpm run -C packages/tosu run:dev",
-    "build": "pnpm run -C packages/tosu compile",
+    "build:win": "pnpm run -C packages/tosu compile:win",
+    "build:linux": "pnpm run -C packages/tosu compile:linux",
     "release": "standard-version",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,css}\"",
     "prettier:ci": "prettier --check \"**/*.{js,jsx,ts,tsx,css}\"",

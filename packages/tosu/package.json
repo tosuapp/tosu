@@ -9,7 +9,8 @@
         "ts:compile": "ncc build src/index.ts -o dist -m -d",
         "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
         "compile:prepare-htmls": "cp -rf node_modules/@tosu/server/assets ./dist",
-        "compile": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts"
+        "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts",
+	"compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
         "@tosu/common": "workspace:*",
