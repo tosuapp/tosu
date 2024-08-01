@@ -65,7 +65,7 @@ jobs:
         run: pnpm build:linux
 
       - name: 🚀 - Upload artifacts for windows
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == "windows-latest"
         uses: actions/upload-artifact@v4
         with: {
           name: "tosu-windows-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
@@ -73,7 +73,7 @@ jobs:
         }
 
       - name: 🚀 - Upload artifacts for linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == "ubuntu-latest"
         uses: actions/upload-artifact@v3
         with: {
           name: "tosu-linux-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
