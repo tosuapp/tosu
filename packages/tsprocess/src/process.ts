@@ -30,10 +30,17 @@ export class Process {
 
     get path(): string {
         if (process.platform === 'win32') {
+            console.log('PATH-win', ProcessUtils.getProcessPath(this.handle));
             return ProcessUtils.getProcessPath(this.handle);
         }
 
-        return this.getProcessCommandLine().split(':')[1].replace(/\\/g, '/');
+        const commandLine = this.getProcessCommandLine();
+        console.log('PATH-linux', commandLine);
+
+        if (commandLine.includes(':')) {
+            return commandLine.split(':')[1].replace(/\\/g, '/');
+        }
+        return commandLine;
     }
 
     getProcessCommandLine(): string {
