@@ -360,6 +360,14 @@ export class OsuInstance {
                             beatmapPpData.resetCurrentAttributes();
                         }
 
+                        // reset before first object
+                        if (
+                            allTimesData.PlayTime <
+                            beatmapPpData.timings.firstObj
+                        ) {
+                            gamePlayData.resetQuick();
+                        }
+
                         this.previousTime = allTimesData.PlayTime;
 
                         gamePlayData.updateState();
