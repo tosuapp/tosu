@@ -64,7 +64,7 @@ const SCAN_PATTERNS: {
         offset: -0x4
     },
     menuModsPtr: {
-        pattern: 'C8 FF 00 00 00 00 00 81 0D 00 00 00 00 00 08 00 00',
+        pattern: 'C8 FF ?? ?? ?? ?? ?? 81 0D ?? ?? ?? ?? ?? 08 00 00',
         offset: 0x9
     },
     getAudioLengthPtr: {
@@ -158,8 +158,7 @@ export class OsuInstance {
                 for (const baseKey in SCAN_PATTERNS) {
                     const s1 = performance.now();
                     const patternValue = this.process.scanSync(
-                        SCAN_PATTERNS[baseKey].pattern,
-                        true
+                        SCAN_PATTERNS[baseKey].pattern
                     );
                     completed += 1;
                     if (patternValue === 0) {

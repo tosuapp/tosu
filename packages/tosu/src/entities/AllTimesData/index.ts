@@ -123,8 +123,7 @@ export class AllTimesData extends AbstractEntity {
             ) {
                 if (this.gameTimePtr === 0) {
                     this.gameTimePtr = await process.scanAsync(
-                        GAME_TIME_PTR.pattern,
-                        true
+                        GAME_TIME_PTR.pattern
                     );
                     wLogger.debug('ATD(updateState) gameTimePtr area found');
                     return;
