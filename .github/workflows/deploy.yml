@@ -74,7 +74,7 @@ jobs:
 
       - name: 🚀 - Upload artifacts for linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with: {
           name: "tosu-linux-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/tosu/dist/tosu
