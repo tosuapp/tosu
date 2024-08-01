@@ -9,6 +9,15 @@ import { InstanceManager } from './objects/instanceManager/instanceManager';
 const currentVersion = require(process.cwd() + '/_version.js');
 
 (async () => {
+    if (
+        process.platform === 'linux' &&
+        process.getuid &&
+        process.getuid() !== 0
+    ) {
+        wLogger.error(`Hello, please run tosu with sudo`);
+        process.exit(1);
+    }
+
     wLogger.info(`Starting tosu v${currentVersion}`);
 
     Process.disablePowerThrottling();
