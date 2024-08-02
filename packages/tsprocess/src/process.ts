@@ -1,3 +1,5 @@
+import path from 'path';
+
 import ProcessUtils from '.';
 
 export interface ProcessInfo {
@@ -30,19 +32,10 @@ export class Process {
 
     get path(): string {
         if (process.platform === 'win32') {
-            console.log('PATH-win', ProcessUtils.getProcessPath(this.handle));
             return ProcessUtils.getProcessPath(this.handle);
         }
 
-        const commandLine = this.getProcessCommandLine();
-
-        console.log('PATH-linux', commandLine);
-        console.log('cwd-linux', this.getProcessCwd());
-
-        if (commandLine.includes(':')) {
-            return commandLine.split(':')[1].replace(/\\/g, '/');
-        }
-        return commandLine;
+        return path.join(this.getProcessCwd(), 'osu!.exe');
     }
 
     getProcessCommandLine(): string {
