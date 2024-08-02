@@ -394,6 +394,18 @@ Napi::Value disable_power_throttling(const Napi::CallbackInfo &args) {
 #endif
 }
 
+Napi::Value get_process_cwd(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() > 1) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  void *handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
+
+  return Napi::Number::From(env, memory::get_process_cwd(handle));
+}
+
 Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["readByte"] = Napi::Function::New(env, read_byte);
   exports["readShort"] = Napi::Function::New(env, read_short);
@@ -411,6 +423,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["isProcessExist"] = Napi::Function::New(env, is_process_exist);
   exports["getProcessPath"] = Napi::Function::New(env, get_process_path);
   exports["getProcessCommandLine"] = Napi::Function::New(env, get_process_command_line);
+  exports["getProcessCwd"] = Napi::Function::New(env, get_process_cwd);
   exports["disablePowerThrottling"] = Napi::Function::New(env, disable_power_throttling);
 
   return exports;

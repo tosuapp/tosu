@@ -76,6 +76,10 @@ std::string memory::get_process_path(void *handle) {
   return filePath;
 }
 
+std::string memory::get_process_cwd(void* process) {
+  return "";
+}
+
 std::string memory::get_process_command_line(void *process) {
   std::string commandLine;
 

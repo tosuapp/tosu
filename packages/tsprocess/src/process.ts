@@ -35,7 +35,9 @@ export class Process {
         }
 
         const commandLine = this.getProcessCommandLine();
+
         console.log('PATH-linux', commandLine);
+        console.log('cwd-linux', this.getProcessCwd());
 
         if (commandLine.includes(':')) {
             return commandLine.split(':')[1].replace(/\\/g, '/');
@@ -45,6 +47,10 @@ export class Process {
 
     getProcessCommandLine(): string {
         return ProcessUtils.getProcessCommandLine(this.handle);
+    }
+
+    getProcessCwd(): string {
+        return ProcessUtils.getProcessCwd(this.handle);
     }
 
     readByte(address: number): number {

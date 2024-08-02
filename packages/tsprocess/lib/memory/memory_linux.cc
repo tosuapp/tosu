@@ -77,6 +77,18 @@ std::string memory::get_process_command_line(void *process) {
   return read_file("/proc/" + std::to_string(pid) + "/cmdline");
 }
 
+std::string memory::get_process_cwd(void *process) {
+  const auto pid = reinterpret_cast<uintptr_t>(process);
+  const auto path = "/proc/" + std::to_string(pid) + "/cwd";
+  char buf[PATH_MAX];
+  const auto len = readlink(path.c_str(), buf, sizeof(buf) - 1);
+  if (len != -1) {
+    buf[len] = '\0';
+    return std::string(buf);
+  }
+  return "";
+}
+
 bool memory::read_buffer(void *process, uintptr_t address, std::size_t size, uint8_t *buffer) {
   const auto pid = reinterpret_cast<uintptr_t>(process);
 

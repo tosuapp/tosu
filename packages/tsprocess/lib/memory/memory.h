@@ -21,6 +21,7 @@ void *open_process(uint32_t id);
 bool is_process_exist(void *process);
 std::string get_process_path(void *process);
 std::string get_process_command_line(void *process);
+std::string get_process_cwd(void* process);
 
 bool read_buffer(void *process, uintptr_t address, std::size_t size, uint8_t *buffer);
 
