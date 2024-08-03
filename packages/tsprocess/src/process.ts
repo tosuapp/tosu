@@ -1,4 +1,4 @@
-import path from 'path';
+import { dirname as pathDirname } from 'path';
 
 import ProcessUtils from '.';
 
@@ -32,10 +32,10 @@ export class Process {
 
     get path(): string {
         if (process.platform === 'win32') {
-            return ProcessUtils.getProcessPath(this.handle);
+            return pathDirname(ProcessUtils.getProcessPath(this.handle));
         }
 
-        return path.join(this.getProcessCwd(), 'osu!.exe');
+        return this.getProcessCwd();
     }
 
     getProcessCommandLine(): string {

@@ -260,7 +260,7 @@ export class OsuInstance {
                 }
 
                 if (!allTimesData.GameFolder) {
-                    allTimesData.setGameFolder(path.join(this.path, '..'));
+                    allTimesData.setGameFolder(this.path);
 
                     // condition when user have different BeatmapDirectory in osu! config
                     if (fs.existsSync(allTimesData.MemorySongsFolder)) {
@@ -269,11 +269,7 @@ export class OsuInstance {
                         );
                     } else {
                         allTimesData.setSongsFolder(
-                            path.join(
-                                this.path,
-                                '../',
-                                allTimesData.MemorySongsFolder
-                            )
+                            path.join(this.path, allTimesData.MemorySongsFolder)
                         );
                     }
                 }

@@ -7,9 +7,9 @@
 #include <cstdint>
 #include <cstring>
 #include <fstream>
-#include <sstream>
 #include <string_view>
 #include <vector>
+#include "../logger.h"
 #include "memory.h"
 
 namespace {
@@ -95,7 +95,15 @@ bool memory::read_buffer(void *process, uintptr_t address, std::size_t size, uin
   iovec local_iov{buffer, size};
   iovec remote_iov{reinterpret_cast<void *>(address), size};
 
-  return process_vm_readv(pid, &local_iov, 1, &remote_iov, 1, 0) == size;
+  const auto result_size = process_vm_readv(pid, &local_iov, 1, &remote_iov, 1, 0);
+
+  const auto success = result_size == size;
+
+  if (!success && errno == EPERM) {
+    logger::println("failed to read address %x of size %x (consider trying to run with sudo)", address, size);
+  }
+
+  return success;
 }
 
 std::vector<MemoryRegion> memory::query_regions(void *process) {

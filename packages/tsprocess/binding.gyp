@@ -7,12 +7,6 @@
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       "cflags": ["-std=c++23", "-fno-exceptions"],
       "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS"],
-      'xcode_settings': {
-        'CLANG_CXX_LIBRARY': 'libc++',
-      },
-      'msvs_settings': {
-        'VCCLCompilerTool': { 'ExceptionHandling': 1 },
-      },
     },
     {
         "target_name": "copy_binary",
