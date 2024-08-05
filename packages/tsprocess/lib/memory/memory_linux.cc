@@ -127,8 +127,11 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
     region.address = std::stoull(address_range.substr(0, dash_pos), nullptr, 16);
     const auto end_address = std::stoull(address_range.substr(dash_pos + 1), nullptr, 16);
     region.size = end_address - region.address;
+    const auto protections = line.substr(first_space_pos + 1, 5);
 
-    regions.push_back(region);
+    if (protections[0] == 'r' && protections[1] == 'w') {
+      regions.push_back(region);
+    }
   }
 
   return regions;
