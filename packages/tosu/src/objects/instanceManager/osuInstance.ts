@@ -82,6 +82,10 @@ const SCAN_PATTERNS: {
     spectatingUserPtr: {
         pattern: '8B 0D ?? ?? ?? ?? 85 C0 74 05 8B 50 30',
         offset: -0x4
+    },
+    gameTimePtr: {
+        pattern: 'A1 ?? ?? ?? ?? 89 46 04 8B D6 E8',
+        offset: 0x1
     }
 };
 
