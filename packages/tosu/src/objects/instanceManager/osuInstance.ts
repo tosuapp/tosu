@@ -299,7 +299,7 @@ export class OsuInstance {
 
                 const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}`;
                 const updateGraph =
-                    this.previousState !== currentState &&
+                    this.previousState !== currentState ||
                     this.previousMP3Length !== menuData.MP3Length;
                 if (
                     menuData.Path?.endsWith('.osu') &&
@@ -358,6 +358,14 @@ export class OsuInstance {
                         if (this.previousTime > allTimesData.PlayTime) {
                             gamePlayData.init(true);
                             beatmapPpData.resetCurrentAttributes();
+                        }
+
+                        // reset before first object
+                        if (
+                            allTimesData.PlayTime <
+                            beatmapPpData.timings.firstObj
+                        ) {
+                            gamePlayData.resetQuick();
                         }
 
                         this.previousTime = allTimesData.PlayTime;

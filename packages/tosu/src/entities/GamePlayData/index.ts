@@ -128,6 +128,12 @@ export class GamePlayData extends AbstractEntity {
         this.Leaderboard = undefined;
     }
 
+    resetQuick() {
+        wLogger.debug('GD(resetQuick) Reset ');
+
+        this.previousPassedObjects = 0;
+    }
+
     resetKeyOverlay() {
         if (this.isKeyOverlayDefaultState) {
             return;
