@@ -299,7 +299,7 @@ export class OsuInstance {
 
                 const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}`;
                 const updateGraph =
-                    this.previousState !== currentState &&
+                    this.previousState !== currentState ||
                     this.previousMP3Length !== menuData.MP3Length;
                 if (
                     menuData.Path?.endsWith('.osu') &&
