@@ -3,7 +3,7 @@ import { wLogger } from '@tosu/common';
 export interface PatternData {
     baseAddr: number;
     playTimeAddr: number;
-    chatCheckerAddr: number;
+    chatCheckerPtr: number;
     skinDataAddr: number;
     settingsClassAddr: number;
     configurationAddr: number;
@@ -29,7 +29,7 @@ export class MemoryPatterns {
         this.patterns = {
             baseAddr: 0,
             playTimeAddr: 0,
-            chatCheckerAddr: 0,
+            chatCheckerPtr: 0,
             skinDataAddr: 0,
             settingsClassAddr: 0,
             configurationAddr: 0,

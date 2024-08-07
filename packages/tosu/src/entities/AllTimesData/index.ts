@@ -41,7 +41,7 @@ export class AllTimesData extends AbstractEntity {
             const {
                 statusPtr,
                 menuModsPtr,
-                chatCheckerAddr,
+                chatCheckerPtr,
                 skinDataAddr,
                 settingsClassAddr,
                 canRunSlowlyAddr,
@@ -50,7 +50,7 @@ export class AllTimesData extends AbstractEntity {
             } = patterns.getPatterns([
                 'statusPtr',
                 'menuModsPtr',
-                'chatCheckerAddr',
+                'chatCheckerPtr',
                 'skinDataAddr',
                 'settingsClassAddr',
                 'canRunSlowlyAddr',
@@ -63,7 +63,7 @@ export class AllTimesData extends AbstractEntity {
             // [MenuMods + 0x9]
             this.MenuMods = process.readPointer(menuModsPtr);
             // ChatChecker - 0x20
-            this.ChatStatus = process.readByte(chatCheckerAddr - 0x20);
+            this.ChatStatus = process.readByte(process.readInt(chatCheckerPtr));
             this.IsWatchingReplay = process.readByte(
                 process.readInt(canRunSlowlyAddr + 0x46)
             );

@@ -155,6 +155,47 @@ Napi::Value scan_sync(const Napi::CallbackInfo &args) {
   return Napi::Number::New(env, result);
 }
 
+Napi::Value batch_scan(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() < 2) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
+  auto pattern_array = args[1].As<Napi::Array>();
+
+  std::vector<Pattern> patterns;
+
+  for (size_t i = 0; i < pattern_array.Length(); i++) {
+    Pattern pattern;
+
+    auto iter_obj = pattern_array.Get(i).As<Napi::Object>();
+    auto signature = iter_obj.Get("signature").As<Napi::Uint8Array>();
+    auto mask = iter_obj.Get("mask").As<Napi::Uint8Array>();
+
+    pattern.index = i;
+    pattern.signature = std::span<uint8_t>(reinterpret_cast<uint8_t *>(signature.Data()), signature.ByteLength());
+    pattern.mask = std::span<uint8_t>(reinterpret_cast<uint8_t *>(mask.Data()), mask.ByteLength());
+    pattern.found = false;
+
+    patterns.push_back(pattern);
+  }
+
+  auto result = memory::batch_find_pattern(handle, patterns);
+  auto result_array = Napi::Array::New(env, result.size());
+
+  for (size_t i = 0; i < result.size(); i++) {
+    auto obj = Napi::Object::New(env);
+    obj.Set("index", Napi::Number::New(env, result[i].index));
+    obj.Set("address", Napi::Number::New(env, result[i].address));
+
+    result_array.Set(i, obj);
+  }
+
+  return result_array;
+}
+
 Napi::Value read_buffer(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
   if (args.Length() < 3) {
@@ -406,6 +447,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["readCSharpString"] = Napi::Function::New(env, read_csharp_string);
   exports["scanSync"] = Napi::Function::New(env, scan_sync);
   exports["scan"] = Napi::Function::New(env, scan);
+  exports["batchScan"] = Napi::Function::New(env, batch_scan);
   exports["openProcess"] = Napi::Function::New(env, open_process);
   exports["findProcesses"] = Napi::Function::New(env, find_processes);
   exports["isProcessExist"] = Napi::Function::New(env, is_process_exist);

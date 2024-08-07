@@ -25,13 +25,11 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
 
   MEMORY_BASIC_INFORMATION info;
   for (uint8_t *address = 0; VirtualQueryEx(process, address, &info, sizeof(info)) != 0; address += info.RegionSize) {
-    if ((info.State & MEM_COMMIT) == 0 || (info.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE)) == 0) {
+    if ((info.State & MEM_COMMIT) == 0 || (info.Protect & (PAGE_EXECUTE_READWRITE)) == 0) {
       continue;
     }
 
-    if (info.Protect == PAGE_EXECUTE_READWRITE || info.Protect == PAGE_READWRITE) {
-      regions.push_back(MemoryRegion{reinterpret_cast<uintptr_t>(info.BaseAddress), info.RegionSize});
-    }
+    regions.push_back(MemoryRegion{reinterpret_cast<uintptr_t>(info.BaseAddress), info.RegionSize});
   }
 
   return regions;
@@ -76,7 +74,7 @@ std::string memory::get_process_path(void *handle) {
   return filePath;
 }
 
-std::string memory::get_process_cwd(void* process) {
+std::string memory::get_process_cwd(void *process) {
   return "";
 }
 

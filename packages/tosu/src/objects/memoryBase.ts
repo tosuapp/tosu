@@ -7,7 +7,7 @@ export interface BaseData {
     baseAddr: number;
     menuModsAddr: number;
     playTimeAddr: number;
-    chatCheckerAddr: number;
+    chatCheckerPtr: number;
     skinDataAddr: number;
     configurationAddr: number;
     bindingsAddr: number;
@@ -31,7 +31,7 @@ export class MemoryBase {
             baseAddr: 0,
             menuModsAddr: 0,
             playTimeAddr: 0,
-            chatCheckerAddr: 0,
+            chatCheckerPtr: 0,
             skinDataAddr: 0,
             configurationAddr: 0,
             bindingsAddr: 0,

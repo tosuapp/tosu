@@ -9,6 +9,16 @@ export interface ProcessInfo {
     pcPriClassBase: number;
 }
 
+export interface Pattern {
+    signature: Buffer;
+    mask: Buffer;
+}
+
+export interface PatternResult {
+    address: number;
+    index: number;
+}
+
 export class Process {
     public id: number;
     public handle: number;
@@ -145,5 +155,27 @@ export class Process {
                 reject(e);
             }
         });
+    }
+
+    scanBatch(signatures: string[]): PatternResult[] {
+        const patterns: Pattern[] = [];
+
+        for (const signature of signatures) {
+            const bytes = signature.split(' ');
+            const signatureBuffer = Buffer.from(
+                bytes.map((x) => (x === '??' ? '00' : x)).join(''),
+                'hex'
+            );
+            const maskBuffer = Buffer.from(
+                bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
+                'hex'
+            );
+            patterns.push({
+                signature: signatureBuffer,
+                mask: maskBuffer
+            });
+        }
+
+        return ProcessUtils.batchScan(this.handle, patterns);
     }
 }

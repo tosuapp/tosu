@@ -129,7 +129,7 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
     region.size = end_address - region.address;
     const auto protections = line.substr(first_space_pos + 1, 5);
 
-    if (protections[0] == 'r' && protections[1] == 'w') {
+    if (protections[0] == 'r' && protections[1] == 'w' && protections[2] == 'x') {
       regions.push_back(region);
     }
   }
