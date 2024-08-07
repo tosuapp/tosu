@@ -64,7 +64,7 @@ export const checkUpdates = async () => {
         config.currentVersion = currentVersion;
         config.updateVersion = versionName || currentVersion;
 
-        if (versionName === null) {
+        if (versionName === null || versionName === undefined) {
             wLogger.info(`Failed to check updates v${currentVersion}`);
 
             return new Error('Version the same');
@@ -90,12 +90,6 @@ export const autoUpdater = async () => {
         }
 
         const { assets, versionName, platformType } = check;
-
-        if (!versionName || !assets) {
-            wLogger.warn(`Version name/assets not found`);
-            return 'noFiles';
-        }
-
         if (versionName.includes(currentVersion)) {
             wLogger.info(`You're using latest version v${currentVersion}`);
 
