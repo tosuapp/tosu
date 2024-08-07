@@ -1,4 +1,4 @@
-import { config, sleep, updateProgressBar, wLogger } from '@tosu/common';
+import { config, sleep, wLogger } from '@tosu/common';
 import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import fs from 'fs';
@@ -36,8 +36,9 @@ const SCAN_PATTERNS: {
     playTimeAddr: {
         pattern: '5E 5F 5D C3 A1 ?? ?? ?? ?? 89 ?? 04'
     },
-    chatCheckerAddr: {
-        pattern: '0A D7 23 3C 00 00 ?? 01'
+    chatCheckerPtr: {
+        pattern: '83 3D ?? ?? ?? ?? 00 75 ?? 80 3D',
+        offset: 0x2
     },
     skinDataAddr: {
         pattern: '74 2C 85 FF 75 28 A1 ?? ?? ?? ?? 8D 15'
@@ -64,7 +65,7 @@ const SCAN_PATTERNS: {
         offset: -0x4
     },
     menuModsPtr: {
-        pattern: 'C8 FF 00 00 00 00 00 81 0D 00 00 00 00 00 08 00 00',
+        pattern: 'C8 FF ?? ?? ?? ?? ?? 81 0D ?? ?? ?? ?? ?? 08 00 00',
         offset: 0x9
     },
     getAudioLengthPtr: {
@@ -82,6 +83,10 @@ const SCAN_PATTERNS: {
     spectatingUserPtr: {
         pattern: '8B 0D ?? ?? ?? ?? 85 C0 74 05 8B 50 30',
         offset: -0x4
+    },
+    gameTimePtr: {
+        pattern: 'A1 ?? ?? ?? ?? 89 46 04 8B D6 E8',
+        offset: 0x1
     }
 };
 
@@ -143,7 +148,7 @@ export class OsuInstance {
     }
 
     async start() {
-        wLogger.info(`[${this.pid}] Running memory chimera..`);
+        wLogger.info(`[${this.pid}] Running memory chimera...`);
         while (!this.isReady) {
             const patternsRepo = this.entities.get('patterns');
             if (!patternsRepo) {
@@ -153,37 +158,29 @@ export class OsuInstance {
             }
 
             try {
-                const total = Object.keys(SCAN_PATTERNS).length;
-                let completed = 0;
-                for (const baseKey in SCAN_PATTERNS) {
-                    const s1 = performance.now();
-                    const patternValue = this.process.scanSync(
-                        SCAN_PATTERNS[baseKey].pattern,
-                        true
-                    );
-                    completed += 1;
-                    if (patternValue === 0) {
-                        updateProgressBar(
-                            `[${this.pid}] Scanning`,
-                            completed / total,
-                            `${(performance.now() - s1).toFixed(
-                                2
-                            )}ms ${baseKey}`
-                        );
-                        continue;
-                    }
+                const s1 = performance.now();
+
+                const results = this.process.scanBatch(
+                    Object.values(SCAN_PATTERNS).map((x) => x.pattern)
+                );
+
+                const indexToKey = Object.keys(SCAN_PATTERNS);
+
+                for (let i = 0; i < results.length; i++) {
+                    const baseKey = indexToKey[
+                        results[i].index
+                    ] as keyof PatternData;
 
                     patternsRepo.setPattern(
-                        baseKey as never,
-                        patternValue + (SCAN_PATTERNS[baseKey].offset || 0)
-                    );
-
-                    updateProgressBar(
-                        `[${this.pid}] Scanning`,
-                        completed / total,
-                        `${(performance.now() - s1).toFixed(2)}ms ${baseKey}`
+                        baseKey,
+                        results[i].address +
+                            (SCAN_PATTERNS[baseKey].offset || 0)
                     );
                 }
+
+                wLogger.debug(
+                    `[${this.pid}] Took ${(performance.now() - s1).toFixed(2)} ms to scan patterns`
+                );
 
                 if (!patternsRepo.checkIsBasesValid()) {
                     throw new Error('Memory resolve failed');
@@ -261,7 +258,7 @@ export class OsuInstance {
                 }
 
                 if (!allTimesData.GameFolder) {
-                    allTimesData.setGameFolder(path.join(this.path, '..'));
+                    allTimesData.setGameFolder(this.path);
 
                     // condition when user have different BeatmapDirectory in osu! config
                     if (fs.existsSync(allTimesData.MemorySongsFolder)) {
@@ -270,11 +267,7 @@ export class OsuInstance {
                         );
                     } else {
                         allTimesData.setSongsFolder(
-                            path.join(
-                                this.path,
-                                '../',
-                                allTimesData.MemorySongsFolder
-                            )
+                            path.join(this.path, allTimesData.MemorySongsFolder)
                         );
                     }
                 }

@@ -160,6 +160,10 @@ importers:
       node-gyp:
         specifier: 10.0.1
         version: 10.0.1
+    devDependencies:
+      node-api-headers:
+        specifier: ^1.2.0
+        version: 1.2.0
 
   packages/updater:
     dependencies:
@@ -3299,6 +3303,10 @@ packages:
   /node-addon-api@7.0.0:
     resolution: {integrity: sha512-vgbBJTS4m5/KkE16t5Ly0WW9hz46swAstv0hYYwMtbG7AznRhNyfLRe8HZAiWIpcHzoO7HxhLuBQj9rJ/Ho0ZA==}
     dev: false
+
+  /node-api-headers@1.2.0:
+    resolution: {integrity: sha512-L9AiEkBfgupC0D/LsudLPOhzy/EdObsp+FHyL1zSK0kKv5FDA9rJMoRz8xd+ojxzlqfg0tTZm2h8ot2nS7bgRA==}
+    dev: true
 
   /node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}

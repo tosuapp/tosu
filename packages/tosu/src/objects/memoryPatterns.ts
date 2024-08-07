@@ -3,7 +3,7 @@ import { wLogger } from '@tosu/common';
 export interface PatternData {
     baseAddr: number;
     playTimeAddr: number;
-    chatCheckerAddr: number;
+    chatCheckerPtr: number;
     skinDataAddr: number;
     settingsClassAddr: number;
     configurationAddr: number;
@@ -16,6 +16,7 @@ export interface PatternData {
     userProfilePtr: number;
     rawLoginStatusPtr: number;
     spectatingUserPtr: number;
+    gameTimePtr: number;
 }
 
 export class MemoryPatterns {
@@ -28,7 +29,7 @@ export class MemoryPatterns {
         this.patterns = {
             baseAddr: 0,
             playTimeAddr: 0,
-            chatCheckerAddr: 0,
+            chatCheckerPtr: 0,
             skinDataAddr: 0,
             settingsClassAddr: 0,
             configurationAddr: 0,
@@ -40,7 +41,8 @@ export class MemoryPatterns {
             getAudioLengthPtr: 0,
             userProfilePtr: 0,
             rawLoginStatusPtr: 0,
-            spectatingUserPtr: 0
+            spectatingUserPtr: 0,
+            gameTimePtr: 0
         };
 
         if (process.platform !== 'win32') {

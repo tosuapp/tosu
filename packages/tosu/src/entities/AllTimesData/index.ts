@@ -2,15 +2,7 @@ import { wLogger } from '@tosu/common';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 
-// NOTE: NOT AVAILABLE IN TOURNAMENT MODE!!!!
-const GAME_TIME_PTR = {
-    pattern: '8B 35 ?? ?? ?? ?? 8B C6 B9',
-    offset: 0x2
-};
-
 export class AllTimesData extends AbstractEntity {
-    gameTimePtr: number = 0;
-
     IsWatchingReplay: number = 0;
     isReplayUiHidden: boolean = false;
     ShowInterface: boolean = false;
@@ -49,19 +41,21 @@ export class AllTimesData extends AbstractEntity {
             const {
                 statusPtr,
                 menuModsPtr,
-                chatCheckerAddr,
+                chatCheckerPtr,
                 skinDataAddr,
                 settingsClassAddr,
                 canRunSlowlyAddr,
-                rulesetsAddr
+                rulesetsAddr,
+                gameTimePtr
             } = patterns.getPatterns([
                 'statusPtr',
                 'menuModsPtr',
-                'chatCheckerAddr',
+                'chatCheckerPtr',
                 'skinDataAddr',
                 'settingsClassAddr',
                 'canRunSlowlyAddr',
-                'rulesetsAddr'
+                'rulesetsAddr',
+                'gameTimePtr'
             ]);
 
             // [Status - 0x4]
@@ -69,10 +63,11 @@ export class AllTimesData extends AbstractEntity {
             // [MenuMods + 0x9]
             this.MenuMods = process.readPointer(menuModsPtr);
             // ChatChecker - 0x20
-            this.ChatStatus = process.readByte(chatCheckerAddr - 0x20);
+            this.ChatStatus = process.readByte(process.readInt(chatCheckerPtr));
             this.IsWatchingReplay = process.readByte(
                 process.readInt(canRunSlowlyAddr + 0x46)
             );
+            this.GameTime = process.readPointer(gameTimePtr);
             this.MemorySongsFolder = process.readSharpString(
                 process.readInt(
                     process.readInt(
@@ -115,24 +110,6 @@ export class AllTimesData extends AbstractEntity {
                     process.readInt(skinOsuBase + 0x44)
                 );
                 return;
-            }
-
-            if (
-                !this.osuInstance.isTourneyManager &&
-                !this.osuInstance.isTourneySpectator
-            ) {
-                if (this.gameTimePtr === 0) {
-                    this.gameTimePtr = await process.scanAsync(
-                        GAME_TIME_PTR.pattern,
-                        true
-                    );
-                    wLogger.debug('ATD(updateState) gameTimePtr area found');
-                    return;
-                } else {
-                    this.GameTime = process.readPointer(
-                        this.gameTimePtr + GAME_TIME_PTR.offset
-                    );
-                }
             }
 
             this.resetReportCount('ATD(updateState)');

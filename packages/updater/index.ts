@@ -64,7 +64,7 @@ export const checkUpdates = async () => {
         config.currentVersion = currentVersion;
         config.updateVersion = versionName || currentVersion;
 
-        if (versionName === null) {
+        if (versionName === null || versionName === undefined) {
             wLogger.info(`Failed to check updates v${currentVersion}`);
 
             return new Error('Version the same');

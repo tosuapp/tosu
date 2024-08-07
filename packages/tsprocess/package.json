@@ -16,5 +16,8 @@
     "lib",
     "dist",
     "binding.gyp"
-  ]
+  ],
+  "devDependencies": {
+    "node-api-headers": "^1.2.0"
+  }
 }

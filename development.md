@@ -37,8 +37,15 @@ pnpm run start
 
 
 6. Compile tosu
+
+For Windows:
 ```
-pnpm install && pnpm build
+pnpm install && pnpm build:win
+```
+
+For Linux
+```
+pnpm install && pnpm build:linux
 ```
 
 7. Go to `/tosu/packages/tosu/dist`, and there is your's tosu build

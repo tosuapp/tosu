@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+    - "-I../node_modules/node-addon-api"
+    - "-I../node_modules/node-api-headers/include"
+    - "-std=c++20"
+

@@ -1,3 +1,5 @@
+import { dirname as pathDirname } from 'path';
+
 import ProcessUtils from '.';
 
 export interface ProcessInfo {
@@ -5,6 +7,16 @@ export interface ProcessInfo {
     exeFile: string;
     parentId: number;
     pcPriClassBase: number;
+}
+
+export interface Pattern {
+    signature: Buffer;
+    mask: Buffer;
+}
+
+export interface PatternResult {
+    address: number;
+    index: number;
 }
 
 export class Process {
@@ -29,11 +41,19 @@ export class Process {
     }
 
     get path(): string {
-        return ProcessUtils.getProcessPath(this.handle);
+        if (process.platform === 'win32') {
+            return pathDirname(ProcessUtils.getProcessPath(this.handle));
+        }
+
+        return this.getProcessCwd();
     }
 
     getProcessCommandLine(): string {
         return ProcessUtils.getProcessCommandLine(this.handle);
+    }
+
+    getProcessCwd(): string {
+        return ProcessUtils.getProcessCwd(this.handle);
     }
 
     readByte(address: number): number {
@@ -90,68 +110,72 @@ export class Process {
         return ProcessUtils.readBuffer(this.handle, address, size);
     }
 
-    scanSync(
-        pattern: string,
-        refresh: boolean = false,
-        baseAddress: number = 0
-    ): number {
-        const buffer = Buffer.from(
-            pattern
-                .split(' ')
-                .map((x) => (x === '??' ? '00' : x))
-                .join(''),
+    scanSync(pattern: string): number {
+        const bytes = pattern.split(' ');
+        const signature = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : x)).join(''),
+            'hex'
+        );
+        const mask = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
             'hex'
         );
 
-        return ProcessUtils.scanSync(this.handle, baseAddress, buffer, refresh);
+        return ProcessUtils.scanSync(this.handle, signature, mask);
     }
 
-    scan(
-        pattern: string,
-        callback: (address: number) => void,
-        refresh: boolean = false,
-        baseAddress: number = 0
-    ): void {
-        const buffer = Buffer.from(
-            pattern
-                .split(' ')
-                .map((x) => (x === '??' ? '00' : x))
-                .join(''),
+    scan(pattern: string, callback: (address: number) => void): void {
+        const bytes = pattern.split(' ');
+        const signature = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : x)).join(''),
+            'hex'
+        );
+        const mask = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
             'hex'
         );
 
-        ProcessUtils.scan(this.handle, baseAddress, buffer, refresh, callback);
+        ProcessUtils.scan(this.handle, signature, mask, callback);
     }
 
-    scanAsync(
-        pattern: string,
-        refresh: boolean = false,
-        baseAddress: number = 0
-    ): Promise<number> {
-        const buffer = Buffer.from(
-            pattern
-                .split(' ')
-                .map((x) => (x === '??' ? '00' : x))
-                .join(''),
+    scanAsync(pattern: string): Promise<number> {
+        const bytes = pattern.split(' ');
+        const signature = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : x)).join(''),
             'hex'
         );
-
+        const mask = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
+            'hex'
+        );
         return new Promise((resolve, reject) => {
             try {
-                ProcessUtils.scan(
-                    this.handle,
-                    baseAddress,
-                    buffer,
-                    refresh,
-                    resolve
-                );
+                ProcessUtils.scan(this.handle, signature, mask, resolve);
             } catch (e) {
                 reject(e);
             }
         });
     }
 
-    static getProcesses(): Array<ProcessInfo> {
-        return ProcessUtils.getProcesses();
+    scanBatch(signatures: string[]): PatternResult[] {
+        const patterns: Pattern[] = [];
+
+        for (const signature of signatures) {
+            const bytes = signature.split(' ');
+            const signatureBuffer = Buffer.from(
+                bytes.map((x) => (x === '??' ? '00' : x)).join(''),
+                'hex'
+            );
+            const maskBuffer = Buffer.from(
+                bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
+                'hex'
+            );
+            patterns.push({
+                signature: signatureBuffer,
+                mask: maskBuffer
+            });
+        }
+
+        return ProcessUtils.batchScan(this.handle, patterns);
     }
 }

@@ -1,0 +1,10 @@
+BasedOnStyle: Chromium
+
+ColumnLimit: 125
+PointerAlignment: Right
+InsertNewlineAtEOF: True
+ContinuationIndentWidth: 2
+
+AlignAfterOpenBracket: BlockIndent
+AllowShortLambdasOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty
