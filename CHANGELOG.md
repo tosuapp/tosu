@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/KotRikD/tosu/compare/v2.10.0...v3.0.0) (2024-08-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* add linux support
+
+### Features
+
+* add linux support ([dd9f243](https://github.com/KotRikD/tosu/commit/dd9f243662c691a5cb299a6ce6c22b7ebd5bdf11))
+* batch pattern scan and various small fixes ([0521911](https://github.com/KotRikD/tosu/commit/05219118734842acf5b0160f422471cd1a2e1241))
+* semicolon ([739d081](https://github.com/KotRikD/tosu/commit/739d0815047d1f757ff541add8592f3e4a264996))
+
+
+### Bug Fixes
+
+* Check sudo permissions on linux ([5b952e4](https://github.com/KotRikD/tosu/commit/5b952e41d0725b1bd0278c09fb44dd472c411b87))
+* Fix path issue for `config.ini` and `static` folder ([41d0093](https://github.com/KotRikD/tosu/commit/41d0093431066e598ca1016cc2d6acb5f5de9974))
+* Fix path to osu!.exe for linux ([2146ad8](https://github.com/KotRikD/tosu/commit/2146ad8efb800b7ded40dbd5bf9e7239b14cd3f8))
+* remove sudo enforcement ([39373bd](https://github.com/KotRikD/tosu/commit/39373bdba5d289d00738b13cb0ec9549776e4800))
+* update game time pattern ([cf6d758](https://github.com/KotRikD/tosu/commit/cf6d7584307b6df0cf10acaf05c43b79d70df67e))
+
 ## [2.10.0](https://github.com/KotRikD/tosu/compare/v2.9.2...v2.10.0) (2024-07-29)
 
 
