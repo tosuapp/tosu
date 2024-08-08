@@ -16,7 +16,7 @@ Napi::Value read_byte(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Int64Value();
+  auto address = args[1].As<Napi::Number>().Uint32Value();
   auto result = memory::read<int8_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read byte at %x", address)).ThrowAsJavaScriptException();
