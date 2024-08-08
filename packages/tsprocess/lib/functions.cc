@@ -355,8 +355,7 @@ Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
       )) {
 #ifdef _WIN32
     auto error_str = logger::format(
-      "Couldn't read C# string length (base: %x, length: %x, last error: %d)", address, address + sizeof(int),
-      GetLastError(), reinterpret_cast<void *>(address)
+      "Couldn't read C# string length (base: %x, length: %x, last error: %d)", address, address + sizeof(int), GetLastError()
     );
 #else
     auto error_str = logger::format("Couldn't read C# string length (base: %x)", address);
