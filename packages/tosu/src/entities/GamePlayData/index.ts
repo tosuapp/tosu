@@ -308,11 +308,12 @@ export class GamePlayData extends AbstractEntity {
 
             const keyOverlayPtr = process.readUInt(rulesetAddr + 0xb0);
             if (keyOverlayPtr === 0) {
-                wLogger.debug(
-                    `GD(updateKeyOverlay) keyOverlayPtr is zero [${keyOverlayPtr}] (${rulesetAddr}  -  ${patterns.getPattern(
-                        'rulesetsAddr'
-                    )})`
-                );
+                if (this.Mode !== 3 && this.Mode !== 1)
+                    wLogger.debug(
+                        `GD(updateKeyOverlay) keyOverlayPtr is zero [${keyOverlayPtr}] (${rulesetAddr}  -  ${patterns.getPattern(
+                            'rulesetsAddr'
+                        )})`
+                    );
                 return;
             }
 
