@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.1](https://github.com/KotRikD/tosu/compare/v3.0.0...v3.0.1) (2024-08-10)
+
+
+### Bug Fixes
+
+* Fix broken --update argument ([52eac7e](https://github.com/KotRikD/tosu/commit/52eac7eb200be47706467b6cfac1ae732222d3cb))
+* missed readByte ([68c0e99](https://github.com/KotRikD/tosu/commit/68c0e993295fc88e46d976211219ebd8c9285c39))
+* Prevent reading gameplay data before first object (mainly because of mania)( ([27b959a](https://github.com/KotRikD/tosu/commit/27b959a8d994c24f7f55e0f84451ed1df872d341))
+* read addresses as uint32 instead of int64 ([b66ea31](https://github.com/KotRikD/tosu/commit/b66ea31b034a0378be94b7671303bbf610578032))
+* remove extra format argument ([489aaa1](https://github.com/KotRikD/tosu/commit/489aaa19f5445319da250949b1ee8a7d3f19439c))
+* remove extra format qualifier ([15a2f02](https://github.com/KotRikD/tosu/commit/15a2f02742c647a716b2f673c5666fd504ab5067))
+
 ## [3.0.0](https://github.com/KotRikD/tosu/compare/v2.10.0...v3.0.0) (2024-08-07)
 
 
