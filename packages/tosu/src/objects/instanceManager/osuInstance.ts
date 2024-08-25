@@ -318,6 +318,8 @@ export class OsuInstance {
                     this.previousMP3Length = menuData.MP3Length;
                 }
 
+                beatmapPpData.updateRealTimeBPM(allTimesData.PlayTime);
+
                 switch (allTimesData.Status) {
                     case 0:
                         bassDensityData.updateState();

@@ -64,6 +64,7 @@ export class BeatmapPPData extends AbstractEntity {
     beatmapContent?: string;
     strains: number[];
     strainsAll: BeatmapStrains;
+    realtimeBPM: number;
     commonBPM: number;
     minBPM: number;
     maxBPM: number;
@@ -94,6 +95,7 @@ export class BeatmapPPData extends AbstractEntity {
             xaxis: []
         };
         this.Mode = 0;
+        this.realtimeBPM = 0.0;
         this.commonBPM = 0.0;
         this.minBPM = 0.0;
         this.maxBPM = 0.0;
@@ -562,5 +564,17 @@ export class BeatmapPPData extends AbstractEntity {
             );
             wLogger.debug(exc);
         }
+    }
+
+    updateRealTimeBPM(timeMS: number) {
+        if (!this.lazerBeatmap) return;
+
+        this.realtimeBPM =
+            this.lazerBeatmap.controlPoints.timingPoints
+                // @ts-ignore
+                .toReversed()
+                .find((r) => r.startTime <= timeMS && r.bpm !== 0)?.bpm ||
+            this.lazerBeatmap.controlPoints.timingPoints[0]?.bpm ||
+            0.0;
     }
 }
