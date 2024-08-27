@@ -315,6 +315,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 },
 
                 bpm: {
+                    realtime: fixDecimals(beatmapPpData.realtimeBPM),
                     common: fixDecimals(beatmapPpData.commonBPM),
                     min: fixDecimals(beatmapPpData.minBPM),
                     max: fixDecimals(beatmapPpData.maxBPM)

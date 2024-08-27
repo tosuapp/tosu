@@ -311,6 +311,7 @@ export interface Hp {
 }
 
 export interface Bpm {
+    realtime: number;
     common: number;
     min: number;
     max: number;
