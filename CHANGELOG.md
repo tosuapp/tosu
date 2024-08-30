@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/KotRikD/tosu/compare/v3.0.1...v3.1.0) (2024-08-30)
+
+
+### Features
+
+* Added realtime BPM ([da28dd6](https://github.com/KotRikD/tosu/commit/da28dd65ba12a9c97f47c65b7a4a6fb83d06a9a4))
+
 ### [3.0.1](https://github.com/KotRikD/tosu/compare/v3.0.0...v3.0.1) (2024-08-10)
 
 
