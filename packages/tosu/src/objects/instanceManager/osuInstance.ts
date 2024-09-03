@@ -339,7 +339,7 @@ export class OsuInstance {
                         if (!gamePlayData.isDefaultState) {
                             gamePlayData.init(undefined, '4,5');
                             resultsScreenData.init();
-                            beatmapPpData.resetCurrentAttributes();
+                            beatmapPpData.resetAttributes();
                         }
 
                         // Reset ResultScreen if we in song select
@@ -352,7 +352,7 @@ export class OsuInstance {
                         // Reset gameplay data on retry
                         if (this.previousTime > allTimesData.PlayTime) {
                             gamePlayData.init(true);
-                            beatmapPpData.resetCurrentAttributes();
+                            beatmapPpData.resetAttributes();
                         }
 
                         // reset before first object

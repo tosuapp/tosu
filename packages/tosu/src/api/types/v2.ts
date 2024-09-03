@@ -369,7 +369,23 @@ export interface Pp {
     current: number;
     fc: number;
     maxAchievedThisPlay: number;
+    detailed: detailedPp;
 }
+
+export interface detailedPp {
+    current: detailedPpAttributes;
+    fc: detailedPpAttributes;
+}
+
+export interface detailedPpAttributes {
+    aim: number;
+    speed: number;
+    accuracy: number;
+    difficulty: number;
+    flashlight: number;
+    total: number;
+}
+
 export interface Pp2 {
     current: number;
     fc: number;

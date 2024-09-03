@@ -381,7 +381,41 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
                 maxAchievedThisPlay: fixDecimals(
                     beatmapPpData.currAttributes.maxThisPlayPP
-                )
+                ),
+                detailed: {
+                    current: {
+                        aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
+                        speed: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppSpeed
+                        ),
+                        accuracy: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppAccuracy
+                        ),
+                        difficulty: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppDifficulty
+                        ),
+                        flashlight: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppFlashlight
+                        ),
+                        total: fixDecimals(beatmapPpData.currAttributes.pp)
+                    },
+                    fc: {
+                        aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
+                        speed: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppSpeed
+                        ),
+                        accuracy: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppAccuracy
+                        ),
+                        difficulty: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppDifficulty
+                        ),
+                        flashlight: fixDecimals(
+                            beatmapPpData.currPPAttributes.ppFlashlight
+                        ),
+                        total: fixDecimals(beatmapPpData.currAttributes.fcPP)
+                    }
+                }
             },
             unstableRate: gamePlayData.UnstableRate
         },
@@ -544,7 +578,49 @@ const buildTourneyData = (
                         fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
                         maxAchievedThisPlay: fixDecimals(
                             beatmapPpData.currAttributes.maxThisPlayPP
-                        )
+                        ),
+                        detailed: {
+                            current: {
+                                aim: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppAim
+                                ),
+                                speed: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppSpeed
+                                ),
+                                accuracy: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppAccuracy
+                                ),
+                                difficulty: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppDifficulty
+                                ),
+                                flashlight: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppFlashlight
+                                ),
+                                total: fixDecimals(
+                                    beatmapPpData.currAttributes.pp
+                                )
+                            },
+                            fc: {
+                                aim: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppAim
+                                ),
+                                speed: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppSpeed
+                                ),
+                                accuracy: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppAccuracy
+                                ),
+                                difficulty: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppDifficulty
+                                ),
+                                flashlight: fixDecimals(
+                                    beatmapPpData.currPPAttributes.ppFlashlight
+                                ),
+                                total: fixDecimals(
+                                    beatmapPpData.currAttributes.fcPP
+                                )
+                            }
+                        }
                     },
 
                     unstableRate: gamePlayData.UnstableRate

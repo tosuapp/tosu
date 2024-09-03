@@ -19,7 +19,7 @@ interface BeatmapPPAcc {
     '95': number;
 }
 
-interface BeatmapPPAttributes {
+interface BeatmapAttributes {
     ar: number;
     cs: number;
     hp: number;
@@ -40,6 +40,14 @@ interface BeatmapPPAttributes {
     color?: number | undefined;
     peak?: number | undefined;
     hitWindow?: number | undefined;
+}
+
+interface BeatmapPPAttributes {
+    ppAccuracy: number;
+    ppAim: number;
+    ppDifficulty: number;
+    ppFlashlight: number;
+    ppSpeed: number;
 }
 
 interface BeatmapPPCurrentAttributes {
@@ -69,12 +77,28 @@ export class BeatmapPPData extends AbstractEntity {
     minBPM: number;
     maxBPM: number;
     ppAcc: BeatmapPPAcc;
-    calculatedMapAttributes: BeatmapPPAttributes;
+    calculatedMapAttributes: BeatmapAttributes;
     currAttributes: BeatmapPPCurrentAttributes = {
         stars: 0.0,
         pp: 0.0,
         maxThisPlayPP: 0.0,
         fcPP: 0.0
+    };
+
+    currPPAttributes: BeatmapPPAttributes = {
+        ppAccuracy: 0.0,
+        ppAim: 0.0,
+        ppDifficulty: 0.0,
+        ppFlashlight: 0.0,
+        ppSpeed: 0.0
+    };
+
+    fcPPAttributes: BeatmapPPAttributes = {
+        ppAccuracy: 0.0,
+        ppAim: 0.0,
+        ppDifficulty: 0.0,
+        ppFlashlight: 0.0,
+        ppSpeed: 0.0
     };
 
     timings: BeatmapPPTimings = {
@@ -135,9 +159,38 @@ export class BeatmapPPData extends AbstractEntity {
             maxThisPlayPP: 0.0,
             fcPP: 0.0
         };
+        this.currPPAttributes = {
+            ppAccuracy: 0.0,
+            ppAim: 0.0,
+            ppDifficulty: 0.0,
+            ppFlashlight: 0.0,
+            ppSpeed: 0.0
+        };
+        this.fcPPAttributes = {
+            ppAccuracy: 0.0,
+            ppAim: 0.0,
+            ppDifficulty: 0.0,
+            ppFlashlight: 0.0,
+            ppSpeed: 0.0
+        };
         this.timings = {
             firstObj: 0,
             full: 0
+        };
+    }
+
+    updatePPAttributes(
+        type: 'curr' | 'fc',
+        attributes: rosu.PerformanceAttributes
+    ) {
+        if (type !== 'curr' && type !== 'fc') return;
+
+        this[`${type}PPAttributes`] = {
+            ppAccuracy: attributes.ppAccuracy || 0.0,
+            ppAim: attributes.ppAim || 0.0,
+            ppDifficulty: attributes.ppDifficulty || 0.0,
+            ppFlashlight: attributes.ppFlashlight || 0.0,
+            ppSpeed: attributes.ppSpeed || 0.0
         };
     }
 
@@ -156,12 +209,27 @@ export class BeatmapPPData extends AbstractEntity {
         this.currAttributes.maxThisPlayPP = maxThisPlayPP;
     }
 
-    resetCurrentAttributes() {
+    resetAttributes() {
         this.currAttributes = {
             stars: 0.0,
             pp: 0.0,
             maxThisPlayPP: 0.0,
             fcPP: this.ppAcc[100] || 0.0
+        };
+
+        this.currPPAttributes = {
+            ppAccuracy: 0.0,
+            ppAim: 0.0,
+            ppDifficulty: 0.0,
+            ppFlashlight: 0.0,
+            ppSpeed: 0.0
+        };
+        this.fcPPAttributes = {
+            ppAccuracy: 0.0,
+            ppAim: 0.0,
+            ppDifficulty: 0.0,
+            ppFlashlight: 0.0,
+            ppSpeed: 0.0
         };
     }
 
