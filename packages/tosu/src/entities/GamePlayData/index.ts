@@ -654,7 +654,7 @@ export class GamePlayData extends AbstractEntity {
                 nGeki: this.HitGeki
             };
 
-            const curPerformance = this.GradualPerformance.nth(
+            const currPerformance = this.GradualPerformance.nth(
                 scoreParams,
                 offset - 1
             )!;
@@ -666,15 +666,18 @@ export class GamePlayData extends AbstractEntity {
             }).calculate(this.PerformanceAttributes);
             const t2 = performance.now();
 
-            if (curPerformance) {
+            if (currPerformance) {
                 beatmapPpData.updateCurrentAttributes(
-                    curPerformance.difficulty.stars,
-                    curPerformance.pp
+                    currPerformance.difficulty.stars,
+                    currPerformance.pp
                 );
+
+                beatmapPpData.updatePPAttributes('curr', currPerformance);
             }
 
             if (fcPerformance) {
                 beatmapPpData.currAttributes.fcPP = fcPerformance.pp;
+                beatmapPpData.updatePPAttributes('fc', currPerformance);
             }
 
             this.previousPassedObjects = passedObjects;
