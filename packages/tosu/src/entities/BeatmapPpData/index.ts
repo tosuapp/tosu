@@ -9,6 +9,7 @@ import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
 import { fixDecimals } from '@/utils/converters';
+import { OsuMods } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -634,15 +635,24 @@ export class BeatmapPPData extends AbstractEntity {
         }
     }
 
-    updateRealTimeBPM(timeMS: number) {
+    updateRealTimeBPM(timeMS: number, mods: number) {
         if (!this.lazerBeatmap) return;
 
-        this.realtimeBPM =
+        const multiply =
+            (mods & OsuMods.DoubleTime) === OsuMods.DoubleTime ||
+            (mods & OsuMods.Nightcore) === OsuMods.Nightcore
+                ? 1.5
+                : (mods & OsuMods.HalfTime) === OsuMods.HalfTime
+                  ? 0.75
+                  : 1;
+        const bpm =
             this.lazerBeatmap.controlPoints.timingPoints
                 // @ts-ignore
                 .toReversed()
                 .find((r) => r.startTime <= timeMS && r.bpm !== 0)?.bpm ||
             this.lazerBeatmap.controlPoints.timingPoints[0]?.bpm ||
             0.0;
+
+        this.realtimeBPM = Math.round(bpm * multiply);
     }
 }
