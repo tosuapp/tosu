@@ -51,6 +51,9 @@ export class MenuData extends AbstractEntity {
                 return 'not-ready';
             }
 
+            // [Base - 0x33]
+            this.MenuGameMode = process.readPointer(baseAddr - 0x33);
+
             // [[Beatmap] + 0x6C]
             const newMD5 = process.readSharpString(
                 process.readInt(beatmapAddr + 0x6c)
@@ -87,9 +90,6 @@ export class MenuData extends AbstractEntity {
             // MD5 hasn't changed in over NEW_MAP_COMMIT_DELAY, commit to new map
             this.MD5 = newMD5;
             this.Path = newPath;
-
-            // [Base - 0x33]
-            this.MenuGameMode = process.readPointer(baseAddr - 0x33);
 
             // [Base - 0x33] + 0xC
             this.Plays = process.readInt(
