@@ -238,7 +238,7 @@ export class BeatmapPPData extends AbstractEntity {
         return this.beatmap;
     }
 
-    updateMapMetadata(currentMods: number) {
+    updateMapMetadata(currentMods: number, currentMode: number) {
         try {
             const startTime = performance.now();
 
@@ -279,6 +279,8 @@ export class BeatmapPPData extends AbstractEntity {
             }
 
             this.beatmap = new rosu.Beatmap(this.beatmapContent);
+            if (this.beatmap.mode !== currentMode)
+                this.beatmap.convert(currentMode);
 
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);

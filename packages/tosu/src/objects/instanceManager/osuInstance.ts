@@ -290,7 +290,14 @@ export class OsuInstance {
                           ? resultsScreenData.Mods
                           : allTimesData.MenuMods;
 
-                const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${currentMods}`;
+                const currentMode =
+                    allTimesData.Status === 2
+                        ? gamePlayData.Mode
+                        : allTimesData.Status === 7
+                          ? resultsScreenData.Mode
+                          : menuData.MenuGameMode;
+
+                const currentState = `${menuData.MD5}:${currentMode}:${currentMods}`;
                 const updateGraph =
                     this.previousState !== currentState ||
                     this.previousMP3Length !== menuData.MP3Length;
@@ -299,8 +306,10 @@ export class OsuInstance {
                     allTimesData.GameFolder &&
                     this.previousState !== currentState
                 ) {
-                    const metadataUpdate =
-                        beatmapPpData.updateMapMetadata(currentMods);
+                    const metadataUpdate = beatmapPpData.updateMapMetadata(
+                        currentMods,
+                        currentMode
+                    );
                     if (metadataUpdate === 'not-ready') {
                         await sleep(config.pollRate);
                         continue;
