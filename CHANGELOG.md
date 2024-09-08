@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/KotRikD/tosu/compare/v3.1.0...v3.2.0) (2024-09-08)
+
+
+### Features
+
+* Detailed pp stats ([b76cca7](https://github.com/KotRikD/tosu/commit/b76cca72fff567bcd29f24cf8b6f3687bf248a97))
+
+
+### Bug Fixes
+
+* multiply bpm by current selected mods ([38a2ee3](https://github.com/KotRikD/tosu/commit/38a2ee3f19a5c652bdc76d6e0b1d938af3c6a0b0))
+* Refresh beatmap on gamemode change (Support converts) ([3a87d64](https://github.com/KotRikD/tosu/commit/3a87d646ed6fd5cecaa80876b8d873fd9a789b78))
+
 ## [3.1.0](https://github.com/KotRikD/tosu/compare/v3.0.1...v3.1.0) (2024-08-30)
 
 
