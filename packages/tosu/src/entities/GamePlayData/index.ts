@@ -677,7 +677,7 @@ export class GamePlayData extends AbstractEntity {
 
             if (fcPerformance) {
                 beatmapPpData.currAttributes.fcPP = fcPerformance.pp;
-                beatmapPpData.updatePPAttributes('fc', currPerformance);
+                beatmapPpData.updatePPAttributes('fc', fcPerformance);
             }
 
             this.previousPassedObjects = passedObjects;
