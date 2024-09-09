@@ -184,15 +184,23 @@ export class BeatmapPPData extends AbstractEntity {
         type: 'curr' | 'fc',
         attributes: rosu.PerformanceAttributes
     ) {
-        if (type !== 'curr' && type !== 'fc') return;
+        try {
+            if (type !== 'curr' && type !== 'fc') return;
 
-        this[`${type}PPAttributes`] = {
-            ppAccuracy: attributes.ppAccuracy || 0.0,
-            ppAim: attributes.ppAim || 0.0,
-            ppDifficulty: attributes.ppDifficulty || 0.0,
-            ppFlashlight: attributes.ppFlashlight || 0.0,
-            ppSpeed: attributes.ppSpeed || 0.0
-        };
+            this[`${type}PPAttributes`] = {
+                ppAccuracy: attributes.ppAccuracy || 0.0,
+                ppAim: attributes.ppAim || 0.0,
+                ppDifficulty: attributes.ppDifficulty || 0.0,
+                ppFlashlight: attributes.ppFlashlight || 0.0,
+                ppSpeed: attributes.ppSpeed || 0.0
+            };
+        } catch (exc) {
+            wLogger.error(
+                `BPPD(updatePPAttributes)-${type}`,
+                (exc as any).message
+            );
+            wLogger.debug(`BPPD(updatePPAttributes)-${type}`, exc);
+        }
     }
 
     updateCurrentAttributes(stars: number, pp: number) {
@@ -292,7 +300,7 @@ export class BeatmapPPData extends AbstractEntity {
             const attributes = new rosu.BeatmapAttributesBuilder({
                 map: this.beatmap,
                 mods: currentMods,
-                mode: menuData.MenuGameMode
+                mode: currentMode
             }).build();
 
             const fcPerformance = new rosu.Performance({
