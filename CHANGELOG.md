@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.1](https://github.com/KotRikD/tosu/compare/v3.2.0...v3.2.1) (2024-09-12)
+
+
+### Bug Fixes
+
+* Attempt to fix undefined on converts ([bb249de](https://github.com/KotRikD/tosu/commit/bb249deda83b2eec201b5264c4e3dc0ba239f6e0))
+
 ## [3.2.0](https://github.com/KotRikD/tosu/compare/v3.1.0...v3.2.0) (2024-09-08)
 
 
