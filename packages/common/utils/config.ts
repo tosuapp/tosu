@@ -40,7 +40,7 @@ ENABLE_GOSU_OVERLAY=false
 # Enables logs for tosu developers, not very intuitive for you, the end user.
 # best not to include without developer's request.
 DEBUG_LOG=false
-OPEN_DASHBOARD_ON_STARTUP=false
+OPEN_DASHBOARD_ON_STARTUP=true
 
 # IP address where the websocket api server will be registered
 # 127.0.0.1 = localhost
