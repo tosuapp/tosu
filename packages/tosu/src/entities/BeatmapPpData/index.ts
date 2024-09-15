@@ -281,7 +281,8 @@ export class BeatmapPPData extends AbstractEntity {
                     this.PerformanceAttributes.free();
             } catch (error) {
                 wLogger.debug(
-                    `BPPD(updateMapMetadata) Can't get map: ${mapPath}`
+                    `BPPD(updateMapMetadata) Can't get map: ${mapPath}`,
+                    error
                 );
                 return 'not-ready';
             }
