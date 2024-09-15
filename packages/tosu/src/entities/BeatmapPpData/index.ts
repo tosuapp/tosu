@@ -281,14 +281,19 @@ export class BeatmapPPData extends AbstractEntity {
                     this.PerformanceAttributes.free();
             } catch (error) {
                 wLogger.debug(
-                    `BPPD(updateMapMetadata) Can't get map: ${mapPath}`,
-                    error
+                    `BPPD(updateMapMetadata) Can't get map`,
+                    {
+                        mapPath,
+                        currentMods,
+                        currentMode
+                    },
+                    (error as Error).stack
                 );
                 return 'not-ready';
             }
 
             this.beatmap = new rosu.Beatmap(this.beatmapContent);
-            if (this.beatmap.mode !== currentMode)
+            if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode)
                 this.beatmap.convert(currentMode);
 
             const beatmapCheckTime = performance.now();
