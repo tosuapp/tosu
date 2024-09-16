@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.2](https://github.com/KotRikD/tosu/compare/v3.2.1...v3.2.2) (2024-09-16)
+
+
+### Bug Fixes
+
+* Fix `Can't get  map` issue ([1f29c1b](https://github.com/KotRikD/tosu/commit/1f29c1b2ec60a2f7237f7fc602d87454e7a9ef5d))
+
 ### [3.2.1](https://github.com/KotRikD/tosu/compare/v3.2.0...v3.2.1) (2024-09-12)
 
 
