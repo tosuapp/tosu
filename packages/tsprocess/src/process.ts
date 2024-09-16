@@ -45,6 +45,17 @@ export class Process {
             return pathDirname(ProcessUtils.getProcessPath(this.handle));
         }
 
+        // If using osu-winello
+        if (
+            process.platform === 'linux' &&
+            this.getProcessPath().match('wine-preloader')
+        ) {
+            return this.getProcessCommandLine()
+                .slice(2)
+                .replace(/\\/g, '/')
+                .replace(/\/osu!.exe$/, ''); // Format windows dir to linux style.
+        }
+
         return this.getProcessCwd();
     }
 
@@ -54,6 +65,10 @@ export class Process {
 
     getProcessCwd(): string {
         return ProcessUtils.getProcessCwd(this.handle);
+    }
+
+    getProcessPath(): string {
+        return ProcessUtils.getProcessPath(this.handle);
     }
 
     readByte(address: number): number {
