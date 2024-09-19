@@ -281,7 +281,7 @@ export class BeatmapPPData extends AbstractEntity {
                 } catch (exc) {
                     this.beatmap = undefined;
                     wLogger.debug(
-                        `BPPD(updateMapMetadata) unnable to free beatmap`,
+                        `BPPD(updateMapMetadata) unable to free beatmap`,
                         exc
                     );
                 }
@@ -292,7 +292,7 @@ export class BeatmapPPData extends AbstractEntity {
                 } catch (exc) {
                     this.PerformanceAttributes = undefined;
                     wLogger.debug(
-                        `BPPD(updateMapMetadata) unnable to free PerformanceAttributes`,
+                        `BPPD(updateMapMetadata) unable to free PerformanceAttributes`,
                         exc
                     );
                 }
