@@ -1,4 +1,5 @@
 import fs from 'fs';
+import fsp from 'fs/promises';
 import path from 'path';
 
 import { config } from './config';
@@ -69,9 +70,9 @@ function writeLog(type: string, ...args) {
         config.logsPath = path.join(logsPath, `${Date.now()}.txt`);
     }
 
-    fs.appendFileSync(
+    fsp.appendFile(
         config.logsPath,
         `${new Date().toISOString()} ${type} ${args.join(' ')}\n`,
         'utf8'
-    );
+    ).catch((reason) => console.log(`writeLog`, reason));
 }
