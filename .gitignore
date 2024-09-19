@@ -9,3 +9,4 @@ config.ini
 tosu.exe
 _version.js
 **/tosu/gameOverlay/
+logs/
