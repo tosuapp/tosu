@@ -276,9 +276,26 @@ export class BeatmapPPData extends AbstractEntity {
             try {
                 this.beatmapContent = fs.readFileSync(mapPath, 'utf8');
 
-                if (this.beatmap) this.beatmap.free();
-                if (this.PerformanceAttributes)
-                    this.PerformanceAttributes.free();
+                try {
+                    if (this.beatmap) this.beatmap.free();
+                } catch (exc) {
+                    this.beatmap = undefined;
+                    wLogger.debug(
+                        `BPPD(updateMapMetadata) unnable to free beatmap`,
+                        exc
+                    );
+                }
+
+                try {
+                    if (this.PerformanceAttributes)
+                        this.PerformanceAttributes.free();
+                } catch (exc) {
+                    this.PerformanceAttributes = undefined;
+                    wLogger.debug(
+                        `BPPD(updateMapMetadata) unnable to free PerformanceAttributes`,
+                        exc
+                    );
+                }
             } catch (error) {
                 wLogger.debug(
                     `BPPD(updateMapMetadata) Can't get map`,
@@ -293,7 +310,7 @@ export class BeatmapPPData extends AbstractEntity {
             }
 
             this.beatmap = new rosu.Beatmap(this.beatmapContent);
-            if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode)
+            if (this.beatmap.mode !== currentMode)
                 this.beatmap.convert(currentMode);
 
             const beatmapCheckTime = performance.now();
