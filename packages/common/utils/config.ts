@@ -77,7 +77,8 @@ export const config = {
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
     timestamp: 0,
     currentVersion: '',
-    updateVersion: ''
+    updateVersion: '',
+    logsPath: ''
 };
 
 export const updateConfigFile = () => {
