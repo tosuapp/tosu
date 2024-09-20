@@ -17,8 +17,8 @@ Pull requests are the best way to propose changes to the codebase. We actively w
 2. Make sure your code lints. (`pnpm run prettier:fix`)
 3. Issue that pull request!
 
-## Any contributions you make will be under the GNU General Public License v3.0
-In short, when you submit code changes, your submissions are understood to be under the same [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/) that covers the project. Feel free to contact the maintainers if that's a concern.
+## Any contributions you make will be under the GNU Lesser General Public License v3.0
+In short, when you submit code changes, your submissions are understood to be under the same [GNU Lesser General Public License v3.0](https://choosealicense.com/licenses/lgpl-3.0/) that covers the project. Feel free to contact the maintainers if that's a concern.
 
 ## Report bugs using Github's [issues](https://github.com/KotRikD/tosu/issues)
 We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/KotRikD/tosu/issues/new); it's that easy!
