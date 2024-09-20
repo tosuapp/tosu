@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/KotRikD/tosu/compare/v3.2.2...v3.3.0) (2024-09-20)
+
+
+### Features
+
+* Write logs to a file (only in debug) ([971d205](https://github.com/KotRikD/tosu/commit/971d2053dcfe4abc2ddda6b8f3efcf998916522d))
+
+
+### Bug Fixes
+
+* Try to fix `null pointer` which cause zero pp sometimes ([6c1682e](https://github.com/KotRikD/tosu/commit/6c1682e117dc4c8260c4e59e788d5f8cffcf7265))
+
 ### [3.2.2](https://github.com/KotRikD/tosu/compare/v3.2.1...v3.2.2) (2024-09-16)
 
 
