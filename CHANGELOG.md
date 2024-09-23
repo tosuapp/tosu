@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.3.1](https://github.com/KotRikD/tosu/compare/v3.3.0...v3.3.1) (2024-09-23)
+
+
+### Bug Fixes
+
+* update chat checker signature ([36b3bf6](https://github.com/KotRikD/tosu/commit/36b3bf66645595f8b4b5fb0c4c4d789142ba1a84))
+
 ## [3.3.0](https://github.com/KotRikD/tosu/compare/v3.2.2...v3.3.0) (2024-09-20)
 
 
