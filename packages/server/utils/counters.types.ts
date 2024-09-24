@@ -19,6 +19,7 @@ export type ISettingsType =
     | 'note';
 
 export interface ICounter {
+    _downloaded?: boolean;
     _settings?: boolean;
     folderName: string;
     name: string;

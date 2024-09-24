@@ -404,6 +404,10 @@ function rebuildJSON({
                     : '';
 
             items += resultItemHTML
+                .replace(
+                    '{CLASS}',
+                    item._downloaded === true ? ' downloaded' : ''
+                )
                 .replace('{NAME}', name)
                 .replace('{AUTHOR}', author)
                 .replace('{AUTHOR_LINKS}', links)
@@ -535,14 +539,17 @@ export async function buildExternalCounters(
     let text = '';
 
     try {
-        const request = await fetch('https://osuck.net/tosu/api.json');
-        const json: any = await request.json();
+        const request: any = await fetch('https://osuck.net/tosu/api.json');
+        const json: ICounter[] = await request.json();
 
         const exists = getLocalCounters();
-        const array = json.filter(
-            (r) =>
-                !exists.find((s) => s.name === r.name && s.author === r.author)
-        );
+        const array = json.map((r) => {
+            const find = exists.find(
+                (s) => s.name === r.name && s.author === r.author
+            );
+            if (find) r._downloaded = true;
+            return r;
+        });
 
         const build = rebuildJSON({
             array,

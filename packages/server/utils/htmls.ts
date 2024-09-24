@@ -28,7 +28,7 @@ export const authorLinksHTML =
 export const galleryImageHTML = '<img src="{LINK}" />';
 
 export const resultItemHTML = `
-<div class="result-item">
+<div class="result-item{CLASS}">
   <div class="ri-head flexer">
     <div>
       {NAME}
