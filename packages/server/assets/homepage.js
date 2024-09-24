@@ -18,7 +18,7 @@ let isClosingModal = false;
 let isBuilderModal = false;
 
 
-document.querySelectorAll(`.tabs>.tab-item`).forEach(r => {
+document.querySelectorAll(`a`).forEach(r => {
   if (!r.href.includes(`?tab=${tab}`)) return;
 
   r.classList.add('active');
@@ -274,6 +274,21 @@ async function openCounter(element) {
   const download = await fetch(`/api/counters/open/${folderName}`);
   const json = await download.json();
 
+
+  let success_text = `PP Counter Opened: ${folderName}`;
+  let target = element.parentElement.parentElement.parentElement;
+
+
+  if (folderName == 'tosu.exe') {
+    success_text = 'Tosu folder opened'
+    target = element.parentElement;
+  }
+  else if (folderName == 'static.exe') {
+    success_text = 'Static folder opened'
+    target = element;
+  };
+
+
   if (json.error != null) {
     if (typeof json.error == 'object') {
       try {
@@ -282,7 +297,7 @@ async function openCounter(element) {
     };
 
     displayNotification({
-      element: element.parentElement.parentElement.parentElement,
+      element: target,
       text: `Error while opening: ${json.error}`,
       classes: ['red'],
       delay: 3000,
@@ -292,8 +307,8 @@ async function openCounter(element) {
   };
 
   displayNotification({
-    element: element.parentElement.parentElement.parentElement,
-    text: `PP Counter Opened: ${folderName}`,
+    element: target,
+    text: success_text,
     classes: ['green'],
     delay: 3000,
   });
@@ -1091,6 +1106,7 @@ window.addEventListener('click', (event) => {
   };
   if (t?.classList.value.includes(' delete-button')) return deleteCounter(t);
   if (t?.classList.value.includes(' open-button')) return openCounter(t);
+  if (t?.classList.value.includes(' open-folder-button')) return openCounter(t);
 
   if (t?.classList.value.includes(' save-button')) {
     startDownload(t);
