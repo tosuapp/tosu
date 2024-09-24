@@ -671,9 +671,9 @@ const optionHTML = `
       <option {text_SELECTED} value="text">Text</option>
       <option {number_SELECTED} value="number">Number</option>
       <option {color_SELECTED} value="color">Color</option>
-      <option {password_SELECTED} value="password">Password</option>
-      <option {checkbox_SELECTED} value="checkbox">Checkbox</option>
-      <option {options_SELECTED} value="options">Options list</option>
+      <option {checkbox_SELECTED} value="checkbox">Toggle</option>
+      <option {options_SELECTED} value="options">Dropdown select</option>
+      <option {password_SELECTED} value="password">Password/Secret value</option>
     </select>
   </div>
   <div class="si flexer">
