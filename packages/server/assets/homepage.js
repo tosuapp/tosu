@@ -140,8 +140,10 @@ async function downloadCounter(element, id) {
       delay: 3000,
     });
 
-    endDownload(element, id, 'Error');
-    element.classList.remove('disable');
+    setTimeout(() => {
+        endDownload(element, id, 'Download');
+        element.classList.remove('disable');
+    }, 101);
     return;
   };
 
