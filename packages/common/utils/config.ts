@@ -60,7 +60,7 @@ dotenv.config({ path: configPath });
 export const config = {
     enableAutoUpdate: (process.env.ENABLE_AUTOUPDATE || 'true') === 'true',
     openDashboardOnStartup:
-        (process.env.OPEN_DASHBOARD_ON_STARTUP || '') === 'true',
+        (process.env.OPEN_DASHBOARD_ON_STARTUP || 'true') === 'true',
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
     enableKeyOverlay: (process.env.ENABLE_KEY_OVERLAY || '') === 'true',
@@ -143,7 +143,7 @@ export const updateConfigFile = () => {
         newOptions += 'OPEN_DASHBOARD_ON_STARTUP, ';
         fs.appendFileSync(
             configPath,
-            '\nOPEN_DASHBOARD_ON_STARTUP=false',
+            '\nOPEN_DASHBOARD_ON_STARTUP=true',
             'utf8'
         );
     }
