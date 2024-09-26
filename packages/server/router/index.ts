@@ -1,6 +1,7 @@
 import {
     downloadFile,
     getCachePath,
+    getProgramPath,
     getStaticPath,
     unzip,
     wLogger,
@@ -148,7 +149,10 @@ export default function buildBaseApi(server: Server) {
                 }
 
                 const staticPath = getStaticPath();
-                const folderPath = path.join(staticPath, decodeURI(folderName));
+                let folderPath = path.join(staticPath, decodeURI(folderName));
+                if (folderName === 'tosu.exe') folderPath = getProgramPath();
+                else if (folderName === 'static.exe')
+                    folderPath = getStaticPath();
 
                 if (!fs.existsSync(folderPath)) {
                     return sendJson(res, {
@@ -156,15 +160,24 @@ export default function buildBaseApi(server: Server) {
                     });
                 }
 
-                // ADDED MULTI PLATFORM SUPPORT
-                // mac exec(`open "${path}"`, (err, stdout, stderr) => {
-                // linux exec(`xdg-open "${path}"`, (err, stdout, stderr) => {
+                let command;
+                switch (process.platform) {
+                    case 'win32':
+                        command = `start "" "${folderPath}"`;
+                        break;
+                    case 'linux':
+                        command = `xdg-open "${folderPath}"`;
+                        break;
+                    case 'darwin':
+                        command = `open -R "${folderPath}"`;
+                        break;
+                }
 
                 wLogger.info(
                     `PP Counter opened: ${folderName} (${req.headers.referer})`
                 );
 
-                exec(`start "" "${folderPath}"`, (err) => {
+                exec(command, (err) => {
                     if (err) {
                         wLogger.error('Error opening file explorer:');
                         wLogger.debug(err);

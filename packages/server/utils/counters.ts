@@ -404,6 +404,10 @@ function rebuildJSON({
                     : '';
 
             items += resultItemHTML
+                .replace(
+                    '{CLASS}',
+                    item._downloaded === true ? ' downloaded' : ''
+                )
                 .replace('{NAME}', name)
                 .replace('{AUTHOR}', author)
                 .replace('{AUTHOR_LINKS}', links)
@@ -535,14 +539,17 @@ export async function buildExternalCounters(
     let text = '';
 
     try {
-        const request = await fetch('https://osuck.net/tosu/api.json');
-        const json: any = await request.json();
+        const request: any = await fetch('https://osuck.net/tosu/api.json');
+        const json: ICounter[] = await request.json();
 
         const exists = getLocalCounters();
-        const array = json.filter(
-            (r) =>
-                !exists.find((s) => s.name === r.name && s.author === r.author)
-        );
+        const array = json.map((r) => {
+            const find = exists.find(
+                (s) => s.name === r.name && s.author === r.author
+            );
+            if (find) r._downloaded = true;
+            return r;
+        });
 
         const build = rebuildJSON({
             array,
@@ -844,7 +851,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
     const pageContent = `<div class="settings">
         <h3>How to Add Your Own Counter <a>Locally</a></h3>
         <p>
-          1. <b>Create a new folder</b>:<br>- First, create a <a>new folder</a> inside your static folder.<br><br>
+          1. <b>Create a new folder</b>:<br>- First, create a <a>new folder</a> inside your <a class="button open-button small" n="static.exe">static folder</a>.<br><br>
           2. <b>Move your pp counter files</b>:<br>- Next, move <a>your pp counter</a> files into the newly created folder.<br><br>
           3. <b>Download and place metadata file</b>:<br>- Download the <a
              href="https://raw.githubusercontent.com/cyperdark/osu-counters/master/quickstart/metadata.txt"
