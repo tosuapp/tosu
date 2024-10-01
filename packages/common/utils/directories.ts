@@ -16,6 +16,8 @@ export function recursiveFilesSearch({
 }) {
     const files = fs.readdirSync(dir);
     files.forEach((file) => {
+        if (file.startsWith('.')) return;
+
         const filePath = path.join(dir, file);
         const stats = fs.statSync(filePath);
         if (stats.isDirectory()) {
