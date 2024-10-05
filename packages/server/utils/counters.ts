@@ -30,7 +30,8 @@ import {
     saveSettingsButtonHTML,
     selectHTML,
     settingsItemHTML,
-    submitCounterHTML
+    submitCounterHTML,
+    textareaHTML
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
 
@@ -789,6 +790,20 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.showMpCommands}`)
         );
 
+    const allowedIPsHTML = settingsItemHTML
+        .replace('{NAME}', 'ALLOWED_IPS')
+        .replace(
+            '{DESCRIPTION}',
+            `Specify IP's which allowed to change and access tosu API's`
+        )
+        .replace(
+            '{INPUT}',
+            textareaHTML
+                .replace(/{ID}/gm, 'ALLOWED_IPS')
+                .replace('{ADDON}', 'rows="5"')
+                .replace('{VALUE}', `${config.allowedIPs}`)
+        );
+
     const settings = `<div class="settings">
     ${debugHTML}
     <div></div>
@@ -811,6 +826,8 @@ export function buildSettings(res: http.ServerResponse) {
     <div></div>
     ${serverIPHTML}
     ${serverPortHTML}
+    <div></div>
+    ${allowedIPsHTML}
     <div></div>
     <div></div>
     ${staticFolderPathtHTML}

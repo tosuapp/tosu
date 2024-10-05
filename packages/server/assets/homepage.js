@@ -372,6 +372,7 @@ async function saveSettings(element) {
   const ENABLE_AUTOUPDATE = document.querySelector('#ENABLE_AUTOUPDATE');
   const OPEN_DASHBOARD_ON_STARTUP = document.querySelector('#OPEN_DASHBOARD_ON_STARTUP');
   const SHOW_MP_COMMANDS = document.querySelector('#SHOW_MP_COMMANDS');
+  const ALLOWED_IPS = document.querySelector('#ALLOWED_IPS');
 
   if (BACKUP_SERVER_IP != SERVER_IP.value || BACKUP_SERVER_PORT != SERVER_PORT.value)
     redirect = true;
@@ -391,6 +392,7 @@ async function saveSettings(element) {
       PRECISE_DATA_POLL_RATE: PRECISE_DATA_POLL_RATE.value,
       SERVER_IP: SERVER_IP.value,
       SERVER_PORT: SERVER_PORT.value,
+      ALLOWED_IPS: ALLOWED_IPS.value,
       STATIC_FOLDER_PATH: STATIC_FOLDER_PATH.value,
     }),
   });

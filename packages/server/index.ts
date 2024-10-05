@@ -1,4 +1,4 @@
-import { config } from '@tosu/common';
+import { config, wLogger } from '@tosu/common';
 
 import buildAssetsApi from './router/assets';
 import buildBaseApi from './router/index';
@@ -7,6 +7,7 @@ import buildV1Api from './router/v1';
 import buildV2Api from './router/v2';
 import { handleSocketCommands } from './utils/commands';
 import { HttpServer } from './utils/http';
+import { isRequestAllowed } from './utils/index';
 import { Websocket } from './utils/socket';
 
 export class Server {
@@ -96,6 +97,22 @@ export class Server {
                 'POST, GET, PUT, DELETE, OPTIONS'
             );
             next();
+        });
+
+        this.app.use((req, res, next) => {
+            const allowed = isRequestAllowed(req);
+            if (allowed) {
+                return next();
+            }
+
+            wLogger.warn('Unallowed request', req.url, {
+                address: req.socket.remoteAddress,
+                origin: req.headers.origin,
+                referer: req.headers.referer
+            });
+
+            res.statusCode = 404;
+            res.end('Not Found');
         });
 
         this.app.use((req, _, next) => {
