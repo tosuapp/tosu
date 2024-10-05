@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.4.0](https://github.com/KotRikD/tosu/compare/v3.3.1...v3.4.0) (2024-10-05)
+
+
+### Features
+
+* Add links below header ([2f174d3](https://github.com/KotRikD/tosu/commit/2f174d3d3f189fdb69debe4967043f27cdf29c4f))
+
+
+### Bug Fixes
+
+* Actually open dashboard on startup ([471eb24](https://github.com/KotRikD/tosu/commit/471eb242e2e137d43555c2e0fe9239a66544d7ae))
+* Add other platforms to open counter link api ([aa9a207](https://github.com/KotRikD/tosu/commit/aa9a207cd729039edf1ab14687afecae45eb0763))
+* Reduce slow load for `installed` tab ([78eac1f](https://github.com/KotRikD/tosu/commit/78eac1fafed63937d7bd842d3c83efa6dc726f1e))
+* Show note instead of hiding counter when it's downloaded ([9954526](https://github.com/KotRikD/tosu/commit/9954526d7488d7d96a682d7f7932f20a6d1dff6f))
+
 ### [3.3.1](https://github.com/KotRikD/tosu/compare/v3.3.0...v3.3.1) (2024-09-23)
 
 
