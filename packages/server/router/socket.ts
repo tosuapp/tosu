@@ -1,6 +1,6 @@
 import { wLogger } from '@tosu/common';
 
-import { HttpServer, Websocket } from '../index';
+import { HttpServer, Websocket, isRequestAllowed } from '../index';
 
 export default function buildSocket({
     app,
@@ -17,6 +17,19 @@ export default function buildSocket({
     WS_COMMANDS: Websocket;
 }) {
     app.server.on('upgrade', function (request, socket, head) {
+        const allowed = isRequestAllowed(request);
+        if (!allowed) {
+            wLogger.warn('External WebSocket request detected', request.url, {
+                address: request.socket.remoteAddress,
+                origin: request.headers.origin,
+                referer: request.headers.referer
+            });
+
+            socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+            socket.destroy();
+            return;
+        }
+
         try {
             const hostname = request.headers.host;
             const parsedURL = new URL(`http://${hostname}${request.url}`);

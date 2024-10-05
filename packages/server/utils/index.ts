@@ -1,3 +1,4 @@
+import { config } from '@tosu/common';
 import http from 'http';
 import path from 'path';
 
@@ -82,5 +83,48 @@ export function sendJson(response: http.ServerResponse, json: object | any[]) {
         return response.end(JSON.stringify(json));
     } catch (error) {
         return response.end(JSON.stringify({ error: 'Json parsing error' }));
+    }
+}
+
+export function isRequestAllowed(req: http.IncomingMessage) {
+    const remoteAddress = req.socket.remoteAddress;
+
+    const origin = req.headers.origin;
+    const referer = req.headers.referer;
+
+    const isOriginOrRefererAllowed =
+        isAllowedIP(origin) || isAllowedIP(referer);
+
+    // NOT SURE
+    if (origin === undefined && referer === undefined) {
+        return true;
+    }
+
+    if (isOriginOrRefererAllowed) {
+        return true;
+    }
+
+    if (isOriginOrRefererAllowed && isAllowedIP(remoteAddress)) {
+        return false;
+    }
+
+    return false;
+}
+
+function isAllowedIP(url: string | undefined) {
+    if (!url) return false;
+
+    const allowedIPs = config.allowedIPs.split(',');
+    try {
+        const parseURL = new URL(url);
+        return allowedIPs.some(
+            (r) =>
+                r.toLowerCase().trim() ===
+                parseURL.hostname.toLowerCase().trim()
+        );
+    } catch (error) {
+        return allowedIPs.some(
+            (r) => r.toLowerCase().trim() === url.toLowerCase().trim()
+        );
     }
 }

@@ -79,7 +79,6 @@ export class HttpServer {
         res: http.ServerResponse
     ) {
         const startTime = performance.now();
-        let index = 0;
         let body = '';
 
         res.on('finish', () => {
@@ -91,11 +90,18 @@ export class HttpServer {
             );
         });
 
-        const next = () => {
+        const next = (index) => {
             if (index < this.middlewares.length) {
+                const savedIndex = index;
                 const middleware = this.middlewares[index++];
-                middleware(req, res, next);
 
+                try {
+                    middleware(req, res, () => {
+                        next(savedIndex + 1);
+                    });
+                } catch (error) {
+                    wLogger.error('middleware error', error);
+                }
                 return;
             }
 
@@ -115,7 +121,7 @@ export class HttpServer {
             this.handleNext(req, res);
         };
 
-        next();
+        next(0);
     }
 
     private handleNext(req: ExtendedIncomingMessage, res: http.ServerResponse) {

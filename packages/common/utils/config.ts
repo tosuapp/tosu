@@ -23,6 +23,8 @@ CALCULATE_PP=true
 ENABLE_KEY_OVERLAY=true
 ENABLE_AUTOUPDATE=true
 
+ALLOWED_IPS=127.0.0.1,localhost
+
 # Reference: 1 second = 1000 milliseconds
 # Once in what value, the programme should read the game values (in milliseconds)
 POLL_RATE=100
@@ -75,6 +77,7 @@ export const config = {
     serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
+    allowedIPs: process.env.ALLOWED_IPS || '',
     timestamp: 0,
     currentVersion: '',
     updateVersion: '',
@@ -148,6 +151,15 @@ export const updateConfigFile = () => {
         );
     }
 
+    if (!process.env.ALLOWED_IPS) {
+        newOptions += 'ALLOWED_IPS, ';
+        fs.appendFileSync(
+            configPath,
+            '\nALLOWED_IPS=127.0.0.1,localhost',
+            'utf8'
+        );
+    }
+
     if (newOptions !== '') {
         wLogger.warn(`New options available in config: ${newOptions}\n`);
     }
@@ -192,7 +204,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     }
 
     const enableAutoUpdate = (parsed.ENABLE_AUTOUPDATE || '') === 'true';
-    const openDashboard = (parsed.OPEN_DASHBOARD || '') === 'true';
+    const openDashboardOnStartup = (parsed.OPEN_DASHBOARD || '') === 'true';
     const debugLogging = (parsed.DEBUG_LOG || '') === 'true';
     const serverIP = parsed.SERVER_IP || '127.0.0.1';
     const serverPort = Number(parsed.SERVER_PORT || '24050');
@@ -205,11 +217,12 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const showMpCommands = (parsed.SHOW_MP_COMMANDS || '') === 'true';
     const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
     const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
+    const allowedIPs = parsed.ALLOWED_IPS || '';
 
     // determine whether config actually was updated or not
     updated =
         config.enableAutoUpdate !== enableAutoUpdate ||
-        config.openDashboardOnStartup !== openDashboard ||
+        config.openDashboardOnStartup !== openDashboardOnStartup ||
         config.debugLogging !== debugLogging ||
         config.calculatePP !== calculatePP ||
         config.enableKeyOverlay !== enableKeyOverlay ||
@@ -219,7 +232,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.staticFolderPath !== staticFolderPath ||
         config.enableGosuOverlay !== enableGosuOverlay ||
         config.serverIP !== serverIP ||
-        config.serverPort !== serverPort;
+        config.serverPort !== serverPort ||
+        config.allowedIPs !== allowedIPs;
 
     if (config.serverIP !== serverIP || config.serverPort !== serverPort) {
         config.serverIP = serverIP;
@@ -253,11 +267,15 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 
     config.enableGosuOverlay = enableGosuOverlay;
 
+    config.enableAutoUpdate = enableAutoUpdate;
+    config.openDashboardOnStartup = openDashboardOnStartup;
+
     config.debugLogging = debugLogging;
     config.calculatePP = calculatePP;
     config.enableKeyOverlay = enableKeyOverlay;
     config.showMpCommands = showMpCommands;
     config.staticFolderPath = staticFolderPath;
+    config.allowedIPs = allowedIPs;
 
     const staticPath = path.join(getProgramPath(), 'static');
     if (config.staticFolderPath === './static' && !fs.existsSync(staticPath)) {
@@ -276,6 +294,7 @@ export const writeConfig = (httpServer: any, options: any) => {
     text += `OPEN_DASHBOARD_ON_STARTUP=${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup}\n\n`;
     text += `ENABLE_GOSU_OVERLAY=${options.ENABLE_GOSU_OVERLAY ?? config.enableGosuOverlay}\n`;
     text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay}\n\n`;
+    text += `ALLOWED_IPS=${options.ALLOWED_IPS ?? config.allowedIPs}\n\n`;
     text += `POLL_RATE=${options.POLL_RATE ?? config.pollRate}\n`;
     text += `PRECISE_DATA_POLL_RATE=${options.PRECISE_DATA_POLL_RATE ?? config.preciseDataPollRate}\n\n`;
     text += `SHOW_MP_COMMANDS=${options.SHOW_MP_COMMANDS ?? config.showMpCommands}\n\n`;
