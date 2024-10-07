@@ -12,7 +12,7 @@
 1. Clone repository
 
 ```
-git clone https://github.com/KotRikD/tosu.git
+git clone https://github.com/tosuapp/tosu.git
 ```
 
 2. Go to project folder
