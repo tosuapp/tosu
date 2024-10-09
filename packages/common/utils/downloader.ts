@@ -50,7 +50,7 @@ export const downloadFile = (
         const options = {
             headers: {
                 Accept: 'application/octet-stream',
-                'User-Agent': '@KotRikD/tosu'
+                'User-Agent': '@tosuapp/tosu'
             }
         };
 

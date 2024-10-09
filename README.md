@@ -1,7 +1,7 @@
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/github/release/KotRikD/tosu.svg?style=for-the-badge&color=%235686A2" />
+  <img alt="Version" src="https://img.shields.io/github/release/tosuapp/tosu.svg?style=for-the-badge&color=%235686A2" />
   <img src="https://img.shields.io/badge/node-%3E%3D20.11.1-45915E.svg?style=for-the-badge&logo=node.js&logoColor=white" />
-  <a href="https://github.com/KotRikD/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/KotRikD/tosu?style=for-the-badge&color=%23A27456" /></a>
+  <a href="https://github.com/tosuapp/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/tosuapp/tosu?style=for-the-badge&color=%23A27456" /></a>
   <a href="https://twitter.com/kotrik0" target="_blank"><img alt="Twitter: kotrik0" src="https://img.shields.io/badge/kotrik0-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" /></a>
 </p>
 
@@ -22,15 +22,15 @@ Eponymous software for reading osu! memory, accounting for most of gosumemory's 
 
 <div  align="center">
 <a href="https://boosty.to/kotrik/donate"><img src=".github/button-boosty.png" /></a><br>
-<a href="https://github.com/KotRikD/tosu/releases/latest"><img src=".github/button-download.png" /></a>
+<a href="https://github.com/tosuapp/tosu/releases/latest"><img src=".github/button-download.png" /></a>
 <a href="https://discord.gg/WX7BTs8kwh"><img src=".github/button-discord.png" /></a>
-<a href="https://github.com/cyperdark/osu-counters/tree/master/counters"><img src=".github/button-counters.png" /></a>
+<a href="https://github.com/tosuapp/counters/tree/master/counters"><img src=".github/button-counters.png" /></a>
 </div>
 
 
 Instruction
 ---
-1. Download [tosu](https://github.com/KotRikD/tosu/releases/latest)
+1. Download [tosu](https://github.com/tosuapp/tosu/releases/latest)
 2. Extract tosu.exe to a `Folder`
 3. Run `tosu.exe`
 4. Go to [http://127.0.0.1:24050](http://127.0.0.1:24050)
@@ -68,7 +68,7 @@ Features
 In-game overlay
 ---
 - To enable it, you need to edit `tosu.env`, and turn on `ENABLE_GOSU_OVERLAY=true` (make it equal `true`)
-- Tutorial: [link](https://github.com/KotRikD/tosu/wiki/How-to-enable-ingame-overlay)
+- Tutorial: [link](https://github.com/tosuapp/tosu/wiki/How-to-enable-ingame-overlay)
 ---
 
 
@@ -79,19 +79,19 @@ Routes
 gosu compatible api
 - `/` - List of all counters you have
 - `/json` - Example of `/ws` response
-- `/ws` - [response example](https://github.com/KotRikD/tosu/wiki/v1-websocket-api-response)
+- `/ws` - [response example](https://github.com/tosuapp/tosu/wiki/v1-websocket-api-response)
 - `/Songs/{path}` - Show content of the file, or show list of files for a folder
 
 v2 _**(tosu own api)**_
 - `/json/v2` - Example of `/websocket/v2` response
-- `/websocket/v2` - [response example](https://github.com/KotRikD/tosu/wiki/v2-websocket-api-response)
-- `/websocket/v2/precise` - [response example](https://github.com/KotRikD/tosu/wiki/v2-precise-websocket-api-response)
+- `/websocket/v2` - [response example](https://github.com/tosuapp/tosu/wiki/v2-websocket-api-response)
+- `/websocket/v2/precise` - [response example](https://github.com/tosuapp/tosu/wiki/v2-precise-websocket-api-response)
 - `/files/beatmap/{path}` - same as `/Songs/{path}`
 - `/files/skin/{path}` - similar as `/files/beatmap/{path}`, but for a skin
 
 api
 - `/api/calculate/pp` - Calculate pp for beatmap with custom data
-  - [Response example](https://github.com/KotRikD/tosu/wiki/api-calculate-pp-response-example)
+  - [Response example](https://github.com/tosuapp/tosu/wiki/api-calculate-pp-response-example)
   - BY DEFAULT IT USES CURRENT BEATMAP (:))
   - All parameters are optional
   - `path` - Path to .osu file. Example: C:/osu/Songs/beatmap/file.osu
@@ -132,11 +132,11 @@ Special thanks to [@xxCherry](https://github.com/xxCherry), for providing memory
 
 ## 🤝 Contributing
 
-Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KotRikD/tosu/issues). You can also take a look at the [contributing guide](https://github.com/KotRikD/tosu/blob/master/CONTRIBUTING.md).
+Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/tosuapp/tosu/issues). You can also take a look at the [contributing guide](https://github.com/tosuapp/tosu/blob/master/CONTRIBUTING.md).
 
 <br />
 
 ## 📝 License
 
 Copyright © 2023-2024 [Mikhail Babynichev](https://github.com/KotRikD).<br />
-This project is [LGPL-3.0](https://github.com/KotRikD/tosu/blob/master/LICENSE) licensed.
+This project is [LGPL-3.0](https://github.com/tosuapp/tosu/blob/master/LICENSE) licensed.

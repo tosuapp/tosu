@@ -36,13 +36,13 @@
       "pnpm run lint:fix"
     ]
   },
-  "homepage": "https://github.com/KotRikD/tosu#readme",
+  "homepage": "https://github.com/tosuapp/tosu#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KotRikD/tosu.git"
+    "url": "git+https://github.com/tosuapp/tosu.git"
   },
   "bugs": {
-    "url": "https://github.com/KotRikD/tosu/issues"
+    "url": "https://github.com/tosuapp/tosu/issues"
   },
   "engines": {
     "node": ">=20.11.1"

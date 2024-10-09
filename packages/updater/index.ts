@@ -14,7 +14,6 @@ import path from 'path';
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
 
-const repositoryName = 'tosu';
 const fileDestination = path.join(getProgramPath(), 'update.zip');
 const backupExecutablePath = path.join(getProgramPath(), 'tosu_old.exe');
 
@@ -50,7 +49,7 @@ export const checkUpdates = async () => {
         }
 
         const request = await fetch(
-            `https://api.github.com/repos/KotRikD/${repositoryName}/releases/latest`
+            `https://api.github.com/repos/tosuapp/tosu/releases/latest`
         );
         const json = (await request.json()) as any;
         const {
