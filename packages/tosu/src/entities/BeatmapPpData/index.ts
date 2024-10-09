@@ -310,7 +310,7 @@ export class BeatmapPPData extends AbstractEntity {
             }
 
             this.beatmap = new rosu.Beatmap(this.beatmapContent);
-            if (this.beatmap.mode !== currentMode)
+            if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode)
                 this.beatmap.convert(currentMode);
 
             const beatmapCheckTime = performance.now();
