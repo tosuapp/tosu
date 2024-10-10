@@ -556,5 +556,8 @@ export interface TourneyClients {
         globalRank: number;
         totalPP: number;
     };
+    beatmap: {
+        stats: Stats;
+    };
     play: Play;
 }

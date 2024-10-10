@@ -18,7 +18,10 @@ import {
     TourneyClients,
     UserLoginStatus
 } from '@/api/types/v2';
+import { BeatmapPPData } from '@/entities/BeatmapPpData';
+import { GamePlayData } from '@/entities/GamePlayData';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
+import { MenuData } from '@/entities/MenuData';
 import { InstanceManager } from '@/objects/instanceManager/instanceManager';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
@@ -237,188 +240,9 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             version: menuData.Difficulty,
 
-            stats: {
-                stars: {
-                    live: fixDecimals(beatmapPpData.currAttributes.stars),
-                    aim: beatmapPpData.calculatedMapAttributes.aim
-                        ? fixDecimals(beatmapPpData.calculatedMapAttributes.aim)
-                        : undefined,
-                    speed: beatmapPpData.calculatedMapAttributes.speed
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.speed
-                          )
-                        : undefined,
-                    flashlight: beatmapPpData.calculatedMapAttributes.flashlight
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.flashlight
-                          )
-                        : undefined,
-                    sliderFactor: beatmapPpData.calculatedMapAttributes
-                        .sliderFactor
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.sliderFactor
-                          )
-                        : undefined,
-                    stamina: beatmapPpData.calculatedMapAttributes.stamina
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.stamina
-                          )
-                        : undefined,
-                    rhythm: beatmapPpData.calculatedMapAttributes.rhythm
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.rhythm
-                          )
-                        : undefined,
-                    color: beatmapPpData.calculatedMapAttributes.color
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.color
-                          )
-                        : undefined,
-                    peak: beatmapPpData.calculatedMapAttributes.peak
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.peak
-                          )
-                        : undefined,
-                    hitWindow: beatmapPpData.calculatedMapAttributes.hitWindow
-                        ? fixDecimals(
-                              beatmapPpData.calculatedMapAttributes.hitWindow
-                          )
-                        : undefined,
-                    total: fixDecimals(
-                        beatmapPpData.calculatedMapAttributes.fullStars
-                    )
-                },
-
-                ar: {
-                    original: fixDecimals(menuData.AR),
-                    converted: fixDecimals(
-                        beatmapPpData.calculatedMapAttributes.ar
-                    )
-                },
-                cs: {
-                    original: fixDecimals(menuData.CS),
-                    converted: fixDecimals(
-                        beatmapPpData.calculatedMapAttributes.cs
-                    )
-                },
-                od: {
-                    original: fixDecimals(menuData.OD),
-                    converted: fixDecimals(
-                        beatmapPpData.calculatedMapAttributes.od
-                    )
-                },
-                hp: {
-                    original: fixDecimals(menuData.HP),
-                    converted: fixDecimals(
-                        beatmapPpData.calculatedMapAttributes.hp
-                    )
-                },
-
-                bpm: {
-                    realtime: fixDecimals(beatmapPpData.realtimeBPM),
-                    common: fixDecimals(beatmapPpData.commonBPM),
-                    min: fixDecimals(beatmapPpData.minBPM),
-                    max: fixDecimals(beatmapPpData.maxBPM)
-                },
-
-                objects: {
-                    circles: beatmapPpData.calculatedMapAttributes.circles,
-                    sliders: beatmapPpData.calculatedMapAttributes.sliders,
-                    spinners: beatmapPpData.calculatedMapAttributes.spinners,
-                    holds: beatmapPpData.calculatedMapAttributes.holds,
-                    total:
-                        beatmapPpData.calculatedMapAttributes.circles +
-                        beatmapPpData.calculatedMapAttributes.sliders +
-                        beatmapPpData.calculatedMapAttributes.spinners +
-                        beatmapPpData.calculatedMapAttributes.holds
-                },
-
-                maxCombo: beatmapPpData.calculatedMapAttributes.maxCombo
-            }
+            stats: buildBeatmapStats(beatmapPpData, menuData)
         },
-        play: {
-            playerName: gamePlayData.PlayerName,
-
-            mode: {
-                number: gamePlayData.Mode,
-                name: Modes[gamePlayData.Mode] || ''
-            },
-
-            score: gamePlayData.Score,
-            accuracy: gamePlayData.Accuracy,
-
-            healthBar: {
-                normal: (gamePlayData.PlayerHP / 200) * 100,
-                smooth: (gamePlayData.PlayerHPSmooth / 200) * 100
-            },
-
-            hits: {
-                300: gamePlayData.Hit300,
-                geki: gamePlayData.HitGeki,
-                100: gamePlayData.Hit100,
-                katu: gamePlayData.HitKatu,
-                50: gamePlayData.Hit50,
-                0: gamePlayData.HitMiss,
-                sliderBreaks: gamePlayData.HitSB
-            },
-
-            hitErrorArray: gamePlayData.HitErrors,
-
-            combo: {
-                current: gamePlayData.Combo,
-                max: gamePlayData.MaxCombo
-            },
-            mods: {
-                number: currentMods,
-                name: getOsuModsString(currentMods)
-            },
-            rank: {
-                current: gamePlayData.GradeCurrent,
-                maxThisPlay: gamePlayData.GradeExpected
-            },
-            pp: {
-                current: fixDecimals(beatmapPpData.currAttributes.pp),
-                fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
-                maxAchievedThisPlay: fixDecimals(
-                    beatmapPpData.currAttributes.maxThisPlayPP
-                ),
-                detailed: {
-                    current: {
-                        aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
-                        speed: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppSpeed
-                        ),
-                        accuracy: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppAccuracy
-                        ),
-                        difficulty: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppDifficulty
-                        ),
-                        flashlight: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppFlashlight
-                        ),
-                        total: fixDecimals(beatmapPpData.currAttributes.pp)
-                    },
-                    fc: {
-                        aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
-                        speed: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppSpeed
-                        ),
-                        accuracy: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppAccuracy
-                        ),
-                        difficulty: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppDifficulty
-                        ),
-                        flashlight: fixDecimals(
-                            beatmapPpData.currPPAttributes.ppFlashlight
-                        ),
-                        total: fixDecimals(beatmapPpData.currAttributes.fcPP)
-                    }
-                }
-            },
-            unstableRate: gamePlayData.UnstableRate
-        },
+        play: buildPlay(gamePlayData, beatmapPpData, currentMods),
         leaderboard: gamePlayData.Leaderboard
             ? gamePlayData.Leaderboard.leaderBoard.map((slot) =>
                   convertMemoryPlayerToResult(slot, Modes[gamePlayData.Mode])
@@ -504,11 +328,13 @@ const buildTourneyData = (
             const {
                 allTimesData,
                 gamePlayData,
+                menuData,
                 tourneyUserProfileData,
                 beatmapPpData
             } = instance.getServices([
                 'allTimesData',
                 'gamePlayData',
+                'menuData',
                 'tourneyUserProfileData',
                 'beatmapPpData'
             ]);
@@ -534,97 +360,10 @@ const buildTourneyData = (
                     globalRank: tourneyUserProfileData.GlobalRank,
                     totalPP: tourneyUserProfileData.PP
                 },
-                play: {
-                    playerName: gamePlayData.PlayerName,
-
-                    mode: {
-                        number: gamePlayData.Mode,
-                        name: Modes[gamePlayData.Mode] || ''
-                    },
-
-                    score: gamePlayData.Score,
-                    accuracy: gamePlayData.Accuracy,
-
-                    healthBar: {
-                        normal: (gamePlayData.PlayerHP / 200) * 100,
-                        smooth: (gamePlayData.PlayerHPSmooth / 200) * 100
-                    },
-                    hits: {
-                        300: gamePlayData.Hit300,
-                        geki: gamePlayData.HitGeki,
-                        100: gamePlayData.Hit100,
-                        katu: gamePlayData.HitKatu,
-                        50: gamePlayData.Hit50,
-                        0: gamePlayData.HitMiss,
-                        sliderBreaks: gamePlayData.HitSB
-                    },
-
-                    hitErrorArray: gamePlayData.HitErrors,
-
-                    mods: {
-                        number: currentMods,
-                        name: getOsuModsString(currentMods)
-                    },
-                    combo: {
-                        current: gamePlayData.Combo,
-                        max: gamePlayData.MaxCombo
-                    },
-                    rank: {
-                        current: gamePlayData.GradeCurrent,
-                        maxThisPlay: gamePlayData.GradeExpected
-                    },
-                    pp: {
-                        current: fixDecimals(beatmapPpData.currAttributes.pp),
-                        fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
-                        maxAchievedThisPlay: fixDecimals(
-                            beatmapPpData.currAttributes.maxThisPlayPP
-                        ),
-                        detailed: {
-                            current: {
-                                aim: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppAim
-                                ),
-                                speed: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppSpeed
-                                ),
-                                accuracy: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppAccuracy
-                                ),
-                                difficulty: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppDifficulty
-                                ),
-                                flashlight: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppFlashlight
-                                ),
-                                total: fixDecimals(
-                                    beatmapPpData.currAttributes.pp
-                                )
-                            },
-                            fc: {
-                                aim: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppAim
-                                ),
-                                speed: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppSpeed
-                                ),
-                                accuracy: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppAccuracy
-                                ),
-                                difficulty: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppDifficulty
-                                ),
-                                flashlight: fixDecimals(
-                                    beatmapPpData.currPPAttributes.ppFlashlight
-                                ),
-                                total: fixDecimals(
-                                    beatmapPpData.currAttributes.fcPP
-                                )
-                            }
-                        }
-                    },
-
-                    unstableRate: gamePlayData.UnstableRate
-                }
+                beatmap: {
+                    stats: buildBeatmapStats(beatmapPpData, menuData)
+                },
+                play: buildPlay(gamePlayData, beatmapPpData, currentMods)
             };
         });
 
@@ -676,3 +415,165 @@ const buildTourneyData = (
         clients: mappedOsuTourneyClients
     };
 };
+
+function buildBeatmapStats(beatmapPpData: BeatmapPPData, menuData: MenuData) {
+    return {
+        stars: {
+            live: fixDecimals(beatmapPpData.currAttributes.stars),
+            aim: beatmapPpData.calculatedMapAttributes.aim
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.aim)
+                : undefined,
+            speed: beatmapPpData.calculatedMapAttributes.speed
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.speed)
+                : undefined,
+            flashlight: beatmapPpData.calculatedMapAttributes.flashlight
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.flashlight)
+                : undefined,
+            sliderFactor: beatmapPpData.calculatedMapAttributes.sliderFactor
+                ? fixDecimals(
+                      beatmapPpData.calculatedMapAttributes.sliderFactor
+                  )
+                : undefined,
+            stamina: beatmapPpData.calculatedMapAttributes.stamina
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.stamina)
+                : undefined,
+            rhythm: beatmapPpData.calculatedMapAttributes.rhythm
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.rhythm)
+                : undefined,
+            color: beatmapPpData.calculatedMapAttributes.color
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.color)
+                : undefined,
+            peak: beatmapPpData.calculatedMapAttributes.peak
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.peak)
+                : undefined,
+            hitWindow: beatmapPpData.calculatedMapAttributes.hitWindow
+                ? fixDecimals(beatmapPpData.calculatedMapAttributes.hitWindow)
+                : undefined,
+            total: fixDecimals(beatmapPpData.calculatedMapAttributes.fullStars)
+        },
+
+        ar: {
+            original: fixDecimals(menuData.AR),
+            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.ar)
+        },
+        cs: {
+            original: fixDecimals(menuData.CS),
+            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.cs)
+        },
+        od: {
+            original: fixDecimals(menuData.OD),
+            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.od)
+        },
+        hp: {
+            original: fixDecimals(menuData.HP),
+            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.hp)
+        },
+
+        bpm: {
+            realtime: fixDecimals(beatmapPpData.realtimeBPM),
+            common: fixDecimals(beatmapPpData.commonBPM),
+            min: fixDecimals(beatmapPpData.minBPM),
+            max: fixDecimals(beatmapPpData.maxBPM)
+        },
+
+        objects: {
+            circles: beatmapPpData.calculatedMapAttributes.circles,
+            sliders: beatmapPpData.calculatedMapAttributes.sliders,
+            spinners: beatmapPpData.calculatedMapAttributes.spinners,
+            holds: beatmapPpData.calculatedMapAttributes.holds,
+            total:
+                beatmapPpData.calculatedMapAttributes.circles +
+                beatmapPpData.calculatedMapAttributes.sliders +
+                beatmapPpData.calculatedMapAttributes.spinners +
+                beatmapPpData.calculatedMapAttributes.holds
+        },
+
+        maxCombo: beatmapPpData.calculatedMapAttributes.maxCombo
+    };
+}
+
+function buildPlay(
+    gamePlayData: GamePlayData,
+    beatmapPpData: BeatmapPPData,
+    currentMods: number
+) {
+    return {
+        playerName: gamePlayData.PlayerName,
+
+        mode: {
+            number: gamePlayData.Mode,
+            name: Modes[gamePlayData.Mode] || ''
+        },
+
+        score: gamePlayData.Score,
+        accuracy: gamePlayData.Accuracy,
+
+        healthBar: {
+            normal: (gamePlayData.PlayerHP / 200) * 100,
+            smooth: (gamePlayData.PlayerHPSmooth / 200) * 100
+        },
+
+        hits: {
+            300: gamePlayData.Hit300,
+            geki: gamePlayData.HitGeki,
+            100: gamePlayData.Hit100,
+            katu: gamePlayData.HitKatu,
+            50: gamePlayData.Hit50,
+            0: gamePlayData.HitMiss,
+            sliderBreaks: gamePlayData.HitSB
+        },
+
+        hitErrorArray: gamePlayData.HitErrors,
+
+        combo: {
+            current: gamePlayData.Combo,
+            max: gamePlayData.MaxCombo
+        },
+        mods: {
+            number: currentMods,
+            name: getOsuModsString(currentMods)
+        },
+        rank: {
+            current: gamePlayData.GradeCurrent,
+            maxThisPlay: gamePlayData.GradeExpected
+        },
+        pp: {
+            current: fixDecimals(beatmapPpData.currAttributes.pp),
+            fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
+            maxAchievedThisPlay: fixDecimals(
+                beatmapPpData.currAttributes.maxThisPlayPP
+            ),
+            detailed: {
+                current: {
+                    aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
+                    speed: fixDecimals(beatmapPpData.currPPAttributes.ppSpeed),
+                    accuracy: fixDecimals(
+                        beatmapPpData.currPPAttributes.ppAccuracy
+                    ),
+                    difficulty: fixDecimals(
+                        beatmapPpData.currPPAttributes.ppDifficulty
+                    ),
+                    flashlight: fixDecimals(
+                        beatmapPpData.currPPAttributes.ppFlashlight
+                    ),
+                    total: fixDecimals(beatmapPpData.currAttributes.pp)
+                },
+                fc: {
+                    aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
+                    speed: fixDecimals(beatmapPpData.currPPAttributes.ppSpeed),
+                    accuracy: fixDecimals(
+                        beatmapPpData.currPPAttributes.ppAccuracy
+                    ),
+                    difficulty: fixDecimals(
+                        beatmapPpData.currPPAttributes.ppDifficulty
+                    ),
+                    flashlight: fixDecimals(
+                        beatmapPpData.currPPAttributes.ppFlashlight
+                    ),
+                    total: fixDecimals(beatmapPpData.currAttributes.fcPP)
+                }
+            }
+        },
+        unstableRate: gamePlayData.UnstableRate
+    };
+}
