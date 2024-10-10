@@ -71,15 +71,15 @@ importers:
 
   packages/server:
     dependencies:
+      '@kotrikd/rosu-pp':
+        specifier: 1.2.0
+        version: 1.2.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
-      rosu-pp-js:
-        specifier: ^1.0.2
-        version: 1.0.2
       semver:
         specifier: ^7.5.4
         version: 7.5.4
@@ -93,6 +93,9 @@ importers:
 
   packages/tosu:
     dependencies:
+      '@kotrikd/rosu-pp':
+        specifier: 1.2.0
+        version: 1.2.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -126,9 +129,6 @@ importers:
       resedit:
         specifier: ^2.0.0
         version: 2.0.0
-      rosu-pp-js:
-        specifier: ^1.0.2
-        version: 1.0.2
       semver:
         specifier: ^7.5.4
         version: 7.5.4
@@ -150,7 +150,7 @@ importers:
         version: 3.1.1
       ts-node:
         specifier: ^10.9.1
-        version: 10.9.1(@types/node@18.18.11)(typescript@5.3.3)
+        version: 10.9.1(@types/node@20.11.1)(typescript@5.3.3)
 
   packages/tsprocess:
     dependencies:
@@ -5314,7 +5314,7 @@ snapshots:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 18.18.11
+      '@types/node': 20.11.1
       acorn: 8.11.2
       acorn-walk: 8.3.0
       arg: 4.1.3
