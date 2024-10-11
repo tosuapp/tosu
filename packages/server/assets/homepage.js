@@ -438,7 +438,15 @@ const settingsBuilder = {
         return;
       };
 
-      if (item.value == '' && (item.type != 'checkbox' && item.type != 'password' && item.type != 'textarea' && item.type != 'commands')) {
+
+      const ignored_types = [
+        'text',
+        'color',
+        'checkbox',
+        'textarea',
+        'password',
+      ];
+      if (item.value == '' && !ignored_types.includes(item.type)) {
         let text = `Specify default value`;
         if (item.type == 'button') text = 'Specify url';
 
