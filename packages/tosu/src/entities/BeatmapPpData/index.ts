@@ -319,7 +319,6 @@ export class BeatmapPPData extends AbstractEntity {
                 `BPPD(updateMapMetadata) [${totalTime}ms] Spend on opening beatmap`
             );
 
-            const difficulty = new rosu.Difficulty({ mods: currentMods });
             const attributes = new rosu.BeatmapAttributesBuilder({
                 map: this.beatmap,
                 mods: currentMods,
@@ -443,7 +442,6 @@ export class BeatmapPPData extends AbstractEntity {
                 hitWindow: fcPerformance.difficulty.hitWindow
             };
 
-            difficulty.free();
             attributes.free();
 
             this.resetReportCount('BPPD(updateMapMetadata)');
@@ -468,9 +466,9 @@ export class BeatmapPPData extends AbstractEntity {
                 xaxis: []
             };
 
-            const difficulty = new rosu.Difficulty({ mods: currentMods });
-            const strains = difficulty.strains(this.beatmap);
-
+            const strains = new rosu.Difficulty({ mods: currentMods }).strains(
+                this.beatmap
+            );
             let oldStrains: number[] = [];
 
             let strainsAmount = 0;
