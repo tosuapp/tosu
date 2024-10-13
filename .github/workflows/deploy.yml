@@ -54,7 +54,7 @@ jobs:
         }
 
       - name: 🛠️ - Install Deps
-        run: npm install -g pnpm@^8 && pnpm install --frozen-lockfile
+        run: npm install -g pnpm@9.12.1 && pnpm install --frozen-lockfile
 
       - name: 📦 - Build (windows)
         if: ${{ matrix.os == 'windows-latest' }}
