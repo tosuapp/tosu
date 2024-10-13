@@ -354,4 +354,42 @@ export class StableMemory extends AbstractMemory {
         );
         return !Object.values(this.patterns).some((base) => base === 0);
     }
+
+    audioVelocityBase() {
+        if (this.process === null) {
+            throw new Error('Process not found');
+        }
+
+        // Ruleset = [[Rulesets - 0xB] + 0x4]
+        const rulesetAddr = this.process.readInt(
+            this.process.readInt(this.getPattern('rulesetsAddr') - 0xb) + 0x4
+        );
+        if (rulesetAddr === 0) {
+            wLogger.debug('BDD(updateState) rulesetAddr is zero');
+            return null;
+        }
+
+        // [Ruleset + 0x44] + 0x10
+        const audioVelocityBase = this.process.readInt(
+            this.process.readInt(rulesetAddr + 0x44) + 0x10
+        );
+
+        const bassDensityLength = this.process.readInt(audioVelocityBase + 0x4);
+        if (bassDensityLength < 40) {
+            wLogger.debug(
+                'BDD(updateState) bassDensity length less than 40 (basically it have 1024 values)'
+            );
+            return null;
+        }
+
+        const result: number[] = [];
+        for (let i = 0; i < 40; i++) {
+            const current = audioVelocityBase + this.getLeaderStart() + 0x4 * i;
+            const value = this.process.readFloat(current);
+
+            result.push(value);
+        }
+
+        return result;
+    }
 }

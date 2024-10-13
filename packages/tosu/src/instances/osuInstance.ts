@@ -5,9 +5,12 @@ import { AbstractInstance } from '@/instances/index';
 import { StableMemory } from '@/memory/stable';
 
 export class OsuInstance extends AbstractInstance {
+    memory: StableMemory;
+
     constructor(pid: number) {
         super(pid);
 
+        this.memory = new StableMemory(this.process, this);
         this.set('memory', new StableMemory(this.process, this));
     }
 

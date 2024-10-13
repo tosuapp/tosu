@@ -95,4 +95,6 @@ export abstract class AbstractMemory {
     getLeaderStart() {
         return this.leaderStart;
     }
+
+    abstract audioVelocityBase(): number[] | null;
 }
