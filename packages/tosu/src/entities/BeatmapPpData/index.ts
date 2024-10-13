@@ -1,9 +1,9 @@
+import rosu from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
-import rosu from 'rosu-pp-js';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractEntity } from '@/entities/AbstractEntity';
@@ -319,7 +319,6 @@ export class BeatmapPPData extends AbstractEntity {
                 `BPPD(updateMapMetadata) [${totalTime}ms] Spend on opening beatmap`
             );
 
-            const difficulty = new rosu.Difficulty({ mods: currentMods });
             const attributes = new rosu.BeatmapAttributesBuilder({
                 map: this.beatmap,
                 mods: currentMods,
@@ -443,7 +442,6 @@ export class BeatmapPPData extends AbstractEntity {
                 hitWindow: fcPerformance.difficulty.hitWindow
             };
 
-            difficulty.free();
             attributes.free();
 
             this.resetReportCount('BPPD(updateMapMetadata)');
@@ -468,9 +466,9 @@ export class BeatmapPPData extends AbstractEntity {
                 xaxis: []
             };
 
-            const difficulty = new rosu.Difficulty({ mods: currentMods });
-            const strains = difficulty.strains(this.beatmap);
-
+            const strains = new rosu.Difficulty({ mods: currentMods }).strains(
+                this.beatmap
+            );
             let oldStrains: number[] = [];
 
             let strainsAmount = 0;
