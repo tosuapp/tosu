@@ -4,7 +4,7 @@ on:
   pull_request:
 
 concurrency:
-  group: lint-${{ github.sha }}
+  group: lint-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -20,16 +20,9 @@ jobs:
         with:
           node-version: 20.11.1
 
-      - name: 🛠️ - Install Rust
-        uses: moonrepo/setup-rust@v1
-        with: {
-          components: clippy,
-          channel: '1.77.0'
-        }
-
       - name: Install Deps 🔧
         run: |
-          npm install -g pnpm@^8
+          npm install -g pnpm@9.12.1
           pnpm install --frozen-lockfile
 
       - name: Lint PR (prettier)
