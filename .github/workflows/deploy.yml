@@ -17,7 +17,7 @@ on:
       - "pnpm-lock.yaml"
 
 concurrency:
-  group: build-${{ github.sha }}
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: true
 
 permissions:

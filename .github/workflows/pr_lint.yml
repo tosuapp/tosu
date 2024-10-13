@@ -4,7 +4,7 @@ on:
   pull_request:
 
 concurrency:
-  group: lint-${{ github.sha }}
+  group: lint-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
