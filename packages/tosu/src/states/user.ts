@@ -1,8 +1,8 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '@/entities/AbstractEntity';
+import { AbstractState } from '@/states';
 
-export class UserProfile extends AbstractEntity {
+export class User extends AbstractState {
     name: string;
     accuracy: number;
     rankedScore: number;
@@ -19,17 +19,17 @@ export class UserProfile extends AbstractEntity {
 
     updateState() {
         try {
-            const { patterns, process } = this.osuInstance.getServices([
-                'patterns',
+            const { memory, process } = this.game.getServices([
+                'memory',
                 'process'
             ]);
 
             const profileBase = process.readPointer(
-                patterns.getPattern('userProfilePtr')
+                memory.getPattern('userProfilePtr')
             );
 
             this.rawLoginStatus = process.readPointer(
-                patterns.getPattern('rawLoginStatusPtr')
+                memory.getPattern('rawLoginStatusPtr')
             );
             this.rawBanchoStatus = process.readByte(profileBase + 0x88);
 

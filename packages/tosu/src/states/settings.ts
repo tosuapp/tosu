@@ -1,7 +1,7 @@
 import { wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
-import { AbstractEntity } from '@/entities/AbstractEntity/index';
+import { AbstractState } from '@/states/index';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import {
     Audio,
@@ -17,7 +17,7 @@ import {
     ScoreMeter
 } from '@/utils/settings.types';
 
-export class Settings extends AbstractEntity {
+export class Settings extends AbstractState {
     audio: Audio = {
         ignoreBeatmapSounds: false,
         useSkinSamples: false,
@@ -652,12 +652,12 @@ export class Settings extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns'
+                'memory'
             ]);
 
-            const { configurationAddr, bindingsAddr } = patterns.getPatterns([
+            const { configurationAddr, bindingsAddr } = memory.getPatterns([
                 'configurationAddr',
                 'bindingsAddr'
             ]);

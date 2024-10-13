@@ -1,8 +1,8 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '@/entities/AbstractEntity';
+import { AbstractState } from '@/states';
 
-export class AllTimesData extends AbstractEntity {
+export class Global extends AbstractState {
     IsWatchingReplay: number = 0;
     isReplayUiHidden: boolean = false;
     ShowInterface: boolean = false;
@@ -33,9 +33,9 @@ export class AllTimesData extends AbstractEntity {
 
     async updateState() {
         try {
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns'
+                'memory'
             ]);
 
             const {
@@ -47,7 +47,7 @@ export class AllTimesData extends AbstractEntity {
                 canRunSlowlyAddr,
                 rulesetsAddr,
                 gameTimePtr
-            } = patterns.getPatterns([
+            } = memory.getPatterns([
                 'statusPtr',
                 'menuModsPtr',
                 'chatCheckerPtr',
@@ -125,12 +125,12 @@ export class AllTimesData extends AbstractEntity {
 
     updatePreciseState() {
         try {
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns'
+                'memory'
             ]);
 
-            const { playTimeAddr } = patterns.getPatterns(['playTimeAddr']);
+            const { playTimeAddr } = memory.getPatterns(['playTimeAddr']);
 
             // [PlayTime + 0x5]
             this.PlayTime = process.readInt(

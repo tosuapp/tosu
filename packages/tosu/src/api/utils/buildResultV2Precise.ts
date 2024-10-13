@@ -1,5 +1,5 @@
 import { ApiAnswerPrecise as ApiAnswer, PreciseTourney } from '@/api/types/v2';
-import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { InstanceManager } from '@/instances/manager';
 
 const buildTourneyData = (
     instanceManager: InstanceManager
@@ -18,29 +18,29 @@ const buildTourneyData = (
     const mappedOsuTourneyClients = osuTourneyClients
         .sort((a, b) => a.ipcId - b.ipcId)
         .map((instance): PreciseTourney => {
-            const { gamePlayData } = instance.getServices(['gamePlayData']);
+            const { gameplay } = instance.getServices(['gameplay']);
 
             return {
                 ipcId: instance.ipcId,
                 keys: {
                     k1: {
-                        isPressed: gamePlayData.KeyOverlay.K1Pressed,
-                        count: gamePlayData.KeyOverlay.K1Count
+                        isPressed: gameplay.KeyOverlay.K1Pressed,
+                        count: gameplay.KeyOverlay.K1Count
                     },
                     k2: {
-                        isPressed: gamePlayData.KeyOverlay.K2Pressed,
-                        count: gamePlayData.KeyOverlay.K2Count
+                        isPressed: gameplay.KeyOverlay.K2Pressed,
+                        count: gameplay.KeyOverlay.K2Count
                     },
                     m1: {
-                        isPressed: gamePlayData.KeyOverlay.M1Pressed,
-                        count: gamePlayData.KeyOverlay.M1Count
+                        isPressed: gameplay.KeyOverlay.M1Pressed,
+                        count: gameplay.KeyOverlay.M1Count
                     },
                     m2: {
-                        isPressed: gamePlayData.KeyOverlay.M2Pressed,
-                        count: gamePlayData.KeyOverlay.M2Count
+                        isPressed: gameplay.KeyOverlay.M2Pressed,
+                        count: gameplay.KeyOverlay.M2Count
                     }
                 },
-                hitErrors: gamePlayData.HitErrors
+                hitErrors: gameplay.HitErrors
             };
         });
 
@@ -53,32 +53,32 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         return { error: 'not_ready' };
     }
 
-    const { allTimesData, gamePlayData } = osuInstance.getServices([
-        'gamePlayData',
-        'allTimesData'
+    const { global, gameplay } = osuInstance.getServices([
+        'gameplay',
+        'global'
     ]);
 
     return {
-        currentTime: allTimesData.PlayTime,
+        currentTime: global.PlayTime,
         keys: {
             k1: {
-                isPressed: gamePlayData.KeyOverlay.K1Pressed,
-                count: gamePlayData.KeyOverlay.K1Count
+                isPressed: gameplay.KeyOverlay.K1Pressed,
+                count: gameplay.KeyOverlay.K1Count
             },
             k2: {
-                isPressed: gamePlayData.KeyOverlay.K2Pressed,
-                count: gamePlayData.KeyOverlay.K2Count
+                isPressed: gameplay.KeyOverlay.K2Pressed,
+                count: gameplay.KeyOverlay.K2Count
             },
             m1: {
-                isPressed: gamePlayData.KeyOverlay.M1Pressed,
-                count: gamePlayData.KeyOverlay.M1Count
+                isPressed: gameplay.KeyOverlay.M1Pressed,
+                count: gameplay.KeyOverlay.M1Count
             },
             m2: {
-                isPressed: gamePlayData.KeyOverlay.M2Pressed,
-                count: gamePlayData.KeyOverlay.M2Count
+                isPressed: gameplay.KeyOverlay.M2Pressed,
+                count: gameplay.KeyOverlay.M2Count
             }
         },
-        hitErrors: gamePlayData.HitErrors,
+        hitErrors: gameplay.HitErrors,
         tourney: buildTourneyData(instanceManager)
     };
 };

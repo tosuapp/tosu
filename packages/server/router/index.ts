@@ -382,27 +382,26 @@ export default function buildBaseApi(server: Server) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData, menuData, beatmapPpData } =
-                osuInstance.getServices([
-                    'allTimesData',
-                    'menuData',
-                    'beatmapPpData'
-                ]);
+            const { global, menu, beatmapPP } = osuInstance.getServices([
+                'global',
+                'menu',
+                'beatmapPP'
+            ]);
 
             let beatmap: rosu.Beatmap;
             const exists = fs.existsSync(query.path);
             if (exists) {
                 const beatmapFilePath = path.join(
-                    allTimesData.GameFolder,
+                    global.GameFolder,
                     'Songs',
-                    menuData.Folder,
-                    menuData.Path
+                    menu.Folder,
+                    menu.Path
                 );
 
                 const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
                 beatmap = new rosu.Beatmap(beatmapContent);
             } else {
-                beatmap = beatmapPpData.getCurrentBeatmap();
+                beatmap = beatmapPP.getCurrentBeatmap();
             }
 
             if (query.mode !== undefined) beatmap.convert(query.mode);

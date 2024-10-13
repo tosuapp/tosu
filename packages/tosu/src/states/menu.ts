@@ -1,12 +1,12 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '@/entities/AbstractEntity';
+import { AbstractState } from '@/states';
 
 // delay in milliseconds. 500ms has been enough to eliminate spurious map ID changes in the tournament client
 // over two weeks of testing at 4WC
 const NEW_MAP_COMMIT_DELAY = 500;
 
-export class MenuData extends AbstractEntity {
+export class Menu extends AbstractState {
     Status: number;
     MenuGameMode: number;
     Plays: number;
@@ -38,12 +38,12 @@ export class MenuData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns'
+                'memory'
             ]);
 
-            const baseAddr = patterns.getPattern('baseAddr');
+            const baseAddr = memory.getPattern('baseAddr');
 
             const beatmapAddr = process.readPointer(baseAddr - 0xc);
             if (beatmapAddr === 0) {
@@ -70,8 +70,7 @@ export class MenuData extends AbstractEntity {
 
             if (
                 this.pendingMD5 !== newMD5 &&
-                (this.osuInstance.isTourneySpectator ||
-                    this.osuInstance.isTourneyManager)
+                (this.game.isTourneySpectator || this.game.isTourneyManager)
             ) {
                 this.mapChangeTime = performance.now();
                 this.pendingMD5 = newMD5;
@@ -81,8 +80,7 @@ export class MenuData extends AbstractEntity {
 
             if (
                 performance.now() - this.mapChangeTime < NEW_MAP_COMMIT_DELAY &&
-                (this.osuInstance.isTourneySpectator ||
-                    this.osuInstance.isTourneyManager)
+                (this.game.isTourneySpectator || this.game.isTourneyManager)
             ) {
                 return;
             }
@@ -169,16 +167,16 @@ export class MenuData extends AbstractEntity {
 
     updateMP3Length() {
         try {
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns'
+                'memory'
             ]);
 
             // [[GetAudioLength + 0x7] + 0x4]
             this.MP3Length = Math.round(
                 process.readDouble(
                     process.readPointer(
-                        patterns.getPattern('getAudioLengthPtr')
+                        memory.getPattern('getAudioLengthPtr')
                     ) + 0x4
                 )
             );

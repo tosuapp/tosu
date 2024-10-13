@@ -14,8 +14,8 @@ export default function buildV1Api(app: HttpServer) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData } = osuInstance.getServices(['allTimesData']);
-            if (allTimesData.SongsFolder === '') {
+            const global = osuInstance.get('global');
+            if (global.SongsFolder === '') {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
@@ -24,7 +24,7 @@ export default function buildV1Api(app: HttpServer) {
                 res,
                 baseUrl: url,
                 pathname: req.params.filePath,
-                folderPath: allTimesData.SongsFolder
+                folderPath: global.SongsFolder
             });
         } catch (error) {
             wLogger.error((error as any).message);

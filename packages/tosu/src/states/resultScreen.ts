@@ -1,13 +1,13 @@
 import { wLogger } from '@tosu/common';
 import rosu from 'rosu-pp-js';
 
-import { AbstractEntity } from '@/entities/AbstractEntity';
-import { OsuInstance } from '@/objects/instanceManager/osuInstance';
+import { AbstractInstance } from '@/instances';
+import { AbstractState } from '@/states';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { OsuMods } from '@/utils/osuMods.types';
 
-export class ResultsScreenData extends AbstractEntity {
+export class ResultScreen extends AbstractState {
     OnlineId: number;
     PlayerName: string;
     Mods: OsuMods;
@@ -28,8 +28,8 @@ export class ResultsScreenData extends AbstractEntity {
 
     previousBeatmap: string;
 
-    constructor(osuInstance: OsuInstance) {
-        super(osuInstance);
+    constructor(game: AbstractInstance) {
+        super(game);
 
         this.init();
     }
@@ -59,23 +59,22 @@ export class ResultsScreenData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns, allTimesData } =
-                this.osuInstance.getServices([
-                    'process',
-                    'patterns',
-                    'allTimesData'
-                ]);
+            const { process, memory, global } = this.game.getServices([
+                'process',
+                'memory',
+                'global'
+            ]);
             if (process === null) {
                 throw new Error('Process not found');
             }
-            if (patterns === null) {
+            if (memory === null) {
                 throw new Error('Bases repo not found');
             }
-            if (allTimesData === null) {
-                throw new Error('AllTimesData not found');
+            if (global === null) {
+                throw new Error('Global not found');
             }
 
-            const { rulesetsAddr } = patterns.getPatterns(['rulesetsAddr']);
+            const { rulesetsAddr } = memory.getPatterns(['rulesetsAddr']);
 
             const rulesetAddr = process.readInt(
                 process.readInt(rulesetsAddr - 0xb) + 0x4
@@ -160,17 +159,17 @@ export class ResultsScreenData extends AbstractEntity {
 
     updatePerformance() {
         try {
-            const { beatmapPpData, menuData } = this.osuInstance.getServices([
-                'beatmapPpData',
-                'menuData'
+            const { beatmapPP, menu } = this.game.getServices([
+                'beatmapPP',
+                'menu'
             ]);
 
-            const key = `${menuData.MD5}${this.Mods}${this.Mode}${this.PlayerName}`;
+            const key = `${menu.MD5}${this.Mods}${this.Mode}${this.PlayerName}`;
             if (this.previousBeatmap === key) {
                 return;
             }
 
-            const currentBeatmap = beatmapPpData.getCurrentBeatmap();
+            const currentBeatmap = beatmapPP.getCurrentBeatmap();
             if (!currentBeatmap) {
                 wLogger.debug("RSD(updatePerformance) can't get current map");
                 return;
