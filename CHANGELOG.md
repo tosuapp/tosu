@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.5.0](https://github.com/tosuapp/tosu/compare/v3.4.0...v3.5.0) (2024-10-13)
+
+
+### Features
+
+* `Socket` and `Api` access permissions ([6d6a2d8](https://github.com/tosuapp/tosu/commit/6d6a2d8cd06a0f6b9b7cf37be9a507b9086c7c58))
+* Added `beatmap stats` to each `player` ([9321e33](https://github.com/tosuapp/tosu/commit/9321e33959701e68d14db037cf7fdb0cfa747aa7))
+* New counter setting `Textarea` ([25344d1](https://github.com/tosuapp/tosu/commit/25344d1d5cf0ddfe7797d3641abf24c4cff915de))
+* Rewrited `Settings builder` ([ca317d4](https://github.com/tosuapp/tosu/commit/ca317d4c03f1d431efc4b8ab621b9ed54901e118))
+* Rewritted `Settings` modal ([1c76749](https://github.com/tosuapp/tosu/commit/1c767491587270b2f2de7265ba93be544be83bda))
+* Update button for pp counters ([a66e98e](https://github.com/tosuapp/tosu/commit/a66e98e64420fcfa731bd04d271796efffd900ec))
+
+
+### Bug Fixes
+
+* Move counter settings to `tosu/settings` folder ([adf0765](https://github.com/tosuapp/tosu/commit/adf076592383809e04b60f8b32c042679a05174c))
+* store font locally ([316a5f9](https://github.com/tosuapp/tosu/commit/316a5f91fe9497c9c4f749d5f31f457c7227cbe2))
+
 ## [3.4.0](https://github.com/tosuapp/tosu/compare/v3.3.1...v3.4.0) (2024-10-05)
 
 
