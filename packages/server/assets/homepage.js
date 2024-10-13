@@ -714,7 +714,7 @@ const showSettings = {
 
 
       try {
-        const _settings = JSON.parse(JSON.stringify(settings.value.slice(1)));
+        const _settings = JSON.parse(JSON.stringify(settings.value));
         for (let i = 0; i < _settings.length; i++) {
           const setting = _settings[i];
           if (setting.type == 'commands') {
