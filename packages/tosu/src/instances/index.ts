@@ -36,6 +36,7 @@ export interface DataRepoList {
 export abstract class AbstractInstance {
     pid: number;
     process: Process;
+    abstract memory: AbstractMemory;
     path: string = '';
 
     isReady: boolean;
@@ -60,7 +61,6 @@ export abstract class AbstractInstance {
         this.path = this.process.path;
 
         this.set('process', this.process);
-        // this.set('memory', new StableMemory(this.process, this));
 
         this.set('settings', new Settings(this));
         this.set('global', new Global(this));

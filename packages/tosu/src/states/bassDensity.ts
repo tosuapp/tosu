@@ -9,48 +9,13 @@ export class BassDensity extends AbstractState {
 
     updateState() {
         try {
-            const { process: osuProcess, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
-            if (osuProcess === null) {
-                throw new Error('Process not found');
-            }
-
-            const isWin = process.platform === 'win32';
-            const leaderStart = isWin ? 0x8 : 0xc;
-
-            // Ruleset = [[Rulesets - 0xB] + 0x4]
-            const rulesetAddr = osuProcess.readInt(
-                osuProcess.readInt(memory.getPattern('rulesetsAddr') - 0xb) +
-                    0x4
-            );
-            if (rulesetAddr === 0) {
-                wLogger.debug('BDD(updateState) rulesetAddr is zero');
-                return;
-            }
-
-            // [Ruleset + 0x44] + 0x10
-            const audioVelocityBase = osuProcess.readInt(
-                osuProcess.readInt(rulesetAddr + 0x44) + 0x10
-            );
-
-            const bassDensityLength = osuProcess.readInt(
-                audioVelocityBase + 0x4
-            );
-            if (bassDensityLength < 40) {
-                wLogger.debug(
-                    'BDD(updateState) bassDensity length less than 40 (basically it have 1024 values)'
-                );
-                return;
-            }
+            const audioVelocityBase = this.game.memory.audioVelocityBase();
+            if (audioVelocityBase === null) return;
 
             let bass = 0.0;
             let currentAudioVelocity = this.currentAudioVelocity;
             for (let i = 0; i < 40; i++) {
-                const current = audioVelocityBase + leaderStart + 0x4 * i;
-
-                const value = osuProcess.readFloat(current);
+                const value = audioVelocityBase[i];
                 if (value < 0) {
                     this.density = 0.5;
                     return;
