@@ -2,7 +2,7 @@
   "author": "Mikhail Babynichev",
   "license": "GPL-3.0",
   "version": "3.5.0",
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@9.12.1",
   "scripts": {
     "prepare": "husky install",
     "start": "pnpm run -C packages/tosu run:dev",
