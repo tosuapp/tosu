@@ -1,11 +1,12 @@
 import { argumetsParser, wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
-import { OsuInstance } from './osuInstance';
+import { AbstractInstance } from '@/instances';
+import { OsuInstance } from '@/instances/osuInstance';
 
 export class InstanceManager {
     osuInstances: {
-        [key: number]: OsuInstance;
+        [key: number]: AbstractInstance;
     };
 
     constructor() {

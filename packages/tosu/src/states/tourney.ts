@@ -1,12 +1,18 @@
 import { config, sleep, wLogger } from '@tosu/common';
 
-import { AbstractEntity } from '@/entities/AbstractEntity';
-
-import { ITourneyManagetChatItem } from './types';
+import { AbstractState } from '@/states';
 
 const TOURNAMENT_CHAT_ENGINE = 'A1 ?? ?? ?? ?? 89 45 F0 8B D1 85 C9 75';
 
-export class TourneyManagerData extends AbstractEntity {
+export type ITourneyManagetChatItem = {
+    time: string;
+    name: string;
+    content: string;
+};
+
+export class TourneyManager extends AbstractState {
+    isDefaultState: boolean = true;
+
     ChatAreaAddr: number = 0;
 
     IPCState: number = 0;
@@ -23,16 +29,41 @@ export class TourneyManagerData extends AbstractEntity {
 
     Messages: ITourneyManagetChatItem[] = [];
 
+    UserAccuracy: number = 0.0;
+    UserRankedScore: number = 0;
+    UserPlayCount: number = 0;
+    UserGlobalRank: number = 0;
+    UserPP: number = 0;
+    UserName: string = '';
+    UserCountry: string = '';
+    UserID: number = 0;
+
+    reset() {
+        if (this.isDefaultState) {
+            return;
+        }
+
+        this.isDefaultState = true;
+        this.UserAccuracy = 0.0;
+        this.UserRankedScore = 0;
+        this.UserPlayCount = 0;
+        this.UserGlobalRank = 0;
+        this.UserPP = 0;
+        this.UserName = '';
+        this.UserCountry = '';
+        this.UserID = 0;
+    }
+
     async updateState() {
         try {
             wLogger.debug('TMD(updateState) Starting');
 
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns'
+                'memory'
             ]);
 
-            const rulesetsAddr = patterns.getPattern('rulesetsAddr');
+            const rulesetsAddr = memory.getPattern('rulesetsAddr');
 
             const rulesetAddr = process.readInt(
                 process.readInt(rulesetsAddr - 0xb) + 0x4
@@ -91,7 +122,7 @@ export class TourneyManagerData extends AbstractEntity {
             for (let i = channelsLength - 1; i >= 0; i--) {
                 try {
                     const current =
-                        channelsItems + patterns.getLeaderStart() + 0x4 * i;
+                        channelsItems + memory.getLeaderStart() + 0x4 * i;
 
                     const channelAddr = process.readInt(current);
                     if (channelAddr === 0) {
@@ -121,7 +152,7 @@ export class TourneyManagerData extends AbstractEntity {
                         try {
                             const current =
                                 messagesItems +
-                                patterns.getLeaderStart() +
+                                memory.getLeaderStart() +
                                 0x4 * i;
                             const currentItem = process.readInt(current);
 
@@ -185,6 +216,68 @@ export class TourneyManagerData extends AbstractEntity {
                 'TMD(updateState)',
                 10,
                 `TMD(updateState) ${(exc as any).message}`
+            );
+            wLogger.debug(exc);
+        }
+    }
+
+    updateUser() {
+        const { process, gameplay, memory } = this.game.getServices([
+            'process',
+            'gameplay',
+            'memory'
+        ]);
+
+        const spectatingUserDrawable = process.readPointer(
+            memory.getPattern('spectatingUserPtr')
+        );
+        if (!spectatingUserDrawable) {
+            wLogger.debug('TUPD(updateState) Slot is not equiped');
+
+            this.reset();
+            if (gameplay.isDefaultState !== true)
+                gameplay.init(undefined, 'tourney');
+            return;
+        }
+
+        this.resetReportCount('TUPD(updateState) Slot');
+
+        try {
+            // UserDrawable + 0x4
+            this.UserAccuracy = process.readDouble(
+                spectatingUserDrawable + 0x4
+            );
+            // UserDrawable + 0xc
+            this.UserRankedScore = process.readLong(
+                spectatingUserDrawable + 0xc
+            );
+            // UserDrawable + 0x7C
+            this.UserPlayCount = process.readInt(spectatingUserDrawable + 0x7c);
+            // UserDrawable + 0x84
+            this.UserGlobalRank = process.readInt(
+                spectatingUserDrawable + 0x84
+            );
+            // UserDrawable + 0x9C
+            this.UserPP = process.readInt(spectatingUserDrawable + 0x9c);
+            // [UserDrawable + 0x30]
+            this.UserName = process.readSharpString(
+                process.readInt(spectatingUserDrawable + 0x30)
+            );
+            // [UserDrawable + 0x2C]
+            this.UserCountry = process.readSharpString(
+                process.readInt(spectatingUserDrawable + 0x2c)
+            );
+            // UserDrawable + 0x70
+            this.UserID = process.readInt(spectatingUserDrawable + 0x70);
+
+            this.isDefaultState = false;
+
+            this.resetReportCount('TUPD(updateState)');
+        } catch (exc) {
+            this.reportError(
+                'TUPD(updateState)',
+                10,
+                `TUPD(updateState) ${(exc as any).message}`
             );
             wLogger.debug(exc);
         }

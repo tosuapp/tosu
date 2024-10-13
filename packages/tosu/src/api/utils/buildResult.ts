@@ -6,8 +6,8 @@ import {
     TourneyIpcClient,
     TourneyValues
 } from '@/api/types/v1';
-import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
-import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { InstanceManager } from '@/instances/manager';
+import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/gameplay';
 import { calculateAccuracy } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
@@ -51,108 +51,108 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     }
 
     const {
-        bassDensityData,
-        allTimesData,
-        menuData,
-        gamePlayData,
-        resultsScreenData,
-        beatmapPpData,
-        userProfile
+        bassDensity,
+        global,
+        menu,
+        gameplay,
+        resultScreen,
+        beatmapPP,
+        user
     } = osuInstance.getServices([
-        'bassDensityData',
-        'allTimesData',
-        'menuData',
-        'gamePlayData',
-        'resultsScreenData',
-        'beatmapPpData',
-        'userProfile'
+        'bassDensity',
+        'global',
+        'menu',
+        'gameplay',
+        'resultScreen',
+        'beatmapPP',
+        'user'
     ]);
 
     const currentMods =
-        allTimesData.Status === 2 || allTimesData.Status === 7
-            ? gamePlayData.Mods
-            : allTimesData.MenuMods;
+        global.Status === 2 || global.Status === 7
+            ? gameplay.Mods
+            : global.MenuMods;
 
     const resultScreenHits = {
-        300: resultsScreenData.Hit300,
-        geki: resultsScreenData.HitGeki,
-        100: resultsScreenData.Hit100,
-        katu: resultsScreenData.HitKatu,
-        50: resultsScreenData.Hit50,
-        0: resultsScreenData.HitMiss
+        300: resultScreen.Hit300,
+        geki: resultScreen.HitGeki,
+        100: resultScreen.Hit100,
+        katu: resultScreen.HitKatu,
+        50: resultScreen.Hit50,
+        0: resultScreen.HitMiss
     };
 
     return {
         settings: {
-            showInterface: allTimesData.ShowInterface,
+            showInterface: global.ShowInterface,
             folders: {
-                game: allTimesData.GameFolder,
-                skin: allTimesData.SkinFolder,
-                songs: allTimesData.SongsFolder
+                game: global.GameFolder,
+                skin: global.SkinFolder,
+                songs: global.SongsFolder
             }
         },
         menu: {
             mainMenu: {
-                bassDensity: bassDensityData.density
+                bassDensity: bassDensity.density
             },
             // TODO: Make enum for osu in-game statuses
-            state: allTimesData.Status,
+            state: global.Status,
             // TODO: Make enum for osu in-game modes
-            gameMode: menuData.MenuGameMode,
-            isChatEnabled: Number(Boolean(allTimesData.ChatStatus)),
+            gameMode: menu.MenuGameMode,
+            isChatEnabled: Number(Boolean(global.ChatStatus)),
             bm: {
                 time: {
-                    firstObj: beatmapPpData.timings.firstObj,
-                    current: allTimesData.PlayTime,
-                    full: beatmapPpData.timings.full,
-                    mp3: menuData.MP3Length
+                    firstObj: beatmapPP.timings.firstObj,
+                    current: global.PlayTime,
+                    full: beatmapPP.timings.full,
+                    mp3: menu.MP3Length
                 },
-                id: menuData.MapID,
-                set: menuData.SetID,
-                md5: menuData.MD5,
+                id: menu.MapID,
+                set: menu.SetID,
+                md5: menu.MD5,
                 // TODO: make ranked status enum
-                rankedStatus: menuData.RankedStatus,
+                rankedStatus: menu.RankedStatus,
                 metadata: {
-                    artist: menuData.Artist,
-                    artistOriginal: menuData.ArtistOriginal,
-                    title: menuData.Title,
-                    titleOriginal: menuData.TitleOriginal,
-                    mapper: menuData.Creator,
-                    difficulty: menuData.Difficulty
+                    artist: menu.Artist,
+                    artistOriginal: menu.ArtistOriginal,
+                    title: menu.Title,
+                    titleOriginal: menu.TitleOriginal,
+                    mapper: menu.Creator,
+                    difficulty: menu.Difficulty
                 },
                 stats: {
-                    AR: fixDecimals(beatmapPpData.calculatedMapAttributes.ar),
-                    CS: fixDecimals(beatmapPpData.calculatedMapAttributes.cs),
-                    OD: fixDecimals(beatmapPpData.calculatedMapAttributes.od),
-                    HP: fixDecimals(beatmapPpData.calculatedMapAttributes.hp),
-                    SR: fixDecimals(beatmapPpData.currAttributes.stars),
+                    AR: fixDecimals(beatmapPP.calculatedMapAttributes.ar),
+                    CS: fixDecimals(beatmapPP.calculatedMapAttributes.cs),
+                    OD: fixDecimals(beatmapPP.calculatedMapAttributes.od),
+                    HP: fixDecimals(beatmapPP.calculatedMapAttributes.hp),
+                    SR: fixDecimals(beatmapPP.currAttributes.stars),
                     BPM: {
-                        common: fixDecimals(beatmapPpData.commonBPM),
-                        min: fixDecimals(beatmapPpData.minBPM),
-                        max: fixDecimals(beatmapPpData.maxBPM)
+                        common: fixDecimals(beatmapPP.commonBPM),
+                        min: fixDecimals(beatmapPP.minBPM),
+                        max: fixDecimals(beatmapPP.maxBPM)
                     },
-                    circles: beatmapPpData.calculatedMapAttributes.circles,
-                    sliders: beatmapPpData.calculatedMapAttributes.sliders,
-                    spinners: beatmapPpData.calculatedMapAttributes.spinners,
-                    holds: beatmapPpData.calculatedMapAttributes.holds,
-                    maxCombo: beatmapPpData.calculatedMapAttributes.maxCombo,
+                    circles: beatmapPP.calculatedMapAttributes.circles,
+                    sliders: beatmapPP.calculatedMapAttributes.sliders,
+                    spinners: beatmapPP.calculatedMapAttributes.spinners,
+                    holds: beatmapPP.calculatedMapAttributes.holds,
+                    maxCombo: beatmapPP.calculatedMapAttributes.maxCombo,
                     fullSR: fixDecimals(
-                        beatmapPpData.calculatedMapAttributes.fullStars
+                        beatmapPP.calculatedMapAttributes.fullStars
                     ),
-                    memoryAR: fixDecimals(menuData.AR),
-                    memoryCS: fixDecimals(menuData.CS),
-                    memoryOD: fixDecimals(menuData.OD),
-                    memoryHP: fixDecimals(menuData.HP)
+                    memoryAR: fixDecimals(menu.AR),
+                    memoryCS: fixDecimals(menu.CS),
+                    memoryOD: fixDecimals(menu.OD),
+                    memoryHP: fixDecimals(menu.HP)
                 },
                 path: {
                     full: path.join(
-                        menuData.Folder || '',
-                        menuData.BackgroundFilename || ''
+                        menu.Folder || '',
+                        menu.BackgroundFilename || ''
                     ),
-                    folder: menuData.Folder,
-                    file: menuData.Path,
-                    bg: menuData.BackgroundFilename,
-                    audio: menuData.AudioFilename
+                    folder: menu.Folder,
+                    file: menu.Path,
+                    bg: menu.BackgroundFilename,
+                    audio: menu.AudioFilename
                 }
             },
             mods: {
@@ -160,119 +160,117 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 str: getOsuModsString(currentMods)
             },
             pp: {
-                ...beatmapPpData.ppAcc,
-                strains: beatmapPpData.strains,
-                strainsAll: beatmapPpData.strainsAll
+                ...beatmapPP.ppAcc,
+                strains: beatmapPP.strains,
+                strainsAll: beatmapPP.strainsAll
             }
         },
         gameplay: {
-            gameMode: gamePlayData.Mode,
-            name: gamePlayData.PlayerName,
-            score: gamePlayData.Score,
-            accuracy: gamePlayData.Accuracy,
+            gameMode: gameplay.Mode,
+            name: gameplay.PlayerName,
+            score: gameplay.Score,
+            accuracy: gameplay.Accuracy,
             combo: {
-                current: gamePlayData.Combo,
-                max: gamePlayData.MaxCombo
+                current: gameplay.Combo,
+                max: gameplay.MaxCombo
             },
             hp: {
-                normal: gamePlayData.PlayerHP,
-                smooth: gamePlayData.PlayerHPSmooth
+                normal: gameplay.PlayerHP,
+                smooth: gameplay.PlayerHPSmooth
             },
             hits: {
-                300: gamePlayData.Hit300,
-                geki: gamePlayData.HitGeki,
-                100: gamePlayData.Hit100,
-                katu: gamePlayData.HitKatu,
-                50: gamePlayData.Hit50,
-                0: gamePlayData.HitMiss,
-                sliderBreaks: gamePlayData.HitSB,
+                300: gameplay.Hit300,
+                geki: gameplay.HitGeki,
+                100: gameplay.Hit100,
+                katu: gameplay.HitKatu,
+                50: gameplay.Hit50,
+                0: gameplay.HitMiss,
+                sliderBreaks: gameplay.HitSB,
                 grade: {
-                    current: gamePlayData.GradeCurrent,
-                    maxThisPlay: gamePlayData.GradeExpected
+                    current: gameplay.GradeCurrent,
+                    maxThisPlay: gameplay.GradeExpected
                 },
-                unstableRate: gamePlayData.UnstableRate,
-                hitErrorArray: gamePlayData.HitErrors
+                unstableRate: gameplay.UnstableRate,
+                hitErrorArray: gameplay.HitErrors
             },
             pp: {
-                current: fixDecimals(beatmapPpData.currAttributes.pp),
-                fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
-                maxThisPlay: fixDecimals(
-                    beatmapPpData.currAttributes.maxThisPlayPP
-                )
+                current: fixDecimals(beatmapPP.currAttributes.pp),
+                fc: fixDecimals(beatmapPP.currAttributes.fcPP),
+                maxThisPlay: fixDecimals(beatmapPP.currAttributes.maxThisPlayPP)
             },
             keyOverlay: {
                 k1: {
-                    isPressed: gamePlayData.KeyOverlay.K1Pressed,
-                    count: gamePlayData.KeyOverlay.K1Count
+                    isPressed: gameplay.KeyOverlay.K1Pressed,
+                    count: gameplay.KeyOverlay.K1Count
                 },
                 k2: {
-                    isPressed: gamePlayData.KeyOverlay.K2Pressed,
-                    count: gamePlayData.KeyOverlay.K2Count
+                    isPressed: gameplay.KeyOverlay.K2Pressed,
+                    count: gameplay.KeyOverlay.K2Count
                 },
                 m1: {
-                    isPressed: gamePlayData.KeyOverlay.M1Pressed,
-                    count: gamePlayData.KeyOverlay.M1Count
+                    isPressed: gameplay.KeyOverlay.M1Pressed,
+                    count: gameplay.KeyOverlay.M1Count
                 },
                 m2: {
-                    isPressed: gamePlayData.KeyOverlay.M2Pressed,
-                    count: gamePlayData.KeyOverlay.M2Count
+                    isPressed: gameplay.KeyOverlay.M2Pressed,
+                    count: gameplay.KeyOverlay.M2Count
                 }
             },
             leaderboard: {
-                hasLeaderboard: Boolean(gamePlayData.Leaderboard),
-                isVisible: gamePlayData.Leaderboard
-                    ? gamePlayData.Leaderboard.isScoreboardVisible
+                hasLeaderboard: Boolean(gameplay.Leaderboard),
+                isVisible: gameplay.Leaderboard
+                    ? gameplay.Leaderboard.isScoreboardVisible
                     : false,
                 ourplayer:
-                    gamePlayData.Leaderboard && gamePlayData.Leaderboard.player
+                    gameplay.Leaderboard && gameplay.Leaderboard.player
                         ? convertMemoryPlayerToResult(
-                              gamePlayData.Leaderboard.player
+                              gameplay.Leaderboard.player
                           )
                         : defaultLBPlayer,
-                slots: gamePlayData.Leaderboard
-                    ? gamePlayData.Leaderboard.leaderBoard.map((slot) =>
+                slots: gameplay.Leaderboard
+                    ? gameplay.Leaderboard.leaderBoard.map((slot) =>
                           convertMemoryPlayerToResult(slot)
                       )
                     : []
             },
-            _isReplayUiHidden: gamePlayData.isReplayUiHidden
+            _isReplayUiHidden: gameplay.isReplayUiHidden
         },
         resultsScreen: {
-            mode: gamePlayData.Mode,
-            name: resultsScreenData.PlayerName,
-            score: resultsScreenData.Score,
+            mode: gameplay.Mode,
+            name: resultScreen.PlayerName,
+            score: resultScreen.Score,
             accuracy: calculateAccuracy({
                 hits: resultScreenHits,
-                mode: gamePlayData.Mode
+                mode: gameplay.Mode
             }),
-            maxCombo: resultsScreenData.MaxCombo,
+            maxCombo: resultScreen.MaxCombo,
             mods: {
-                num: resultsScreenData.Mods,
-                str: getOsuModsString(resultsScreenData.Mods)
+                num: resultScreen.Mods,
+                str: getOsuModsString(resultScreen.Mods)
             },
-            300: resultsScreenData.Hit300,
-            geki: resultsScreenData.HitGeki,
-            100: resultsScreenData.Hit100,
-            katu: resultsScreenData.HitKatu,
-            50: resultsScreenData.Hit50,
-            0: resultsScreenData.HitMiss,
-            grade: resultsScreenData.Grade,
-            createdAt: resultsScreenData.Date
+            300: resultScreen.Hit300,
+            geki: resultScreen.HitGeki,
+            100: resultScreen.Hit100,
+            katu: resultScreen.HitKatu,
+            50: resultScreen.Hit50,
+            0: resultScreen.HitMiss,
+            grade: resultScreen.Grade,
+            createdAt: resultScreen.Date
         },
         userProfile: {
-            rawLoginStatus: userProfile.rawLoginStatus,
-            name: userProfile.name,
-            accuracy: userProfile.accuracy,
-            rankedScore: userProfile.rankedScore,
-            id: userProfile.id,
-            level: userProfile.level,
-            playCount: userProfile.playCount,
-            playMode: userProfile.playMode,
-            rank: userProfile.rank,
-            countryCode: userProfile.countryCode,
-            performancePoints: userProfile.performancePoints,
-            rawBanchoStatus: userProfile.rawBanchoStatus,
-            backgroundColour: userProfile.backgroundColour?.toString(16)
+            rawLoginStatus: user.rawLoginStatus,
+            name: user.name,
+            accuracy: user.accuracy,
+            rankedScore: user.rankedScore,
+            id: user.id,
+            level: user.level,
+            playCount: user.playCount,
+            playMode: user.playMode,
+            rank: user.rank,
+            countryCode: user.countryCode,
+            performancePoints: user.performancePoints,
+            rawBanchoStatus: user.rawBanchoStatus,
+            backgroundColour: user.backgroundColour?.toString(16)
         },
         tourney: buildTourneyData(instanceManager)
     };
@@ -295,17 +293,16 @@ const buildTourneyData = (
     const mappedOsuTourneyClients = osuTourneyClients
         .sort((a, b) => a.ipcId - b.ipcId)
         .map<TourneyIpcClient>((instance, iterator) => {
-            const { allTimesData, gamePlayData, tourneyUserProfileData } =
-                instance.getServices([
-                    'allTimesData',
-                    'gamePlayData',
-                    'tourneyUserProfileData'
-                ]);
+            const { global, gameplay, tourneyManager } = instance.getServices([
+                'global',
+                'gameplay',
+                'tourneyManager'
+            ]);
 
             const currentMods =
-                allTimesData.Status === 2 || allTimesData.Status === 7
-                    ? gamePlayData.Mods
-                    : allTimesData.MenuMods;
+                global.Status === 2 || global.Status === 7
+                    ? gameplay.Mods
+                    : global.MenuMods;
 
             const spectatorTeam =
                 iterator < osuTourneyClients.length / 2 ? 'left' : 'right';
@@ -313,42 +310,42 @@ const buildTourneyData = (
             return {
                 team: spectatorTeam,
                 spectating: {
-                    name: tourneyUserProfileData.Name,
-                    country: tourneyUserProfileData.Country,
-                    userID: tourneyUserProfileData.UserID,
-                    accuracy: tourneyUserProfileData.Accuracy,
-                    rankedScore: tourneyUserProfileData.RankedScore,
-                    playCount: tourneyUserProfileData.PlayCount,
-                    globalRank: tourneyUserProfileData.GlobalRank,
-                    totalPP: tourneyUserProfileData.PP
+                    name: tourneyManager.UserName,
+                    country: tourneyManager.UserCountry,
+                    userID: tourneyManager.UserID,
+                    accuracy: tourneyManager.UserAccuracy,
+                    rankedScore: tourneyManager.UserRankedScore,
+                    playCount: tourneyManager.UserPlayCount,
+                    globalRank: tourneyManager.UserGlobalRank,
+                    totalPP: tourneyManager.UserPP
                 },
                 gameplay: {
-                    gameMode: gamePlayData.Mode,
-                    name: gamePlayData.PlayerName,
-                    score: gamePlayData.Score,
-                    accuracy: gamePlayData.Accuracy,
+                    gameMode: gameplay.Mode,
+                    name: gameplay.PlayerName,
+                    score: gameplay.Score,
+                    accuracy: gameplay.Accuracy,
                     combo: {
-                        current: gamePlayData.Combo,
-                        max: gamePlayData.MaxCombo
+                        current: gameplay.Combo,
+                        max: gameplay.MaxCombo
                     },
                     hp: {
-                        normal: gamePlayData.PlayerHP,
-                        smooth: gamePlayData.PlayerHPSmooth
+                        normal: gameplay.PlayerHP,
+                        smooth: gameplay.PlayerHPSmooth
                     },
                     hits: {
-                        300: gamePlayData.Hit300,
-                        geki: gamePlayData.HitGeki,
-                        100: gamePlayData.Hit100,
-                        katu: gamePlayData.HitKatu,
-                        50: gamePlayData.Hit50,
-                        0: gamePlayData.HitMiss,
-                        sliderBreaks: gamePlayData.HitSB,
+                        300: gameplay.Hit300,
+                        geki: gameplay.HitGeki,
+                        100: gameplay.Hit100,
+                        katu: gameplay.HitKatu,
+                        50: gameplay.Hit50,
+                        0: gameplay.HitMiss,
+                        sliderBreaks: gameplay.HitSB,
                         grade: {
-                            current: gamePlayData.GradeCurrent,
-                            maxThisPlay: gamePlayData.GradeExpected
+                            current: gameplay.GradeCurrent,
+                            maxThisPlay: gameplay.GradeExpected
                         },
-                        unstableRate: gamePlayData.UnstableRate,
-                        hitErrorArray: gamePlayData.HitErrors
+                        unstableRate: gameplay.UnstableRate,
+                        hitErrorArray: gameplay.HitErrors
                     },
                     mods: {
                         num: currentMods,
@@ -358,11 +355,11 @@ const buildTourneyData = (
             };
         });
 
-    const { tourneyManagerData } = osuTourneyManager[0].getServices([
-        'tourneyManagerData'
+    const { tourneyManager } = osuTourneyManager[0].getServices([
+        'tourneyManager'
     ]);
 
-    const mappedChat = tourneyManagerData.Messages.map((message) => {
+    const mappedChat = tourneyManager.Messages.map((message) => {
         const ipcClient = mappedOsuTourneyClients.find(
             (client) => client.spectating.name === message.name
         );
@@ -381,25 +378,25 @@ const buildTourneyData = (
 
     return {
         manager: {
-            ipcState: tourneyManagerData.IPCState,
-            bestOF: tourneyManagerData.BestOf,
+            ipcState: tourneyManager.IPCState,
+            bestOF: tourneyManager.BestOf,
             teamName: {
-                left: tourneyManagerData.FirstTeamName,
-                right: tourneyManagerData.SecondTeamName
+                left: tourneyManager.FirstTeamName,
+                right: tourneyManager.SecondTeamName
             },
             stars: {
-                left: tourneyManagerData.LeftStars,
-                right: tourneyManagerData.RightStars
+                left: tourneyManager.LeftStars,
+                right: tourneyManager.RightStars
             },
             bools: {
-                scoreVisible: tourneyManagerData.ScoreVisible,
-                starsVisible: tourneyManagerData.StarsVisible
+                scoreVisible: tourneyManager.ScoreVisible,
+                starsVisible: tourneyManager.StarsVisible
             },
             chat: mappedChat,
             gameplay: {
                 score: {
-                    left: tourneyManagerData.FirstTeamScore,
-                    right: tourneyManagerData.SecondTeamScore
+                    left: tourneyManager.FirstTeamScore,
+                    right: tourneyManager.SecondTeamScore
                 }
             }
         },

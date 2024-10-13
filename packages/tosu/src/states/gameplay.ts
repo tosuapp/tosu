@@ -2,9 +2,8 @@ import { config, wLogger } from '@tosu/common';
 import rosu from 'rosu-pp-js';
 import { Process } from 'tsprocess/dist/process';
 
-import { AbstractEntity } from '@/entities/AbstractEntity';
-import { Leaderboard } from '@/entities/GamePlayData/Leaderboard';
-import { OsuInstance } from '@/objects/instanceManager/osuInstance';
+import { AbstractInstance } from '@/instances';
+import { AbstractState } from '@/states/index';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { OsuMods } from '@/utils/osuMods.types';
 
@@ -19,7 +18,22 @@ export interface KeyOverlay {
     M2Count: number;
 }
 
-export class GamePlayData extends AbstractEntity {
+export interface LeaderboardPlayer {
+    Name: string;
+    Score: number;
+    Combo: number;
+    MaxCombo: number;
+    Mods: number;
+    H300: number;
+    H100: number;
+    H50: number;
+    H0: number;
+    Team: number;
+    Position: number;
+    IsPassing: boolean;
+}
+
+export class Gameplay extends AbstractState {
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
 
@@ -59,8 +73,8 @@ export class GamePlayData extends AbstractEntity {
     previousState: string = '';
     previousPassedObjects = 0;
 
-    constructor(osuInstance: OsuInstance) {
-        super(osuInstance);
+    constructor(game: AbstractInstance) {
+        super(game);
 
         this.init();
     }
@@ -156,17 +170,17 @@ export class GamePlayData extends AbstractEntity {
 
     updateState() {
         try {
-            const { process, patterns, allTimesData, beatmapPpData, menuData } =
-                this.osuInstance.getServices([
+            const { process, memory, global, beatmapPP, menu } =
+                this.game.getServices([
                     'process',
-                    'patterns',
-                    'allTimesData',
-                    'menuData',
-                    'allTimesData',
-                    'beatmapPpData'
+                    'memory',
+                    'global',
+                    'menu',
+                    'global',
+                    'beatmapPP'
                 ]);
 
-            const { baseAddr, rulesetsAddr } = patterns.getPatterns([
+            const { baseAddr, rulesetsAddr } = memory.getPatterns([
                 'baseAddr',
                 'rulesetsAddr'
             ]);
@@ -197,8 +211,8 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
-            // Resetting default state value, to define other componenets that we have touched gamePlayData
-            // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gamePlayData/resultsScreenData
+            // Resetting default state value, to define other componenets that we have touched gameplay
+            // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gameplay/resultScreen
             this.isDefaultState = false;
 
             // [Base - 0x33] + 0x8
@@ -226,7 +240,7 @@ export class GamePlayData extends AbstractEntity {
                 process.readInt(gameplayBase + 0x48) + 0xc
             );
 
-            if (allTimesData.PlayTime >= beatmapPpData.timings.firstObj - 100) {
+            if (global.PlayTime >= beatmapPP.timings.firstObj - 100) {
                 // [[Ruleset + 0x68] + 0x38] + 0x88
                 this.Hit100 = process.readShort(scoreBase + 0x88);
                 // [[Ruleset + 0x68] + 0x38] + 0x8A
@@ -271,12 +285,12 @@ export class GamePlayData extends AbstractEntity {
             this.HitMissPrev = this.HitMiss;
             this.ComboPrev = this.Combo;
 
-            this.updateGrade(menuData.ObjectCount);
+            this.updateGrade(menu.ObjectCount);
             this.updateStarsAndPerformance();
             // [[[Ruleset + 0x68] + 0x38] + 0x38]
             this.updateLeaderboard(
                 process,
-                patterns.getLeaderStart(),
+                memory.getLeaderStart(),
                 rulesetAddr
             );
 
@@ -293,13 +307,13 @@ export class GamePlayData extends AbstractEntity {
 
     updateKeyOverlay() {
         try {
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns'
+                'memory'
             ]);
 
             const rulesetAddr = process.readInt(
-                process.readInt(patterns.getPattern('rulesetsAddr') - 0xb) + 0x4
+                process.readInt(memory.getPattern('rulesetsAddr') - 0xb) + 0x4
             );
             if (rulesetAddr === 0) {
                 wLogger.debug('GD(updateKeyOverlay) rulesetAddr is zero');
@@ -310,7 +324,7 @@ export class GamePlayData extends AbstractEntity {
             if (keyOverlayPtr === 0) {
                 if (this.Mode !== 3 && this.Mode !== 1)
                     wLogger.debug(
-                        `GD(updateKeyOverlay) keyOverlayPtr is zero [${keyOverlayPtr}] (${rulesetAddr}  -  ${patterns.getPattern(
+                        `GD(updateKeyOverlay) keyOverlayPtr is zero [${keyOverlayPtr}] (${rulesetAddr}  -  ${memory.getPattern(
                             'rulesetsAddr'
                         )})`
                     );
@@ -427,13 +441,13 @@ export class GamePlayData extends AbstractEntity {
 
     updateHitErrors() {
         try {
-            const { process, patterns } = this.osuInstance.getServices([
+            const { process, memory } = this.game.getServices([
                 'process',
-                'patterns',
-                'allTimesData'
+                'memory',
+                'global'
             ]);
 
-            const { rulesetsAddr } = patterns.getPatterns(['rulesetsAddr']);
+            const { rulesetsAddr } = memory.getPatterns(['rulesetsAddr']);
 
             const rulesetAddr = process.readInt(
                 process.readInt(rulesetsAddr - 0xb) + 0x4
@@ -455,7 +469,7 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
-            const leaderStart = patterns.getLeaderStart();
+            const leaderStart = memory.getLeaderStart();
 
             const base = process.readInt(scoreBase + 0x38);
             const items = process.readInt(base + 0x4);
@@ -576,21 +590,20 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
-            const { allTimesData, beatmapPpData, menuData } =
-                this.osuInstance.getServices([
-                    'allTimesData',
-                    'beatmapPpData',
-                    'menuData'
-                ]);
+            const { global, beatmapPP, menu } = this.game.getServices([
+                'global',
+                'beatmapPP',
+                'menu'
+            ]);
 
-            if (!allTimesData.GameFolder) {
+            if (!global.GameFolder) {
                 wLogger.debug(
                     'GD(updateStarsAndPerformance) game folder not found'
                 );
                 return;
             }
 
-            const currentBeatmap = beatmapPpData.getCurrentBeatmap();
+            const currentBeatmap = beatmapPP.getCurrentBeatmap();
             if (!currentBeatmap) {
                 wLogger.debug(
                     "GD(updateStarsAndPerformance) can't get current map"
@@ -598,7 +611,7 @@ export class GamePlayData extends AbstractEntity {
                 return;
             }
 
-            const currentState = `${menuData.MD5}:${menuData.MenuGameMode}:${this.Mods}:${menuData.MP3Length}`;
+            const currentState = `${menu.MD5}:${menu.MenuGameMode}:${this.Mods}:${menu.MP3Length}`;
             const isUpdate = this.previousState !== currentState;
 
             // update precalculated attributes
@@ -667,17 +680,17 @@ export class GamePlayData extends AbstractEntity {
             const t2 = performance.now();
 
             if (currPerformance) {
-                beatmapPpData.updateCurrentAttributes(
+                beatmapPP.updateCurrentAttributes(
                     currPerformance.difficulty.stars,
                     currPerformance.pp
                 );
 
-                beatmapPpData.updatePPAttributes('curr', currPerformance);
+                beatmapPP.updatePPAttributes('curr', currPerformance);
             }
 
             if (fcPerformance) {
-                beatmapPpData.currAttributes.fcPP = fcPerformance.pp;
-                beatmapPpData.updatePPAttributes('fc', fcPerformance);
+                beatmapPP.currAttributes.fcPP = fcPerformance.pp;
+                beatmapPP.updatePPAttributes('fc', fcPerformance);
             }
 
             this.previousPassedObjects = passedObjects;
@@ -695,5 +708,122 @@ export class GamePlayData extends AbstractEntity {
             );
             wLogger.debug(exc);
         }
+    }
+}
+
+class Leaderboard {
+    private process: Process;
+
+    private leaderboardBase: number = 0;
+
+    leaderBoard: LeaderboardPlayer[] = [];
+
+    player: LeaderboardPlayer | undefined;
+
+    isScoreboardVisible: boolean = false;
+
+    constructor(process: Process, leaderboardBase: number) {
+        this.process = process;
+        this.leaderboardBase = leaderboardBase;
+    }
+
+    updateBase(newBase: number) {
+        this.leaderboardBase = newBase;
+    }
+
+    private readLeaderPlayerStruct(
+        base: number
+    ): [LeaderboardPlayer, boolean] | undefined {
+        const IsLeaderBoardVisible = this.process.readByte(
+            this.process.readInt(base + 0x24) + 0x20
+        );
+        const scoreboardEntry = this.process.readInt(base + 0x20);
+        if (scoreboardEntry === 0) {
+            return undefined;
+        }
+
+        // [[Base + 0x20] + 0x1C] + 0x8
+        const ModsXor1 = this.process.readInt(
+            this.process.readInt(scoreboardEntry + 0x1c) + 0x8
+        );
+        // [[Base + 0x20] + 0x1C] + 0xC
+        const ModsXor2 = this.process.readInt(
+            this.process.readInt(scoreboardEntry + 0x1c) + 0xc
+        );
+        return [
+            {
+                // [Base + 0x8]
+                Name: this.process.readSharpString(
+                    this.process.readInt(base + 0x8)
+                ),
+                // Base + 0x30
+                Score: this.process.readInt(base + 0x30),
+                // [Base + 0x20] + 0x94
+                Combo: this.process.readShort(scoreboardEntry + 0x94),
+                // [Base + 0x20] + 0x68
+                MaxCombo: this.process.readShort(scoreboardEntry + 0x68),
+                Mods: ModsXor1 ^ ModsXor2,
+                // [Base + 0x20] + 0x8A
+                H300: this.process.readShort(scoreboardEntry + 0x8a),
+                // [Base + 0x20] + 0x88
+                H100: this.process.readShort(scoreboardEntry + 0x88),
+                // [Base + 0x20] + 0x8C
+                H50: this.process.readShort(scoreboardEntry + 0x8c),
+                // [Base + 0x20] + 0x92
+                H0: this.process.readShort(scoreboardEntry + 0x92),
+                // Base + 0x40
+                Team: this.process.readInt(base + 0x40),
+                // Base + 0x2C
+                Position: this.process.readInt(base + 0x2c),
+                // Base + 0x4B
+                IsPassing: Boolean(this.process.readByte(base + 0x4b))
+            },
+            Boolean(IsLeaderBoardVisible)
+        ];
+    }
+
+    readLeaderboard(leaderStart: number) {
+        if (this.leaderboardBase === 0) {
+            this.clear();
+            return this.leaderBoard;
+        }
+
+        const playerBase = this.process.readInt(this.leaderboardBase + 0x10);
+        const playerEntry = this.readLeaderPlayerStruct(playerBase);
+        if (playerEntry) {
+            [this.player, this.isScoreboardVisible] = playerEntry;
+        }
+
+        const playersArray = this.process.readInt(this.leaderboardBase + 0x4);
+        const amOfSlots = this.process.readInt(playersArray + 0xc);
+        if (amOfSlots < 1) {
+            return;
+        }
+
+        const newLeaderBoard: LeaderboardPlayer[] = [];
+
+        const items = this.process.readInt(playersArray + 0x4);
+        const itemsSize = this.process.readInt(playersArray + 0xc);
+
+        for (let i = 0; i < itemsSize; i++) {
+            const current = items + leaderStart + 0x4 * i;
+
+            const lbEntry = this.readLeaderPlayerStruct(
+                this.process.readInt(current)
+            );
+
+            if (!lbEntry) {
+                // break due to un-consistency of leaderboard
+                break;
+            }
+
+            newLeaderBoard.push(lbEntry[0]);
+        }
+        this.leaderBoard = newLeaderBoard;
+    }
+
+    clear() {
+        this.player = undefined;
+        this.leaderBoard = [];
     }
 }
