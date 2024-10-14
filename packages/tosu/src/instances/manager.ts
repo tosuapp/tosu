@@ -2,7 +2,8 @@ import { argumetsParser, wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
 import { AbstractInstance } from '@/instances';
-import { OsuInstance } from '@/instances/osuInstance';
+
+import { LazerInstance } from './lazerInstance';
 
 export class InstanceManager {
     osuInstances: {
@@ -47,7 +48,7 @@ export class InstanceManager {
                     continue;
                 }
 
-                const osuInstance = new OsuInstance(processId);
+                const osuInstance = new LazerInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
 
                 const args = argumetsParser(cmdLine);

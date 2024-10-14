@@ -25,7 +25,7 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
 
   MEMORY_BASIC_INFORMATION info;
   for (uint8_t *address = 0; VirtualQueryEx(process, address, &info, sizeof(info)) != 0; address += info.RegionSize) {
-    if ((info.State & MEM_COMMIT) == 0 || (info.Protect & (PAGE_EXECUTE_READWRITE)) == 0) {
+    if ((info.State & MEM_COMMIT) == 0 || (info.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE)) == 0) {
       continue;
     }
 

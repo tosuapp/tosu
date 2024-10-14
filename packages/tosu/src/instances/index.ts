@@ -114,9 +114,10 @@ export abstract class AbstractInstance {
                 );
             }
 
-            if (!this.checkIsBasesValid()) {
-                return false;
-            }
+            // TODO: fix this when PatternData will be separated between different instances
+            // if (!this.checkIsBasesValid()) {
+            //     return false;
+            // }
 
             return true;
         } catch (error) {

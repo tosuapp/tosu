@@ -6,8 +6,9 @@ import { KeyOverlay } from '@/states/gameplay';
 import { OsuMods } from '@/utils/osuMods.types';
 import { BindingsList, ConfigList } from '@/utils/settings.types';
 
+// TODO: fix this when PatternData will be separated for each
 export type ScanPatterns = {
-    [k in keyof PatternData]: {
+    [k in keyof any]: {
         pattern: string;
         offset?: number;
         isTourneyOnly?: boolean;
