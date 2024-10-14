@@ -256,7 +256,7 @@ export class BeatmapPP extends AbstractState {
                 wLogger.debug(
                     `BPPD(updateMapMetadata) Skip osu! music theme file`,
                     {
-                        SongsFolder: global.SongsFolder,
+                        SongsFolder: global.songsFolder,
                         Folder: menu.Folder,
                         Path: menu.Path
                     }
@@ -265,7 +265,7 @@ export class BeatmapPP extends AbstractState {
             }
 
             const mapPath = path.join(
-                global.SongsFolder,
+                global.songsFolder,
                 menu.Folder,
                 menu.Path
             );
@@ -629,7 +629,7 @@ export class BeatmapPP extends AbstractState {
             );
 
             const passedObjects = this.lazerBeatmap.hitObjects.filter(
-                (r) => r.startTime <= global.PlayTime
+                (r) => r.startTime <= global.playTime
             );
 
             const curPerformance = new rosu.Performance({

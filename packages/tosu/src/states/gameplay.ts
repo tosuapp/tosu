@@ -37,35 +37,35 @@ export class Gameplay extends AbstractState {
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
 
-    PerformanceAttributes: rosu.PerformanceAttributes | undefined;
-    GradualPerformance: rosu.GradualPerformance | undefined;
+    performanceAttributes: rosu.PerformanceAttributes | undefined;
+    gradualPerformance: rosu.GradualPerformance | undefined;
 
-    Retries: number;
-    PlayerName: string;
-    Mods: OsuMods;
-    HitErrors: number[];
-    Mode: number;
-    MaxCombo: number;
-    Score: number;
-    Hit100: number;
-    Hit300: number;
-    Hit50: number;
-    HitGeki: number;
-    HitKatu: number;
-    HitMiss: number;
-    HitMissPrev: number;
-    HitUR: number;
-    HitSB: number;
-    ComboPrev: number;
-    Combo: number;
-    PlayerHPSmooth: number;
-    PlayerHP: number;
-    Accuracy: number;
-    UnstableRate: number;
-    GradeCurrent: string;
-    GradeExpected: string;
-    Leaderboard?: Leaderboard;
-    KeyOverlay: KeyOverlay;
+    retries: number;
+    playerName: string;
+    mods: OsuMods;
+    hitErrors: number[];
+    mode: number;
+    maxCombo: number;
+    score: number;
+    hit100: number;
+    hit300: number;
+    hit50: number;
+    hitGeki: number;
+    hitKatu: number;
+    hitMiss: number;
+    hitMissPrev: number;
+    hitUR: number;
+    hitSB: number;
+    comboPrev: number;
+    combo: number;
+    playerHPSmooth: number;
+    playerHP: number;
+    accuracy: number;
+    unstableRate: number;
+    gradeCurrent: string;
+    gradeExpected: string;
+    leaderboard?: Leaderboard;
+    keyOverlay: KeyOverlay;
     isReplayUiHidden: boolean;
 
     private cachedkeys: string = '';
@@ -82,39 +82,39 @@ export class Gameplay extends AbstractState {
     init(isRetry?: boolean, from?: string) {
         wLogger.debug(`GD(init) Reset (${isRetry} - ${from})`);
 
-        this.HitErrors = [];
-        this.MaxCombo = 0;
-        this.Score = 0;
-        this.Hit100 = 0;
-        this.Hit300 = 0;
-        this.Hit50 = 0;
-        this.HitGeki = 0;
-        this.HitKatu = 0;
-        this.HitMiss = 0;
-        this.HitMissPrev = 0;
-        this.HitUR = 0.0;
-        this.HitSB = 0;
-        this.ComboPrev = 0;
-        this.Combo = 0;
-        this.PlayerHPSmooth = 0.0;
-        this.PlayerHP = 0.0;
-        this.Accuracy = 100.0;
-        this.UnstableRate = 0;
-        this.GradeCurrent = calculateGrade({
-            mods: this.Mods,
-            mode: this.Mode,
+        this.hitErrors = [];
+        this.maxCombo = 0;
+        this.score = 0;
+        this.hit100 = 0;
+        this.hit300 = 0;
+        this.hit50 = 0;
+        this.hitGeki = 0;
+        this.hitKatu = 0;
+        this.hitMiss = 0;
+        this.hitMissPrev = 0;
+        this.hitUR = 0.0;
+        this.hitSB = 0;
+        this.comboPrev = 0;
+        this.combo = 0;
+        this.playerHPSmooth = 0.0;
+        this.playerHP = 0.0;
+        this.accuracy = 100.0;
+        this.unstableRate = 0;
+        this.gradeCurrent = calculateGrade({
+            mods: this.mods,
+            mode: this.mode,
             hits: {
-                300: this.Hit300,
-                geki: this.HitGeki,
-                100: this.Hit100,
-                katu: this.HitKatu,
-                50: this.Hit50,
-                0: this.HitMiss
+                300: this.hit300,
+                geki: 0,
+                100: this.hit100,
+                katu: 0,
+                50: this.hit50,
+                0: this.hitMiss
             }
         });
 
-        this.GradeExpected = this.GradeCurrent;
-        this.KeyOverlay = {
+        this.gradeExpected = this.gradeCurrent;
+        this.keyOverlay = {
             K1Pressed: false,
             K1Count: 0,
             K2Pressed: false,
@@ -127,19 +127,19 @@ export class Gameplay extends AbstractState {
         this.isReplayUiHidden = false;
 
         this.previousPassedObjects = 0;
-        this.GradualPerformance = undefined;
-        this.PerformanceAttributes = undefined;
+        this.gradualPerformance = undefined;
+        this.performanceAttributes = undefined;
         // below is gata that shouldn't be reseted on retry
         if (isRetry === true) {
             return;
         }
 
         this.isDefaultState = true;
-        this.Retries = 0;
-        this.PlayerName = '';
-        this.Mode = 0;
-        this.Mods = 0;
-        this.Leaderboard = undefined;
+        this.retries = 0;
+        this.playerName = '';
+        this.mode = 0;
+        this.mods = 0;
+        this.leaderboard = undefined;
     }
 
     resetQuick() {
@@ -155,143 +155,89 @@ export class Gameplay extends AbstractState {
 
         wLogger.debug('GD(resetKeyOverlay) Reset');
 
-        this.KeyOverlay.K1Pressed = false;
-        this.KeyOverlay.K2Pressed = false;
-        this.KeyOverlay.M1Pressed = false;
-        this.KeyOverlay.M2Pressed = false;
+        this.keyOverlay.K1Pressed = false;
+        this.keyOverlay.K2Pressed = false;
+        this.keyOverlay.M1Pressed = false;
+        this.keyOverlay.M2Pressed = false;
 
-        this.KeyOverlay.K1Count = 0;
-        this.KeyOverlay.K2Count = 0;
-        this.KeyOverlay.M1Count = 0;
-        this.KeyOverlay.M2Count = 0;
+        this.keyOverlay.K1Count = 0;
+        this.keyOverlay.K2Count = 0;
+        this.keyOverlay.M1Count = 0;
+        this.keyOverlay.M2Count = 0;
 
         this.isKeyOverlayDefaultState = true;
     }
 
     updateState() {
         try {
-            const { process, memory, global, beatmapPP, menu } =
-                this.game.getServices([
-                    'process',
-                    'memory',
-                    'global',
-                    'menu',
-                    'global',
-                    'beatmapPP'
-                ]);
-
-            const { baseAddr, rulesetsAddr } = memory.getPatterns([
-                'baseAddr',
-                'rulesetsAddr'
-            ]);
-
-            const rulesetAddr = process.readInt(
-                process.readInt(rulesetsAddr - 0xb) + 0x4
-            );
-            if (rulesetAddr === 0) {
-                wLogger.debug('GD(updateState) RulesetAddr is 0');
-                return;
+            const process = this.game.process;
+            const memory = this.game.memory;
+            const menu = this.game.get('menu');
+            if (menu === null) {
+                return 'not-ready';
             }
 
-            const gameplayBase = process.readInt(rulesetAddr + 0x68);
-            if (gameplayBase === 0) {
-                wLogger.debug('GD(updateState) gameplayBase is zero');
-                return;
-            }
-
-            const scoreBase = process.readInt(gameplayBase + 0x38);
-            if (scoreBase === 0) {
-                wLogger.debug('GD(updateState) scoreBase is zero');
-                return;
-            }
-
-            const hpBarBase = process.readInt(gameplayBase + 0x40);
-            if (hpBarBase === 0) {
-                wLogger.debug('GD(updateState) hpBar is zero');
-                return;
+            const result = this.game.memory.gameplay();
+            if (result instanceof Error) throw result;
+            if (typeof result === 'string') {
+                wLogger.debug(`GD(updateState) ${result}`);
+                return 'not-ready';
             }
 
             // Resetting default state value, to define other componenets that we have touched gameplay
             // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gameplay/resultScreen
             this.isDefaultState = false;
 
-            // [Base - 0x33] + 0x8
-            this.Retries = process.readInt(
-                process.readInt(baseAddr - 0x33) + 0x8
-            );
-            // [[[Ruleset + 0x68] + 0x38] + 0x28]
-            this.PlayerName = process.readSharpString(
-                process.readInt(scoreBase + 0x28)
-            );
-            // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
-            this.Mods =
-                process.readInt(process.readInt(scoreBase + 0x1c) + 0xc) ^
-                process.readInt(process.readInt(scoreBase + 0x1c) + 0x8);
-            // [[Ruleset + 0x68] + 0x38] + 0x64
-            this.Mode = process.readInt(scoreBase + 0x64);
-            // [[Ruleset + 0x68] + 0x38] + 0x78
-            this.Score = process.readInt(rulesetAddr + 0x100);
-            // [[Ruleset + 0x68] + 0x40] + 0x14
-            this.PlayerHPSmooth = process.readDouble(hpBarBase + 0x14) || 0;
-            // [[Ruleset + 0x68] + 0x40] + 0x1C
-            this.PlayerHP = process.readDouble(hpBarBase + 0x1c);
-            // [[Ruleset + 0x68] + 0x48] + 0xC
-            this.Accuracy = process.readDouble(
-                process.readInt(gameplayBase + 0x48) + 0xc
-            );
+            this.retries = result.retries;
+            this.playerName = result.playerName;
+            this.mods = result.mods;
+            this.mode = result.mode;
+            this.score = result.score;
+            this.playerHPSmooth = result.playerHPSmooth;
+            this.playerHP = result.playerHP;
+            this.accuracy = result.accuracy;
 
-            if (global.PlayTime >= beatmapPP.timings.firstObj - 100) {
-                // [[Ruleset + 0x68] + 0x38] + 0x88
-                this.Hit100 = process.readShort(scoreBase + 0x88);
-                // [[Ruleset + 0x68] + 0x38] + 0x8A
-                this.Hit300 = process.readShort(scoreBase + 0x8a);
-                // [[Ruleset + 0x68] + 0x38] + 0x8C
-                this.Hit50 = process.readShort(scoreBase + 0x8c);
-                // [[Ruleset + 0x68] + 0x38] + 0x8E
-                this.HitGeki = process.readShort(scoreBase + 0x8e);
-                // [[Ruleset + 0x68] + 0x38] + 0x90
-                this.HitKatu = process.readShort(scoreBase + 0x90);
-                // [[Ruleset + 0x68] + 0x38] + 0x92
-                this.HitMiss = process.readShort(scoreBase + 0x92);
-                // [[Ruleset + 0x68] + 0x38] + 0x94
-                this.Combo = process.readShort(scoreBase + 0x94);
-                // [[Ruleset + 0x68] + 0x38] + 0x68
-                this.MaxCombo = process.readShort(scoreBase + 0x68);
-            }
+            this.hit100 = result.hit100;
+            this.hit300 = result.hit300;
+            this.hit50 = result.hit50;
+            this.hitGeki = result.hitGeki;
+            this.hitKatu = result.hitKatu;
+            this.hitMiss = result.hitMiss;
+            this.combo = result.combo;
+            this.maxCombo = result.maxCombo;
 
-            if (this.MaxCombo > 0) {
+            if (this.maxCombo > 0) {
                 const baseUR = this.calculateUR();
-                if ((this.Mods & OsuMods.DoubleTime) === OsuMods.DoubleTime) {
-                    this.UnstableRate = baseUR / 1.5;
+                if ((this.mods & OsuMods.DoubleTime) === OsuMods.DoubleTime) {
+                    this.unstableRate = baseUR / 1.5;
                 } else if (
-                    (this.Mods & OsuMods.HalfTime) ===
+                    (this.mods & OsuMods.HalfTime) ===
                     OsuMods.HalfTime
                 ) {
-                    this.UnstableRate = baseUR * 1.33;
+                    this.unstableRate = baseUR * 1.33;
                 } else {
-                    this.UnstableRate = baseUR;
+                    this.unstableRate = baseUR;
                 }
             }
 
-            if (this.ComboPrev > this.MaxCombo) {
-                this.ComboPrev = 0;
+            if (this.comboPrev > this.maxCombo) {
+                this.comboPrev = 0;
             }
             if (
-                this.Combo < this.ComboPrev &&
-                this.HitMiss === this.HitMissPrev
+                this.combo < this.comboPrev &&
+                this.hitMiss === this.hitMissPrev
             ) {
-                this.HitSB += 1;
+                this.hitSB += 1;
             }
-            this.HitMissPrev = this.HitMiss;
-            this.ComboPrev = this.Combo;
+            this.hitMissPrev = this.hitMiss;
+            this.comboPrev = this.combo;
 
             this.updateGrade(menu.ObjectCount);
             this.updateStarsAndPerformance();
-            // [[[Ruleset + 0x68] + 0x38] + 0x38]
             this.updateLeaderboard(
                 process,
                 memory.getLeaderStart(),
-                rulesetAddr
+                result.address
             );
 
             this.resetReportCount('GD(updateState)');
@@ -307,65 +253,38 @@ export class Gameplay extends AbstractState {
 
     updateKeyOverlay() {
         try {
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
+            const result = this.game.memory.keyOverlay(this.mode);
+            if (result instanceof Error) throw result;
+            if (typeof result === 'string') {
+                if (result === '') return;
 
-            const rulesetAddr = process.readInt(
-                process.readInt(memory.getPattern('rulesetsAddr') - 0xb) + 0x4
-            );
-            if (rulesetAddr === 0) {
-                wLogger.debug('GD(updateKeyOverlay) rulesetAddr is zero');
-                return;
+                wLogger.debug(`GD(updateKeyOverlay)`, result);
+                return 'not-ready';
             }
 
-            const keyOverlayPtr = process.readUInt(rulesetAddr + 0xb0);
-            if (keyOverlayPtr === 0) {
-                if (this.Mode !== 3 && this.Mode !== 1)
-                    wLogger.debug(
-                        `GD(updateKeyOverlay) keyOverlayPtr is zero [${keyOverlayPtr}] (${rulesetAddr}  -  ${memory.getPattern(
-                            'rulesetsAddr'
-                        )})`
-                    );
-                return;
+            if (result.K1Count < 0 || result.K1Count > 1_000_000) {
+                result.K1Pressed = false;
+                result.K1Count = 0;
+            }
+            if (result.K2Count < 0 || result.K2Count > 1_000_000) {
+                result.K2Pressed = false;
+                result.K2Count = 0;
+            }
+            if (result.M1Count < 0 || result.M1Count > 1_000_000) {
+                result.M1Pressed = false;
+                result.M1Count = 0;
+            }
+            if (result.M2Count < 0 || result.M2Count > 1_000_000) {
+                result.M2Pressed = false;
+                result.M2Count = 0;
             }
 
-            // [[Ruleset + 0xB0] + 0x10] + 0x4
-            const keyOverlayArrayAddr = process.readInt(
-                process.readInt(keyOverlayPtr + 0x10) + 0x4
-            );
-            if (keyOverlayArrayAddr === 0) {
-                wLogger.debug('GD(updateKeyOverlay) keyOverlayAddr[] is zero');
-                return;
-            }
-
-            const keys = this.getKeyOverlay(process, keyOverlayArrayAddr);
-            if (keys.K1Count < 0 || keys.K1Count > 1_000_000) {
-                keys.K1Pressed = false;
-                keys.K1Count = 0;
-            }
-            if (keys.K2Count < 0 || keys.K2Count > 1_000_000) {
-                keys.K2Pressed = false;
-                keys.K2Count = 0;
-            }
-            if (keys.M1Count < 0 || keys.M1Count > 1_000_000) {
-                keys.M1Pressed = false;
-                keys.M1Count = 0;
-            }
-            if (keys.M2Count < 0 || keys.M2Count > 1_000_000) {
-                keys.M2Pressed = false;
-                keys.M2Count = 0;
-            }
-
-            this.KeyOverlay = keys;
+            this.keyOverlay = result;
             this.isKeyOverlayDefaultState = false;
 
-            const keysLine = `${keys.K1Count}:${keys.K2Count}:${keys.M1Count}:${keys.M2Count}`;
+            const keysLine = `${this.keyOverlay.K1Count}:${this.keyOverlay.K2Count}:${this.keyOverlay.M1Count}:${this.keyOverlay.M2Count}`;
             if (this.cachedkeys !== keysLine) {
-                wLogger.debug(
-                    `GD(updateKeyOverlay) updated (${rulesetAddr} ${keyOverlayArrayAddr}) ${keysLine}`
-                );
+                wLogger.debug(`GD(updateKeyOverlay) updated ${keysLine}`);
                 this.cachedkeys = keysLine;
             }
 
@@ -380,110 +299,18 @@ export class Gameplay extends AbstractState {
         }
     }
 
-    private getKeyOverlay(process: Process, keyOverlayArrayAddr: number) {
-        const itemsSize = process.readInt(keyOverlayArrayAddr + 0x4);
-        if (itemsSize < 4) {
-            return {
-                K1Pressed: false,
-                K1Count: 0,
-                K2Pressed: false,
-                K2Count: 0,
-                M1Pressed: false,
-                M1Count: 0,
-                M2Pressed: false,
-                M2Count: 0
-            };
-        }
-
-        return {
-            // [Base + 0x8] + 0x1C
-            K1Pressed: Boolean(
-                process.readByte(
-                    process.readInt(keyOverlayArrayAddr + 0x8) + 0x1c
-                )
-            ),
-            // [Base + 0x8] + 0x14
-            K1Count: process.readInt(
-                process.readInt(keyOverlayArrayAddr + 0x8) + 0x14
-            ),
-            // [Base + 0xC] + 0x1C
-            K2Pressed: Boolean(
-                process.readByte(
-                    process.readInt(keyOverlayArrayAddr + 0xc) + 0x1c
-                )
-            ),
-            // [Base + 0xC] + 0x14
-            K2Count: process.readInt(
-                process.readInt(keyOverlayArrayAddr + 0xc) + 0x14
-            ),
-            // [Base + 0x10] + 0x1C
-            M1Pressed: Boolean(
-                process.readByte(
-                    process.readInt(keyOverlayArrayAddr + 0x10) + 0x1c
-                )
-            ),
-            // [Base + 0x10] + 0x14
-            M1Count: process.readInt(
-                process.readInt(keyOverlayArrayAddr + 0x10) + 0x14
-            ),
-            // [Base + 0x14] + 0x1C
-            M2Pressed: Boolean(
-                process.readByte(
-                    process.readInt(keyOverlayArrayAddr + 0x14) + 0x1c
-                )
-            ),
-            // [Base + 0x14] + 0x14
-            M2Count: process.readInt(
-                process.readInt(keyOverlayArrayAddr + 0x14) + 0x14
-            )
-        };
-    }
-
     updateHitErrors() {
         try {
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory',
-                'global'
-            ]);
+            const result = this.game.memory.hitErors();
+            if (result instanceof Error) throw result;
+            if (typeof result === 'string') {
+                if (result === '') return;
 
-            const { rulesetsAddr } = memory.getPatterns(['rulesetsAddr']);
-
-            const rulesetAddr = process.readInt(
-                process.readInt(rulesetsAddr - 0xb) + 0x4
-            );
-            if (rulesetAddr === 0) {
-                wLogger.debug('GD(updateHitErrors) RulesetAddr is 0');
-                return;
+                wLogger.debug(`GD(updateHitErrors)`, result);
+                return 'not-ready';
             }
 
-            const gameplayBase = process.readInt(rulesetAddr + 0x68);
-            if (gameplayBase === 0) {
-                wLogger.debug('GD(updateHitErrors) gameplayBase is zero');
-                return;
-            }
-
-            const scoreBase = process.readInt(gameplayBase + 0x38);
-            if (scoreBase === 0) {
-                wLogger.debug('GD(updateHitErrors) scoreBase is zero');
-                return;
-            }
-
-            const leaderStart = memory.getLeaderStart();
-
-            const base = process.readInt(scoreBase + 0x38);
-            const items = process.readInt(base + 0x4);
-            const size = process.readInt(base + 0xc);
-
-            const errors: Array<number> = [];
-            for (let i = 0; i < size; i++) {
-                const current = items + leaderStart + 0x4 * i;
-                const error = process.readInt(current);
-
-                errors.push(error);
-            }
-
-            this.HitErrors = errors;
+            this.hitErrors = result;
 
             this.resetReportCount('GD(updateHitErrors)');
         } catch (exc) {
@@ -498,52 +325,52 @@ export class Gameplay extends AbstractState {
 
     // IMPROVE, WE DONT NEED TO SUM EVERY HITERROR EACH TIME (for future)
     private calculateUR(): number {
-        if (this.HitErrors.length < 1) {
+        if (this.hitErrors.length < 1) {
             return 0;
         }
 
         let totalAll = 0.0;
-        for (const hit of this.HitErrors) {
+        for (const hit of this.hitErrors) {
             totalAll += hit;
         }
 
-        const average = totalAll / this.HitErrors.length;
+        const average = totalAll / this.hitErrors.length;
         let variance = 0;
-        for (const hit of this.HitErrors) {
+        for (const hit of this.hitErrors) {
             variance += Math.pow(hit - average, 2);
         }
-        variance = variance / this.HitErrors.length;
+        variance = variance / this.hitErrors.length;
 
         return Math.sqrt(variance) * 10;
     }
 
     private updateGrade(objectCount: number) {
         const remaining =
-            objectCount - this.Hit300 - this.Hit100 - this.Hit50 - this.HitMiss;
+            objectCount - this.hit300 - this.hit100 - this.hit50 - this.hitMiss;
 
-        this.GradeCurrent = calculateGrade({
-            mods: this.Mods,
-            mode: this.Mode,
+        this.gradeCurrent = calculateGrade({
+            mods: this.mods,
+            mode: this.mode,
             hits: {
-                300: this.Hit300,
-                geki: this.HitGeki,
-                100: this.Hit100,
-                katu: this.HitKatu,
-                50: this.Hit50,
-                0: this.HitMiss
+                300: this.hit300,
+                geki: 0,
+                100: this.hit100,
+                katu: 0,
+                50: this.hit50,
+                0: this.hitMiss
             }
         });
 
-        this.GradeExpected = calculateGrade({
-            mods: this.Mods,
-            mode: this.Mode,
+        this.gradeExpected = calculateGrade({
+            mods: this.mods,
+            mode: this.mode,
             hits: {
-                300: this.Hit300 + remaining,
-                geki: this.HitGeki,
-                100: this.Hit100,
-                katu: this.HitKatu,
-                50: this.Hit50,
-                0: this.HitMiss
+                300: this.hit300 + remaining,
+                geki: 0,
+                100: this.hit100,
+                katu: 0,
+                50: this.hit50,
+                0: this.hitMiss
             }
         });
     }
@@ -562,12 +389,12 @@ export class Gameplay extends AbstractState {
                 leaderBoardBase > 0
                     ? process.readInt(leaderBoardBase + 0x24)
                     : 0;
-            if (!this.Leaderboard) {
-                this.Leaderboard = new Leaderboard(process, leaderBoardAddr);
+            if (!this.leaderboard) {
+                this.leaderboard = new Leaderboard(process, leaderBoardAddr);
             } else {
-                this.Leaderboard.updateBase(leaderBoardAddr);
+                this.leaderboard.updateBase(leaderBoardAddr);
             }
-            this.Leaderboard.readLeaderboard(leaderStart);
+            this.leaderboard.readLeaderboard(leaderStart);
 
             this.resetReportCount('GD(updateLeaderboard)');
         } catch (exc) {
@@ -596,7 +423,7 @@ export class Gameplay extends AbstractState {
                 'menu'
             ]);
 
-            if (!global.GameFolder) {
+            if (!global.gameFolder) {
                 wLogger.debug(
                     'GD(updateStarsAndPerformance) game folder not found'
                 );
@@ -611,72 +438,72 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentState = `${menu.MD5}:${menu.MenuGameMode}:${this.Mods}:${menu.MP3Length}`;
+            const currentState = `${menu.MD5}:${menu.MenuGameMode}:${this.mods}:${menu.MP3Length}`;
             const isUpdate = this.previousState !== currentState;
 
             // update precalculated attributes
             if (
                 isUpdate ||
-                !this.GradualPerformance ||
-                !this.PerformanceAttributes
+                !this.gradualPerformance ||
+                !this.performanceAttributes
             ) {
-                if (this.GradualPerformance) this.GradualPerformance.free();
-                if (this.PerformanceAttributes)
-                    this.PerformanceAttributes.free();
+                if (this.gradualPerformance) this.gradualPerformance.free();
+                if (this.performanceAttributes)
+                    this.performanceAttributes.free();
 
-                const difficulty = new rosu.Difficulty({ mods: this.Mods });
-                this.GradualPerformance = new rosu.GradualPerformance(
+                const difficulty = new rosu.Difficulty({ mods: this.mods });
+                this.gradualPerformance = new rosu.GradualPerformance(
                     difficulty,
                     currentBeatmap
                 );
 
-                this.PerformanceAttributes = new rosu.Performance({
-                    mods: this.Mods
+                this.performanceAttributes = new rosu.Performance({
+                    mods: this.mods
                 }).calculate(currentBeatmap);
 
                 this.previousState = currentState;
             }
 
-            if (!this.GradualPerformance || !this.PerformanceAttributes) {
+            if (!this.gradualPerformance || !this.performanceAttributes) {
                 wLogger.debug(
-                    `GD(updateStarsAndPerformance) One of things not ready. GP:${this.GradualPerformance === undefined} - PA:${this.PerformanceAttributes === undefined}`
+                    `GD(updateStarsAndPerformance) One of things not ready. GP:${this.gradualPerformance === undefined} - PA:${this.performanceAttributes === undefined}`
                 );
                 return;
             }
 
             const passedObjects = calculatePassedObjects(
-                this.Mode,
-                this.Hit300,
-                this.Hit100,
-                this.Hit50,
-                this.HitMiss,
-                this.HitKatu,
-                this.HitGeki
+                this.mode,
+                this.hit300,
+                this.hit100,
+                this.hit50,
+                this.hitMiss,
+                this.hitKatu,
+                this.hitGeki
             );
 
             const offset = passedObjects - this.previousPassedObjects;
             if (offset <= 0) return;
 
             const scoreParams: rosu.ScoreState = {
-                maxCombo: this.MaxCombo,
-                misses: this.HitMiss,
-                n50: this.Hit50,
-                n100: this.Hit100,
-                n300: this.Hit300,
-                nKatu: this.HitKatu,
-                nGeki: this.HitGeki
+                maxCombo: this.maxCombo,
+                misses: this.hitMiss,
+                n50: this.hit50,
+                n100: this.hit100,
+                n300: this.hit300,
+                nKatu: this.hitKatu,
+                nGeki: this.hitGeki
             };
 
-            const currPerformance = this.GradualPerformance.nth(
+            const currPerformance = this.gradualPerformance.nth(
                 scoreParams,
                 offset - 1
             )!;
 
             const fcPerformance = new rosu.Performance({
-                mods: this.Mods,
+                mods: this.mods,
                 misses: 0,
-                accuracy: this.Accuracy
-            }).calculate(this.PerformanceAttributes);
+                accuracy: this.accuracy
+            }).calculate(this.performanceAttributes);
             const t2 = performance.now();
 
             if (currPerformance) {

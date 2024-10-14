@@ -18,9 +18,6 @@ import { TourneyManager } from '@/states/tourney';
 import { User } from '@/states/user';
 
 export interface DataRepoList {
-    process: Process;
-    memory: AbstractMemory;
-
     settings: Settings;
 
     global: Global;
@@ -60,8 +57,6 @@ export abstract class AbstractInstance {
         this.process = new Process(this.pid);
         this.path = this.process.path;
 
-        this.set('process', this.process);
-
         this.set('settings', new Settings(this));
         this.set('global', new Global(this));
         this.set('beatmapPP', new BeatmapPP(this));
@@ -73,6 +68,7 @@ export abstract class AbstractInstance {
         this.set('user', new User(this));
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
+        this.preciseDataLoop = this.preciseDataLoop.bind(this);
     }
 
     /**
@@ -102,6 +98,16 @@ export abstract class AbstractInstance {
     abstract start(): void;
 
     abstract injectGameOverlay(): void;
+
+    initiateDataLoops() {
+        const { global, gameplay } = this.getServices(['global', 'gameplay']);
+
+        this.regularDataLoop();
+        this.preciseDataLoop(global, gameplay);
+    }
+
+    abstract regularDataLoop(): void;
+    abstract preciseDataLoop(global: Global, gameplay: Gameplay): void;
 
     watchProcessHealth() {
         if (this.isDestroyed === true) return;

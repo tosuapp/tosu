@@ -19,41 +19,29 @@ export class User extends AbstractState {
 
     updateState() {
         try {
-            const { memory, process } = this.game.getServices([
-                'memory',
-                'process'
-            ]);
+            const profile = this.game.memory.user();
+            if (profile instanceof Error) throw profile;
 
-            const profileBase = process.readPointer(
-                memory.getPattern('userProfilePtr')
-            );
+            this.name = profile.name;
+            this.accuracy = profile.accuracy;
+            this.rankedScore = profile.rankedScore;
+            this.id = profile.id;
+            this.level = profile.level;
+            this.playCount = profile.playCount;
+            this.playMode = profile.playMode;
+            this.rank = profile.rank;
+            this.countryCode = profile.countryCode;
+            this.performancePoints = profile.performancePoints;
+            this.rawBanchoStatus = profile.rawBanchoStatus;
+            this.backgroundColour = profile.backgroundColour;
+            this.rawLoginStatus = profile.rawLoginStatus;
 
-            this.rawLoginStatus = process.readPointer(
-                memory.getPattern('rawLoginStatusPtr')
-            );
-            this.rawBanchoStatus = process.readByte(profileBase + 0x88);
-
-            this.name = process.readSharpString(
-                process.readInt(profileBase + 0x30)
-            );
-            this.accuracy = process.readDouble(profileBase + 0x4);
-            this.rankedScore = process.readLong(profileBase + 0xc);
-            this.id = process.readInt(profileBase + 0x70);
-            this.level = process.readFloat(profileBase + 0x74);
-            this.playCount = process.readInt(profileBase + 0x7c);
-            this.playMode = process.readInt(profileBase + 0x80);
-            this.rank = process.readInt(profileBase + 0x84);
-            this.countryCode = process.readInt(profileBase + 0x98);
-            this.performancePoints = process.readShort(profileBase + 0x9c);
-            // ARGB, to convert use UserProfile.backgroundColour.toString(16)
-            this.backgroundColour = process.readUInt(profileBase + 0xac);
-
-            this.resetReportCount('UP(updateState)');
+            this.resetReportCount('User(updateState)');
         } catch (exc) {
             this.reportError(
-                'UP(updateState)',
+                'User(updateState)',
                 10,
-                `UP(updateState) ${(exc as any).message}`
+                `User(updateState) ${(exc as any).message}`
             );
             wLogger.debug(exc);
         }

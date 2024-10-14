@@ -3,114 +3,57 @@ import { wLogger } from '@tosu/common';
 import { AbstractState } from '@/states';
 
 export class Global extends AbstractState {
-    IsWatchingReplay: number = 0;
+    isWatchingReplay: number = 0;
     isReplayUiHidden: boolean = false;
-    ShowInterface: boolean = false;
+    showInterface: boolean = false;
 
-    ChatStatus: number = 0;
-    Status: number = 0;
+    chatStatus: number = 0;
+    status: number = 0;
 
-    GameTime: number = 0;
-    PlayTime: number = 0;
-    MenuMods: number = 0;
+    gameTime: number = 0;
+    playTime: number = 0;
+    menuMods: number = 0;
 
-    GameFolder: string = '';
-    SkinFolder: string = '';
-    SongsFolder: string = '';
-    MemorySongsFolder: string = '';
+    gameFolder: string = '';
+    skinFolder: string = '';
+    songsFolder: string = '';
+    memorySongsFolder: string = '';
 
     setGameFolder(value: string) {
         if (typeof value !== 'string') return;
 
-        this.GameFolder = value;
+        this.gameFolder = value;
     }
 
     setSongsFolder(value: string) {
         if (typeof value !== 'string') return;
 
-        this.SongsFolder = value;
+        this.songsFolder = value;
     }
 
     async updateState() {
         try {
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
+            const result = this.game.memory.global();
+            if (result instanceof Error) throw result;
+            if (typeof result === 'string') {
+                if (result === '') return;
 
-            const {
-                statusPtr,
-                menuModsPtr,
-                chatCheckerPtr,
-                skinDataAddr,
-                settingsClassAddr,
-                canRunSlowlyAddr,
-                rulesetsAddr,
-                gameTimePtr
-            } = memory.getPatterns([
-                'statusPtr',
-                'menuModsPtr',
-                'chatCheckerPtr',
-                'skinDataAddr',
-                'settingsClassAddr',
-                'canRunSlowlyAddr',
-                'rulesetsAddr',
-                'gameTimePtr'
-            ]);
-
-            // [Status - 0x4]
-            this.Status = process.readPointer(statusPtr);
-            // [MenuMods + 0x9]
-            this.MenuMods = process.readPointer(menuModsPtr);
-            // ChatChecker - 0x20
-            this.ChatStatus = process.readByte(process.readInt(chatCheckerPtr));
-            this.IsWatchingReplay = process.readByte(
-                process.readInt(canRunSlowlyAddr + 0x46)
-            );
-            this.GameTime = process.readPointer(gameTimePtr);
-            this.MemorySongsFolder = process.readSharpString(
-                process.readInt(
-                    process.readInt(
-                        process.readInt(settingsClassAddr + 0x8) + 0xb8
-                    ) + 0x4
-                )
-            );
-
-            // [[SettingsClass + 0x8] + 0x4] + 0xC
-            this.ShowInterface = Boolean(
-                process.readByte(
-                    process.readInt(
-                        process.readInt(settingsClassAddr + 0x8) + 0x4
-                    ) + 0xc
-                )
-            );
-
-            if (this.IsWatchingReplay) {
-                const rulesetAddr = process.readInt(
-                    process.readInt(rulesetsAddr - 0xb) + 0x4
-                );
-                if (rulesetAddr !== 0) {
-                    // rulesetAddr mean ReplayWatcher... Sooo....
-                    // Ruleset + 0x1d8
-                    this.isReplayUiHidden = Boolean(
-                        process.readByte(rulesetAddr + 0x1d8)
-                    );
-                } else {
-                    this.isReplayUiHidden = false;
-                }
-            } else {
-                this.isReplayUiHidden = false;
+                wLogger.debug(`Global(updateState)`, result);
+                return 'not-ready';
             }
 
-            const skinOsuAddr = process.readInt(skinDataAddr + 0x7);
-            if (skinOsuAddr !== 0) {
-                const skinOsuBase = process.readInt(skinOsuAddr);
+            this.isWatchingReplay = result.isWatchingReplay;
+            this.isReplayUiHidden = result.isReplayUiHidden;
 
-                this.SkinFolder = process.readSharpString(
-                    process.readInt(skinOsuBase + 0x44)
-                );
-                return;
-            }
+            this.showInterface = result.showInterface;
+            this.chatStatus = result.chatStatus;
+            this.status = result.status;
+
+            this.gameTime = result.gameTime;
+            this.menuMods = result.menuMods;
+
+            this.skinFolder = result.skinFolder;
+            this.memorySongsFolder = result.memorySongsFolder;
 
             this.resetReportCount('ATD(updateState)');
         } catch (exc) {
@@ -125,17 +68,10 @@ export class Global extends AbstractState {
 
     updatePreciseState() {
         try {
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
+            const result = this.game.memory.globalPrecise();
+            if (result instanceof Error) throw result;
 
-            const { playTimeAddr } = memory.getPatterns(['playTimeAddr']);
-
-            // [PlayTime + 0x5]
-            this.PlayTime = process.readInt(
-                process.readInt(playTimeAddr + 0x5)
-            );
+            this.playTime = result.time;
 
             this.resetReportCount('ATD(updatePreciseState)');
         } catch (exc) {

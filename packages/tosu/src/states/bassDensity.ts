@@ -37,12 +37,12 @@ export class BassDensity extends AbstractState {
             this.currentAudioVelocity = currentAudioVelocity;
             this.density = (1 + currentAudioVelocity) * 0.5;
 
-            this.resetReportCount('BDD(updateState)');
+            this.resetReportCount('BassDensity(updateState)');
         } catch (exc) {
             this.reportError(
-                'BDD(updateState)',
+                'BassDensity(updateState)',
                 10,
-                `BDD(updateState) ${(exc as any).message}`
+                `BassDensity(updateState) ${(exc as any).message}`
             );
             wLogger.debug(exc);
         }

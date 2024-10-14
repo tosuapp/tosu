@@ -101,39 +101,39 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     ]);
 
     const currentMods =
-        global.Status === 2 || global.Status === 7
-            ? gameplay.Mods
-            : global.MenuMods;
+        global.status === 2 || global.status === 7
+            ? gameplay.mods
+            : global.menuMods;
 
     const resultScreenHits = {
-        300: resultScreen.Hit300,
-        geki: resultScreen.HitGeki,
-        100: resultScreen.Hit100,
-        katu: resultScreen.HitKatu,
-        50: resultScreen.Hit50,
-        0: resultScreen.HitMiss
+        300: resultScreen.hit300,
+        geki: resultScreen.hitGeki,
+        100: resultScreen.hit100,
+        katu: resultScreen.hitKatu,
+        50: resultScreen.hit50,
+        0: resultScreen.hitMiss
     };
 
     return {
         state: {
-            number: global.Status,
-            name: GameState[global.Status] || ''
+            number: global.status,
+            name: GameState[global.status] || ''
         },
         session: {
-            playTime: global.GameTime,
+            playTime: global.gameTime,
             playCount: 0 // need counting
         },
         settings: {
-            interfaceVisible: global.ShowInterface,
+            interfaceVisible: global.showInterface,
             replayUIVisible: global.isReplayUiHidden === false,
             chatVisibilityStatus: {
-                number: global.ChatStatus,
-                name: ChatStatus[global.ChatStatus] || ''
+                number: global.chatStatus,
+                name: ChatStatus[global.chatStatus] || ''
             },
 
             leaderboard: {
-                visible: gameplay.Leaderboard
-                    ? gameplay.Leaderboard.isScoreboardVisible
+                visible: gameplay.leaderboard
+                    ? gameplay.leaderboard.isScoreboardVisible
                     : false,
                 type: {
                     number: settings.leaderboardType,
@@ -213,7 +213,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         },
         beatmap: {
             time: {
-                live: global.PlayTime,
+                live: global.playTime,
                 firstObject: beatmapPP.timings.firstObj,
                 lastObject: beatmapPP.timings.full,
                 mp3Length: menu.MP3Length
@@ -244,9 +244,9 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             stats: buildBeatmapStats(beatmapPP, menu)
         },
         play: buildPlay(gameplay, beatmapPP, currentMods),
-        leaderboard: gameplay.Leaderboard
-            ? gameplay.Leaderboard.leaderBoard.map((slot) =>
-                  convertMemoryPlayerToResult(slot, Modes[gameplay.Mode])
+        leaderboard: gameplay.leaderboard
+            ? gameplay.leaderboard.leaderBoard.map((slot) =>
+                  convertMemoryPlayerToResult(slot, Modes[gameplay.mode])
               )
             : [],
         performance: {
@@ -254,36 +254,36 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             graph: beatmapPP.strainsAll
         },
         resultsScreen: {
-            scoreId: resultScreen.OnlineId,
+            scoreId: resultScreen.onlineId,
 
-            playerName: resultScreen.PlayerName,
+            playerName: resultScreen.playerName,
 
             mode: {
-                number: resultScreen.Mode,
-                name: Modes[resultScreen.Mode] || ''
+                number: resultScreen.mode,
+                name: Modes[resultScreen.mode] || ''
             },
 
-            score: resultScreen.Score,
-            accuracy: resultScreen.Accuracy,
+            score: resultScreen.score,
+            accuracy: resultScreen.accuracy,
 
-            name: resultScreen.PlayerName, // legacy, remove it later
+            name: resultScreen.playerName, // legacy, remove it later
             hits: resultScreenHits,
             mods: {
-                number: resultScreen.Mods,
-                name: getOsuModsString(resultScreen.Mods)
+                number: resultScreen.mods,
+                name: getOsuModsString(resultScreen.mods)
             },
-            maxCombo: resultScreen.MaxCombo,
-            rank: resultScreen.Grade,
+            maxCombo: resultScreen.maxCombo,
+            rank: resultScreen.grade,
             pp: {
                 current: resultScreen.pp,
                 fc: resultScreen.fcPP
             },
-            createdAt: resultScreen.Date
+            createdAt: resultScreen.date
         },
         folders: {
-            game: global.GameFolder,
-            skin: global.SkinFolder,
-            songs: global.SongsFolder,
+            game: global.gameFolder,
+            skin: global.skinFolder,
+            songs: global.songsFolder,
             beatmap: menu.Folder
         },
         files: {
@@ -302,7 +302,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 menu.AudioFilename || ''
             ),
             beatmapFolder: menu.Folder,
-            skinFolder: global.SkinFolder
+            skinFolder: global.skinFolder
         },
 
         tourney: buildTourneyData(instanceManager)
@@ -336,9 +336,9 @@ const buildTourneyData = (
                 ]);
 
             const currentMods =
-                global.Status === 2 || global.Status === 7
-                    ? gameplay.Mods
-                    : global.MenuMods;
+                global.status === 2 || global.status === 7
+                    ? gameplay.mods
+                    : global.menuMods;
 
             const spectatorTeam =
                 iterator < osuTourneyClients.length / 2 ? 'left' : 'right';
@@ -492,44 +492,44 @@ function buildPlay(
     currentMods: number
 ) {
     return {
-        playerName: gameplay.PlayerName,
+        playerName: gameplay.playerName,
 
         mode: {
-            number: gameplay.Mode,
-            name: Modes[gameplay.Mode] || ''
+            number: gameplay.mode,
+            name: Modes[gameplay.mode] || ''
         },
 
-        score: gameplay.Score,
-        accuracy: gameplay.Accuracy,
+        score: gameplay.score,
+        accuracy: gameplay.accuracy,
 
         healthBar: {
-            normal: (gameplay.PlayerHP / 200) * 100,
-            smooth: (gameplay.PlayerHPSmooth / 200) * 100
+            normal: (gameplay.playerHP / 200) * 100,
+            smooth: (gameplay.playerHPSmooth / 200) * 100
         },
 
         hits: {
-            300: gameplay.Hit300,
-            geki: gameplay.HitGeki,
-            100: gameplay.Hit100,
-            katu: gameplay.HitKatu,
-            50: gameplay.Hit50,
-            0: gameplay.HitMiss,
-            sliderBreaks: gameplay.HitSB
+            300: gameplay.hit300,
+            geki: gameplay.hitGeki,
+            100: gameplay.hit100,
+            katu: gameplay.hitKatu,
+            50: gameplay.hit50,
+            0: gameplay.hitMiss,
+            sliderBreaks: gameplay.hitSB
         },
 
-        hitErrorArray: gameplay.HitErrors,
+        hitErrorArray: gameplay.hitErrors,
 
         combo: {
-            current: gameplay.Combo,
-            max: gameplay.MaxCombo
+            current: gameplay.combo,
+            max: gameplay.maxCombo
         },
         mods: {
             number: currentMods,
             name: getOsuModsString(currentMods)
         },
         rank: {
-            current: gameplay.GradeCurrent,
-            maxThisPlay: gameplay.GradeExpected
+            current: gameplay.gradeCurrent,
+            maxThisPlay: gameplay.gradeExpected
         },
         pp: {
             current: fixDecimals(beatmapPP.currAttributes.pp),
@@ -568,6 +568,6 @@ function buildPlay(
                 }
             }
         },
-        unstableRate: gameplay.UnstableRate
+        unstableRate: gameplay.unstableRate
     };
 }
