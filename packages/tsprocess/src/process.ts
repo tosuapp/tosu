@@ -121,51 +121,52 @@ export class Process {
         return result;
     }
 
+    private static buildPattern(pattern: string): Pattern {
+        const bytes = pattern.split(' ');
+
+        const signature = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : x)).join(''),
+            'hex'
+        );
+        const mask = Buffer.from(
+            bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
+            'hex'
+        );
+
+        return { signature, mask };
+    }
+
     readBuffer(address: number, size: number): Buffer {
         return ProcessUtils.readBuffer(this.handle, address, size);
     }
 
     scanSync(pattern: string): number {
-        const bytes = pattern.split(' ');
-        const signature = Buffer.from(
-            bytes.map((x) => (x === '??' ? '00' : x)).join(''),
-            'hex'
-        );
-        const mask = Buffer.from(
-            bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
-            'hex'
-        );
+        const result = Process.buildPattern(pattern);
 
-        return ProcessUtils.scanSync(this.handle, signature, mask);
+        return ProcessUtils.scanSync(
+            this.handle,
+            result.signature,
+            result.mask
+        );
     }
 
     scan(pattern: string, callback: (address: number) => void): void {
-        const bytes = pattern.split(' ');
-        const signature = Buffer.from(
-            bytes.map((x) => (x === '??' ? '00' : x)).join(''),
-            'hex'
-        );
-        const mask = Buffer.from(
-            bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
-            'hex'
-        );
+        const result = Process.buildPattern(pattern);
 
-        ProcessUtils.scan(this.handle, signature, mask, callback);
+        ProcessUtils.scan(this.handle, result.signature, result.mask, callback);
     }
 
     scanAsync(pattern: string): Promise<number> {
-        const bytes = pattern.split(' ');
-        const signature = Buffer.from(
-            bytes.map((x) => (x === '??' ? '00' : x)).join(''),
-            'hex'
-        );
-        const mask = Buffer.from(
-            bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
-            'hex'
-        );
+        const result = Process.buildPattern(pattern);
+
         return new Promise((resolve, reject) => {
             try {
-                ProcessUtils.scan(this.handle, signature, mask, resolve);
+                ProcessUtils.scan(
+                    this.handle,
+                    result.signature,
+                    result.mask,
+                    resolve
+                );
             } catch (e) {
                 reject(e);
             }
@@ -176,18 +177,11 @@ export class Process {
         const patterns: Pattern[] = [];
 
         for (const signature of signatures) {
-            const bytes = signature.split(' ');
-            const signatureBuffer = Buffer.from(
-                bytes.map((x) => (x === '??' ? '00' : x)).join(''),
-                'hex'
-            );
-            const maskBuffer = Buffer.from(
-                bytes.map((x) => (x === '??' ? '00' : '01')).join(''),
-                'hex'
-            );
+            const result = Process.buildPattern(signature);
+
             patterns.push({
-                signature: signatureBuffer,
-                mask: maskBuffer
+                signature: result.signature,
+                mask: result.mask
             });
         }
 
