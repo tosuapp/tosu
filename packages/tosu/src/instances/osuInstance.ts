@@ -18,33 +18,7 @@ export class OsuInstance extends AbstractInstance {
     }
 
     async start() {
-        wLogger.info(`[${this.pid}] Running memory chimera...`);
-
-        while (!this.isReady) {
-            try {
-                const s1 = performance.now();
-                const result = this.memory.resolvePatterns();
-                if (!result) {
-                    throw new Error('Memory resolve failed');
-                }
-
-                wLogger.debug(
-                    `[${this.pid}] Took ${(performance.now() - s1).toFixed(2)} ms to scan patterns`
-                );
-
-                wLogger.info(
-                    `[${this.pid}] ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA`
-                );
-                this.isReady = true;
-            } catch (exc) {
-                wLogger.error(
-                    `[${this.pid}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
-                );
-                wLogger.debug(exc);
-                this.emitter.emit('onResolveFailed', this.pid);
-                return;
-            }
-        }
+        super.start();
 
         /**
          * ENABLING GOSU OVERLAY

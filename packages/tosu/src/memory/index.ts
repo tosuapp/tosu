@@ -6,6 +6,14 @@ import { KeyOverlay } from '@/states/gameplay';
 import { OsuMods } from '@/utils/osuMods.types';
 import { BindingsList, ConfigList } from '@/utils/settings.types';
 
+export type ScanPatterns = {
+    [k in keyof PatternData]: {
+        pattern: string;
+        offset?: number;
+        isTourneyOnly?: boolean;
+    };
+};
+
 export interface PatternData {
     baseAddr: number;
     playTimeAddr: number;
@@ -62,7 +70,7 @@ export abstract class AbstractMemory {
         this.game = instance;
     }
 
-    abstract resolvePatterns(): boolean;
+    abstract getScanPatterns(): ScanPatterns;
 
     setPattern(key: keyof PatternData, val: number): boolean {
         this.patterns[key] = val;

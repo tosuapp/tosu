@@ -1,19 +1,11 @@
 import { wLogger } from '@tosu/common';
 
-import { AbstractMemory, PatternData } from '@/memory';
+import { AbstractMemory, ScanPatterns } from '@/memory';
 import { netDateBinaryToDate } from '@/utils/converters';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
-type SCAN_PATTERNS = {
-    [k in keyof PatternData]: {
-        pattern: string;
-        offset?: number;
-        isTourneyOnly?: boolean;
-    };
-};
-
 export class StableMemory extends AbstractMemory {
-    SCAN_PATTERNS: SCAN_PATTERNS = {
+    private scanPatterns: ScanPatterns = {
         baseAddr: {
             pattern: 'F8 01 74 04 83 65'
         },
@@ -78,43 +70,8 @@ export class StableMemory extends AbstractMemory {
     previousMP3Length: number = 0;
     previousTime: number = 0;
 
-    resolvePatterns(): boolean {
-        try {
-            const results = this.process.scanBatch(
-                Object.values(this.SCAN_PATTERNS).map((x) => x.pattern)
-            );
-
-            const patternsEntries = Object.entries(this.SCAN_PATTERNS);
-            for (let i = 0; i < results.length; i++) {
-                const item = results[i];
-                const pattern = patternsEntries[item.index];
-
-                this.setPattern(
-                    pattern[0] as keyof PatternData,
-                    item.address + (pattern[1].offset || 0)
-                );
-            }
-
-            if (!this.checkIsBasesValid()) {
-                return false;
-            }
-
-            return true;
-        } catch (error) {
-            wLogger.debug(`MP(resolvePatterns)[${this.pid}]`, error);
-            return false;
-        }
-    }
-
-    private checkIsBasesValid(): boolean {
-        Object.entries(this.patterns).map((entry) =>
-            wLogger.debug(
-                `SM(checkIsBasesValid)[${this.pid}] ${entry[0]}: ${entry[1]
-                    .toString(16)
-                    .toUpperCase()}`
-            )
-        );
-        return !Object.values(this.patterns).some((base) => base === 0);
+    getScanPatterns(): ScanPatterns {
+        return this.scanPatterns;
     }
 
     audioVelocityBase() {

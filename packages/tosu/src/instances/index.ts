@@ -6,7 +6,7 @@ import { buildResult } from '@/api/utils/buildResult';
 import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
 import { buildResult as buildResultV2Precise } from '@/api/utils/buildResultV2Precise';
 import { InstanceManager } from '@/instances/manager';
-import { AbstractMemory } from '@/memory';
+import { AbstractMemory, PatternData } from '@/memory';
 import { BassDensity } from '@/states/bassDensity';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
@@ -95,7 +95,76 @@ export abstract class AbstractInstance {
         return instance;
     }
 
-    abstract start(): void;
+    private resolvePatterns(): boolean {
+        try {
+            const scanPatterns = this.memory.getScanPatterns();
+
+            const results = this.process.scanBatch(
+                Object.values(scanPatterns).map((x) => x.pattern)
+            );
+
+            const patternsEntries = Object.entries(scanPatterns);
+            for (let i = 0; i < results.length; i++) {
+                const item = results[i];
+                const pattern = patternsEntries[item.index];
+
+                this.memory.setPattern(
+                    pattern[0] as keyof PatternData,
+                    item.address + (pattern[1].offset || 0)
+                );
+            }
+
+            if (!this.checkIsBasesValid()) {
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            wLogger.debug(`MP(resolvePatterns)[${this.pid}]`, error);
+            return false;
+        }
+    }
+
+    private checkIsBasesValid(): boolean {
+        Object.entries(this.memory.patterns).map((entry) =>
+            wLogger.debug(
+                `SM(checkIsBasesValid)[${this.pid}] ${entry[0]}: ${entry[1]
+                    .toString(16)
+                    .toUpperCase()}`
+            )
+        );
+        return !Object.values(this.memory.patterns).some((base) => base === 0);
+    }
+
+    start(): void | Promise<void> {
+        wLogger.info(`[${this.pid}] Running memory chimera...`);
+
+        while (!this.isReady) {
+            try {
+                const s1 = performance.now();
+                const result = this.resolvePatterns();
+                if (!result) {
+                    throw new Error('Memory resolve failed');
+                }
+
+                wLogger.debug(
+                    `[${this.pid}] Took ${(performance.now() - s1).toFixed(2)} ms to scan patterns`
+                );
+
+                wLogger.info(
+                    `[${this.pid}] ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA`
+                );
+                this.isReady = true;
+            } catch (exc) {
+                wLogger.error(
+                    `[${this.pid}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
+                );
+                wLogger.debug(exc);
+                this.emitter.emit('onResolveFailed', this.pid);
+                return;
+            }
+        }
+    }
 
     abstract injectGameOverlay(): void;
 
