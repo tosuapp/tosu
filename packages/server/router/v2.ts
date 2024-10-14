@@ -36,9 +36,8 @@ export default function buildV2Api(app: HttpServer) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
-
             const global = osuInstance.get('global');
-            if (global.SongsFolder === '') {
+            if (global.songsFolder === '') {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
@@ -47,7 +46,7 @@ export default function buildV2Api(app: HttpServer) {
                 res,
                 baseUrl: url,
                 pathname: req.params.filePath,
-                folderPath: global.SongsFolder
+                folderPath: global.songsFolder
             });
         } catch (error) {
             wLogger.error((error as any).message);
@@ -71,17 +70,17 @@ export default function buildV2Api(app: HttpServer) {
 
             const global = osuInstance.get('global');
             if (
-                (global.GameFolder === '' && global.SkinFolder === '') ||
-                (global.GameFolder == null && global.SkinFolder == null)
+                (global.gameFolder === '' && global.skinFolder === '') ||
+                (global.gameFolder == null && global.skinFolder == null)
             ) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
 
             const folder = path.join(
-                global.GameFolder,
+                global.gameFolder,
                 'Skins',
-                global.SkinFolder
+                global.skinFolder
             );
             directoryWalker({
                 res,
