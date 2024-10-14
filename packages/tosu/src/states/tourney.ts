@@ -58,10 +58,8 @@ export class TourneyManager extends AbstractState {
         try {
             wLogger.debug('TMD(updateState) Starting');
 
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
+            const process = this.game.process;
+            const memory = this.game.memory;
 
             const rulesetsAddr = memory.getPattern('rulesetsAddr');
 
@@ -222,11 +220,9 @@ export class TourneyManager extends AbstractState {
     }
 
     updateUser() {
-        const { process, gameplay, memory } = this.game.getServices([
-            'process',
-            'gameplay',
-            'memory'
-        ]);
+        const process = this.game.process;
+        const memory = this.game.memory;
+        const { gameplay } = this.game.getServices(['gameplay']);
 
         const spectatingUserDrawable = process.readPointer(
             memory.getPattern('spectatingUserPtr')

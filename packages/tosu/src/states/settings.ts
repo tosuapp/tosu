@@ -1,15 +1,14 @@
 import { wLogger } from '@tosu/common';
-import { Process } from 'tsprocess/dist/process';
 
 import { AbstractState } from '@/states/index';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import {
     Audio,
     Background,
+    BindingsList,
     Client,
+    ConfigList,
     Cursor,
-    IBindable,
-    IConfigBindable,
     Keybinds,
     Mania,
     Mouse,
@@ -87,13 +86,7 @@ export class Settings extends AbstractState {
     configPositions: number[] = [];
     bindingPositions: number[] = [];
 
-    private configStateErrorAttempts: number = 0;
-    private bindingStateErrorAttempts: number = 0;
-
-    private scvErrorAttempts: number = 0;
-    private sbvErrorAttempts: number = 0;
-
-    private configList: Record<string, IConfigBindable> = {
+    private configList: ConfigList = {
         VolumeUniversal: {
             type: 'int',
             setValue: (value: number) => {
@@ -361,7 +354,7 @@ export class Settings extends AbstractState {
         }
     };
 
-    private bindingList: Record<number, IBindable> = {
+    private bindingList: BindingsList = {
         [Bindings.OsuLeft]: {
             setValue: (value: number) => {
                 if (!this.isRealNumber(value)) return;
@@ -434,187 +427,41 @@ export class Settings extends AbstractState {
         return typeof value === 'number' && !isNaN(value) && isFinite(value);
     }
 
-    setConfigValue(process: Process, address: number, position: number = 0) {
-        try {
-            const offset =
-                process.readInt(address + 0x8) + 0x8 + 0x10 * position;
-            const keyAddress = process.readInt(offset);
-
-            const key = process.readSharpString(keyAddress);
-            const bindable = process.readInt(offset + 0x4);
-
-            if (!this.configList[key]) {
-                // console.log('config', key);
-                return;
-            }
-
-            let value: any;
-            switch (this.configList[key].type) {
-                case 'byte':
-                    value = process.readByte(bindable + 0xc);
-                    break;
-                case 'bool':
-                    value = Boolean(process.readByte(bindable + 0xc));
-                    break;
-                case 'int':
-                case 'double':
-                    value = process.readDouble(bindable + 0x4);
-                    break;
-                case 'string':
-                    value = process.readSharpString(
-                        process.readInt(offset + 0x4)
-                    );
-                    break;
-                case 'bstring':
-                    value = process.readSharpString(
-                        process.readInt(bindable + 0x4)
-                    );
-                    break;
-                case 'enum':
-                    value = process.readInt(bindable + 0xc);
-                    break;
-                default:
-                    break;
-            }
-
-            if (value === null || value === undefined) {
-                return;
-            }
-
-            // console.log(position, key, value);
-            this.configList[key].setValue(value);
-
-            this.resetReportCount(`ATD(setConfigValue)[${position}]`);
-        } catch (exc) {
-            this.reportError(
-                `ATD(setConfigValue)[${position}]`,
-                10,
-                `ATD(setConfigValue)[${position}] ${(exc as any).message}`
-            );
-            wLogger.debug(exc);
-        }
-    }
-
-    setBindingValue(process: Process, address: number, position: number = 0) {
-        try {
-            const current =
-                process.readInt(address + 0x8) + 0x8 + 0x10 * position;
-
-            const key = process.readInt(current);
-            const value = process.readInt(current + 0xc);
-
-            const bindable = this.bindingList[key];
-            if (bindable === null || bindable === undefined) {
-                // console.log('binding', key);
-                return;
-            }
-
-            // console.log(position, Bindings[key], VirtualKeyCode[value]);
-            bindable.setValue(value);
-
-            this.resetReportCount(`ATD(setBindingValue)[${position}]`);
-        } catch (exc) {
-            this.reportError(
-                `ATD(setBindingValue)[${position}]`,
-                10,
-                `ATD(setBindingValue)[${position}] ${(exc as any).message}`
-            );
-            wLogger.debug(exc);
-        }
-    }
-
-    // preventSpamArray: (number | string)[] = [];
-
-    findConfigOffsets(process: Process, configurationAddr: number) {
-        try {
-            const rawSharpDictionary =
-                process.readSharpDictionary(configurationAddr);
-            for (let i = 0; i < rawSharpDictionary.length; i++) {
-                const current = rawSharpDictionary[i];
-
-                try {
-                    const keyAddress = process.readInt(current);
-                    const key = process.readSharpString(keyAddress);
-
-                    if (!(key in this.configList)) {
-                        continue;
-                    }
-
-                    // console.log(i, current, key);
-                    this.configPositions.push(i);
-
-                    this.resetReportCount(`ATD(configOffset)[${i}]`);
-                } catch (exc) {
-                    this.reportError(
-                        `ATD(configOffset)[${i}]`,
-                        10,
-                        `ATD(configOffset)[${i}] ${(exc as any).message}`
-                    );
-                    wLogger.debug(exc);
-                }
-            }
-
-            this.resetReportCount('ATD(findConfigOffsets)');
-        } catch (exc) {
-            this.reportError(
-                'ATD(findConfigOffsets)',
-                10,
-                `ATD(findConfigOffsets) ${(exc as any).message}`
-            );
-            wLogger.debug(exc);
-        }
-    }
-
-    findBindingOffsets(process: Process, bindingConfigAddr: number) {
-        try {
-            // KEEP AS THE REFERENCE TO POSITION OF VALUES
-            const rawSharpDictionary =
-                process.readSharpDictionary(bindingConfigAddr);
-            for (let i = 0; i < rawSharpDictionary.length; i++) {
-                const current = rawSharpDictionary[i];
-                try {
-                    const key = process.readInt(current);
-                    // const value = process.readInt(current + 0xc);
-
-                    if (!(key in this.bindingList)) {
-                        continue;
-                    }
-
-                    // const bindable = Bindings[key];
-                    // console.log(i, current, bindable, key, value);
-                    this.bindingPositions.push(i);
-
-                    this.resetReportCount(`ATD(bindingOffset)[${i}]`);
-                } catch (exc) {
-                    this.reportError(
-                        `ATD(bindingOffset)[${i}]`,
-                        10,
-                        `ATD(bindingOffset)[${i}] ${(exc as any).message}`
-                    );
-                    wLogger.debug(exc);
-                }
-            }
-
-            this.resetReportCount('ATD(findBindingOffsets)');
-        } catch (exc) {
-            this.reportError(
-                'ATD(findBindingOffsets)',
-                10,
-                `ATD(findBindingOffsets) ${(exc as any).message}`
-            );
-            wLogger.debug(exc);
-        }
-    }
-
-    updateConfigState(process: Process, configurationAddr: number) {
+    updateConfigState(configurationAddr: number) {
         try {
             if (this.configPositions.length === 0) {
-                this.findConfigOffsets(process, configurationAddr);
-                return;
+                const offsets = this.game.memory.configOffsets(
+                    configurationAddr,
+                    this.configList
+                );
+                if (offsets instanceof Error) throw offsets;
+
+                this.configPositions = offsets;
             }
 
             for (const position of this.configPositions) {
-                this.setConfigValue(process, configurationAddr, position);
+                try {
+                    const result = this.game.memory.configValue(
+                        configurationAddr,
+                        position,
+                        this.configList
+                    );
+                    if (result === null) continue;
+                    if (result instanceof Error) throw result;
+
+                    this.configList[result.key].setValue(result.value);
+
+                    this.resetReportCount(
+                        `ATD(updateConfigState)[${position}]`
+                    );
+                } catch (exc) {
+                    this.reportError(
+                        `ATD(updateConfigState)[${position}]`,
+                        10,
+                        `ATD(updateConfigState)[${position}] ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
+                }
             }
 
             this.resetReportCount('ATD(updateConfigState)');
@@ -628,15 +475,46 @@ export class Settings extends AbstractState {
         }
     }
 
-    updateBindingState(process: Process, bindingConfigAddr: number) {
+    updateBindingState(bindingConfigAddr: number) {
         try {
             if (this.bindingPositions.length === 0) {
-                this.findBindingOffsets(process, bindingConfigAddr);
-                return;
+                const offsets = this.game.memory.bindingsOffsets(
+                    bindingConfigAddr,
+                    this.bindingList
+                );
+                if (offsets instanceof Error) throw offsets;
+
+                this.bindingPositions = offsets;
             }
 
             for (const position of this.bindingPositions) {
-                this.setBindingValue(process, bindingConfigAddr, position);
+                try {
+                    const result = this.game.memory.bindingValue(
+                        bindingConfigAddr,
+                        position
+                    );
+                    if (result instanceof Error) throw result;
+
+                    const bindable = this.bindingList[result.key];
+                    if (bindable === null || bindable === undefined) {
+                        // console.log('binding', key);
+                        continue;
+                    }
+
+                    // console.log(position, Bindings[key], VirtualKeyCode[value]);
+                    bindable.setValue(result.value);
+
+                    this.resetReportCount(
+                        `ATD(updateBindingState)[${position}]`
+                    );
+                } catch (exc) {
+                    this.reportError(
+                        `ATD(updateBindingState)[${position}]`,
+                        10,
+                        `ATD(updateBindingState)[${position}] ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
+                }
             }
 
             this.resetReportCount('ATD(updateBindingState)');
@@ -652,22 +530,11 @@ export class Settings extends AbstractState {
 
     updateState() {
         try {
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
+            const pointers = this.game.memory.settingsPointers();
+            if (pointers instanceof Error) throw pointers;
 
-            const { configurationAddr, bindingsAddr } = memory.getPatterns([
-                'configurationAddr',
-                'bindingsAddr'
-            ]);
-
-            this.updateConfigState(
-                process,
-                process.readPointer(configurationAddr)
-            );
-
-            this.updateBindingState(process, process.readPointer(bindingsAddr));
+            this.updateConfigState(pointers.config);
+            this.updateBindingState(pointers.binding);
 
             this.resetReportCount('SETTINGS(updatestate)');
         } catch (exc) {

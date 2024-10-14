@@ -1,10 +1,8 @@
-import { config, sleep, wLogger } from '@tosu/common';
-import fs from 'fs';
-import path from 'path';
+import { wLogger } from '@tosu/common';
 
 import { AbstractMemory, PatternData } from '@/memory';
-import { Gameplay } from '@/states/gameplay';
-import { Global } from '@/states/global';
+import { netDateBinaryToDate } from '@/utils/converters';
+import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 type SCAN_PATTERNS = {
     [k in keyof PatternData]: {
@@ -108,242 +106,6 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    initiateDataLoops() {
-        const { global, gameplay } = this.game.getServices([
-            'global',
-            'gameplay'
-        ]);
-
-        this.regularDataLoop();
-        this.preciseDataLoop(global, gameplay);
-    }
-
-    async regularDataLoop() {
-        try {
-            wLogger.debug('SM(startDataLoop) starting');
-
-            const {
-                global,
-                menu,
-                bassDensity,
-                beatmapPP,
-                gameplay,
-                resultScreen,
-                settings,
-                tourneyManager,
-                user
-            } = this.game.getServices([
-                'global',
-                'menu',
-                'bassDensity',
-                'beatmapPP',
-                'gameplay',
-                'resultScreen',
-                'settings',
-                'tourneyManager',
-                'user'
-            ]);
-
-            while (!this.game.isDestroyed) {
-                try {
-                    global.updateState();
-                    const menuUpdate = menu.updateState();
-                    if (menuUpdate === 'not-ready') {
-                        await sleep(config.pollRate);
-                        continue;
-                    }
-
-                    // osu! calculates audioTrack length a little bit after updating menu, sooo.. lets this thing run regardless of menu updating
-                    if (menu.Folder !== '' && menu.Folder !== null) {
-                        menu.updateMP3Length();
-                    }
-
-                    if (!global.GameFolder) {
-                        global.setGameFolder(this.path);
-
-                        // condition when user have different BeatmapDirectory in osu! config
-                        if (fs.existsSync(global.MemorySongsFolder)) {
-                            global.setSongsFolder(global.MemorySongsFolder);
-                        } else {
-                            global.setSongsFolder(
-                                path.join(this.path, global.MemorySongsFolder)
-                            );
-                        }
-                    }
-
-                    // update important data before doing rest
-                    if (global.Status === 7) {
-                        const resultUpdate = resultScreen.updateState();
-                        if (resultUpdate === 'not-ready') {
-                            await sleep(config.pollRate);
-                            continue;
-                        }
-                    }
-
-                    settings.updateState();
-
-                    const currentMods =
-                        global.Status === 2
-                            ? gameplay.Mods
-                            : global.Status === 7
-                              ? resultScreen.Mods
-                              : global.MenuMods;
-
-                    const currentMode =
-                        global.Status === 2
-                            ? gameplay.Mode
-                            : global.Status === 7
-                              ? resultScreen.Mode
-                              : menu.MenuGameMode;
-
-                    const currentState = `${menu.MD5}:${currentMode}:${currentMods}`;
-                    const updateGraph =
-                        this.previousState !== currentState ||
-                        this.previousMP3Length !== menu.MP3Length;
-                    if (
-                        menu.Path?.endsWith('.osu') &&
-                        global.GameFolder &&
-                        this.previousState !== currentState
-                    ) {
-                        const metadataUpdate = beatmapPP.updateMapMetadata(
-                            currentMods,
-                            currentMode
-                        );
-                        if (metadataUpdate === 'not-ready') {
-                            await sleep(config.pollRate);
-                            continue;
-                        }
-                        beatmapPP.updateGraph(currentMods);
-                        this.previousState = currentState;
-                    }
-
-                    if (
-                        menu.Path?.endsWith('.osu') &&
-                        global.GameFolder &&
-                        updateGraph
-                    ) {
-                        beatmapPP.updateGraph(currentMods);
-                        this.previousMP3Length = menu.MP3Length;
-                    }
-
-                    beatmapPP.updateRealTimeBPM(global.PlayTime, currentMods);
-
-                    switch (global.Status) {
-                        case 0:
-                            bassDensity.updateState();
-                            break;
-
-                        case 1:
-                            if (this.previousTime === global.PlayTime) break;
-
-                            this.previousTime = global.PlayTime;
-                            beatmapPP.updateEditorPP();
-                            break;
-
-                        // EditorSongSElect and SongSelect
-                        case 4:
-                        case 5:
-                            // Reset Gameplay/ResultScreen data on joining to songSelect
-                            if (!gameplay.isDefaultState) {
-                                gameplay.init(undefined, '4,5');
-                                resultScreen.init();
-                                beatmapPP.resetAttributes();
-                            }
-
-                            // Reset ResultScreen if we in song select
-                            if (resultScreen.PlayerName) {
-                                resultScreen.init();
-                            }
-                            break;
-
-                        case 2:
-                            // Reset gameplay data on retry
-                            if (this.previousTime > global.PlayTime) {
-                                gameplay.init(true);
-                                beatmapPP.resetAttributes();
-                            }
-
-                            // reset before first object
-                            if (global.PlayTime < beatmapPP.timings.firstObj) {
-                                gameplay.resetQuick();
-                            }
-
-                            this.previousTime = global.PlayTime;
-
-                            gameplay.updateState();
-                            break;
-
-                        case 7:
-                            resultScreen.updatePerformance();
-                            break;
-
-                        case 22:
-                            if (!this.game.isTourneyManager) {
-                                this.game.isTourneyManager = true;
-                            }
-                            await tourneyManager.updateState();
-                            break;
-
-                        // do not spam reset on multiplayer and direct
-                        case 11:
-                        case 12:
-                        case 15:
-                            break;
-
-                        default:
-                            gameplay.init(
-                                undefined,
-                                `default-${global.Status}`
-                            );
-                            resultScreen.init();
-                            break;
-                    }
-
-                    if (this.game.isTourneySpectator) {
-                        tourneyManager.updateUser();
-                    }
-
-                    user.updateState();
-                } catch (exc) {
-                    wLogger.error(
-                        `SM(startDataLoop)[${this.pid}]`,
-                        'error happend while another loop executed'
-                    );
-                    wLogger.debug(exc);
-                }
-
-                await sleep(config.pollRate);
-            }
-        } catch (error) {
-            wLogger.debug(`SM(startDataLoop)[${this.pid}]`, error);
-        }
-    }
-
-    preciseDataLoop(global: Global, gameplay: Gameplay) {
-        if (this.game.isDestroyed === true) return;
-        global.updatePreciseState();
-
-        switch (global.Status) {
-            case 2:
-                if (global.PlayTime < 150) {
-                    break;
-                }
-
-                if (config.enableKeyOverlay) {
-                    gameplay.updateKeyOverlay();
-                }
-                gameplay.updateHitErrors();
-                break;
-            default:
-                gameplay.resetKeyOverlay();
-                break;
-        }
-
-        setTimeout(() => {
-            this.preciseDataLoop(global, gameplay);
-        }, config.preciseDataPollRate);
-    }
-
     private checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
             wLogger.debug(
@@ -391,5 +153,597 @@ export class StableMemory extends AbstractMemory {
         }
 
         return result;
+    }
+
+    user() {
+        try {
+            const profileBase = this.process.readPointer(
+                this.getPattern('userProfilePtr')
+            );
+
+            const rawLoginStatus = this.process.readPointer(
+                this.getPattern('rawLoginStatusPtr')
+            );
+            const rawBanchoStatus = this.process.readByte(profileBase + 0x88);
+
+            const name = this.process.readSharpString(
+                this.process.readInt(profileBase + 0x30)
+            );
+            const accuracy = this.process.readDouble(profileBase + 0x4);
+            const rankedScore = this.process.readLong(profileBase + 0xc);
+            const id = this.process.readInt(profileBase + 0x70);
+            const level = this.process.readFloat(profileBase + 0x74);
+            const playCount = this.process.readInt(profileBase + 0x7c);
+            const playMode = this.process.readInt(profileBase + 0x80);
+            const rank = this.process.readInt(profileBase + 0x84);
+            const countryCode = this.process.readInt(profileBase + 0x98);
+            const performancePoints = this.process.readShort(
+                profileBase + 0x9c
+            );
+            // ARGB, to convert use UserProfile.backgroundColour.toString(16)
+            const backgroundColour = this.process.readUInt(profileBase + 0xac);
+
+            return {
+                name,
+                accuracy,
+                rankedScore,
+                id,
+                level,
+                playCount,
+                playMode,
+                rank,
+                countryCode,
+                performancePoints,
+                rawBanchoStatus,
+                backgroundColour,
+                rawLoginStatus
+            };
+        } catch (exc) {
+            return exc as Error;
+        }
+    }
+
+    settingsPointers() {
+        try {
+            const { configurationAddr, bindingsAddr } = this.getPatterns([
+                'configurationAddr',
+                'bindingsAddr'
+            ]);
+
+            const configPointer = this.process.readPointer(configurationAddr);
+            const bindingPointer = this.process.readPointer(bindingsAddr);
+
+            return {
+                config: configPointer,
+                binding: bindingPointer
+            };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    configOffsets(address: number, list: ConfigList) {
+        try {
+            const result: number[] = [];
+
+            const rawSharpDictionary =
+                this.process.readSharpDictionary(address);
+            for (let i = 0; i < rawSharpDictionary.length; i++) {
+                const current = rawSharpDictionary[i];
+
+                try {
+                    const keyAddress = this.process.readInt(current);
+                    const key = this.process.readSharpString(keyAddress);
+
+                    if (!(key in list)) {
+                        continue;
+                    }
+
+                    result.push(i);
+
+                    // FIXME: FIX THIS LATER
+                    // this.resetReportCount(`ATD(configOffset)[${i}]`);
+                } catch (exc) {
+                    // this.reportError(
+                    //     `ATD(configOffset)[${i}]`,
+                    //     10,
+                    //     `ATD(configOffset)[${i}] ${(exc as any).message}`
+                    // );
+                    wLogger.debug(exc);
+                }
+            }
+
+            return result;
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    bindingsOffsets(address: number, list: BindingsList) {
+        try {
+            const result: number[] = [];
+
+            const rawSharpDictionary =
+                this.process.readSharpDictionary(address);
+            for (let i = 0; i < rawSharpDictionary.length; i++) {
+                const current = rawSharpDictionary[i];
+                try {
+                    const key = this.process.readInt(current);
+                    if (!(key in list)) {
+                        continue;
+                    }
+
+                    result.push(i);
+
+                    // this.resetReportCount(`ATD(bindingOffset)[${i}]`);
+                } catch (exc) {
+                    // this.reportError(
+                    //     `ATD(bindingOffset)[${i}]`,
+                    //     10,
+                    //     `ATD(bindingOffset)[${i}] ${(exc as any).message}`
+                    // );
+                    wLogger.debug(exc);
+                }
+            }
+
+            return result;
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    configValue(address: number, position: number, list: ConfigList) {
+        try {
+            const offset =
+                this.process.readInt(address + 0x8) + 0x8 + 0x10 * position;
+            const keyAddress = this.process.readInt(offset);
+
+            const key = this.process.readSharpString(keyAddress);
+            const bindable = this.process.readInt(offset + 0x4);
+
+            if (!list[key]) {
+                // console.log('config', key);
+                return null;
+            }
+
+            let value: any;
+            switch (list[key].type) {
+                case 'byte':
+                    value = this.process.readByte(bindable + 0xc);
+                    break;
+                case 'bool':
+                    value = Boolean(this.process.readByte(bindable + 0xc));
+                    break;
+                case 'int':
+                case 'double':
+                    value = this.process.readDouble(bindable + 0x4);
+                    break;
+                case 'string':
+                    value = this.process.readSharpString(
+                        this.process.readInt(offset + 0x4)
+                    );
+                    break;
+                case 'bstring':
+                    value = this.process.readSharpString(
+                        this.process.readInt(bindable + 0x4)
+                    );
+                    break;
+                case 'enum':
+                    value = this.process.readInt(bindable + 0xc);
+                    break;
+                default:
+                    break;
+            }
+
+            if (value === null || value === undefined) {
+                return null;
+            }
+
+            return { key, value };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    bindingValue(address: number, position: number) {
+        try {
+            const offset =
+                this.process.readInt(address + 0x8) + 0x8 + 0x10 * position;
+
+            const key = this.process.readInt(offset);
+            const value = this.process.readInt(offset + 0xc);
+
+            return { key, value };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    resultScreen() {
+        try {
+            const address = this.getPattern('rulesetsAddr');
+            const rulesetAddr = this.process.readInt(
+                this.process.readInt(address - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) {
+                return 'rulesetAddr is zero';
+            }
+
+            const resultScreenBase = this.process.readInt(rulesetAddr + 0x38);
+            if (resultScreenBase === 0) {
+                wLogger.debug('RSD(updateState) ');
+                return 'resultScreenBase is zero';
+            }
+
+            const onlineId = this.process.readLong(resultScreenBase + 0x4);
+            const playerName = this.process.readSharpString(
+                this.process.readInt(resultScreenBase + 0x28)
+            );
+            const mods =
+                this.process.readInt(
+                    this.process.readInt(resultScreenBase + 0x1c) + 0xc
+                ) ^
+                this.process.readInt(
+                    this.process.readInt(resultScreenBase + 0x1c) + 0x8
+                );
+            const mode = this.process.readInt(resultScreenBase + 0x64);
+            const maxCombo = this.process.readShort(resultScreenBase + 0x68);
+            const score = this.process.readInt(resultScreenBase + 0x78);
+            const hit100 = this.process.readShort(resultScreenBase + 0x88);
+            const hit300 = this.process.readShort(resultScreenBase + 0x8a);
+            const hit50 = this.process.readShort(resultScreenBase + 0x8c);
+            const hitGeki = this.process.readShort(resultScreenBase + 0x8e);
+            const hitKatu = this.process.readShort(resultScreenBase + 0x90);
+            const hitMiss = this.process.readShort(resultScreenBase + 0x92);
+
+            const date = netDateBinaryToDate(
+                this.process.readInt(resultScreenBase + 0xa4),
+                this.process.readInt(resultScreenBase + 0xa0)
+            ).toISOString();
+
+            return {
+                onlineId,
+                playerName,
+                mods,
+                mode,
+                maxCombo,
+                score,
+                hit100,
+                hit300,
+                hit50,
+                hitGeki,
+                hitKatu,
+                hitMiss,
+                date
+            };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    gameplay() {
+        try {
+            const { baseAddr, rulesetsAddr } = this.getPatterns([
+                'baseAddr',
+                'rulesetsAddr'
+            ]);
+
+            const rulesetAddr = this.process.readInt(
+                this.process.readInt(rulesetsAddr - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) {
+                return 'RulesetAddr is 0';
+            }
+
+            const gameplayBase = this.process.readInt(rulesetAddr + 0x68);
+            if (gameplayBase === 0) {
+                return 'gameplayBase is zero';
+            }
+
+            const scoreBase = this.process.readInt(gameplayBase + 0x38);
+            if (scoreBase === 0) {
+                return 'scoreBase is zero';
+            }
+
+            const hpBarBase = this.process.readInt(gameplayBase + 0x40);
+            if (hpBarBase === 0) {
+                return 'hpBar is zero';
+            }
+
+            const { beatmapPP, global } = this.game.getServices([
+                'beatmapPP',
+                'global'
+            ]);
+
+            // [Base - 0x33] + 0x8
+            const retries = this.process.readInt(
+                this.process.readInt(baseAddr - 0x33) + 0x8
+            );
+            // [[[Ruleset + 0x68] + 0x38] + 0x28]
+            const playerName = this.process.readSharpString(
+                this.process.readInt(scoreBase + 0x28)
+            );
+            // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
+            const mods =
+                this.process.readInt(
+                    this.process.readInt(scoreBase + 0x1c) + 0xc
+                ) ^
+                this.process.readInt(
+                    this.process.readInt(scoreBase + 0x1c) + 0x8
+                );
+            // [[Ruleset + 0x68] + 0x38] + 0x64
+            const mode = this.process.readInt(scoreBase + 0x64);
+            // [[Ruleset + 0x68] + 0x38] + 0x78
+            const score = this.process.readInt(rulesetAddr + 0x100);
+            // [[Ruleset + 0x68] + 0x40] + 0x14
+            const playerHPSmooth =
+                this.process.readDouble(hpBarBase + 0x14) || 0;
+            // [[Ruleset + 0x68] + 0x40] + 0x1C
+            const playerHP = this.process.readDouble(hpBarBase + 0x1c);
+            // [[Ruleset + 0x68] + 0x48] + 0xC
+            const accuracy = this.process.readDouble(
+                this.process.readInt(gameplayBase + 0x48) + 0xc
+            );
+
+            let hit100 = 0;
+            let hit300 = 0;
+            let hit50 = 0;
+            let hitGeki = 0;
+            let hitKatu = 0;
+            let hitMiss = 0;
+            let combo = 0;
+            let maxCombo = 0;
+            if (global.playTime >= beatmapPP.timings.firstObj - 100) {
+                // [[Ruleset + 0x68] + 0x38] + 0x88
+                hit100 = this.process.readShort(scoreBase + 0x88);
+                // [[Ruleset + 0x68] + 0x38] + 0x8A
+                hit300 = this.process.readShort(scoreBase + 0x8a);
+                // [[Ruleset + 0x68] + 0x38] + 0x8C
+                hit50 = this.process.readShort(scoreBase + 0x8c);
+                // [[Ruleset + 0x68] + 0x38] + 0x8E
+                hitGeki = this.process.readShort(scoreBase + 0x8e);
+                // [[Ruleset + 0x68] + 0x38] + 0x90
+                hitKatu = this.process.readShort(scoreBase + 0x90);
+                // [[Ruleset + 0x68] + 0x38] + 0x92
+                hitMiss = this.process.readShort(scoreBase + 0x92);
+                // [[Ruleset + 0x68] + 0x38] + 0x94
+                combo = this.process.readShort(scoreBase + 0x94);
+                // [[Ruleset + 0x68] + 0x38] + 0x68
+                maxCombo = this.process.readShort(scoreBase + 0x68);
+            }
+
+            return {
+                address: rulesetAddr,
+                retries,
+                playerName,
+                mods,
+                mode,
+                score,
+                playerHPSmooth,
+                playerHP,
+                accuracy,
+                hit100,
+                hit300,
+                hit50,
+                hitGeki,
+                hitKatu,
+                hitMiss,
+                combo,
+                maxCombo
+            };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    keyOverlay(mode: number) {
+        try {
+            const address = this.getPattern('rulesetsAddr');
+            const rulesetAddr = this.process.readInt(
+                this.process.readInt(address - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) return 'rulesetAddr is zero';
+
+            const keyOverlayPtr = this.process.readUInt(rulesetAddr + 0xb0);
+            if (keyOverlayPtr === 0) {
+                if (mode === 3 || mode === 1) return '';
+
+                return `keyOverlayPtr is zero [${keyOverlayPtr}] (${rulesetAddr}  -  ${address})`;
+            }
+
+            // [[Ruleset + 0xB0] + 0x10] + 0x4
+            const keyOverlayArrayAddr = this.process.readInt(
+                this.process.readInt(keyOverlayPtr + 0x10) + 0x4
+            );
+            if (keyOverlayArrayAddr === 0) return 'keyOverlayAddr[] is zero';
+
+            const itemsSize = this.process.readInt(keyOverlayArrayAddr + 0x4);
+            if (itemsSize < 4) {
+                return {
+                    K1Pressed: false,
+                    K1Count: 0,
+                    K2Pressed: false,
+                    K2Count: 0,
+                    M1Pressed: false,
+                    M1Count: 0,
+                    M2Pressed: false,
+                    M2Count: 0
+                };
+            }
+
+            return {
+                K1Pressed: Boolean(
+                    this.process.readByte(
+                        this.process.readInt(keyOverlayArrayAddr + 0x8) + 0x1c
+                    )
+                ),
+                K1Count: this.process.readInt(
+                    this.process.readInt(keyOverlayArrayAddr + 0x8) + 0x14
+                ),
+                K2Pressed: Boolean(
+                    this.process.readByte(
+                        this.process.readInt(keyOverlayArrayAddr + 0xc) + 0x1c
+                    )
+                ),
+                K2Count: this.process.readInt(
+                    this.process.readInt(keyOverlayArrayAddr + 0xc) + 0x14
+                ),
+                M1Pressed: Boolean(
+                    this.process.readByte(
+                        this.process.readInt(keyOverlayArrayAddr + 0x10) + 0x1c
+                    )
+                ),
+                M1Count: this.process.readInt(
+                    this.process.readInt(keyOverlayArrayAddr + 0x10) + 0x14
+                ),
+                M2Pressed: Boolean(
+                    this.process.readByte(
+                        this.process.readInt(keyOverlayArrayAddr + 0x14) + 0x1c
+                    )
+                ),
+                M2Count: this.process.readInt(
+                    this.process.readInt(keyOverlayArrayAddr + 0x14) + 0x14
+                )
+            };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    hitErors() {
+        try {
+            const rulesetsAddr = this.getPattern('rulesetsAddr');
+
+            const rulesetAddr = this.process.readInt(
+                this.process.readInt(rulesetsAddr - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) return 'RulesetAddr is 0';
+
+            const gameplayBase = this.process.readInt(rulesetAddr + 0x68);
+            if (gameplayBase === 0) return 'gameplayBase is zero';
+
+            const scoreBase = this.process.readInt(gameplayBase + 0x38);
+            if (scoreBase === 0) return 'scoreBase is zero';
+
+            const leaderStart = this.getLeaderStart();
+
+            const base = this.process.readInt(scoreBase + 0x38);
+            const items = this.process.readInt(base + 0x4);
+            const size = this.process.readInt(base + 0xc);
+
+            const errors: Array<number> = [];
+            for (let i = 0; i < size; i++) {
+                const current = items + leaderStart + 0x4 * i;
+                const error = this.process.readInt(current);
+
+                errors.push(error);
+            }
+
+            return errors;
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    global() {
+        try {
+            const {
+                statusPtr,
+                menuModsPtr,
+                chatCheckerPtr,
+                skinDataAddr,
+                settingsClassAddr,
+                canRunSlowlyAddr,
+                rulesetsAddr,
+                gameTimePtr
+            } = this.getPatterns([
+                'statusPtr',
+                'menuModsPtr',
+                'chatCheckerPtr',
+                'skinDataAddr',
+                'settingsClassAddr',
+                'canRunSlowlyAddr',
+                'rulesetsAddr',
+                'gameTimePtr'
+            ]);
+
+            const status = this.process.readPointer(statusPtr);
+            const menuMods = this.process.readPointer(menuModsPtr);
+            const chatStatus = this.process.readByte(
+                this.process.readInt(chatCheckerPtr)
+            );
+            const isWatchingReplay = this.process.readByte(
+                this.process.readInt(canRunSlowlyAddr + 0x46)
+            );
+            const gameTime = this.process.readPointer(gameTimePtr);
+            const memorySongsFolder = this.process.readSharpString(
+                this.process.readInt(
+                    this.process.readInt(
+                        this.process.readInt(settingsClassAddr + 0x8) + 0xb8
+                    ) + 0x4
+                )
+            );
+
+            // [[SettingsClass + 0x8] + 0x4] + 0xC
+            const showInterface = Boolean(
+                this.process.readByte(
+                    this.process.readInt(
+                        this.process.readInt(settingsClassAddr + 0x8) + 0x4
+                    ) + 0xc
+                )
+            );
+
+            let isReplayUiHidden = false;
+            if (isWatchingReplay) {
+                const rulesetAddr = this.process.readInt(
+                    this.process.readInt(rulesetsAddr - 0xb) + 0x4
+                );
+                if (rulesetAddr !== 0) {
+                    isReplayUiHidden = Boolean(
+                        this.process.readByte(rulesetAddr + 0x1d8)
+                    );
+                }
+            }
+
+            const skinOsuAddr = this.process.readInt(skinDataAddr + 0x7);
+            let skinFolder = '';
+            if (skinOsuAddr !== 0) {
+                const skinOsuBase = this.process.readInt(skinOsuAddr);
+
+                skinFolder = this.process.readSharpString(
+                    this.process.readInt(skinOsuBase + 0x44)
+                );
+            }
+
+            return {
+                isWatchingReplay,
+                isReplayUiHidden,
+
+                showInterface,
+                chatStatus,
+                status,
+
+                gameTime,
+                menuMods,
+
+                skinFolder,
+                memorySongsFolder
+            };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    globalPrecise() {
+        try {
+            const playTimeAddr = this.getPattern('playTimeAddr');
+            const playTime = this.process.readInt(
+                this.process.readInt(playTimeAddr + 0x5)
+            );
+
+            return { time: playTime };
+        } catch (error) {
+            return error as Error;
+        }
     }
 }

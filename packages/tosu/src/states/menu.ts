@@ -38,10 +38,8 @@ export class Menu extends AbstractState {
 
     updateState() {
         try {
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
+            const process = this.game.process;
+            const memory = this.game.memory;
 
             const baseAddr = memory.getPattern('baseAddr');
 
@@ -167,10 +165,8 @@ export class Menu extends AbstractState {
 
     updateMP3Length() {
         try {
-            const { process, memory } = this.game.getServices([
-                'process',
-                'memory'
-            ]);
+            const process = this.game.process;
+            const memory = this.game.memory;
 
             // [[GetAudioLength + 0x7] + 0x4]
             this.MP3Length = Math.round(

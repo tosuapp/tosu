@@ -24,23 +24,23 @@ const buildTourneyData = (
                 ipcId: instance.ipcId,
                 keys: {
                     k1: {
-                        isPressed: gameplay.KeyOverlay.K1Pressed,
-                        count: gameplay.KeyOverlay.K1Count
+                        isPressed: gameplay.keyOverlay.K1Pressed,
+                        count: gameplay.keyOverlay.K1Count
                     },
                     k2: {
-                        isPressed: gameplay.KeyOverlay.K2Pressed,
-                        count: gameplay.KeyOverlay.K2Count
+                        isPressed: gameplay.keyOverlay.K2Pressed,
+                        count: gameplay.keyOverlay.K2Count
                     },
                     m1: {
-                        isPressed: gameplay.KeyOverlay.M1Pressed,
-                        count: gameplay.KeyOverlay.M1Count
+                        isPressed: gameplay.keyOverlay.M1Pressed,
+                        count: gameplay.keyOverlay.M1Count
                     },
                     m2: {
-                        isPressed: gameplay.KeyOverlay.M2Pressed,
-                        count: gameplay.KeyOverlay.M2Count
+                        isPressed: gameplay.keyOverlay.M2Pressed,
+                        count: gameplay.keyOverlay.M2Count
                     }
                 },
-                hitErrors: gameplay.HitErrors
+                hitErrors: gameplay.hitErrors
             };
         });
 
@@ -59,26 +59,26 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     ]);
 
     return {
-        currentTime: global.PlayTime,
+        currentTime: global.playTime,
         keys: {
             k1: {
-                isPressed: gameplay.KeyOverlay.K1Pressed,
-                count: gameplay.KeyOverlay.K1Count
+                isPressed: gameplay.keyOverlay.K1Pressed,
+                count: gameplay.keyOverlay.K1Count
             },
             k2: {
-                isPressed: gameplay.KeyOverlay.K2Pressed,
-                count: gameplay.KeyOverlay.K2Count
+                isPressed: gameplay.keyOverlay.K2Pressed,
+                count: gameplay.keyOverlay.K2Count
             },
             m1: {
-                isPressed: gameplay.KeyOverlay.M1Pressed,
-                count: gameplay.KeyOverlay.M1Count
+                isPressed: gameplay.keyOverlay.M1Pressed,
+                count: gameplay.keyOverlay.M1Count
             },
             m2: {
-                isPressed: gameplay.KeyOverlay.M2Pressed,
-                count: gameplay.KeyOverlay.M2Count
+                isPressed: gameplay.keyOverlay.M2Pressed,
+                count: gameplay.keyOverlay.M2Count
             }
         },
-        hitErrors: gameplay.HitErrors,
+        hitErrors: gameplay.hitErrors,
         tourney: buildTourneyData(instanceManager)
     };
 };
