@@ -333,26 +333,26 @@ Napi::Value get_process_command_line(const Napi::CallbackInfo &args) {
 
   return Napi::String::New(env, command_line.c_str());
 }
-
 Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
 
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   void *handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
   auto address = static_cast<intptr_t>(args[1].As<Napi::Number>().Int64Value());
+  auto bitness = args[2].As<Napi::Number>().Int32Value();
 
   if (address == 0) {
     return Napi::String::New(env, "");
   }
 
-  int string_length;
-  if (!memory::read_buffer(
-        handle, address + sizeof(int), sizeof(string_length), reinterpret_cast<uint8_t *>(&string_length)
-      )) {
+  auto offset = bitness == 32 ? 4 : 8;
+
+  auto [string_length, length_success] = memory::read<int>(handle, address + offset);
+  if (!length_success) {
 #ifdef _WIN32
     auto error_str = logger::format(
       "Couldn't read C# string length (base: %x, length: %x, last error: %d)", address, address + sizeof(int), GetLastError()
@@ -360,7 +360,6 @@ Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
 #else
     auto error_str = logger::format("Couldn't read C# string length (base: %x)", address);
 #endif
-
     Napi::TypeError::New(env, error_str.c_str()).ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -369,10 +368,12 @@ Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
     return Napi::String::New(env, "");
   }
 
-  std::vector<wchar_t> string_buffer(string_length);
-  if (!memory::read_buffer(
-        handle, address + sizeof(int) * 2, string_length * sizeof(wchar_t), reinterpret_cast<uint8_t *>(string_buffer.data())
-      )) {
+  std::vector<wchar_t> string_buffer(string_length * 2);
+  auto string_success = memory::read_buffer(
+    handle, address + offset + 4, string_length * sizeof(wchar_t), reinterpret_cast<uint8_t *>(string_buffer.data())
+  );
+
+  if (!string_success) {
     Napi::TypeError::New(env, "Couldn't read C# string data").ThrowAsJavaScriptException();
     return env.Null();
   }

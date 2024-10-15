@@ -116,7 +116,19 @@ export class Process {
     }
 
     readSharpString(address: number): string {
-        return ProcessUtils.readCSharpString(this.handle, address);
+        return ProcessUtils.readCSharpString(
+            this.handle,
+            address,
+            this.bitness
+        );
+    }
+
+    readSharpStringPtr(address: number): string {
+        return ProcessUtils.readCSharpString(
+            this.handle,
+            this.readIntPtr(address),
+            this.bitness
+        );
     }
 
     readSharpDictionary(address: number): number[] {

@@ -6,6 +6,16 @@ import path from 'path';
 import { getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
 
+function isPathDirectory(path) {
+    const stat = fs.lstatSync(path);
+
+    if (stat) {
+        return stat.isDirectory();
+    }
+
+    return false;
+}
+
 export function directoryWalker({
     _htmlRedirect,
     res,
@@ -31,10 +41,11 @@ export function directoryWalker({
         res.end('');
         return;
     }
+
     const contentType = getContentType(cleanedUrl);
     const filePath = path.join(folderPath, cleanedUrl);
 
-    const isDirectory = path.extname(filePath) === '';
+    const isDirectory = isPathDirectory(filePath);
     const isHTML = filePath.endsWith('.html');
 
     if (isDirectory) {
