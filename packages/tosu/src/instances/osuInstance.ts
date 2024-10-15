@@ -71,7 +71,7 @@ export class OsuInstance extends AbstractInstance {
                     }
 
                     // osu! calculates audioTrack length a little bit after updating menu, sooo.. lets this thing run regardless of menu updating
-                    if (menu.Folder !== '' && menu.Folder !== null) {
+                    if (menu.folder !== '' && menu.folder !== null) {
                         menu.updateMP3Length();
                     }
 
@@ -111,14 +111,14 @@ export class OsuInstance extends AbstractInstance {
                             ? gameplay.mode
                             : global.status === 7
                               ? resultScreen.mode
-                              : menu.MenuGameMode;
+                              : menu.gamemode;
 
-                    const currentState = `${menu.MD5}:${currentMode}:${currentMods}`;
+                    const currentState = `${menu.checksum}:${currentMode}:${currentMods}`;
                     const updateGraph =
                         this.previousState !== currentState ||
-                        this.previousMP3Length !== menu.MP3Length;
+                        this.previousMP3Length !== menu.mp3Length;
                     if (
-                        menu.Path?.endsWith('.osu') &&
+                        menu.filename?.endsWith('.osu') &&
                         global.gameFolder &&
                         this.previousState !== currentState
                     ) {
@@ -135,12 +135,12 @@ export class OsuInstance extends AbstractInstance {
                     }
 
                     if (
-                        menu.Path?.endsWith('.osu') &&
+                        menu.filename?.endsWith('.osu') &&
                         global.gameFolder &&
                         updateGraph
                     ) {
                         beatmapPP.updateGraph(currentMods);
-                        this.previousMP3Length = menu.MP3Length;
+                        this.previousMP3Length = menu.mp3Length;
                     }
 
                     beatmapPP.updateRealTimeBPM(global.playTime, currentMods);

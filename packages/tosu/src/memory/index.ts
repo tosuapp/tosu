@@ -1,10 +1,12 @@
 import { platform } from 'process';
 import { Process } from 'tsprocess/dist/process';
 
-import { AbstractInstance } from '@/instances';
-import { KeyOverlay } from '@/states/gameplay';
-import { OsuMods } from '@/utils/osuMods.types';
-import { BindingsList, ConfigList } from '@/utils/settings.types';
+import type { AbstractInstance } from '@/instances';
+import type { ReportError, ResetReportCount } from '@/states';
+import type { KeyOverlay } from '@/states/gameplay';
+import type { ITourneyManagetChatItem } from '@/states/tourney';
+import type { OsuMods } from '@/utils/osuMods.types';
+import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 // TODO: fix this when PatternData will be separated for each
 export type ScanPatterns = {
@@ -119,11 +121,18 @@ export abstract class AbstractMemory {
           };
 
     abstract settingsPointers(): { config: number; binding: number } | Error;
-    abstract configOffsets(address: number, list: ConfigList): number[] | Error;
+    abstract configOffsets(
+        address: number,
+        list: ConfigList,
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ): number[] | Error;
 
     abstract bindingsOffsets(
         address: number,
-        list: BindingsList
+        list: BindingsList,
+        reportError: ReportError,
+        resetCount: ResetReportCount
     ): number[] | Error;
 
     abstract configValue(
@@ -191,7 +200,7 @@ export abstract class AbstractMemory {
         | Error;
 
     abstract keyOverlay(mode: number): KeyOverlay | string | Error;
-    abstract hitErors(): number[] | string | Error;
+    abstract hitErrors(): number[] | string | Error;
     abstract global():
         | {
               isWatchingReplay: number;
@@ -211,4 +220,69 @@ export abstract class AbstractMemory {
         | Error;
 
     abstract globalPrecise(): { time: number } | Error;
+
+    abstract menu(previousChecksum: string):
+        | {
+              gamemode: number;
+              checksum: string;
+              filename: string;
+              plays: number;
+              artist: string;
+              artistOriginal: string;
+              title: string;
+              titleOriginal: string;
+              ar: number;
+              cs: number;
+              hp: number;
+              od: number;
+              audioFilename: string;
+              backgroundFilename: string;
+              folder: string;
+              creator: string;
+              difficulty: string;
+              mapID: number;
+              setID: number;
+              rankedStatus: number;
+              objectCount: number;
+          }
+        | string
+        | Error;
+
+    abstract mp3Length(): number | Error;
+
+    abstract tourney():
+        | {
+              ipcState: number;
+              leftStars: number;
+              rightStars: number;
+              bestOf: number;
+              starsVisible: boolean;
+              scoreVisible: boolean;
+              firstTeamName: string;
+              secondTeamName: string;
+              firstTeamScore: number;
+              secondTeamScore: number;
+          }
+        | string
+        | Error;
+
+    abstract tourneyChat(
+        messages: ITourneyManagetChatItem[],
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ): ITourneyManagetChatItem[] | Error;
+
+    abstract tourneyUser():
+        | {
+              id: number;
+              name: string;
+              country: string;
+              accuracy: number;
+              playcount: number;
+              rankedScore: number;
+              globalRank: number;
+              pp: number;
+          }
+        | string
+        | Error;
 }

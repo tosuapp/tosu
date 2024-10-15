@@ -98,27 +98,27 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             // TODO: Make enum for osu in-game statuses
             state: global.status,
             // TODO: Make enum for osu in-game modes
-            gameMode: menu.MenuGameMode,
+            gameMode: menu.gamemode,
             isChatEnabled: Number(Boolean(global.chatStatus)),
             bm: {
                 time: {
                     firstObj: beatmapPP.timings.firstObj,
                     current: global.playTime,
                     full: beatmapPP.timings.full,
-                    mp3: menu.MP3Length
+                    mp3: menu.mp3Length
                 },
-                id: menu.MapID,
-                set: menu.SetID,
-                md5: menu.MD5,
+                id: menu.mapID,
+                set: menu.setID,
+                md5: menu.checksum,
                 // TODO: make ranked status enum
-                rankedStatus: menu.RankedStatus,
+                rankedStatus: menu.rankedStatus,
                 metadata: {
-                    artist: menu.Artist,
-                    artistOriginal: menu.ArtistOriginal,
-                    title: menu.Title,
-                    titleOriginal: menu.TitleOriginal,
-                    mapper: menu.Creator,
-                    difficulty: menu.Difficulty
+                    artist: menu.artist,
+                    artistOriginal: menu.artistOriginal,
+                    title: menu.title,
+                    titleOriginal: menu.titleOriginal,
+                    mapper: menu.creator,
+                    difficulty: menu.difficulty
                 },
                 stats: {
                     AR: fixDecimals(beatmapPP.calculatedMapAttributes.ar),
@@ -139,20 +139,20 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                     fullSR: fixDecimals(
                         beatmapPP.calculatedMapAttributes.fullStars
                     ),
-                    memoryAR: fixDecimals(menu.AR),
-                    memoryCS: fixDecimals(menu.CS),
-                    memoryOD: fixDecimals(menu.OD),
-                    memoryHP: fixDecimals(menu.HP)
+                    memoryAR: fixDecimals(menu.ar),
+                    memoryCS: fixDecimals(menu.cs),
+                    memoryOD: fixDecimals(menu.od),
+                    memoryHP: fixDecimals(menu.hp)
                 },
                 path: {
                     full: path.join(
-                        menu.Folder || '',
-                        menu.BackgroundFilename || ''
+                        menu.folder || '',
+                        menu.backgroundFilename || ''
                     ),
-                    folder: menu.Folder,
-                    file: menu.Path,
-                    bg: menu.BackgroundFilename,
-                    audio: menu.AudioFilename
+                    folder: menu.folder,
+                    file: menu.filename,
+                    bg: menu.backgroundFilename,
+                    audio: menu.audioFilename
                 }
             },
             mods: {
@@ -310,14 +310,14 @@ const buildTourneyData = (
             return {
                 team: spectatorTeam,
                 spectating: {
-                    name: tourneyManager.UserName,
-                    country: tourneyManager.UserCountry,
-                    userID: tourneyManager.UserID,
-                    accuracy: tourneyManager.UserAccuracy,
-                    rankedScore: tourneyManager.UserRankedScore,
-                    playCount: tourneyManager.UserPlayCount,
-                    globalRank: tourneyManager.UserGlobalRank,
-                    totalPP: tourneyManager.UserPP
+                    name: tourneyManager.userName,
+                    country: tourneyManager.userCountry,
+                    userID: tourneyManager.userID,
+                    accuracy: tourneyManager.userAccuracy,
+                    rankedScore: tourneyManager.userRankedScore,
+                    playCount: tourneyManager.userPlayCount,
+                    globalRank: tourneyManager.userGlobalRank,
+                    totalPP: tourneyManager.userPP
                 },
                 gameplay: {
                     gameMode: gameplay.mode,
@@ -359,7 +359,7 @@ const buildTourneyData = (
         'tourneyManager'
     ]);
 
-    const mappedChat = tourneyManager.Messages.map((message) => {
+    const mappedChat = tourneyManager.messages.map((message) => {
         const ipcClient = mappedOsuTourneyClients.find(
             (client) => client.spectating.name === message.name
         );
@@ -378,25 +378,25 @@ const buildTourneyData = (
 
     return {
         manager: {
-            ipcState: tourneyManager.IPCState,
-            bestOF: tourneyManager.BestOf,
+            ipcState: tourneyManager.ipcState,
+            bestOF: tourneyManager.bestOf,
             teamName: {
-                left: tourneyManager.FirstTeamName,
-                right: tourneyManager.SecondTeamName
+                left: tourneyManager.firstTeamName,
+                right: tourneyManager.secondTeamName
             },
             stars: {
-                left: tourneyManager.LeftStars,
-                right: tourneyManager.RightStars
+                left: tourneyManager.leftStars,
+                right: tourneyManager.rightStars
             },
             bools: {
-                scoreVisible: tourneyManager.ScoreVisible,
-                starsVisible: tourneyManager.StarsVisible
+                scoreVisible: tourneyManager.scoreVisible,
+                starsVisible: tourneyManager.starsVisible
             },
             chat: mappedChat,
             gameplay: {
                 score: {
-                    left: tourneyManager.FirstTeamScore,
-                    right: tourneyManager.SecondTeamScore
+                    left: tourneyManager.firstTeamScore,
+                    right: tourneyManager.secondTeamScore
                 }
             }
         },

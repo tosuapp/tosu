@@ -172,8 +172,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             skin: settings.skin,
             mode: {
-                number: menu.MenuGameMode,
-                name: Modes[menu.MenuGameMode] || ''
+                number: menu.gamemode,
+                name: Modes[menu.gamemode] || ''
             },
             audio: settings.audio,
             background: settings.background,
@@ -216,30 +216,30 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 live: global.playTime,
                 firstObject: beatmapPP.timings.firstObj,
                 lastObject: beatmapPP.timings.full,
-                mp3Length: menu.MP3Length
+                mp3Length: menu.mp3Length
             },
             status: {
-                number: menu.RankedStatus,
-                name: BeatmapStatuses[menu.RankedStatus || -1] || ''
+                number: menu.rankedStatus,
+                name: BeatmapStatuses[menu.rankedStatus || -1] || ''
             },
-            checksum: menu.MD5,
+            checksum: menu.checksum,
 
-            id: menu.MapID,
-            set: menu.SetID,
+            id: menu.mapID,
+            set: menu.setID,
 
             mode: {
                 number: beatmapPP.Mode,
                 name: Modes[beatmapPP.Mode] || ''
             },
 
-            artist: menu.Artist,
-            artistUnicode: menu.ArtistOriginal,
-            title: menu.Title,
-            titleUnicode: menu.TitleOriginal,
+            artist: menu.artist,
+            artistUnicode: menu.artistOriginal,
+            title: menu.title,
+            titleUnicode: menu.titleOriginal,
 
-            mapper: menu.Creator,
+            mapper: menu.creator,
 
-            version: menu.Difficulty,
+            version: menu.difficulty,
 
             stats: buildBeatmapStats(beatmapPP, menu)
         },
@@ -284,24 +284,24 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             game: global.gameFolder,
             skin: global.skinFolder,
             songs: global.songsFolder,
-            beatmap: menu.Folder
+            beatmap: menu.folder
         },
         files: {
-            beatmap: menu.Path,
-            background: menu.BackgroundFilename,
-            audio: menu.AudioFilename
+            beatmap: menu.filename,
+            background: menu.backgroundFilename,
+            audio: menu.audioFilename
         },
         directPath: {
-            beatmapFile: path.join(menu.Folder || '', menu.Path || ''),
+            beatmapFile: path.join(menu.folder || '', menu.filename || ''),
             beatmapBackground: path.join(
-                menu.Folder || '',
-                menu.BackgroundFilename || ''
+                menu.folder || '',
+                menu.backgroundFilename || ''
             ),
             beatmapAudio: path.join(
-                menu.Folder || '',
-                menu.AudioFilename || ''
+                menu.folder || '',
+                menu.audioFilename || ''
             ),
-            beatmapFolder: menu.Folder,
+            beatmapFolder: menu.folder,
             skinFolder: global.skinFolder
         },
 
@@ -347,14 +347,14 @@ const buildTourneyData = (
                 ipcId: instance.ipcId,
                 team: spectatorTeam,
                 user: {
-                    id: tourneyManager.UserID,
-                    name: tourneyManager.UserName,
-                    country: tourneyManager.UserCountry,
-                    accuracy: tourneyManager.UserAccuracy,
-                    rankedScore: tourneyManager.UserRankedScore,
-                    playCount: tourneyManager.UserPlayCount,
-                    globalRank: tourneyManager.UserGlobalRank,
-                    totalPP: tourneyManager.UserPP
+                    id: tourneyManager.userID,
+                    name: tourneyManager.userName,
+                    country: tourneyManager.userCountry,
+                    accuracy: tourneyManager.userAccuracy,
+                    rankedScore: tourneyManager.userRankedScore,
+                    playCount: tourneyManager.userPlayCount,
+                    globalRank: tourneyManager.userGlobalRank,
+                    totalPP: tourneyManager.userPP
                 },
                 beatmap: {
                     stats: buildBeatmapStats(beatmapPP, menu)
@@ -367,7 +367,7 @@ const buildTourneyData = (
         'tourneyManager'
     ]);
 
-    const mappedChat = tourneyManager.Messages.map(
+    const mappedChat = tourneyManager.messages.map(
         (message): TourneyChatMessages => {
             const ipcClient = mappedOsuTourneyClients.find(
                 (client) => client.user.name === message.name
@@ -387,26 +387,26 @@ const buildTourneyData = (
     );
 
     return {
-        scoreVisible: tourneyManager.ScoreVisible,
-        starsVisible: tourneyManager.StarsVisible,
+        scoreVisible: tourneyManager.scoreVisible,
+        starsVisible: tourneyManager.starsVisible,
 
-        ipcState: tourneyManager.IPCState,
-        bestOF: tourneyManager.BestOf,
+        ipcState: tourneyManager.ipcState,
+        bestOF: tourneyManager.bestOf,
         team: {
-            left: tourneyManager.FirstTeamName,
-            right: tourneyManager.SecondTeamName
+            left: tourneyManager.firstTeamName,
+            right: tourneyManager.secondTeamName
         },
 
         points: {
-            left: tourneyManager.LeftStars,
-            right: tourneyManager.RightStars
+            left: tourneyManager.leftStars,
+            right: tourneyManager.rightStars
         },
 
         chat: mappedChat,
 
         totalScore: {
-            left: tourneyManager.FirstTeamScore,
-            right: tourneyManager.SecondTeamScore
+            left: tourneyManager.firstTeamScore,
+            right: tourneyManager.secondTeamScore
         },
         clients: mappedOsuTourneyClients
     };
@@ -447,19 +447,19 @@ function buildBeatmapStats(beatmapPP: BeatmapPP, menu: Menu) {
         },
 
         ar: {
-            original: fixDecimals(menu.AR),
+            original: fixDecimals(menu.ar),
             converted: fixDecimals(beatmapPP.calculatedMapAttributes.ar)
         },
         cs: {
-            original: fixDecimals(menu.CS),
+            original: fixDecimals(menu.cs),
             converted: fixDecimals(beatmapPP.calculatedMapAttributes.cs)
         },
         od: {
-            original: fixDecimals(menu.OD),
+            original: fixDecimals(menu.od),
             converted: fixDecimals(beatmapPP.calculatedMapAttributes.od)
         },
         hp: {
-            original: fixDecimals(menu.HP),
+            original: fixDecimals(menu.hp),
             converted: fixDecimals(beatmapPP.calculatedMapAttributes.hp)
         },
 
