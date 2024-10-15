@@ -2,6 +2,7 @@ import { config, wLogger } from '@tosu/common';
 
 import { AbstractMemory, ScanPatterns } from '@/memory';
 import type { ReportError, ResetReportCount } from '@/states';
+import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagetChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
@@ -1026,5 +1027,85 @@ export class StableMemory extends AbstractMemory {
         } catch (error) {
             return error as Error;
         }
+    }
+
+    leaderboard(
+        rulesetAddr: number
+    ): [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]] | Error {
+        try {
+            const base = this.process.readInt(rulesetAddr + 0x7c);
+            const address = Math.max(0, this.process.readInt(base + 0x24)); // known as leaderBoardAddr, leaderboardBase
+            if (address === 0) {
+                return [false, undefined, []];
+            }
+
+            const playerBase = this.process.readInt(address + 0x10);
+            const isVisible = this.process.readByte(
+                this.process.readInt(playerBase + 0x24) + 0x20
+            );
+
+            const currentPlayer = this.leaderboardPlayer(playerBase);
+
+            const playersAddr = this.process.readInt(address + 0x4);
+            const slotsAmount = this.process.readInt(playersAddr + 0xc);
+            if (slotsAmount < 1) {
+                return [Boolean(isVisible), currentPlayer, []];
+            }
+
+            const result: LeaderboardPlayer[] = [];
+
+            const itemsBase = this.process.readInt(playersAddr + 0x4);
+            const itemsSize = this.process.readInt(playersAddr + 0xc);
+            const leaderStart = this.getLeaderStart();
+
+            for (let i = 0; i < itemsSize; i++) {
+                const current = itemsBase + leaderStart + 0x4 * i;
+
+                const lbEntry = this.leaderboardPlayer(
+                    this.process.readInt(current)
+                );
+
+                if (!lbEntry) {
+                    // break due to un-consistency of leaderboard
+                    break;
+                }
+
+                result.push(lbEntry);
+            }
+
+            return [Boolean(isVisible), currentPlayer, result];
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    private leaderboardPlayer(base: number): LeaderboardPlayer | undefined {
+        const entry = this.process.readInt(base + 0x20);
+        if (entry === 0) {
+            return undefined;
+        }
+
+        const ModsXor1 = this.process.readInt(
+            this.process.readInt(entry + 0x1c) + 0x8
+        );
+        const ModsXor2 = this.process.readInt(
+            this.process.readInt(entry + 0x1c) + 0xc
+        );
+        return {
+            name: this.process.readSharpString(
+                this.process.readInt(base + 0x8)
+            ),
+            score: this.process.readInt(base + 0x30),
+            combo: this.process.readShort(entry + 0x94),
+            maxCombo: this.process.readShort(entry + 0x68),
+            mods: ModsXor1 ^ ModsXor2,
+            h300: this.process.readShort(entry + 0x8a),
+            h100: this.process.readShort(entry + 0x88),
+            h50: this.process.readShort(entry + 0x8c),
+            h0: this.process.readShort(entry + 0x92),
+            team: this.process.readInt(base + 0x40),
+            position: this.process.readInt(base + 0x2c),
+            isPassing: Boolean(this.process.readByte(base + 0x4b))
+        };
     }
 }

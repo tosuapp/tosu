@@ -12,36 +12,21 @@ import { calculateAccuracy } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { getOsuModsString } from '@/utils/osuMods';
 
-const defaultLBPlayer = {
-    name: '',
-    score: 0,
-    combo: 0,
-    maxCombo: 0,
-    mods: '',
-    h300: 0,
-    h100: 0,
-    h50: 0,
-    h0: 0,
-    team: 0,
-    position: 0,
-    isPassing: 0
-} as LeaderboardPlayer;
-
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer
 ): LeaderboardPlayer => ({
-    name: memoryPlayer.Name,
-    score: memoryPlayer.Score,
-    combo: memoryPlayer.Combo,
-    maxCombo: memoryPlayer.MaxCombo,
-    mods: getOsuModsString(memoryPlayer.Mods),
-    h300: memoryPlayer.H300,
-    h100: memoryPlayer.H100,
-    h50: memoryPlayer.H50,
-    h0: memoryPlayer.H0,
-    team: memoryPlayer.Team,
-    position: memoryPlayer.Position,
-    isPassing: Number(memoryPlayer.IsPassing)
+    name: memoryPlayer.name,
+    score: memoryPlayer.score,
+    combo: memoryPlayer.combo,
+    maxCombo: memoryPlayer.maxCombo,
+    mods: getOsuModsString(memoryPlayer.mods),
+    h300: memoryPlayer.h300,
+    h100: memoryPlayer.h100,
+    h50: memoryPlayer.h50,
+    h0: memoryPlayer.h0,
+    team: memoryPlayer.team,
+    position: memoryPlayer.position,
+    isPassing: Number(memoryPlayer.isPassing)
 });
 
 export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
@@ -217,21 +202,14 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 }
             },
             leaderboard: {
-                hasLeaderboard: Boolean(gameplay.leaderboard),
-                isVisible: gameplay.leaderboard
-                    ? gameplay.leaderboard.isScoreboardVisible
-                    : false,
-                ourplayer:
-                    gameplay.leaderboard && gameplay.leaderboard.player
-                        ? convertMemoryPlayerToResult(
-                              gameplay.leaderboard.player
-                          )
-                        : defaultLBPlayer,
-                slots: gameplay.leaderboard
-                    ? gameplay.leaderboard.leaderBoard.map((slot) =>
-                          convertMemoryPlayerToResult(slot)
-                      )
-                    : []
+                hasLeaderboard: gameplay.leaderboardScores.length > 0,
+                isVisible: gameplay.isLeaderboardVisible,
+                ourplayer: convertMemoryPlayerToResult(
+                    gameplay.leaderboardPlayer
+                ),
+                slots: gameplay.leaderboardScores.map(
+                    convertMemoryPlayerToResult
+                )
             },
             _isReplayUiHidden: gameplay.isReplayUiHidden
         },
