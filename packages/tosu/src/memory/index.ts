@@ -2,10 +2,28 @@ import { platform } from 'process';
 import { Process } from 'tsprocess/dist/process';
 
 import type { AbstractInstance } from '@/instances';
+import type {
+    IAudioVelocityBase,
+    IBindingValue,
+    IConfigValue,
+    IGameplay,
+    IGlobal,
+    IGlobalPrecise,
+    IHitErrors,
+    IKeyOverlay,
+    ILeaderboard,
+    IMP3Length,
+    IMenu,
+    IOffsets,
+    IResultScreen,
+    ISettingsPointers,
+    ITourney,
+    ITourneyChat,
+    ITourneyUser,
+    IUser
+} from '@/memory/types';
 import type { ReportError, ResetReportCount } from '@/states';
-import type { KeyOverlay, LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagetChatItem } from '@/states/tourney';
-import type { OsuMods } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 // TODO: fix this when PatternData will be separated for each
@@ -100,193 +118,55 @@ export abstract class AbstractMemory {
         return this.leaderStart;
     }
 
-    abstract audioVelocityBase(): number[] | null;
+    abstract audioVelocityBase(): IAudioVelocityBase;
 
-    abstract user():
-        | Error
-        | {
-              name: string;
-              accuracy: number;
-              rankedScore: number;
-              id: number;
-              level: number;
-              playCount: number;
-              playMode: number;
-              rank: number;
-              countryCode: number;
-              performancePoints: number;
-              rawBanchoStatus: number;
-              backgroundColour: number;
-              rawLoginStatus: number;
-          };
+    abstract user(): IUser;
 
-    abstract settingsPointers(): { config: number; binding: number } | Error;
+    abstract settingsPointers(): ISettingsPointers;
     abstract configOffsets(
         address: number,
         list: ConfigList,
         reportError: ReportError,
         resetCount: ResetReportCount
-    ): number[] | Error;
+    ): IOffsets;
 
     abstract bindingsOffsets(
         address: number,
         list: BindingsList,
         reportError: ReportError,
         resetCount: ResetReportCount
-    ): number[] | Error;
+    ): IOffsets;
 
     abstract configValue(
         address: number,
         position: number,
         list: ConfigList
-    ):
-        | {
-              key: string;
-              value: any;
-          }
-        | null
-        | Error;
+    ): IConfigValue;
 
-    abstract bindingValue(
-        address: number,
-        position: number
-    ):
-        | {
-              key: number;
-              value: number;
-          }
-        | Error;
+    abstract bindingValue(address: number, position: number): IBindingValue;
 
-    abstract resultScreen():
-        | {
-              onlineId: number;
-              playerName: string;
-              mods: OsuMods;
-              mode: number;
-              maxCombo: number;
-              score: number;
-              hit100: number;
-              hit300: number;
-              hit50: number;
-              hitGeki: number;
-              hitKatu: number;
-              hitMiss: number;
-              date: string;
-          }
-        | string
-        | Error;
+    abstract resultScreen(): IResultScreen;
+    abstract gameplay(): IGameplay;
 
-    abstract gameplay():
-        | {
-              address: number;
-              retries: number;
-              playerName: string;
-              mods: OsuMods;
-              mode: number;
-              score: number;
-              playerHPSmooth: number;
-              playerHP: number;
-              accuracy: number;
-              hit100: number;
-              hit300: number;
-              hit50: number;
-              hitGeki: number;
-              hitKatu: number;
-              hitMiss: number;
-              combo: number;
-              maxCombo: number;
-          }
-        | string
-        | Error;
+    abstract keyOverlay(mode: number): IKeyOverlay;
+    abstract hitErrors(): IHitErrors;
+    abstract global(): IGlobal;
 
-    abstract keyOverlay(mode: number): KeyOverlay | string | Error;
-    abstract hitErrors(): number[] | string | Error;
-    abstract global():
-        | {
-              isWatchingReplay: number;
-              isReplayUiHidden: boolean;
+    abstract globalPrecise(): IGlobalPrecise;
 
-              showInterface: boolean;
-              chatStatus: number;
-              status: number;
+    abstract menu(previousChecksum: string): IMenu;
 
-              gameTime: number;
-              menuMods: number;
+    abstract mp3Length(): IMP3Length;
 
-              skinFolder: string;
-              memorySongsFolder: string;
-          }
-        | string
-        | Error;
-
-    abstract globalPrecise(): { time: number } | Error;
-
-    abstract menu(previousChecksum: string):
-        | {
-              gamemode: number;
-              checksum: string;
-              filename: string;
-              plays: number;
-              artist: string;
-              artistOriginal: string;
-              title: string;
-              titleOriginal: string;
-              ar: number;
-              cs: number;
-              hp: number;
-              od: number;
-              audioFilename: string;
-              backgroundFilename: string;
-              folder: string;
-              creator: string;
-              difficulty: string;
-              mapID: number;
-              setID: number;
-              rankedStatus: number;
-              objectCount: number;
-          }
-        | string
-        | Error;
-
-    abstract mp3Length(): number | Error;
-
-    abstract tourney():
-        | {
-              ipcState: number;
-              leftStars: number;
-              rightStars: number;
-              bestOf: number;
-              starsVisible: boolean;
-              scoreVisible: boolean;
-              firstTeamName: string;
-              secondTeamName: string;
-              firstTeamScore: number;
-              secondTeamScore: number;
-          }
-        | string
-        | Error;
+    abstract tourney(): ITourney;
 
     abstract tourneyChat(
         messages: ITourneyManagetChatItem[],
         reportError: ReportError,
         resetCount: ResetReportCount
-    ): ITourneyManagetChatItem[] | Error;
+    ): ITourneyChat;
 
-    abstract tourneyUser():
-        | {
-              id: number;
-              name: string;
-              country: string;
-              accuracy: number;
-              playcount: number;
-              rankedScore: number;
-              globalRank: number;
-              pp: number;
-          }
-        | string
-        | Error;
+    abstract tourneyUser(): ITourneyUser;
 
-    abstract leaderboard(
-        rulesetAddr: number
-    ): [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]] | Error;
+    abstract leaderboard(rulesetAddr: number): ILeaderboard;
 }

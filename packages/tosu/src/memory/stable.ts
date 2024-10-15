@@ -1,6 +1,26 @@
 import { config, wLogger } from '@tosu/common';
 
 import { AbstractMemory, ScanPatterns } from '@/memory';
+import type {
+    IAudioVelocityBase,
+    IBindingValue,
+    IConfigValue,
+    IGameplay,
+    IGlobal,
+    IGlobalPrecise,
+    IHitErrors,
+    IKeyOverlay,
+    ILeaderboard,
+    IMP3Length,
+    IMenu,
+    IOffsets,
+    IResultScreen,
+    ISettingsPointers,
+    ITourney,
+    ITourneyChat,
+    ITourneyUser,
+    IUser
+} from '@/memory/types';
 import type { ReportError, ResetReportCount } from '@/states';
 import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagetChatItem } from '@/states/tourney';
@@ -80,7 +100,7 @@ export class StableMemory extends AbstractMemory {
         return this.scanPatterns;
     }
 
-    audioVelocityBase() {
+    audioVelocityBase(): IAudioVelocityBase {
         if (this.process === null) {
             throw new Error('Process not found');
         }
@@ -118,7 +138,7 @@ export class StableMemory extends AbstractMemory {
         return result;
     }
 
-    user() {
+    user(): IUser {
         try {
             const profileBase = this.process.readPointer(
                 this.getPattern('userProfilePtr')
@@ -166,7 +186,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    settingsPointers() {
+    settingsPointers(): ISettingsPointers {
         try {
             const { configurationAddr, bindingsAddr } = this.getPatterns([
                 'configurationAddr',
@@ -190,7 +210,7 @@ export class StableMemory extends AbstractMemory {
         list: ConfigList,
         reportError: ReportError,
         resetCount: ResetReportCount
-    ) {
+    ): IOffsets {
         try {
             const result: number[] = [];
 
@@ -231,7 +251,7 @@ export class StableMemory extends AbstractMemory {
         list: BindingsList,
         reportError: ReportError,
         resetCount: ResetReportCount
-    ) {
+    ): IOffsets {
         try {
             const result: number[] = [];
 
@@ -264,7 +284,11 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    configValue(address: number, position: number, list: ConfigList) {
+    configValue(
+        address: number,
+        position: number,
+        list: ConfigList
+    ): IConfigValue {
         try {
             const offset =
                 this.process.readInt(address + 0x8) + 0x8 + 0x10 * position;
@@ -317,7 +341,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    bindingValue(address: number, position: number) {
+    bindingValue(address: number, position: number): IBindingValue {
         try {
             const offset =
                 this.process.readInt(address + 0x8) + 0x8 + 0x10 * position;
@@ -331,7 +355,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    resultScreen() {
+    resultScreen(): IResultScreen {
         try {
             const address = this.getPattern('rulesetsAddr');
             const rulesetAddr = this.process.readInt(
@@ -393,7 +417,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    gameplay() {
+    gameplay(): IGameplay {
         try {
             const { baseAddr, rulesetsAddr } = this.getPatterns([
                 'baseAddr',
@@ -508,7 +532,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    keyOverlay(mode: number) {
+    keyOverlay(mode: number): IKeyOverlay {
         try {
             const address = this.getPattern('rulesetsAddr');
             const rulesetAddr = this.process.readInt(
@@ -582,7 +606,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    hitErrors() {
+    hitErrors(): IHitErrors {
         try {
             const rulesetsAddr = this.getPattern('rulesetsAddr');
 
@@ -617,7 +641,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    global() {
+    global(): IGlobal {
         try {
             const {
                 statusPtr,
@@ -706,7 +730,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    globalPrecise() {
+    globalPrecise(): IGlobalPrecise {
         try {
             const playTimeAddr = this.getPattern('playTimeAddr');
             const playTime = this.process.readInt(
@@ -719,7 +743,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    menu(previousChecksum: string) {
+    menu(previousChecksum: string): IMenu {
         try {
             const baseAddr = this.getPattern('baseAddr');
 
@@ -808,7 +832,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    mp3Length() {
+    mp3Length(): IMP3Length {
         try {
             const mp3Length = Math.round(
                 this.process.readDouble(
@@ -824,7 +848,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    tourney() {
+    tourney(): ITourney {
         try {
             const address = this.getPattern('rulesetsAddr');
             const rulesetAddr = this.process.readInt(
@@ -881,7 +905,7 @@ export class StableMemory extends AbstractMemory {
         messages: ITourneyManagetChatItem[],
         reportError: ReportError,
         resetCount: ResetReportCount
-    ) {
+    ): ITourneyChat {
         try {
             if (this.ChatAreaAddr === 0) {
                 this.ChatAreaAddr = this.process.scanSync(
@@ -992,7 +1016,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    tourneyUser() {
+    tourneyUser(): ITourneyUser {
         try {
             const address = this.process.readPointer(
                 this.getPattern('spectatingUserPtr')
@@ -1029,9 +1053,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    leaderboard(
-        rulesetAddr: number
-    ): [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]] | Error {
+    leaderboard(rulesetAddr: number): ILeaderboard {
         try {
             const base = this.process.readInt(rulesetAddr + 0x7c);
             const address = Math.max(0, this.process.readInt(base + 0x24)); // known as leaderBoardAddr, leaderboardBase
