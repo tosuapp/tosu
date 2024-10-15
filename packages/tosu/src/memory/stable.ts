@@ -26,7 +26,7 @@ import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
-export type PatternData = {
+export type OsuPatternData = {
     baseAddr: number;
     playTimeAddr: number;
     chatCheckerPtr: number;
@@ -45,7 +45,7 @@ export type PatternData = {
     gameTimePtr: number;
 };
 
-export class StableMemory extends AbstractMemory<PatternData> {
+export class StableMemory extends AbstractMemory<OsuPatternData> {
     private scanPatterns: ScanPatterns = {
         baseAddr: {
             pattern: 'F8 01 74 04 83 65'
@@ -107,7 +107,7 @@ export class StableMemory extends AbstractMemory<PatternData> {
         }
     };
 
-    patterns: PatternData = {
+    patterns: OsuPatternData = {
         baseAddr: 0,
         playTimeAddr: 0,
         chatCheckerPtr: 0,
