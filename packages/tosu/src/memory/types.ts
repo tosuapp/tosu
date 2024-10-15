@@ -1,5 +1,5 @@
 import { KeyOverlay, LeaderboardPlayer } from '@/states/gameplay';
-import { ITourneyManagetChatItem } from '@/states/tourney';
+import { ITourneyManagerChatItem } from '@/states/tourney';
 import { OsuMods } from '@/utils/osuMods.types';
 
 export type IAudioVelocityBase = number[] | null;
@@ -150,7 +150,7 @@ export type ITourney =
     | string
     | Error;
 
-export type ITourneyChat = ITourneyManagetChatItem[] | Error;
+export type ITourneyChat = ITourneyManagerChatItem[] | Error;
 
 export type ITourneyUser =
     | {

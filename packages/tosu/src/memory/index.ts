@@ -23,7 +23,7 @@ import type {
     IUser
 } from '@/memory/types';
 import type { ReportError, ResetReportCount } from '@/states';
-import type { ITourneyManagetChatItem } from '@/states/tourney';
+import type { ITourneyManagerChatItem } from '@/states/tourney';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 // TODO: fix this when PatternData will be separated for each
@@ -161,7 +161,7 @@ export abstract class AbstractMemory {
     abstract tourney(): ITourney;
 
     abstract tourneyChat(
-        messages: ITourneyManagetChatItem[],
+        messages: ITourneyManagerChatItem[],
         reportError: ReportError,
         resetCount: ResetReportCount
     ): ITourneyChat;

@@ -2,7 +2,7 @@ import { wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
-export type ITourneyManagetChatItem = {
+export type ITourneyManagerChatItem = {
     time: string;
     name: string;
     content: string;
@@ -24,7 +24,7 @@ export class TourneyManager extends AbstractState {
     firstTeamScore: number = 0;
     secondTeamScore: number = 0;
 
-    messages: ITourneyManagetChatItem[] = [];
+    messages: ITourneyManagerChatItem[] = [];
 
     userAccuracy: number = 0.0;
     userRankedScore: number = 0;
