@@ -252,13 +252,13 @@ export class BeatmapPP extends AbstractState {
 
             const { menu, global } = this.game.getServices(['menu', 'global']);
 
-            if (menu.Folder === '') {
+            if (menu.folder === '') {
                 wLogger.debug(
                     `BPPD(updateMapMetadata) Skip osu! music theme file`,
                     {
                         SongsFolder: global.songsFolder,
-                        Folder: menu.Folder,
-                        Path: menu.Path
+                        Folder: menu.folder,
+                        Path: menu.filename
                     }
                 );
                 return;
@@ -266,8 +266,8 @@ export class BeatmapPP extends AbstractState {
 
             const mapPath = path.join(
                 global.songsFolder,
-                menu.Folder,
-                menu.Path
+                menu.folder,
+                menu.filename
             );
 
             try {
@@ -374,9 +374,9 @@ export class BeatmapPP extends AbstractState {
 
                 if (
                     this.lazerBeatmap.events.backgroundPath !==
-                    menu.BackgroundFilename
+                    menu.backgroundFilename
                 ) {
-                    menu.BackgroundFilename =
+                    menu.backgroundFilename =
                         this.lazerBeatmap.events.backgroundPath || '';
                 }
 
@@ -493,7 +493,7 @@ export class BeatmapPP extends AbstractState {
             const firstObjectTime = this.timings.firstObj / this.clockRate;
             const lastObjectTime =
                 firstObjectTime + strainsAmount * sectionOffsetTime;
-            const mp3LengthTime = menu.MP3Length / this.clockRate;
+            const mp3LengthTime = menu.mp3Length / this.clockRate;
 
             const LEFT_OFFSET = Math.floor(firstObjectTime / sectionOffsetTime);
             const RIGHT_OFFSET =

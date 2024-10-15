@@ -2,6 +2,13 @@ import { wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 
+export type ReportError = (
+    id: string | number,
+    maxAmount: number,
+    ...args: any[]
+) => void;
+export type ResetReportCount = (id: string | number) => void;
+
 export abstract class AbstractState {
     errorsCount: { [key: string | number]: number } = {};
     game: AbstractInstance;

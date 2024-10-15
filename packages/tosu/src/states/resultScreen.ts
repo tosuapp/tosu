@@ -117,7 +117,7 @@ export class ResultScreen extends AbstractState {
                 'menu'
             ]);
 
-            const key = `${menu.MD5}${this.mods}${this.mode}${this.playerName}`;
+            const key = `${menu.checksum}${this.mods}${this.mode}${this.playerName}`;
             if (this.previousBeatmap === key) {
                 return;
             }

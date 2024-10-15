@@ -232,7 +232,7 @@ export class Gameplay extends AbstractState {
             this.hitMissPrev = this.hitMiss;
             this.comboPrev = this.combo;
 
-            this.updateGrade(menu.ObjectCount);
+            this.updateGrade(menu.objectCount);
             this.updateStarsAndPerformance();
             this.updateLeaderboard(
                 process,
@@ -301,7 +301,7 @@ export class Gameplay extends AbstractState {
 
     updateHitErrors() {
         try {
-            const result = this.game.memory.hitErors();
+            const result = this.game.memory.hitErrors();
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 if (result === '') return;
@@ -438,7 +438,7 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentState = `${menu.MD5}:${menu.MenuGameMode}:${this.mods}:${menu.MP3Length}`;
+            const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods}:${menu.mp3Length}`;
             const isUpdate = this.previousState !== currentState;
 
             // update precalculated attributes

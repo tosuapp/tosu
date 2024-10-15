@@ -1,6 +1,8 @@
-import { wLogger } from '@tosu/common';
+import { config, wLogger } from '@tosu/common';
 
 import { AbstractMemory, ScanPatterns } from '@/memory';
+import type { ReportError, ResetReportCount } from '@/states';
+import type { ITourneyManagetChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
@@ -65,6 +67,9 @@ export class StableMemory extends AbstractMemory {
             offset: 0x1
         }
     };
+
+    TOURNAMENT_CHAT_ENGINE = 'A1 ?? ?? ?? ?? 89 45 F0 8B D1 85 C9 75';
+    ChatAreaAddr: number = 0;
 
     previousState: string = '';
     previousMP3Length: number = 0;
@@ -179,7 +184,12 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    configOffsets(address: number, list: ConfigList) {
+    configOffsets(
+        address: number,
+        list: ConfigList,
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ) {
         try {
             const result: number[] = [];
 
@@ -198,14 +208,13 @@ export class StableMemory extends AbstractMemory {
 
                     result.push(i);
 
-                    // FIXME: FIX THIS LATER
-                    // this.resetReportCount(`ATD(configOffset)[${i}]`);
+                    resetCount(`ATD(configOffset)[${i}]`);
                 } catch (exc) {
-                    // this.reportError(
-                    //     `ATD(configOffset)[${i}]`,
-                    //     10,
-                    //     `ATD(configOffset)[${i}] ${(exc as any).message}`
-                    // );
+                    reportError(
+                        `ATD(configOffset)[${i}]`,
+                        10,
+                        `ATD(configOffset)[${i}] ${(exc as any).message}`
+                    );
                     wLogger.debug(exc);
                 }
             }
@@ -216,7 +225,12 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    bindingsOffsets(address: number, list: BindingsList) {
+    bindingsOffsets(
+        address: number,
+        list: BindingsList,
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ) {
         try {
             const result: number[] = [];
 
@@ -232,13 +246,13 @@ export class StableMemory extends AbstractMemory {
 
                     result.push(i);
 
-                    // this.resetReportCount(`ATD(bindingOffset)[${i}]`);
+                    resetCount(`ATD(bindingOffset)[${i}]`);
                 } catch (exc) {
-                    // this.reportError(
-                    //     `ATD(bindingOffset)[${i}]`,
-                    //     10,
-                    //     `ATD(bindingOffset)[${i}] ${(exc as any).message}`
-                    // );
+                    reportError(
+                        `ATD(bindingOffset)[${i}]`,
+                        10,
+                        `ATD(bindingOffset)[${i}] ${(exc as any).message}`
+                    );
                     wLogger.debug(exc);
                 }
             }
@@ -567,7 +581,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    hitErors() {
+    hitErrors() {
         try {
             const rulesetsAddr = this.getPattern('rulesetsAddr');
 
@@ -699,6 +713,316 @@ export class StableMemory extends AbstractMemory {
             );
 
             return { time: playTime };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    menu(previousChecksum: string) {
+        try {
+            const baseAddr = this.getPattern('baseAddr');
+
+            const beatmapAddr = this.process.readPointer(baseAddr - 0xc);
+            if (beatmapAddr === 0) {
+                return 'beatmapAddr is 0';
+            }
+
+            const gamemode = this.process.readPointer(baseAddr - 0x33);
+            const checksum = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x6c)
+            );
+            const filename = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x90)
+            );
+
+            if (checksum === previousChecksum || !filename.endsWith('.osu')) {
+                return '';
+            }
+
+            const plays = this.process.readInt(
+                this.process.readInt(baseAddr - 0x33) + 0xc
+            );
+            const artist = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x18)
+            );
+            const artistOriginal = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x1c)
+            );
+            const title = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x24)
+            );
+            const titleOriginal = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x28)
+            );
+
+            const ar = this.process.readFloat(beatmapAddr + 0x2c);
+            const cs = this.process.readFloat(beatmapAddr + 0x30);
+            const hp = this.process.readFloat(beatmapAddr + 0x34);
+            const od = this.process.readFloat(beatmapAddr + 0x38);
+            const audioFilename = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x64)
+            );
+            const backgroundFilename = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x68)
+            );
+            const folder = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x78)
+            );
+            const creator = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0x7c)
+            );
+            const difficulty = this.process.readSharpString(
+                this.process.readInt(beatmapAddr + 0xac)
+            );
+            const mapID = this.process.readInt(beatmapAddr + 0xc8);
+            const setID = this.process.readInt(beatmapAddr + 0xcc);
+            const rankedStatus = this.process.readInt(beatmapAddr + 0x12c);
+            const objectCount = this.process.readInt(beatmapAddr + 0xf8);
+
+            return {
+                gamemode,
+                checksum,
+                filename,
+                plays,
+                artist,
+                artistOriginal,
+                title,
+                titleOriginal,
+                ar,
+                cs,
+                hp,
+                od,
+                audioFilename,
+                backgroundFilename,
+                folder,
+                creator,
+                difficulty,
+                mapID,
+                setID,
+                rankedStatus,
+                objectCount
+            };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    mp3Length() {
+        try {
+            const mp3Length = Math.round(
+                this.process.readDouble(
+                    this.process.readPointer(
+                        this.getPattern('getAudioLengthPtr')
+                    ) + 0x4
+                )
+            );
+
+            return mp3Length;
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    tourney() {
+        try {
+            const address = this.getPattern('rulesetsAddr');
+            const rulesetAddr = this.process.readInt(
+                this.process.readInt(address - 0xb) + 0x4
+            );
+            if (rulesetAddr === 0) {
+                return 'RulesetAddr is 0';
+            }
+
+            const teamLeftBase = this.process.readInt(rulesetAddr + 0x1c);
+            const teamRightBase = this.process.readInt(rulesetAddr + 0x20);
+
+            const ipcState = this.process.readInt(rulesetAddr + 0x54);
+            const leftStars = this.process.readInt(teamLeftBase + 0x2c);
+            const rightStars = this.process.readInt(teamRightBase + 0x2c);
+            const bestOf = this.process.readInt(teamRightBase + 0x30);
+            const starsVisible = Boolean(
+                this.process.readByte(teamRightBase + 0x38)
+            );
+            const scoreVisible = Boolean(
+                this.process.readByte(teamRightBase + 0x39)
+            );
+            const firstTeamName = this.process.readSharpString(
+                this.process.readInt(
+                    this.process.readInt(teamLeftBase + 0x20) + 0x144
+                )
+            );
+            const secondTeamName = this.process.readSharpString(
+                this.process.readInt(
+                    this.process.readInt(teamRightBase + 0x20) + 0x144
+                )
+            );
+            const firstTeamScore = this.process.readInt(teamLeftBase + 0x28);
+            const secondTeamScore = this.process.readInt(teamRightBase + 0x28);
+
+            return {
+                ipcState,
+                leftStars,
+                rightStars,
+                bestOf,
+                starsVisible,
+                scoreVisible,
+                firstTeamName,
+                secondTeamName,
+                firstTeamScore,
+                secondTeamScore
+            };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    tourneyChat(
+        messages: ITourneyManagetChatItem[],
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ) {
+        try {
+            if (this.ChatAreaAddr === 0) {
+                this.ChatAreaAddr = this.process.scanSync(
+                    this.TOURNAMENT_CHAT_ENGINE
+                );
+            }
+
+            const channelsList = this.process.readPointer(
+                this.ChatAreaAddr + 0x1
+            );
+            const channelsItems = this.process.readInt(channelsList + 0x4);
+            const channelsLength = this.process.readInt(channelsItems + 0x4);
+
+            for (let i = channelsLength - 1; i >= 0; i--) {
+                try {
+                    const current =
+                        channelsItems + this.getLeaderStart() + 0x4 * i;
+
+                    const channelAddr = this.process.readInt(current);
+                    if (channelAddr === 0) {
+                        continue;
+                    }
+
+                    const chatTag = this.process.readSharpString(
+                        this.process.readInt(channelAddr + 0x4)
+                    );
+                    if (chatTag !== '#multiplayer') {
+                        continue;
+                    }
+
+                    const result: ITourneyManagetChatItem[] = [];
+
+                    const messagesAddr = this.process.readInt(
+                        channelAddr + 0x10
+                    );
+
+                    const messagesItems = this.process.readInt(
+                        messagesAddr + 0x4
+                    );
+                    const messagesSize = this.process.readInt(
+                        messagesAddr + 0xc
+                    );
+
+                    if (messages.length === messagesSize) {
+                        // Not needed an update
+                        continue;
+                    }
+
+                    for (let i = 0; i < messagesSize; i++) {
+                        try {
+                            const current =
+                                messagesItems + this.getLeaderStart() + 0x4 * i;
+                            const currentItem = this.process.readInt(current);
+
+                            // [Base + 0x4]
+                            const content = this.process.readSharpString(
+                                this.process.readInt(currentItem + 0x4)
+                            );
+                            // NOTE: Check for empty, and !mp commands
+                            if (
+                                content === '' ||
+                                (!config.showMpCommands &&
+                                    content.startsWith('!mp'))
+                            ) {
+                                continue;
+                            }
+                            // [Base + 0x8]
+                            const timeName = this.process.readSharpString(
+                                this.process.readInt(currentItem + 0x8)
+                            );
+                            const [time] = timeName.split(' ');
+
+                            result.push({
+                                time: time.trim(),
+                                name: timeName
+                                    .replace(time, '')
+                                    .replace(/:$/, '')
+                                    .trimStart(),
+                                content
+                            });
+
+                            resetCount('TMD(chatMessage)');
+                        } catch (exc) {
+                            reportError(
+                                'TMD(chatMessage)',
+                                10,
+                                `TMD(chatMessage) ${(exc as any).message}`
+                            );
+                            wLogger.debug(exc);
+                        }
+                    }
+
+                    resetCount('TMD(channelUpdate)');
+                    return result;
+                } catch (exc) {
+                    reportError(
+                        'TMD(channelUpdate)',
+                        10,
+                        `TMD(channelUpdate) ${(exc as any).message}`
+                    );
+                    wLogger.debug(exc);
+                }
+            }
+
+            return [];
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    tourneyUser() {
+        try {
+            const address = this.process.readPointer(
+                this.getPattern('spectatingUserPtr')
+            );
+            if (!address) {
+                return 'Slot is not equiped';
+            }
+
+            const userAccuracy = this.process.readDouble(address + 0x4);
+            const userRankedScore = this.process.readLong(address + 0xc);
+            const userPlayCount = this.process.readInt(address + 0x7c);
+            const userGlobalRank = this.process.readInt(address + 0x84);
+            const userPP = this.process.readInt(address + 0x9c);
+            const userName = this.process.readSharpString(
+                this.process.readInt(address + 0x30)
+            );
+            const userCountry = this.process.readSharpString(
+                this.process.readInt(address + 0x2c)
+            );
+            const userID = this.process.readInt(address + 0x70);
+
+            return {
+                id: userID,
+                name: userName,
+                country: userCountry,
+                accuracy: userAccuracy,
+                playcount: userPlayCount,
+                rankedScore: userRankedScore,
+                globalRank: userGlobalRank,
+                pp: userPP
+            };
         } catch (error) {
             return error as Error;
         }

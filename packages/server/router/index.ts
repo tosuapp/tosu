@@ -394,8 +394,8 @@ export default function buildBaseApi(server: Server) {
                 const beatmapFilePath = path.join(
                     global.GameFolder,
                     'Songs',
-                    menu.Folder,
-                    menu.Path
+                    menu.folder,
+                    menu.filename
                 );
 
                 const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
