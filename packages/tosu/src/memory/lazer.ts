@@ -1,9 +1,27 @@
-import { KeyOverlay, LeaderboardPlayer } from '@/states/gameplay';
+import { AbstractMemory, ScanPatterns } from '@/memory';
+import type {
+    IAudioVelocityBase,
+    IBindingValue,
+    IConfigValue,
+    IGameplay,
+    IGlobal,
+    IGlobalPrecise,
+    IHitErrors,
+    IKeyOverlay,
+    ILeaderboard,
+    IMP3Length,
+    IMenu,
+    IOffsets,
+    IResultScreen,
+    ISettingsPointers,
+    ITourney,
+    ITourneyChat,
+    ITourneyUser,
+    IUser
+} from '@/memory/types';
+import { ReportError, ResetReportCount } from '@/states';
 import { ITourneyManagetChatItem } from '@/states/tourney';
-import { OsuMods } from '@/utils/osuMods.types';
 import { BindingsList, ConfigList } from '@/utils/settings.types';
-
-import { AbstractMemory, ScanPatterns } from '.';
 
 export class LazerMemory extends AbstractMemory {
     private scanPatterns: ScanPatterns = {
@@ -18,214 +36,108 @@ export class LazerMemory extends AbstractMemory {
         return this.scanPatterns;
     }
 
-    audioVelocityBase(): number[] | null {
+    audioVelocityBase(): IAudioVelocityBase {
         throw new Error('Lazer:audioVelocityBase not implemented.');
     }
 
-    user():
-        | Error
-        | {
-              name: string;
-              accuracy: number;
-              rankedScore: number;
-              id: number;
-              level: number;
-              playCount: number;
-              playMode: number;
-              rank: number;
-              countryCode: number;
-              performancePoints: number;
-              rawBanchoStatus: number;
-              backgroundColour: number;
-              rawLoginStatus: number;
-          } {
+    user(): IUser {
         throw new Error('Lazer:user not implemented.');
     }
 
-    settingsPointers(): { config: number; binding: number } | Error {
+    settingsPointers(): ISettingsPointers {
         throw new Error('Lazer:settingsPointers not implemented.');
     }
 
-    configOffsets(address: number, list: ConfigList): number[] | Error {
-        throw new Error(
-            'Lazer:configOffsets not implemented.' + address + list
-        );
+    configOffsets(
+        address: number,
+        list: ConfigList,
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ): IOffsets {
+        console.log(address, list, reportError, resetCount);
+
+        throw new Error('Lazer:configOffsets not implemented.');
     }
 
-    bindingsOffsets(address: number, list: BindingsList): number[] | Error {
-        throw new Error(
-            'Lazer:bindingsOffsets not implemented.' + address + list
-        );
+    bindingsOffsets(
+        address: number,
+        list: BindingsList,
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ): IOffsets {
+        console.log(address, list, reportError, resetCount);
+
+        throw new Error('Lazer:bindingsOffsets not implemented.');
     }
 
     configValue(
         address: number,
         position: number,
         list: ConfigList
-    ): { key: string; value: any } | null | Error {
-        throw new Error(
-            'Lazer:configValue not implemented.' + address + position + list
-        );
+    ): IConfigValue {
+        console.log(address, position, list);
+        throw new Error('Lazer:configValue not implemented.');
     }
 
-    bindingValue(
-        address: number,
-        position: number
-    ): { key: number; value: number } | Error {
-        throw new Error(
-            'Lazer:bindingValue not implemented.' + address + position
-        );
+    bindingValue(address: number, position: number): IBindingValue {
+        console.log(address, position);
+        throw new Error('Lazer:bindingValue not implemented.');
     }
 
-    resultScreen():
-        | {
-              onlineId: number;
-              playerName: string;
-              mods: OsuMods;
-              mode: number;
-              maxCombo: number;
-              score: number;
-              hit100: number;
-              hit300: number;
-              hit50: number;
-              hitGeki: number;
-              hitKatu: number;
-              hitMiss: number;
-              date: string;
-          }
-        | string
-        | Error {
+    resultScreen(): IResultScreen {
         throw new Error('Lazer:resultScreen not implemented.');
     }
 
-    gameplay():
-        | {
-              address: number;
-              retries: number;
-              playerName: string;
-              mods: OsuMods;
-              mode: number;
-              score: number;
-              playerHPSmooth: number;
-              playerHP: number;
-              accuracy: number;
-              hit100: number;
-              hit300: number;
-              hit50: number;
-              hitGeki: number;
-              hitKatu: number;
-              hitMiss: number;
-              combo: number;
-              maxCombo: number;
-          }
-        | string
-        | Error {
+    gameplay(): IGameplay {
         throw new Error('Lazer:gameplay not implemented.');
     }
 
-    keyOverlay(mode: number): KeyOverlay | string | Error {
-        throw new Error('Lazer:keyOverlay not implemented.' + mode);
+    keyOverlay(mode: number): IKeyOverlay {
+        console.log(mode);
+        throw new Error('Lazer:keyOverlay not implemented.');
     }
 
-    hitErrors(): number[] | string | Error {
+    hitErrors(): IHitErrors {
         throw new Error('Lazer:hitErrors not implemented.');
     }
 
-    global():
-        | {
-              isWatchingReplay: number;
-              isReplayUiHidden: boolean;
-              showInterface: boolean;
-              chatStatus: number;
-              status: number;
-              gameTime: number;
-              menuMods: number;
-              skinFolder: string;
-              memorySongsFolder: string;
-          }
-        | string
-        | Error {
+    global(): IGlobal {
         throw new Error('Lazer:global not implemented.');
     }
 
-    globalPrecise(): { time: number } | Error {
+    globalPrecise(): IGlobalPrecise {
         throw new Error('Lazer:globalPrecise not implemented.');
     }
 
-    menu():
-        | string
-        | {
-              gamemode: number;
-              checksum: string;
-              filename: string;
-              plays: number;
-              artist: string;
-              artistOriginal: string;
-              title: string;
-              titleOriginal: string;
-              ar: number;
-              cs: number;
-              hp: number;
-              od: number;
-              audioFilename: string;
-              backgroundFilename: string;
-              folder: string;
-              creator: string;
-              difficulty: string;
-              mapID: number;
-              setID: number;
-              rankedStatus: number;
-              objectCount: number;
-          }
-        | Error {
+    menu(previousChecksum: string): IMenu {
+        console.log(previousChecksum);
         throw new Error('Lazer:menu not implemented.');
     }
 
-    mp3Length(): number | Error {
+    mp3Length(): IMP3Length {
         throw new Error('Lazer:mp3Length not implemented.');
     }
 
-    tourney():
-        | string
-        | {
-              ipcState: number;
-              leftStars: number;
-              rightStars: number;
-              bestOf: number;
-              starsVisible: boolean;
-              scoreVisible: boolean;
-              firstTeamName: string;
-              secondTeamName: string;
-              firstTeamScore: number;
-              secondTeamScore: number;
-          }
-        | Error {
+    tourney(): ITourney {
         throw new Error('Lazer:tourney not implemented.');
     }
 
-    tourneyChat(): ITourneyManagetChatItem[] | Error {
+    tourneyChat(
+        messages: ITourneyManagetChatItem[],
+        reportError: ReportError,
+        resetCount: ResetReportCount
+    ): ITourneyChat {
+        console.log(messages, reportError, resetCount);
+
         throw new Error('Lazer:tourneyChat not implemented.');
     }
 
-    tourneyUser():
-        | string
-        | {
-              id: number;
-              name: string;
-              country: string;
-              accuracy: number;
-              playcount: number;
-              rankedScore: number;
-              globalRank: number;
-              pp: number;
-          }
-        | Error {
+    tourneyUser(): ITourneyUser {
         throw new Error('Lazer:tourneyUser not implemented.');
     }
 
-    leaderboard():
-        | [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]]
-        | Error {
-        throw new Error('Lazer:leaderboard not implemented.');
+    leaderboard(rulesetAddr: number): ILeaderboard {
+        console.log(rulesetAddr);
+        throw new Error('Lazer:tourneyUser not implemented.');
     }
 }
