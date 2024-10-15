@@ -35,35 +35,35 @@ const convertMemoryPlayerToResult = (
     gameMode: any
 ): Leaderboard => {
     const hits = {
-        300: memoryPlayer.H300,
-        100: memoryPlayer.H100,
-        50: memoryPlayer.H50,
-        0: memoryPlayer.H0,
+        300: memoryPlayer.h300,
+        100: memoryPlayer.h100,
+        50: memoryPlayer.h50,
+        0: memoryPlayer.h0,
         geki: 0,
         katu: 0
     };
 
-    const modsName = getOsuModsString(memoryPlayer.Mods);
+    const modsName = getOsuModsString(memoryPlayer.mods);
 
     return {
-        isFailed: memoryPlayer.IsPassing === false,
+        isFailed: memoryPlayer.isPassing === false,
 
-        position: memoryPlayer.Position,
-        team: memoryPlayer.Team,
+        position: memoryPlayer.position,
+        team: memoryPlayer.team,
 
-        name: memoryPlayer.Name,
+        name: memoryPlayer.name,
 
-        score: memoryPlayer.Score,
+        score: memoryPlayer.score,
         accuracy: calculateAccuracy({ hits, mode: gameMode }),
 
         hits,
 
         combo: {
-            current: memoryPlayer.Combo,
-            max: memoryPlayer.MaxCombo
+            current: memoryPlayer.combo,
+            max: memoryPlayer.maxCombo
         },
         mods: {
-            number: memoryPlayer.Mods,
+            number: memoryPlayer.mods,
             name: modsName
         },
         rank: calculateGrade({
@@ -132,9 +132,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
 
             leaderboard: {
-                visible: gameplay.leaderboard
-                    ? gameplay.leaderboard.isScoreboardVisible
-                    : false,
+                visible: gameplay.isLeaderboardVisible,
                 type: {
                     number: settings.leaderboardType,
                     name: LeaderboardType[settings.leaderboardType] || ''
@@ -244,11 +242,9 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             stats: buildBeatmapStats(beatmapPP, menu)
         },
         play: buildPlay(gameplay, beatmapPP, currentMods),
-        leaderboard: gameplay.leaderboard
-            ? gameplay.leaderboard.leaderBoard.map((slot) =>
-                  convertMemoryPlayerToResult(slot, Modes[gameplay.mode])
-              )
-            : [],
+        leaderboard: gameplay.leaderboardScores.map((slot) =>
+            convertMemoryPlayerToResult(slot, Modes[gameplay.mode])
+        ),
         performance: {
             accuracy: beatmapPP.ppAcc,
             graph: beatmapPP.strainsAll

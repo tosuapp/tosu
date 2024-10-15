@@ -3,7 +3,7 @@ import { Process } from 'tsprocess/dist/process';
 
 import type { AbstractInstance } from '@/instances';
 import type { ReportError, ResetReportCount } from '@/states';
-import type { KeyOverlay } from '@/states/gameplay';
+import type { KeyOverlay, LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagetChatItem } from '@/states/tourney';
 import type { OsuMods } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
@@ -285,4 +285,8 @@ export abstract class AbstractMemory {
           }
         | string
         | Error;
+
+    abstract leaderboard(
+        rulesetAddr: number
+    ): [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]] | Error;
 }
