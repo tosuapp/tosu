@@ -146,7 +146,7 @@ export class Gameplay extends AbstractState {
         this.previousPassedObjects = 0;
         this.gradualPerformance = undefined;
         this.performanceAttributes = undefined;
-        // below is gata that shouldn't be reseted on retry
+        // below is data that shouldn't be reseted on retry
         if (isRetry === true) {
             return;
         }

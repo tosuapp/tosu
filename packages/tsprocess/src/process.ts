@@ -22,10 +22,12 @@ export interface PatternResult {
 export class Process {
     public id: number;
     public handle: number;
+    public bitness: number;
 
-    constructor(id: number) {
+    constructor(id: number, bitness: number = 32) {
         this.id = id;
         this.handle = ProcessUtils.openProcess(this.id);
+        this.bitness = bitness;
     }
 
     static findProcesses(imageName: string): number[] {
@@ -59,6 +61,10 @@ export class Process {
         return this.getProcessCwd();
     }
 
+    sizeOfPtr() {
+        return this.bitness === 32 ? 4 : 8;
+    }
+
     getProcessCommandLine(): string {
         return ProcessUtils.getProcessCommandLine(this.handle);
     }
@@ -69,6 +75,12 @@ export class Process {
 
     getProcessPath(): string {
         return ProcessUtils.getProcessPath(this.handle);
+    }
+
+    readIntPtr(address: number): number {
+        return this.bitness === 64
+            ? ProcessUtils.readLong(this.handle, address)
+            : ProcessUtils.readInt(this.handle, address);
     }
 
     readByte(address: number): number {
@@ -88,7 +100,7 @@ export class Process {
     }
 
     readPointer(address: number): number {
-        return this.readInt(this.readInt(address));
+        return this.readIntPtr(this.readIntPtr(address));
     }
 
     readLong(address: number): number {

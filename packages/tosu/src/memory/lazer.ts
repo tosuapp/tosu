@@ -22,13 +22,21 @@ import type {
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
-export class LazerMemory extends AbstractMemory {
+type PatternData = {
+    spectatorClient: number;
+};
+
+export class LazerMemory extends AbstractMemory<PatternData> {
     private scanPatterns: ScanPatterns = {
         spectatorClient: {
             pattern:
                 '3F 00 00 80 3F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ?? 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00',
             offset: -0x16f
         }
+    };
+
+    patterns: PatternData = {
+        spectatorClient: 0
     };
 
     getScanPatterns(): ScanPatterns {

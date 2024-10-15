@@ -12,7 +12,7 @@ export class OsuInstance extends AbstractInstance {
     memory: StableMemory;
 
     constructor(pid: number) {
-        super(pid);
+        super(pid, 32);
 
         this.memory = new StableMemory(this.process, this);
     }
