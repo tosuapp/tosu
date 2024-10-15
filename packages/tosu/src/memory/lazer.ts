@@ -1,4 +1,5 @@
-import { KeyOverlay } from '@/states/gameplay';
+import { KeyOverlay, LeaderboardPlayer } from '@/states/gameplay';
+import { ITourneyManagetChatItem } from '@/states/tourney';
 import { OsuMods } from '@/utils/osuMods.types';
 import { BindingsList, ConfigList } from '@/utils/settings.types';
 
@@ -126,7 +127,7 @@ export class LazerMemory extends AbstractMemory {
         throw new Error('Lazer:keyOverlay not implemented.' + mode);
     }
 
-    hitErors(): number[] | string | Error {
+    hitErrors(): number[] | string | Error {
         throw new Error('Lazer:hitErrors not implemented.');
     }
 
@@ -149,5 +150,82 @@ export class LazerMemory extends AbstractMemory {
 
     globalPrecise(): { time: number } | Error {
         throw new Error('Lazer:globalPrecise not implemented.');
+    }
+
+    menu():
+        | string
+        | {
+              gamemode: number;
+              checksum: string;
+              filename: string;
+              plays: number;
+              artist: string;
+              artistOriginal: string;
+              title: string;
+              titleOriginal: string;
+              ar: number;
+              cs: number;
+              hp: number;
+              od: number;
+              audioFilename: string;
+              backgroundFilename: string;
+              folder: string;
+              creator: string;
+              difficulty: string;
+              mapID: number;
+              setID: number;
+              rankedStatus: number;
+              objectCount: number;
+          }
+        | Error {
+        throw new Error('Lazer:menu not implemented.');
+    }
+
+    mp3Length(): number | Error {
+        throw new Error('Lazer:mp3Length not implemented.');
+    }
+
+    tourney():
+        | string
+        | {
+              ipcState: number;
+              leftStars: number;
+              rightStars: number;
+              bestOf: number;
+              starsVisible: boolean;
+              scoreVisible: boolean;
+              firstTeamName: string;
+              secondTeamName: string;
+              firstTeamScore: number;
+              secondTeamScore: number;
+          }
+        | Error {
+        throw new Error('Lazer:tourney not implemented.');
+    }
+
+    tourneyChat(): ITourneyManagetChatItem[] | Error {
+        throw new Error('Lazer:tourneyChat not implemented.');
+    }
+
+    tourneyUser():
+        | string
+        | {
+              id: number;
+              name: string;
+              country: string;
+              accuracy: number;
+              playcount: number;
+              rankedScore: number;
+              globalRank: number;
+              pp: number;
+          }
+        | Error {
+        throw new Error('Lazer:tourneyUser not implemented.');
+    }
+
+    leaderboard():
+        | [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]]
+        | Error {
+        throw new Error('Lazer:leaderboard not implemented.');
     }
 }
