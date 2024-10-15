@@ -392,8 +392,7 @@ export default function buildBaseApi(server: Server) {
             const exists = fs.existsSync(query.path);
             if (exists) {
                 const beatmapFilePath = path.join(
-                    global.GameFolder,
-                    'Songs',
+                    global.songsFolder,
                     menu.folder,
                     menu.filename
                 );

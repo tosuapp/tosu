@@ -226,8 +226,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             set: menu.setID,
 
             mode: {
-                number: beatmapPP.Mode,
-                name: Modes[beatmapPP.Mode] || ''
+                number: beatmapPP.mode,
+                name: Modes[beatmapPP.mode] || ''
             },
 
             artist: menu.artist,
