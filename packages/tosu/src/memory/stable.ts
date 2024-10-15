@@ -23,7 +23,7 @@ import type {
 } from '@/memory/types';
 import type { ReportError, ResetReportCount } from '@/states';
 import { LeaderboardPlayer } from '@/states/gameplay';
-import type { ITourneyManagetChatItem } from '@/states/tourney';
+import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
@@ -902,7 +902,7 @@ export class StableMemory extends AbstractMemory {
     }
 
     tourneyChat(
-        messages: ITourneyManagetChatItem[],
+        messages: ITourneyManagerChatItem[],
         reportError: ReportError,
         resetCount: ResetReportCount
     ): ITourneyChat {
@@ -936,7 +936,7 @@ export class StableMemory extends AbstractMemory {
                         continue;
                     }
 
-                    const result: ITourneyManagetChatItem[] = [];
+                    const result: ITourneyManagerChatItem[] = [];
 
                     const messagesAddr = this.process.readInt(
                         channelAddr + 0x10
@@ -1107,10 +1107,10 @@ export class StableMemory extends AbstractMemory {
             return undefined;
         }
 
-        const ModsXor1 = this.process.readInt(
+        const modsXor1 = this.process.readInt(
             this.process.readInt(entry + 0x1c) + 0x8
         );
-        const ModsXor2 = this.process.readInt(
+        const modsXor2 = this.process.readInt(
             this.process.readInt(entry + 0x1c) + 0xc
         );
         return {
@@ -1120,7 +1120,7 @@ export class StableMemory extends AbstractMemory {
             score: this.process.readInt(base + 0x30),
             combo: this.process.readShort(entry + 0x94),
             maxCombo: this.process.readShort(entry + 0x68),
-            mods: ModsXor1 ^ ModsXor2,
+            mods: modsXor1 ^ modsXor2,
             h300: this.process.readShort(entry + 0x8a),
             h100: this.process.readShort(entry + 0x88),
             h50: this.process.readShort(entry + 0x8c),

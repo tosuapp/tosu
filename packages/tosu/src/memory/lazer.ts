@@ -20,7 +20,7 @@ import type {
     IUser
 } from '@/memory/types';
 import { ReportError, ResetReportCount } from '@/states';
-import { ITourneyManagetChatItem } from '@/states/tourney';
+import { ITourneyManagerChatItem } from '@/states/tourney';
 import { BindingsList, ConfigList } from '@/utils/settings.types';
 
 export class LazerMemory extends AbstractMemory {
@@ -123,7 +123,7 @@ export class LazerMemory extends AbstractMemory {
     }
 
     tourneyChat(
-        messages: ITourneyManagetChatItem[],
+        messages: ITourneyManagerChatItem[],
         reportError: ReportError,
         resetCount: ResetReportCount
     ): ITourneyChat {
