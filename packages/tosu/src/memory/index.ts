@@ -22,7 +22,6 @@ import type {
     ITourneyUser,
     IUser
 } from '@/memory/types';
-import type { ReportError, ResetReportCount } from '@/states';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
@@ -123,19 +122,9 @@ export abstract class AbstractMemory {
     abstract user(): IUser;
 
     abstract settingsPointers(): ISettingsPointers;
-    abstract configOffsets(
-        address: number,
-        list: ConfigList,
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): IOffsets;
+    abstract configOffsets(address: number, list: ConfigList): IOffsets;
 
-    abstract bindingsOffsets(
-        address: number,
-        list: BindingsList,
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): IOffsets;
+    abstract bindingsOffsets(address: number, list: BindingsList): IOffsets;
 
     abstract configValue(
         address: number,
@@ -160,11 +149,7 @@ export abstract class AbstractMemory {
 
     abstract tourney(): ITourney;
 
-    abstract tourneyChat(
-        messages: ITourneyManagerChatItem[],
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): ITourneyChat;
+    abstract tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat;
 
     abstract tourneyUser(): ITourneyUser;
 

@@ -21,7 +21,6 @@ import type {
     ITourneyUser,
     IUser
 } from '@/memory/types';
-import type { ReportError, ResetReportCount } from '@/states';
 import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
@@ -205,12 +204,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    configOffsets(
-        address: number,
-        list: ConfigList,
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): IOffsets {
+    configOffsets(address: number, list: ConfigList): IOffsets {
         try {
             const result: number[] = [];
 
@@ -228,14 +222,7 @@ export class StableMemory extends AbstractMemory {
                     }
 
                     result.push(i);
-
-                    resetCount(`ATD(configOffset)[${i}]`);
                 } catch (exc) {
-                    reportError(
-                        `ATD(configOffset)[${i}]`,
-                        10,
-                        `ATD(configOffset)[${i}] ${(exc as any).message}`
-                    );
                     wLogger.debug(exc);
                 }
             }
@@ -246,12 +233,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    bindingsOffsets(
-        address: number,
-        list: BindingsList,
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): IOffsets {
+    bindingsOffsets(address: number, list: BindingsList): IOffsets {
         try {
             const result: number[] = [];
 
@@ -266,14 +248,7 @@ export class StableMemory extends AbstractMemory {
                     }
 
                     result.push(i);
-
-                    resetCount(`ATD(bindingOffset)[${i}]`);
                 } catch (exc) {
-                    reportError(
-                        `ATD(bindingOffset)[${i}]`,
-                        10,
-                        `ATD(bindingOffset)[${i}] ${(exc as any).message}`
-                    );
                     wLogger.debug(exc);
                 }
             }
@@ -901,11 +876,7 @@ export class StableMemory extends AbstractMemory {
         }
     }
 
-    tourneyChat(
-        messages: ITourneyManagerChatItem[],
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): ITourneyChat {
+    tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat {
         try {
             if (this.ChatAreaAddr === 0) {
                 this.ChatAreaAddr = this.process.scanSync(
@@ -986,26 +957,13 @@ export class StableMemory extends AbstractMemory {
                                     .trimStart(),
                                 content
                             });
-
-                            resetCount('TMD(chatMessage)');
                         } catch (exc) {
-                            reportError(
-                                'TMD(chatMessage)',
-                                10,
-                                `TMD(chatMessage) ${(exc as any).message}`
-                            );
                             wLogger.debug(exc);
                         }
                     }
 
-                    resetCount('TMD(channelUpdate)');
                     return result;
                 } catch (exc) {
-                    reportError(
-                        'TMD(channelUpdate)',
-                        10,
-                        `TMD(channelUpdate) ${(exc as any).message}`
-                    );
                     wLogger.debug(exc);
                 }
             }
