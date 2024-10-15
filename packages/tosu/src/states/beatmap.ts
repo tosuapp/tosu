@@ -66,9 +66,9 @@ interface BeatmapPPTimings {
 export class BeatmapPP extends AbstractState {
     beatmap?: rosu.Beatmap;
     lazerBeatmap?: ParsedBeatmap;
-    PerformanceAttributes?: rosu.PerformanceAttributes;
+    performanceAttributes?: rosu.PerformanceAttributes;
 
-    Mode: number;
+    mode: number;
     clockRate: number = 1;
     beatmapContent?: string;
     strains: number[];
@@ -119,7 +119,7 @@ export class BeatmapPP extends AbstractState {
             series: [],
             xaxis: []
         };
-        this.Mode = 0;
+        this.mode = 0;
         this.realtimeBPM = 0.0;
         this.commonBPM = 0.0;
         this.minBPM = 0.0;
@@ -284,10 +284,10 @@ export class BeatmapPP extends AbstractState {
                 }
 
                 try {
-                    if (this.PerformanceAttributes)
-                        this.PerformanceAttributes.free();
+                    if (this.performanceAttributes)
+                        this.performanceAttributes.free();
                 } catch (exc) {
-                    this.PerformanceAttributes = undefined;
+                    this.performanceAttributes = undefined;
                     wLogger.debug(
                         `BPPD(updateMapMetadata) unable to free PerformanceAttributes`,
                         exc
@@ -327,7 +327,7 @@ export class BeatmapPP extends AbstractState {
                 mods: currentMods
             }).calculate(this.beatmap);
 
-            this.PerformanceAttributes = fcPerformance;
+            this.performanceAttributes = fcPerformance;
             this.clockRate = attributes.clockRate;
 
             if (config.calculatePP) {
@@ -592,7 +592,7 @@ export class BeatmapPP extends AbstractState {
 
             this.strains = oldStrains;
             this.strainsAll = resultStrains;
-            this.Mode = strains.mode;
+            this.mode = strains.mode;
 
             strains.free();
 
@@ -612,7 +612,7 @@ export class BeatmapPP extends AbstractState {
             if (
                 !this.beatmap ||
                 !this.beatmapContent ||
-                !this.PerformanceAttributes ||
+                !this.performanceAttributes ||
                 !this.lazerBeatmap
             ) {
                 return;
@@ -634,7 +634,7 @@ export class BeatmapPP extends AbstractState {
 
             const curPerformance = new rosu.Performance({
                 passedObjects: passedObjects.length
-            }).calculate(this.PerformanceAttributes);
+            }).calculate(this.performanceAttributes);
 
             const calculateTime = performance.now();
 

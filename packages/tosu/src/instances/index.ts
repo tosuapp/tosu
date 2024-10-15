@@ -6,7 +6,7 @@ import { buildResult } from '@/api/utils/buildResult';
 import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
 import { buildResult as buildResultV2Precise } from '@/api/utils/buildResultV2Precise';
 import { InstanceManager } from '@/instances/manager';
-import { AbstractMemory, PatternData } from '@/memory';
+import { AbstractMemory } from '@/memory';
 import { BassDensity } from '@/states/bassDensity';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
@@ -31,9 +31,10 @@ export interface DataRepoList {
 }
 
 export abstract class AbstractInstance {
+    abstract memory: AbstractMemory<Record<string, number>>;
+
     pid: number;
     process: Process;
-    abstract memory: AbstractMemory;
     path: string = '';
 
     isReady: boolean;
@@ -51,10 +52,10 @@ export abstract class AbstractInstance {
 
     states: Partial<DataRepoList> = {};
 
-    constructor(pid: number) {
+    constructor(pid: number, bitness: number) {
         this.pid = pid;
 
-        this.process = new Process(this.pid);
+        this.process = new Process(this.pid, bitness);
         this.path = this.process.path;
 
         this.set('settings', new Settings(this));
@@ -109,32 +110,20 @@ export abstract class AbstractInstance {
                 const pattern = patternsEntries[item.index];
 
                 this.memory.setPattern(
-                    pattern[0] as keyof PatternData,
+                    pattern[0],
                     item.address + (pattern[1].offset || 0)
                 );
             }
 
-            // TODO: fix this when PatternData will be separated between different instances
-            // if (!this.checkIsBasesValid()) {
-            //     return false;
-            // }
+            if (!this.memory.checkIsBasesValid()) {
+                return false;
+            }
 
             return true;
         } catch (error) {
             wLogger.debug(`MP(resolvePatterns)[${this.pid}]`, error);
             return false;
         }
-    }
-
-    private checkIsBasesValid(): boolean {
-        Object.entries(this.memory.patterns).map((entry) =>
-            wLogger.debug(
-                `SM(checkIsBasesValid)[${this.pid}] ${entry[0]}: ${entry[1]
-                    .toString(16)
-                    .toUpperCase()}`
-            )
-        );
-        return !Object.values(this.memory.patterns).some((base) => base === 0);
     }
 
     start(): void | Promise<void> {

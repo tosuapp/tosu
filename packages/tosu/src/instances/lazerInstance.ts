@@ -8,7 +8,7 @@ export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
 
     constructor(pid: number) {
-        super(pid);
+        super(pid, 64);
 
         this.memory = new LazerMemory(this.process, this);
     }

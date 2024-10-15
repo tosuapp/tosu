@@ -26,7 +26,26 @@ import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
-export class StableMemory extends AbstractMemory {
+export type PatternData = {
+    baseAddr: number;
+    playTimeAddr: number;
+    chatCheckerPtr: number;
+    skinDataAddr: number;
+    settingsClassAddr: number;
+    configurationAddr: number;
+    bindingsAddr: number;
+    rulesetsAddr: number;
+    canRunSlowlyAddr: number;
+    statusPtr: number;
+    menuModsPtr: number;
+    getAudioLengthPtr: number;
+    userProfilePtr: number;
+    rawLoginStatusPtr: number;
+    spectatingUserPtr: number;
+    gameTimePtr: number;
+};
+
+export class StableMemory extends AbstractMemory<PatternData> {
     private scanPatterns: ScanPatterns = {
         baseAddr: {
             pattern: 'F8 01 74 04 83 65'
@@ -88,6 +107,25 @@ export class StableMemory extends AbstractMemory {
         }
     };
 
+    patterns: PatternData = {
+        baseAddr: 0,
+        playTimeAddr: 0,
+        chatCheckerPtr: 0,
+        skinDataAddr: 0,
+        settingsClassAddr: 0,
+        configurationAddr: 0,
+        bindingsAddr: 0,
+        rulesetsAddr: 0,
+        canRunSlowlyAddr: 0,
+        statusPtr: 0,
+        menuModsPtr: 0,
+        getAudioLengthPtr: 0,
+        userProfilePtr: 0,
+        rawLoginStatusPtr: 0,
+        spectatingUserPtr: 0,
+        gameTimePtr: 0
+    };
+
     TOURNAMENT_CHAT_ENGINE = 'A1 ?? ?? ?? ?? 89 45 F0 8B D1 85 C9 75';
     ChatAreaAddr: number = 0;
 
@@ -108,6 +146,7 @@ export class StableMemory extends AbstractMemory {
         const rulesetAddr = this.process.readInt(
             this.process.readInt(this.getPattern('rulesetsAddr') - 0xb) + 0x4
         );
+
         if (rulesetAddr === 0) {
             wLogger.debug('BDD(updateState) rulesetAddr is zero');
             return null;
