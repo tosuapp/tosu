@@ -19,9 +19,8 @@ import type {
     ITourneyUser,
     IUser
 } from '@/memory/types';
-import { ReportError, ResetReportCount } from '@/states';
-import { ITourneyManagerChatItem } from '@/states/tourney';
-import { BindingsList, ConfigList } from '@/utils/settings.types';
+import type { ITourneyManagerChatItem } from '@/states/tourney';
+import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 export class LazerMemory extends AbstractMemory {
     private scanPatterns: ScanPatterns = {
@@ -48,24 +47,14 @@ export class LazerMemory extends AbstractMemory {
         throw new Error('Lazer:settingsPointers not implemented.');
     }
 
-    configOffsets(
-        address: number,
-        list: ConfigList,
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): IOffsets {
-        console.log(address, list, reportError, resetCount);
+    configOffsets(address: number, list: ConfigList): IOffsets {
+        console.log(address, list);
 
         throw new Error('Lazer:configOffsets not implemented.');
     }
 
-    bindingsOffsets(
-        address: number,
-        list: BindingsList,
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): IOffsets {
-        console.log(address, list, reportError, resetCount);
+    bindingsOffsets(address: number, list: BindingsList): IOffsets {
+        console.log(address, list);
 
         throw new Error('Lazer:bindingsOffsets not implemented.');
     }
@@ -122,12 +111,8 @@ export class LazerMemory extends AbstractMemory {
         throw new Error('Lazer:tourney not implemented.');
     }
 
-    tourneyChat(
-        messages: ITourneyManagerChatItem[],
-        reportError: ReportError,
-        resetCount: ResetReportCount
-    ): ITourneyChat {
-        console.log(messages, reportError, resetCount);
+    tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat {
+        console.log(messages);
 
         throw new Error('Lazer:tourneyChat not implemented.');
     }

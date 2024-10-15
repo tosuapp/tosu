@@ -432,9 +432,7 @@ export class Settings extends AbstractState {
             if (this.configPositions.length === 0) {
                 const offsets = this.game.memory.configOffsets(
                     configurationAddr,
-                    this.configList,
-                    this.reportError,
-                    this.resetReportCount
+                    this.configList
                 );
                 if (offsets instanceof Error) throw offsets;
 
@@ -482,9 +480,7 @@ export class Settings extends AbstractState {
             if (this.bindingPositions.length === 0) {
                 const offsets = this.game.memory.bindingsOffsets(
                     bindingConfigAddr,
-                    this.bindingList,
-                    this.reportError,
-                    this.resetReportCount
+                    this.bindingList
                 );
                 if (offsets instanceof Error) throw offsets;
 

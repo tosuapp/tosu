@@ -73,11 +73,7 @@ export class TourneyManager extends AbstractState {
             this.firstTeamScore = result.firstTeamScore;
             this.secondTeamScore = result.secondTeamScore;
 
-            const messages = this.game.memory.tourneyChat(
-                this.messages,
-                this.reportError,
-                this.resetReportCount
-            );
+            const messages = this.game.memory.tourneyChat(this.messages);
             if (messages instanceof Error) throw Error;
 
             this.messages = messages;
