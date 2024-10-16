@@ -1,13 +1,20 @@
 import { wLogger } from '@tosu/common';
 
-import { OsuInstance } from '@/objects/instanceManager/osuInstance';
+import { AbstractInstance } from '@/instances';
 
-export abstract class AbstractEntity {
+export type ReportError = (
+    id: string | number,
+    maxAmount: number,
+    ...args: any[]
+) => void;
+export type ResetReportCount = (id: string | number) => void;
+
+export abstract class AbstractState {
     errorsCount: { [key: string | number]: number } = {};
-    osuInstance: OsuInstance;
+    game: AbstractInstance;
 
-    constructor(osuInstance: OsuInstance) {
-        this.osuInstance = osuInstance;
+    constructor(game: AbstractInstance) {
+        this.game = game;
     }
 
     updateState() {

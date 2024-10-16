@@ -6,8 +6,8 @@ import path from 'path';
 import rosu from 'rosu-pp-js';
 
 import { BeatmapStrains } from '@/api/types/v1';
-import { AbstractEntity } from '@/entities/AbstractEntity';
-import { OsuInstance } from '@/objects/instanceManager/osuInstance';
+import { AbstractInstance } from '@/instances';
+import { AbstractState } from '@/states';
 import { fixDecimals } from '@/utils/converters';
 import { OsuMods } from '@/utils/osuMods.types';
 
@@ -63,12 +63,12 @@ interface BeatmapPPTimings {
     full: number;
 }
 
-export class BeatmapPPData extends AbstractEntity {
+export class BeatmapPP extends AbstractState {
     beatmap?: rosu.Beatmap;
     lazerBeatmap?: ParsedBeatmap;
-    PerformanceAttributes?: rosu.PerformanceAttributes;
+    performanceAttributes?: rosu.PerformanceAttributes;
 
-    Mode: number;
+    mode: number;
     clockRate: number = 1;
     beatmapContent?: string;
     strains: number[];
@@ -107,8 +107,8 @@ export class BeatmapPPData extends AbstractEntity {
         full: 0
     };
 
-    constructor(osuInstance: OsuInstance) {
-        super(osuInstance);
+    constructor(game: AbstractInstance) {
+        super(game);
 
         this.init();
     }
@@ -119,7 +119,7 @@ export class BeatmapPPData extends AbstractEntity {
             series: [],
             xaxis: []
         };
-        this.Mode = 0;
+        this.mode = 0;
         this.realtimeBPM = 0.0;
         this.commonBPM = 0.0;
         this.minBPM = 0.0;
@@ -246,31 +246,32 @@ export class BeatmapPPData extends AbstractEntity {
         return this.beatmap;
     }
 
-    updateMapMetadata(currentMods: number, currentMode: number) {
+    updateMapMetadata(
+        currentMods: number,
+        currentMode: number,
+        force: boolean = false
+    ) {
         try {
             const startTime = performance.now();
 
-            const { menuData, allTimesData } = this.osuInstance.getServices([
-                'menuData',
-                'allTimesData'
-            ]);
+            const { menu, global } = this.game.getServices(['menu', 'global']);
 
-            if (menuData.Folder === '') {
+            if (menu.folder === '' && !force) {
                 wLogger.debug(
                     `BPPD(updateMapMetadata) Skip osu! music theme file`,
                     {
-                        SongsFolder: allTimesData.SongsFolder,
-                        Folder: menuData.Folder,
-                        Path: menuData.Path
+                        SongsFolder: global.songsFolder,
+                        Folder: menu.folder,
+                        Path: menu.filename
                     }
                 );
                 return;
             }
 
             const mapPath = path.join(
-                allTimesData.SongsFolder,
-                menuData.Folder,
-                menuData.Path
+                global.songsFolder,
+                menu.folder,
+                menu.filename
             );
 
             try {
@@ -287,10 +288,10 @@ export class BeatmapPPData extends AbstractEntity {
                 }
 
                 try {
-                    if (this.PerformanceAttributes)
-                        this.PerformanceAttributes.free();
+                    if (this.performanceAttributes)
+                        this.performanceAttributes.free();
                 } catch (exc) {
-                    this.PerformanceAttributes = undefined;
+                    this.performanceAttributes = undefined;
                     wLogger.debug(
                         `BPPD(updateMapMetadata) unable to free PerformanceAttributes`,
                         exc
@@ -330,7 +331,7 @@ export class BeatmapPPData extends AbstractEntity {
                 mods: currentMods
             }).calculate(this.beatmap);
 
-            this.PerformanceAttributes = fcPerformance;
+            this.performanceAttributes = fcPerformance;
             this.clockRate = attributes.clockRate;
 
             if (config.calculatePP) {
@@ -377,9 +378,10 @@ export class BeatmapPPData extends AbstractEntity {
 
                 if (
                     this.lazerBeatmap.events.backgroundPath !==
-                    menuData.BackgroundFilename
+                        menu.backgroundFilename &&
+                    !force
                 ) {
-                    menuData.BackgroundFilename =
+                    menu.backgroundFilename =
                         this.lazerBeatmap.events.backgroundPath || '';
                 }
 
@@ -461,7 +463,7 @@ export class BeatmapPPData extends AbstractEntity {
         if (this.beatmap === undefined) return;
         try {
             const startTime = performance.now();
-            const { menuData } = this.osuInstance.getServices(['menuData']);
+            const { menu } = this.game.getServices(['menu']);
 
             const resultStrains: BeatmapStrains = {
                 series: [],
@@ -496,7 +498,7 @@ export class BeatmapPPData extends AbstractEntity {
             const firstObjectTime = this.timings.firstObj / this.clockRate;
             const lastObjectTime =
                 firstObjectTime + strainsAmount * sectionOffsetTime;
-            const mp3LengthTime = menuData.MP3Length / this.clockRate;
+            const mp3LengthTime = menu.mp3Length / this.clockRate;
 
             const LEFT_OFFSET = Math.floor(firstObjectTime / sectionOffsetTime);
             const RIGHT_OFFSET =
@@ -595,7 +597,7 @@ export class BeatmapPPData extends AbstractEntity {
 
             this.strains = oldStrains;
             this.strainsAll = resultStrains;
-            this.Mode = strains.mode;
+            this.mode = strains.mode;
 
             strains.free();
 
@@ -615,7 +617,7 @@ export class BeatmapPPData extends AbstractEntity {
             if (
                 !this.beatmap ||
                 !this.beatmapContent ||
-                !this.PerformanceAttributes ||
+                !this.performanceAttributes ||
                 !this.lazerBeatmap
             ) {
                 return;
@@ -623,9 +625,7 @@ export class BeatmapPPData extends AbstractEntity {
 
             const startTime = performance.now();
 
-            const { allTimesData } = this.osuInstance.getServices([
-                'allTimesData'
-            ]);
+            const { global } = this.game.getServices(['global']);
 
             const beatmapParseTime = performance.now();
             const totalTime = (beatmapParseTime - startTime).toFixed(2);
@@ -634,12 +634,12 @@ export class BeatmapPPData extends AbstractEntity {
             );
 
             const passedObjects = this.lazerBeatmap.hitObjects.filter(
-                (r) => r.startTime <= allTimesData.PlayTime
+                (r) => r.startTime <= global.playTime
             );
 
             const curPerformance = new rosu.Performance({
                 passedObjects: passedObjects.length
-            }).calculate(this.PerformanceAttributes);
+            }).calculate(this.performanceAttributes);
 
             const calculateTime = performance.now();
 
