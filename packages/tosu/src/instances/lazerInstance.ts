@@ -62,7 +62,7 @@ export class LazerInstance extends AbstractInstance {
                 switch (global.status) {
                     case 0: // anything not in the map
                         break;
-                    case 1: // is playing (after player initialized)
+                    case 2: // is playing (after player initialized)
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
