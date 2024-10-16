@@ -89,18 +89,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const screenStack = this.screenStack();
 
         const stack = this.process.readIntPtr(screenStack + 0x320);
-        const items = this.process.readIntPtr(stack + 0x8);
+        const count = this.process.readInt(stack + 0x10);
 
-        // TODO: very dirty check doing it like that just for a quick test
-        const item1 = this.process.readIntPtr(items + 0x30);
-        const item2 = this.process.readIntPtr(items + 0x38);
-
-        if (item1 && this.checkIfPlayer(item1)) {
-            return item1;
+        if (count <= 4) {
+            return 0;
         }
 
-        if (item2 && this.checkIfPlayer(item2)) {
-            return item2;
+        const items = this.process.readIntPtr(stack + 0x8);
+        const last = this.process.readIntPtr(items + 0x10 + 0x8 * (count - 1));
+
+        if (last && this.checkIfPlayer(last)) {
+            return last;
         }
 
         return 0;
@@ -212,6 +211,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!hash) {
             return '';
         }
+
         return `${hash[0]}\\${hash.substring(0, 2)}\\${hash}`;
     }
 
