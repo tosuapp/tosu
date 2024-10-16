@@ -91,9 +91,9 @@ export class GamePlayData extends AbstractEntity {
             mode: this.Mode,
             hits: {
                 300: this.Hit300,
-                geki: 0,
+                geki: this.HitGeki,
                 100: this.Hit100,
-                katu: 0,
+                katu: this.HitKatu,
                 50: this.Hit50,
                 0: this.HitMiss
             }
@@ -512,9 +512,9 @@ export class GamePlayData extends AbstractEntity {
             mode: this.Mode,
             hits: {
                 300: this.Hit300,
-                geki: 0,
+                geki: this.HitGeki,
                 100: this.Hit100,
-                katu: 0,
+                katu: this.HitKatu,
                 50: this.Hit50,
                 0: this.HitMiss
             }
@@ -525,9 +525,9 @@ export class GamePlayData extends AbstractEntity {
             mode: this.Mode,
             hits: {
                 300: this.Hit300 + remaining,
-                geki: 0,
+                geki: this.HitGeki,
                 100: this.Hit100,
-                katu: 0,
+                katu: this.HitKatu,
                 50: this.Hit50,
                 0: this.HitMiss
             }
