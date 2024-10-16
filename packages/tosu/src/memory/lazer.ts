@@ -76,6 +76,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(this.gameBase() + 0x5f0);
     }
 
+    // TODO: works for now but consider a better way of checking if it's player
     private checkIfPlayer(address: number) {
         const b1 = this.process.readByte(address + 0x318) === 1;
         const b2 = this.process.readByte(address + 0x319) === 1;
@@ -105,16 +106,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return 0;
     }
 
-    private currentScore() {
-        const player = this.player();
+    private currentScore(player: number) {
         if (!player) {
             return 0;
         }
         return this.process.readIntPtr(player + 0x470);
     }
 
-    private scoreInfo() {
-        const currentScore = this.currentScore();
+    private scoreInfo(player: number) {
+        const currentScore = this.currentScore(player);
 
         if (!currentScore) {
             return 0;
@@ -290,24 +290,29 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     gameplay(): IGameplay {
-        const scoreInfo = this.scoreInfo();
+        const player = this.player();
+        const scoreInfo = this.scoreInfo(player);
 
         if (!scoreInfo) {
             return 'No ScoreInfo found';
         }
-
-        const mods = getOsuModsNumber(this.mods(scoreInfo).join(''));
-
-        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
-        const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
-        const mode = this.process.readInt(ruleset + 0x30);
-        const username = this.process.readSharpStringPtr(realmUser + 0x18);
 
         const statistics = this.process.readIntPtr(scoreInfo + 0x78);
 
         if (!statistics) {
             return 'No Statistics';
         }
+
+        const healthProcessor = this.process.readIntPtr(player + 0x440);
+        const healthBindable = this.process.readIntPtr(healthProcessor + 0x230);
+        const health = this.process.readDouble(healthBindable + 0x30); // 0..1
+
+        const mods = getOsuModsNumber(this.mods(scoreInfo));
+
+        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
+        const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
+        const mode = this.process.readInt(ruleset + 0x30);
+        const username = this.process.readSharpStringPtr(realmUser + 0x18);
 
         const statisticsEntries = this.process.readIntPtr(statistics + 0x10);
 
@@ -325,14 +330,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         return {
             address: 0,
-            retries: 0,
+            retries: this.process.readInt(player + 0x38c),
             playerName: username,
             mods,
             mode,
-            score: this.process.readDouble(scoreInfo + 0x98),
-            playerHPSmooth: 100,
-            playerHP: 100,
-            accuracy: this.process.readDouble(scoreInfo + 0xa8),
+            score: this.process.readLong(scoreInfo + 0x98),
+            playerHPSmooth: health * 200,
+            playerHP: health * 200,
+            accuracy: this.process.readDouble(scoreInfo + 0xa8) * 100,
             hit100: okCount,
             hit300: greatCount,
             hit50: mehCount,
@@ -365,12 +370,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     global(): IGlobal {
         const filesFolder = path.join(this.basePath(), 'files');
 
-        const isPlaying = !!this.scoreInfo();
+        const isPlaying = this.player() !== 0;
 
         let status = 0;
 
         if (isPlaying) {
-            status = 1;
+            status = 2;
         }
 
         return {
