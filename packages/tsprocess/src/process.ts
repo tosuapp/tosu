@@ -124,11 +124,13 @@ export class Process {
     }
 
     readSharpStringPtr(address: number): string {
-        return ProcessUtils.readCSharpString(
-            this.handle,
-            this.readIntPtr(address),
-            this.bitness
-        );
+        const addr = this.readIntPtr(address);
+
+        if (!addr) {
+            return '';
+        }
+
+        return ProcessUtils.readCSharpString(this.handle, addr, this.bitness);
     }
 
     readSharpDictionary(address: number): number[] {
