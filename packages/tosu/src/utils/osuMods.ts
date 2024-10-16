@@ -35,6 +35,15 @@ const MODS_MAP: { [K in OsuMods]: string } = {
     [OsuMods.FadeIn]: ''
 };
 
+const MODS_MAP_REVERSED: { [x: string]: OsuMods } = Object.entries(
+    MODS_MAP
+).reduce(
+    (_, [k, v]) => ({
+        [v]: Number(k) as OsuMods
+    }),
+    {}
+);
+
 const MODS_ORDER: { [key: string]: number } = {
     nf: 0,
     ez: 1,
@@ -80,4 +89,23 @@ export const getOsuModsString = (mods: OsuMods): string => {
     }
 
     return converted;
+};
+
+/**
+ *
+ * @param {string} modString - A string representation of osu! mods
+ * @returns {OsuMods} - The corresponding OsuMods number
+ */
+export const getOsuModsNumber = (modString: string): OsuMods => {
+    let mods: OsuMods = 0;
+
+    const modNames = modString.split('').map((mod) => mod.toUpperCase());
+    modNames.forEach((mod) => {
+        const modValue = MODS_MAP_REVERSED[mod];
+        if (modValue !== undefined) {
+            mods += modValue;
+        }
+    });
+
+    return mods;
 };

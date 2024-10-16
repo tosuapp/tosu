@@ -22,11 +22,16 @@ import type {
     IUser
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
+import { getOsuModsNumber } from '@/utils/osuMods';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 type LazerPatternData = {
     spectatorClient: number;
 };
+
+interface ModAcronym {
+    acronym: string;
+}
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private scanPatterns: ScanPatterns = {
@@ -65,6 +70,93 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return this.gameBaseAddress;
+    }
+
+    private screenStack() {
+        return this.process.readIntPtr(this.gameBase() + 0x5f0);
+    }
+
+    private checkIfPlayer(address: number) {
+        const b1 = this.process.readByte(address + 0x318) === 1;
+        const b2 = this.process.readByte(address + 0x319) === 1;
+        const b3 = this.process.readIntPtr(address + 0x360) === 0;
+        const b4 = this.process.readIntPtr(address + 0x218) === 0;
+
+        return b1 && b2 && b3 && b4;
+    }
+
+    private player() {
+        const screenStack = this.screenStack();
+
+        const stack = this.process.readIntPtr(screenStack + 0x320);
+        const items = this.process.readIntPtr(stack + 0x8);
+
+        // TODO: very dirty check doing it like that just for a quick test
+        const item1 = this.process.readIntPtr(items + 0x30);
+        const item2 = this.process.readIntPtr(items + 0x38);
+
+        if (item1 && this.checkIfPlayer(item1)) {
+            return item1;
+        }
+
+        if (item2 && this.checkIfPlayer(item2)) {
+            return item2;
+        }
+
+        return 0;
+    }
+
+    private currentScore() {
+        const player = this.player();
+        if (!player) {
+            return 0;
+        }
+        return this.process.readIntPtr(player + 0x470);
+    }
+
+    private scoreInfo() {
+        const currentScore = this.currentScore();
+
+        if (!currentScore) {
+            return 0;
+        }
+
+        return this.process.readIntPtr(currentScore + 0x8);
+    }
+
+    // TODO:
+    // private modMapping() {
+    //     const availableModsDict = this.process.readIntPtr(
+    //         this.process.readIntPtr(this.gameBase() + 0x468) + 0x20
+    //     );
+    //     const entries = this.process.readIntPtr(availableModsDict + 0x10);
+
+    //     const diffReducingMods = this.process.readIntPtr(entries + 0x10);
+    //     const diffReducingModsItems = this.process.readIntPtr(
+    //         diffReducingMods + 0x8
+    //     );
+
+    //     const diffIncreasingMods = this.process.readIntPtr(entries + 0x18);
+
+    //     // automation
+    //     // conversion
+    //     // fun
+    // }
+
+    private mods(scoreInfo: number): string[] {
+        if (!scoreInfo) {
+            return [];
+        }
+
+        const mods = this.process.readSharpStringPtr(scoreInfo + 0x50);
+
+        if (mods.length === 0) {
+            return [];
+        }
+
+        const modAcronyms = JSON.parse(mods) as ModAcronym[];
+
+        return modAcronyms.map((x) => x.acronym);
     }
 
     private beatmapClock() {
@@ -117,6 +209,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private toLazerPath(hash: string) {
+        if (!hash) {
+            return '';
+        }
         return `${hash[0]}\\${hash.substring(0, 2)}\\${hash}`;
     }
 
@@ -195,24 +290,57 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     gameplay(): IGameplay {
+        const scoreInfo = this.scoreInfo();
+
+        if (!scoreInfo) {
+            return 'No ScoreInfo found';
+        }
+
+        const mods = getOsuModsNumber(this.mods(scoreInfo).join(''));
+
+        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
+        const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
+        const mode = this.process.readInt(ruleset + 0x30);
+        const username = this.process.readSharpStringPtr(realmUser + 0x18);
+
+        const statistics = this.process.readIntPtr(scoreInfo + 0x78);
+
+        if (!statistics) {
+            return 'No Statistics';
+        }
+
+        const statisticsEntries = this.process.readIntPtr(statistics + 0x10);
+
+        let missCount = 0;
+        let mehCount = 0;
+        let okCount = 0;
+        let greatCount = 0;
+
+        if (statisticsEntries) {
+            missCount = this.process.readInt(statisticsEntries + 0x2c);
+            mehCount = this.process.readInt(statisticsEntries + 0x3c);
+            okCount = this.process.readInt(statisticsEntries + 0x4c);
+            greatCount = this.process.readInt(statisticsEntries + 0x6c);
+        }
+
         return {
             address: 0,
             retries: 0,
-            playerName: '',
-            mods: 0,
-            mode: 0,
-            score: 0,
-            playerHPSmooth: 0,
-            playerHP: 0,
-            accuracy: 0,
-            hit100: 0,
-            hit300: 0,
-            hit50: 0,
+            playerName: username,
+            mods,
+            mode,
+            score: this.process.readDouble(scoreInfo + 0x98),
+            playerHPSmooth: 100,
+            playerHP: 100,
+            accuracy: this.process.readDouble(scoreInfo + 0xa8),
+            hit100: okCount,
+            hit300: greatCount,
+            hit50: mehCount,
             hitGeki: 0,
             hitKatu: 0,
-            hitMiss: 0,
-            combo: 0,
-            maxCombo: 0
+            hitMiss: missCount,
+            combo: this.process.readInt(scoreInfo + 0xcc),
+            maxCombo: this.process.readInt(scoreInfo + 0xc4)
         };
     }
 
@@ -237,12 +365,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     global(): IGlobal {
         const filesFolder = path.join(this.basePath(), 'files');
 
+        const isPlaying = !!this.scoreInfo();
+
+        let status = 0;
+
+        if (isPlaying) {
+            status = 1;
+        }
+
         return {
             isWatchingReplay: 0,
             isReplayUiHidden: false,
             showInterface: false,
             chatStatus: 0,
-            status: 0,
+            status,
             gameTime: 0,
             menuMods: 0,
             skinFolder: filesFolder,
@@ -327,7 +463,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     leaderboard(rulesetAddr: number): ILeaderboard {
-        console.log(rulesetAddr);
-        throw new Error('Lazer:tourneyUser not implemented.');
+        return [!rulesetAddr, undefined, []];
     }
 }

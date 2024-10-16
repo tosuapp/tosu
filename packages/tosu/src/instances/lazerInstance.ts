@@ -29,7 +29,7 @@ export class LazerInstance extends AbstractInstance {
     async regularDataLoop(): Promise<void> {
         wLogger.debug('SM(lazer:startDataLoop) starting');
 
-        const { global, menu } = this.getServices([
+        const { global, menu, beatmapPP, gameplay } = this.getServices([
             'global',
             'menu',
             'bassDensity',
@@ -51,7 +51,34 @@ export class LazerInstance extends AbstractInstance {
                     global.setSongsFolder(global.memorySongsFolder);
                 }
 
-                // const currentState = `${menu.checksum}:${currentMode}:${currentMods}`;
+                const currentState = `${menu.checksum}`;
+
+                if (global.gameFolder && this.previousState !== currentState) {
+                    beatmapPP.updateMapMetadata(0, 0, true);
+
+                    this.previousState = currentState;
+                }
+
+                switch (global.status) {
+                    case 0: // anything not in the map
+                        break;
+                    case 1: // is playing (after player initialized)
+                        // Reset gameplay data on retry
+                        if (this.previousTime > global.playTime) {
+                            gameplay.init(true);
+                            beatmapPP.resetAttributes();
+                        }
+
+                        // reset before first object
+                        if (global.playTime < beatmapPP.timings.firstObj) {
+                            gameplay.resetQuick();
+                        }
+
+                        this.previousTime = global.playTime;
+
+                        gameplay.updateState();
+                        break;
+                }
 
                 await sleep(config.pollRate);
             } catch (exc) {
