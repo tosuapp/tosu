@@ -29,17 +29,18 @@ export class LazerInstance extends AbstractInstance {
     async regularDataLoop(): Promise<void> {
         wLogger.debug('SM(lazer:startDataLoop) starting');
 
-        const { global, menu, beatmapPP, gameplay } = this.getServices([
-            'global',
-            'menu',
-            'bassDensity',
-            'beatmapPP',
-            'gameplay',
-            'resultScreen',
-            'settings',
-            'tourneyManager',
-            'user'
-        ]);
+        const { global, menu, beatmapPP, gameplay, resultScreen } =
+            this.getServices([
+                'global',
+                'menu',
+                'bassDensity',
+                'beatmapPP',
+                'gameplay',
+                'resultScreen',
+                'settings',
+                'tourneyManager',
+                'user'
+            ]);
 
         while (!this.isDestroyed) {
             try {
@@ -51,7 +52,25 @@ export class LazerInstance extends AbstractInstance {
                     global.setSongsFolder(global.memorySongsFolder);
                 }
 
-                const currentState = `${menu.checksum}`;
+                if (global.status === 7) {
+                    resultScreen.updateState();
+                }
+
+                const currentMods =
+                    global.status === 2
+                        ? gameplay.mods
+                        : global.status === 7
+                          ? resultScreen.mods
+                          : global.menuMods;
+
+                const currentMode =
+                    global.status === 2
+                        ? gameplay.mode
+                        : global.status === 7
+                          ? resultScreen.mode
+                          : menu.gamemode;
+
+                const currentState = `${menu.checksum}:${currentMode}:${currentMods}`;
 
                 if (global.gameFolder && this.previousState !== currentState) {
                     beatmapPP.updateMapMetadata(0, 0, true);
@@ -61,8 +80,11 @@ export class LazerInstance extends AbstractInstance {
 
                 switch (global.status) {
                     case 0: // anything not in the map
+                        if (resultScreen.playerName) {
+                            resultScreen.init();
+                        }
                         break;
-                    case 2: // is playing (after player initialized)
+                    case 2: // is playing (after player is loaded)
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
@@ -77,6 +99,9 @@ export class LazerInstance extends AbstractInstance {
                         this.previousTime = global.playTime;
 
                         gameplay.updateState();
+                        break;
+                    case 7: // result screen
+                        resultScreen.updatePerformance();
                         break;
                 }
 
