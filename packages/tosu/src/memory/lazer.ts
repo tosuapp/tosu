@@ -187,14 +187,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(this.gameBase() + 0x5f0);
     }
 
-    // TODO: works for now but consider a better way of checking if it's player
     private checkIfPlayer(address: number) {
-        const b1 = this.process.readByte(address + 0x318) === 1;
-        const b2 = this.process.readByte(address + 0x319) === 1;
-        const b3 = this.process.readIntPtr(address + 0x360) === 0;
-        const b4 = this.process.readIntPtr(address + 0x218) === 0;
-
-        return b1 && b2 && b3 && b4;
+        return this.process.readIntPtr(address + 0x3f8) === this.gameBase();
     }
 
     private player() {
