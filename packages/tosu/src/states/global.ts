@@ -3,7 +3,7 @@ import { wLogger } from '@tosu/common';
 import { AbstractState } from '@/states';
 
 export class Global extends AbstractState {
-    isWatchingReplay: number = 0;
+    isWatchingReplay: boolean = false;
     isReplayUiHidden: boolean = false;
     showInterface: boolean = false;
 

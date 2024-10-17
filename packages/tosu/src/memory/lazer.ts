@@ -23,6 +23,7 @@ import type {
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { getOsuModsNumber } from '@/utils/osuMods';
+import { OsuMods } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 type LazerPatternData = {
@@ -97,6 +98,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     };
 
     private modsInitialized = false;
+
+    private menuMods: OsuMods = 0;
 
     private modMapping: ModMapping = {
         EZ: { type: 0 },
@@ -610,21 +613,30 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const selectedModsBindable = this.process.readIntPtr(
             this.gameBase() + 0x460
         );
-        const selectedMods = this.process.readIntPtr(
-            selectedModsBindable + 0x20
-        );
-        const selectedModsItems = this.readListItems(selectedMods);
 
-        const modAcronyms: string[] = [];
+        const selectedModsIsDisabled =
+            this.process.readByte(selectedModsBindable + 0x50) === 1;
 
-        for (let i = 0; i < selectedModsItems.length; i++) {
-            const type = this.process.readIntPtr(selectedModsItems[i]);
+        if (!selectedModsIsDisabled) {
+            const selectedMods = this.process.readIntPtr(
+                selectedModsBindable + 0x20
+            );
 
-            const mod = this.typeToMod[type];
+            const selectedModsItems = this.readListItems(selectedMods);
 
-            if (mod) {
-                modAcronyms.push(mod);
+            const modAcronyms: string[] = [];
+
+            for (let i = 0; i < selectedModsItems.length; i++) {
+                const type = this.process.readIntPtr(selectedModsItems[i]);
+
+                const mod = this.typeToMod[type];
+
+                if (mod) {
+                    modAcronyms.push(mod);
+                }
             }
+
+            this.menuMods = getOsuModsNumber(modAcronyms);
         }
 
         const filesFolder = path.join(this.basePath(), 'files');
@@ -637,13 +649,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return {
-            isWatchingReplay: 0,
+            isWatchingReplay: selectedModsIsDisabled,
             isReplayUiHidden: false,
             showInterface: false,
             chatStatus: 0,
             status,
             gameTime: 0,
-            menuMods: getOsuModsNumber(modAcronyms),
+            menuMods: this.menuMods,
             skinFolder: filesFolder,
             memorySongsFolder: filesFolder
         };

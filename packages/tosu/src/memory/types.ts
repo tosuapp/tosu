@@ -87,7 +87,7 @@ export type IHitErrors = number[] | string | Error;
 
 export type IGlobal =
     | {
-          isWatchingReplay: number;
+          isWatchingReplay: boolean;
           isReplayUiHidden: boolean;
 
           showInterface: boolean;

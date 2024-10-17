@@ -682,9 +682,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const chatStatus = this.process.readByte(
                 this.process.readInt(chatCheckerPtr)
             );
-            const isWatchingReplay = this.process.readByte(
-                this.process.readInt(canRunSlowlyAddr + 0x46)
-            );
+            const isWatchingReplay =
+                this.process.readByte(
+                    this.process.readInt(canRunSlowlyAddr + 0x46)
+                ) === 1;
             const gameTime = this.process.readPointer(gameTimePtr);
             const memorySongsFolder = this.process.readSharpString(
                 this.process.readInt(
