@@ -22,6 +22,7 @@ import type {
     IUser
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
+import { netDateBinaryToDate } from '@/utils/converters';
 import { getOsuModsNumber } from '@/utils/osuMods';
 import { OsuMods } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
@@ -36,6 +37,13 @@ interface ModAcronym {
 
 interface ModItem {
     type: number;
+}
+
+interface Statistics {
+    great: number;
+    ok: number;
+    meh: 0;
+    miss: 5;
 }
 
 type ModMapping = {
@@ -98,8 +106,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     };
 
     private modsInitialized = false;
-
     private menuMods: OsuMods = 0;
+
+    private currentScreen: number = 0;
 
     private modMapping: ModMapping = {
         EZ: { type: 0 },
@@ -191,21 +200,26 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(address + 0x3f8) === this.gameBase();
     }
 
-    private player() {
+    private checkIfResultScreen(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x3b8) ===
+            this.process.readIntPtr(this.gameBase() + 0x438)
+        );
+    }
+
+    private getCurrentScreen() {
         const screenStack = this.screenStack();
 
         const stack = this.process.readIntPtr(screenStack + 0x320);
         const count = this.process.readInt(stack + 0x10);
 
-        if (count <= 4) {
-            return 0;
-        }
-
         const items = this.process.readIntPtr(stack + 0x8);
-        const last = this.process.readIntPtr(items + 0x10 + 0x8 * (count - 1));
+        return this.process.readIntPtr(items + 0x10 + 0x8 * (count - 1));
+    }
 
-        if (last && this.checkIfPlayer(last)) {
-            return last;
+    private player() {
+        if (this.currentScreen && this.checkIfPlayer(this.currentScreen)) {
+            return this.currentScreen;
         }
 
         return 0;
@@ -447,6 +461,72 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return `${hash[0]}\\${hash.substring(0, 2)}\\${hash}`;
     }
 
+    private readScore(
+        scoreInfo: number,
+        health: number = 0,
+        retries: number = 0
+    ): IGameplay {
+        const statistics = this.process.readIntPtr(scoreInfo + 0x78);
+
+        if (!statistics) {
+            return 'No Statistics';
+        }
+
+        const mods = getOsuModsNumber(this.mods(scoreInfo));
+
+        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
+        const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
+        const mode = this.process.readInt(ruleset + 0x30);
+        const username = this.process.readSharpStringPtr(realmUser + 0x18);
+
+        const statisticsCount = this.process.readInt(statistics + 0x38);
+        const statisticsEntries = this.process.readIntPtr(statistics + 0x10);
+
+        let missCount = 0;
+        let mehCount = 0;
+        let okCount = 0;
+        let greatCount = 0;
+
+        if (statisticsEntries) {
+            // TODO: support all modes
+            if (statisticsCount === 4) {
+                const statistics: Statistics = JSON.parse(
+                    this.process.readSharpStringPtr(scoreInfo + 0x58)
+                );
+
+                missCount = statistics.miss;
+                mehCount = statistics.meh;
+                okCount = statistics.ok;
+                greatCount = statistics.great;
+            } else {
+                missCount = this.process.readInt(statisticsEntries + 0x2c);
+                mehCount = this.process.readInt(statisticsEntries + 0x3c);
+                okCount = this.process.readInt(statisticsEntries + 0x4c);
+                greatCount = this.process.readInt(statisticsEntries + 0x6c);
+            }
+        }
+
+        return {
+            address: 0,
+            retries,
+            playerName: username,
+            mods,
+            mode,
+            score: this.process.readLong(scoreInfo + 0x98),
+            playerHPSmooth: health,
+            playerHP: health,
+            accuracy: this.process.readDouble(scoreInfo + 0xa8) * 100,
+            hit100: okCount,
+            hit300: greatCount,
+            hit50: mehCount,
+            hitGeki: 0,
+            hitKatu: 0,
+            hitMiss: missCount,
+            combo: this.process.readInt(scoreInfo + 0xcc),
+            maxCombo: this.process.readInt(scoreInfo + 0xc4)
+        };
+    }
+
     getScanPatterns(): ScanPatterns {
         return this.scanPatterns;
     }
@@ -504,20 +584,41 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     resultScreen(): IResultScreen {
+        const scoreInfo = this.process.readIntPtr(this.currentScreen + 0x398);
+
+        const score = this.readScore(scoreInfo);
+
+        if (score instanceof Error) throw score;
+        if (typeof score === 'string') {
+            return 'not-ready';
+        }
+
+        const onlineId = Math.max(
+            this.process.readLong(this.currentScreen + 0xb0),
+            this.process.readLong(this.currentScreen + 0xb8)
+        );
+
+        const scoreDate = scoreInfo + 0x100;
+
+        const date = netDateBinaryToDate(
+            this.process.readInt(scoreDate + 0x4),
+            this.process.readInt(scoreDate)
+        ).toISOString();
+
         return {
-            onlineId: 0,
-            playerName: '',
-            mods: 0,
-            mode: 0,
-            maxCombo: 0,
-            score: 0,
-            hit100: 0,
-            hit300: 0,
-            hit50: 0,
-            hitGeki: 0,
-            hitKatu: 0,
-            hitMiss: 0,
-            date: ''
+            onlineId,
+            playerName: score.playerName,
+            mods: score.mods,
+            mode: score.mode,
+            maxCombo: score.maxCombo,
+            score: score.score,
+            hit100: score.hit100,
+            hit300: score.hit300,
+            hit50: score.hit50,
+            hitGeki: score.hitGeki,
+            hitKatu: score.hitKatu,
+            hitMiss: score.hitMiss,
+            date
         };
     }
 
@@ -525,60 +626,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const player = this.player();
         const scoreInfo = this.scoreInfo(player);
 
-        if (!scoreInfo) {
-            return 'No ScoreInfo found';
-        }
-
-        const statistics = this.process.readIntPtr(scoreInfo + 0x78);
-
-        if (!statistics) {
-            return 'No Statistics';
-        }
-
         const healthProcessor = this.process.readIntPtr(player + 0x440);
         const healthBindable = this.process.readIntPtr(healthProcessor + 0x230);
         const health = this.process.readDouble(healthBindable + 0x30); // 0..1
 
-        const mods = getOsuModsNumber(this.mods(scoreInfo));
-
-        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
-        const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
-        const mode = this.process.readInt(ruleset + 0x30);
-        const username = this.process.readSharpStringPtr(realmUser + 0x18);
-
-        const statisticsEntries = this.process.readIntPtr(statistics + 0x10);
-
-        let missCount = 0;
-        let mehCount = 0;
-        let okCount = 0;
-        let greatCount = 0;
-
-        if (statisticsEntries) {
-            missCount = this.process.readInt(statisticsEntries + 0x2c);
-            mehCount = this.process.readInt(statisticsEntries + 0x3c);
-            okCount = this.process.readInt(statisticsEntries + 0x4c);
-            greatCount = this.process.readInt(statisticsEntries + 0x6c);
-        }
-
-        return {
-            address: 0,
-            retries: this.process.readInt(player + 0x38c),
-            playerName: username,
-            mods,
-            mode,
-            score: this.process.readLong(scoreInfo + 0x98),
-            playerHPSmooth: health * 200,
-            playerHP: health * 200,
-            accuracy: this.process.readDouble(scoreInfo + 0xa8) * 100,
-            hit100: okCount,
-            hit300: greatCount,
-            hit50: mehCount,
-            hitGeki: 0,
-            hitKatu: 0,
-            hitMiss: missCount,
-            combo: this.process.readInt(scoreInfo + 0xcc),
-            maxCombo: this.process.readInt(scoreInfo + 0xc4)
-        };
+        return this.readScore(
+            scoreInfo,
+            health,
+            this.process.readInt(player + 0x38c)
+        );
     }
 
     keyOverlay(mode: number): IKeyOverlay {
@@ -603,6 +659,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!this.modsInitialized) {
             this.initModMapping();
         }
+
+        this.currentScreen = this.getCurrentScreen();
 
         const selectedModsBindable = this.process.readIntPtr(
             this.gameBase() + 0x460
@@ -635,11 +693,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const filesFolder = path.join(this.basePath(), 'files');
         const isPlaying = this.player() !== 0;
+        const isResultScreen = this.checkIfResultScreen(this.currentScreen);
 
         let status = 0;
 
         if (isPlaying) {
             status = 2;
+        } else if (isResultScreen) {
+            status = 7;
         }
 
         return {

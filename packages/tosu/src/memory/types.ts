@@ -59,28 +59,27 @@ export type IResultScreen =
     | string
     | Error;
 
-export type IGameplay =
-    | {
-          address: number;
-          retries: number;
-          playerName: string;
-          mods: OsuMods;
-          mode: number;
-          score: number;
-          playerHPSmooth: number;
-          playerHP: number;
-          accuracy: number;
-          hit100: number;
-          hit300: number;
-          hit50: number;
-          hitGeki: number;
-          hitKatu: number;
-          hitMiss: number;
-          combo: number;
-          maxCombo: number;
-      }
-    | string
-    | Error;
+export type IScore = {
+    address: number;
+    retries: number;
+    playerName: string;
+    mods: OsuMods;
+    mode: number;
+    score: number;
+    playerHPSmooth: number;
+    playerHP: number;
+    accuracy: number;
+    hit100: number;
+    hit300: number;
+    hit50: number;
+    hitGeki: number;
+    hitKatu: number;
+    hitMiss: number;
+    combo: number;
+    maxCombo: number;
+};
+
+export type IGameplay = IScore | string | Error;
 
 export type IKeyOverlay = KeyOverlay | string | Error;
 export type IHitErrors = number[] | string | Error;
