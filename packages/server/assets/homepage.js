@@ -631,21 +631,33 @@ const showSettings = {
     for (let i = 0; i < props.settings.length; i++) {
       const setting = props.settings[i];
       let value = props.values[setting.uniqueID] ?? setting.value;
+
+
       if (setting.type == "commands") {
         setting.options.forEach(r => {
           if (r.values) r.values = r.values.filter(r => r !== '' && r != null);
         });
+
+
+        setting.value.forEach((command, cmd_ind) => {
+          Object.entries(command).forEach(entry => {
+            const custom_value = value[cmd_ind][entry[0]];
+            if (custom_value == null) return;
+            if (entry[1] == custom_value) return;
+
+
+            setting.value[cmd_ind][entry[0]] = custom_value;
+          });
+        });
+
 
         if (!Array.isArray(value)) value = [];
         value.push({});
       };
 
 
-      if (props.values[setting.uniqueID]) {
-        value = props.values[setting.uniqueID];
-      }
-
-      setting.value = value;
+      if (setting.type != "commands")
+        setting.value = value;
       settings.value.push(setting);
     };
 
