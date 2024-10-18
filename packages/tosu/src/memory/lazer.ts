@@ -810,8 +810,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             K1Count: keyCounters[0].count,
             K2Pressed: keyCounters[1].isPressed,
             K2Count: keyCounters[1].count,
-            M1Pressed: false,
-            M1Count: 0,
+            M1Pressed: keyCounters[2].isPressed,
+            M1Count: keyCounters[2].count,
             M2Pressed: false,
             M2Count: 0
         };
