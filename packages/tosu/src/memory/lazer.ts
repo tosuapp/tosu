@@ -675,12 +675,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const scoreInfo = this.scoreInfo(player);
 
         const healthProcessor = this.process.readIntPtr(player + 0x440);
+
         const healthBindable = this.process.readIntPtr(healthProcessor + 0x230);
-        const health = this.process.readDouble(healthBindable + 0x30); // 0..1
+        const health = this.process.readDouble(healthBindable + 0x40); // 0..1
 
         return this.readScore(
             scoreInfo,
-            health,
+            health * 200,
             this.process.readInt(player + 0x38c)
         );
     }
