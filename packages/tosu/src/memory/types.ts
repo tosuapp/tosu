@@ -60,7 +60,6 @@ export type IResultScreen =
     | Error;
 
 export type IScore = {
-    address: number;
     retries: number;
     playerName: string;
     mods: OsuMods;
