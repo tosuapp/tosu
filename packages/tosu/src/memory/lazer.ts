@@ -21,6 +21,7 @@ import type {
     ITourneyUser,
     IUser
 } from '@/memory/types';
+import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { getOsuModsNumber } from '@/utils/osuMods';
@@ -42,8 +43,8 @@ interface ModItem {
 interface Statistics {
     great: number;
     ok: number;
-    meh: 0;
-    miss: 5;
+    meh: number;
+    miss: number;
 }
 
 type ModMapping = {
@@ -109,6 +110,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private menuMods: OsuMods = 0;
 
     private currentScreen: number = 0;
+
+    private replayMode: boolean = false;
 
     private modMapping: ModMapping = {
         EZ: { type: 0 },
@@ -203,7 +206,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private checkIfResultScreen(address: number) {
         return (
             this.process.readIntPtr(address + 0x3b8) ===
-            this.process.readIntPtr(this.gameBase() + 0x438)
+                this.process.readIntPtr(this.gameBase() + 0x438) &&
+            this.process.readIntPtr(address + 0x3c0) !==
+                this.process.readIntPtr(this.gameBase() + 0x440)
         );
     }
 
@@ -461,12 +466,78 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return `${hash[0]}\\${hash.substring(0, 2)}\\${hash}`;
     }
 
+    private readStatistics(scoreInfo: number): Statistics | undefined {
+        const statistics = this.process.readIntPtr(scoreInfo + 0x78);
+
+        const readFromJson =
+            !statistics ||
+            (statistics && this.process.readInt(statistics + 0x38) === 4);
+
+        // TODO: support all modes
+        if (readFromJson) {
+            return JSON.parse(
+                this.process.readSharpStringPtr(scoreInfo + 0x58)
+            );
+        } else {
+            const statisticsEntries = this.process.readIntPtr(
+                statistics + 0x10
+            );
+
+            if (!statisticsEntries) {
+                return undefined;
+            }
+
+            return {
+                miss: this.process.readInt(statisticsEntries + 0x2c),
+                meh: this.process.readInt(statisticsEntries + 0x3c),
+                ok: this.process.readInt(statisticsEntries + 0x4c),
+                great: this.process.readInt(statisticsEntries + 0x6c)
+            };
+        }
+    }
+
+    private readLeaderboardScore(
+        scoreInfo: number,
+        index: number
+    ): LeaderboardPlayer {
+        const mods = getOsuModsNumber(this.mods(scoreInfo));
+
+        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
+        const username = this.process.readSharpStringPtr(realmUser + 0x18);
+
+        let statistics = this.readStatistics(scoreInfo);
+
+        if (!statistics) {
+            statistics = {
+                great: 0,
+                ok: 0,
+                meh: 0,
+                miss: 0
+            };
+        }
+
+        return {
+            name: username,
+            mods,
+            score: this.process.readLong(scoreInfo + 0x98),
+            h300: statistics.great,
+            h100: statistics.ok,
+            h50: statistics.meh,
+            h0: statistics.miss,
+            combo: this.process.readInt(scoreInfo + 0xcc),
+            maxCombo: this.process.readInt(scoreInfo + 0xc4),
+            team: 0,
+            isPassing: true,
+            position: index + 1
+        };
+    }
+
     private readScore(
         scoreInfo: number,
         health: number = 0,
         retries: number = 0
     ): IGameplay {
-        const statistics = this.process.readIntPtr(scoreInfo + 0x78);
+        const statistics = this.readStatistics(scoreInfo);
 
         if (!statistics) {
             return 'No Statistics';
@@ -479,35 +550,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const mode = this.process.readInt(ruleset + 0x30);
         const username = this.process.readSharpStringPtr(realmUser + 0x18);
 
-        const statisticsCount = this.process.readInt(statistics + 0x38);
-        const statisticsEntries = this.process.readIntPtr(statistics + 0x10);
-
-        let missCount = 0;
-        let mehCount = 0;
-        let okCount = 0;
-        let greatCount = 0;
-
-        if (statisticsEntries) {
-            // TODO: support all modes
-            if (statisticsCount === 4) {
-                const statistics: Statistics = JSON.parse(
-                    this.process.readSharpStringPtr(scoreInfo + 0x58)
-                );
-
-                missCount = statistics.miss;
-                mehCount = statistics.meh;
-                okCount = statistics.ok;
-                greatCount = statistics.great;
-            } else {
-                missCount = this.process.readInt(statisticsEntries + 0x2c);
-                mehCount = this.process.readInt(statisticsEntries + 0x3c);
-                okCount = this.process.readInt(statisticsEntries + 0x4c);
-                greatCount = this.process.readInt(statisticsEntries + 0x6c);
-            }
-        }
-
         return {
-            address: 0,
             retries,
             playerName: username,
             mods,
@@ -516,12 +559,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             playerHPSmooth: health,
             playerHP: health,
             accuracy: this.process.readDouble(scoreInfo + 0xa8) * 100,
-            hit100: okCount,
-            hit300: greatCount,
-            hit50: mehCount,
+            hit100: statistics.ok,
+            hit300: statistics.great,
+            hit50: statistics.meh,
             hitGeki: 0,
             hitKatu: 0,
-            hitMiss: missCount,
+            hitMiss: statistics.miss,
             combo: this.process.readInt(scoreInfo + 0xcc),
             maxCombo: this.process.readInt(scoreInfo + 0xc4)
         };
@@ -703,6 +746,16 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             status = 7;
         }
 
+        if (isPlaying) {
+            const dependencies = this.process.readIntPtr(this.player() + 0x480);
+            const cache = this.process.readIntPtr(dependencies + 0x8);
+            const entries = this.process.readIntPtr(cache + 0x10);
+            const drawableRuleset = this.process.readIntPtr(entries + 0x10);
+
+            this.replayMode =
+                this.process.readIntPtr(drawableRuleset + 0x328) !== 0;
+        }
+
         return {
             isWatchingReplay: selectedModsIsDisabled,
             isReplayUiHidden: false,
@@ -773,9 +826,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     mp3Length(): IMP3Length {
-        const beatmap = this.currentBeatmap();
+        const beatmapClock = this.beatmapClock();
+        const decoupledTrack = this.process.readIntPtr(beatmapClock + 0x228);
+        const sourceTrack = this.process.readIntPtr(decoupledTrack + 0x18);
 
-        return this.process.readDouble(beatmap.info + 0x78);
+        return this.process.readDouble(sourceTrack + 0x48);
     }
 
     tourney(): ITourney {
@@ -792,7 +847,32 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         throw new Error('Lazer:tourneyUser not implemented.');
     }
 
-    leaderboard(rulesetAddr: number): ILeaderboard {
-        return [!rulesetAddr, undefined, []];
+    /*
+     * Doesn't work for ReplayPlayer
+     * @see https://github.com/ppy/osu/issues/27609
+     */
+    leaderboard(): ILeaderboard {
+        const player = this.player();
+
+        const personalScore = this.readLeaderboardScore(
+            this.scoreInfo(player),
+            -1
+        );
+
+        const leaderboardScores = this.process.readIntPtr(
+            player + (this.replayMode ? 0x4e0 : 0x520)
+        );
+
+        const items = this.readListItems(
+            this.process.readIntPtr(leaderboardScores + 0x18)
+        );
+
+        const scores: LeaderboardPlayer[] = [];
+
+        for (let i = 0; i < items.length; i++) {
+            scores.push(this.readLeaderboardScore(items[i], i));
+        }
+
+        return [true, personalScore, scores];
     }
 }

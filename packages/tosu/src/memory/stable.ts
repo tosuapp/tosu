@@ -523,7 +523,6 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             }
 
             return {
-                address: rulesetAddr,
                 retries,
                 playerName,
                 mods,
@@ -1051,8 +1050,13 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    leaderboard(rulesetAddr: number): ILeaderboard {
+    leaderboard(): ILeaderboard {
         try {
+            const rulesetAddr = this.process.readInt(
+                this.process.readInt(this.getPattern('rulesetsAddr') - 0xb) +
+                    0x4
+            );
+
             const base = this.process.readInt(rulesetAddr + 0x7c);
             const address = Math.max(0, this.process.readInt(base + 0x24)); // known as leaderBoardAddr, leaderboardBase
             if (address === 0) {

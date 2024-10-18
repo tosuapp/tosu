@@ -251,7 +251,7 @@ export class Gameplay extends AbstractState {
 
             this.updateGrade(menu.objectCount);
             this.updateStarsAndPerformance();
-            this.updateLeaderboard(result.address);
+            this.updateLeaderboard();
 
             this.resetReportCount('GD(updateState)');
         } catch (exc) {
@@ -388,9 +388,9 @@ export class Gameplay extends AbstractState {
         });
     }
 
-    private updateLeaderboard(rulesetAddr: number) {
+    private updateLeaderboard() {
         try {
-            const result = this.game.memory.leaderboard(rulesetAddr);
+            const result = this.game.memory.leaderboard();
             if (result instanceof Error) throw result;
 
             this.isLeaderboardVisible = result[0];

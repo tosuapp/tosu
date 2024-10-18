@@ -78,7 +78,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract tourney(): ITourney;
     abstract tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat;
     abstract tourneyUser(): ITourneyUser;
-    abstract leaderboard(rulesetAddr: number): ILeaderboard;
+    abstract leaderboard(): ILeaderboard;
 
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
