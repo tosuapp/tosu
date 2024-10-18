@@ -238,6 +238,19 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
     }
 
+    private checkIfSongSelect(address: number) {
+        return this.process.readIntPtr(address + 0x3b0) === this.gameBase();
+    }
+
+    // private checkIfPlayerLoader(address: number) {
+    //     let player = this.process.readIntPtr(address + 0x408);
+    //     if (!player || player < 1000000) {
+    //         return false;
+    //     }
+
+    //     return this.checkIfPlayer(player);
+    // }
+
     private getCurrentScreen() {
         const screenStack = this.screenStack();
 
@@ -962,11 +975,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const filesFolder = path.join(this.basePath(), 'files');
         const isPlaying = this.player() !== 0;
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
+        const isSongSelect = this.checkIfSongSelect(this.currentScreen);
+        // const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
 
         let status = 0;
 
         if (isPlaying) {
             status = 2;
+        } else if (isSongSelect) {
+            status = 5;
         } else if (isResultScreen) {
             status = 7;
         }
