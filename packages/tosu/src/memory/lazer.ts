@@ -28,6 +28,27 @@ import { getOsuModsNumber } from '@/utils/osuMods';
 import { OsuMods } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
+enum HitResult {
+    None = 0,
+    Miss = 1,
+    Meh = 2,
+    Ok = 3,
+    Good = 4,
+    Great = 5,
+    Perfect = 6,
+    SmallTickMiss = 7,
+    SmallTickHit = 8,
+    LargeTickMiss = 9,
+    LargeTickHit = 10,
+    SmallBonus = 11,
+    LargeBonus = 12,
+    IgnoreMiss = 13,
+    IgnoreHit = 14,
+    ComboBreak = 15,
+    SliderTailHit = 16,
+    LegacyComboIncrease = 99
+}
+
 type LazerPatternData = {
     spectatorClient: number;
 };
@@ -266,14 +287,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return result;
     }
 
-    private readListItems(list: number): number[] {
+    private readListItems(
+        list: number,
+        inlined: boolean = false,
+        structSize: number = 8
+    ): number[] {
         const size = this.process.readInt(list + 0x10);
         const items = this.process.readIntPtr(list + 0x8);
 
         const result: number[] = [];
 
         for (let i = 0; i < size; i++) {
-            const current = this.process.readIntPtr(items + 0x10 + 0x8 * i);
+            const current = inlined
+                ? items + 0x10 + structSize * i
+                : this.process.readIntPtr(items + 0x10 + structSize * i);
 
             result.push(current);
         }
@@ -817,8 +844,83 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         };
     }
 
+    private isResultHit(result: number): boolean {
+        switch (result) {
+            case HitResult.None:
+            case HitResult.IgnoreMiss:
+            case HitResult.Miss:
+            case HitResult.SmallTickMiss:
+            case HitResult.LargeTickMiss:
+            case HitResult.SmallBonus:
+            case HitResult.LargeBonus:
+            case HitResult.ComboBreak:
+                return false;
+
+            default:
+                return true;
+        }
+    }
+
+    private isHitCircle(object: number): boolean {
+        // These might potentially change
+        const sliderHeadCircleBaseSize = 0xe8;
+        const hitCircleBaseSize = 0xe0;
+
+        const type = this.process.readIntPtr(object);
+        const baseSize = this.process.readInt(type + 0x4);
+
+        if (
+            baseSize !== sliderHeadCircleBaseSize &&
+            baseSize !== hitCircleBaseSize
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private readHitEvent(address: number): [number, number] | undefined {
+        const hitObject = this.process.readIntPtr(address);
+
+        if (!hitObject) {
+            return undefined;
+        }
+
+        if (!this.isHitCircle(hitObject)) {
+            return undefined;
+        }
+
+        const hitResult = this.process.readInt(address + 0x18);
+
+        if (!this.isResultHit(hitResult)) {
+            return undefined;
+        }
+
+        const timeOffset = this.process.readDouble(address + 0x10);
+
+        return [timeOffset, address];
+    }
+
+    private hitEvents(): [number, number][] {
+        const player = this.player();
+        const scoreProcessor = this.process.readIntPtr(player + 0x438);
+        const hitEventsList = this.process.readIntPtr(scoreProcessor + 0x288);
+        const hitEvents = this.readListItems(hitEventsList, true, 0x40);
+
+        const result: [number, number][] = [];
+        for (let i = 0; i < hitEvents.length; i++) {
+            const hitEvent = this.readHitEvent(hitEvents[i]);
+            if (!hitEvent) {
+                continue;
+            }
+
+            result.push([hitEvent[0], hitEvent[1]]);
+        }
+        return result;
+    }
+
     hitErrors(): IHitErrors {
-        return [];
+        return this.hitEvents().map((x) => x[0]);
     }
 
     global(): IGlobal {
