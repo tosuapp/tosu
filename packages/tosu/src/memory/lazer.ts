@@ -47,6 +47,11 @@ interface Statistics {
     miss: number;
 }
 
+interface KeyCounter {
+    isPressed: boolean;
+    count: number;
+}
+
 type ModMapping = {
     EZ: ModItem;
     NF: ModItem;
@@ -287,7 +292,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const mods = this.process.readIntPtr(current + 0x10);
 
             const isMultiMod =
-                mods !== 0 && this.process.readInt(mods + 0x8) === 2;
+                mods > 1000 && this.process.readInt(mods + 0x8) === 2;
 
             if (isMultiMod) {
                 const modsList = this.process.readIntPtr(current + 0x10);
@@ -680,13 +685,130 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
     }
 
-    keyOverlay(mode: number): IKeyOverlay {
-        console.log(mode);
+    private readChildrenLazyList(container: number) {
+        const children = this.process.readIntPtr(container + 0x310);
+        const source = this.process.readIntPtr(children + 0x8);
+        const list = this.process.readIntPtr(source + 0x8);
+
+        return this.readListItems(list);
+    }
+
+    private readChildren(container: number) {
+        const children = this.process.readIntPtr(container + 0x310);
+        const list = this.process.readIntPtr(children + 0x8);
+
+        return this.readListItems(list);
+    }
+
+    private readComponents(container: number): number[] {
+        const content = this.process.readIntPtr(container + 0x338);
+
+        return this.readChildren(content);
+    }
+
+    private isKeyOverlay(address: number, controller: number) {
+        return this.process.readIntPtr(address + 0x348) === controller;
+    }
+
+    private findKeyOverlay(components: number[], controller: number) {
+        let keyOverlay = 0;
+
+        for (let i = 0; i < components.length; i++) {
+            if (this.isKeyOverlay(components[i], controller)) {
+                keyOverlay = components[i];
+
+                break;
+            }
+        }
+
+        return keyOverlay;
+    }
+
+    private readKeyCounter(keyCounter: number): KeyCounter {
+        const isActiveBindable = this.process.readIntPtr(keyCounter + 0x330);
+        const isActive = this.process.readByte(isActiveBindable + 0x40) === 1;
+
+        const trigger = this.process.readIntPtr(keyCounter + 0x328);
+        const activationCountBindable = this.process.readIntPtr(
+            trigger + 0x208
+        );
+        const activationCount = this.process.readInt(
+            activationCountBindable + 0x40
+        );
+
         return {
+            isPressed: isActive,
+            count: activationCount
+        };
+    }
+
+    private readKeyFlow(keyFlow: number): KeyCounter[] {
+        const keyCounters = this.readChildrenLazyList(keyFlow);
+
+        const result: KeyCounter[] = [];
+
+        for (const counter of keyCounters) {
+            result.push(this.readKeyCounter(counter));
+        }
+
+        return result;
+    }
+
+    keyOverlay(mode: number): IKeyOverlay {
+        const emptyKeyOverlay: IKeyOverlay = {
             K1Pressed: false,
             K1Count: 0,
             K2Pressed: false,
             K2Count: 0,
+            M1Pressed: false,
+            M1Count: 0,
+            M2Pressed: false,
+            M2Count: 0
+        };
+
+        if (mode !== 0) {
+            return emptyKeyOverlay;
+        }
+
+        const player = this.player();
+        const hudOverlay = this.process.readIntPtr(player + 0x450);
+        const inputController = this.process.readIntPtr(hudOverlay + 0x348);
+        const rulesetComponents = this.readComponents(
+            this.process.readIntPtr(hudOverlay + 0x3c0)
+        );
+
+        // try to look for legacy key overlay in ruleset components
+        let keyOverlay = this.findKeyOverlay(
+            rulesetComponents,
+            inputController
+        );
+
+        // in case we don't have legacy key overlay displayed
+        // let's try to look for other key overlays in main components
+        if (!keyOverlay) {
+            const mainComponents = this.readComponents(
+                this.process.readIntPtr(hudOverlay + 0x3b8)
+            );
+
+            keyOverlay = this.findKeyOverlay(mainComponents, inputController);
+        }
+
+        // there's no key overlay currently being displayed
+        if (!keyOverlay) {
+            return emptyKeyOverlay;
+        }
+
+        const keyFlow = this.process.readIntPtr(keyOverlay + 0x350);
+
+        // available keys:
+        // 0 - k1/m1, 1 - k2/m2, 2 - smoke
+        const keyCounters = this.readKeyFlow(keyFlow);
+
+        return {
+            K1Pressed: keyCounters[0].isPressed,
+            K1Count: keyCounters[0].count,
+            K2Pressed: keyCounters[1].isPressed,
+            K2Count: keyCounters[1].count,
             M1Pressed: false,
             M1Count: 0,
             M2Pressed: false,

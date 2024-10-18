@@ -111,8 +111,23 @@ export class LazerInstance extends AbstractInstance {
 
     preciseDataLoop(global: Global, gameplay: Gameplay): void {
         if (this.isDestroyed) return;
-
         global.updatePreciseState();
+
+        switch (global.status) {
+            case 2:
+                if (global.playTime < 150) {
+                    break;
+                }
+
+                if (config.enableKeyOverlay) {
+                    gameplay.updateKeyOverlay();
+                }
+                gameplay.updateHitErrors();
+                break;
+            default:
+                gameplay.resetKeyOverlay();
+                break;
+        }
 
         setTimeout(() => {
             this.preciseDataLoop(global, gameplay);
