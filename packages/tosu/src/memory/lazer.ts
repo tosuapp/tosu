@@ -757,7 +757,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return {
-            isWatchingReplay: selectedModsIsDisabled,
+            isWatchingReplay: this.replayMode,
             isReplayUiHidden: false,
             showInterface: false,
             chatStatus: 0,
