@@ -32,6 +32,7 @@ export interface DataRepoList {
 
 export abstract class AbstractInstance {
     abstract memory: AbstractMemory<Record<string, number>>;
+    bitness: number;
 
     pid: number;
     process: Process;
@@ -56,6 +57,7 @@ export abstract class AbstractInstance {
         this.pid = pid;
 
         this.process = new Process(this.pid, bitness);
+        this.bitness = bitness;
         this.path = this.process.path;
 
         this.set('settings', new Settings(this));
@@ -126,7 +128,7 @@ export abstract class AbstractInstance {
         }
     }
 
-    start(): void | Promise<void> {
+    start(): void {
         wLogger.info(`[${this.pid}] Running memory chimera...`);
 
         while (!this.isReady) {
@@ -154,6 +156,16 @@ export abstract class AbstractInstance {
                 return;
             }
         }
+
+        /**
+         * ENABLING GOSU OVERLAY (stable only, for now)
+         */
+        if (config.enableGosuOverlay && this.bitness === 32) {
+            this.injectGameOverlay();
+        }
+
+        this.initiateDataLoops();
+        this.watchProcessHealth();
     }
 
     abstract injectGameOverlay(): void;

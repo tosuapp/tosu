@@ -17,20 +17,6 @@ export class OsuInstance extends AbstractInstance {
         this.memory = new StableMemory(this.process, this);
     }
 
-    async start() {
-        super.start();
-
-        /**
-         * ENABLING GOSU OVERLAY
-         */
-        if (config.enableGosuOverlay) {
-            await this.injectGameOverlay();
-        }
-
-        this.initiateDataLoops();
-        this.watchProcessHealth();
-    }
-
     async injectGameOverlay() {
         await injectGameOverlay(this.process);
     }
