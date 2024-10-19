@@ -184,13 +184,15 @@ export class ResultsScreenData extends AbstractEntity {
                 n100: this.Hit100,
                 n300: this.Hit300,
                 nKatu: this.HitKatu,
-                nGeki: this.HitGeki
+                nGeki: this.HitGeki,
+                lazer: true
             };
 
             const curPerformance = new rosu.Performance(scoreParams).calculate(
                 currentBeatmap
             );
             const fcPerformance = new rosu.Performance({
+                lazer: true,
                 mods: this.Mods,
                 misses: 0,
                 accuracy: this.Accuracy

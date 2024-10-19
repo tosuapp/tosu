@@ -611,13 +611,17 @@ export class GamePlayData extends AbstractEntity {
                 if (this.PerformanceAttributes)
                     this.PerformanceAttributes.free();
 
-                const difficulty = new rosu.Difficulty({ mods: this.Mods });
+                const difficulty = new rosu.Difficulty({
+                    mods: this.Mods,
+                    lazer: true
+                });
                 this.GradualPerformance = new rosu.GradualPerformance(
                     difficulty,
                     currentBeatmap
                 );
 
                 this.PerformanceAttributes = new rosu.Performance({
+                    lazer: true,
                     mods: this.Mods
                 }).calculate(currentBeatmap);
 
@@ -660,6 +664,7 @@ export class GamePlayData extends AbstractEntity {
             )!;
 
             const fcPerformance = new rosu.Performance({
+                lazer: true,
                 mods: this.Mods,
                 misses: 0,
                 accuracy: this.Accuracy
