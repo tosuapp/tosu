@@ -8,6 +8,7 @@ import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
+    previousCombo: number = 0;
 
     constructor(pid: number) {
         super(pid, 64);
@@ -97,6 +98,11 @@ export class LazerInstance extends AbstractInstance {
                         // bassDensity.updateState();
                         break;
                     case 2: // is playing (after player is loaded)
+                        // support replay rewind
+                        if (this.previousCombo > gameplay.combo) {
+                            gameplay.resetQuick();
+                        }
+
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
@@ -109,9 +115,10 @@ export class LazerInstance extends AbstractInstance {
                             break;
                         }
 
-                        this.previousTime = global.playTime;
-
                         gameplay.updateState();
+
+                        this.previousTime = global.playTime;
+                        this.previousCombo = gameplay.combo;
                         break;
 
                     case 5:
