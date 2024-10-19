@@ -29,24 +29,24 @@ import { OsuMods } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 enum HitResult {
-    None = 0,
-    Miss = 1,
-    Meh = 2,
-    Ok = 3,
-    Good = 4,
-    Great = 5,
-    Perfect = 6,
-    SmallTickMiss = 7,
-    SmallTickHit = 8,
-    LargeTickMiss = 9,
-    LargeTickHit = 10,
-    SmallBonus = 11,
-    LargeBonus = 12,
-    IgnoreMiss = 13,
-    IgnoreHit = 14,
-    ComboBreak = 15,
-    SliderTailHit = 16,
-    LegacyComboIncrease = 99
+    none = 0,
+    miss = 1,
+    meh = 2,
+    ok = 3,
+    good = 4,
+    great = 5,
+    perfect = 6,
+    smallTickMiss = 7,
+    smallTickHit = 8,
+    largeTickMiss = 9,
+    largeTickHit = 10,
+    smallBonus = 11,
+    largeBonus = 12,
+    ignoreMiss = 13,
+    ignoreHit = 14,
+    comboBreak = 15,
+    sliderTailHit = 16,
+    legacyComboIncrease = 99
 }
 
 interface Statistics {
@@ -585,18 +585,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 0x10
             );
 
-            const keys = Object.keys(statistics);
-
             for (const item of items) {
                 const key = this.process.readInt(item + 0x8);
-
                 if (key === 0) {
                     continue;
                 }
 
                 const value = this.process.readInt(item + 0xc);
 
-                statistics[keys[key]] = value;
+                statistics[HitResult[key]] = value;
             }
         }
 
@@ -657,11 +654,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             playerHPSmooth: health,
             playerHP: health,
             accuracy: this.process.readDouble(scoreInfo + 0xa8) * 100,
-            hit100: statistics.ok,
+            hitGeki: statistics.perfect,
             hit300: statistics.great,
+            hitKatu: statistics.good,
+            hit100: statistics.ok,
             hit50: statistics.meh,
-            hitGeki: 0,
-            hitKatu: 0,
             hitMiss: statistics.miss,
             combo: this.process.readInt(scoreInfo + 0xcc),
             maxCombo: this.process.readInt(scoreInfo + 0xc4)
@@ -916,14 +913,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private isResultHit(result: number): boolean {
         switch (result) {
-            case HitResult.None:
-            case HitResult.IgnoreMiss:
-            case HitResult.Miss:
-            case HitResult.SmallTickMiss:
-            case HitResult.LargeTickMiss:
-            case HitResult.SmallBonus:
-            case HitResult.LargeBonus:
-            case HitResult.ComboBreak:
+            case HitResult.none:
+            case HitResult.ignoreMiss:
+            case HitResult.miss:
+            case HitResult.smallTickMiss:
+            case HitResult.largeTickMiss:
+            case HitResult.smallBonus:
+            case HitResult.largeBonus:
+            case HitResult.comboBreak:
                 return false;
 
             default:
