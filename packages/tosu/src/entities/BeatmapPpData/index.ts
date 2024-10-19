@@ -326,7 +326,7 @@ export class BeatmapPPData extends AbstractEntity {
             }).build();
 
             const fcPerformance = new rosu.Performance({
-                lazer: true,
+                lazer: false,
                 mods: currentMods
             }).calculate(this.beatmap);
 
@@ -337,7 +337,7 @@ export class BeatmapPPData extends AbstractEntity {
                 const ppAcc = {};
                 for (const acc of [100, 99, 98, 97, 96, 95]) {
                     const calculate = new rosu.Performance({
-                        lazer: true,
+                        lazer: false,
                         mods: currentMods,
                         accuracy: acc
                     }).calculate(fcPerformance);
@@ -470,7 +470,7 @@ export class BeatmapPPData extends AbstractEntity {
 
             const strains = new rosu.Difficulty({
                 mods: currentMods,
-                lazer: true
+                lazer: false
             }).strains(this.beatmap);
             let oldStrains: number[] = [];
 
@@ -639,7 +639,7 @@ export class BeatmapPPData extends AbstractEntity {
             );
 
             const curPerformance = new rosu.Performance({
-                lazer: true,
+                lazer: false,
                 passedObjects: passedObjects.length
             }).calculate(this.PerformanceAttributes);
 

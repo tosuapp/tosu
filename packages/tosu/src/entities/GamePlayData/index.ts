@@ -613,7 +613,7 @@ export class GamePlayData extends AbstractEntity {
 
                 const difficulty = new rosu.Difficulty({
                     mods: this.Mods,
-                    lazer: true
+                    lazer: false
                 });
                 this.GradualPerformance = new rosu.GradualPerformance(
                     difficulty,
@@ -621,7 +621,7 @@ export class GamePlayData extends AbstractEntity {
                 );
 
                 this.PerformanceAttributes = new rosu.Performance({
-                    lazer: true,
+                    lazer: false,
                     mods: this.Mods
                 }).calculate(currentBeatmap);
 
@@ -664,7 +664,7 @@ export class GamePlayData extends AbstractEntity {
             )!;
 
             const fcPerformance = new rosu.Performance({
-                lazer: true,
+                lazer: false,
                 mods: this.Mods,
                 misses: 0,
                 accuracy: this.Accuracy
@@ -672,6 +672,8 @@ export class GamePlayData extends AbstractEntity {
             const t2 = performance.now();
 
             if (currPerformance) {
+                console.log('update', currPerformance.pp, scoreParams);
+
                 beatmapPpData.updateCurrentAttributes(
                     currPerformance.difficulty.stars,
                     currPerformance.pp
