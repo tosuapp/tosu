@@ -41,7 +41,7 @@ export function parseCounterSettings(
         if (!fs.existsSync(settingsPath))
             fs.writeFileSync(settingsPath, JSON.stringify([]), 'utf8');
 
-        if (!fs.existsSync(settingsValuesPath))
+        if (fs.existsSync(settingsPath) && !fs.existsSync(settingsValuesPath))
             fs.writeFileSync(settingsValuesPath, JSON.stringify({}), 'utf8');
 
         const settings: ISettings[] = JsonSafeParse(
