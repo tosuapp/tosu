@@ -36,6 +36,7 @@ export class ResultScreen extends AbstractState {
     init() {
         wLogger.debug('RSD(init) Reset');
 
+        this.onlineId = 0;
         this.playerName = '';
         this.mods = 0;
         this.mode = 0;
