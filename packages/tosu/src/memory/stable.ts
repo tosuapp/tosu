@@ -1058,6 +1058,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
 
             const base = this.process.readInt(rulesetAddr + 0x7c);
+
+            if (base === 0) {
+                return [false, undefined, []];
+            }
+
             const address = Math.max(0, this.process.readInt(base + 0x24)); // known as leaderBoardAddr, leaderboardBase
             if (address === 0) {
                 return [false, undefined, []];
