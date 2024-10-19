@@ -1,3 +1,4 @@
+import rosu from '@kotrikd/rosu-pp';
 import {
     downloadFile,
     getCachePath,
@@ -12,7 +13,6 @@ import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import rosu from 'rosu-pp-js';
 
 import { Server, sendJson } from '../index';
 import {
@@ -421,6 +421,7 @@ export default function buildBaseApi(server: Server) {
             if (query.nKatu) params.nKatu = +query.nKatu;
             if (query.mods) params.mods = +query.mods;
             if (query.acc) params.accuracy = +query.acc;
+            if (query.lazer) params.lazer = query.lazer ?? true;
 
             const calculate = new rosu.Performance(params).calculate(beatmap);
             sendJson(res, calculate);
