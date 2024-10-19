@@ -593,7 +593,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
         const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
         const mode = this.process.readInt(ruleset + 0x30);
-        const username = this.process.readSharpStringPtr(realmUser + 0x18);
+        let username = this.process.readSharpStringPtr(realmUser + 0x18);
+        if (username === 'Autoplay') username = 'osu!';
+        if (username === 'osu!salad') username = 'salad!';
+        if (username === 'osu!topus') username = 'osu!topus!';
 
         return {
             retries,
@@ -1013,7 +1016,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     globalPrecise(): IGlobalPrecise {
         return {
-            time: this.currentTime()
+            time: Math.round(this.currentTime())
         };
     }
 
@@ -1072,7 +1075,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const decoupledTrack = this.process.readIntPtr(beatmapClock + 0x228);
         const sourceTrack = this.process.readIntPtr(decoupledTrack + 0x18);
 
-        return this.process.readDouble(sourceTrack + 0x48);
+        return Math.round(this.process.readDouble(sourceTrack + 0x48));
     }
 
     tourney(): ITourney {

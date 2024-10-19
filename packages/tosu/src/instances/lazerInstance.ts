@@ -38,15 +38,26 @@ export class LazerInstance extends AbstractInstance {
         while (!this.isDestroyed) {
             try {
                 global.updateState();
-                menu.updateState();
+                const menuUpdate = menu.updateState();
+                if (menuUpdate === 'not-ready') {
+                    await sleep(config.pollRate);
+                    continue;
+                }
+
+                menu.updateMP3Length();
 
                 if (!global.gameFolder) {
                     global.setGameFolder(this.path);
                     global.setSongsFolder(global.memorySongsFolder);
                 }
 
+                // update important data before doing rest
                 if (global.status === 7) {
-                    resultScreen.updateState();
+                    const resultUpdate = resultScreen.updateState();
+                    if (resultUpdate === 'not-ready') {
+                        await sleep(config.pollRate);
+                        continue;
+                    }
                 }
 
                 const currentMods =
@@ -64,18 +75,26 @@ export class LazerInstance extends AbstractInstance {
                           : menu.gamemode;
 
                 const currentState = `${menu.checksum}:${currentMode}:${currentMods}`;
-
+                const updateGraph =
+                    this.previousState !== currentState ||
+                    this.previousMP3Length !== menu.mp3Length;
                 if (global.gameFolder && this.previousState !== currentState) {
-                    beatmapPP.updateMapMetadata(0, 0, true);
+                    beatmapPP.updateMapMetadata(currentMods, currentMode, true);
 
                     this.previousState = currentState;
                 }
 
+                if (global.gameFolder && updateGraph) {
+                    beatmapPP.updateGraph(currentMods);
+                    this.previousMP3Length = menu.mp3Length;
+                }
+
+                beatmapPP.updateRealTimeBPM(global.playTime, currentMods);
+
                 switch (global.status) {
-                    case 0: // anything not in the map
-                        if (resultScreen.playerName) {
-                            resultScreen.init();
-                        }
+                    case 0:
+                        // FIXME: TODO
+                        // bassDensity.updateState();
                         break;
                     case 2: // is playing (after player is loaded)
                         // Reset gameplay data on retry
@@ -85,16 +104,37 @@ export class LazerInstance extends AbstractInstance {
                         }
 
                         // reset before first object
-                        if (global.playTime < beatmapPP.timings.firstObj) {
+                        if (global.playTime <= beatmapPP.timings.firstObj) {
                             gameplay.resetQuick();
+                            break;
                         }
 
                         this.previousTime = global.playTime;
 
                         gameplay.updateState();
                         break;
+
+                    case 5:
+                        // Reset Gameplay/ResultScreen data on joining to songSelect
+                        if (!gameplay.isDefaultState) {
+                            gameplay.init(undefined, '4,5');
+                            resultScreen.init();
+                            beatmapPP.resetAttributes();
+                        }
+
+                        // Reset ResultScreen if we in song select
+                        if (resultScreen.playerName) {
+                            resultScreen.init();
+                        }
+                        break;
+
                     case 7: // result screen
                         resultScreen.updatePerformance();
+                        break;
+
+                    default:
+                        gameplay.init(undefined, `default-${global.status}`);
+                        resultScreen.init();
                         break;
                 }
 

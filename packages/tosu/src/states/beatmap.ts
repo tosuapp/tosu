@@ -249,14 +249,14 @@ export class BeatmapPP extends AbstractState {
     updateMapMetadata(
         currentMods: number,
         currentMode: number,
-        force: boolean = false
+        lazerByPass: boolean = false
     ) {
         try {
             const startTime = performance.now();
 
             const { menu, global } = this.game.getServices(['menu', 'global']);
 
-            if (menu.folder === '' && !force) {
+            if (menu.folder === '' && !lazerByPass) {
                 wLogger.debug(
                     `BPPD(updateMapMetadata) Skip osu! music theme file`,
                     {
@@ -379,7 +379,7 @@ export class BeatmapPP extends AbstractState {
                 if (
                     this.lazerBeatmap.events.backgroundPath !==
                         menu.backgroundFilename &&
-                    !force
+                    !lazerByPass
                 ) {
                     menu.backgroundFilename =
                         this.lazerBeatmap.events.backgroundPath || '';
