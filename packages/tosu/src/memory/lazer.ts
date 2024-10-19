@@ -49,6 +49,26 @@ enum HitResult {
     LegacyComboIncrease = 99
 }
 
+interface Statistics {
+    miss: number;
+    meh: number;
+    ok: number;
+    good: number;
+    great: number;
+    perfect: number;
+    smallTickMiss: number;
+    smallTickHit: number;
+    largeTickMiss: number;
+    largeTickHit: number;
+    smallBonus: number;
+    largeBonus: number;
+    ignoreMiss: number;
+    ignoreHit: number;
+    comboBreak: number;
+    sliderTailHit: number;
+    legacyComboIncrease: number;
+}
+
 type LazerPatternData = {
     spectatorClient: number;
 };
@@ -59,13 +79,6 @@ interface ModAcronym {
 
 interface ModItem {
     type: number;
-}
-
-interface Statistics {
-    great: number;
-    ok: number;
-    meh: number;
-    miss: number;
 }
 
 interface KeyCounter {
@@ -300,14 +313,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return result;
     }
 
-    private readListItems(
-        list: number,
+    private readItems(
+        items: number,
+        size: number,
         inlined: boolean = false,
         structSize: number = 8
     ): number[] {
-        const size = this.process.readInt(list + 0x10);
-        const items = this.process.readIntPtr(list + 0x8);
-
         const result: number[] = [];
 
         for (let i = 0; i < size; i++) {
@@ -319,6 +330,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return result;
+    }
+
+    private readListItems(
+        list: number,
+        inlined: boolean = false,
+        structSize: number = 8
+    ): number[] {
+        const size = this.process.readInt(list + 0x10);
+        const items = this.process.readIntPtr(list + 0x8);
+
+        return this.readItems(items, size, inlined, structSize);
     }
 
     private readModList(list: number): number[] {
@@ -511,34 +533,74 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return `${hash[0]}\\${hash.substring(0, 2)}\\${hash}`;
     }
 
-    private readStatistics(scoreInfo: number): Statistics | undefined {
-        const statistics = this.process.readIntPtr(scoreInfo + 0x78);
+    private readStatistics(scoreInfo: number): Statistics {
+        const statisticsDict = this.process.readIntPtr(scoreInfo + 0x78);
+        const statisticsJson = this.process.readSharpStringPtr(
+            scoreInfo + 0x58
+        );
 
-        const readFromJson =
-            !statistics ||
-            (statistics && this.process.readInt(statistics + 0x38) === 4);
+        const statistics: Statistics = {
+            miss: 0,
+            meh: 0,
+            ok: 0,
+            good: 0,
+            great: 0,
+            perfect: 0,
+            smallTickMiss: 0,
+            smallTickHit: 0,
+            largeTickMiss: 0,
+            largeTickHit: 0,
+            smallBonus: 0,
+            largeBonus: 0,
+            ignoreMiss: 0,
+            ignoreHit: 0,
+            comboBreak: 0,
+            sliderTailHit: 0,
+            legacyComboIncrease: 0
+        };
+
+        const statisticsCount = this.process.readInt(statisticsDict + 0x38);
 
         // TODO: support all modes
-        if (readFromJson) {
-            return JSON.parse(
-                this.process.readSharpStringPtr(scoreInfo + 0x58)
-            );
+        if (statisticsJson.length > 0 && statisticsCount === 4) {
+            const parsedStatistics: Statistics = JSON.parse(statisticsJson);
+
+            statistics.miss = parsedStatistics.miss;
+            statistics.meh = parsedStatistics.meh;
+            statistics.ok = parsedStatistics.ok;
+            statistics.great = parsedStatistics.great;
         } else {
             const statisticsEntries = this.process.readIntPtr(
-                statistics + 0x10
+                statisticsDict + 0x10
             );
 
             if (!statisticsEntries) {
-                return undefined;
+                return statistics;
             }
 
-            return {
-                miss: this.process.readInt(statisticsEntries + 0x2c),
-                meh: this.process.readInt(statisticsEntries + 0x3c),
-                ok: this.process.readInt(statisticsEntries + 0x4c),
-                great: this.process.readInt(statisticsEntries + 0x6c)
-            };
+            const items = this.readItems(
+                statisticsEntries,
+                statisticsCount,
+                true,
+                0x10
+            );
+
+            const keys = Object.keys(statistics);
+
+            for (const item of items) {
+                const key = this.process.readInt(item + 0x8);
+
+                if (key === 0) {
+                    continue;
+                }
+
+                const value = this.process.readInt(item + 0xc);
+
+                statistics[keys[key]] = value;
+            }
         }
+
+        return statistics;
     }
 
     private readLeaderboardScore(
@@ -550,16 +612,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
         const username = this.process.readSharpStringPtr(realmUser + 0x18);
 
-        let statistics = this.readStatistics(scoreInfo);
-
-        if (!statistics) {
-            statistics = {
-                great: 0,
-                ok: 0,
-                meh: 0,
-                miss: 0
-            };
-        }
+        const statistics = this.readStatistics(scoreInfo);
 
         return {
             name: username,
@@ -584,16 +637,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     ): IGameplay {
         const statistics = this.readStatistics(scoreInfo);
 
-        if (!statistics) {
-            return 'No Statistics';
-        }
-
         const mods = getOsuModsNumber(this.mods(scoreInfo));
 
         const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
         const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
         const mode = this.process.readInt(ruleset + 0x30);
         let username = this.process.readSharpStringPtr(realmUser + 0x18);
+
         if (username === 'Autoplay') username = 'osu!';
         if (username === 'osu!salad') username = 'salad!';
         if (username === 'osu!topus') username = 'osu!topus!';
@@ -675,7 +725,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     resultScreen(): IResultScreen {
-        const scoreInfo = this.process.readIntPtr(this.currentScreen + 0x398);
+        const selectedScoreBindable = this.process.readIntPtr(
+            this.currentScreen + 0x390
+        );
+
+        const scoreInfo = this.process.readIntPtr(selectedScoreBindable + 0x20);
 
         const score = this.readScore(scoreInfo);
 
