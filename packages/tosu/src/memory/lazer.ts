@@ -996,6 +996,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     global(): IGlobal {
         if (!this.modsInitialized) {
             this.initModMapping();
+
+            this.modsInitialized = true;
         }
 
         this.currentScreen = this.getCurrentScreen();
@@ -1074,15 +1076,24 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         };
     }
 
+    private lastGamemode = 0;
+
     menu(previousChecksum: string): IMenu {
         const beatmap = this.currentBeatmap();
         const checksum = this.process.readSharpStringPtr(beatmap.info + 0x58);
 
-        if (checksum === previousChecksum) {
+        const rulesetBindable = this.process.readIntPtr(
+            this.gameBase() + 0x458
+        );
+        const rulesetInfo = this.process.readIntPtr(rulesetBindable + 0x20);
+
+        const gamemode = this.process.readInt(rulesetInfo + 0x30);
+        if (checksum === previousChecksum && gamemode === this.lastGamemode) {
             return '';
         }
 
-        const rulesetInfo = this.process.readIntPtr(beatmap.info + 0x20);
+        this.lastGamemode = gamemode;
+
         const metadata = this.process.readIntPtr(beatmap.info + 0x30);
         const difficulty = this.process.readIntPtr(beatmap.info + 0x28);
         const hash = this.process.readSharpStringPtr(beatmap.info + 0x50);
@@ -1094,6 +1105,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             files[this.process.readSharpStringPtr(metadata + 0x50)];
         const backgroundFilename =
             files[this.process.readSharpStringPtr(metadata + 0x58)];
+
+        const difficultyName = this.process.readSharpStringPtr(
+            beatmap.info + 0x18
+        );
 
         return {
             gamemode: this.process.readInt(rulesetInfo + 0x30),
@@ -1112,7 +1127,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             backgroundFilename: this.toLazerPath(backgroundFilename),
             folder: '',
             creator: this.process.readSharpStringPtr(author + 0x18),
-            difficulty: this.process.readSharpStringPtr(metadata + 0x18),
+            difficulty: difficultyName,
             mapID: this.process.readInt(beatmap.info + 0xac),
             setID: this.process.readInt(beatmap.setInfo + 0x30),
             rankedStatus: Number(
