@@ -627,6 +627,63 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         };
     }
 
+    private readChildrenLazyList(container: number) {
+        const children = this.process.readIntPtr(container + 0x310);
+        const source = this.process.readIntPtr(children + 0x8);
+        const list = this.process.readIntPtr(source + 0x8);
+
+        return this.readListItems(list);
+    }
+
+    private readChildren(container: number) {
+        const children = this.process.readIntPtr(container + 0x310);
+        const list = this.process.readIntPtr(children + 0x8);
+
+        return this.readListItems(list);
+    }
+
+    private readComponents(container: number): number[] {
+        const content = this.process.readIntPtr(container + 0x338);
+
+        return this.readChildren(content);
+    }
+
+    private isKeyOverlay(address: number, controller: number) {
+        return this.process.readIntPtr(address + 0x348) === controller;
+    }
+
+    private findKeyOverlay(components: number[], controller: number) {
+        let keyOverlay = 0;
+
+        for (let i = 0; i < components.length; i++) {
+            if (this.isKeyOverlay(components[i], controller)) {
+                keyOverlay = components[i];
+
+                break;
+            }
+        }
+
+        return keyOverlay;
+    }
+
+    private isPPCounter(address: number, processor: number) {
+        return this.process.readIntPtr(address + 0x340) === processor;
+    }
+
+    private findPPCounter(components: number[], processor: number) {
+        let keyOverlay = 0;
+
+        for (let i = 0; i < components.length; i++) {
+            if (this.isPPCounter(components[i], processor)) {
+                keyOverlay = components[i];
+
+                break;
+            }
+        }
+
+        return keyOverlay;
+    }
+
     private readScore(
         scoreInfo: number,
         health: number = 0,
@@ -639,11 +696,27 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
         const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
         const mode = this.process.readInt(ruleset + 0x30);
+
         let username = this.process.readSharpStringPtr(realmUser + 0x18);
 
         if (username === 'Autoplay') username = 'osu!';
         if (username === 'osu!salad') username = 'salad!';
         if (username === 'osu!topus') username = 'osu!topus!';
+
+        const player = this.player();
+        const scoreProcessor = this.process.readIntPtr(player + 0x438);
+
+        const hudOverlay = this.process.readIntPtr(player + 0x450);
+        const mainComponents = this.readComponents(
+            this.process.readIntPtr(hudOverlay + 0x3b8)
+        );
+
+        const ppCounter = this.findPPCounter(mainComponents, scoreProcessor);
+        let pp = 0;
+
+        if (ppCounter) {
+            pp = this.process.readInt(ppCounter + 0x324);
+        }
 
         return {
             retries,
@@ -661,7 +734,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             hit50: statistics.meh,
             hitMiss: statistics.miss,
             combo: this.process.readInt(scoreInfo + 0xcc),
-            maxCombo: this.process.readInt(scoreInfo + 0xc4)
+            maxCombo: this.process.readInt(scoreInfo + 0xc4),
+            pp
         };
     }
 
@@ -782,45 +856,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             health * 200,
             this.process.readInt(player + 0x38c)
         );
-    }
-
-    private readChildrenLazyList(container: number) {
-        const children = this.process.readIntPtr(container + 0x310);
-        const source = this.process.readIntPtr(children + 0x8);
-        const list = this.process.readIntPtr(source + 0x8);
-
-        return this.readListItems(list);
-    }
-
-    private readChildren(container: number) {
-        const children = this.process.readIntPtr(container + 0x310);
-        const list = this.process.readIntPtr(children + 0x8);
-
-        return this.readListItems(list);
-    }
-
-    private readComponents(container: number): number[] {
-        const content = this.process.readIntPtr(container + 0x338);
-
-        return this.readChildren(content);
-    }
-
-    private isKeyOverlay(address: number, controller: number) {
-        return this.process.readIntPtr(address + 0x348) === controller;
-    }
-
-    private findKeyOverlay(components: number[], controller: number) {
-        let keyOverlay = 0;
-
-        for (let i = 0; i < components.length; i++) {
-            if (this.isKeyOverlay(components[i], controller)) {
-                keyOverlay = components[i];
-
-                break;
-            }
-        }
-
-        return keyOverlay;
     }
 
     private readKeyCounter(keyCounter: number): KeyCounter {

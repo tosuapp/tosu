@@ -76,6 +76,7 @@ export type IScore = {
     hitMiss: number;
     combo: number;
     maxCombo: number;
+    pp?: number;
 };
 
 export type IGameplay = IScore | string | Error;
