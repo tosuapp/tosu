@@ -32,7 +32,7 @@ export interface DataRepoList {
 
 export abstract class AbstractInstance {
     abstract memory: AbstractMemory<Record<string, number>>;
-    bitness: number;
+    client: 'lazer' | 'stable' | '' = '';
 
     pid: number;
     process: Process;
@@ -57,8 +57,9 @@ export abstract class AbstractInstance {
         this.pid = pid;
 
         this.process = new Process(this.pid, bitness);
-        this.bitness = bitness;
         this.path = this.process.path;
+
+        this.client = bitness === 64 ? 'lazer' : bitness === 32 ? 'stable' : '';
 
         this.set('settings', new Settings(this));
         this.set('global', new Global(this));
@@ -160,7 +161,7 @@ export abstract class AbstractInstance {
         /**
          * ENABLING GOSU OVERLAY (stable only, for now)
          */
-        if (config.enableGosuOverlay && this.bitness === 32) {
+        if (config.enableGosuOverlay && this.client === 'stable') {
             this.injectGameOverlay();
         }
 

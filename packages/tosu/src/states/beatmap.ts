@@ -1,9 +1,9 @@
+import rosu from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
-import rosu from 'rosu-pp-js';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
@@ -320,7 +320,6 @@ export class BeatmapPP extends AbstractState {
                 `BPPD(updateMapMetadata) [${totalTime}ms] Spend on opening beatmap`
             );
 
-            const difficulty = new rosu.Difficulty({ mods: currentMods });
             const attributes = new rosu.BeatmapAttributesBuilder({
                 map: this.beatmap,
                 mods: currentMods,
@@ -328,7 +327,8 @@ export class BeatmapPP extends AbstractState {
             }).build();
 
             const fcPerformance = new rosu.Performance({
-                mods: currentMods
+                mods: currentMods,
+                lazer: this.game.client === 'lazer'
             }).calculate(this.beatmap);
 
             this.performanceAttributes = fcPerformance;
@@ -339,7 +339,8 @@ export class BeatmapPP extends AbstractState {
                 for (const acc of [100, 99, 98, 97, 96, 95]) {
                     const calculate = new rosu.Performance({
                         mods: currentMods,
-                        accuracy: acc
+                        accuracy: acc,
+                        lazer: this.game.client === 'lazer'
                     }).calculate(fcPerformance);
                     ppAcc[acc] = fixDecimals(calculate.pp);
 
@@ -445,7 +446,6 @@ export class BeatmapPP extends AbstractState {
                 hitWindow: fcPerformance.difficulty.hitWindow
             };
 
-            difficulty.free();
             attributes.free();
 
             this.resetReportCount('BPPD(updateMapMetadata)');
@@ -470,7 +470,10 @@ export class BeatmapPP extends AbstractState {
                 xaxis: []
             };
 
-            const difficulty = new rosu.Difficulty({ mods: currentMods });
+            const difficulty = new rosu.Difficulty({
+                mods: currentMods,
+                lazer: this.game.client === 'lazer'
+            });
             const strains = difficulty.strains(this.beatmap);
 
             let oldStrains: number[] = [];
@@ -638,7 +641,8 @@ export class BeatmapPP extends AbstractState {
             );
 
             const curPerformance = new rosu.Performance({
-                passedObjects: passedObjects.length
+                passedObjects: passedObjects.length,
+                lazer: this.game.client === 'lazer'
             }).calculate(this.performanceAttributes);
 
             const calculateTime = performance.now();

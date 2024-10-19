@@ -1,5 +1,5 @@
+import rosu from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
-import rosu from 'rosu-pp-js';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -67,6 +67,8 @@ export class Gameplay extends AbstractState {
     hitGeki: number;
     hitKatu: number;
     hitMiss: number;
+    sliderEndHits: number;
+    sliderTickHits: number;
     hitMissPrev: number;
     hitUR: number;
     hitSB: number;
@@ -108,6 +110,8 @@ export class Gameplay extends AbstractState {
         this.hitGeki = 0;
         this.hitKatu = 0;
         this.hitMiss = 0;
+        this.sliderEndHits = 0;
+        this.sliderTickHits = 0;
         this.hitMissPrev = 0;
         this.hitUR = 0.0;
         this.hitSB = 0;
@@ -220,6 +224,9 @@ export class Gameplay extends AbstractState {
             this.hitGeki = result.hitGeki;
             this.hitKatu = result.hitKatu;
             this.hitMiss = result.hitMiss;
+            this.sliderEndHits = result.sliderEndHits;
+            this.sliderTickHits = result.sliderTickHits;
+
             this.combo = result.combo;
             this.maxCombo = result.maxCombo;
 
@@ -453,14 +460,18 @@ export class Gameplay extends AbstractState {
                 if (this.performanceAttributes)
                     this.performanceAttributes.free();
 
-                const difficulty = new rosu.Difficulty({ mods: this.mods });
+                const difficulty = new rosu.Difficulty({
+                    mods: this.mods,
+                    lazer: this.game.client === 'lazer'
+                });
                 this.gradualPerformance = new rosu.GradualPerformance(
                     difficulty,
                     currentBeatmap
                 );
 
                 this.performanceAttributes = new rosu.Performance({
-                    mods: this.mods
+                    mods: this.mods,
+                    lazer: this.game.client === 'lazer'
                 }).calculate(currentBeatmap);
 
                 this.previousState = currentState;
@@ -493,7 +504,9 @@ export class Gameplay extends AbstractState {
                 n100: this.hit100,
                 n300: this.hit300,
                 nKatu: this.hitKatu,
-                nGeki: this.hitGeki
+                nGeki: this.hitGeki,
+                sliderEndHits: this.sliderEndHits,
+                sliderTickHits: this.sliderTickHits
             };
 
             const currPerformance = this.gradualPerformance.nth(
@@ -504,7 +517,8 @@ export class Gameplay extends AbstractState {
             const fcPerformance = new rosu.Performance({
                 mods: this.mods,
                 misses: 0,
-                accuracy: this.accuracy
+                accuracy: this.accuracy,
+                lazer: this.game.client === 'lazer'
             }).calculate(this.performanceAttributes);
             const t2 = performance.now();
 

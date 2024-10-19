@@ -424,6 +424,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 hitGeki,
                 hitKatu,
                 hitMiss,
+                sliderEndHits: 0,
+                sliderTickHits: 0,
                 date
             };
         } catch (error) {
@@ -537,6 +539,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 hitGeki,
                 hitKatu,
                 hitMiss,
+                sliderEndHits: 0,
+                sliderTickHits: 0,
                 combo,
                 maxCombo
             };
