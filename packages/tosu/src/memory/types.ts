@@ -54,6 +54,8 @@ export type IResultScreen =
           hitGeki: number;
           hitKatu: number;
           hitMiss: number;
+          sliderEndHits: number;
+          sliderTickHits: number;
           date: string;
       }
     | string
@@ -74,6 +76,8 @@ export type IScore = {
     hitGeki: number;
     hitKatu: number;
     hitMiss: number;
+    sliderEndHits: number;
+    sliderTickHits: number;
     combo: number;
     maxCombo: number;
     pp?: number;

@@ -1,5 +1,5 @@
+import rosu from '@kotrikd/rosu-pp';
 import { wLogger } from '@tosu/common';
-import rosu from 'rosu-pp-js';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
@@ -19,6 +19,8 @@ export class ResultScreen extends AbstractState {
     hitGeki: number;
     hitKatu: number;
     hitMiss: number;
+    sliderEndHits: number;
+    sliderTickHits: number;
     grade: string;
     date: string;
     accuracy: number;
@@ -48,6 +50,8 @@ export class ResultScreen extends AbstractState {
         this.hitGeki = 0;
         this.hitKatu = 0;
         this.hitMiss = 0;
+        this.sliderEndHits = 0;
+        this.sliderTickHits = 0;
         this.grade = '';
         this.date = '';
         this.accuracy = 0;
@@ -78,6 +82,8 @@ export class ResultScreen extends AbstractState {
             this.hitGeki = result.hitGeki;
             this.hitKatu = result.hitKatu;
             this.hitMiss = result.hitMiss;
+            this.sliderEndHits = result.sliderEndHits;
+            this.sliderTickHits = result.sliderTickHits;
             this.date = result.date;
 
             const hits = {
@@ -137,7 +143,10 @@ export class ResultScreen extends AbstractState {
                 n100: this.hit100,
                 n300: this.hit300,
                 nKatu: this.hitKatu,
-                nGeki: this.hitGeki
+                nGeki: this.hitGeki,
+                sliderEndHits: this.sliderEndHits,
+                sliderTickHits: this.sliderTickHits,
+                lazer: this.game.client === 'lazer'
             };
 
             const curPerformance = new rosu.Performance(scoreParams).calculate(
