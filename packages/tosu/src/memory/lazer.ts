@@ -204,6 +204,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private typeToMod: Record<number, string> = {};
 
+    private isPlayerLoading: boolean = false;
+
     private gameBaseAddress: number;
 
     patterns: LazerPatternData = {
@@ -255,14 +257,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(address + 0x3b0) === this.gameBase();
     }
 
-    // private checkIfPlayerLoader(address: number) {
-    //     let player = this.process.readIntPtr(address + 0x408);
-    //     if (!player || player < 1000000) {
-    //         return false;
-    //     }
-
-    //     return this.checkIfPlayer(player);
-    // }
+    private checkIfPlayerLoader(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x378) ===
+            this.process.readIntPtr(address + 0x468)
+        );
+    }
 
     private getCurrentScreen() {
         const screenStack = this.screenStack();
@@ -765,6 +765,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     gameplay(): IGameplay {
+        if (this.isPlayerLoading) {
+            return 'not-ready';
+        }
+
         const player = this.player();
         const scoreInfo = this.scoreInfo(player);
 
@@ -861,7 +865,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             M2Count: 0
         };
 
-        if (mode !== 0) {
+        if (mode !== 0 || this.isPlayerLoading) {
             return emptyKeyOverlay;
         }
 
@@ -987,6 +991,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     hitErrors(): IHitErrors {
+        if (this.isPlayerLoading) {
+            return [];
+        }
+
         return this.hitEvents().map((x) => x[0]);
     }
 
@@ -1032,17 +1040,19 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const isPlaying = this.player() !== 0;
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
         const isSongSelect = this.checkIfSongSelect(this.currentScreen);
-        // const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
+        const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
 
         let status = 0;
 
-        if (isPlaying) {
+        if (isPlaying || isPlayerLoader) {
             status = 2;
         } else if (isSongSelect) {
             status = 5;
         } else if (isResultScreen) {
             status = 7;
         }
+
+        this.isPlayerLoading = isPlayerLoader;
 
         if (isPlaying) {
             const dependencies = this.process.readIntPtr(this.player() + 0x480);
