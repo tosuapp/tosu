@@ -1,3 +1,4 @@
+import rosu from '@kotrikd/rosu-pp';
 import {
     downloadFile,
     getCachePath,
@@ -12,7 +13,6 @@ import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import rosu from 'rosu-pp-js';
 
 import { Server, sendJson } from '../index';
 import {
@@ -382,27 +382,25 @@ export default function buildBaseApi(server: Server) {
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData, menuData, beatmapPpData } =
-                osuInstance.getServices([
-                    'allTimesData',
-                    'menuData',
-                    'beatmapPpData'
-                ]);
+            const { global, menu, beatmapPP } = osuInstance.getServices([
+                'global',
+                'menu',
+                'beatmapPP'
+            ]);
 
             let beatmap: rosu.Beatmap;
             const exists = fs.existsSync(query.path);
             if (exists) {
                 const beatmapFilePath = path.join(
-                    allTimesData.GameFolder,
-                    'Songs',
-                    menuData.Folder,
-                    menuData.Path
+                    global.songsFolder,
+                    menu.folder,
+                    menu.filename
                 );
 
                 const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
                 beatmap = new rosu.Beatmap(beatmapContent);
             } else {
-                beatmap = beatmapPpData.getCurrentBeatmap();
+                beatmap = beatmapPP.getCurrentBeatmap();
             }
 
             if (query.mode !== undefined) beatmap.convert(query.mode);
@@ -421,6 +419,16 @@ export default function buildBaseApi(server: Server) {
             if (query.nKatu) params.nKatu = +query.nKatu;
             if (query.mods) params.mods = +query.mods;
             if (query.acc) params.accuracy = +query.acc;
+            if (query.sliderEndHits)
+                params.sliderEndHits = +query.sliderEndHits;
+            if (query.sliderTickHits)
+                params.sliderTickHits = +query.sliderTickHits;
+
+            if (
+                params.sliderEndHits === undefined &&
+                params.sliderTickHits === undefined
+            )
+                params.lazer = false;
 
             const calculate = new rosu.Performance(params).calculate(beatmap);
             sendJson(res, calculate);
