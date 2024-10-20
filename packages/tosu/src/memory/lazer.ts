@@ -610,9 +610,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         // TODO: read ulong instead long
         const pp = numberFromDecimal(
-            this.process.readInt(ppDecimal),
+            this.process.readLong(ppDecimal + 0x8),
             this.process.readUInt(ppDecimal + 0x4),
-            this.process.readLong(ppDecimal + 0x8)
+            this.process.readInt(ppDecimal)
         );
 
         let gamemode =
