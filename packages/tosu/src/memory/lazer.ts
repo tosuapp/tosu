@@ -539,19 +539,25 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (username === 'osu!salad') username = 'salad!';
         if (username === 'osu!topus') username = 'osu!topus!';
 
-        const player = this.player();
-        const scoreProcessor = this.process.readIntPtr(player + 0x438);
-
-        const hudOverlay = this.process.readIntPtr(player + 0x450);
-        const mainComponents = this.readComponents(
-            this.process.readIntPtr(hudOverlay + 0x3b8)
-        );
-
-        const ppCounter = this.findPPCounter(mainComponents, scoreProcessor);
         let pp = 0;
 
-        if (ppCounter) {
-            pp = this.process.readInt(ppCounter + 0x324);
+        const player = this.player();
+        if (player) {
+            const scoreProcessor = this.process.readIntPtr(player + 0x438);
+
+            const hudOverlay = this.process.readIntPtr(player + 0x450);
+            const mainComponents = this.readComponents(
+                this.process.readIntPtr(hudOverlay + 0x3b8)
+            );
+
+            const ppCounter = this.findPPCounter(
+                mainComponents,
+                scoreProcessor
+            );
+
+            if (ppCounter) {
+                pp = this.process.readInt(ppCounter + 0x324);
+            }
         }
 
         return {
@@ -592,9 +598,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const statistics = this.process.readIntPtr(user + 0xa8);
 
-        const pp = this.process.readBuffer(statistics + 0x60, 1 + 4 + 4 + 8);
-
-        console.log(pp.toString('hex'));
+        // const pp = this.process.readBuffer(statistics + 0x60, 1 + 4 + 4 + 8);
 
         // const gamemode = this.process.readInt(rulesetInfo + 0x30);
 
