@@ -57,7 +57,7 @@ export class Gameplay extends AbstractState {
 
     retries: number;
     playerName: string;
-    mods: CalculateMods;
+    mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
     hitErrors: number[];
     mode: number;
     maxCombo: number;

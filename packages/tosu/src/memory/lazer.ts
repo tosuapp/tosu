@@ -88,7 +88,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     };
 
     private modsInitialized = false;
-    private menuMods: CalculateMods;
+    private menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
 
     private currentScreen: number = 0;
 

@@ -10,7 +10,7 @@ import { CalculateMods } from '@/utils/osuMods.types';
 export class ResultScreen extends AbstractState {
     onlineId: number;
     playerName: string;
-    mods: CalculateMods;
+    mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
     mode: number;
     maxCombo: number;
     score: number;
