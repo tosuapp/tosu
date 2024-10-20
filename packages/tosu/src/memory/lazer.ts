@@ -1,3 +1,4 @@
+import { CountryCodes } from '@tosu/common';
 import path from 'path';
 
 import { AbstractMemory, ScanPatterns } from '@/memory';
@@ -23,7 +24,7 @@ import type {
 } from '@/memory/types';
 import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
-import { netDateBinaryToDate } from '@/utils/converters';
+import { netDateBinaryToDate, numberFromDecimal } from '@/utils/converters';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods, Mod, ModsCategories } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
@@ -47,6 +48,13 @@ enum HitResult {
     comboBreak = 15,
     sliderTailHit = 16,
     legacyComboIncrease = 99
+}
+
+enum RulesetName {
+    osu,
+    taiko,
+    catch,
+    mania
 }
 
 interface Statistics {
@@ -598,9 +606,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const statistics = this.process.readIntPtr(user + 0xa8);
 
-        // const pp = this.process.readBuffer(statistics + 0x60, 1 + 4 + 4 + 8);
+        const ppDecimal = statistics + 0x60 + 0x8;
 
-        // const gamemode = this.process.readInt(rulesetInfo + 0x30);
+        // TODO: read ulong instead long
+        const pp = numberFromDecimal(
+            this.process.readInt(ppDecimal),
+            this.process.readUInt(ppDecimal + 0x4),
+            this.process.readLong(ppDecimal + 0x8)
+        );
+
+        let gamemode =
+            RulesetName[this.process.readSharpStringPtr(user + 0x90)];
+
+        if (gamemode === undefined) {
+            gamemode = -1;
+        }
 
         return {
             id: this.process.readInt(user + 0xf0),
@@ -609,10 +629,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             rankedScore: this.process.readLong(statistics + 0x18),
             level: this.process.readInt(statistics + 0x44),
             playCount: this.process.readInt(statistics + 0x30),
-            playMode: 0,
-            rank: this.process.readByte(statistics + 0x4c + 0x4),
-            countryCode: 0,
-            performancePoints: 0,
+            playMode: gamemode,
+            rank: this.process.readInt(statistics + 0x4c + 0x4),
+            countryCode:
+                CountryCodes[
+                    this.process.readSharpStringPtr(user + 0x20).toLowerCase()
+                ],
+            performancePoints: pp,
             rawBanchoStatus: 0,
             backgroundColour: 0xffffffff,
             rawLoginStatus: 0
