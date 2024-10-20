@@ -315,6 +315,7 @@ export interface UserProfileAnswer {
 }
 
 export interface GosuCompatibleApi {
+    client: 'lazer' | 'stable' | '';
     settings: InSettingsValues;
     menu: InMenuValues;
     gameplay: GameplayValues;

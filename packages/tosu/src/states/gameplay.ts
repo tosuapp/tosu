@@ -4,14 +4,15 @@ import { config, wLogger } from '@tosu/common';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
-import { OsuMods } from '@/utils/osuMods.types';
+import { defaultCalculatedMods } from '@/utils/osuMods';
+import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
 const defaultLBPlayer = {
     name: '',
     score: 0,
     combo: 0,
     maxCombo: 0,
-    mods: 0,
+    mods: Object.assign({}, defaultCalculatedMods),
     h300: 0,
     h100: 0,
     h50: 0,
@@ -37,7 +38,7 @@ export interface LeaderboardPlayer {
     score: number;
     combo: number;
     maxCombo: number;
-    mods: number;
+    mods: CalculateMods;
     h300: number;
     h100: number;
     h50: number;
@@ -56,7 +57,7 @@ export class Gameplay extends AbstractState {
 
     retries: number;
     playerName: string;
-    mods: OsuMods;
+    mods: CalculateMods;
     hitErrors: number[];
     mode: number;
     maxCombo: number;
@@ -122,7 +123,7 @@ export class Gameplay extends AbstractState {
         this.accuracy = 100.0;
         this.unstableRate = 0;
         this.gradeCurrent = calculateGrade({
-            mods: this.mods,
+            mods: this.mods.number,
             mode: this.mode,
             hits: {
                 300: this.hit300,
@@ -159,7 +160,7 @@ export class Gameplay extends AbstractState {
         this.retries = 0;
         this.playerName = '';
         this.mode = 0;
-        this.mods = 0;
+        this.mods = Object.assign({}, defaultCalculatedMods);
         this.isLeaderboardVisible = false;
         this.leaderboardPlayer = Object.assign({}, defaultLBPlayer);
         this.leaderboardScores = [];
@@ -232,10 +233,13 @@ export class Gameplay extends AbstractState {
 
             if (this.maxCombo > 0) {
                 const baseUR = this.calculateUR();
-                if ((this.mods & OsuMods.DoubleTime) === OsuMods.DoubleTime) {
+                if (
+                    (this.mods.number & OsuMods.DoubleTime) ===
+                    OsuMods.DoubleTime
+                ) {
                     this.unstableRate = baseUR / 1.5;
                 } else if (
-                    (this.mods & OsuMods.HalfTime) ===
+                    (this.mods.number & OsuMods.HalfTime) ===
                     OsuMods.HalfTime
                 ) {
                     this.unstableRate = baseUR * 1.33;
@@ -369,7 +373,7 @@ export class Gameplay extends AbstractState {
             objectCount - this.hit300 - this.hit100 - this.hit50 - this.hitMiss;
 
         this.gradeCurrent = calculateGrade({
-            mods: this.mods,
+            mods: this.mods.number,
             mode: this.mode,
             hits: {
                 300: this.hit300,
@@ -382,7 +386,7 @@ export class Gameplay extends AbstractState {
         });
 
         this.gradeExpected = calculateGrade({
-            mods: this.mods,
+            mods: this.mods.number,
             mode: this.mode,
             hits: {
                 300: this.hit300 + remaining,
@@ -447,7 +451,7 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods}:${menu.mp3Length}`;
+            const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.name}:${menu.mp3Length}`;
             const isUpdate = this.previousState !== currentState;
 
             // update precalculated attributes
@@ -461,7 +465,7 @@ export class Gameplay extends AbstractState {
                     this.performanceAttributes.free();
 
                 const difficulty = new rosu.Difficulty({
-                    mods: this.mods,
+                    mods: this.mods.array,
                     lazer: this.game.client === 'lazer'
                 });
                 this.gradualPerformance = new rosu.GradualPerformance(
@@ -470,7 +474,7 @@ export class Gameplay extends AbstractState {
                 );
 
                 this.performanceAttributes = new rosu.Performance({
-                    mods: this.mods,
+                    mods: this.mods.array,
                     lazer: this.game.client === 'lazer'
                 }).calculate(currentBeatmap);
 
@@ -515,7 +519,7 @@ export class Gameplay extends AbstractState {
             )!;
 
             const fcPerformance = new rosu.Performance({
-                mods: this.mods,
+                mods: this.mods.array,
                 misses: 0,
                 accuracy: this.accuracy,
                 lazer: this.game.client === 'lazer'

@@ -24,8 +24,8 @@ import type {
 import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
-import { getOsuModsNumber } from '@/utils/osuMods';
-import { OsuMods } from '@/utils/osuMods.types';
+import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
+import { CalculateMods, Mod, ModsCategories } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 enum HitResult {
@@ -73,68 +73,10 @@ type LazerPatternData = {
     spectatorClient: number;
 };
 
-interface ModAcronym {
-    acronym: string;
-}
-
-interface ModItem {
-    type: number;
-}
-
 interface KeyCounter {
     isPressed: boolean;
     count: number;
 }
-
-type ModMapping = {
-    EZ: ModItem;
-    NF: ModItem;
-    HT: ModItem;
-    DC: ModItem;
-    HR: ModItem;
-    SD: ModItem;
-    PF: ModItem;
-    DT: ModItem;
-    NC: ModItem;
-    HD: ModItem;
-    FL: ModItem;
-    BL: ModItem;
-    ST: ModItem;
-    AC: ModItem;
-    TP: ModItem;
-    DA: ModItem;
-    CL: ModItem;
-    RD: ModItem;
-    MR: ModItem;
-    AL: ModItem;
-    SG: ModItem;
-    AT: ModItem;
-    CN: ModItem;
-    RX: ModItem;
-    AP: ModItem;
-    SO: ModItem;
-    TR: ModItem;
-    WG: ModItem;
-    SI: ModItem;
-    GR: ModItem;
-    DF: ModItem;
-    WU: ModItem;
-    WD: ModItem;
-    TC: ModItem;
-    BR: ModItem;
-    AD: ModItem;
-    MU: ModItem;
-    NS: ModItem;
-    MG: ModItem;
-    RP: ModItem;
-    AS: ModItem;
-    FR: ModItem;
-    BU: ModItem;
-    SY: ModItem;
-    DP: ModItem;
-    TD: ModItem;
-    SV2: ModItem;
-};
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private scanPatterns: ScanPatterns = {
@@ -146,63 +88,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     };
 
     private modsInitialized = false;
-    private menuMods: OsuMods = 0;
+    private menuMods: CalculateMods;
 
     private currentScreen: number = 0;
 
     private replayMode: boolean = false;
 
-    private modMapping: ModMapping = {
-        EZ: { type: 0 },
-        NF: { type: 0 },
-        HT: { type: 0 },
-        DC: { type: 0 },
-        HR: { type: 0 },
-        SD: { type: 0 },
-        PF: { type: 0 },
-        DT: { type: 0 },
-        NC: { type: 0 },
-        HD: { type: 0 },
-        FL: { type: 0 },
-        BL: { type: 0 },
-        ST: { type: 0 },
-        AC: { type: 0 },
-        TP: { type: 0 },
-        DA: { type: 0 },
-        CL: { type: 0 },
-        RD: { type: 0 },
-        MR: { type: 0 },
-        AL: { type: 0 },
-        SG: { type: 0 },
-        AT: { type: 0 },
-        CN: { type: 0 },
-        RX: { type: 0 },
-        AP: { type: 0 },
-        SO: { type: 0 },
-        TR: { type: 0 },
-        WG: { type: 0 },
-        SI: { type: 0 },
-        GR: { type: 0 },
-        DF: { type: 0 },
-        WU: { type: 0 },
-        WD: { type: 0 },
-        TC: { type: 0 },
-        BR: { type: 0 },
-        AD: { type: 0 },
-        MU: { type: 0 },
-        NS: { type: 0 },
-        MG: { type: 0 },
-        RP: { type: 0 },
-        AS: { type: 0 },
-        FR: { type: 0 },
-        BU: { type: 0 },
-        SY: { type: 0 },
-        DP: { type: 0 },
-        TD: { type: 0 },
-        SV2: { type: 0 }
-    };
-
-    private typeToMod: Record<number, string> = {};
+    private modMapping: Map<number, string> = new Map();
 
     private isPlayerLoading: boolean = false;
 
@@ -384,96 +276,40 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const funModsList = this.process.readIntPtr(entries + 0x70);
         const systemModsList = this.process.readIntPtr(entries + 0x88);
 
-        const diffReducingMods = this.readModList(diffReducingModsList);
-        const diffIncreasingMods = this.readModList(diffIncreasingModsList);
-        const conversionMods = this.readModList(conversionModsList);
-        const automationMods = this.readModList(automationModsList);
-        const funMods = this.readModList(funModsList);
-        const systemMods = this.readModList(systemModsList);
+        const ModsList = {
+            diffReductionCategory: this.readModList(diffReducingModsList),
+            diffIncreasingCategory: this.readModList(diffIncreasingModsList),
+            conversionCategory: this.readModList(conversionModsList),
+            automationCategory: this.readModList(automationModsList),
+            funCategory: this.readModList(funModsList),
+            systemCategory: this.readModList(systemModsList)
+        };
 
-        const diffReductionCategory = ['EZ', 'NF', 'HT', 'DC'];
-        const diffIncreasingCategory = [
-            'HR',
-            'SD',
-            'PF',
-            'DT',
-            'NC',
-            'HD',
-            'FL',
-            'BL',
-            'ST',
-            'AC'
-        ];
-        const conversionCategory = ['TP', 'DA', 'CL', 'RD', 'MR', 'AL', 'SG'];
-        const automationCategory = ['AT', 'CN', 'RX', 'AP', 'SO'];
-        const funCategory = [
-            'TR',
-            'WG',
-            'SI',
-            'GR',
-            'DF',
-            'WU',
-            'WD',
-            'TC',
-            'BR',
-            'AD',
-            'MU',
-            'NS',
-            'MG',
-            'RP',
-            'AS',
-            'FR',
-            'BU',
-            'SY',
-            'DP'
-        ];
-        const systemCategory = ['TD', 'SV2'];
-
-        for (let i = 0; i < diffReductionCategory.length; i++) {
-            this.modMapping[diffReductionCategory[i]].type =
-                diffReducingMods[i];
-        }
-
-        for (let i = 0; i < diffIncreasingCategory.length; i++) {
-            this.modMapping[diffIncreasingCategory[i]].type =
-                diffIncreasingMods[i];
-        }
-
-        for (let i = 0; i < conversionCategory.length; i++) {
-            this.modMapping[conversionCategory[i]].type = conversionMods[i];
-        }
-
-        for (let i = 0; i < automationCategory.length; i++) {
-            this.modMapping[automationCategory[i]].type = automationMods[i];
-        }
-
-        for (let i = 0; i < funCategory.length; i++) {
-            this.modMapping[funCategory[i]].type = funMods[i];
-        }
-
-        for (let i = 0; i < systemCategory.length; i++) {
-            this.modMapping[systemCategory[i]].type = systemMods[i];
-        }
-
-        for (const mod of Object.entries(this.modMapping)) {
-            this.typeToMod[mod[1].type] = mod[0];
+        for (const [category, mods] of Object.entries(ModsCategories)) {
+            for (let i = 0; i < mods.length; i++) {
+                const mod = mods[i];
+                this.modMapping.set(ModsList[category][i], mod);
+            }
         }
     }
 
-    private mods(scoreInfo: number): string[] {
+    private mods(scoreInfo: number): CalculateMods {
         if (!scoreInfo) {
-            return [];
+            return Object.assign({}, defaultCalculatedMods);
         }
 
-        const mods = this.process.readSharpStringPtr(scoreInfo + 0x50);
-
-        if (mods.length === 0) {
-            return [];
+        const jsonString = this.process.readSharpStringPtr(scoreInfo + 0x50);
+        if (jsonString.length === 0) {
+            return Object.assign({}, defaultCalculatedMods);
         }
 
-        const modAcronyms = JSON.parse(mods) as ModAcronym[];
+        const modAcronyms = JSON.parse(jsonString) as Mod[];
 
-        return modAcronyms.map((x) => x.acronym);
+        let mods = calculateMods(modAcronyms);
+        if (mods instanceof Error)
+            mods = Object.assign({}, defaultCalculatedMods);
+
+        return mods;
     }
 
     private beatmapClock() {
@@ -604,7 +440,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         scoreInfo: number,
         index: number
     ): LeaderboardPlayer {
-        const mods = getOsuModsNumber(this.mods(scoreInfo));
+        const mods = this.mods(scoreInfo);
 
         const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
         const username = this.process.readSharpStringPtr(realmUser + 0x18);
@@ -691,7 +527,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     ): IGameplay {
         const statistics = this.readStatistics(scoreInfo);
 
-        const mods = getOsuModsNumber(this.mods(scoreInfo));
+        const mods = this.mods(scoreInfo);
 
         const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
         const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
@@ -1072,19 +908,22 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             const selectedModsItems = this.readListItems(selectedMods);
 
-            const modAcronyms: string[] = [];
+            const modAcronyms: { acronym: any }[] = [];
 
             for (let i = 0; i < selectedModsItems.length; i++) {
                 const type = this.process.readIntPtr(selectedModsItems[i]);
 
-                const mod = this.typeToMod[type];
-
+                const mod = this.modMapping.get(type);
                 if (mod) {
-                    modAcronyms.push(mod);
+                    modAcronyms.push({ acronym: mod });
                 }
             }
 
-            this.menuMods = getOsuModsNumber(modAcronyms);
+            let mods = calculateMods(modAcronyms);
+            if (mods instanceof Error)
+                mods = Object.assign({}, defaultCalculatedMods);
+
+            this.menuMods = mods;
         }
 
         const filesFolder = path.join(this.basePath(), 'files');

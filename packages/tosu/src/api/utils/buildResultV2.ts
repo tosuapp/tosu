@@ -28,7 +28,7 @@ import {
 import { Menu } from '@/states/menu';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { getOsuModsString } from '@/utils/osuMods';
+import { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
@@ -42,8 +42,6 @@ const convertMemoryPlayerToResult = (
         geki: 0,
         katu: 0
     };
-
-    const modsName = getOsuModsString(memoryPlayer.mods);
 
     return {
         isFailed: memoryPlayer.isPassing === false,
@@ -63,11 +61,11 @@ const convertMemoryPlayerToResult = (
             max: memoryPlayer.maxCombo
         },
         mods: {
-            number: memoryPlayer.mods,
-            name: modsName
+            number: memoryPlayer.mods.number,
+            name: memoryPlayer.mods.name
         },
         rank: calculateGrade({
-            mods: modsName,
+            mods: memoryPlayer.mods.number,
             mode: gameMode,
             hits
         })
@@ -115,6 +113,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     };
 
     return {
+        client: osuInstance.client,
         state: {
             number: global.status,
             name: GameState[global.status] || ''
@@ -265,8 +264,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             name: resultScreen.playerName, // legacy, remove it later
             hits: resultScreenHits,
             mods: {
-                number: resultScreen.mods,
-                name: getOsuModsString(resultScreen.mods)
+                number: resultScreen.mods.number,
+                name: resultScreen.mods.name
             },
             maxCombo: resultScreen.maxCombo,
             rank: resultScreen.grade,
@@ -485,7 +484,7 @@ function buildBeatmapStats(beatmapPP: BeatmapPP, menu: Menu) {
 function buildPlay(
     gameplay: Gameplay,
     beatmapPP: BeatmapPP,
-    currentMods: number
+    currentMods: CalculateMods
 ) {
     return {
         playerName: gameplay.playerName,
@@ -520,8 +519,8 @@ function buildPlay(
             max: gameplay.maxCombo
         },
         mods: {
-            number: currentMods,
-            name: getOsuModsString(currentMods)
+            number: currentMods.number,
+            name: currentMods.name
         },
         rank: {
             current: gameplay.gradeCurrent,

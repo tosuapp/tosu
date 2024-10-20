@@ -149,6 +149,7 @@ export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
 
 export interface TosuAPi {
+    client: 'lazer' | 'stable' | '';
     state: NumberName;
     session: Session;
     settings: Settings;

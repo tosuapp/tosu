@@ -4,12 +4,13 @@ import { wLogger } from '@tosu/common';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
-import { OsuMods } from '@/utils/osuMods.types';
+import { defaultCalculatedMods } from '@/utils/osuMods';
+import { CalculateMods } from '@/utils/osuMods.types';
 
 export class ResultScreen extends AbstractState {
     onlineId: number;
     playerName: string;
-    mods: OsuMods;
+    mods: CalculateMods;
     mode: number;
     maxCombo: number;
     score: number;
@@ -40,7 +41,7 @@ export class ResultScreen extends AbstractState {
 
         this.onlineId = 0;
         this.playerName = '';
-        this.mods = 0;
+        this.mods = Object.assign({}, defaultCalculatedMods);
         this.mode = 0;
         this.maxCombo = 0;
         this.score = 0;
@@ -96,7 +97,7 @@ export class ResultScreen extends AbstractState {
             };
 
             this.grade = calculateGrade({
-                mods: this.mods,
+                mods: this.mods.number,
                 mode: this.mode,
                 hits
             });
@@ -137,7 +138,7 @@ export class ResultScreen extends AbstractState {
 
             const scoreParams: rosu.PerformanceArgs = {
                 combo: this.maxCombo,
-                mods: this.mods,
+                mods: this.mods.array,
                 misses: this.hitMiss,
                 n50: this.hit50,
                 n100: this.hit100,
@@ -153,7 +154,7 @@ export class ResultScreen extends AbstractState {
                 currentBeatmap
             );
             const fcPerformance = new rosu.Performance({
-                mods: this.mods,
+                mods: this.mods.array,
                 misses: 0,
                 accuracy: this.accuracy
             }).calculate(curPerformance);

@@ -10,7 +10,6 @@ import { InstanceManager } from '@/instances/manager';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/gameplay';
 import { calculateAccuracy } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { getOsuModsString } from '@/utils/osuMods';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer
@@ -19,7 +18,7 @@ const convertMemoryPlayerToResult = (
     score: memoryPlayer.score,
     combo: memoryPlayer.combo,
     maxCombo: memoryPlayer.maxCombo,
-    mods: getOsuModsString(memoryPlayer.mods),
+    mods: memoryPlayer.mods.name,
     h300: memoryPlayer.h300,
     h100: memoryPlayer.h100,
     h50: memoryPlayer.h50,
@@ -68,6 +67,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     };
 
     return {
+        client: osuInstance.client,
         settings: {
             showInterface: global.showInterface,
             folders: {
@@ -141,8 +141,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 }
             },
             mods: {
-                num: currentMods,
-                str: getOsuModsString(currentMods)
+                num: currentMods.number,
+                str: currentMods.name
             },
             pp: {
                 ...beatmapPP.ppAcc,
@@ -223,8 +223,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             }),
             maxCombo: resultScreen.maxCombo,
             mods: {
-                num: resultScreen.mods,
-                str: getOsuModsString(resultScreen.mods)
+                num: resultScreen.mods.number,
+                str: resultScreen.mods.name
             },
             300: resultScreen.hit300,
             geki: resultScreen.hitGeki,
@@ -326,8 +326,8 @@ const buildTourneyData = (
                         hitErrorArray: gameplay.hitErrors
                     },
                     mods: {
-                        num: currentMods,
-                        str: getOsuModsString(currentMods)
+                        num: currentMods.number,
+                        str: currentMods.name
                     }
                 }
             };

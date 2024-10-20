@@ -1,6 +1,8 @@
 import { wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
+import { defaultCalculatedMods } from '@/utils/osuMods';
+import { CalculateMods } from '@/utils/osuMods.types';
 
 export class Global extends AbstractState {
     isWatchingReplay: boolean = false;
@@ -12,7 +14,7 @@ export class Global extends AbstractState {
 
     gameTime: number = 0;
     playTime: number = 0;
-    menuMods: number = 0;
+    menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
 
     gameFolder: string = '';
     skinFolder: string = '';

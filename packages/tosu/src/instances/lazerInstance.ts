@@ -75,22 +75,31 @@ export class LazerInstance extends AbstractInstance {
                           ? resultScreen.mode
                           : menu.gamemode;
 
-                const currentState = `${menu.checksum}:${currentMode}:${currentMods}`;
+                const currentState = `${menu.checksum}:${currentMode}:${currentMods.name}`;
                 const updateGraph =
                     this.previousState !== currentState ||
                     this.previousMP3Length !== menu.mp3Length;
                 if (global.gameFolder && this.previousState !== currentState) {
-                    beatmapPP.updateMapMetadata(currentMods, currentMode, true);
+                    const metadataUpdate = beatmapPP.updateMapMetadata(
+                        currentMods.array,
+                        currentMode,
+                        true
+                    );
+                    if (metadataUpdate === 'not-ready') {
+                        await sleep(config.pollRate);
+                        continue;
+                    }
 
+                    beatmapPP.updateGraph(currentMods.array);
                     this.previousState = currentState;
                 }
 
                 if (global.gameFolder && updateGraph) {
-                    beatmapPP.updateGraph(currentMods);
+                    beatmapPP.updateGraph(currentMods.array);
                     this.previousMP3Length = menu.mp3Length;
                 }
 
-                beatmapPP.updateRealTimeBPM(global.playTime, currentMods);
+                beatmapPP.updateRealTimeBPM(global.playTime, currentMods.rate);
 
                 switch (global.status) {
                     case 0:

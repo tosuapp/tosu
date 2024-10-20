@@ -99,7 +99,7 @@ export class OsuInstance extends AbstractInstance {
                               ? resultScreen.mode
                               : menu.gamemode;
 
-                    const currentState = `${menu.checksum}:${currentMode}:${currentMods}`;
+                    const currentState = `${menu.checksum}:${currentMode}:${currentMods.name}`;
                     const updateGraph =
                         this.previousState !== currentState ||
                         this.previousMP3Length !== menu.mp3Length;
@@ -109,14 +109,15 @@ export class OsuInstance extends AbstractInstance {
                         this.previousState !== currentState
                     ) {
                         const metadataUpdate = beatmapPP.updateMapMetadata(
-                            currentMods,
+                            currentMods.array,
                             currentMode
                         );
                         if (metadataUpdate === 'not-ready') {
                             await sleep(config.pollRate);
                             continue;
                         }
-                        beatmapPP.updateGraph(currentMods);
+
+                        beatmapPP.updateGraph(currentMods.array);
                         this.previousState = currentState;
                     }
 
@@ -125,11 +126,14 @@ export class OsuInstance extends AbstractInstance {
                         global.gameFolder &&
                         updateGraph
                     ) {
-                        beatmapPP.updateGraph(currentMods);
+                        beatmapPP.updateGraph(currentMods.array);
                         this.previousMP3Length = menu.mp3Length;
                     }
 
-                    beatmapPP.updateRealTimeBPM(global.playTime, currentMods);
+                    beatmapPP.updateRealTimeBPM(
+                        global.playTime,
+                        currentMods.rate
+                    );
 
                     switch (global.status) {
                         case 0:

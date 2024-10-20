@@ -1,6 +1,6 @@
 import { KeyOverlay, LeaderboardPlayer } from '@/states/gameplay';
 import { ITourneyManagerChatItem } from '@/states/tourney';
-import { OsuMods } from '@/utils/osuMods.types';
+import { CalculateMods } from '@/utils/osuMods.types';
 
 export type IAudioVelocityBase = number[] | null;
 
@@ -44,7 +44,7 @@ export type IResultScreen =
     | {
           onlineId: number;
           playerName: string;
-          mods: OsuMods;
+          mods: CalculateMods;
           mode: number;
           maxCombo: number;
           score: number;
@@ -64,7 +64,7 @@ export type IResultScreen =
 export type IScore = {
     retries: number;
     playerName: string;
-    mods: OsuMods;
+    mods: CalculateMods;
     mode: number;
     score: number;
     playerHPSmooth: number;
@@ -98,7 +98,7 @@ export type IGlobal =
           status: number;
 
           gameTime: number;
-          menuMods: number;
+          menuMods: CalculateMods;
 
           skinFolder: string;
           memorySongsFolder: string;

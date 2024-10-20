@@ -24,6 +24,7 @@ import type {
 import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate } from '@/utils/converters';
+import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 export type OsuPatternData = {
@@ -389,7 +390,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const playerName = this.process.readSharpString(
                 this.process.readInt(resultScreenBase + 0x28)
             );
-            const mods =
+            const modsInt =
                 this.process.readInt(
                     this.process.readInt(resultScreenBase + 0x1c) + 0xc
                 ) ^
@@ -410,6 +411,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 this.process.readInt(resultScreenBase + 0xa4),
                 this.process.readInt(resultScreenBase + 0xa0)
             ).toISOString();
+
+            let mods = calculateMods(modsInt);
+            if (mods instanceof Error)
+                mods = Object.assign({}, defaultCalculatedMods);
 
             return {
                 onlineId,
@@ -476,7 +481,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 this.process.readInt(scoreBase + 0x28)
             );
             // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
-            const mods =
+            const modsInt =
                 this.process.readInt(
                     this.process.readInt(scoreBase + 0x1c) + 0xc
                 ) ^
@@ -523,6 +528,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 // [[Ruleset + 0x68] + 0x38] + 0x68
                 maxCombo = this.process.readShort(scoreBase + 0x68);
             }
+
+            let mods = calculateMods(modsInt);
+            if (mods instanceof Error)
+                mods = Object.assign({}, defaultCalculatedMods);
 
             return {
                 retries,
@@ -729,6 +738,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 );
             }
 
+            let mods = calculateMods(menuMods);
+            if (mods instanceof Error)
+                mods = Object.assign({}, defaultCalculatedMods);
+
             return {
                 isWatchingReplay,
                 isReplayUiHidden,
@@ -738,7 +751,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 status,
 
                 gameTime,
-                menuMods,
+                menuMods: mods,
 
                 skinFolder,
                 memorySongsFolder
@@ -1124,6 +1137,13 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         const modsXor2 = this.process.readInt(
             this.process.readInt(entry + 0x1c) + 0xc
         );
+
+        const modsInt = modsXor1 ^ modsXor2;
+
+        let mods = calculateMods(modsInt);
+        if (mods instanceof Error)
+            mods = Object.assign({}, defaultCalculatedMods);
+
         return {
             name: this.process.readSharpString(
                 this.process.readInt(base + 0x8)
@@ -1131,7 +1151,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             score: this.process.readInt(base + 0x30),
             combo: this.process.readShort(entry + 0x94),
             maxCombo: this.process.readShort(entry + 0x68),
-            mods: modsXor1 ^ modsXor2,
+            mods,
             h300: this.process.readShort(entry + 0x8a),
             h100: this.process.readShort(entry + 0x88),
             h50: this.process.readShort(entry + 0x8c),

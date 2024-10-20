@@ -9,7 +9,7 @@ import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals } from '@/utils/converters';
-import { OsuMods } from '@/utils/osuMods.types';
+import { ModsLazer } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -247,7 +247,7 @@ export class BeatmapPP extends AbstractState {
     }
 
     updateMapMetadata(
-        currentMods: number,
+        currentMods: ModsLazer,
         currentMode: number,
         lazerByPass: boolean = false
     ) {
@@ -459,7 +459,7 @@ export class BeatmapPP extends AbstractState {
         }
     }
 
-    updateGraph(currentMods: number) {
+    updateGraph(currentMods: ModsLazer) {
         if (this.beatmap === undefined) return;
         try {
             const startTime = performance.now();
@@ -672,16 +672,9 @@ export class BeatmapPP extends AbstractState {
         }
     }
 
-    updateRealTimeBPM(timeMS: number, mods: number) {
+    updateRealTimeBPM(timeMS: number, multiply: number) {
         if (!this.lazerBeatmap) return;
 
-        const multiply =
-            (mods & OsuMods.DoubleTime) === OsuMods.DoubleTime ||
-            (mods & OsuMods.Nightcore) === OsuMods.Nightcore
-                ? 1.5
-                : (mods & OsuMods.HalfTime) === OsuMods.HalfTime
-                  ? 0.75
-                  : 1;
         const bpm =
             this.lazerBeatmap.controlPoints.timingPoints
                 // @ts-ignore
