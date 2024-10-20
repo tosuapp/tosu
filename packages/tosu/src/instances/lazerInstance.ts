@@ -23,7 +23,7 @@ export class LazerInstance extends AbstractInstance {
     async regularDataLoop(): Promise<void> {
         wLogger.debug('SM(lazer:startDataLoop) starting');
 
-        const { global, menu, beatmapPP, gameplay, resultScreen } =
+        const { global, menu, beatmapPP, gameplay, resultScreen, user } =
             this.getServices([
                 'global',
                 'menu',
@@ -144,6 +144,8 @@ export class LazerInstance extends AbstractInstance {
                         resultScreen.init();
                         break;
                 }
+
+                user.updateState();
 
                 await sleep(config.pollRate);
             } catch (exc) {

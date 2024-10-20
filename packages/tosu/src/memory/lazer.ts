@@ -750,15 +750,27 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     user(): IUser {
+        const api = this.process.readIntPtr(this.gameBase() + 0x438);
+        const userBindable = this.process.readIntPtr(api + 0x258);
+        const user = this.process.readIntPtr(userBindable + 0x20);
+
+        const statistics = this.process.readIntPtr(user + 0xa8);
+
+        const pp = this.process.readBuffer(statistics + 0x60, 1 + 4 + 4 + 8);
+
+        console.log(pp.toString('hex'));
+
+        // const gamemode = this.process.readInt(rulesetInfo + 0x30);
+
         return {
-            name: 'Guest',
-            accuracy: 0,
-            rankedScore: 0,
-            id: 0,
-            level: 0,
-            playCount: 0,
+            id: this.process.readInt(user + 0xf0),
+            name: this.process.readSharpStringPtr(user + 0x8),
+            accuracy: this.process.readDouble(statistics + 0x20),
+            rankedScore: this.process.readLong(statistics + 0x18),
+            level: this.process.readInt(statistics + 0x44),
+            playCount: this.process.readInt(statistics + 0x30),
             playMode: 0,
-            rank: 1,
+            rank: this.process.readByte(statistics + 0x4c + 0x4),
             countryCode: 0,
             performancePoints: 0,
             rawBanchoStatus: 0,
