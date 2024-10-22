@@ -315,7 +315,7 @@ function rebuildJSON({
     return items;
 }
 
-function getLocalCounters(): ICounter[] {
+export function getLocalCounters(): ICounter[] {
     try {
         const staticPath = getStaticPath();
 
@@ -560,21 +560,18 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.enableKeyOverlay}`)
         );
 
-    const enableGosuOverlayHTML = settingsItemHTML
-        .replace('{NAME}', 'ENABLE_GOSU_OVERLAY')
-        .replace(
-            '{DESCRIPTION}',
-            'Enables/disable in-game <b>gosumemory</b> overlay<br />(!!!I AM NOT RESPONSIBLE FOR USING IT!!!)'
-        )
+    const enableIngameOverlayHTML = settingsItemHTML
+        .replace('{NAME}', 'ENABLE_INGAME_OVERLAY')
+        .replace('{DESCRIPTION}', 'Enables/disable in-game overlay')
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{ID}/gm, 'ENABLE_GOSU_OVERLAY')
+                .replace(/{ID}/gm, 'ENABLE_INGAME_OVERLAY')
                 .replace(
                     '{ADDON}',
-                    config.enableGosuOverlay ? 'checked="true"' : ''
+                    config.enableIngameOverlay ? 'checked="true"' : ''
                 )
-                .replace('{VALUE}', `${config.enableGosuOverlay}`)
+                .replace('{VALUE}', `${config.enableIngameOverlay}`)
         );
 
     const pollRateHTML = settingsItemHTML
@@ -713,7 +710,7 @@ export function buildSettings(res: http.ServerResponse) {
     ${openDashboardOnStartupHtml}
     <div></div>
     <div></div>
-    ${enableGosuOverlayHTML}
+    ${enableIngameOverlayHTML}
     ${enableKeyOverlayHTML}
     <div></div>
     <div></div>

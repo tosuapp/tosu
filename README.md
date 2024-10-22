@@ -46,7 +46,7 @@ Features
 - [x] All _**Gamemodes**_ are supported
 - [x] Gosumemory _**compatible**_ api
 - [X] Brand _**new api**_ for websocket
-- [x] _**In-game**_ overlay (based on gosumemory closed overlay injection)
+- [x] _**In-game**_ overlay, allow adding multiple overlays (pp counters)
 - [x] _**Available**_ websocket data:
   - Settings
   - Gameplay data
@@ -67,8 +67,8 @@ Features
 
 In-game overlay
 ---
-- To enable it, you need to edit `tosu.env`, and turn on `ENABLE_GOSU_OVERLAY=true` (make it equal `true`)
-- Tutorial: [link](https://github.com/tosuapp/tosu/wiki/How-to-enable-ingame-overlay)
+- To enable it, you need to edit `tosu.env`, and turn on `ENABLE_INGAME_OVERLAY=true` (make it equal `true`)
+- Tutorial: TBA
 ---
 
 

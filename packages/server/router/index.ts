@@ -20,11 +20,17 @@ import {
     buildInstructionLocal,
     buildLocalCounters,
     buildSettings,
+    getLocalCounters,
     saveSettings
 } from '../utils/counters';
 import { ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
+
+const pkgAssetsPath =
+    'pkg' in process
+        ? path.join(__dirname, 'assets')
+        : path.join(__filename, '../../../assets');
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
@@ -442,6 +448,36 @@ export default function buildBaseApi(server: Server) {
 
             return sendJson(res, {
                 error: typeof exc === 'string' ? exc : (exc as any).message
+            });
+        }
+    });
+
+    server.app.route('/api/ingame', 'GET', (req, res) => {
+        try {
+            fs.readFile(
+                path.join(pkgAssetsPath, 'ingame.html'),
+                'utf8',
+                (err, content) => {
+                    if (err) {
+                        res.writeHead(500);
+                        return res.end(`Server Error: ${err.code}`);
+                    }
+
+                    const counters = getLocalCounters();
+
+                    content += `\n\n\n<script>\rwindow.COUNTERS = ${JSON.stringify(counters)}\r</script>\n`;
+
+                    res.writeHead(200, {
+                        'Content-Type': 'text/html; charset=utf-8'
+                    });
+                    res.end(content, 'utf-8');
+                }
+            );
+        } catch (error) {
+            wLogger.debug(error);
+
+            return sendJson(res, {
+                error: (error as any).message
             });
         }
     });

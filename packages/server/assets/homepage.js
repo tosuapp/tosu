@@ -627,6 +627,7 @@ const showSettings = {
     },
   },
   setup(props) {
+    const is_ingame = window.location.pathname == '/api/ingame';
     const settings = ref([]);
     for (let i = 0; i < props.settings.length; i++) {
       const setting = props.settings[i];
@@ -715,8 +716,10 @@ const showSettings = {
 
 
     async function updateSettings(event) {
-      const confirmed = confirm(`Update settings?`);
-      if (!confirmed) return;
+      if (!is_ingame) {
+        const confirmed = confirm(`Update settings?`);
+        if (!confirmed) return;
+      };
 
       const element = event.target;
 
@@ -794,9 +797,10 @@ const showSettings = {
 
     function removeCommand(ind, ind2) {
       const item = settings.value[ind2];
-      const confirmed = confirm(`Delete command?`);
-      if (!confirmed) return;
-
+      if (!is_ingame) {
+        const confirmed = confirm(`Delete command?`);
+        if (!confirmed) return;
+      };
 
       item.value.splice(ind, 1);
     };
@@ -888,7 +892,7 @@ function startDownload(element) {
 
 
     const loadingDiv = previousImage || document.createElement('img');
-    if (!previousImage) loadingDiv.src = 'https://cdn-icons-png.flaticon.com/128/39/39979.png';
+    if (!previousImage) loadingDiv.src = '/assets/images/39979.png';
     loadingDiv.style.width = 0;
     loadingDiv.style.opacity = 0;
 
@@ -902,7 +906,7 @@ function startDownload(element) {
 
       setTimeout(() => {
         loadingDiv.style.opacity = 1;
-        loadingDiv.style.width = loadingDiv.style.height = childrenSize.height;
+        loadingDiv.style.width = loadingDiv.style.height = `${childrenSize.height}px`;
       }, 100);
     }, 10);
   };
@@ -929,7 +933,7 @@ function endDownload(element, id, text) {
 
     setTimeout(() => {
       span.style.opacity = 1;
-      span.style.width = spanSize.width;
+      span.style.width = `${spanSize.width}px`;
     }, 100);
 
 
@@ -1173,7 +1177,7 @@ async function saveSettings(element) {
   const DEBUG_LOG = document.querySelector('#DEBUG_LOG');
   const CALCULATE_PP = document.querySelector('#CALCULATE_PP');
   const ENABLE_KEY_OVERLAY = document.querySelector('#ENABLE_KEY_OVERLAY');
-  const ENABLE_GOSU_OVERLAY = document.querySelector('#ENABLE_GOSU_OVERLAY');
+  const ENABLE_INGAME_OVERLAY = document.querySelector('#ENABLE_INGAME_OVERLAY');
   const POLL_RATE = document.querySelector('#POLL_RATE');
   const PRECISE_DATA_POLL_RATE = document.querySelector('#PRECISE_DATA_POLL_RATE');
   const SERVER_IP = document.querySelector('#SERVER_IP');
@@ -1197,7 +1201,7 @@ async function saveSettings(element) {
       CALCULATE_PP: CALCULATE_PP.checked,
       SHOW_MP_COMMANDS: SHOW_MP_COMMANDS.checked,
       ENABLE_KEY_OVERLAY: ENABLE_KEY_OVERLAY.checked,
-      ENABLE_GOSU_OVERLAY: ENABLE_GOSU_OVERLAY.checked,
+      ENABLE_INGAME_OVERLAY: ENABLE_INGAME_OVERLAY.checked,
       POLL_RATE: POLL_RATE.value,
       PRECISE_DATA_POLL_RATE: PRECISE_DATA_POLL_RATE.value,
       SERVER_IP: SERVER_IP.value,
@@ -1428,8 +1432,8 @@ async function startBuilderModal(element) {
 };
 
 
-search_bar.addEventListener('input', handleInput);
-search_bar.addEventListener('keydown', handleInput);
+search_bar?.addEventListener('input', handleInput);
+search_bar?.addEventListener('keydown', handleInput);
 
 
 window.addEventListener('click', (event) => {
@@ -1465,6 +1469,11 @@ window.addEventListener('click', (event) => {
   };
 
   if (t?.classList.value.includes(' settings-button')) {
+    loadCounterSettings(t);
+    return;
+  };
+
+  if (t?.classList.value.includes(' -settings')) {
     loadCounterSettings(t);
     return;
   };

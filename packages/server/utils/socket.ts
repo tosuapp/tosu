@@ -106,7 +106,16 @@ export class Websocket {
 
         // resend commands internally "this.socket.emit"
         this.socket.on('message', (data) => {
-            this.clients.forEach((client) => client.emit('message', data));
+            this.clients.forEach((client) => {
+                // skip sending settings to wrong overlay
+                if (
+                    data.startsWith('getSettings:') &&
+                    !data.endsWith(encodeURI(client.query.l || ''))
+                )
+                    return;
+
+                client.emit('message', data);
+            });
         });
 
         if (this.pollRateFieldName !== '') {

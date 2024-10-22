@@ -14,6 +14,7 @@ export function parseCounterSettings(
     action: 'parse' | 'user/save' | 'counter/get' | 'dev/save' | '',
     payload?: bodyPayload[] & ISettings[]
 ) {
+    const ingameOverlay = folderName === '__ingame__';
     const staticPath = getStaticPath();
     const settingsPath = path.join(
         staticPath,
@@ -38,16 +39,15 @@ export function parseCounterSettings(
             );
         }
 
-        if (!fs.existsSync(settingsPath))
+        if (ingameOverlay !== true && !fs.existsSync(settingsPath))
             fs.writeFileSync(settingsPath, JSON.stringify([]), 'utf8');
 
         if (fs.existsSync(settingsPath) && !fs.existsSync(settingsValuesPath))
             fs.writeFileSync(settingsValuesPath, JSON.stringify({}), 'utf8');
 
-        const settings: ISettings[] = JsonSafeParse(
-            fs.readFileSync(settingsPath, 'utf8'),
-            []
-        );
+        const settings: ISettings[] = ingameOverlay
+            ? []
+            : JsonSafeParse(fs.readFileSync(settingsPath, 'utf8'), []);
 
         const values: ISettingsCompact = JsonSafeParse(
             fs.readFileSync(settingsValuesPath, 'utf8'),
@@ -62,6 +62,12 @@ export function parseCounterSettings(
                 };
 
             case 'user/save':
+                if (ingameOverlay)
+                    return {
+                        values: payload,
+                        settingsValuesPath
+                    };
+
                 if (!Array.isArray(payload)) {
                     return new Error('body payload is not array');
                 }

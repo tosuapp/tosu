@@ -1,55 +1,38 @@
 import {
     checkGameOverlayConfig,
+    config,
     downloadFile,
     getProgramPath,
     unzip,
     wLogger
 } from '@tosu/common';
 import { execFile } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Process } from 'tsprocess/dist/process';
-
-const configPath = path.join(getProgramPath(), 'config.ini');
-const checkGosuConfig = (p: Process, checking?: boolean) => {
-    if (!existsSync(configPath)) return null;
-
-    const read = readFileSync(configPath, 'utf8');
-    const parseURL = /^overlayURL[ ]*=[ ]*(.*)$/m.exec(read);
-    if (!parseURL || !parseURL?.[1]) {
-        setTimeout(() => {
-            checkGosuConfig(p, true);
-        }, 1000);
-        return false;
-    }
-
-    if (checking) injectGameOverlay(p);
-    return true;
-};
 
 export const injectGameOverlay = async (p: Process) => {
     try {
         if (process.platform !== 'win32') {
             wLogger.error(
-                '[gosu-overlay] Ingame overlay can run only under windows, sorry linux/darwin user!'
+                '[ingame-overlay] Ingame overlay can run only under windows, sorry linux/darwin user!'
             );
             return;
         }
 
-        // Check for DEPRECATED GOSU CONFIG, due its needed to read [GameOverlay] section from original configuration
         checkGameOverlayConfig();
 
-        const gameOverlayPath = path.join(getProgramPath(), 'gameOverlay');
+        const gameOverlayPath = path.join(getProgramPath(), 'game-overlay');
         if (!existsSync(gameOverlayPath)) {
             const archivePath = path.join(
                 gameOverlayPath,
-                'gosu-gameoverlay.zip'
+                'tosu-gameoverlay.zip'
             );
 
             await mkdir(gameOverlayPath);
             await downloadFile(
-                'https://dl.kotworks.cyou/gosu-gameoverlay.zip',
+                'https://nocfdl.kotworks.cyou/tosu-overlay-alpha.zip',
                 archivePath
             );
 
@@ -57,29 +40,26 @@ export const injectGameOverlay = async (p: Process) => {
             await rm(archivePath);
         }
 
-        if (!existsSync(path.join(gameOverlayPath, 'gosumemoryoverlay.dll'))) {
-            wLogger.info(
-                '[gosu-overlay] Please delete gameOverlay folder, and restart program!'
-            );
-            return;
-        }
-
-        const overlayURLstatus = checkGosuConfig(p);
-        if (!overlayURLstatus) {
-            wLogger.warn(
-                '[gosu-overlay] Specify overlayURL for gameOverlay in config.ini'
+        if (
+            !existsSync(path.join(gameOverlayPath, 'tosu_overlay.dll')) &&
+            !existsSync(path.join(gameOverlayPath, 'tosu_injector.exe'))
+        ) {
+            wLogger.error(
+                '[ingame-overlay] Please delete game-overlay folder, and restart program!'
             );
             return;
         }
 
         return await new Promise((resolve, reject) => {
             const child = execFile(
-                path.join(gameOverlayPath, 'a.exe'),
+                path.join(gameOverlayPath, 'tosu_injector.exe'),
                 [
                     p.id.toString(),
-                    path.join(gameOverlayPath, 'gosumemoryoverlay.dll')
+                    config.serverIP,
+                    config.serverPort.toString()
                 ],
                 {
+                    cwd: gameOverlayPath,
                     windowsHide: true
                 }
             );
@@ -87,9 +67,7 @@ export const injectGameOverlay = async (p: Process) => {
                 reject(err);
             });
             child.on('exit', () => {
-                wLogger.info(
-                    '[gosu-overlay] initialized successfully, see https://github.com/l3lackShark/gosumemory/wiki/GameOverlay for tutorial'
-                );
+                wLogger.warn('[ingame-overlay] initialized successfully');
                 resolve(true);
             });
         });

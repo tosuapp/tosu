@@ -159,9 +159,9 @@ export abstract class AbstractInstance {
         }
 
         /**
-         * ENABLING GOSU OVERLAY (stable only, for now)
+         * ENABLING INGAME OVERLAY (stable only, for now)
          */
-        if (config.enableGosuOverlay && this.client === 'stable') {
+        if (config.enableIngameOverlay && this.client === 'stable') {
             this.injectGameOverlay();
         }
 
