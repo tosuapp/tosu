@@ -864,9 +864,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return true;
     }
 
-    private readHitEvent(address: number): [number, number] | undefined {
+    private readHitEvent(address: number): number | undefined {
         const hitObject = this.process.readIntPtr(address);
-
         if (!hitObject) {
             return undefined;
         }
@@ -876,31 +875,30 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         const hitResult = this.process.readInt(address + 0x18);
-
         if (!this.isResultHit(hitResult)) {
             return undefined;
         }
 
         const timeOffset = this.process.readDouble(address + 0x10);
-
-        return [timeOffset, address];
+        return timeOffset;
     }
 
-    private hitEvents(): [number, number][] {
+    private hitEvents(): number[] {
         const player = this.player();
         const scoreProcessor = this.process.readIntPtr(player + 0x438);
         const hitEventsList = this.process.readIntPtr(scoreProcessor + 0x288);
         const hitEvents = this.readListItems(hitEventsList, true, 0x40);
 
-        const result: [number, number][] = [];
+        const result: number[] = [];
         for (let i = 0; i < hitEvents.length; i++) {
             const hitEvent = this.readHitEvent(hitEvents[i]);
-            if (!hitEvent) {
+            if (hitEvent === undefined) {
                 continue;
             }
 
-            result.push([hitEvent[0], hitEvent[1]]);
+            result.push(hitEvent);
         }
+
         return result;
     }
 
@@ -909,7 +907,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return [];
         }
 
-        return this.hitEvents().map((x) => x[0]);
+        return this.hitEvents();
     }
 
     global(): IGlobal {
