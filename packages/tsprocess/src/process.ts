@@ -83,24 +83,24 @@ export class Process {
 
     readIntPtr(address: number): number {
         return this.bitness === 64
-            ? ProcessUtils.readLong(this.handle, address, this.bitness)
-            : ProcessUtils.readInt(this.handle, address, this.bitness);
+            ? ProcessUtils.readLong(this.handle, this.bitness, address)
+            : ProcessUtils.readInt(this.handle, this.bitness, address);
     }
 
     readByte(address: number): number {
-        return ProcessUtils.readByte(this.handle, address, this.bitness);
+        return ProcessUtils.readByte(this.handle, this.bitness, address);
     }
 
     readShort(address: number): number {
-        return ProcessUtils.readShort(this.handle, address, this.bitness);
+        return ProcessUtils.readShort(this.handle, this.bitness, address);
     }
 
     readInt(address: number): number {
-        return ProcessUtils.readInt(this.handle, address, this.bitness);
+        return ProcessUtils.readInt(this.handle, this.bitness, address);
     }
 
     readUInt(address: number): number {
-        return ProcessUtils.readUInt(this.handle, address, this.bitness);
+        return ProcessUtils.readUInt(this.handle, this.bitness, address);
     }
 
     readPointer(address: number): number {
@@ -108,22 +108,22 @@ export class Process {
     }
 
     readLong(address: number): number {
-        return ProcessUtils.readLong(this.handle, address, this.bitness);
+        return ProcessUtils.readLong(this.handle, this.bitness, address);
     }
 
     readFloat(address: number): number {
-        return ProcessUtils.readFloat(this.handle, address, this.bitness);
+        return ProcessUtils.readFloat(this.handle, this.bitness, address);
     }
 
     readDouble(address: number): number {
-        return ProcessUtils.readDouble(this.handle, address, this.bitness);
+        return ProcessUtils.readDouble(this.handle, this.bitness, address);
     }
 
     readSharpString(address: number): string {
         return ProcessUtils.readCSharpString(
             this.handle,
-            address,
-            this.bitness
+            this.bitness,
+            address
         );
     }
 
@@ -134,7 +134,7 @@ export class Process {
             return '';
         }
 
-        return ProcessUtils.readCSharpString(this.handle, addr, this.bitness);
+        return ProcessUtils.readCSharpString(this.handle, this.bitness, addr);
     }
 
     readSharpDictionary(address: number): number[] {
