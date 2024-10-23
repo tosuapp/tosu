@@ -354,6 +354,8 @@ export interface Hits {
     geki: number;
     katu: number;
     sliderBreaks: number;
+    sliderEndHits: number;
+    sliderTickHits: number;
 }
 
 export interface Combo {
@@ -490,6 +492,8 @@ export interface Hits3 {
     '300': number;
     geki: number;
     katu: number;
+    sliderEndHits: number;
+    sliderTickHits: number;
 }
 
 export interface Folders {

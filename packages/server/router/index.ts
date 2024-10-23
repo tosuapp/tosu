@@ -413,21 +413,27 @@ export default function buildBaseApi(server: Server) {
 
             const params: rosu.PerformanceArgs = {};
 
-            if (query.clockRate) params.clockRate = +query.clockRate;
-            if (query.passedObjects)
+            if (query.ar !== undefined) params.ar = +query.ar;
+            if (query.cs !== undefined) params.cs = +query.cs;
+            if (query.hp !== undefined) params.hp = +query.hp;
+            if (query.od !== undefined) params.od = +query.od;
+
+            if (query.clockRate !== undefined)
+                params.clockRate = +query.clockRate;
+            if (query.passedObjects !== undefined)
                 params.passedObjects = +query.passedObjects;
-            if (query.combo) params.combo = +query.combo;
-            if (query.nMisses) params.misses = +query.nMisses;
-            if (query.n100) params.n100 = +query.n100;
-            if (query.n300) params.n300 = +query.n300;
-            if (query.n50) params.n50 = +query.n50;
-            if (query.nGeki) params.nGeki = +query.nGeki;
-            if (query.nKatu) params.nKatu = +query.nKatu;
-            if (query.mods) params.mods = +query.mods;
-            if (query.acc) params.accuracy = +query.acc;
-            if (query.sliderEndHits)
+            if (query.combo !== undefined) params.combo = +query.combo;
+            if (query.nMisses !== undefined) params.misses = +query.nMisses;
+            if (query.n100 !== undefined) params.n100 = +query.n100;
+            if (query.n300 !== undefined) params.n300 = +query.n300;
+            if (query.n50 !== undefined) params.n50 = +query.n50;
+            if (query.nGeki !== undefined) params.nGeki = +query.nGeki;
+            if (query.nKatu !== undefined) params.nKatu = +query.nKatu;
+            if (query.mods !== undefined) params.mods = +query.mods;
+            if (query.acc !== undefined) params.accuracy = +query.acc;
+            if (query.sliderEndHits !== undefined)
                 params.sliderEndHits = +query.sliderEndHits;
-            if (query.sliderTickHits)
+            if (query.sliderTickHits !== undefined)
                 params.sliderTickHits = +query.sliderTickHits;
 
             if (
@@ -452,7 +458,7 @@ export default function buildBaseApi(server: Server) {
         }
     });
 
-    server.app.route('/api/ingame', 'GET', (req, res) => {
+    server.app.route(/\/api\/ingame/, 'GET', (req, res) => {
         try {
             fs.readFile(
                 path.join(pkgAssetsPath, 'ingame.html'),

@@ -75,7 +75,10 @@ export const calculateMods = (
         return {
             number: mods,
             name,
-            array: [],
+            array:
+                name
+                    .match(/.{1,2}/g)
+                    ?.map((r) => ({ acronym: r.toUpperCase() })) || [],
             rate: speedChange
         };
     }
@@ -238,7 +241,8 @@ export const calculateMods = (
 
     const ModsLazer = Array.isArray(mods)
         ? mods
-        : ModsArray.map((r) => ({ acronym: r }));
+        : ModsArray.map((r) => ({ acronym: r.toUpperCase() }));
+
     const settingsSpeedChange = (ModsLazer as any).find(
         (r) =>
             r.acronym === 'DT' && typeof r.settings?.speed_change === 'number'
