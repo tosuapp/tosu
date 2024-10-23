@@ -1,11 +1,14 @@
 import { argumetsParser, wLogger } from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
+import { AbstractInstance } from '@/instances';
+
+import { LazerInstance } from './lazerInstance';
 import { OsuInstance } from './osuInstance';
 
 export class InstanceManager {
     osuInstances: {
-        [key: number]: OsuInstance;
+        [key: number]: AbstractInstance;
     };
 
     constructor() {
@@ -46,7 +49,9 @@ export class InstanceManager {
                     continue;
                 }
 
-                const osuInstance = new OsuInstance(processId);
+                const osuInstance = Process.isProcess64bit(processId)
+                    ? new LazerInstance(processId)
+                    : new OsuInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
 
                 const args = argumetsParser(cmdLine);
@@ -81,6 +86,6 @@ export class InstanceManager {
     runWatcher() {
         this.handleProcesses();
 
-        setTimeout(this.runWatcher, 5000);
+        setTimeout(this.runWatcher, 1000);
     }
 }

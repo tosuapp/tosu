@@ -149,6 +149,7 @@ export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
 
 export interface TosuAPi {
+    client: 'lazer' | 'stable' | '';
     state: NumberName;
     session: Session;
     settings: Settings;
@@ -353,6 +354,8 @@ export interface Hits {
     geki: number;
     katu: number;
     sliderBreaks: number;
+    sliderEndHits: number;
+    sliderTickHits: number;
 }
 
 export interface Combo {
@@ -489,6 +492,8 @@ export interface Hits3 {
     '300': number;
     geki: number;
     katu: number;
+    sliderEndHits: number;
+    sliderTickHits: number;
 }
 
 export interface Folders {

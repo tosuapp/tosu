@@ -16,7 +16,15 @@ Napi::Value read_byte(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+
+  if (bitness == 64) {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
+
   auto result = memory::read<int8_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read byte at %x", address)).ThrowAsJavaScriptException();
@@ -33,7 +41,15 @@ Napi::Value read_short(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+
+  if (bitness == 64) {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
+
   auto result = memory::read<int16_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read short at %x", address)).ThrowAsJavaScriptException();
@@ -50,7 +66,15 @@ Napi::Value read_int(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+
+  if (bitness == 64) {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
+
   auto result = memory::read<int32_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read int at %x", address)).ThrowAsJavaScriptException();
@@ -67,7 +91,15 @@ Napi::Value read_uint(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+
+  if (bitness == 64) {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
+
   auto result = memory::read<uint32_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read uint at %x", address)).ThrowAsJavaScriptException();
@@ -84,7 +116,15 @@ Napi::Value read_float(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+
+  if (bitness == 64) {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
+
   auto result = memory::read<float>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read float at %x", address)).ThrowAsJavaScriptException();
@@ -101,7 +141,15 @@ Napi::Value read_long(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+
+  if (bitness == 64) {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
+
   auto result = memory::read<int64_t>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read long at %x", address)).ThrowAsJavaScriptException();
@@ -118,7 +166,15 @@ Napi::Value read_double(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+
+  if (bitness == 64) {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
+
   auto result = memory::read<double>(handle, address);
   if (!std::get<1>(result)) {
     Napi::TypeError::New(env, logger::format("Couldn't read double at %x", address)).ThrowAsJavaScriptException();
@@ -204,7 +260,7 @@ Napi::Value read_buffer(const Napi::CallbackInfo &args) {
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto address = static_cast<intptr_t>(args[1].As<Napi::Number>().Int64Value());
   auto size = args[2].As<Napi::Number>().Uint32Value();
   auto buffer = new uint8_t[size];
   auto data = (uint8_t *)malloc(sizeof(uint8_t) * size);
@@ -309,6 +365,17 @@ Napi::Value is_process_exist(const Napi::CallbackInfo &args) {
   return Napi::Boolean::New(env, memory::is_process_exist(handle));
 }
 
+Napi::Value is_process_64bit(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() < 1) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  auto process_id = args[0].As<Napi::Number>().Int64Value();
+  return Napi::Boolean::New(env, memory::is_process_64bit(process_id));
+}
+
 Napi::Value get_process_path(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
   if (args.Length() < 1) {
@@ -333,26 +400,32 @@ Napi::Value get_process_command_line(const Napi::CallbackInfo &args) {
 
   return Napi::String::New(env, command_line.c_str());
 }
-
 Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
 
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   void *handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = args[1].As<Napi::Number>().Uint32Value();
+  auto bitness = args[1].As<Napi::Number>().Int32Value();
+  intptr_t address;
+  
+  if (bitness == 64) {
+    address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
+  } else {
+    address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
+  }
 
   if (address == 0) {
     return Napi::String::New(env, "");
   }
 
-  int string_length;
-  if (!memory::read_buffer(
-        handle, address + sizeof(int), sizeof(string_length), reinterpret_cast<uint8_t *>(&string_length)
-      )) {
+  auto offset = bitness == 32 ? 4 : 8;
+
+  auto [string_length, length_success] = memory::read<int>(handle, address + offset);
+  if (!length_success) {
 #ifdef _WIN32
     auto error_str = logger::format(
       "Couldn't read C# string length (base: %x, length: %x, last error: %d)", address, address + sizeof(int), GetLastError()
@@ -360,7 +433,6 @@ Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
 #else
     auto error_str = logger::format("Couldn't read C# string length (base: %x)", address);
 #endif
-
     Napi::TypeError::New(env, error_str.c_str()).ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -369,10 +441,12 @@ Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
     return Napi::String::New(env, "");
   }
 
-  std::vector<wchar_t> string_buffer(string_length);
-  if (!memory::read_buffer(
-        handle, address + sizeof(int) * 2, string_length * sizeof(wchar_t), reinterpret_cast<uint8_t *>(string_buffer.data())
-      )) {
+  std::vector<wchar_t> string_buffer(string_length * 2);
+  auto string_success = memory::read_buffer(
+    handle, address + offset + 4, string_length * sizeof(wchar_t), reinterpret_cast<uint8_t *>(string_buffer.data())
+  );
+
+  if (!string_success) {
     Napi::TypeError::New(env, "Couldn't read C# string data").ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -459,6 +533,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["openProcess"] = Napi::Function::New(env, open_process);
   exports["findProcesses"] = Napi::Function::New(env, find_processes);
   exports["isProcessExist"] = Napi::Function::New(env, is_process_exist);
+  exports["isProcess64bit"] = Napi::Function::New(env, is_process_64bit);
   exports["getProcessPath"] = Napi::Function::New(env, get_process_path);
   exports["getProcessCommandLine"] = Napi::Function::New(env, get_process_command_line);
   exports["getProcessCwd"] = Napi::Function::New(env, get_process_cwd);

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { getProgramPath } from './directories';
-import { checkGameOverlayConfig } from './gosu';
+import { checkGameOverlayConfig } from './ingame';
 import { wLogger } from './logger';
 
 const configPath = path.join(getProgramPath(), 'tsosu.env');
@@ -34,8 +34,8 @@ PRECISE_DATA_POLL_RATE=100
 # Shows !mp commands (messages starting with '!mp') in tournament manager chat (hidden by default)
 SHOW_MP_COMMANDS=false
 
-# Enables/disables the in-game gosumemory overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
-ENABLE_GOSU_OVERLAY=false
+# Enables/disables the in-game overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
+ENABLE_INGAME_OVERLAY=false
 
 # WARNING: EVERYTHING BELOW IS NOT TO BE TOUCHED UNNECESSARILY.
 
@@ -77,6 +77,7 @@ export const config = {
     serverPort: Number(process.env.SERVER_PORT || '24050'),
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
+    enableIngameOverlay: (process.env.ENABLE_INGAME_OVERLAY || '') === 'true',
     allowedIPs: process.env.ALLOWED_IPS || '',
     timestamp: 0,
     currentVersion: '',
@@ -132,9 +133,9 @@ export const updateConfigFile = () => {
         fs.appendFileSync(configPath, '\nSTATIC_FOLDER_PATH=./static', 'utf8');
     }
 
-    if (!process.env.ENABLE_GOSU_OVERLAY) {
-        newOptions += 'ENABLE_GOSU_OVERLAY, ';
-        fs.appendFileSync(configPath, '\nENABLE_GOSU_OVERLAY=false', 'utf8');
+    if (!process.env.ENABLE_INGAME_OVERLAY) {
+        newOptions += 'ENABLE_INGAME_OVERLAY, ';
+        fs.appendFileSync(configPath, '\nENABLE_INGAME_OVERLAY=false', 'utf8');
     }
 
     if (!process.env.ENABLE_AUTOUPDATE) {
@@ -204,7 +205,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     }
 
     const enableAutoUpdate = (parsed.ENABLE_AUTOUPDATE || '') === 'true';
-    const openDashboardOnStartup = (parsed.OPEN_DASHBOARD || '') === 'true';
+    const openDashboardOnStartup =
+        (parsed.OPEN_DASHBOARD_ON_STARTUP || '') === 'true';
     const debugLogging = (parsed.DEBUG_LOG || '') === 'true';
     const serverIP = parsed.SERVER_IP || '127.0.0.1';
     const serverPort = Number(parsed.SERVER_PORT || '24050');
@@ -217,6 +219,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const showMpCommands = (parsed.SHOW_MP_COMMANDS || '') === 'true';
     const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
     const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
+    const enableIngameOverlay = (parsed.ENABLE_INGAME_OVERLAY || '') === 'true';
     const allowedIPs = parsed.ALLOWED_IPS || '';
 
     // determine whether config actually was updated or not
@@ -230,7 +233,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.preciseDataPollRate !== preciseDataPollRate ||
         config.showMpCommands !== showMpCommands ||
         config.staticFolderPath !== staticFolderPath ||
-        config.enableGosuOverlay !== enableGosuOverlay ||
+        config.enableIngameOverlay !== enableIngameOverlay ||
         config.serverIP !== serverIP ||
         config.serverPort !== serverPort ||
         config.allowedIPs !== allowedIPs;
@@ -259,13 +262,21 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     );
     if (
         osuInstances.length === 1 &&
-        enableGosuOverlay === true &&
+        enableIngameOverlay === true &&
         updated === true
     ) {
         osuInstances[0].injectGameOverlay();
     }
 
-    config.enableGosuOverlay = enableGosuOverlay;
+    if (enableGosuOverlay === true) {
+        wLogger.warn(
+            '\n\n\n',
+            'Gosu Ingame-overlay removed, please use new one, you can https://osuck.link/tosu-ingame',
+            '\n\n\n'
+        );
+    }
+
+    config.enableIngameOverlay = enableIngameOverlay;
 
     config.enableAutoUpdate = enableAutoUpdate;
     config.openDashboardOnStartup = openDashboardOnStartup;
@@ -292,7 +303,7 @@ export const writeConfig = (httpServer: any, options: any) => {
     text += `CALCULATE_PP=${options.CALCULATE_PP ?? config.calculatePP}\n\n`;
     text += `ENABLE_AUTOUPDATE=${options.ENABLE_AUTOUPDATE ?? config.enableAutoUpdate}\n`;
     text += `OPEN_DASHBOARD_ON_STARTUP=${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup}\n\n`;
-    text += `ENABLE_GOSU_OVERLAY=${options.ENABLE_GOSU_OVERLAY ?? config.enableGosuOverlay}\n`;
+    text += `ENABLE_INGAME_OVERLAY=${options.ENABLE_INGAME_OVERLAY ?? config.enableIngameOverlay}\n`;
     text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay}\n\n`;
     text += `ALLOWED_IPS=${options.ALLOWED_IPS ?? config.allowedIPs}\n\n`;
     text += `POLL_RATE=${options.POLL_RATE ?? config.pollRate}\n`;
