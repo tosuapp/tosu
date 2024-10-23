@@ -60,6 +60,27 @@ bool memory::is_process_exist(void *process) {
   return true;
 }
 
+bool memory::is_process_64bit(uint32_t id) {
+  const auto exe_path = "/proc/" + std::to_string(id) + "/exe";
+  
+  std::ifstream file(exe_path, std::ios::binary);
+  if (!file.is_open()) {
+    return false;
+  }
+
+  unsigned char magic[4];
+  file.read(reinterpret_cast<char*>(magic), sizeof(magic));
+  
+  if (magic[0] != 0x7F || magic[1] != 'E' || magic[2] != 'L' || magic[3] != 'F') {
+    return false;
+  }
+
+  unsigned char elf_class;
+  file.read(reinterpret_cast<char*>(&elf_class), sizeof(elf_class));
+  
+  return elf_class == 2;
+}
+
 std::string memory::get_process_path(void *process) {
   const auto pid = reinterpret_cast<uintptr_t>(process);
   const auto path = "/proc/" + std::to_string(pid) + "/exe";

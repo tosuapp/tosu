@@ -67,6 +67,19 @@ bool memory::is_process_exist(void *handle) {
   return false;
 }
 
+bool memory::is_process_64bit(uint32_t id) {
+    HANDLE process_handle = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, id);
+    BOOL is_wow64 = FALSE;
+
+    if (!IsWow64Process(process_handle, &is_wow64)) {
+        DWORD error = GetLastError();
+        std::cerr << "Failed to determine process bitness, error: " << error << std::endl;
+        return false;
+    }
+
+    return !is_wow64;
+}
+
 std::string memory::get_process_path(void *handle) {
   char filePath[MAX_PATH];
   GetModuleFileNameExA(handle, NULL, filePath, MAX_PATH);

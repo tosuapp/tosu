@@ -38,6 +38,10 @@ export class Process {
         return ProcessUtils.isProcessExist(pid);
     }
 
+    static isProcess64bit(pid: number): boolean {
+        return ProcessUtils.isProcess64bit(pid);
+    }
+
     static disablePowerThrottling() {
         return ProcessUtils.disablePowerThrottling();
     }
@@ -79,24 +83,24 @@ export class Process {
 
     readIntPtr(address: number): number {
         return this.bitness === 64
-            ? ProcessUtils.readLong(this.handle, address)
-            : ProcessUtils.readInt(this.handle, address);
+            ? ProcessUtils.readLong(this.handle, address, this.bitness)
+            : ProcessUtils.readInt(this.handle, address, this.bitness);
     }
 
     readByte(address: number): number {
-        return ProcessUtils.readByte(this.handle, address);
+        return ProcessUtils.readByte(this.handle, address, this.bitness);
     }
 
     readShort(address: number): number {
-        return ProcessUtils.readShort(this.handle, address);
+        return ProcessUtils.readShort(this.handle, address, this.bitness);
     }
 
     readInt(address: number): number {
-        return ProcessUtils.readInt(this.handle, address);
+        return ProcessUtils.readInt(this.handle, address, this.bitness);
     }
 
     readUInt(address: number): number {
-        return ProcessUtils.readUInt(this.handle, address);
+        return ProcessUtils.readUInt(this.handle, address, this.bitness);
     }
 
     readPointer(address: number): number {
@@ -104,15 +108,15 @@ export class Process {
     }
 
     readLong(address: number): number {
-        return ProcessUtils.readLong(this.handle, address);
+        return ProcessUtils.readLong(this.handle, address, this.bitness);
     }
 
     readFloat(address: number): number {
-        return ProcessUtils.readFloat(this.handle, address);
+        return ProcessUtils.readFloat(this.handle, address, this.bitness);
     }
 
     readDouble(address: number): number {
-        return ProcessUtils.readDouble(this.handle, address);
+        return ProcessUtils.readDouble(this.handle, address, this.bitness);
     }
 
     readSharpString(address: number): string {
