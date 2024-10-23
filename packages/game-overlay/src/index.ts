@@ -31,10 +31,7 @@ export const injectGameOverlay = async (p: Process) => {
             );
 
             await mkdir(gameOverlayPath);
-            await downloadFile(
-                'https://nocfdl.kotworks.cyou/tosu-overlay-alpha.zip',
-                archivePath
-            );
+            await downloadFile('https://tosu.app/overlay.zip', archivePath);
 
             await unzip(archivePath, gameOverlayPath);
             await rm(archivePath);
