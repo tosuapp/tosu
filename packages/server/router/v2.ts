@@ -2,6 +2,7 @@ import { wLogger } from '@tosu/common';
 import path from 'path';
 
 import { HttpServer, sendJson } from '../index';
+import { beatmapFileShortcut } from '../scripts/beatmapFile';
 import { directoryWalker } from '../utils/directories';
 
 export default function buildV2Api(app: HttpServer) {
@@ -26,6 +27,12 @@ export default function buildV2Api(app: HttpServer) {
         const json = osuInstance.getPreciseData(req.instanceManager);
         sendJson(res, json);
     });
+
+    app.route(
+        /\/files\/beatmap\/(?<type>background|audio|file)/,
+        'GET',
+        (req, res) => beatmapFileShortcut(req, res, req.params.type as any)
+    );
 
     app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
         try {
