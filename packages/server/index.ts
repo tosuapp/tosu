@@ -2,6 +2,7 @@ import { config, wLogger } from '@tosu/common';
 
 import buildAssetsApi from './router/assets';
 import buildBaseApi from './router/index';
+import buildSCApi from './router/scApi';
 import buildSocket from './router/socket';
 import buildV1Api from './router/v1';
 import buildV2Api from './router/v2';
@@ -15,6 +16,7 @@ export class Server {
     app = new HttpServer();
 
     WS_V1: Websocket;
+    WS_SC: Websocket;
     WS_V2: Websocket;
     WS_V2_PRECISE: Websocket;
     WS_COMMANDS: Websocket;
@@ -32,6 +34,13 @@ export class Server {
             stateFunctionName: 'getState',
             onMessageCallback: handleSocketCommands
         });
+        this.WS_SC = new Websocket({
+            instanceManager: this.instanceManager,
+            pollRateFieldName: 'pollRate',
+            stateFunctionName: 'getStateSC',
+            onMessageCallback: handleSocketCommands
+        });
+
         this.WS_V2 = new Websocket({
             instanceManager: this.instanceManager,
             pollRateFieldName: 'pollRate',
@@ -51,19 +60,23 @@ export class Server {
             onMessageCallback: handleSocketCommands
         });
 
-        buildBaseApi(this);
         buildAssetsApi(this);
         buildV1Api(this.app);
+        buildSCApi(this.app);
+
         buildV2Api(this.app);
 
         buildSocket({
             app: this.app,
 
             WS_V1: this.WS_V1,
+            WS_SC: this.WS_SC,
             WS_V2: this.WS_V2,
             WS_V2_PRECISE: this.WS_V2_PRECISE,
             WS_COMMANDS: this.WS_COMMANDS
         });
+
+        buildBaseApi(this);
 
         this.app.listen(config.serverPort, config.serverIP);
     }
@@ -75,10 +88,12 @@ export class Server {
 
     restartWS() {
         if (this.WS_V1) this.WS_V1.stopLoop();
+        if (this.WS_SC) this.WS_SC.stopLoop();
         if (this.WS_V2) this.WS_V2.stopLoop();
         if (this.WS_V2_PRECISE) this.WS_V2_PRECISE.stopLoop();
 
         if (this.WS_V1) this.WS_V1.startLoop();
+        if (this.WS_SC) this.WS_SC.startLoop();
         if (this.WS_V2) this.WS_V2.startLoop();
         if (this.WS_V2_PRECISE) this.WS_V2_PRECISE.startLoop();
     }

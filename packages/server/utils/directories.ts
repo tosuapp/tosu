@@ -7,7 +7,7 @@ import { getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
 
 function isPathDirectory(path) {
-    const stat = fs.lstatSync(path);
+    const stat = fs.statSync(path);
 
     if (stat) {
         return stat.isDirectory();

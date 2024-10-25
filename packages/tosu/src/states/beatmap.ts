@@ -1,7 +1,11 @@
 import rosu from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
 import fs from 'fs';
-import { Beatmap as ParsedBeatmap } from 'osu-classes';
+import {
+    BeatmapBreakEvent,
+    Beatmap as ParsedBeatmap,
+    TimingPoint
+} from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 
@@ -18,6 +22,11 @@ interface BeatmapPPAcc {
     '97': number;
     '96': number;
     '95': number;
+    '94': number;
+    '93': number;
+    '92': number;
+    '91': number;
+    '90': number;
 }
 
 interface BeatmapAttributes {
@@ -70,6 +79,7 @@ export class BeatmapPP extends AbstractState {
 
     mode: number;
     clockRate: number = 1;
+    previewtime: number = 0;
     beatmapContent?: string;
     strains: number[];
     strainsAll: BeatmapStrains;
@@ -107,6 +117,9 @@ export class BeatmapPP extends AbstractState {
         full: 0
     };
 
+    timingPoints: TimingPoint[] = [];
+    breaks: BeatmapBreakEvent[] = [];
+
     constructor(game: AbstractInstance) {
         super(game);
 
@@ -120,6 +133,7 @@ export class BeatmapPP extends AbstractState {
             xaxis: []
         };
         this.mode = 0;
+        this.previewtime = 0;
         this.realtimeBPM = 0.0;
         this.commonBPM = 0.0;
         this.minBPM = 0.0;
@@ -130,7 +144,12 @@ export class BeatmapPP extends AbstractState {
             98: 0.0,
             97: 0.0,
             96: 0.0,
-            95: 0.0
+            95: 0.0,
+            94: 0.0,
+            93: 0.0,
+            92: 0.0,
+            91: 0.0,
+            90: 0.0
         };
         this.calculatedMapAttributes = {
             ar: 0.0,
@@ -178,6 +197,8 @@ export class BeatmapPP extends AbstractState {
             firstObj: 0,
             full: 0
         };
+        this.timingPoints = [];
+        this.breaks = [];
     }
 
     updatePPAttributes(
@@ -336,7 +357,9 @@ export class BeatmapPP extends AbstractState {
 
             if (config.calculatePP) {
                 const ppAcc = {};
-                for (const acc of [100, 99, 98, 97, 96, 95]) {
+                for (const acc of [
+                    100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
+                ]) {
                     const calculate = new rosu.Performance({
                         mods: currentMods,
                         accuracy: acc,
@@ -369,7 +392,7 @@ export class BeatmapPP extends AbstractState {
 
                         parseColours: false,
                         parseEditor: false,
-                        parseGeneral: false,
+                        parseGeneral: true,
                         parseStoryboard: false,
                         parseMetadata: false
                     }
@@ -386,9 +409,13 @@ export class BeatmapPP extends AbstractState {
                         this.lazerBeatmap.events.backgroundPath || '';
                 }
 
+                this.previewtime = this.lazerBeatmap.general.previewTime;
+
                 this.commonBPM = Math.round(bpm * this.clockRate);
                 this.minBPM = Math.round(bpmMin * this.clockRate);
                 this.maxBPM = Math.round(bpmMax * this.clockRate);
+
+                this.breaks = this.lazerBeatmap.events.breaks;
 
                 const firstObj = Math.round(
                     this.lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
@@ -397,6 +424,9 @@ export class BeatmapPP extends AbstractState {
 
                 this.timings.firstObj = firstObj;
                 this.timings.full = full;
+
+                this.timingPoints =
+                    this.lazerBeatmap.controlPoints.timingPoints;
 
                 this.resetReportCount('BPPD(updateMapMetadataTimings)');
             } catch (exc) {

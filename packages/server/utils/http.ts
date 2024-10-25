@@ -139,9 +139,7 @@ export class HttpServer {
             (value, key) => (req.query[key] = value)
         );
 
-        const routes = (this.routes[method] || []).sort(
-            (a, b) => b.path.toString().length - a.path.toString().length
-        );
+        const routes = this.routes[method] || [];
         for (let i = 0; i < routes.length; i++) {
             const route = routes[i];
             let routeExists = false;

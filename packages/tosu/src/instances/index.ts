@@ -3,6 +3,7 @@ import EventEmitter from 'events';
 import { Process } from 'tsprocess/dist/process';
 
 import { buildResult } from '@/api/utils/buildResult';
+import { buildResult as buildResultSC } from '@/api/utils/buildResultSC';
 import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
 import { buildResult as buildResultV2Precise } from '@/api/utils/buildResultV2Precise';
 import { InstanceManager } from '@/instances/manager';
@@ -209,6 +210,10 @@ export abstract class AbstractInstance {
 
     getStateV2(instanceManager: InstanceManager) {
         return buildResultV2(instanceManager);
+    }
+
+    getStateSC(instanceManager: InstanceManager) {
+        return buildResultSC(instanceManager);
     }
 
     getPreciseData(instanceManager: InstanceManager) {

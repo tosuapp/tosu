@@ -30,6 +30,7 @@ interface BeatmapStats {
     HP: number;
     SR: number;
     BPM: {
+        realtime: number;
         common: number;
         min: number;
         max: number;
@@ -83,6 +84,11 @@ interface PP {
     '97': number;
     '96': number;
     '95': number;
+    '94': number;
+    '93': number;
+    '92': number;
+    '91': number;
+    '90': number;
     strains: number[];
     strainsAll: BeatmapStrains;
 }

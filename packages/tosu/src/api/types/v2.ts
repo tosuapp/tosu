@@ -452,6 +452,11 @@ export interface Performance {
 }
 
 export interface Accuracy {
+    '90': number;
+    '91': number;
+    '92': number;
+    '93': number;
+    '94': number;
     '95': number;
     '96': number;
     '97': number;

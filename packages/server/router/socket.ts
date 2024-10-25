@@ -6,12 +6,14 @@ export default function buildSocket({
     app,
 
     WS_V1,
+    WS_SC,
     WS_V2,
     WS_V2_PRECISE,
     WS_COMMANDS
 }: {
     app: HttpServer;
     WS_V1: Websocket;
+    WS_SC: Websocket;
     WS_V2: Websocket;
     WS_V2_PRECISE: Websocket;
     WS_COMMANDS: Websocket;
@@ -46,6 +48,17 @@ export default function buildSocket({
                     head,
                     function (ws) {
                         WS_V1.socket.emit('connection', ws, request);
+                    }
+                );
+            }
+
+            if (parsedURL.pathname === '/tokens') {
+                WS_SC.socket.handleUpgrade(
+                    request,
+                    socket,
+                    head,
+                    function (ws) {
+                        WS_SC.socket.emit('connection', ws, request);
                     }
                 );
             }
