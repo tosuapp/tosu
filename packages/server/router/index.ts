@@ -104,6 +104,11 @@ export default function buildBaseApi(server: Server) {
                             );
                             fs.unlinkSync(tempPath);
 
+                            server.WS_COMMANDS.socket.emit(
+                                'message',
+                                `getCounters:__ingame__`
+                            );
+
                             sendJson(res, {
                                 status: 'Finished',
                                 path: result
@@ -219,6 +224,12 @@ export default function buildBaseApi(server: Server) {
                 );
 
                 fs.rmSync(folderPath, { recursive: true, force: true });
+
+                server.WS_COMMANDS.socket.emit(
+                    'message',
+                    `getCounters:__ingame__`
+                );
+
                 return sendJson(res, {
                     status: 'deleted'
                 });

@@ -88,14 +88,13 @@ body.-editing {
     background-size: cover;
     pointer-events: none;
     opacity: 0;
-    translate: -5px -5px;
     z-index: 10000;
     transition: opacity 0.5s ease;
 }
 
 main.main {
-    width: var(--w);
-    height: var(--h);
+    width: 100vw;
+    height: 100vh;
     z-index: 1;
 
     &::before {
@@ -118,8 +117,8 @@ main.main {
     color: #46515e;
     top: 0;
     left: 0;
-    width: var(--w);
-    height: var(--h);
+    width: 100vw;
+    height: 100vh;
     padding: 3em;
     opacity: 0;
     background: hsl(from #2a323b h s l / 75%);

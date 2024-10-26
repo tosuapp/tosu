@@ -534,8 +534,8 @@ const app = createApp({
 
 
     window.addEventListener('resize', (event) => {
-      max_width.value = max_width.value;
-      max_height.value = max_height.value;
+      max_width.value = window.innerWidth;
+      max_height.value = window.innerHeight;
     });
 
 
@@ -704,6 +704,7 @@ const app = createApp({
     };
 
     socket.sendCommand('getSettings', encodeURI('__ingame__'));
+    socket.sendCommand('getCounters', encodeURI('__ingame__'));
     socket.commands((data) => {
       try {
 
@@ -713,36 +714,15 @@ const app = createApp({
             overlays.value = message.overlays;
           };
         };
+
+
+        if (command == 'getCounters' && Array.isArray(message)) {
+          available_overlays.value = message;
+        }
       } catch (error) {
         console.log(error);
       };
     });
-
-
-    socket.api_v2((data) => {
-      try {
-        if (data.settings.resolution.fullscreen) {
-          if (max_width.value != data.settings.resolution.widthFullscreen)
-            max_width.value = data.settings.resolution.widthFullscreen;
-          if (max_height.value != data.settings.resolution.heightFullscreen)
-            max_height.value = data.settings.resolution.heightFullscreen;
-
-          return;
-        }
-
-        if (max_width.value != data.settings.resolution.width)
-          max_width.value = data.settings.resolution.width;
-        if (max_height.value != data.settings.resolution.height)
-          max_height.value = data.settings.resolution.height;
-      } catch (error) {
-        console.log(error);
-      };
-    }, [
-      {
-        field: 'settings',
-        keys: ['resolution']
-      }
-    ]);
 
 
     return {

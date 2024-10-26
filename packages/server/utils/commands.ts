@@ -1,5 +1,6 @@
 import { JsonSafeParse, wLogger } from '@tosu/common';
 
+import { getLocalCounters } from './counters';
 import { parseCounterSettings } from './parseSettings';
 import { ModifiedWebsocket } from './socket';
 
@@ -18,6 +19,21 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
     const requestedFrom = decodeURI(socket.query?.l || '');
     const requestedName = decodeURI(payload || '');
     switch (command) {
+        case 'getCounters': {
+            if (
+                requestedFrom !== '__ingame__' ||
+                requestedName !== requestedFrom
+            ) {
+                message = {
+                    error: 'Wrong overlay'
+                };
+                break;
+            }
+
+            message = getLocalCounters();
+            break;
+        }
+
         case 'getSettings': {
             if (requestedName !== requestedFrom) {
                 message = {
