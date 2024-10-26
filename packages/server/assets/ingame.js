@@ -140,14 +140,20 @@ const app = createApp({
       save_settings();
     }, 400);
 
-    const is_edit = ref(true);
+    const is_edit = ref(false);
 
 
     const max_width = ref(window.innerWidth);
     const max_height = ref(window.innerHeight);
+    const cursor = ref({
+      type: 'arrow',
+      x: 0,
+      y: 0,
+    });
 
     const empty_ctx = ref(null);
     const overlay_ctx = ref(null);
+    const cursor_ctx = ref(null);
 
 
 
@@ -244,14 +250,14 @@ const app = createApp({
       if (is_resize) return (is_top || is_left || is_right || is_bottom) && !event.shiftKey;
 
 
-      if (event.shiftKey) element.style.cursor = 'move';
-      else if (is_left && is_top) element.style.cursor = 'nw-resize';
-      else if (is_right && is_top) element.style.cursor = 'ne-resize';
-      else if (is_left && is_bottom) element.style.cursor = 'sw-resize';
-      else if (is_right && is_bottom) element.style.cursor = 'se-resize';
-      else if (is_left || is_right) element.style.cursor = 'ew-resize';
-      else if (is_top || is_bottom) element.style.cursor = 'ns-resize';
-      else element.style.cursor = 'move';
+      if (event.shiftKey) cursor.value.type = 'move';
+      else if (is_left && is_top) cursor.value.type = 'nw-resize';
+      else if (is_right && is_top) cursor.value.type = 'ne-resize';
+      else if (is_left && is_bottom) cursor.value.type = 'ne-resize';
+      else if (is_right && is_bottom) cursor.value.type = 'nw-resize';
+      else if (is_left || is_right) cursor.value.type = 'ew-resize';
+      else if (is_top || is_bottom) cursor.value.type = 'ns-resize';
+      else cursor.value.type = 'move';
 
 
       if (is_resizing) return;
@@ -397,6 +403,9 @@ const app = createApp({
 
 
     window.addEventListener('mousemove', (event) => {
+      cursor.value.x = event.clientX;
+      cursor.value.y = event.clientY;
+
       if (is_resizing) return resizing(event);
       if (!is_dragging) return;
 
@@ -678,6 +687,7 @@ const app = createApp({
 
     function reset_hover() {
       hovered_index = -1;
+      cursor.value.type = 'arrow';
     };
 
 
@@ -736,8 +746,8 @@ const app = createApp({
 
 
     return {
-      max_width, max_height,
-      empty_ctx, overlay_ctx,
+      max_width, max_height, cursor,
+      empty_ctx, overlay_ctx, cursor_ctx,
       available_overlays, overlays,
       context_empty, context_overlay,
       side_decide, enable_drag, stop_drag,

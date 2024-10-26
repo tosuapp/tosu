@@ -52,6 +52,7 @@ input[type="range"].input2::-moz-range-thumb {
 
 html,
 body {
+    cursor: none;
     width: 100vw;
     height: 100vh;
 }
@@ -59,20 +60,37 @@ body {
 body {
     font-weight: 800 !important;
     color: white;
-    background-color: black;
     /* background-color: transparent !important; */
     overflow: hidden;
+    transition: background 0.5s ease;
 }
 
 body.-editing {
+    background-color: rgba(0, 0, 0, 0.5);
+
     .background-notice {
-        display: unset;
+        opacity: 1;
     }
 
     .overlay iframe {
         outline-color: var(--text-1);
-        transition: 0.2s ease;
     }
+
+    .custom-cursor {
+        opacity: 1;
+    }
+}
+
+.custom-cursor {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+    pointer-events: none;
+    opacity: 0;
+    translate: -5px -5px;
+    z-index: 10000;
+    transition: opacity 0.5s ease;
 }
 
 main.main {
@@ -97,14 +115,15 @@ main.main {
     pointer-events: none;
     user-select: none;
     position: fixed;
-    display: none;
     color: #46515e;
     top: 0;
     left: 0;
     width: var(--w);
     height: var(--h);
     padding: 3em;
+    opacity: 0;
     background: hsl(from #2a323b h s l / 75%);
+    transition: opacity 0.5s ease;
     z-index: 0;
 
     &::before {
@@ -139,7 +158,7 @@ iframe {
     height: 100%;
     outline: 2px solid transparent;
     border: none;
-    transition: 0.2s 5s ease;
+    transition: 0.2s ease;
 }
 
 .scroll {
