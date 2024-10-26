@@ -102,7 +102,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private replayMode: boolean = false;
 
-    private modMapping: Map<number, string> = new Map();
+    private modMappings: Map<number, Map<number, string>> = new Map();
 
     private isPlayerLoading: boolean = false;
 
@@ -271,34 +271,39 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return types;
     }
 
-    private initModMapping() {
+    private readModMapping() {
         const availableModsDict = this.process.readIntPtr(
             this.process.readIntPtr(this.gameBase() + 0x468) + 0x20
         );
+
         const entries = this.process.readIntPtr(availableModsDict + 0x10);
+        const count = this.process.readIntPtr(availableModsDict + 0x38);
 
-        const diffReducingModsList = this.process.readIntPtr(entries + 0x10);
-        const diffIncreasingModsList = this.process.readIntPtr(entries + 0x28);
-        const conversionModsList = this.process.readIntPtr(entries + 0x40);
-        const automationModsList = this.process.readIntPtr(entries + 0x58);
-        const funModsList = this.process.readIntPtr(entries + 0x70);
-        const systemModsList = this.process.readIntPtr(entries + 0x88);
+        return this.readItems(entries, count, true, 0x18);
+    }
 
-        const ModsList = {
-            diffReductionCategory: this.readModList(diffReducingModsList),
-            diffIncreasingCategory: this.readModList(diffIncreasingModsList),
-            conversionCategory: this.readModList(conversionModsList),
-            automationCategory: this.readModList(automationModsList),
-            funCategory: this.readModList(funModsList),
-            systemCategory: this.readModList(systemModsList)
+    private initModMapping() {
+        const currentModMapping = this.readModMapping();
+
+        const modsList = {
+            diffReductionCategory: this.readModList(currentModMapping[0]),
+            diffIncreasingCategory: this.readModList(currentModMapping[1]),
+            conversionCategory: this.readModList(currentModMapping[2]),
+            automationCategory: this.readModList(currentModMapping[3]),
+            funCategory: this.readModList(currentModMapping[4]),
+            systemCategory: this.readModList(currentModMapping[5])
         };
+
+        const modMapping = new Map<number, string>();
 
         for (const [category, mods] of Object.entries(ModsCategories)) {
             for (let i = 0; i < mods.length; i++) {
                 const mod = mods[i];
-                this.modMapping.set(ModsList[category][i], mod);
+                modMapping.set(modsList[category][i], mod);
             }
         }
+
+        this.modMappings.set(0, modMapping);
     }
 
     private mods(scoreInfo: number): CalculateMods {
@@ -938,7 +943,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             for (let i = 0; i < selectedModsItems.length; i++) {
                 const type = this.process.readIntPtr(selectedModsItems[i]);
 
-                const mod = this.modMapping.get(type);
+                const modMapping = this.modMappings.get(this.lastGamemode);
+                const mod = modMapping?.get(type);
                 if (mod) {
                     modAcronyms.push({ acronym: mod });
                 }
