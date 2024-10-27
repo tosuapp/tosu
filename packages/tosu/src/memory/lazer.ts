@@ -1577,8 +1577,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 );
 
                 mod.settings = {
-                    spin_speed: this.process.readInt(spinSpeedBindable + 0x40),
-                    direction: this.process.readDouble(directionBindable + 0x40)
+                    spin_speed: this.process.readDouble(
+                        spinSpeedBindable + 0x40
+                    ),
+                    direction: this.process.readInt(directionBindable + 0x40)
                 };
                 break;
             }
