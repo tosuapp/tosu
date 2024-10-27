@@ -277,9 +277,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         const entries = this.process.readIntPtr(availableModsDict + 0x10);
-        const count = this.process.readIntPtr(availableModsDict + 0x38);
+        const count = this.process.readInt(availableModsDict + 0x38);
 
-        return this.readItems(entries, count, true, 0x18);
+        return this.readItems(entries, count, false, 0x18);
     }
 
     private initModMapping() {
