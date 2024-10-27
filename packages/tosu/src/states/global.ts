@@ -33,7 +33,7 @@ export class Global extends AbstractState {
         this.songsFolder = value;
     }
 
-    async updateState() {
+    updateState() {
         try {
             const result = this.game.memory.global();
             if (result instanceof Error) throw result;

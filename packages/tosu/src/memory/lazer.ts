@@ -1,4 +1,4 @@
-import { CountryCodes } from '@tosu/common';
+import { CountryCodes, wLogger } from '@tosu/common';
 import path from 'path';
 
 import { AbstractMemory, ScanPatterns } from '@/memory';
@@ -95,14 +95,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
     };
 
-    private modsInitialized = false;
     private menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
 
     private currentScreen: number = 0;
 
     private replayMode: boolean = false;
 
-    private modMappings: Map<number, Map<number, string>> = new Map();
+    private modMappings: Map<string, string> = new Map();
 
     private isPlayerLoading: boolean = false;
 
@@ -282,7 +281,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.readItems(entries, count, false, 0x18);
     }
 
-    private initModMapping() {
+    private initModMapping(gamemode: number) {
+        if (!ModsCategories[gamemode]) {
+            wLogger.warn(`Unknown mods gamemode`, gamemode);
+            return;
+        }
+
         const currentModMapping = this.readModMapping();
 
         const modsList = {
@@ -294,16 +298,19 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             systemCategory: this.readModList(currentModMapping[5])
         };
 
-        const modMapping = new Map<number, string>();
-
-        for (const [category, mods] of Object.entries(ModsCategories)) {
+        for (const [category, mods] of Object.entries(
+            ModsCategories[gamemode as 0]
+        )) {
             for (let i = 0; i < mods.length; i++) {
                 const mod = mods[i];
-                modMapping.set(modsList[category][i], mod);
+                this.modMappings.set(
+                    `${gamemode}-${modsList[category][i]}`,
+                    mod
+                );
             }
         }
 
-        this.modMappings.set(0, modMapping);
+        this.modMappings.set(gamemode.toString(), '');
     }
 
     private mods(scoreInfo: number): CalculateMods {
@@ -916,10 +923,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     global(): IGlobal {
-        if (!this.modsInitialized) {
-            this.initModMapping();
-
-            this.modsInitialized = true;
+        if (!this.modMappings.has(this.lastGamemode.toString())) {
+            this.initModMapping(this.lastGamemode);
         }
 
         this.currentScreen = this.getCurrentScreen();
@@ -943,8 +948,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             for (let i = 0; i < selectedModsItems.length; i++) {
                 const type = this.process.readIntPtr(selectedModsItems[i]);
 
-                const modMapping = this.modMappings.get(this.lastGamemode);
-                const mod = modMapping?.get(type);
+                const mod = this.modMappings.get(
+                    `${this.lastGamemode}-${type}`
+                );
                 if (mod) {
                     modAcronyms.push({ acronym: mod });
                 }

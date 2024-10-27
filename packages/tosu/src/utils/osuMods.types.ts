@@ -127,43 +127,116 @@ export const ModsOrder: {
 };
 
 export const ModsCategories = {
-    diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
-    diffIncreasingCategory: [
-        'HR',
-        'SD',
-        'PF',
-        'DT',
-        'NC',
-        'HD',
-        'FL',
-        'BL',
-        'ST',
-        'AC'
-    ],
-    conversionCategory: ['TP', 'DA', 'CL', 'RD', 'MR', 'AL', 'SG'],
-    automationCategory: ['AT', 'CN', 'RX', 'AP', 'SO'],
-    funCategory: [
-        'TR',
-        'WG',
-        'SI',
-        'GR',
-        'DF',
-        'WU',
-        'WD',
-        'TC',
-        'BR',
-        'AD',
-        'MU',
-        'NS',
-        'MG',
-        'RP',
-        'AS',
-        'FR',
-        'BU',
-        'SY',
-        'DP'
-    ],
-    systemCategory: ['TD', 'SV2']
+    0: {
+        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
+        diffIncreasingCategory: [
+            'HR',
+            'SD',
+            'PF',
+            'DT',
+            'NC',
+            'HD',
+            'FL',
+            'BL',
+            'ST',
+            'AC'
+        ],
+        automationCategory: ['AT', 'CN', 'RX', 'AP', 'SO'],
+        conversionCategory: ['TP', 'DA', 'CL', 'RD', 'MR', 'AL', 'SG'],
+        funCategory: [
+            'TR',
+            'WG',
+            'SI',
+            'GR',
+            'DF',
+            'WU',
+            'WD',
+            'TC',
+            'BR',
+            'AD',
+            'MU',
+            'NS',
+            'MG',
+            'RP',
+            'AS',
+            'FR',
+            'BU',
+            'SY',
+            'DP'
+        ],
+        systemCategory: ['TD', 'SV2']
+    },
+    1: {
+        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
+        diffIncreasingCategory: [
+            'HR',
+            'SD',
+            'PF',
+            'DT',
+            'NC',
+            'HD',
+            'FL',
+            'AC'
+        ],
+        automationCategory: ['AT', 'CN', 'RX'],
+        conversionCategory: ['RD', 'DA', 'CL', 'SW', 'SG', 'CS'],
+        funCategory: ['WU', 'WD', 'MU', 'AS'],
+        systemCategory: ['TD', 'SV2']
+    },
+    2: {
+        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
+        diffIncreasingCategory: [
+            'HR',
+            'SD',
+            'PF',
+            'DT',
+            'NC',
+            'HD',
+            'FL',
+            'AC'
+        ],
+        automationCategory: ['AT', 'CN', 'RX'],
+        conversionCategory: ['DA', 'MR'],
+        funCategory: ['WU', 'WD', 'FF', 'MU', 'NS'],
+        systemCategory: ['TD', 'SV2']
+    },
+    3: {
+        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
+        diffIncreasingCategory: [
+            'HR',
+            'SD',
+            'PF',
+            'DT',
+            'NC',
+            'FI',
+            'HD',
+            'CO',
+            'FL',
+            'AC'
+        ],
+        automationCategory: ['AT', 'CN'],
+        conversionCategory: [
+            'RD',
+            'DS',
+            'MR',
+            'DA',
+            'IN',
+            'CS',
+            'HO',
+            '1K',
+            '2K',
+            '3K',
+            '4K',
+            '5K',
+            '6K',
+            '7K',
+            '8K',
+            '9K',
+            '10K'
+        ],
+        funCategory: ['WU', 'WD', 'MU', 'AS'],
+        systemCategory: ['TD', 'SV2']
+    }
 };
 
 export enum OsuMods {

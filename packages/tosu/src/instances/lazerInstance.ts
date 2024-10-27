@@ -38,7 +38,12 @@ export class LazerInstance extends AbstractInstance {
 
         while (!this.isDestroyed) {
             try {
-                global.updateState();
+                const globalUpdate = global.updateState();
+                if (globalUpdate === 'not-ready') {
+                    await sleep(config.pollRate);
+                    continue;
+                }
+
                 const menuUpdate = menu.updateState();
                 if (menuUpdate === 'not-ready') {
                     await sleep(config.pollRate);
