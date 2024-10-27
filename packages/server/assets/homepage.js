@@ -1234,7 +1234,7 @@ async function saveSettings(element) {
   };
 
   displayNotification({
-    element: element.parentElement.parentElement.parentElement,
+    element: element.parentElement,
     text: `Config has been saved`,
     classes: ['green'],
     delay: 3000,
@@ -1252,7 +1252,7 @@ async function saveSettings(element) {
   };
 
   setTimeout(() => {
-    endDownload(element, 'save-settings', 'Saved');
+    endDownload(element, 'save-settings', 'Save settings');
     element.classList.remove('disable');
   }, 300);
 };
