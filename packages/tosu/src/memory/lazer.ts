@@ -29,6 +29,112 @@ import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods, Mod, ModsCategories } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
+export enum ScoringMode {
+    Standardised,
+    Classic
+}
+
+export enum OsuSetting {
+    Ruleset,
+    Token,
+    MenuCursorSize,
+    GameplayCursorSize,
+    AutoCursorSize,
+    GameplayCursorDuringTouch,
+    DimLevel,
+    BlurLevel,
+    EditorDim,
+    LightenDuringBreaks,
+    ShowStoryboard,
+    KeyOverlay,
+    GameplayLeaderboard,
+    PositionalHitsoundsLevel,
+    AlwaysPlayFirstComboBreak,
+    FloatingComments,
+    HUDVisibilityMode,
+    ShowHealthDisplayWhenCantFail,
+    FadePlayfieldWhenHealthLow,
+    MouseDisableButtons,
+    MouseDisableWheel,
+    ConfineMouseMode,
+    AudioOffset,
+    VolumeInactive,
+    MenuMusic,
+    MenuVoice,
+    MenuTips,
+    CursorRotation,
+    MenuParallax,
+    Prefer24HourTime,
+    BeatmapDetailTab,
+    BeatmapDetailModsFilter,
+    Username,
+    ReleaseStream,
+    SavePassword,
+    SaveUsername,
+    DisplayStarsMinimum,
+    DisplayStarsMaximum,
+    SongSelectGroupingMode,
+    SongSelectSortingMode,
+    RandomSelectAlgorithm,
+    ModSelectHotkeyStyle,
+    ShowFpsDisplay,
+    ChatDisplayHeight,
+    BeatmapListingCardSize,
+    ToolbarClockDisplayMode,
+    SongSelectBackgroundBlur,
+    Version,
+    ShowFirstRunSetup,
+    ShowConvertedBeatmaps,
+    Skin,
+    ScreenshotFormat,
+    ScreenshotCaptureMenuCursor,
+    SongSelectRightMouseScroll,
+    BeatmapSkins,
+    BeatmapColours,
+    BeatmapHitsounds,
+    IncreaseFirstObjectVisibility,
+    ScoreDisplayMode,
+    ExternalLinkWarning,
+    PreferNoVideo,
+    Scaling,
+    ScalingPositionX,
+    ScalingPositionY,
+    ScalingSizeX,
+    ScalingSizeY,
+    ScalingBackgroundDim,
+    UIScale,
+    IntroSequence,
+    NotifyOnUsernameMentioned,
+    NotifyOnPrivateMessage,
+    UIHoldActivationDelay,
+    HitLighting,
+    MenuBackgroundSource,
+    GameplayDisableWinKey,
+    SeasonalBackgroundMode,
+    EditorWaveformOpacity,
+    EditorShowHitMarkers,
+    EditorAutoSeekOnPlacement,
+    DiscordRichPresence,
+    AutomaticallyDownloadWhenSpectating,
+    ShowOnlineExplicitContent,
+    LastProcessedMetadataId,
+    SafeAreaConsiderations,
+    ComboColourNormalisationAmount,
+    ProfileCoverExpanded,
+    EditorLimitedDistanceSnap,
+    ReplaySettingsOverlay,
+    ReplayPlaybackControlsExpanded,
+    AutomaticallyDownloadMissingBeatmaps,
+    EditorShowSpeedChanges,
+    TouchDisableGameplayTaps,
+    ModSelectTextSearchStartsActive,
+    UserOnlineStatus,
+    MultiplayerRoomFilter,
+    HideCountryFlags,
+    EditorTimelineShowTimingChanges,
+    EditorTimelineShowTicks
+}
+
 enum HitResult {
     none = 0,
     miss = 1,
@@ -95,6 +201,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
     };
 
+    private static MAX_SCORE = 1000000;
+
     private menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
 
     private currentScreen: number = 0;
@@ -135,6 +243,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.gameBaseAddress;
     }
 
+    private localConfig() {
+        return this.process.readIntPtr(this.gameBase() + 0x3d8);
+    }
+
+    private configStore() {
+        return this.process.readIntPtr(this.localConfig() + 0x20);
+    }
+
     private screenStack() {
         return this.process.readIntPtr(this.gameBase() + 0x5f0);
     }
@@ -171,6 +287,33 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const items = this.process.readIntPtr(stack + 0x8);
         return this.process.readIntPtr(items + 0x10 + 0x8 * (count - 1));
+    }
+
+    private osuConfig() {
+        const configStore = this.configStore();
+        const entries = this.process.readIntPtr(configStore + 0x10);
+        const count = this.process.readInt(configStore + 0x38);
+
+        const config: Record<number, any> = {};
+
+        for (let i = 0; i < count; i++) {
+            const current = entries + 0x10 + 0x18 * i;
+
+            const key = this.process.readInt(current + 0x10) as OsuSetting;
+            const bindable = this.process.readIntPtr(current);
+
+            const valueAddress = bindable + 0x40;
+
+            switch (key) {
+                case OsuSetting.ScoreDisplayMode:
+                    config[key] = this.process.readInt(valueAddress);
+                    break;
+                default:
+                    continue;
+            }
+        }
+
+        return config;
     }
 
     private player() {
@@ -389,11 +532,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return `${hash[0]}\\${hash.substring(0, 2)}\\${hash}`;
     }
 
-    private readStatistics(scoreInfo: number): Statistics {
-        const statisticsDict = this.process.readIntPtr(scoreInfo + 0x78);
-        const statisticsJson = this.process.readSharpStringPtr(
-            scoreInfo + 0x58
-        );
+    private readStatisticsDict(statisticsDict: number) {
+        const statisticsCount = this.process.readInt(statisticsDict + 0x38);
 
         const statistics: Statistics = {
             miss: 0,
@@ -415,45 +555,45 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             legacyComboIncrease: 0
         };
 
-        const statisticsCount = this.process.readInt(statisticsDict + 0x38);
+        const statisticsEntries = this.process.readIntPtr(
+            statisticsDict + 0x10
+        );
 
-        // TODO: support all modes
-        if (statisticsJson.length > 0 && statisticsCount === 4) {
-            const parsedStatistics: Statistics = JSON.parse(statisticsJson);
+        if (!statisticsEntries) {
+            return statistics;
+        }
 
-            statistics.miss = parsedStatistics.miss;
-            statistics.meh = parsedStatistics.meh;
-            statistics.ok = parsedStatistics.ok;
-            statistics.great = parsedStatistics.great;
-        } else {
-            const statisticsEntries = this.process.readIntPtr(
-                statisticsDict + 0x10
-            );
+        const items = this.readItems(
+            statisticsEntries,
+            statisticsCount,
+            true,
+            0x10
+        );
 
-            if (!statisticsEntries) {
-                return statistics;
+        for (const item of items) {
+            const key = this.process.readInt(item + 0x8);
+            if (key === 0) {
+                continue;
             }
 
-            const items = this.readItems(
-                statisticsEntries,
-                statisticsCount,
-                true,
-                0x10
-            );
+            const value = this.process.readInt(item + 0xc);
 
-            for (const item of items) {
-                const key = this.process.readInt(item + 0x8);
-                if (key === 0) {
-                    continue;
-                }
-
-                const value = this.process.readInt(item + 0xc);
-
-                statistics[HitResult[key]] = value;
-            }
+            statistics[HitResult[key]] = value;
         }
 
         return statistics;
+    }
+
+    private readStatistics(scoreInfo: number): Statistics {
+        const statisticsDict = this.process.readIntPtr(scoreInfo + 0x78);
+
+        return this.readStatisticsDict(statisticsDict);
+    }
+
+    private readMaximumStatistics(scoreInfo: number): Statistics {
+        const statisticsDict = this.process.readIntPtr(scoreInfo + 0x80);
+
+        return this.readStatisticsDict(statisticsDict);
     }
 
     private readLeaderboardScore(
@@ -540,6 +680,118 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return keyOverlay;
     }
 
+    private isScorableHitResult(result: HitResult) {
+        switch (result) {
+            case HitResult.legacyComboIncrease:
+                return true;
+
+            case HitResult.comboBreak:
+                return true;
+
+            case HitResult.sliderTailHit:
+                return true;
+
+            default:
+                return (
+                    result >= HitResult.miss && result < HitResult.ignoreMiss
+                );
+        }
+    }
+
+    private isTickHitResult(result: HitResult) {
+        switch (result) {
+            case HitResult.largeTickHit:
+            case HitResult.largeTickMiss:
+            case HitResult.smallTickHit:
+            case HitResult.smallTickMiss:
+            case HitResult.sliderTailHit:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private isBonusHitResult(result: HitResult) {
+        switch (result) {
+            case HitResult.smallBonus:
+            case HitResult.largeBonus:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private isBasicHitResult(result: HitResult) {
+        switch (result) {
+            case HitResult.legacyComboIncrease:
+                return false;
+            case HitResult.comboBreak:
+                return false;
+            default:
+                return (
+                    this.isScorableHitResult(result) &&
+                    !this.isTickHitResult(result) &&
+                    !this.isBonusHitResult(result)
+                );
+        }
+    }
+
+    private getObjectCountFromMaxStatistics(statistics: Statistics): number {
+        let total = 0;
+
+        const entries = Object.entries(statistics);
+        for (let i = 0; i < entries.length; i++) {
+            const kvp = entries[i];
+
+            const key = HitResult[kvp[0]] as HitResult;
+            const value = kvp[1] as number;
+
+            if (this.isBasicHitResult(key)) {
+                total += value;
+            }
+        }
+
+        return total;
+    }
+
+    private getDisplayScore(
+        mode: number,
+        standardisedTotalScore: number,
+        objectCount: number
+    ) {
+        switch (mode) {
+            case 0:
+                return Math.round(
+                    ((Math.pow(objectCount, 2) * 32.57 + 100000) *
+                        standardisedTotalScore) /
+                        LazerMemory.MAX_SCORE
+                );
+
+            case 1:
+                return Math.round(
+                    ((objectCount * 1109 + 100000) * standardisedTotalScore) /
+                        LazerMemory.MAX_SCORE
+                );
+
+            case 2:
+                return Math.round(
+                    Math.pow(
+                        (standardisedTotalScore / LazerMemory.MAX_SCORE) *
+                            objectCount,
+                        2
+                    ) *
+                        21.62 +
+                        standardisedTotalScore / 10
+                );
+
+            case 3:
+            default:
+                return standardisedTotalScore;
+        }
+    }
+
     private readScore(
         scoreInfo: number,
         health: number = 0,
@@ -580,12 +832,23 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
         }
 
+        let score = this.process.readLong(scoreInfo + 0x98);
+        const config = this.osuConfig();
+
+        if (config[OsuSetting.ScoreDisplayMode] === ScoringMode.Classic) {
+            const objectCount = this.getObjectCountFromMaxStatistics(
+                this.readMaximumStatistics(scoreInfo)
+            );
+
+            score = this.getDisplayScore(mode, score, objectCount);
+        }
+
         return {
             retries,
             playerName: username,
             mods,
             mode,
-            score: this.process.readLong(scoreInfo + 0x98),
+            score,
             playerHPSmooth: health,
             playerHP: health,
             accuracy: this.process.readDouble(scoreInfo + 0xa8) * 100,
