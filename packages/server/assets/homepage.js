@@ -1513,3 +1513,35 @@ document.addEventListener('keydown', (event) => {
     return;
   };
 });
+
+
+window.onload = async () => {
+  try {
+    const requst = await fetch('https://osuck.net/tosu/api.json');
+    const json = await requst.json();
+
+    const installed = document.querySelectorAll('.calu');
+    for (let i = 0; i < installed.length; i++) {
+      const counter = installed[i];
+
+      const find = json.find(r => r.name == counter.attributes.getNamedItem('n')?.value);
+      if (!find) continue;
+
+
+      const updatable = counter.attributes.getNamedItem('v')?.value != find.version;
+      if (!updatable) continue;
+
+      const button = document.createElement('button');
+      button.classList.add('button', 'update-button', 'flexer');
+
+      button.setAttribute('l', find.downloadLink);
+      button.setAttribute('n', find.name);
+      button.setAttribute('a', find.author);
+
+      button.innerHTML = `<span>Update</span>`;
+      counter.prepend(button);
+    };
+  } catch (error) {
+    console.log(error);
+  };
+};
