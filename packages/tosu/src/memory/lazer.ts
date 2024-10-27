@@ -26,7 +26,12 @@ import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { netDateBinaryToDate, numberFromDecimal } from '@/utils/converters';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
-import { CalculateMods, Mod, ModsCategories } from '@/utils/osuMods.types';
+import {
+    CalculateMods,
+    Mod,
+    ModsAcronyms,
+    ModsCategories
+} from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 export enum ScoringMode {
@@ -1185,6 +1190,521 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.hitEvents();
     }
 
+    private readMod(acronym: ModsAcronyms, modObject: number): Mod {
+        const mod: Mod = {
+            acronym: acronym as any
+        };
+
+        switch (mod.acronym) {
+            case 'EZ': {
+                mod.settings = {
+                    retries: this.process.readInt(modObject + 0x20)
+                };
+
+                break;
+            }
+            case 'HT': {
+                const speedChangeBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+                const adjustPitchBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+
+                mod.settings = {
+                    speed_change: this.process.readDouble(
+                        speedChangeBindable + 0x40
+                    ),
+                    adjust_pitch:
+                        this.process.readByte(adjustPitchBindable + 0x40) === 1
+                };
+
+                break;
+            }
+            case 'DC': {
+                const speedChangeBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                mod.settings = {
+                    speed_change: this.process.readDouble(
+                        speedChangeBindable + 0x40
+                    )
+                };
+
+                break;
+            }
+            case 'SD': {
+                const restartBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                mod.settings = {
+                    restart: this.process.readByte(restartBindable + 0x40) === 1
+                };
+
+                break;
+            }
+            case 'PF': {
+                const restartBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                mod.settings = {
+                    restart: this.process.readByte(restartBindable + 0x40) === 1
+                };
+
+                break;
+            }
+            case 'DT': {
+                const speedChangeBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                const adjustPitchBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+
+                mod.settings = {
+                    speed_change: this.process.readDouble(
+                        speedChangeBindable + 0x40
+                    ),
+                    adjust_pitch:
+                        this.process.readByte(adjustPitchBindable + 0x40) === 1
+                };
+
+                break;
+            }
+            case 'NC': {
+                const speedChangeBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                mod.settings = {
+                    speed_change: this.process.readDouble(
+                        speedChangeBindable + 0x40
+                    )
+                };
+
+                break;
+            }
+            case 'HD': {
+                const onlyFadeApproachCirclesBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                mod.settings = {
+                    only_fade_approach_circles:
+                        this.process.readByte(
+                            onlyFadeApproachCirclesBindable + 0x40
+                        ) === 1
+                };
+                break;
+            }
+            case 'FL': {
+                const followDelayBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+
+                const sizeMultiplierBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                const comboBasedBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+
+                mod.settings = {
+                    follow_delay: this.process.readDouble(
+                        followDelayBindable + 0x40
+                    ),
+                    size_multiplier: this.process.readFloat(
+                        sizeMultiplierBindable + 0x40
+                    ),
+                    combo_based_size:
+                        this.process.readByte(comboBasedBindable + 0x40) === 1
+                };
+                break;
+            }
+            case 'AC': {
+                const restartBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                const minimumAccuracyBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                const accuracyJudgeModeBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+
+                mod.settings = {
+                    minimum_accuracy: this.process.readDouble(
+                        minimumAccuracyBindable + 0x40
+                    ),
+                    accuracy_judge_mode: this.process.readInt(
+                        accuracyJudgeModeBindable + 0x40
+                    ),
+                    restart: this.process.readByte(restartBindable + 0x40) === 1
+                };
+                break;
+            }
+            case 'TP': {
+                const seedBindable = this.process.readIntPtr(modObject + 0x20);
+                const metronomeBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+                const valueNullable = seedBindable + 0x44 + 0x4;
+
+                mod.settings = {
+                    seed: this.process.readInt(valueNullable),
+                    metronome:
+                        this.process.readByte(metronomeBindable + 0x40) === 1
+                };
+                break;
+            }
+            case 'DA': {
+                const drainRateBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+                const overallDifficultyBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+                const extendedLimitsBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+                const circleSizeBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+                const approachRateBindable = this.process.readIntPtr(
+                    modObject + 0x30
+                );
+
+                const drainRateCurrentBindable = this.process.readIntPtr(
+                    drainRateBindable + 0x60
+                );
+
+                const overallDifficultyCurrentBindable =
+                    this.process.readIntPtr(overallDifficultyBindable + 0x60);
+
+                const circleSizeCurrentBindable = this.process.readIntPtr(
+                    circleSizeBindable + 0x60
+                );
+
+                const approachRateCurrentBindable = this.process.readIntPtr(
+                    approachRateBindable + 0x60
+                );
+
+                mod.settings = {
+                    circle_size: this.process.readFloat(
+                        circleSizeCurrentBindable + 0x40
+                    ),
+                    approach_rate: this.process.readFloat(
+                        approachRateCurrentBindable + 0x40
+                    ),
+                    drain_rate: this.process.readFloat(
+                        drainRateCurrentBindable + 0x40
+                    ),
+                    overall_difficulty: this.process.readFloat(
+                        overallDifficultyCurrentBindable + 0x40
+                    ),
+                    extended_limits:
+                        this.process.readByte(extendedLimitsBindable + 0x40) ===
+                        1
+                };
+                break;
+            }
+            case 'CL': {
+                const noSliderHeadAccuracyBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+                const classicNoteLockBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+                const alwaysPlayTailSampleBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+                const fadeHitCircleEarlyBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+                const classicHealthBindable = this.process.readIntPtr(
+                    modObject + 0x30
+                );
+
+                mod.settings = {
+                    no_slider_head_accuracy:
+                        this.process.readByte(
+                            noSliderHeadAccuracyBindable + 0x40
+                        ) === 1,
+                    classic_note_lock:
+                        this.process.readByte(
+                            classicNoteLockBindable + 0x40
+                        ) === 1,
+                    always_play_tail_sample:
+                        this.process.readByte(
+                            alwaysPlayTailSampleBindable + 0x40
+                        ) === 1,
+                    fade_hit_circle_early:
+                        this.process.readByte(
+                            fadeHitCircleEarlyBindable + 0x40
+                        ) === 1,
+                    classic_health:
+                        this.process.readByte(classicHealthBindable + 0x40) ===
+                        1
+                };
+                break;
+            }
+            case 'RD': {
+                const seedBindable = this.process.readIntPtr(modObject + 0x10);
+                const angleSharpnessBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+                const valueNullable = seedBindable + 0x44 + 0x4;
+
+                mod.settings = {
+                    angle_sharpness:
+                        this.lastGamemode === 3
+                            ? 0
+                            : this.process.readFloat(
+                                  angleSharpnessBindable + 0x40
+                              ),
+                    seed: this.process.readInt(valueNullable)
+                };
+                break;
+            }
+            case 'MR': {
+                const reflectionBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+                mod.settings = {
+                    reflection: this.process.readInt(reflectionBindable + 0x40)
+                };
+                break;
+            }
+            case 'WG': {
+                const strengthBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                mod.settings = {
+                    strength: this.process.readDouble(strengthBindable + 0x40)
+                };
+                break;
+            }
+            case 'GR': {
+                const startScaleBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                mod.settings = {
+                    start_scale: this.process.readFloat(
+                        startScaleBindable + 0x40
+                    )
+                };
+                break;
+            }
+            case 'DF': {
+                const startScaleBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                mod.settings = {
+                    start_scale: this.process.readFloat(
+                        startScaleBindable + 0x40
+                    )
+                };
+
+                break;
+            }
+            case 'WU': {
+                const initialRateBindable = this.process.readIntPtr(
+                    modObject + 0x30
+                );
+
+                const finalRateBindable = this.process.readIntPtr(
+                    modObject + 0x38
+                );
+
+                const adjustPitchBindable = this.process.readIntPtr(
+                    modObject + 0x40
+                );
+
+                mod.settings = {
+                    initial_rate: this.process.readDouble(
+                        initialRateBindable + 0x40
+                    ),
+                    final_rate: this.process.readDouble(
+                        finalRateBindable + 0x40
+                    ),
+                    adjust_pitch:
+                        this.process.readByte(adjustPitchBindable + 0x40) === 1
+                };
+                break;
+            }
+            case 'WD': {
+                const initialRateBindable = this.process.readIntPtr(
+                    modObject + 0x30
+                );
+
+                const finalRateBindable = this.process.readIntPtr(
+                    modObject + 0x38
+                );
+
+                const adjustPitchBindable = this.process.readIntPtr(
+                    modObject + 0x40
+                );
+
+                mod.settings = {
+                    initial_rate: this.process.readDouble(
+                        initialRateBindable + 0x40
+                    ),
+                    final_rate: this.process.readDouble(
+                        finalRateBindable + 0x40
+                    ),
+                    adjust_pitch:
+                        this.process.readByte(adjustPitchBindable + 0x40) === 1
+                };
+                break;
+            }
+            case 'BR': {
+                const spinSpeedBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                const directionBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+
+                mod.settings = {
+                    spin_speed: this.process.readInt(spinSpeedBindable + 0x40),
+                    direction: this.process.readDouble(directionBindable + 0x40)
+                };
+                break;
+            }
+            case 'AD': {
+                const scaleBindable = this.process.readIntPtr(modObject + 0x10);
+                const styleBindable = this.process.readIntPtr(modObject + 0x18);
+
+                mod.settings = {
+                    scale: this.process.readFloat(scaleBindable + 0x40),
+                    style: this.process.readInt(styleBindable + 0x40)
+                };
+                break;
+            }
+            case 'MU': {
+                const inverseMutingBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+
+                const enableMetronomeBindable = this.process.readIntPtr(
+                    modObject + 0x30
+                );
+
+                const muteComboCountBindable = this.process.readIntPtr(
+                    modObject + 0x38
+                );
+
+                const affectsHitSoundsBindable = this.process.readIntPtr(
+                    modObject + 0x40
+                );
+
+                mod.settings = {
+                    inverse_muting:
+                        this.process.readByte(inverseMutingBindable + 0x40) ===
+                        1,
+                    enable_metronome:
+                        this.process.readByte(
+                            enableMetronomeBindable + 0x40
+                        ) === 1,
+                    mute_combo_count: this.process.readInt(
+                        muteComboCountBindable + 0x40
+                    ),
+                    affects_hit_sounds:
+                        this.process.readByte(
+                            affectsHitSoundsBindable + 0x40
+                        ) === 1
+                };
+                break;
+            }
+            case 'NS': {
+                const hiddenComboCountBindable = this.process.readIntPtr(
+                    modObject + 0x30
+                );
+
+                mod.settings = {
+                    hidden_combo_count: this.process.readInt(
+                        hiddenComboCountBindable + 0x40
+                    )
+                };
+                break;
+            }
+            case 'MG': {
+                const attractionStrengthBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                mod.settings = {
+                    attraction_strength: this.process.readFloat(
+                        attractionStrengthBindable + 0x40
+                    )
+                };
+                break;
+            }
+            case 'RP': {
+                const repulsionStrengthBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                mod.settings = {
+                    repulsion_strength: this.process.readFloat(
+                        repulsionStrengthBindable + 0x40
+                    )
+                };
+
+                break;
+            }
+            case 'AS': {
+                const initialRateBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+
+                const adjustPitchBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+
+                mod.settings = {
+                    initial_rate: this.process.readDouble(
+                        initialRateBindable + 0x40
+                    ),
+                    adjust_pitch:
+                        this.process.readByte(adjustPitchBindable + 0x40) === 1
+                };
+                break;
+            }
+            case 'DP': {
+                const maxDepthBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                const showApproachRateBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+
+                mod.settings = {
+                    max_depth: this.process.readFloat(maxDepthBindable + 0x40),
+                    show_approach_circles:
+                        this.process.readByte(
+                            showApproachRateBindable + 0x40
+                        ) === 1
+                };
+                break;
+            }
+        }
+
+        return mod;
+    }
+
     global(): IGlobal {
         if (!this.modMappings.has(this.lastGamemode.toString())) {
             this.initModMapping(this.lastGamemode);
@@ -1206,20 +1726,23 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             const selectedModsItems = this.readListItems(selectedMods);
 
-            const modAcronyms: { acronym: any }[] = [];
+            const modList: Mod[] = [];
 
             for (let i = 0; i < selectedModsItems.length; i++) {
                 const type = this.process.readIntPtr(selectedModsItems[i]);
 
-                const mod = this.modMappings.get(
+                const acronym = this.modMappings.get(
                     `${this.lastGamemode}-${type}`
                 );
-                if (mod) {
-                    modAcronyms.push({ acronym: mod });
+
+                if (acronym) {
+                    modList.push(
+                        this.readMod(acronym as any, selectedModsItems[i])
+                    );
                 }
             }
 
-            let mods = calculateMods(modAcronyms);
+            let mods = calculateMods(modList);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 

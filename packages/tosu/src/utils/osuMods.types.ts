@@ -383,7 +383,7 @@ export interface AC {
     acronym: 'AC';
     settings?: {
         minimum_accuracy?: number;
-        accuracy_judge_mode?: string;
+        accuracy_judge_mode?: number;
         restart?: boolean;
     };
 }
@@ -443,7 +443,7 @@ export interface ManiaKeys {
 export interface MR {
     acronym: 'MR';
     settings?: {
-        reflection: string;
+        reflection: number;
     };
 }
 
@@ -530,7 +530,7 @@ export interface BR {
     acronym: 'BR';
     settings?: {
         spin_speed?: number;
-        direction?: string;
+        direction?: number;
     };
 }
 
@@ -538,7 +538,7 @@ export interface AD {
     acronym: 'AD';
     settings?: {
         scale?: number;
-        style?: string;
+        style?: number;
     };
 }
 
