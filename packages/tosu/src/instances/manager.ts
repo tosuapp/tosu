@@ -44,8 +44,12 @@ export class InstanceManager {
         try {
             let osuProcesses = Process.findProcesses('osu!.exe');
 
+            let lazerOnLinux = false;
+
             if (osuProcesses.length === 0 && process.platform === 'linux') {
                 osuProcesses = Process.findProcesses('osu!');
+
+                lazerOnLinux = true;
             }
 
             for (const processId of osuProcesses || []) {
@@ -54,9 +58,10 @@ export class InstanceManager {
                     continue;
                 }
 
-                const isProcess64bit = Process.isProcess64bit(processId);
+                const isLazer =
+                    Process.isProcess64bit(processId) || lazerOnLinux;
 
-                const osuInstance = isProcess64bit
+                const osuInstance = isLazer
                     ? new LazerInstance(processId)
                     : new OsuInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
@@ -83,10 +88,6 @@ export class InstanceManager {
 
                 this.osuInstances[processId] = osuInstance;
                 osuInstance.start();
-
-                if (process.platform === 'linux' && isProcess64bit) {
-                    break;
-                }
             }
         } catch (exc) {
             wLogger.error('InstanceManager', (exc as any).message);
