@@ -1753,6 +1753,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 };
                 break;
             }
+            case 'CO': {
+                const coverageBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                const directionBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+
+                mod.settings = {
+                    coverage: this.process.readFloat(coverageBindable + 0x40),
+                    direction: this.process.readInt(directionBindable + 0x40)
+                };
+                break;
+            }
         }
 
         return mod;

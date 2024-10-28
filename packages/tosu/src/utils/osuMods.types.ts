@@ -629,6 +629,10 @@ export interface DS {
 
 export interface CO {
     acronym: 'CO';
+    settings?: {
+        coverage?: number;
+        direction?: number;
+    };
 }
 
 export interface FI {
