@@ -1197,6 +1197,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         switch (mod.acronym) {
             case 'EZ': {
+                if (this.selectedGamemode === 1) break;
+
                 mod.settings = {
                     retries: this.process.readInt(modObject + 0x20)
                 };
@@ -1289,6 +1291,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'HD': {
+                if ([1, 2].includes(this.selectedGamemode)) break;
                 const onlyFadeApproachCirclesBindable = this.process.readIntPtr(
                     modObject + 0x20
                 );
@@ -1302,6 +1305,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'FL': {
+                const settings: any = {};
                 const followDelayBindable = this.process.readIntPtr(
                     modObject + 0x18
                 );
@@ -1314,16 +1318,28 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     modObject + 0x28
                 );
 
-                mod.settings = {
-                    follow_delay: this.process.readDouble(
+                if (this.selectedGamemode === 0) {
+                    settings.follow_delay = this.process.readDouble(
                         followDelayBindable + 0x40
-                    ),
-                    size_multiplier: this.process.readFloat(
+                    );
+
+                    settings.combo_based_size =
+                        this.process.readByte(comboBasedBindable + 0x40) === 1;
+
+                    settings.size_multiplier = this.process.readFloat(
                         sizeMultiplierBindable + 0x40
-                    ),
-                    combo_based_size:
-                        this.process.readByte(comboBasedBindable + 0x40) === 1
-                };
+                    );
+                } else if ([1, 2, 3].includes(this.selectedGamemode)) {
+                    settings.size_multiplier = this.process.readFloat(
+                        followDelayBindable + 0x40
+                    );
+
+                    settings.combo_based_size =
+                        this.process.readByte(sizeMultiplierBindable + 0x40) ===
+                        1;
+                }
+
+                mod.settings = settings;
                 break;
             }
             case 'AC': {
@@ -1365,6 +1381,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'DA': {
+                const settings: any = {};
+
                 const drainRateBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
@@ -1388,34 +1406,60 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 const overallDifficultyCurrentBindable =
                     this.process.readIntPtr(overallDifficultyBindable + 0x60);
 
-                const circleSizeCurrentBindable = this.process.readIntPtr(
-                    circleSizeBindable + 0x60
-                );
+                if (this.selectedGamemode === 0) {
+                    const circleSizeCurrentBindable = this.process.readIntPtr(
+                        circleSizeBindable + 0x60
+                    );
+                    const approachRateCurrentBindable = this.process.readIntPtr(
+                        approachRateBindable + 0x60
+                    );
 
-                const approachRateCurrentBindable = this.process.readIntPtr(
-                    approachRateBindable + 0x60
-                );
-
-                mod.settings = {
-                    circle_size: this.process.readFloat(
-                        circleSizeCurrentBindable + 0x40
-                    ),
-                    approach_rate: this.process.readFloat(
+                    settings.approach_rate = this.process.readFloat(
                         approachRateCurrentBindable + 0x40
-                    ),
-                    drain_rate: this.process.readFloat(
-                        drainRateCurrentBindable + 0x40
-                    ),
-                    overall_difficulty: this.process.readFloat(
-                        overallDifficultyCurrentBindable + 0x40
-                    ),
-                    extended_limits:
-                        this.process.readByte(extendedLimitsBindable + 0x40) ===
-                        1
-                };
+                    );
+
+                    settings.circle_size = this.process.readFloat(
+                        circleSizeCurrentBindable + 0x40
+                    );
+                } else if (this.selectedGamemode === 1) {
+                    const circleSizeCurrentBindable = this.process.readIntPtr(
+                        circleSizeBindable + 0x60
+                    );
+                    settings.scroll_speed = this.process.readFloat(
+                        circleSizeCurrentBindable + 0x40
+                    );
+                } else if (this.selectedGamemode === 2) {
+                    const circleSizeCurrentBindable = this.process.readIntPtr(
+                        circleSizeBindable + 0x60
+                    );
+                    const approachRateCurrentBindable = this.process.readIntPtr(
+                        approachRateBindable + 0x60
+                    );
+
+                    settings.approach_rate = this.process.readFloat(
+                        approachRateCurrentBindable + 0x40
+                    );
+
+                    settings.circle_size = this.process.readFloat(
+                        circleSizeCurrentBindable + 0x40
+                    );
+                }
+
+                settings.drain_rate = this.process.readFloat(
+                    drainRateCurrentBindable + 0x40
+                );
+                settings.overall_difficulty = this.process.readFloat(
+                    overallDifficultyCurrentBindable + 0x40
+                );
+
+                settings.extended_limits =
+                    this.process.readByte(extendedLimitsBindable + 0x40) === 1;
+
+                mod.settings = settings;
                 break;
             }
             case 'CL': {
+                if (this.selectedGamemode === 1) break;
                 const noSliderHeadAccuracyBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
@@ -1456,24 +1500,24 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'RD': {
+                const settings: any = {};
                 const seedBindable = this.process.readIntPtr(modObject + 0x10);
                 const angleSharpnessBindable = this.process.readIntPtr(
                     modObject + 0x18
                 );
                 const valueNullable = seedBindable + 0x44 + 0x4;
+                if (![3, 1].includes(this.selectedGamemode)) {
+                    settings.angle_sharpness = this.process.readFloat(
+                        angleSharpnessBindable + 0x40
+                    );
+                }
 
-                mod.settings = {
-                    angle_sharpness:
-                        this.lastGamemode === 3
-                            ? 0
-                            : this.process.readFloat(
-                                  angleSharpnessBindable + 0x40
-                              ),
-                    seed: this.process.readInt(valueNullable)
-                };
+                settings.seed = this.process.readInt(valueNullable);
+                mod.settings = settings;
                 break;
             }
             case 'MR': {
+                if (this.selectedGamemode === 3) break;
                 const reflectionBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
@@ -1707,9 +1751,29 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return mod;
     }
 
+    private readGamemode() {
+        const rulesetBindable = this.process.readIntPtr(
+            this.gameBase() + 0x458
+        );
+        const rulesetInfo = this.process.readIntPtr(rulesetBindable + 0x20);
+
+        const gamemode = this.process.readInt(rulesetInfo + 0x30);
+        return gamemode;
+    }
+
+    private selectedGamemode = 0;
+
     global(): IGlobal {
-        if (!this.modMappings.has(this.lastGamemode.toString())) {
-            this.initModMapping(this.lastGamemode);
+        const gamemode = this.readGamemode();
+        if (this.selectedGamemode !== gamemode)
+            this.selectedGamemode = gamemode;
+
+        if (!this.modMappings.has(gamemode.toString())) {
+            try {
+                this.initModMapping(gamemode);
+            } catch (error) {
+                wLogger.debug('lazer-global', error);
+            }
         }
 
         this.currentScreen = this.getCurrentScreen();
@@ -1733,21 +1797,24 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             for (let i = 0; i < selectedModsItems.length; i++) {
                 const type = this.process.readIntPtr(selectedModsItems[i]);
 
-                const acronym = this.modMappings.get(
-                    `${this.lastGamemode}-${type}`
-                );
+                const acronym = this.modMappings.get(`${gamemode}-${type}`);
 
                 if (acronym) {
                     modList.push(
                         this.readMod(acronym as any, selectedModsItems[i])
                     );
-                }
+                } else console.log(type, acronym);
             }
 
             let mods = calculateMods(modList);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
+            if (
+                JSON.stringify(this.menuMods.array) !==
+                JSON.stringify(mods.array)
+            )
+                console.log(mods.array);
             this.menuMods = mods;
         }
 
@@ -1804,12 +1871,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const beatmap = this.currentBeatmap();
         const checksum = this.process.readSharpStringPtr(beatmap.info + 0x58);
 
-        const rulesetBindable = this.process.readIntPtr(
-            this.gameBase() + 0x458
-        );
-        const rulesetInfo = this.process.readIntPtr(rulesetBindable + 0x20);
-
-        const gamemode = this.process.readInt(rulesetInfo + 0x30);
+        const gamemode = this.readGamemode();
         if (checksum === previousChecksum && gamemode === this.lastGamemode) {
             return '';
         }
@@ -1833,7 +1895,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         return {
-            gamemode: this.process.readInt(rulesetInfo + 0x30),
+            gamemode,
             checksum,
             filename: this.toLazerPath(hash),
             plays: 0,

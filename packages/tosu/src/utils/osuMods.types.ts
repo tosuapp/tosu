@@ -201,7 +201,7 @@ export const ModsCategories = {
         systemCategory: ['TD', 'SV2']
     },
     3: {
-        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
+        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC', 'NR'],
         diffIncreasingCategory: [
             'HR',
             'SD',
