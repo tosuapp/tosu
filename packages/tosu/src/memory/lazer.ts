@@ -405,7 +405,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         for (let i = 0; i < items.length; i++) {
             const current = items[i];
 
-            console.log(current.toString(16));
             const isMultiMod = this.isMultiMod(
                 this.process.readIntPtr(current)
             );
