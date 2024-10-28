@@ -196,7 +196,7 @@ export const ModsCategories = {
             'AC'
         ],
         automationCategory: ['AT', 'CN', 'RX'],
-        conversionCategory: ['DA', 'MR'],
+        conversionCategory: ['DA', 'CL', 'MR'],
         funCategory: ['WU', 'WD', 'FF', 'MU', 'NS'],
         systemCategory: ['TD', 'SV2']
     },
@@ -220,6 +220,7 @@ export const ModsCategories = {
             'DS',
             'MR',
             'DA',
+            'CL',
             'IN',
             'CS',
             'HO',
@@ -404,6 +405,7 @@ export interface DA {
         drain_rate?: number;
         overall_difficulty?: number;
         extended_limits?: boolean;
+        hard_rock_offsets?: boolean; // spicy patterns in catch
     };
 }
 

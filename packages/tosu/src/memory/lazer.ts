@@ -390,6 +390,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.readItems(items, size, inlined, structSize);
     }
 
+    private isMultiMod(type: number): boolean {
+        return (
+            this.process.readInt(type) === 0x1000000 &&
+            this.process.readInt(type + 0x3) === 8193
+        );
+    }
+
     private readModList(list: number): number[] {
         const items = this.readListItems(list);
 
@@ -398,10 +405,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         for (let i = 0; i < items.length; i++) {
             const current = items[i];
 
-            const mods = this.process.readIntPtr(current + 0x10);
-
-            const isMultiMod =
-                mods > 1000 && this.process.readInt(mods + 0x8) === 2;
+            console.log(current.toString(16));
+            const isMultiMod = this.isMultiMod(
+                this.process.readIntPtr(current)
+            );
 
             if (isMultiMod) {
                 const modsList = this.process.readIntPtr(current + 0x10);
@@ -1406,7 +1413,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 const overallDifficultyCurrentBindable =
                     this.process.readIntPtr(overallDifficultyBindable + 0x60);
 
-                if (this.selectedGamemode === 0) {
+                if (
+                    this.selectedGamemode === 0 ||
+                    this.selectedGamemode === 2
+                ) {
                     const circleSizeCurrentBindable = this.process.readIntPtr(
                         circleSizeBindable + 0x60
                     );
@@ -1421,26 +1431,22 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     settings.circle_size = this.process.readFloat(
                         circleSizeCurrentBindable + 0x40
                     );
+
+                    if (this.selectedGamemode === 2) {
+                        const hardRockOffsetsBindable = this.process.readIntPtr(
+                            modObject + 0x38
+                        );
+
+                        settings.hard_rock_offsets =
+                            this.process.readByte(
+                                hardRockOffsetsBindable + 0x40
+                            ) === 1;
+                    }
                 } else if (this.selectedGamemode === 1) {
                     const circleSizeCurrentBindable = this.process.readIntPtr(
                         circleSizeBindable + 0x60
                     );
                     settings.scroll_speed = this.process.readFloat(
-                        circleSizeCurrentBindable + 0x40
-                    );
-                } else if (this.selectedGamemode === 2) {
-                    const circleSizeCurrentBindable = this.process.readIntPtr(
-                        circleSizeBindable + 0x60
-                    );
-                    const approachRateCurrentBindable = this.process.readIntPtr(
-                        approachRateBindable + 0x60
-                    );
-
-                    settings.approach_rate = this.process.readFloat(
-                        approachRateCurrentBindable + 0x40
-                    );
-
-                    settings.circle_size = this.process.readFloat(
                         circleSizeCurrentBindable + 0x40
                     );
                 }
@@ -1517,7 +1523,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'MR': {
-                if (this.selectedGamemode === 3) break;
+                if ([2, 3].includes(this.selectedGamemode)) break;
                 const reflectionBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
@@ -1674,8 +1680,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'NS': {
+                const offset = this.selectedGamemode === 2 ? 0x28 : 0x30;
+
                 const hiddenComboCountBindable = this.process.readIntPtr(
-                    modObject + 0x30
+                    modObject + offset
                 );
 
                 mod.settings = {
@@ -1803,7 +1811,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     modList.push(
                         this.readMod(acronym as any, selectedModsItems[i])
                     );
-                } else console.log(type, acronym);
+                } else console.log(type.toString(16), acronym);
             }
 
             let mods = calculateMods(modList);
