@@ -131,7 +131,7 @@ export abstract class AbstractInstance {
     }
 
     start(): void {
-        wLogger.info(`[${this.pid}] Running memory chimera...`);
+        wLogger.info(`[${this.pid} ${this.client}] Running memory chimera...`);
 
         while (!this.isReady) {
             try {
@@ -142,16 +142,16 @@ export abstract class AbstractInstance {
                 }
 
                 wLogger.debug(
-                    `[${this.pid}] Took ${(performance.now() - s1).toFixed(2)} ms to scan patterns`
+                    `[${this.pid} ${this.client}] Took ${(performance.now() - s1).toFixed(2)} ms to scan patterns`
                 );
 
                 wLogger.info(
-                    `[${this.pid}] ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA`
+                    `[${this.pid} ${this.client}] ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA`
                 );
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    `[${this.pid}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
+                    `[${this.pid} ${this.client}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
                 );
                 wLogger.debug(exc);
                 this.emitter.emit('onResolveFailed', this.pid);
@@ -221,7 +221,7 @@ export abstract class AbstractInstance {
     }
 
     /**
-     * Returns map of requested services\
+     * Returns map of requested services
      * Throws if any of requested services is not currently present
      */
     getServices<T extends (keyof DataRepoList)[]>(
