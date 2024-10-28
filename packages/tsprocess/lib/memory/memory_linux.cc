@@ -62,22 +62,22 @@ bool memory::is_process_exist(void *process) {
 
 bool memory::is_process_64bit(uint32_t id) {
   const auto exe_path = "/proc/" + std::to_string(id) + "/exe";
-  
+
   std::ifstream file(exe_path, std::ios::binary);
   if (!file.is_open()) {
     return false;
   }
 
   unsigned char magic[4];
-  file.read(reinterpret_cast<char*>(magic), sizeof(magic));
-  
+  file.read(reinterpret_cast<char *>(magic), sizeof(magic));
+
   if (magic[0] != 0x7F || magic[1] != 'E' || magic[2] != 'L' || magic[3] != 'F') {
     return false;
   }
 
   unsigned char elf_class;
-  file.read(reinterpret_cast<char*>(&elf_class), sizeof(elf_class));
-  
+  file.read(reinterpret_cast<char *>(&elf_class), sizeof(elf_class));
+
   return elf_class == 2;
 }
 
@@ -150,7 +150,7 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
     region.size = end_address - region.address;
     const auto protections = line.substr(first_space_pos + 1, 5);
 
-    if (protections[0] == 'r' && protections[1] == 'w' && protections[2] == 'x') {
+    if (protections[0] == 'r' && protections[1] == 'w') {
       regions.push_back(region);
     }
   }
