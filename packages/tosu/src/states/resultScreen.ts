@@ -1,5 +1,5 @@
 import rosu from '@kotrikd/rosu-pp';
-import { wLogger } from '@tosu/common';
+import { ClientType, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
@@ -147,7 +147,7 @@ export class ResultScreen extends AbstractState {
                 nGeki: this.hitGeki,
                 sliderEndHits: this.sliderEndHits,
                 sliderTickHits: this.sliderTickHits,
-                lazer: this.game.client === 'lazer'
+                lazer: this.game.client === ClientType.lazer
             };
 
             const curPerformance = new rosu.Performance(scoreParams).calculate(

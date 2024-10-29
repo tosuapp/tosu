@@ -1,4 +1,4 @@
-import { config, sleep, wLogger } from '@tosu/common';
+import { GameState, config, sleep, wLogger } from '@tosu/common';
 
 import { LazerMemory } from '@/memory/lazer';
 import { Gameplay } from '@/states/gameplay';
@@ -58,7 +58,7 @@ export class LazerInstance extends AbstractInstance {
                 }
 
                 // update important data before doing rest
-                if (global.status === 7) {
+                if (global.status === GameState.resultScreen) {
                     const resultUpdate = resultScreen.updateState();
                     if (resultUpdate === 'not-ready') {
                         await sleep(config.pollRate);
@@ -67,16 +67,16 @@ export class LazerInstance extends AbstractInstance {
                 }
 
                 const currentMods =
-                    global.status === 2
+                    global.status === GameState.play
                         ? gameplay.mods
-                        : global.status === 7
+                        : global.status === GameState.resultScreen
                           ? resultScreen.mods
                           : global.menuMods;
 
                 const currentMode =
-                    global.status === 2
+                    global.status === GameState.play
                         ? gameplay.mode
-                        : global.status === 7
+                        : global.status === GameState.resultScreen
                           ? resultScreen.mode
                           : menu.gamemode;
 
@@ -107,11 +107,11 @@ export class LazerInstance extends AbstractInstance {
                 beatmapPP.updateRealTimeBPM(global.playTime, currentMods.rate);
 
                 switch (global.status) {
-                    case 0:
+                    case GameState.menu:
                         // FIXME: TODO
                         // bassDensity.updateState();
                         break;
-                    case 2: // is playing (after player is loaded)
+                    case GameState.play: // is playing (after player is loaded)
                         // support replay rewind
                         if (this.previousCombo > gameplay.combo) {
                             gameplay.resetQuick();
@@ -135,7 +135,7 @@ export class LazerInstance extends AbstractInstance {
                         this.previousCombo = gameplay.combo;
                         break;
 
-                    case 5:
+                    case GameState.selectPlay:
                         // Reset Gameplay/ResultScreen data on joining to songSelect
                         if (!gameplay.isDefaultState) {
                             gameplay.init(undefined, '4,5');
@@ -149,7 +149,7 @@ export class LazerInstance extends AbstractInstance {
                         }
                         break;
 
-                    case 7: // result screen
+                    case GameState.resultScreen:
                         resultScreen.updatePerformance();
                         break;
 
@@ -177,7 +177,7 @@ export class LazerInstance extends AbstractInstance {
         global.updatePreciseState();
 
         switch (global.status) {
-            case 2:
+            case GameState.play:
                 if (global.playTime < 150) {
                     break;
                 }

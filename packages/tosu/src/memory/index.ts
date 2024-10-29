@@ -21,18 +21,11 @@ import type {
     ITourney,
     ITourneyChat,
     ITourneyUser,
-    IUser
+    IUser,
+    ScanPatterns
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
-
-export type ScanPatterns = {
-    [k in keyof any]: {
-        pattern: string;
-        offset?: number;
-        isTourneyOnly?: boolean;
-    };
-};
 
 export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract patterns: M;

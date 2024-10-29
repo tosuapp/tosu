@@ -1,31 +1,32 @@
-import { CountryCodes } from '@tosu/common';
+import {
+    BanchoStatus,
+    ChatStatus,
+    ClientType,
+    CountryCodes,
+    GameState,
+    GroupType,
+    LeaderboardType,
+    ProgressBarType,
+    Rulesets,
+    ScoreMeterType,
+    SortType,
+    StableBeatmapStatuses,
+    UserLoginStatus
+} from '@tosu/common';
 import path from 'path';
 
 import {
     ApiAnswer,
-    BanchoStatusEnum,
-    BeatmapStatuses,
-    ChatStatus,
-    GameState,
-    GroupType,
     Leaderboard,
-    LeaderboardType,
-    Modes,
-    ProgressBarType,
-    ScoreMeterType,
-    SortType,
     Tourney,
     TourneyChatMessages,
-    TourneyClients,
-    UserLoginStatus
+    TourneyClients
 } from '@/api/types/v2';
 import { InstanceManager } from '@/instances/manager';
 import { BeatmapPP } from '@/states/beatmap';
-import {
-    Gameplay,
-    LeaderboardPlayer as MemoryLeaderboardPlayer
-} from '@/states/gameplay';
+import { Gameplay } from '@/states/gameplay';
 import { Menu } from '@/states/menu';
+import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { CalculateMods } from '@/utils/osuMods.types';
@@ -62,7 +63,9 @@ const convertMemoryPlayerToResult = (
         },
         mods: {
             number: memoryPlayer.mods.number,
-            name: memoryPlayer.mods.name
+            name: memoryPlayer.mods.name,
+            array: memoryPlayer.mods.array,
+            rate: memoryPlayer.mods.rate
         },
         rank: calculateGrade({
             mods: memoryPlayer.mods.number,
@@ -99,9 +102,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     ]);
 
     const currentMods =
-        global.status === 2 || global.status === 7
+        global.status === GameState.play
             ? gameplay.mods
-            : global.menuMods;
+            : global.status === GameState.resultScreen
+              ? resultScreen.mods
+              : global.menuMods;
 
     const resultScreenHits = {
         300: resultScreen.hit300,
@@ -115,7 +120,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     };
 
     return {
-        client: osuInstance.client,
+        client: ClientType[osuInstance.client],
         state: {
             number: global.status,
             name: GameState[global.status] || ''
@@ -172,7 +177,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             skin: settings.skin,
             mode: {
                 number: menu.gamemode,
-                name: Modes[menu.gamemode] || ''
+                name: Rulesets[menu.gamemode] || ''
             },
             audio: settings.audio,
             background: settings.background,
@@ -186,13 +191,13 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             banchoStatus: {
                 number: user.rawBanchoStatus,
-                name: BanchoStatusEnum[user.rawBanchoStatus] || ''
+                name: BanchoStatus[user.rawBanchoStatus] || ''
             },
             id: user.id,
             name: user.name,
             mode: {
                 number: user.playMode,
-                name: Modes[user.playMode] || ''
+                name: Rulesets[user.playMode] || ''
             },
 
             rankedScore: user.rankedScore,
@@ -219,7 +224,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             status: {
                 number: menu.rankedStatus,
-                name: BeatmapStatuses[menu.rankedStatus || -1] || ''
+                name: StableBeatmapStatuses[menu.rankedStatus || -1] || ''
             },
             checksum: menu.checksum,
 
@@ -228,7 +233,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             mode: {
                 number: beatmapPP.mode,
-                name: Modes[beatmapPP.mode] || ''
+                name: Rulesets[beatmapPP.mode] || ''
             },
 
             artist: menu.artist,
@@ -244,7 +249,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         },
         play: buildPlay(gameplay, beatmapPP, currentMods),
         leaderboard: gameplay.leaderboardScores.map((slot) =>
-            convertMemoryPlayerToResult(slot, Modes[gameplay.mode])
+            convertMemoryPlayerToResult(slot, Rulesets[gameplay.mode])
         ),
         performance: {
             accuracy: beatmapPP.ppAcc,
@@ -257,7 +262,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             mode: {
                 number: resultScreen.mode,
-                name: Modes[resultScreen.mode] || ''
+                name: Rulesets[resultScreen.mode] || ''
             },
 
             score: resultScreen.score,
@@ -267,7 +272,9 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             hits: resultScreenHits,
             mods: {
                 number: resultScreen.mods.number,
-                name: resultScreen.mods.name
+                name: resultScreen.mods.name,
+                array: resultScreen.mods.array,
+                rate: resultScreen.mods.rate
             },
             maxCombo: resultScreen.maxCombo,
             rank: resultScreen.grade,
@@ -323,19 +330,28 @@ const buildTourneyData = (
     const mappedOsuTourneyClients = osuTourneyClients
         .sort((a, b) => a.ipcId - b.ipcId)
         .map((instance, iterator): TourneyClients => {
-            const { global, gameplay, menu, tourneyManager, beatmapPP } =
-                instance.getServices([
-                    'global',
-                    'gameplay',
-                    'menu',
-                    'tourneyManager',
-                    'beatmapPP'
-                ]);
+            const {
+                global,
+                gameplay,
+                resultScreen,
+                menu,
+                tourneyManager,
+                beatmapPP
+            } = instance.getServices([
+                'global',
+                'gameplay',
+                'menu',
+                'resultScreen',
+                'tourneyManager',
+                'beatmapPP'
+            ]);
 
             const currentMods =
-                global.status === 2 || global.status === 7
+                global.status === GameState.play
                     ? gameplay.mods
-                    : global.menuMods;
+                    : global.status === GameState.resultScreen
+                      ? resultScreen.mods
+                      : global.menuMods;
 
             const spectatorTeam =
                 iterator < osuTourneyClients.length / 2 ? 'left' : 'right';
@@ -493,7 +509,7 @@ function buildPlay(
 
         mode: {
             number: gameplay.mode,
-            name: Modes[gameplay.mode] || ''
+            name: Rulesets[gameplay.mode] || ''
         },
 
         score: gameplay.score,
@@ -524,7 +540,9 @@ function buildPlay(
         },
         mods: {
             number: currentMods.number,
-            name: currentMods.name
+            name: currentMods.name,
+            array: currentMods.array,
+            rate: currentMods.rate
         },
         rank: {
             current: gameplay.gradeCurrent,

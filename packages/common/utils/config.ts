@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
+import { ClientType } from '../enums/tosu';
 import { getProgramPath } from './directories';
 import { checkGameOverlayConfig } from './ingame';
 import { wLogger } from './logger';
@@ -262,13 +263,14 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     );
     if (
         osuInstances.length === 1 &&
+        osuInstances[0].client === ClientType.stable &&
         enableIngameOverlay === true &&
         updated === true
     ) {
         osuInstances[0].injectGameOverlay();
     }
 
-    if (enableGosuOverlay === true) {
+    if (enableGosuOverlay === true && !enableIngameOverlay) {
         wLogger.warn(
             '\n\n\n',
             'Gosu Ingame-overlay removed, please use new one, you can https://osuck.link/tosu-ingame',

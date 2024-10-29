@@ -1,3 +1,5 @@
+import { Rulesets } from '@tosu/common';
+
 export type ModsLazer = Mod[] | { acronym: string }[];
 export type IMods = ModsLazer | string | number;
 
@@ -127,7 +129,7 @@ export const ModsOrder: {
 };
 
 export const ModsCategories = {
-    0: {
+    [Rulesets.osu]: {
         diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
         diffIncreasingCategory: [
             'HR',
@@ -166,7 +168,7 @@ export const ModsCategories = {
         ],
         systemCategory: ['TD', 'SV2']
     },
-    1: {
+    [Rulesets.taiko]: {
         diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
         diffIncreasingCategory: [
             'HR',
@@ -183,7 +185,7 @@ export const ModsCategories = {
         funCategory: ['WU', 'WD', 'MU', 'AS'],
         systemCategory: ['TD', 'SV2']
     },
-    2: {
+    [Rulesets.fruits]: {
         diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
         diffIncreasingCategory: [
             'HR',
@@ -200,7 +202,7 @@ export const ModsCategories = {
         funCategory: ['WU', 'WD', 'FF', 'MU', 'NS'],
         systemCategory: ['TD', 'SV2']
     },
-    3: {
+    [Rulesets.mania]: {
         diffReductionCategory: ['EZ', 'NF', 'HT', 'DC', 'NR'],
         diffIncreasingCategory: [
             'HR',

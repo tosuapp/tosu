@@ -12,7 +12,7 @@ export const defaultCalculatedMods = {
     rate: 1
 };
 
-export const ModsToName = (modsNumber: number, order?: boolean): string => {
+export const modsName = (modsNumber: number, order?: boolean): string => {
     let bit = 1;
 
     if (order === true) {
@@ -71,7 +71,7 @@ export const calculateMods = (
 
     let speedChange = 1;
     if (typeof mods === 'number') {
-        const name = ModsToName(mods, order);
+        const name = modsName(mods, order);
         return {
             number: mods,
             name,
@@ -242,6 +242,17 @@ export const calculateMods = (
     const ModsLazer = Array.isArray(mods)
         ? mods
         : ModsArray.map((r) => ({ acronym: r.toUpperCase() }));
+
+    // Fixing 4.50000003 numbers
+    (ModsLazer as any[]).forEach((r, ind) =>
+        Object.entries(r.settings).forEach((s) =>
+            typeof s[1] === 'number'
+                ? ((ModsLazer as any)[ind].settings[s[0]] = parseFloat(
+                      s[1].toFixed(2)
+                  ))
+                : ''
+        )
+    );
 
     const settingsSpeedChange = (ModsLazer as any).find(
         (r) =>

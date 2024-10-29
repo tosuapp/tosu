@@ -30,7 +30,6 @@ export class Menu extends AbstractState {
     pendingChecksum: string = '';
     mapChangeTime: number = 0;
 
-    tested = false;
     updateState() {
         try {
             const result = this.game.memory.menu(this.previousMD5);

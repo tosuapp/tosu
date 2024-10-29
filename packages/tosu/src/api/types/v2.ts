@@ -1,3 +1,4 @@
+import { CalculateMods } from '@/utils/osuMods.types';
 import {
     Audio,
     Background,
@@ -9,147 +10,11 @@ import {
     Resolution
 } from '@/utils/settings.types';
 
-export enum BeatmapStatuses {
-    Unknown,
-    NotSubmitted = 1,
-    Pending = 2,
-    Ranked = 4,
-    Approved = 5,
-    Qualified = 6,
-    Loved = 7
-}
-
-export enum Modes {
-    Osu = 0,
-    Taiko = 1,
-    Fruits = 2,
-    Mania = 3
-}
-
-export enum BanchoStatusEnum {
-    Idle,
-    Afk,
-    Playing,
-    Editing,
-    Modding,
-    Multiplayer,
-    Watching,
-    Unknown,
-    Testing,
-    Submitting,
-    Paused,
-    Lobby,
-    Multiplaying,
-    OsuDirect
-}
-
-export enum UserLoginStatus {
-    Reconnecting = 0,
-    Guest = 256,
-    Recieving_data = 257,
-    Disconnected = 65537,
-    Connected = 65793
-}
-
-export enum ReleaseStream {
-    CuttingEdge,
-    Stable,
-    Beta,
-    Fallback
-}
-
-export enum ScoreMeterType {
-    None,
-    Colour,
-    Error
-}
-
-export enum LeaderboardType {
-    Local,
-    Global,
-    Selectedmods,
-    Friends,
-    Country
-}
-
-export enum GroupType {
-    None,
-    Artist,
-    BPM,
-    Creator,
-    Date,
-    Difficulty,
-    Length,
-    Rank,
-    MyMaps,
-    Search = 12,
-    Show_All = 12,
-    Title,
-    LastPlayed,
-    OnlineFavourites,
-    ManiaKeys,
-    Mode,
-    Collection,
-    RankedStatus
-}
-
-export enum SortType {
-    Artist,
-    BPM,
-    Creator,
-    Date,
-    Difficulty,
-    Length,
-    Rank,
-    Title
-}
-
-export enum ChatStatus {
-    Hidden,
-    Visible,
-    VisibleWithFriendsList
-}
-
-export enum ProgressBarType {
-    Off,
-    Pie,
-    TopRight,
-    BottomRight,
-    Bottom
-}
-
-export enum GameState {
-    Menu,
-    Edit,
-    Play,
-    Exit,
-    SelectEdit,
-    SelectPlay,
-    SelectDrawings,
-    ResultScreen,
-    Update,
-    Busy,
-    Unknown,
-    Lobby,
-    MatchSetup,
-    SelectMulti,
-    RankingVs,
-    OnlineSelection,
-    OptionsOffsetWizard,
-    RankingTagCoop,
-    RankingTeam,
-    BeatmapImport,
-    PackageUpdater,
-    Benchmark,
-    Tourney,
-    Charts
-}
-
 export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
 
 export interface TosuAPi {
-    client: 'lazer' | 'stable' | '';
+    client: string;
     state: NumberName;
     session: Session;
     settings: Settings;
@@ -335,7 +200,7 @@ export interface Play {
     hits: Hits;
     hitErrorArray: any[];
     combo: Combo;
-    mods: NumberName;
+    mods: CalculateMods;
     rank: Rank;
     pp: Pp;
     unstableRate: number;
@@ -403,7 +268,7 @@ export interface Leaderboard {
     accuracy: number;
     hits: Hits2;
     combo: Combo2;
-    mods: NumberName;
+    mods: CalculateMods;
     rank: string;
 }
 
@@ -483,7 +348,7 @@ export interface ResultsScreen {
     accuracy: number;
     name: string;
     hits: Hits3;
-    mods: NumberName;
+    mods: CalculateMods;
     maxCombo: number;
     rank: string;
     pp: Pp2;

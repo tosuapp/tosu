@@ -1,6 +1,14 @@
-import { KeyOverlay, LeaderboardPlayer } from '@/states/gameplay';
 import { ITourneyManagerChatItem } from '@/states/tourney';
+import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
 import { CalculateMods } from '@/utils/osuMods.types';
+
+export type ScanPatterns = {
+    [k in keyof any]: {
+        pattern: string;
+        offset?: number;
+        isTourneyOnly?: boolean;
+    };
+};
 
 export type IAudioVelocityBase = number[] | null;
 

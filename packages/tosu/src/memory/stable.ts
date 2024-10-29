@@ -1,6 +1,6 @@
 import { config, wLogger } from '@tosu/common';
 
-import { AbstractMemory, ScanPatterns } from '@/memory';
+import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
     IBindingValue,
@@ -19,10 +19,11 @@ import type {
     ITourney,
     ITourneyChat,
     ITourneyUser,
-    IUser
+    IUser,
+    ScanPatterns
 } from '@/memory/types';
-import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
+import { LeaderboardPlayer } from '@/states/types';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';

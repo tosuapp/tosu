@@ -1,4 +1,4 @@
-import { config, sleep, wLogger } from '@tosu/common';
+import { GameState, config, sleep, wLogger } from '@tosu/common';
 import { injectGameOverlay } from '@tosu/game-overlay';
 import fs from 'fs';
 import path from 'path';
@@ -75,7 +75,7 @@ export class OsuInstance extends AbstractInstance {
                     }
 
                     // update important data before doing rest
-                    if (global.status === 7) {
+                    if (global.status === GameState.resultScreen) {
                         const resultUpdate = resultScreen.updateState();
                         if (resultUpdate === 'not-ready') {
                             await sleep(config.pollRate);
@@ -86,16 +86,16 @@ export class OsuInstance extends AbstractInstance {
                     settings.updateState();
 
                     const currentMods =
-                        global.status === 2
+                        global.status === GameState.play
                             ? gameplay.mods
-                            : global.status === 7
+                            : global.status === GameState.resultScreen
                               ? resultScreen.mods
                               : global.menuMods;
 
                     const currentMode =
-                        global.status === 2
+                        global.status === GameState.play
                             ? gameplay.mode
-                            : global.status === 7
+                            : global.status === GameState.resultScreen
                               ? resultScreen.mode
                               : menu.gamemode;
 
@@ -136,11 +136,11 @@ export class OsuInstance extends AbstractInstance {
                     );
 
                     switch (global.status) {
-                        case 0:
+                        case GameState.menu:
                             bassDensity.updateState();
                             break;
 
-                        case 1:
+                        case GameState.edit:
                             if (this.previousTime === global.playTime) break;
 
                             this.previousTime = global.playTime;
@@ -148,8 +148,8 @@ export class OsuInstance extends AbstractInstance {
                             break;
 
                         // EditorSongSElect and SongSelect
-                        case 4:
-                        case 5:
+                        case GameState.selectEdit:
+                        case GameState.selectPlay:
                             // Reset Gameplay/ResultScreen data on joining to songSelect
                             if (!gameplay.isDefaultState) {
                                 gameplay.init(undefined, '4,5');
@@ -163,7 +163,7 @@ export class OsuInstance extends AbstractInstance {
                             }
                             break;
 
-                        case 2:
+                        case GameState.play:
                             // Reset gameplay data on retry
                             if (this.previousTime > global.playTime) {
                                 gameplay.init(true);
@@ -180,11 +180,11 @@ export class OsuInstance extends AbstractInstance {
                             gameplay.updateState();
                             break;
 
-                        case 7:
+                        case GameState.resultScreen:
                             resultScreen.updatePerformance();
                             break;
 
-                        case 22:
+                        case GameState.tourney:
                             if (!this.isTourneyManager) {
                                 this.isTourneyManager = true;
                             }
@@ -192,9 +192,9 @@ export class OsuInstance extends AbstractInstance {
                             break;
 
                         // do not spam reset on multiplayer and direct
-                        case 11:
-                        case 12:
-                        case 15:
+                        case GameState.lobby:
+                        case GameState.matchSetup:
+                        case GameState.onlineSelection:
                             break;
 
                         default:
@@ -235,7 +235,7 @@ export class OsuInstance extends AbstractInstance {
         global.updatePreciseState();
 
         switch (global.status) {
-            case 2:
+            case GameState.play:
                 if (global.playTime < 150) {
                     break;
                 }

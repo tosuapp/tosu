@@ -1,8 +1,9 @@
 import rosu from '@kotrikd/rosu-pp';
-import { config, wLogger } from '@tosu/common';
+import { ClientType, config, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
+import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
@@ -21,32 +22,6 @@ const defaultLBPlayer = {
     position: 0,
     isPassing: false
 } as LeaderboardPlayer;
-
-export interface KeyOverlay {
-    K1Pressed: boolean;
-    K1Count: number;
-    K2Pressed: boolean;
-    K2Count: number;
-    M1Pressed: boolean;
-    M1Count: number;
-    M2Pressed: boolean;
-    M2Count: number;
-}
-
-export interface LeaderboardPlayer {
-    name: string;
-    score: number;
-    combo: number;
-    maxCombo: number;
-    mods: CalculateMods;
-    h300: number;
-    h100: number;
-    h50: number;
-    h0: number;
-    team: number;
-    position: number;
-    isPassing: boolean;
-}
 
 export class Gameplay extends AbstractState {
     isDefaultState: boolean = true;
@@ -466,7 +441,7 @@ export class Gameplay extends AbstractState {
 
                 const difficulty = new rosu.Difficulty({
                     mods: this.mods.array,
-                    lazer: this.game.client === 'lazer'
+                    lazer: this.game.client === ClientType.lazer
                 });
                 this.gradualPerformance = new rosu.GradualPerformance(
                     difficulty,
@@ -475,7 +450,7 @@ export class Gameplay extends AbstractState {
 
                 this.performanceAttributes = new rosu.Performance({
                     mods: this.mods.array,
-                    lazer: this.game.client === 'lazer'
+                    lazer: this.game.client === ClientType.lazer
                 }).calculate(currentBeatmap);
 
                 this.previousState = currentState;
@@ -522,7 +497,7 @@ export class Gameplay extends AbstractState {
                 mods: this.mods.array,
                 misses: 0,
                 accuracy: this.accuracy,
-                lazer: this.game.client === 'lazer'
+                lazer: this.game.client === ClientType.lazer
             }).calculate(this.performanceAttributes);
             const t2 = performance.now();
 

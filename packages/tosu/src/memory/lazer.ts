@@ -1,7 +1,14 @@
-import { CountryCodes, wLogger } from '@tosu/common';
+import {
+    CountryCodes,
+    LazerHitResults,
+    LazerSettings,
+    Rulesets,
+    ScoringMode,
+    wLogger
+} from '@tosu/common';
 import path from 'path';
 
-import { AbstractMemory, ScanPatterns } from '@/memory';
+import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
     IBindingValue,
@@ -20,10 +27,11 @@ import type {
     ITourney,
     ITourneyChat,
     ITourneyUser,
-    IUser
+    IUser,
+    ScanPatterns
 } from '@/memory/types';
-import { LeaderboardPlayer } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
+import { LeaderboardPlayer, Statistics } from '@/states/types';
 import { netDateBinaryToDate, numberFromDecimal } from '@/utils/converters';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import {
@@ -33,160 +41,6 @@ import {
     ModsCategories
 } from '@/utils/osuMods.types';
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
-
-export enum ScoringMode {
-    Standardised,
-    Classic
-}
-
-export enum OsuSetting {
-    Ruleset,
-    Token,
-    MenuCursorSize,
-    GameplayCursorSize,
-    AutoCursorSize,
-    GameplayCursorDuringTouch,
-    DimLevel,
-    BlurLevel,
-    EditorDim,
-    LightenDuringBreaks,
-    ShowStoryboard,
-    KeyOverlay,
-    GameplayLeaderboard,
-    PositionalHitsoundsLevel,
-    AlwaysPlayFirstComboBreak,
-    FloatingComments,
-    HUDVisibilityMode,
-    ShowHealthDisplayWhenCantFail,
-    FadePlayfieldWhenHealthLow,
-    MouseDisableButtons,
-    MouseDisableWheel,
-    ConfineMouseMode,
-    AudioOffset,
-    VolumeInactive,
-    MenuMusic,
-    MenuVoice,
-    MenuTips,
-    CursorRotation,
-    MenuParallax,
-    Prefer24HourTime,
-    BeatmapDetailTab,
-    BeatmapDetailModsFilter,
-    Username,
-    ReleaseStream,
-    SavePassword,
-    SaveUsername,
-    DisplayStarsMinimum,
-    DisplayStarsMaximum,
-    SongSelectGroupingMode,
-    SongSelectSortingMode,
-    RandomSelectAlgorithm,
-    ModSelectHotkeyStyle,
-    ShowFpsDisplay,
-    ChatDisplayHeight,
-    BeatmapListingCardSize,
-    ToolbarClockDisplayMode,
-    SongSelectBackgroundBlur,
-    Version,
-    ShowFirstRunSetup,
-    ShowConvertedBeatmaps,
-    Skin,
-    ScreenshotFormat,
-    ScreenshotCaptureMenuCursor,
-    SongSelectRightMouseScroll,
-    BeatmapSkins,
-    BeatmapColours,
-    BeatmapHitsounds,
-    IncreaseFirstObjectVisibility,
-    ScoreDisplayMode,
-    ExternalLinkWarning,
-    PreferNoVideo,
-    Scaling,
-    ScalingPositionX,
-    ScalingPositionY,
-    ScalingSizeX,
-    ScalingSizeY,
-    ScalingBackgroundDim,
-    UIScale,
-    IntroSequence,
-    NotifyOnUsernameMentioned,
-    NotifyOnPrivateMessage,
-    UIHoldActivationDelay,
-    HitLighting,
-    MenuBackgroundSource,
-    GameplayDisableWinKey,
-    SeasonalBackgroundMode,
-    EditorWaveformOpacity,
-    EditorShowHitMarkers,
-    EditorAutoSeekOnPlacement,
-    DiscordRichPresence,
-    AutomaticallyDownloadWhenSpectating,
-    ShowOnlineExplicitContent,
-    LastProcessedMetadataId,
-    SafeAreaConsiderations,
-    ComboColourNormalisationAmount,
-    ProfileCoverExpanded,
-    EditorLimitedDistanceSnap,
-    ReplaySettingsOverlay,
-    ReplayPlaybackControlsExpanded,
-    AutomaticallyDownloadMissingBeatmaps,
-    EditorShowSpeedChanges,
-    TouchDisableGameplayTaps,
-    ModSelectTextSearchStartsActive,
-    UserOnlineStatus,
-    MultiplayerRoomFilter,
-    HideCountryFlags,
-    EditorTimelineShowTimingChanges,
-    EditorTimelineShowTicks
-}
-
-enum HitResult {
-    none = 0,
-    miss = 1,
-    meh = 2,
-    ok = 3,
-    good = 4,
-    great = 5,
-    perfect = 6,
-    smallTickMiss = 7,
-    smallTickHit = 8,
-    largeTickMiss = 9,
-    largeTickHit = 10,
-    smallBonus = 11,
-    largeBonus = 12,
-    ignoreMiss = 13,
-    ignoreHit = 14,
-    comboBreak = 15,
-    sliderTailHit = 16,
-    legacyComboIncrease = 99
-}
-
-enum RulesetName {
-    osu,
-    taiko,
-    catch,
-    mania
-}
-
-interface Statistics {
-    miss: number;
-    meh: number;
-    ok: number;
-    good: number;
-    great: number;
-    perfect: number;
-    smallTickMiss: number;
-    smallTickHit: number;
-    largeTickMiss: number;
-    largeTickHit: number;
-    smallBonus: number;
-    largeBonus: number;
-    ignoreMiss: number;
-    ignoreHit: number;
-    comboBreak: number;
-    sliderTailHit: number;
-    legacyComboIncrease: number;
-}
 
 type LazerPatternData = {
     spectatorClient: number;
@@ -304,13 +158,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         for (let i = 0; i < count; i++) {
             const current = entries + 0x10 + 0x18 * i;
 
-            const key = this.process.readInt(current + 0x10) as OsuSetting;
+            const key = this.process.readInt(current + 0x10) as LazerSettings;
             const bindable = this.process.readIntPtr(current);
 
             const valueAddress = bindable + 0x40;
 
             switch (key) {
-                case OsuSetting.ScoreDisplayMode:
+                case LazerSettings.ScoreDisplayMode:
                     config[key] = this.process.readInt(valueAddress);
                     break;
                 default:
@@ -589,7 +443,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             const value = this.process.readInt(item + 0xc);
 
-            statistics[HitResult[key]] = value;
+            statistics[LazerHitResults[key]] = value;
         }
 
         return statistics;
@@ -691,31 +545,32 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return keyOverlay;
     }
 
-    private isScorableHitResult(result: HitResult) {
+    private isScorableHitResult(result: LazerHitResults) {
         switch (result) {
-            case HitResult.legacyComboIncrease:
+            case LazerHitResults.legacyComboIncrease:
                 return true;
 
-            case HitResult.comboBreak:
+            case LazerHitResults.comboBreak:
                 return true;
 
-            case HitResult.sliderTailHit:
+            case LazerHitResults.sliderTailHit:
                 return true;
 
             default:
                 return (
-                    result >= HitResult.miss && result < HitResult.ignoreMiss
+                    result >= LazerHitResults.miss &&
+                    result < LazerHitResults.ignoreMiss
                 );
         }
     }
 
-    private isTickHitResult(result: HitResult) {
+    private isTickHitResult(result: LazerHitResults) {
         switch (result) {
-            case HitResult.largeTickHit:
-            case HitResult.largeTickMiss:
-            case HitResult.smallTickHit:
-            case HitResult.smallTickMiss:
-            case HitResult.sliderTailHit:
+            case LazerHitResults.largeTickHit:
+            case LazerHitResults.largeTickMiss:
+            case LazerHitResults.smallTickHit:
+            case LazerHitResults.smallTickMiss:
+            case LazerHitResults.sliderTailHit:
                 return true;
 
             default:
@@ -723,10 +578,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
     }
 
-    private isBonusHitResult(result: HitResult) {
+    private isBonusHitResult(result: LazerHitResults) {
         switch (result) {
-            case HitResult.smallBonus:
-            case HitResult.largeBonus:
+            case LazerHitResults.smallBonus:
+            case LazerHitResults.largeBonus:
                 return true;
 
             default:
@@ -734,11 +589,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
     }
 
-    private isBasicHitResult(result: HitResult) {
+    private isBasicHitResult(result: LazerHitResults) {
         switch (result) {
-            case HitResult.legacyComboIncrease:
+            case LazerHitResults.legacyComboIncrease:
                 return false;
-            case HitResult.comboBreak:
+            case LazerHitResults.comboBreak:
                 return false;
             default:
                 return (
@@ -756,7 +611,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         for (let i = 0; i < entries.length; i++) {
             const kvp = entries[i];
 
-            const key = HitResult[kvp[0]] as HitResult;
+            const key = LazerHitResults[kvp[0]];
             const value = kvp[1] as number;
 
             if (this.isBasicHitResult(key)) {
@@ -773,20 +628,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         objectCount: number
     ) {
         switch (mode) {
-            case 0:
+            case Rulesets.osu:
                 return Math.round(
                     ((Math.pow(objectCount, 2) * 32.57 + 100000) *
                         standardisedTotalScore) /
                         LazerMemory.MAX_SCORE
                 );
 
-            case 1:
+            case Rulesets.taiko:
                 return Math.round(
                     ((objectCount * 1109 + 100000) * standardisedTotalScore) /
                         LazerMemory.MAX_SCORE
                 );
 
-            case 2:
+            case Rulesets.fruits:
                 return Math.round(
                     Math.pow(
                         (standardisedTotalScore / LazerMemory.MAX_SCORE) *
@@ -797,7 +652,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         standardisedTotalScore / 10
                 );
 
-            case 3:
+            case Rulesets.mania:
             default:
                 return standardisedTotalScore;
         }
@@ -846,7 +701,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         let score = this.process.readLong(scoreInfo + 0x98);
         const config = this.osuConfig();
 
-        if (config[OsuSetting.ScoreDisplayMode] === ScoringMode.Classic) {
+        if (config[LazerSettings.ScoreDisplayMode] === ScoringMode.classic) {
             const objectCount = this.getObjectCountFromMaxStatistics(
                 this.readMaximumStatistics(scoreInfo)
             );
@@ -901,8 +756,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.process.readInt(ppDecimal)
         );
 
-        let gamemode =
-            RulesetName[this.process.readSharpStringPtr(user + 0x90)];
+        let gamemode = Rulesets[this.process.readSharpStringPtr(user + 0x90)];
 
         if (gamemode === undefined) {
             gamemode = -1;
@@ -1054,77 +908,96 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     keyOverlay(mode: number): IKeyOverlay {
-        const emptyKeyOverlay: IKeyOverlay = {
-            K1Pressed: false,
-            K1Count: 0,
-            K2Pressed: false,
-            K2Count: 0,
-            M1Pressed: false,
-            M1Count: 0,
-            M2Pressed: false,
-            M2Count: 0
-        };
+        try {
+            const emptyKeyOverlay: IKeyOverlay = {
+                K1Pressed: false,
+                K1Count: 0,
+                K2Pressed: false,
+                K2Count: 0,
+                M1Pressed: false,
+                M1Count: 0,
+                M2Pressed: false,
+                M2Count: 0
+            };
 
-        if (mode !== 0 || this.isPlayerLoading) {
-            return emptyKeyOverlay;
-        }
+            if (mode !== 0 || this.isPlayerLoading) {
+                return emptyKeyOverlay;
+            }
 
-        const player = this.player();
-        const hudOverlay = this.process.readIntPtr(player + 0x450);
-        const inputController = this.process.readIntPtr(hudOverlay + 0x348);
-        const rulesetComponents = this.readComponents(
-            this.process.readIntPtr(hudOverlay + 0x3c0)
-        );
-
-        // try to look for legacy key overlay in ruleset components
-        let keyOverlay = this.findKeyOverlay(
-            rulesetComponents,
-            inputController
-        );
-
-        // in case we don't have legacy key overlay displayed
-        // let's try to look for other key overlays in main components
-        if (!keyOverlay) {
-            const mainComponents = this.readComponents(
-                this.process.readIntPtr(hudOverlay + 0x3b8)
+            const player = this.player();
+            const hudOverlay = this.process.readIntPtr(player + 0x450);
+            const inputController = this.process.readIntPtr(hudOverlay + 0x348);
+            const rulesetComponents = this.readComponents(
+                this.process.readIntPtr(hudOverlay + 0x3c0)
             );
 
-            keyOverlay = this.findKeyOverlay(mainComponents, inputController);
+            // try to look for legacy key overlay in ruleset components
+            let keyOverlay = this.findKeyOverlay(
+                rulesetComponents,
+                inputController
+            );
+
+            // in case we don't have legacy key overlay displayed
+            // let's try to look for other key overlays in main components
+            if (!keyOverlay) {
+                const mainComponents = this.readComponents(
+                    this.process.readIntPtr(hudOverlay + 0x3b8)
+                );
+
+                keyOverlay = this.findKeyOverlay(
+                    mainComponents,
+                    inputController
+                );
+            }
+
+            // there's no key overlay currently being displayed
+            if (!keyOverlay) {
+                return emptyKeyOverlay;
+            }
+
+            const keyFlow = this.process.readIntPtr(keyOverlay + 0x350);
+
+            // available keys:
+            // 0 - k1/m1, 1 - k2/m2, 2 - smoke
+            const keyCounters = this.readKeyFlow(keyFlow);
+            if (keyCounters.length === 0) {
+                return {
+                    K1Pressed: false,
+                    K1Count: 0,
+                    K2Pressed: false,
+                    K2Count: 0,
+                    M1Pressed: false,
+                    M1Count: 0,
+                    M2Pressed: false,
+                    M2Count: 0
+                };
+            }
+
+            return {
+                K1Pressed: keyCounters[0].isPressed,
+                K1Count: keyCounters[0].count,
+                K2Pressed: keyCounters[1].isPressed,
+                K2Count: keyCounters[1].count,
+                M1Pressed: keyCounters[2].isPressed,
+                M1Count: keyCounters[2].count,
+                M2Pressed: false,
+                M2Count: 0
+            };
+        } catch (error) {
+            return error as Error;
         }
-
-        // there's no key overlay currently being displayed
-        if (!keyOverlay) {
-            return emptyKeyOverlay;
-        }
-
-        const keyFlow = this.process.readIntPtr(keyOverlay + 0x350);
-
-        // available keys:
-        // 0 - k1/m1, 1 - k2/m2, 2 - smoke
-        const keyCounters = this.readKeyFlow(keyFlow);
-
-        return {
-            K1Pressed: keyCounters[0].isPressed,
-            K1Count: keyCounters[0].count,
-            K2Pressed: keyCounters[1].isPressed,
-            K2Count: keyCounters[1].count,
-            M1Pressed: keyCounters[2].isPressed,
-            M1Count: keyCounters[2].count,
-            M2Pressed: false,
-            M2Count: 0
-        };
     }
 
     private isResultHit(result: number): boolean {
         switch (result) {
-            case HitResult.none:
-            case HitResult.ignoreMiss:
-            case HitResult.miss:
-            case HitResult.smallTickMiss:
-            case HitResult.largeTickMiss:
-            case HitResult.smallBonus:
-            case HitResult.largeBonus:
-            case HitResult.comboBreak:
+            case LazerHitResults.none:
+            case LazerHitResults.ignoreMiss:
+            case LazerHitResults.miss:
+            case LazerHitResults.smallTickMiss:
+            case LazerHitResults.largeTickMiss:
+            case LazerHitResults.smallBonus:
+            case LazerHitResults.largeBonus:
+            case LazerHitResults.comboBreak:
                 return false;
 
             default:
@@ -1297,7 +1170,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'HD': {
-                if ([1, 2].includes(this.selectedGamemode)) break;
+                if ([1, 2, 3].includes(this.selectedGamemode)) break;
                 const onlyFadeApproachCirclesBindable = this.process.readIntPtr(
                     modObject + 0x20
                 );

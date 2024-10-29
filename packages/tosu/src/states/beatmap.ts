@@ -1,5 +1,5 @@
 import rosu from '@kotrikd/rosu-pp';
-import { config, wLogger } from '@tosu/common';
+import { ClientType, config, wLogger } from '@tosu/common';
 import fs from 'fs';
 import {
     BeatmapBreakEvent,
@@ -289,6 +289,15 @@ export class BeatmapPP extends AbstractState {
                 return;
             }
 
+            if (!menu.filename) {
+                wLogger.debug(`BPPD(updateMapMetadata) Skip new map creation`, {
+                    SongsFolder: global.songsFolder,
+                    Folder: menu.folder,
+                    Path: menu.filename
+                });
+                return;
+            }
+
             const mapPath = path.join(
                 global.songsFolder,
                 menu.folder,
@@ -349,7 +358,7 @@ export class BeatmapPP extends AbstractState {
 
             const fcPerformance = new rosu.Performance({
                 mods: currentMods,
-                lazer: this.game.client === 'lazer'
+                lazer: this.game.client === ClientType.lazer
             }).calculate(this.beatmap);
 
             this.performanceAttributes = fcPerformance;
@@ -363,7 +372,7 @@ export class BeatmapPP extends AbstractState {
                     const calculate = new rosu.Performance({
                         mods: currentMods,
                         accuracy: acc,
-                        lazer: this.game.client === 'lazer'
+                        lazer: this.game.client === ClientType.lazer
                     }).calculate(fcPerformance);
                     ppAcc[acc] = fixDecimals(calculate.pp);
 
@@ -502,7 +511,7 @@ export class BeatmapPP extends AbstractState {
 
             const difficulty = new rosu.Difficulty({
                 mods: currentMods,
-                lazer: this.game.client === 'lazer'
+                lazer: this.game.client === ClientType.lazer
             });
             const strains = difficulty.strains(this.beatmap);
 
@@ -672,7 +681,7 @@ export class BeatmapPP extends AbstractState {
 
             const curPerformance = new rosu.Performance({
                 passedObjects: passedObjects.length,
-                lazer: this.game.client === 'lazer'
+                lazer: this.game.client === ClientType.lazer
             }).calculate(this.performanceAttributes);
 
             const calculateTime = performance.now();

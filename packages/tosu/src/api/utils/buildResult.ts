@@ -1,3 +1,4 @@
+import { ClientType, GameState } from '@tosu/common';
 import path from 'path';
 
 import {
@@ -7,7 +8,7 @@ import {
     TourneyValues
 } from '@/api/types/v1';
 import { InstanceManager } from '@/instances/manager';
-import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/gameplay';
+import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateAccuracy } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 
@@ -53,9 +54,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     ]);
 
     const currentMods =
-        global.status === 2 || global.status === 7
+        global.status === GameState.play
             ? gameplay.mods
-            : global.menuMods;
+            : global.status === GameState.resultScreen
+              ? resultScreen.mods
+              : global.menuMods;
 
     const resultScreenHits = {
         300: resultScreen.hit300,
@@ -67,7 +70,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     };
 
     return {
-        client: osuInstance.client,
+        client: ClientType[osuInstance.client],
         settings: {
             showInterface: global.showInterface,
             folders: {
@@ -80,9 +83,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             mainMenu: {
                 bassDensity: bassDensity.density
             },
-            // TODO: Make enum for osu in-game statuses
             state: global.status,
-            // TODO: Make enum for osu in-game modes
             gameMode: menu.gamemode,
             isChatEnabled: Number(Boolean(global.chatStatus)),
             bm: {
@@ -272,16 +273,20 @@ const buildTourneyData = (
     const mappedOsuTourneyClients = osuTourneyClients
         .sort((a, b) => a.ipcId - b.ipcId)
         .map<TourneyIpcClient>((instance, iterator) => {
-            const { global, gameplay, tourneyManager } = instance.getServices([
-                'global',
-                'gameplay',
-                'tourneyManager'
-            ]);
+            const { global, gameplay, resultScreen, tourneyManager } =
+                instance.getServices([
+                    'global',
+                    'gameplay',
+                    'resultScreen',
+                    'tourneyManager'
+                ]);
 
             const currentMods =
-                global.status === 2 || global.status === 7
+                global.status === GameState.play
                     ? gameplay.mods
-                    : global.menuMods;
+                    : global.status === GameState.resultScreen
+                      ? resultScreen.mods
+                      : global.menuMods;
 
             const spectatorTeam =
                 iterator < osuTourneyClients.length / 2 ? 'left' : 'right';

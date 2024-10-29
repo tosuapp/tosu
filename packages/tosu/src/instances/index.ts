@@ -1,4 +1,4 @@
-import { config, wLogger } from '@tosu/common';
+import { ClientType, config, wLogger } from '@tosu/common';
 import EventEmitter from 'events';
 import { Process } from 'tsprocess/dist/process';
 
@@ -33,7 +33,7 @@ export interface DataRepoList {
 
 export abstract class AbstractInstance {
     abstract memory: AbstractMemory<Record<string, number>>;
-    client: 'lazer' | 'stable' | '' = '';
+    client: ClientType;
 
     pid: number;
     process: Process;
@@ -60,7 +60,7 @@ export abstract class AbstractInstance {
         this.process = new Process(this.pid, bitness);
         this.path = this.process.path;
 
-        this.client = bitness === 64 ? 'lazer' : bitness === 32 ? 'stable' : '';
+        this.client = bitness === 64 ? ClientType.lazer : ClientType.stable;
 
         this.set('settings', new Settings(this));
         this.set('global', new Global(this));
@@ -162,7 +162,7 @@ export abstract class AbstractInstance {
         /**
          * ENABLING INGAME OVERLAY (stable only, for now)
          */
-        if (config.enableIngameOverlay && this.client === 'stable') {
+        if (config.enableIngameOverlay && this.client === ClientType.stable) {
             this.injectGameOverlay();
         }
 

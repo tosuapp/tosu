@@ -8,12 +8,7 @@ import { OVERLAYS_STATIC } from './homepage';
 
 function isPathDirectory(path) {
     const stat = fs.statSync(path);
-
-    if (stat) {
-        return stat.isDirectory();
-    }
-
-    return false;
+    return Boolean(stat && stat.isDirectory());
 }
 
 export function directoryWalker({

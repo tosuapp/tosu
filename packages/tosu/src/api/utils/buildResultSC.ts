@@ -1,23 +1,16 @@
-import { CountryCodes, config } from '@tosu/common';
+import {
+    CountryCodes,
+    GameState,
+    GradeEnum,
+    Rulesets,
+    config
+} from '@tosu/common';
 import path from 'path';
 
 import { InstanceManager } from '@/instances/manager';
 import { fixDecimals } from '@/utils/converters';
 
 import { ApiAnswer } from '../types/sc';
-import { Modes } from '../types/v2';
-
-enum GradeEnum {
-    XH,
-    X,
-    SH,
-    S,
-    A,
-    B,
-    C,
-    D,
-    None
-}
 
 export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     const osuInstance = instanceManager.getInstance();
@@ -37,16 +30,16 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         ]);
 
     const currentMods =
-        global.status === 2
+        global.status === GameState.play
             ? gameplay.mods
-            : global.status === 7
+            : global.status === GameState.resultScreen
               ? resultScreen.mods
               : global.menuMods;
 
     const currentMode =
-        global.status === 2
+        global.status === GameState.play
             ? gameplay.mode
-            : global.status === 7
+            : global.status === GameState.resultScreen
               ? resultScreen.mode
               : menu.gamemode;
 
@@ -121,7 +114,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
         md5: menu.checksum,
 
-        gameMode: Modes[currentMode],
+        gameMode: Rulesets[currentMode],
         mode: currentMode,
 
         time: global.playTime / 1000,

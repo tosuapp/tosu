@@ -143,9 +143,7 @@ export interface InMenuValues {
          */
         bassDensity: number;
     };
-    // TODO: Make enum for osu in-game statuses
     state: number;
-    // TODO: Make enum for osu in-game modes
     gameMode: number;
     isChatEnabled: number;
     bm: Beatmap;
@@ -196,7 +194,6 @@ interface TourneyHits
     > {}
 
 export interface GameplayValues {
-    // TODO: Make enum for osu in-game modes
     gameMode: number;
     name: string;
     score: number;
@@ -321,7 +318,7 @@ export interface UserProfileAnswer {
 }
 
 export interface GosuCompatibleApi {
-    client: 'lazer' | 'stable' | '';
+    client: string;
     settings: InSettingsValues;
     menu: InMenuValues;
     gameplay: GameplayValues;
