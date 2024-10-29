@@ -8,6 +8,7 @@ export * from './utils/unzip';
 export * from './utils/directories';
 export * from './utils/json';
 export * from './utils/ingame';
+export * from './utils/time';
 
 export * from './enums/osu';
 export * from './enums/tosu';

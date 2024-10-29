@@ -3,7 +3,8 @@ import {
     GameState,
     GradeEnum,
     Rulesets,
-    config
+    config,
+    formatMilliseconds
 } from '@tosu/common';
 import path from 'path';
 
@@ -42,19 +43,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             : global.status === GameState.resultScreen
               ? resultScreen.mode
               : menu.gamemode;
-
-    function formatMilliseconds(ms: number) {
-        const hours = Math.floor(ms / 3600000);
-        const minutes = Math.floor((ms % 3600000) / 60000);
-        const seconds = Math.floor((ms % 60000) / 1000);
-        const milliseconds = ms % 1000;
-
-        const hoursStr = String(hours).padStart(2, '0');
-        const minutesStr = String(minutes).padStart(2, '0');
-        const secondsStr = String(seconds).padStart(2, '0');
-
-        return `${hoursStr}:${minutesStr}:${secondsStr}.${milliseconds}`;
-    }
 
     return {
         osuIsRunning: 1,
