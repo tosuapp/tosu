@@ -11,7 +11,8 @@ import {
     ScoreMeterType,
     SortType,
     StableBeatmapStatuses,
-    UserLoginStatus
+    UserLoginStatus,
+    capitalizeFirstLetter
 } from '@tosu/common';
 import path from 'path';
 
@@ -123,7 +124,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         client: ClientType[osuInstance.client],
         state: {
             number: global.status,
-            name: GameState[global.status] || ''
+            name: capitalizeFirstLetter(GameState[global.status] || '')
         },
         session: {
             playTime: global.gameTime,
