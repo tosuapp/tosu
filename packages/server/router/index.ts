@@ -440,7 +440,10 @@ export default function buildBaseApi(server: Server) {
             if (query.n50 !== undefined) params.n50 = +query.n50;
             if (query.nGeki !== undefined) params.nGeki = +query.nGeki;
             if (query.nKatu !== undefined) params.nKatu = +query.nKatu;
-            if (query.mods !== undefined) params.mods = +query.mods;
+            if (query.mods !== undefined)
+                params.mods = Array.isArray(query.mods)
+                    ? query.mods
+                    : +query.mods;
             if (query.acc !== undefined) params.accuracy = +query.acc;
             if (query.sliderEndHits !== undefined)
                 params.sliderEndHits = +query.sliderEndHits;
