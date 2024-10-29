@@ -1,4 +1,4 @@
-export const platformResolver = (platform: string) => {
+export function platformResolver(platform: string) {
     let platformType = '';
     let platformFileType = '';
     let platformCommand = '';
@@ -6,7 +6,7 @@ export const platformResolver = (platform: string) => {
     switch (platform) {
         case 'win32':
             platformType = 'windows';
-            platformFileType = 'exe';
+            platformFileType = '.exe';
             platformCommand = 'start ""';
             break;
 
@@ -17,10 +17,9 @@ export const platformResolver = (platform: string) => {
 
         case 'darwin':
             platformType = 'macos';
-            platformFileType = 'macos';
             platformCommand = 'open -R';
             break;
     }
 
     return { platformType, platformFileType, platformCommand };
-};
+}
