@@ -245,7 +245,7 @@ export const calculateMods = (
 
     // Fixing 4.50000003 numbers
     (ModsLazer as any[]).forEach((r, ind) =>
-        Object.entries(r.settings).forEach((s) =>
+        Object.entries(r.settings || {}).forEach((s) =>
             typeof s[1] === 'number'
                 ? ((ModsLazer as any)[ind].settings[s[0]] = parseFloat(
                       s[1].toFixed(2)
