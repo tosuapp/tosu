@@ -394,7 +394,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return '';
         }
 
-        return `${hash[0]}\\${hash.substring(0, 2)}\\${hash}`;
+        return path.join(hash[0], hash.substring(0, 2), hash);
     }
 
     private readStatisticsDict(statisticsDict: number) {
