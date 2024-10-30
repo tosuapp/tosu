@@ -672,8 +672,6 @@ export class GamePlayData extends AbstractEntity {
             const t2 = performance.now();
 
             if (currPerformance) {
-                console.log('update', currPerformance.pp, scoreParams);
-
                 beatmapPpData.updateCurrentAttributes(
                     currPerformance.difficulty.stars,
                     currPerformance.pp
