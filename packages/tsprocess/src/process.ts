@@ -167,7 +167,12 @@ export class Process {
     }
 
     readBuffer(address: number, size: number): Buffer {
-        return ProcessUtils.readBuffer(this.handle, address, size);
+        return ProcessUtils.readBuffer(
+            this.handle,
+            this.bitness,
+            address,
+            size
+        );
     }
 
     scanSync(pattern: string): number {

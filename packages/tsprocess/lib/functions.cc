@@ -8,22 +8,27 @@
 #include <Windows.h>
 #endif
 
+namespace {
+
+intptr_t get_intptr_value(Napi::Value address_value, Napi::Value bitness_value) {
+  const auto bitness = bitness_value.As<Napi::Number>().Int32Value();
+  const auto address_number = address_value.As<Napi::Number>();
+
+  return bitness == 64 ? static_cast<intptr_t>(address_number.Int64Value())
+                       : static_cast<intptr_t>(address_number.Uint32Value());
+}
+
+}  // namespace
+
 Napi::Value read_byte(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-
-  if (bitness == 64) {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   auto result = memory::read<int8_t>(handle, address);
   if (!std::get<1>(result)) {
@@ -35,20 +40,13 @@ Napi::Value read_byte(const Napi::CallbackInfo &args) {
 
 Napi::Value read_short(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-
-  if (bitness == 64) {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   auto result = memory::read<int16_t>(handle, address);
   if (!std::get<1>(result)) {
@@ -60,20 +58,13 @@ Napi::Value read_short(const Napi::CallbackInfo &args) {
 
 Napi::Value read_int(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-
-  if (bitness == 64) {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   auto result = memory::read<int32_t>(handle, address);
   if (!std::get<1>(result)) {
@@ -85,20 +76,13 @@ Napi::Value read_int(const Napi::CallbackInfo &args) {
 
 Napi::Value read_uint(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-
-  if (bitness == 64) {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   auto result = memory::read<uint32_t>(handle, address);
   if (!std::get<1>(result)) {
@@ -110,20 +94,13 @@ Napi::Value read_uint(const Napi::CallbackInfo &args) {
 
 Napi::Value read_float(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-
-  if (bitness == 64) {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   auto result = memory::read<float>(handle, address);
   if (!std::get<1>(result)) {
@@ -135,20 +112,13 @@ Napi::Value read_float(const Napi::CallbackInfo &args) {
 
 Napi::Value read_long(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-
-  if (bitness == 64) {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   auto result = memory::read<int64_t>(handle, address);
   if (!std::get<1>(result)) {
@@ -160,20 +130,13 @@ Napi::Value read_long(const Napi::CallbackInfo &args) {
 
 Napi::Value read_double(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 2) {
+  if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-
-  if (bitness == 64) {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-      address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   auto result = memory::read<double>(handle, address);
   if (!std::get<1>(result)) {
@@ -254,14 +217,14 @@ Napi::Value batch_scan(const Napi::CallbackInfo &args) {
 
 Napi::Value read_buffer(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 3) {
+  if (args.Length() < 4) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
-  auto address = static_cast<intptr_t>(args[1].As<Napi::Number>().Int64Value());
-  auto size = args[2].As<Napi::Number>().Uint32Value();
+  auto address = get_intptr_value(args[2], args[1]);
+  auto size = args[3].As<Napi::Number>().Uint32Value();
   auto buffer = new uint8_t[size];
   auto data = (uint8_t *)malloc(sizeof(uint8_t) * size);
   auto result = memory::read_buffer(handle, address, size, data);
@@ -410,13 +373,7 @@ Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
 
   void *handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
   auto bitness = args[1].As<Napi::Number>().Int32Value();
-  intptr_t address;
-  
-  if (bitness == 64) {
-    address = static_cast<intptr_t>(args[2].As<Napi::Number>().Int64Value());
-  } else {
-    address = static_cast<intptr_t>(args[2].As<Napi::Number>().Uint32Value());
-  }
+  auto address = get_intptr_value(args[2], args[1]);
 
   if (address == 0) {
     return Napi::String::New(env, "");
