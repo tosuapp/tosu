@@ -1,5 +1,5 @@
+import rosu from '@kotrikd/rosu-pp';
 import { config, wLogger } from '@tosu/common';
-import rosu from 'rosu-pp-js';
 import { Process } from 'tsprocess/dist/process';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
@@ -611,13 +611,17 @@ export class GamePlayData extends AbstractEntity {
                 if (this.PerformanceAttributes)
                     this.PerformanceAttributes.free();
 
-                const difficulty = new rosu.Difficulty({ mods: this.Mods });
+                const difficulty = new rosu.Difficulty({
+                    mods: this.Mods,
+                    lazer: false
+                });
                 this.GradualPerformance = new rosu.GradualPerformance(
                     difficulty,
                     currentBeatmap
                 );
 
                 this.PerformanceAttributes = new rosu.Performance({
+                    lazer: false,
                     mods: this.Mods
                 }).calculate(currentBeatmap);
 
@@ -660,6 +664,7 @@ export class GamePlayData extends AbstractEntity {
             )!;
 
             const fcPerformance = new rosu.Performance({
+                lazer: false,
                 mods: this.Mods,
                 misses: 0,
                 accuracy: this.Accuracy

@@ -1,5 +1,5 @@
+import rosu from '@kotrikd/rosu-pp';
 import { wLogger } from '@tosu/common';
-import rosu from 'rosu-pp-js';
 
 import { AbstractEntity } from '@/entities/AbstractEntity';
 import { OsuInstance } from '@/objects/instanceManager/osuInstance';
@@ -184,13 +184,15 @@ export class ResultsScreenData extends AbstractEntity {
                 n100: this.Hit100,
                 n300: this.Hit300,
                 nKatu: this.HitKatu,
-                nGeki: this.HitGeki
+                nGeki: this.HitGeki,
+                lazer: false
             };
 
             const curPerformance = new rosu.Performance(scoreParams).calculate(
                 currentBeatmap
             );
             const fcPerformance = new rosu.Performance({
+                lazer: false,
                 mods: this.Mods,
                 misses: 0,
                 accuracy: this.Accuracy
