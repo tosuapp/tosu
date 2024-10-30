@@ -679,9 +679,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         let pp = 0;
 
+        let combo = 0;
+
         const player = this.player();
         if (player) {
             const scoreProcessor = this.process.readIntPtr(player + 0x438);
+
+            const comboBindable = this.process.readIntPtr(
+                scoreProcessor + 0x250
+            );
+
+            combo = this.process.readInt(comboBindable + 0x40);
 
             const hudOverlay = this.process.readIntPtr(player + 0x450);
             const mainComponents = this.readComponents(
@@ -726,7 +734,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             hitMiss: statistics.miss,
             sliderEndHits: statistics.sliderTailHit || statistics.smallTickHit,
             sliderTickHits: statistics.largeTickHit,
-            combo: this.process.readInt(scoreInfo + 0xcc),
+            combo,
             maxCombo: this.process.readInt(scoreInfo + 0xc4),
             pp
         };
