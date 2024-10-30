@@ -640,14 +640,15 @@ const showSettings = {
 
 
         setting.value.forEach((command, cmd_ind) => {
-          Object.entries(command).forEach(entry => {
-            const custom_value = value[cmd_ind][entry[0]];
-            if (custom_value == null) return;
-            if (entry[1] == custom_value) return;
+          setting.options.forEach(option => {
+            const original = setting.value[cmd_ind][option.name];
+            const modified = value[cmd_ind][option.name];
 
+            if (modified == null) return;
+            if (original == modified) return;
 
-            setting.value[cmd_ind][entry[0]] = custom_value;
-          });
+            setting.value[cmd_ind][option.name] = modified;
+          })
         });
 
 
