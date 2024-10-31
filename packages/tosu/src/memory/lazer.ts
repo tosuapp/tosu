@@ -129,10 +129,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private checkIfSongSelect(address: number) {
-        return (
-            this.process.readIntPtr(address + 0x430) ===
-            this.process.readIntPtr(this.gameBase())
-        );
+        return this.process.readIntPtr(address + 0x3b0) === this.gameBase();
     }
 
     private checkIfPlayerLoader(address: number) {
