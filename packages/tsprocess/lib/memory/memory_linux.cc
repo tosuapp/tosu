@@ -158,4 +158,8 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
   return regions;
 }
 
+void *memory::get_foreground_window_process() {
+  return 0;
+}
+
 #endif

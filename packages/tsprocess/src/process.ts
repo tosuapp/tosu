@@ -46,6 +46,10 @@ export class Process {
         return ProcessUtils.disablePowerThrottling();
     }
 
+    static getFocusedProcess(): number {
+        return ProcessUtils.getForegroundWindowProcess();
+    }
+
     get path(): string {
         if (process.platform === 'win32') {
             return pathDirname(ProcessUtils.getProcessPath(this.handle));

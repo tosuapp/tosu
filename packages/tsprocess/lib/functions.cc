@@ -474,6 +474,16 @@ Napi::Value get_process_cwd(const Napi::CallbackInfo &args) {
   return Napi::Number::From(env, memory::get_process_cwd(handle));
 }
 
+Napi::Value get_foreground_window_process(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() > 0) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  return Napi::Number::From(env, memory::get_foreground_window_process());
+}
+
 Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["readByte"] = Napi::Function::New(env, read_byte);
   exports["readShort"] = Napi::Function::New(env, read_short);
@@ -494,6 +504,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["getProcessPath"] = Napi::Function::New(env, get_process_path);
   exports["getProcessCommandLine"] = Napi::Function::New(env, get_process_command_line);
   exports["getProcessCwd"] = Napi::Function::New(env, get_process_cwd);
+  exports["getForegroundWindowProcess"] = Napi::Function::New(env, get_foreground_window_process);
   exports["disablePowerThrottling"] = Napi::Function::New(env, disable_power_throttling);
 
   return exports;
