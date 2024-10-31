@@ -62,12 +62,13 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         titleRoman: menu.title,
         titleUnicode: menu.titleOriginal,
 
+        mapArtistTitle: `${menu.artist} - ${menu.title}`,
+        mapArtistTitleUnicode: `${menu.artistOriginal} - ${menu.titleOriginal}`,
+
         diffName: menu.difficulty,
         mapDiff: `[${menu.difficulty}]`,
 
         creator: menu.creator,
-        mapArtistTitle: `${menu.artist} - ${menu.title}`,
-        mapArtistTitleUnicode: `${menu.artistOriginal} - ${menu.titleOriginal}`,
 
         liveStarRating: fixDecimals(beatmapPP.currAttributes.stars),
         mStars: fixDecimals(beatmapPP.calculatedMapAttributes.fullStars),
@@ -84,6 +85,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         hp: fixDecimals(menu.hp),
         mHP: fixDecimals(beatmapPP.calculatedMapAttributes.hp),
 
+        currentBpm: Math.round(beatmapPP.realtimeBPM),
         bpm: Math.round(beatmapPP.commonBPM),
 
         mainBpm: Math.round(beatmapPP.commonBPM),
@@ -98,7 +100,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             beatmapPP.minBPM === beatmapPP.maxBPM
                 ? beatmapPP.maxBPM.toString()
                 : `${Math.round(beatmapPP.minBPM)}-${Math.round(beatmapPP.maxBPM)} (${Math.round(beatmapPP.commonBPM)})`,
-        currentBpm: Math.round(beatmapPP.realtimeBPM),
 
         md5: menu.checksum,
 
@@ -131,6 +132,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         sliders: beatmapPP.calculatedMapAttributes.sliders,
         circles: beatmapPP.calculatedMapAttributes.circles,
         spinners: beatmapPP.calculatedMapAttributes.spinners,
+        maxCombo: beatmapPP.calculatedMapAttributes.maxCombo,
 
         mp3Name: menu.audioFilename,
         osuFileName: menu.filename,
@@ -187,7 +189,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
         ppIfMapEndsNow: fixDecimals(beatmapPP.currAttributes.pp),
         ppIfRestFced: fixDecimals(beatmapPP.currAttributes.fcPP),
-        maxCombo: beatmapPP.calculatedMapAttributes.maxCombo,
 
         leaderBoardMainPlayer: JSON.stringify({
             IsLeaderboardVisible: gameplay.isLeaderboardVisible,
