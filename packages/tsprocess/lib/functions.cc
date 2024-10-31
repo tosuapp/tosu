@@ -481,7 +481,7 @@ Napi::Value get_foreground_window_process(const Napi::CallbackInfo &args) {
     return env.Null();
   }
 
-  return Napi::Number::From(env, memory::get_foreground_window_process());
+  return Napi::Number::From(env, reinterpret_cast<uintptr_t>(memory::get_foreground_window_process()));
 }
 
 Napi::Object init(Napi::Env env, Napi::Object exports) {
