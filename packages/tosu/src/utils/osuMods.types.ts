@@ -4,6 +4,7 @@ export type ModsLazer = Mod[] | { acronym: string }[];
 export type IMods = ModsLazer | string | number;
 
 export type CalculateMods = {
+    checksum: string;
     number: number;
     name: string;
     array: ModsLazer;

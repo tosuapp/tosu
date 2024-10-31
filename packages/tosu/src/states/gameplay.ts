@@ -426,7 +426,7 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.name}:${menu.mp3Length}`;
+            const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.checksum}:${menu.mp3Length}`;
             const isUpdate = this.previousState !== currentState;
 
             // update precalculated attributes

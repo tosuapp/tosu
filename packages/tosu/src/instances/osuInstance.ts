@@ -99,7 +99,7 @@ export class OsuInstance extends AbstractInstance {
                               ? resultScreen.mode
                               : menu.gamemode;
 
-                    const currentState = `${menu.checksum}:${currentMode}:${currentMods.name}`;
+                    const currentState = `${menu.checksum}:${currentMode}:${currentMods.checksum}`;
                     const updateGraph =
                         this.previousState !== currentState ||
                         this.previousMP3Length !== menu.mp3Length;

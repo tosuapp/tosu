@@ -1,3 +1,5 @@
+import { textMD5 } from '@tosu/common';
+
 import {
     CalculateMods,
     IMods,
@@ -6,11 +8,12 @@ import {
 } from '@/utils/osuMods.types';
 
 export const defaultCalculatedMods = {
+    checksum: '',
     number: 0,
     name: '',
     array: [],
     rate: 1
-};
+} as CalculateMods;
 
 export const modsName = (modsNumber: number, order?: boolean): string => {
     let bit = 1;
@@ -72,13 +75,14 @@ export const calculateMods = (
     let speedChange = 1;
     if (typeof mods === 'number') {
         const name = modsName(mods, order);
+        const array =
+            name.match(/.{1,2}/g)?.map((r) => ({ acronym: r.toUpperCase() })) ||
+            [];
         return {
+            checksum: textMD5(JSON.stringify(array)),
             number: mods,
             name,
-            array:
-                name
-                    .match(/.{1,2}/g)
-                    ?.map((r) => ({ acronym: r.toUpperCase() })) || [],
+            array,
             rate: speedChange
         };
     }
@@ -259,6 +263,7 @@ export const calculateMods = (
     )?.settings?.speed_change;
 
     return {
+        checksum: textMD5(JSON.stringify(ModsLazer)),
         number: modsID,
         name: convertedParts.join(''),
         array: ModsLazer,

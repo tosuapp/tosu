@@ -63,6 +63,7 @@ const convertMemoryPlayerToResult = (
             max: memoryPlayer.maxCombo
         },
         mods: {
+            checksum: memoryPlayer.mods.checksum,
             number: memoryPlayer.mods.number,
             name: memoryPlayer.mods.name,
             array: memoryPlayer.mods.array,
@@ -272,6 +273,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             name: resultScreen.playerName, // legacy, remove it later
             hits: resultScreenHits,
             mods: {
+                checksum: resultScreen.mods.checksum,
                 number: resultScreen.mods.number,
                 name: resultScreen.mods.name,
                 array: resultScreen.mods.array,
@@ -540,6 +542,7 @@ function buildPlay(
             max: gameplay.maxCombo
         },
         mods: {
+            checksum: currentMods.checksum,
             number: currentMods.number,
             name: currentMods.name,
             array: currentMods.array,

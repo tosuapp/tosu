@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export function formatMilliseconds(ms: number) {
     const hours = Math.floor(ms / 3600000);
     const minutes = Math.floor((ms % 3600000) / 60000);
@@ -14,4 +16,8 @@ export function formatMilliseconds(ms: number) {
 export function capitalizeFirstLetter(text: string) {
     if (text === '') return '';
     return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+export function textMD5(text: string) {
+    return crypto.createHash('md5').update(text).digest('hex');
 }
