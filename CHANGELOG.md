@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.6.0](https://github.com/tosuapp/tosu/compare/v3.5.2...v3.6.0) (2024-10-31)
+
+
+### Features
+
+* pp rework ([2018683](https://github.com/tosuapp/tosu/commit/2018683544901bb1ce1534eca795e4dde4d46f7d))
+
+
+### Bug Fixes
+
+* Fix out of order replacement & `undefined` values ([de464b6](https://github.com/tosuapp/tosu/commit/de464b65ac8981b5d39f94e00e89c5d33fed70ee))
+
 ### [3.5.2](https://github.com/tosuapp/tosu/compare/v3.5.1...v3.5.2) (2024-10-25)
 
 
