@@ -1,5 +1,6 @@
 import {
     CountryCodes,
+    GameState,
     LazerHitResults,
     LazerSettings,
     Rulesets,
@@ -128,13 +129,34 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private checkIfSongSelect(address: number) {
-        return this.process.readIntPtr(address + 0x3b0) === this.gameBase();
+        return (
+            this.process.readIntPtr(address + 0x430) ===
+            this.process.readIntPtr(this.gameBase())
+        );
     }
 
     private checkIfPlayerLoader(address: number) {
         return (
             this.process.readIntPtr(address + 0x378) ===
             this.process.readIntPtr(address + 0x468)
+        );
+    }
+
+    private checkIfEditor(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x430) ===
+                this.process.readIntPtr(this.gameBase() + 0x438) &&
+            this.process.readIntPtr(address + 0x490) ===
+                this.process.readIntPtr(this.gameBase() + 0x430)
+        );
+    }
+
+    private checkIfMulti(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x3c0) ===
+                this.process.readIntPtr(this.gameBase() + 0x438) &&
+            this.process.readIntPtr(address + 0x338) ===
+                this.process.readIntPtr(this.gameBase() + 0x430)
         );
     }
 
@@ -1726,15 +1748,32 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
         const isSongSelect = this.checkIfSongSelect(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
-
+        const isEditor = this.checkIfEditor(this.currentScreen);
+        const isMulti = this.checkIfMulti(this.currentScreen);
         let status = 0;
 
         if (isPlaying || isPlayerLoader) {
-            status = 2;
+            status = GameState.play;
         } else if (isSongSelect) {
-            status = 5;
+            status = GameState.selectPlay;
         } else if (isResultScreen) {
-            status = 7;
+            status = GameState.resultScreen;
+        } else if (isEditor) {
+            status = GameState.edit;
+        } else if (isMulti) {
+            const roomManager = this.process.readIntPtr(
+                this.currentScreen + 0x3b0
+            );
+            const joinedRoomBindable = this.process.readIntPtr(
+                roomManager + 0x208
+            );
+            const room = this.process.readIntPtr(joinedRoomBindable + 0x20);
+
+            if (room) {
+                status = GameState.lobby;
+            } else {
+                status = GameState.selectMulti;
+            }
         }
 
         this.isPlayerLoading = isPlayerLoader;
