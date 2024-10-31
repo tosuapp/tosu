@@ -1,4 +1,4 @@
-import { ClientType, config, wLogger } from '@tosu/common';
+import { Bitness, ClientType, config, wLogger } from '@tosu/common';
 import EventEmitter from 'events';
 import { Process } from 'tsprocess/dist/process';
 
@@ -54,13 +54,14 @@ export abstract class AbstractInstance {
 
     states: Partial<DataRepoList> = {};
 
-    constructor(pid: number, bitness: number) {
+    constructor(pid: number, bitness: Bitness) {
         this.pid = pid;
 
         this.process = new Process(this.pid, bitness);
         this.path = this.process.path;
 
-        this.client = bitness === 64 ? ClientType.lazer : ClientType.stable;
+        this.client =
+            bitness === Bitness.x64 ? ClientType.lazer : ClientType.stable;
 
         this.set('settings', new Settings(this));
         this.set('global', new Global(this));

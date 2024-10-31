@@ -1,4 +1,4 @@
-import { GameState, config, sleep, wLogger } from '@tosu/common';
+import { Bitness, GameState, config, sleep, wLogger } from '@tosu/common';
 import { injectGameOverlay } from '@tosu/game-overlay';
 import fs from 'fs';
 import path from 'path';
@@ -12,7 +12,7 @@ export class OsuInstance extends AbstractInstance {
     memory: StableMemory;
 
     constructor(pid: number) {
-        super(pid, 32);
+        super(pid, Bitness.x86);
 
         this.memory = new StableMemory(this.process, this);
     }

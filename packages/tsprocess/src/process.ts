@@ -24,7 +24,7 @@ export class Process {
     public handle: number;
     public bitness: number;
 
-    constructor(id: number, bitness: number = 32) {
+    constructor(id: number, bitness: number) {
         this.id = id;
         this.handle = ProcessUtils.openProcess(this.id);
         this.bitness = bitness;

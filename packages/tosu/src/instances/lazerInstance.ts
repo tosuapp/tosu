@@ -1,4 +1,4 @@
-import { GameState, config, sleep, wLogger } from '@tosu/common';
+import { Bitness, GameState, config, sleep, wLogger } from '@tosu/common';
 
 import { LazerMemory } from '@/memory/lazer';
 import { Gameplay } from '@/states/gameplay';
@@ -11,7 +11,7 @@ export class LazerInstance extends AbstractInstance {
     previousCombo: number = 0;
 
     constructor(pid: number) {
-        super(pid, 64);
+        super(pid, Bitness.x64);
 
         this.memory = new LazerMemory(this.process, this);
     }
