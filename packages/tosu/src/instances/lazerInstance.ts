@@ -111,28 +111,12 @@ export class LazerInstance extends AbstractInstance {
                         // FIXME: TODO
                         // bassDensity.updateState();
                         break;
-                    case GameState.play: // is playing (after player is loaded)
-                        // support replay rewind
-                        if (this.previousCombo > gameplay.combo) {
-                            gameplay.resetQuick();
-                        }
 
-                        // Reset gameplay data on retry
-                        if (this.previousTime > global.playTime) {
-                            gameplay.init(true);
-                            beatmapPP.resetAttributes();
-                        }
-
-                        // reset before first object
-                        if (global.playTime <= beatmapPP.timings.firstObj) {
-                            gameplay.resetQuick();
-                            break;
-                        }
-
-                        gameplay.updateState();
+                    case GameState.edit:
+                        if (this.previousTime === global.playTime) break;
 
                         this.previousTime = global.playTime;
-                        this.previousCombo = gameplay.combo;
+                        beatmapPP.updateEditorPP();
                         break;
 
                     case GameState.selectPlay:
@@ -147,6 +131,37 @@ export class LazerInstance extends AbstractInstance {
                         if (resultScreen.playerName) {
                             resultScreen.init();
                         }
+                        break;
+
+                    case GameState.play: // is playing (after player is loaded)
+                        // Reset gameplay data on retry
+                        if (this.previousTime > global.playTime) {
+                            gameplay.init(true);
+                            beatmapPP.resetAttributes();
+                        }
+
+                        // reset before first object
+                        if (global.playTime <= beatmapPP.timings.firstObj) {
+                            gameplay.resetQuick();
+                            break;
+                        }
+
+                        gameplay.updateState();
+
+                        // support replay rewind
+                        console.log(
+                            'yes',
+                            this.previousCombo > gameplay.combo,
+                            this.previousCombo,
+                            gameplay.combo
+                        );
+
+                        if (this.previousCombo > gameplay.combo) {
+                            gameplay.resetQuick();
+                        }
+
+                        this.previousTime = global.playTime;
+                        this.previousCombo = gameplay.combo;
                         break;
 
                     case GameState.resultScreen:

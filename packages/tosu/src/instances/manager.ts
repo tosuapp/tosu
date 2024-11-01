@@ -132,7 +132,6 @@ export class InstanceManager {
 
         if (this.platformType !== 'windows') return;
 
-        const s1 = performance.now();
         const focusedPID = Process.getFocusedProcess();
         const instance = Object.values(this.osuInstances).find(
             (r) => r.pid === focusedPID
@@ -143,16 +142,6 @@ export class InstanceManager {
             this.focusedClient =
                 this.getInstance()?.client || ClientType.stable;
         }
-
-        console.log(
-            'focused',
-            ClientType[this.focusedClient],
-            Object.values(this.osuInstances).map((r) => ({
-                id: r.pid,
-                client: r.client
-            })),
-            performance.now() - s1
-        );
 
         setTimeout(this.runDetemination, 100);
     }

@@ -147,7 +147,6 @@ export class OsuInstance extends AbstractInstance {
                             beatmapPP.updateEditorPP();
                             break;
 
-                        // EditorSongSElect and SongSelect
                         case GameState.selectEdit:
                         case GameState.selectPlay:
                             // Reset Gameplay/ResultScreen data on joining to songSelect
