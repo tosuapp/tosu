@@ -7,7 +7,9 @@ import { directoryWalker } from '../utils/directories';
 
 export default function buildV2Api(app: HttpServer) {
     app.route('/json/v2', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance();
+        const osuInstance: any = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
         if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
@@ -18,7 +20,9 @@ export default function buildV2Api(app: HttpServer) {
     });
 
     app.route('/json/v2/precise', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance();
+        const osuInstance: any = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
         if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });
@@ -38,7 +42,9 @@ export default function buildV2Api(app: HttpServer) {
         try {
             const url = req.pathname || '/';
 
-            const osuInstance: any = req.instanceManager.getInstance();
+            const osuInstance: any = req.instanceManager.getInstance(
+                req.instanceManager.focusedClient
+            );
             if (!osuInstance) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
@@ -69,7 +75,9 @@ export default function buildV2Api(app: HttpServer) {
         try {
             const url = req.pathname || '/';
 
-            const osuInstance: any = req.instanceManager.getInstance();
+            const osuInstance: any = req.instanceManager.getInstance(
+                req.instanceManager.focusedClient
+            );
             if (!osuInstance) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });

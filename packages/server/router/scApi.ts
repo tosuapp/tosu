@@ -3,7 +3,9 @@ import { beatmapFileShortcut } from '../scripts/beatmapFile';
 
 export default function buildSCApi(app: HttpServer) {
     app.route('/json/sc', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance();
+        const osuInstance: any = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
         if (!osuInstance) {
             res.statusCode = 500;
             return sendJson(res, { error: 'not_ready' });

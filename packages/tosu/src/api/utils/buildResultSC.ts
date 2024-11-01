@@ -14,7 +14,9 @@ import { fixDecimals } from '@/utils/converters';
 import { ApiAnswer } from '../types/sc';
 
 export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
-    const osuInstance = instanceManager.getInstance();
+    const osuInstance = instanceManager.getInstance(
+        instanceManager.focusedClient
+    );
     if (!osuInstance) {
         return { error: 'not_ready' };
     }

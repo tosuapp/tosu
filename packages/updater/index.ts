@@ -19,7 +19,7 @@ const platform = platformResolver(process.platform);
 const fileDestination = path.join(getProgramPath(), 'update.zip');
 const backupExecutablePath = path.join(
     getProgramPath(),
-    `tosu_old${platform.platformFileType}`
+    `tosu_old${platform.fileType}`
 );
 
 const deleteNotLocked = async (filePath: string) => {
@@ -41,7 +41,7 @@ export const checkUpdates = async () => {
     wLogger.info('Checking updates');
 
     try {
-        if (platform.platformType === '') {
+        if (platform.type === 'unknown') {
             wLogger.warn(
                 `Unsupported platform (${process.platform}). Unable to run updater`
             );
@@ -107,14 +107,10 @@ export const autoUpdater = async () => {
         }
 
         const findAsset = assets.find(
-            (r) =>
-                r.name.includes(platform.platformType) &&
-                r.name.endsWith('.zip')
+            (r) => r.name.includes(platform.type) && r.name.endsWith('.zip')
         );
         if (!findAsset) {
-            wLogger.info(
-                `Files to update not found (${platform.platformType})`
-            );
+            wLogger.info(`Files to update not found (${platform.type})`);
             return 'noFiles';
         }
 

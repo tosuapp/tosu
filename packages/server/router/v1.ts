@@ -8,7 +8,9 @@ export default function buildV1Api(app: HttpServer) {
         try {
             const url = req.pathname || '/';
 
-            const osuInstance: any = req.instanceManager.getInstance();
+            const osuInstance: any = req.instanceManager.getInstance(
+                req.instanceManager.focusedClient
+            );
             if (!osuInstance) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });

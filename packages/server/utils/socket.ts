@@ -126,7 +126,9 @@ export class Websocket {
     startLoop() {
         this.loopInterval = setInterval(() => {
             try {
-                const osuInstance: any = this.instanceManager.getInstance();
+                const osuInstance: any = this.instanceManager.getInstance(
+                    this.instanceManager.focusedClient
+                );
                 if (!osuInstance || this.clients.size === 0) {
                     return; // Exit the loop if conditions are not met
                 }

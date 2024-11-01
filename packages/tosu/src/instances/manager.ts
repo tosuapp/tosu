@@ -1,4 +1,10 @@
-import { argumetsParser, wLogger } from '@tosu/common';
+import {
+    ClientType,
+    Platform,
+    argumetsParser,
+    platformResolver,
+    wLogger
+} from '@tosu/common';
 import { Process } from 'tsprocess/dist/process';
 
 import { AbstractInstance } from '@/instances';
@@ -7,6 +13,9 @@ import { LazerInstance } from './lazerInstance';
 import { OsuInstance } from './osuInstance';
 
 export class InstanceManager {
+    platformType: Platform;
+    focusedClient: ClientType;
+
     osuInstances: {
         [key: number]: AbstractInstance;
     };
@@ -15,18 +24,32 @@ export class InstanceManager {
         this.osuInstances = {};
 
         this.runWatcher = this.runWatcher.bind(this);
+        this.runDetemination = this.runDetemination.bind(this);
     }
 
     /**
      * Gets a regular instance if osu running in normal mode, else gets tournament manager
      */
-    public getInstance() {
+    public getInstance(clientType?: ClientType) {
         if (Object.keys(this.osuInstances).length === 0) return;
 
         for (const key in this.osuInstances) {
-            if (this.osuInstances[key].isTourneyManager) {
-                return this.osuInstances[key];
+            const instance = this.osuInstances[key];
+            const ClientFilter =
+                typeof ClientType[clientType as any] !== 'undefined'
+                    ? instance.client === clientType
+                    : true;
+
+            if (instance.isTourneyManager && ClientFilter) {
+                return instance;
             }
+        }
+
+        if (typeof clientType === 'number') {
+            const search = Object.values(this.osuInstances).find(
+                (r) => r.client === clientType
+            );
+            return search;
         }
         return Object.values(this.osuInstances)[0];
     }
@@ -99,5 +122,38 @@ export class InstanceManager {
         this.handleProcesses();
 
         setTimeout(this.runWatcher, 1000);
+    }
+
+    runDetemination() {
+        if (!this.platformType) {
+            const platform = platformResolver(process.platform);
+            this.platformType = platform.type;
+        }
+
+        if (this.platformType !== 'windows') return;
+
+        const s1 = performance.now();
+        const focusedPID = Process.getFocusedProcess();
+        const instance = Object.values(this.osuInstances).find(
+            (r) => r.pid === focusedPID
+        );
+        if (instance) this.focusedClient = instance.client;
+
+        if (this.focusedClient === undefined) {
+            this.focusedClient =
+                this.getInstance()?.client || ClientType.stable;
+        }
+
+        console.log(
+            'focused',
+            ClientType[this.focusedClient],
+            Object.values(this.osuInstances).map((r) => ({
+                id: r.pid,
+                client: r.client
+            })),
+            performance.now() - s1
+        );
+
+        setTimeout(this.runDetemination, 100);
     }
 }

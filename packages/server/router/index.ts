@@ -34,7 +34,9 @@ const pkgAssetsPath =
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance();
+        const osuInstance: any = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
         if (!osuInstance) {
             res.statusCode = 500;
             wLogger.debug('/json', 'not_ready');
@@ -175,8 +177,8 @@ export default function buildBaseApi(server: Server) {
                     `PP Counter opened: ${folderName} (${req.headers.referer})`
                 );
 
-                const { platformCommand } = platformResolver(process.platform);
-                exec(`${platformCommand} "${folderPath}"`, (err) => {
+                const platform = platformResolver(process.platform);
+                exec(`${platform.command} "${folderPath}"`, (err) => {
                     if (err) {
                         wLogger.error('Error opening file explorer:');
                         wLogger.debug(err);
@@ -393,7 +395,9 @@ export default function buildBaseApi(server: Server) {
         try {
             const query: any = req.query;
 
-            const osuInstance: any = req.instanceManager.getInstance();
+            const osuInstance: any = req.instanceManager.getInstance(
+                req.instanceManager.focusedClient
+            );
             if (!osuInstance) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
