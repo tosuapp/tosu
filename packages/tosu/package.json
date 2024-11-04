@@ -8,9 +8,10 @@
         "ts:run": "cross-env NODE_ENV=development ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
         "ts:compile": "ncc build src/index.ts -o dist -m -d",
         "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
-        "compile:prepare-htmls": "cp -rf node_modules/@tosu/server/assets ./dist",
-        "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts",
-        "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
+        "compile:prepare-htmls-win": "xcopy node_modules\\@tosu\\server\\assets .\\dist\\assets\\ /E /Y /Q",
+        "compile:prepare-htmls-linux": "cp -rf node_modules/@tosu/server/assets ./dist",
+        "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls-win && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts",
+        "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls-linux && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
         "@tosu/common": "workspace:*",
