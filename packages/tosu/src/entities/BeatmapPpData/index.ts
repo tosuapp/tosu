@@ -368,7 +368,7 @@ export class BeatmapPPData extends AbstractEntity {
 
                         parseColours: false,
                         parseEditor: false,
-                        parseGeneral: false,
+                        parseGeneral: true,
                         parseStoryboard: false,
                         parseMetadata: false
                     }
@@ -396,7 +396,7 @@ export class BeatmapPPData extends AbstractEntity {
                 this.timings.firstObj = firstObj;
                 this.timings.full = full;
 
-                this.Mode = this.beatmap.mode;
+                this.Mode = this.lazerBeatmap.mode;
 
                 this.resetReportCount('BPPD(updateMapMetadataTimings)');
             } catch (exc) {

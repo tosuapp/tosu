@@ -218,7 +218,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             backgroundColour: userProfile.backgroundColour?.toString(16)
         },
         beatmap: {
-            isConvert: beatmapPpData.Mode !== currentMode,
+            isConvert:
+                beatmapPpData.Mode === 0
+                    ? beatmapPpData.Mode !== currentMode
+                    : false,
             time: {
                 live: allTimesData.PlayTime,
                 firstObject: beatmapPpData.timings.firstObj,
