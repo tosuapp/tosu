@@ -250,6 +250,7 @@ export interface Profile {
 }
 
 export interface Beatmap {
+    isConvert: boolean;
     time: BeatmapTime;
     status: NumberName;
     checksum: string;

@@ -421,7 +421,7 @@ export default function buildBaseApi(server: Server) {
             if (query.nKatu) params.nKatu = +query.nKatu;
             if (query.mods) params.mods = +query.mods;
             if (query.acc) params.accuracy = +query.acc;
-            if (query.lazer) params.lazer = query.lazer ?? true;
+            if (query.lazer) params.lazer = query.lazer === 'true';
 
             const calculate = new rosu.Performance(params).calculate(beatmap);
             sendJson(res, calculate);

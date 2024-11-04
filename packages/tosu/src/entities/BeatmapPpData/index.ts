@@ -396,6 +396,8 @@ export class BeatmapPPData extends AbstractEntity {
                 this.timings.firstObj = firstObj;
                 this.timings.full = full;
 
+                this.Mode = this.beatmap.mode;
+
                 this.resetReportCount('BPPD(updateMapMetadataTimings)');
             } catch (exc) {
                 this.reportError(
@@ -596,7 +598,6 @@ export class BeatmapPPData extends AbstractEntity {
 
             this.strains = oldStrains;
             this.strainsAll = resultStrains;
-            this.Mode = strains.mode;
 
             strains.free();
 
