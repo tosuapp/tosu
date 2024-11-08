@@ -113,11 +113,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
               : global.menuMods;
 
     const currentMode =
-        allTimesData.Status === 2
-            ? gamePlayData.Mode
-            : allTimesData.Status === 7
-              ? resultsScreenData.Mode
-              : menuData.MenuGameMode;
+        global.status === 2
+            ? gameplay.mode
+            : global.status === 7
+              ? resultScreen.mode
+              : menu.gamemode;
 
     const resultScreenHits = {
         300: resultScreen.hit300,
@@ -228,9 +228,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         },
         beatmap: {
             isConvert:
-                beatmapPpData.Mode === 0
-                    ? beatmapPpData.Mode !== currentMode
-                    : false,
+                beatmapPP.mode === 0 ? beatmapPP.mode !== currentMode : false,
             time: {
                 live: global.playTime,
                 firstObject: beatmapPP.timings.firstObj,
