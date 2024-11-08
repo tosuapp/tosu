@@ -112,6 +112,13 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
               ? resultScreen.mods
               : global.menuMods;
 
+    const currentMode =
+        allTimesData.Status === 2
+            ? gamePlayData.Mode
+            : allTimesData.Status === 7
+              ? resultsScreenData.Mode
+              : menuData.MenuGameMode;
+
     const resultScreenHits = {
         300: resultScreen.hit300,
         geki: resultScreen.hitGeki,
@@ -220,6 +227,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             backgroundColour: user.backgroundColour?.toString(16)
         },
         beatmap: {
+            isConvert:
+                beatmapPpData.Mode === 0
+                    ? beatmapPpData.Mode !== currentMode
+                    : false,
             time: {
                 live: global.playTime,
                 firstObject: beatmapPP.timings.firstObj,

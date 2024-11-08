@@ -434,6 +434,8 @@ export class BeatmapPP extends AbstractState {
                 this.timings.firstObj = firstObj;
                 this.timings.full = full;
 
+                this.mode = this.lazerBeatmap.mode;
+
                 this.timingPoints =
                     this.lazerBeatmap.controlPoints.timingPoints;
 
@@ -639,7 +641,6 @@ export class BeatmapPP extends AbstractState {
 
             this.strains = oldStrains;
             this.strainsAll = resultStrains;
-            this.mode = strains.mode;
 
             strains.free();
 
