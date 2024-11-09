@@ -62,13 +62,23 @@ body {
     color: white;
     /* background-color: transparent !important; */
     overflow: hidden;
-    transition: background 0.5s ease;
+    transition: background 0.3s ease;
 }
 
 body.-editing {
     background-color: rgba(0, 0, 0, 0.5);
 
-    .background-notice {
+    .background-notice,
+    .copyright {
+        opacity: 1;
+    }
+
+    .copyright {
+        top: 0.8em;
+    }
+
+    .download-more {
+        bottom: 2em;
         opacity: 1;
     }
 
@@ -89,7 +99,7 @@ body.-editing {
     pointer-events: none;
     opacity: 0;
     z-index: 10000;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.3s ease;
 }
 
 main.main {
@@ -112,21 +122,25 @@ main.main {
 
 .background-notice {
     pointer-events: none;
+    justify-content: flex-end;
+    flex-direction: column;
     user-select: none;
     position: fixed;
-    color: #46515e;
+    display: flex;
+    color: #737f8d;
     top: 0;
     left: 0;
+    gap: 0.3em;
     width: 100vw;
     height: 100vh;
-    padding: 3em;
+    padding: 2em;
     opacity: 0;
     background: hsl(from #2a323b h s l / 75%);
-    transition: opacity 0.5s ease;
+    transition: opacity 0.3s ease;
     z-index: 0;
 
     &::before {
-        --offset: 20px;
+        --offset: 15px;
         content: '';
         position: absolute;
         top: var(--offset);
@@ -141,8 +155,22 @@ main.main {
     b {
         color: black;
         padding: 0em 0.2em;
-        background: #46515e;
+        background: #737f8d;
     }
+}
+
+.copyright {
+    pointer-events: none;
+    text-shadow: 0em 0em 0.2em black, 0em 0em 2em #417bc5;
+    font-size: 1.4em;
+    position: fixed;
+    color: #417bc5;
+    top: 0;
+    left: 50%;
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity 0.3s ease, top 0.3s ease;
+    z-index: 1;
 }
 
 .overlay {
@@ -350,4 +378,19 @@ iframe {
     opacity: 0;
     transform: scale(0.8);
     transform-origin: center center;
+}
+
+.no-available {
+    margin: 1em;
+}
+
+.download-more {
+    text-decoration: none;
+    position: fixed;
+    right: 2em;
+    bottom: 0;
+    opacity: 0;
+    transition: 0.3s ease;
+    transition-property: filter, translate, opacity, bottom;
+    z-index: 1;
 }

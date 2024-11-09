@@ -64,7 +64,9 @@ export const injectGameOverlay = async (p: Process) => {
                 reject(err);
             });
             child.on('exit', () => {
-                wLogger.warn('[ingame-overlay] initialized successfully');
+                wLogger.warn(
+                    '[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor\n'
+                );
                 resolve(true);
             });
         });
