@@ -1,5 +1,4 @@
 import { Bitness, GameState, config, sleep, wLogger } from '@tosu/common';
-import { injectGameOverlay } from '@tosu/game-overlay';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,16 +8,13 @@ import { Gameplay } from '@/states/gameplay';
 import { Global } from '@/states/global';
 
 export class OsuInstance extends AbstractInstance {
+    gameOverlayAllowed = true;
     memory: StableMemory;
 
     constructor(pid: number) {
         super(pid, Bitness.x86);
 
         this.memory = new StableMemory(this.process, this);
-    }
-
-    async injectGameOverlay() {
-        await injectGameOverlay(this.process);
     }
 
     async regularDataLoop() {

@@ -1,4 +1,5 @@
 import { Bitness, ClientType, config, wLogger } from '@tosu/common';
+import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import { Process } from 'tsprocess/dist/process';
 
@@ -33,16 +34,19 @@ export interface DataRepoList {
 
 export abstract class AbstractInstance {
     abstract memory: AbstractMemory<Record<string, number>>;
+    abstract gameOverlayAllowed: boolean;
     client: ClientType;
 
     pid: number;
     process: Process;
     path: string = '';
+    bitness: Bitness;
 
     isReady: boolean;
     isDestroyed: boolean = false;
     isTourneyManager: boolean = false;
     isTourneySpectator: boolean = false;
+    isGameOverlayInjected: boolean = false;
 
     ipcId: number = 0;
 
@@ -59,6 +63,7 @@ export abstract class AbstractInstance {
 
         this.process = new Process(this.pid, bitness);
         this.path = this.process.path;
+        this.bitness = bitness;
 
         this.client =
             bitness === Bitness.x64 ? ClientType.lazer : ClientType.stable;
@@ -160,18 +165,21 @@ export abstract class AbstractInstance {
             }
         }
 
-        /**
-         * ENABLING INGAME OVERLAY (stable only, for now)
-         */
-        if (config.enableIngameOverlay && this.client === ClientType.stable) {
-            this.injectGameOverlay();
-        }
-
         this.initiateDataLoops();
         this.watchProcessHealth();
+        this.injectGameOverlay();
     }
 
-    abstract injectGameOverlay(): void;
+    async injectGameOverlay() {
+        if (!this.gameOverlayAllowed) return;
+
+        try {
+            const result = await injectGameOverlay(this.process, this.bitness);
+            this.isGameOverlayInjected = result === true;
+        } catch (exc) {
+            wLogger.debug(`instance(injectGameOverlay)`, exc);
+        }
+    }
 
     initiateDataLoops() {
         const { global, gameplay } = this.getServices(['global', 'gameplay']);

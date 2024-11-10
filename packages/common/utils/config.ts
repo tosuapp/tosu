@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-import { ClientType } from '../enums/tosu';
 import { getProgramPath } from './directories';
 import { checkGameOverlayConfig } from './ingame';
 import { wLogger } from './logger';
@@ -258,16 +257,18 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 
     checkGameOverlayConfig();
 
-    const osuInstances: any = Object.values(
-        httpServer.instanceManager.osuInstances || {}
+    const osuInstance: any = httpServer.instanceManager.getInstance(
+        httpServer.instanceManager.focusedClient
     );
+
     if (
-        osuInstances.length === 1 &&
-        osuInstances[0].client === ClientType.stable &&
+        osuInstance &&
+        osuInstance.isGameOverlayInjected !== true &&
+        osuInstance.gameOverlayAllowed !== true &&
         enableIngameOverlay === true &&
         updated === true
     ) {
-        osuInstances[0].injectGameOverlay();
+        osuInstance.injectGameOverlay();
     }
 
     if (enableGosuOverlay === true && !enableIngameOverlay) {

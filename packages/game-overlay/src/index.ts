@@ -1,6 +1,6 @@
 import {
+    Bitness,
     checkGameOverlayConfig,
-    config,
     downloadFile,
     getProgramPath,
     unzip,
@@ -12,13 +12,13 @@ import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Process } from 'tsprocess/dist/process';
 
-export const injectGameOverlay = async (p: Process) => {
+export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
     try {
         if (process.platform !== 'win32') {
             wLogger.error(
                 '[ingame-overlay] Ingame overlay can run only under windows, sorry linux/darwin user!'
             );
-            return;
+            return false;
         }
 
         checkGameOverlayConfig();
@@ -30,7 +30,7 @@ export const injectGameOverlay = async (p: Process) => {
                 'tosu-gameoverlay.zip'
             );
 
-            await mkdir(gameOverlayPath);
+            await mkdir(gameOverlayPath, { recursive: true });
             await downloadFile('https://tosu.app/overlay.zip', archivePath);
 
             await unzip(archivePath, gameOverlayPath);
@@ -38,30 +38,39 @@ export const injectGameOverlay = async (p: Process) => {
         }
 
         if (
-            !existsSync(path.join(gameOverlayPath, 'tosu_overlay.dll')) &&
-            !existsSync(path.join(gameOverlayPath, 'tosu_injector.exe'))
+            !existsSync(
+                path.join(gameOverlayPath, Bitness[bitness], 'tosu_overlay.dll')
+            ) &&
+            !existsSync(
+                path.join(
+                    gameOverlayPath,
+                    Bitness[bitness],
+                    'tosu_injector.exe'
+                )
+            )
         ) {
             wLogger.error(
                 '[ingame-overlay] Please delete game-overlay folder, and restart program!'
             );
-            return;
+            return false;
         }
 
-        return await new Promise((resolve, reject) => {
+        return await new Promise((resolve) => {
             const child = execFile(
-                path.join(gameOverlayPath, 'tosu_injector.exe'),
-                [
-                    p.id.toString(),
-                    config.serverIP,
-                    config.serverPort.toString()
-                ],
+                path.join(
+                    gameOverlayPath,
+                    Bitness[bitness],
+                    'tosu_injector.exe'
+                ),
+                [p.id.toString()],
                 {
                     cwd: gameOverlayPath,
                     windowsHide: true
                 }
             );
             child.on('error', (err) => {
-                reject(err);
+                wLogger.warn('[ingame-overlay] inject error', err);
+                resolve(false);
             });
             child.on('exit', () => {
                 wLogger.warn(
@@ -71,7 +80,9 @@ export const injectGameOverlay = async (p: Process) => {
             });
         });
     } catch (exc) {
-        wLogger.error('injectOverlay', (exc as any).message);
-        wLogger.debug('injectOverlay', exc);
+        wLogger.error('[ingame-overlay]', (exc as any).message);
+        wLogger.debug('[ingame-overlay]', exc);
+
+        return false;
     }
 };

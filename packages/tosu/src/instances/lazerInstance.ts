@@ -7,6 +7,7 @@ import { Global } from '@/states/global';
 import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
+    gameOverlayAllowed = true;
     memory: LazerMemory;
     previousCombo: number = 0;
 
@@ -14,10 +15,6 @@ export class LazerInstance extends AbstractInstance {
         super(pid, Bitness.x64);
 
         this.memory = new LazerMemory(this.process, this);
-    }
-
-    injectGameOverlay(): void {
-        throw new Error('Method not implemented.');
     }
 
     async regularDataLoop(): Promise<void> {
