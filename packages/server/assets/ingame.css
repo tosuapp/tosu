@@ -74,7 +74,7 @@ body.-editing {
     }
 
     .copyright {
-        top: 0.8em;
+        top: 0.5em;
     }
 
     .download-more {
@@ -147,9 +147,10 @@ main.main {
         left: var(--offset);
         right: var(--offset);
         bottom: var(--offset);
-        border-width: 5px;
+        border-width: 4px;
         border-color: #495665;
         border-style: dashed;
+        border-radius: 0.8em;
     }
 
     b {

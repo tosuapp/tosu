@@ -1539,13 +1539,13 @@ window.onload = async () => {
       button.innerHTML = `<span>Update</span>`;
       counter.prepend(button);
     };
-
-    if (queryParams.has('ingame')) {
-      document.querySelector('.tabs')?.remove();
-      document.querySelector('.links')?.remove();
-      document.querySelector('.submit-counter')?.remove();
-    };
   } catch (error) {
     console.log(error);
   };
+};
+
+if (queryParams.has('ingame')) {
+    document.querySelector('.tabs')?.remove();
+    document.querySelector('.links')?.remove();
+    document.querySelector('.submit-counter')?.remove();
 };
