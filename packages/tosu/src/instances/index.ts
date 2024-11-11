@@ -171,6 +171,7 @@ export abstract class AbstractInstance {
     }
 
     async injectGameOverlay() {
+        if (config.enableIngameOverlay !== true) return;
         if (!this.gameOverlayAllowed) return;
 
         try {

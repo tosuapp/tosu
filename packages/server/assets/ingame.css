@@ -1,3 +1,12 @@
+.modal:not(.hidden) {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+.modal .m-content {
+    box-shadow: none !important;
+}
+
 input[type="number"].input2 {
     font-family: inherit;
     font-size: inherit;
@@ -105,7 +114,6 @@ body.-editing {
 main.main {
     width: 100vw;
     height: 100vh;
-    z-index: 1;
 
     &::before {
         content: '';

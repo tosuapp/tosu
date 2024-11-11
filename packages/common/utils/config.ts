@@ -255,6 +255,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         httpServer.restartWS();
     }
 
+    config.enableIngameOverlay = enableIngameOverlay;
     checkGameOverlayConfig();
 
     const osuInstance: any = httpServer.instanceManager.getInstance(
@@ -264,7 +265,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     if (
         osuInstance &&
         osuInstance.isGameOverlayInjected !== true &&
-        osuInstance.gameOverlayAllowed !== true &&
+        osuInstance.gameOverlayAllowed === true &&
         enableIngameOverlay === true &&
         updated === true
     ) {
@@ -278,8 +279,6 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
             '\n\n\n'
         );
     }
-
-    config.enableIngameOverlay = enableIngameOverlay;
 
     config.enableAutoUpdate = enableAutoUpdate;
     config.openDashboardOnStartup = openDashboardOnStartup;
