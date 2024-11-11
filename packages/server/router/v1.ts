@@ -8,14 +8,16 @@ export default function buildV1Api(app: HttpServer) {
         try {
             const url = req.pathname || '/';
 
-            const osuInstance: any = req.instanceManager.getInstance();
+            const osuInstance: any = req.instanceManager.getInstance(
+                req.instanceManager.focusedClient
+            );
             if (!osuInstance) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData } = osuInstance.getServices(['allTimesData']);
-            if (allTimesData.SongsFolder === '') {
+            const global = osuInstance.get('global');
+            if (global.songsFolder === '') {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
@@ -24,7 +26,7 @@ export default function buildV1Api(app: HttpServer) {
                 res,
                 baseUrl: url,
                 pathname: req.params.filePath,
-                folderPath: allTimesData.SongsFolder
+                folderPath: global.songsFolder
             });
         } catch (error) {
             wLogger.error((error as any).message);

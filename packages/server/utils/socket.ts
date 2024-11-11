@@ -106,7 +106,16 @@ export class Websocket {
 
         // resend commands internally "this.socket.emit"
         this.socket.on('message', (data) => {
-            this.clients.forEach((client) => client.emit('message', data));
+            this.clients.forEach((client) => {
+                // skip sending settings to wrong overlay
+                if (
+                    data.startsWith('getSettings:') &&
+                    !data.endsWith(encodeURI(client.query.l || ''))
+                )
+                    return;
+
+                client.emit('message', data);
+            });
         });
 
         if (this.pollRateFieldName !== '') {
@@ -117,7 +126,9 @@ export class Websocket {
     startLoop() {
         this.loopInterval = setInterval(() => {
             try {
-                const osuInstance: any = this.instanceManager.getInstance();
+                const osuInstance: any = this.instanceManager.getInstance(
+                    this.instanceManager.focusedClient
+                );
                 if (!osuInstance || this.clients.size === 0) {
                     return; // Exit the loop if conditions are not met
                 }

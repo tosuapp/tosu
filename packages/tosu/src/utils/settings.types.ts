@@ -1,3 +1,6 @@
+export type ConfigList = Record<string, IConfigBindable>;
+export type BindingsList = Record<number, IBindable>;
+
 export interface IBindable {
     setValue: (value: any) => void;
 }

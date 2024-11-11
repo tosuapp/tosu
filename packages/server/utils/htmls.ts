@@ -63,7 +63,7 @@ export const inputHTML =
 export const textareaHTML = '<textarea id="{ID}" {ADDON}>{VALUE}</textarea>';
 
 export const saveSettingsButtonHTML =
-    '<div class="flexer si-btn"><button class="button save-button flexer"><span>Save settings</span></button></div>';
+    '<div class="flexer si-btn ssb"><button class="button save-button flexer"><span>Save settings</span></button></div>';
 
 export const submitCounterHTML = `<a class="submit-counter flexer" href="https://osuck.link/tosu-counter-submit" target="_blank">
   <i class="icon-link"></i>

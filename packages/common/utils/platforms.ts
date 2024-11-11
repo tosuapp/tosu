@@ -1,26 +1,33 @@
-export const platformResolver = (platform: string) => {
-    let platformType = '';
-    let platformFileType = '';
-    let platformCommand = '';
+export type Platform = 'windows' | 'linux' | 'macos' | 'unknown';
+
+interface IPlatform {
+    type: Platform;
+    fileType: string;
+    command: string;
+}
+
+export function platformResolver(platform: string): IPlatform {
+    let type: Platform = 'unknown';
+    let fileType = '';
+    let command = '';
 
     switch (platform) {
         case 'win32':
-            platformType = 'windows';
-            platformFileType = 'exe';
-            platformCommand = 'start ""';
+            type = 'windows';
+            fileType = '.exe';
+            command = 'start ""';
             break;
 
         case 'linux':
-            platformType = 'linux';
-            platformCommand = 'xdg-open';
+            type = 'linux';
+            command = 'xdg-open';
             break;
 
         case 'darwin':
-            platformType = 'macos';
-            platformFileType = 'macos';
-            platformCommand = 'open -R';
+            type = 'macos';
+            command = 'open -R';
             break;
     }
 
-    return { platformType, platformFileType, platformCommand };
-};
+    return { type, fileType, command };
+}

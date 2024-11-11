@@ -146,11 +146,21 @@ function rebuildJSON({
 
         try {
             if (query != null) {
+                let isCompatibleFilter = false;
+                if (
+                    query.toLowerCase() === 'sc' &&
+                    item.compatiblewith?.some((r) =>
+                        r.toLowerCase().includes('streamcompanion')
+                    )
+                )
+                    isCompatibleFilter = true;
+
                 if (
                     !(
                         item.name.toLowerCase().includes(query) ||
                         item.name.toLowerCase().includes(query)
-                    )
+                    ) &&
+                    isCompatibleFilter !== true
                 ) {
                     continue;
                 }
@@ -273,7 +283,7 @@ function rebuildJSON({
                 ${downloadBtn}
             </div>`;
 
-            const localButtons = `<div class="buttons-group flexer indent-left">
+            const localButtons = `<div class="calu buttons-group flexer indent-left" n="${item.name}" v="${item.version}">
                 ${settingsBuilderBtn}
                 ${settingsBtn}
                 <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
@@ -315,7 +325,7 @@ function rebuildJSON({
     return items;
 }
 
-function getLocalCounters(): ICounter[] {
+export function getLocalCounters(): ICounter[] {
     try {
         const staticPath = getStaticPath();
 
@@ -409,7 +419,10 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
                 return;
             }
 
-            let html = content.replace('{{LIST}}', build || emptyNotice);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', ` (${array.length})`)
+                .replace('{{AVAILABLE_AMOUNT}}', ``)
+                .replace('{{LIST}}', build || emptyNotice);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -430,6 +443,8 @@ export async function buildExternalCounters(
     query?: string
 ) {
     let text = '';
+    let totalLocal = 0;
+    let totalAvailable = 0;
 
     try {
         const request: any = await fetch('https://osuck.net/tosu/api.json');
@@ -467,6 +482,9 @@ export async function buildExternalCounters(
         }
 
         text = build;
+
+        totalLocal = exists.length;
+        totalAvailable = json.length;
     } catch (error) {
         wLogger.error((error as any).message);
         wLogger.debug(error);
@@ -498,7 +516,10 @@ export async function buildExternalCounters(
             let responseHTML = submitCounterHTML;
             responseHTML += text || noMoreCounters;
 
-            let html = content.replace('{{LIST}}', responseHTML);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', ` (${totalLocal})`)
+                .replace('{{AVAILABLE_AMOUNT}}', ` (${totalAvailable})`)
+                .replace('{{LIST}}', responseHTML);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -560,21 +581,18 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{VALUE}', `${config.enableKeyOverlay}`)
         );
 
-    const enableGosuOverlayHTML = settingsItemHTML
-        .replace('{NAME}', 'ENABLE_GOSU_OVERLAY')
-        .replace(
-            '{DESCRIPTION}',
-            'Enables/disable in-game <b>gosumemory</b> overlay<br />(!!!I AM NOT RESPONSIBLE FOR USING IT!!!)'
-        )
+    const enableIngameOverlayHTML = settingsItemHTML
+        .replace('{NAME}', 'ENABLE_INGAME_OVERLAY')
+        .replace('{DESCRIPTION}', 'Enables/disable in-game overlay')
         .replace(
             '{INPUT}',
             checkboxHTML
-                .replace(/{ID}/gm, 'ENABLE_GOSU_OVERLAY')
+                .replace(/{ID}/gm, 'ENABLE_INGAME_OVERLAY')
                 .replace(
                     '{ADDON}',
-                    config.enableGosuOverlay ? 'checked="true"' : ''
+                    config.enableIngameOverlay ? 'checked="true"' : ''
                 )
-                .replace('{VALUE}', `${config.enableGosuOverlay}`)
+                .replace('{VALUE}', `${config.enableIngameOverlay}`)
         );
 
     const pollRateHTML = settingsItemHTML
@@ -713,7 +731,7 @@ export function buildSettings(res: http.ServerResponse) {
     ${openDashboardOnStartupHtml}
     <div></div>
     <div></div>
-    ${enableGosuOverlayHTML}
+    ${enableIngameOverlayHTML}
     ${enableKeyOverlayHTML}
     <div></div>
     <div></div>
@@ -749,7 +767,10 @@ export function buildSettings(res: http.ServerResponse) {
                 return;
             }
 
-            let html = content.replace('{{LIST}}', settings);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', '')
+                .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{LIST}}', settings);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -791,7 +812,10 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 return;
             }
 
-            let html = content.replace('{{LIST}}', pageContent);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', '')
+                .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{LIST}}', pageContent);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)

@@ -627,6 +627,7 @@ const showSettings = {
     },
   },
   setup(props) {
+    const is_ingame = window.location.pathname == '/api/ingame';
     const settings = ref([]);
     for (let i = 0; i < props.settings.length; i++) {
       const setting = props.settings[i];
@@ -713,8 +714,10 @@ const showSettings = {
 
 
     async function updateSettings(event) {
-      const confirmed = confirm(`Update settings?`);
-      if (!confirmed) return;
+      if (!is_ingame) {
+        const confirmed = confirm(`Update settings?`);
+        if (!confirmed) return;
+      };
 
       const element = event.target;
 
@@ -792,9 +795,10 @@ const showSettings = {
 
     function removeCommand(ind, ind2) {
       const item = settings.value[ind2];
-      const confirmed = confirm(`Delete command?`);
-      if (!confirmed) return;
-
+      if (!is_ingame) {
+        const confirmed = confirm(`Delete command?`);
+        if (!confirmed) return;
+      };
 
       item.value.splice(ind, 1);
     };
@@ -886,7 +890,7 @@ function startDownload(element) {
 
 
     const loadingDiv = previousImage || document.createElement('img');
-    if (!previousImage) loadingDiv.src = 'https://cdn-icons-png.flaticon.com/128/39/39979.png';
+    if (!previousImage) loadingDiv.src = '/assets/images/39979.png';
     loadingDiv.style.width = 0;
     loadingDiv.style.opacity = 0;
 
@@ -900,7 +904,7 @@ function startDownload(element) {
 
       setTimeout(() => {
         loadingDiv.style.opacity = 1;
-        loadingDiv.style.width = loadingDiv.style.height = childrenSize.height;
+        loadingDiv.style.width = loadingDiv.style.height = `${childrenSize.height}px`;
       }, 100);
     }, 10);
   };
@@ -927,7 +931,7 @@ function endDownload(element, id, text) {
 
     setTimeout(() => {
       span.style.opacity = 1;
-      span.style.width = spanSize.width;
+      span.style.width = `${spanSize.width}px`;
     }, 100);
 
 
@@ -1171,7 +1175,7 @@ async function saveSettings(element) {
   const DEBUG_LOG = document.querySelector('#DEBUG_LOG');
   const CALCULATE_PP = document.querySelector('#CALCULATE_PP');
   const ENABLE_KEY_OVERLAY = document.querySelector('#ENABLE_KEY_OVERLAY');
-  const ENABLE_GOSU_OVERLAY = document.querySelector('#ENABLE_GOSU_OVERLAY');
+  const ENABLE_INGAME_OVERLAY = document.querySelector('#ENABLE_INGAME_OVERLAY');
   const POLL_RATE = document.querySelector('#POLL_RATE');
   const PRECISE_DATA_POLL_RATE = document.querySelector('#PRECISE_DATA_POLL_RATE');
   const SERVER_IP = document.querySelector('#SERVER_IP');
@@ -1195,7 +1199,7 @@ async function saveSettings(element) {
       CALCULATE_PP: CALCULATE_PP.checked,
       SHOW_MP_COMMANDS: SHOW_MP_COMMANDS.checked,
       ENABLE_KEY_OVERLAY: ENABLE_KEY_OVERLAY.checked,
-      ENABLE_GOSU_OVERLAY: ENABLE_GOSU_OVERLAY.checked,
+      ENABLE_INGAME_OVERLAY: ENABLE_INGAME_OVERLAY.checked,
       POLL_RATE: POLL_RATE.value,
       PRECISE_DATA_POLL_RATE: PRECISE_DATA_POLL_RATE.value,
       SERVER_IP: SERVER_IP.value,
@@ -1228,7 +1232,7 @@ async function saveSettings(element) {
   };
 
   displayNotification({
-    element: element.parentElement.parentElement.parentElement,
+    element: element.parentElement,
     text: `Config has been saved`,
     classes: ['green'],
     delay: 3000,
@@ -1246,7 +1250,7 @@ async function saveSettings(element) {
   };
 
   setTimeout(() => {
-    endDownload(element, 'save-settings', 'Saved');
+    endDownload(element, 'save-settings', 'Save settings');
     element.classList.remove('disable');
   }, 300);
 };
@@ -1426,8 +1430,8 @@ async function startBuilderModal(element) {
 };
 
 
-search_bar.addEventListener('input', handleInput);
-search_bar.addEventListener('keydown', handleInput);
+search_bar?.addEventListener('input', handleInput);
+search_bar?.addEventListener('keydown', handleInput);
 
 
 window.addEventListener('click', (event) => {
@@ -1467,6 +1471,11 @@ window.addEventListener('click', (event) => {
     return;
   };
 
+  if (t?.classList.value.includes(' -settings')) {
+    loadCounterSettings(t);
+    return;
+  };
+
   if (t?.classList.value.includes(' settings-builder-button')) {
     startBuilderModal(t);
     return;
@@ -1502,3 +1511,41 @@ document.addEventListener('keydown', (event) => {
     return;
   };
 });
+
+
+window.onload = async () => {
+  try {
+    const requst = await fetch('https://osuck.net/tosu/api.json');
+    const json = await requst.json();
+
+    const installed = document.querySelectorAll('.calu');
+    for (let i = 0; i < installed.length; i++) {
+      const counter = installed[i];
+
+      const find = json.find(r => r.name == counter.attributes.getNamedItem('n')?.value);
+      if (!find) continue;
+
+
+      const updatable = counter.attributes.getNamedItem('v')?.value != find.version;
+      if (!updatable) continue;
+
+      const button = document.createElement('button');
+      button.classList.add('button', 'update-button', 'flexer');
+
+      button.setAttribute('l', find.downloadLink);
+      button.setAttribute('n', find.name);
+      button.setAttribute('a', find.author);
+
+      button.innerHTML = `<span>Update</span>`;
+      counter.prepend(button);
+    };
+  } catch (error) {
+    console.log(error);
+  };
+};
+
+if (queryParams.has('ingame')) {
+    document.querySelector('.tabs')?.remove();
+    document.querySelector('.links')?.remove();
+    document.querySelector('.submit-counter')?.remove();
+};

@@ -20,15 +20,23 @@ import {
     buildInstructionLocal,
     buildLocalCounters,
     buildSettings,
+    getLocalCounters,
     saveSettings
 } from '../utils/counters';
 import { ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
 
+const pkgAssetsPath =
+    'pkg' in process
+        ? path.join(__dirname, 'assets')
+        : path.join(__filename, '../../../assets');
+
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance();
+        const osuInstance: any = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
         if (!osuInstance) {
             res.statusCode = 500;
             wLogger.debug('/json', 'not_ready');
@@ -98,6 +106,11 @@ export default function buildBaseApi(server: Server) {
                             );
                             fs.unlinkSync(tempPath);
 
+                            server.WS_COMMANDS.socket.emit(
+                                'message',
+                                `getCounters:__ingame__`
+                            );
+
                             sendJson(res, {
                                 status: 'Finished',
                                 path: result
@@ -164,8 +177,8 @@ export default function buildBaseApi(server: Server) {
                     `PP Counter opened: ${folderName} (${req.headers.referer})`
                 );
 
-                const { platformCommand } = platformResolver(process.platform);
-                exec(`${platformCommand} "${folderPath}"`, (err) => {
+                const platform = platformResolver(process.platform);
+                exec(`${platform.command} "${folderPath}"`, (err) => {
                     if (err) {
                         wLogger.error('Error opening file explorer:');
                         wLogger.debug(err);
@@ -213,6 +226,12 @@ export default function buildBaseApi(server: Server) {
                 );
 
                 fs.rmSync(folderPath, { recursive: true, force: true });
+
+                server.WS_COMMANDS.socket.emit(
+                    'message',
+                    `getCounters:__ingame__`
+                );
+
                 return sendJson(res, {
                     status: 'deleted'
                 });
@@ -376,52 +395,70 @@ export default function buildBaseApi(server: Server) {
         try {
             const query: any = req.query;
 
-            const osuInstance: any = req.instanceManager.getInstance();
+            const osuInstance: any = req.instanceManager.getInstance(
+                req.instanceManager.focusedClient
+            );
             if (!osuInstance) {
                 res.statusCode = 500;
                 return sendJson(res, { error: 'not_ready' });
             }
 
-            const { allTimesData, menuData, beatmapPpData } =
-                osuInstance.getServices([
-                    'allTimesData',
-                    'menuData',
-                    'beatmapPpData'
-                ]);
+            const { global, menu, beatmapPP } = osuInstance.getServices([
+                'global',
+                'menu',
+                'beatmapPP'
+            ]);
 
             let beatmap: rosu.Beatmap;
             const exists = fs.existsSync(query.path);
             if (exists) {
                 const beatmapFilePath = path.join(
-                    allTimesData.GameFolder,
-                    'Songs',
-                    menuData.Folder,
-                    menuData.Path
+                    global.songsFolder,
+                    menu.folder,
+                    menu.filename
                 );
 
                 const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
                 beatmap = new rosu.Beatmap(beatmapContent);
             } else {
-                beatmap = beatmapPpData.getCurrentBeatmap();
+                beatmap = beatmapPP.getCurrentBeatmap();
             }
 
             if (query.mode !== undefined) beatmap.convert(query.mode);
 
             const params: rosu.PerformanceArgs = {};
 
-            if (query.clockRate) params.clockRate = +query.clockRate;
-            if (query.passedObjects)
+            if (query.ar !== undefined) params.ar = +query.ar;
+            if (query.cs !== undefined) params.cs = +query.cs;
+            if (query.hp !== undefined) params.hp = +query.hp;
+            if (query.od !== undefined) params.od = +query.od;
+
+            if (query.clockRate !== undefined)
+                params.clockRate = +query.clockRate;
+            if (query.passedObjects !== undefined)
                 params.passedObjects = +query.passedObjects;
-            if (query.combo) params.combo = +query.combo;
-            if (query.nMisses) params.misses = +query.nMisses;
-            if (query.n100) params.n100 = +query.n100;
-            if (query.n300) params.n300 = +query.n300;
-            if (query.n50) params.n50 = +query.n50;
-            if (query.nGeki) params.nGeki = +query.nGeki;
-            if (query.nKatu) params.nKatu = +query.nKatu;
-            if (query.mods) params.mods = +query.mods;
-            if (query.acc) params.accuracy = +query.acc;
-            if (query.lazer) params.lazer = query.lazer === 'true';
+            if (query.combo !== undefined) params.combo = +query.combo;
+            if (query.nMisses !== undefined) params.misses = +query.nMisses;
+            if (query.n100 !== undefined) params.n100 = +query.n100;
+            if (query.n300 !== undefined) params.n300 = +query.n300;
+            if (query.n50 !== undefined) params.n50 = +query.n50;
+            if (query.nGeki !== undefined) params.nGeki = +query.nGeki;
+            if (query.nKatu !== undefined) params.nKatu = +query.nKatu;
+            if (query.mods !== undefined)
+                params.mods = Array.isArray(query.mods)
+                    ? query.mods
+                    : +query.mods;
+            if (query.acc !== undefined) params.accuracy = +query.acc;
+            if (query.sliderEndHits !== undefined)
+                params.sliderEndHits = +query.sliderEndHits;
+            if (query.sliderTickHits !== undefined)
+                params.sliderTickHits = +query.sliderTickHits;
+
+            if (
+                params.sliderEndHits === undefined &&
+                params.sliderTickHits === undefined
+            )
+                params.lazer = false;
 
             const calculate = new rosu.Performance(params).calculate(beatmap);
             sendJson(res, calculate);
@@ -435,6 +472,36 @@ export default function buildBaseApi(server: Server) {
 
             return sendJson(res, {
                 error: typeof exc === 'string' ? exc : (exc as any).message
+            });
+        }
+    });
+
+    server.app.route(/\/api\/ingame/, 'GET', (req, res) => {
+        try {
+            fs.readFile(
+                path.join(pkgAssetsPath, 'ingame.html'),
+                'utf8',
+                (err, content) => {
+                    if (err) {
+                        res.writeHead(500);
+                        return res.end(`Server Error: ${err.code}`);
+                    }
+
+                    const counters = getLocalCounters();
+
+                    content += `\n\n\n<script>\rwindow.COUNTERS = ${JSON.stringify(counters)}\r</script>\n`;
+
+                    res.writeHead(200, {
+                        'Content-Type': 'text/html; charset=utf-8'
+                    });
+                    res.end(content, 'utf-8');
+                }
+            );
+        } catch (error) {
+            wLogger.debug(error);
+
+            return sendJson(res, {
+                error: (error as any).message
             });
         }
     });

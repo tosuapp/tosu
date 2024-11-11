@@ -1,72 +1,75 @@
+import {
+    BanchoStatus,
+    ChatStatus,
+    ClientType,
+    CountryCodes,
+    GameState,
+    GroupType,
+    LeaderboardType,
+    ProgressBarType,
+    Rulesets,
+    ScoreMeterType,
+    SortType,
+    StableBeatmapStatuses,
+    UserLoginStatus
+} from '@tosu/common';
 import path from 'path';
 
 import {
     ApiAnswer,
-    BanchoStatusEnum,
-    BeatmapStatuses,
-    ChatStatus,
-    GameState,
-    GroupType,
     Leaderboard,
-    LeaderboardType,
-    Modes,
-    ProgressBarType,
-    ScoreMeterType,
-    SortType,
     Tourney,
     TourneyChatMessages,
-    TourneyClients,
-    UserLoginStatus
+    TourneyClients
 } from '@/api/types/v2';
-import { BeatmapPPData } from '@/entities/BeatmapPpData';
-import { GamePlayData } from '@/entities/GamePlayData';
-import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/entities/GamePlayData/Leaderboard';
-import { MenuData } from '@/entities/MenuData';
-import { InstanceManager } from '@/objects/instanceManager/instanceManager';
+import { InstanceManager } from '@/instances/manager';
+import { BeatmapPP } from '@/states/beatmap';
+import { Gameplay } from '@/states/gameplay';
+import { Menu } from '@/states/menu';
+import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { getOsuModsString } from '@/utils/osuMods';
-
-import { CountryCodes } from './countryCodes';
+import { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
     gameMode: any
 ): Leaderboard => {
     const hits = {
-        300: memoryPlayer.H300,
-        100: memoryPlayer.H100,
-        50: memoryPlayer.H50,
-        0: memoryPlayer.H0,
+        300: memoryPlayer.h300,
+        100: memoryPlayer.h100,
+        50: memoryPlayer.h50,
+        0: memoryPlayer.h0,
         geki: 0,
         katu: 0
     };
 
-    const modsName = getOsuModsString(memoryPlayer.Mods);
-
     return {
-        isFailed: memoryPlayer.IsPassing === false,
+        isFailed: memoryPlayer.isPassing === false,
 
-        position: memoryPlayer.Position,
-        team: memoryPlayer.Team,
+        position: memoryPlayer.position,
+        team: memoryPlayer.team,
 
-        name: memoryPlayer.Name,
+        name: memoryPlayer.name,
 
-        score: memoryPlayer.Score,
+        score: memoryPlayer.score,
         accuracy: calculateAccuracy({ hits, mode: gameMode }),
 
         hits,
 
         combo: {
-            current: memoryPlayer.Combo,
-            max: memoryPlayer.MaxCombo
+            current: memoryPlayer.combo,
+            max: memoryPlayer.maxCombo
         },
         mods: {
-            number: memoryPlayer.Mods,
-            name: modsName
+            checksum: memoryPlayer.mods.checksum,
+            number: memoryPlayer.mods.number,
+            name: memoryPlayer.mods.name,
+            array: memoryPlayer.mods.array,
+            rate: memoryPlayer.mods.rate
         },
         rank: calculateGrade({
-            mods: modsName,
+            mods: memoryPlayer.mods.number,
             mode: gameMode,
             hits
         })
@@ -74,73 +77,78 @@ const convertMemoryPlayerToResult = (
 };
 
 export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
-    const osuInstance = instanceManager.getInstance();
+    const osuInstance = instanceManager.getInstance(
+        instanceManager.focusedClient
+    );
     if (!osuInstance) {
         return { error: 'not_ready' };
     }
 
     const {
         settings,
-        bassDensityData,
-        allTimesData,
-        menuData,
-        gamePlayData,
-        resultsScreenData,
-        beatmapPpData,
-        userProfile
+        bassDensity,
+        global,
+        menu,
+        gameplay,
+        resultScreen,
+        beatmapPP,
+        user
     } = osuInstance.getServices([
         'settings',
-        'bassDensityData',
-        'allTimesData',
-        'menuData',
-        'gamePlayData',
-        'resultsScreenData',
-        'beatmapPpData',
-        'userProfile'
+        'bassDensity',
+        'global',
+        'menu',
+        'gameplay',
+        'resultScreen',
+        'beatmapPP',
+        'user'
     ]);
 
     const currentMods =
-        allTimesData.Status === 2 || allTimesData.Status === 7
-            ? gamePlayData.Mods
-            : allTimesData.MenuMods;
+        global.status === GameState.play
+            ? gameplay.mods
+            : global.status === GameState.resultScreen
+              ? resultScreen.mods
+              : global.menuMods;
 
     const currentMode =
-        allTimesData.Status === 2
-            ? gamePlayData.Mode
-            : allTimesData.Status === 7
-              ? resultsScreenData.Mode
-              : menuData.MenuGameMode;
+        global.status === 2
+            ? gameplay.mode
+            : global.status === 7
+              ? resultScreen.mode
+              : menu.gamemode;
 
     const resultScreenHits = {
-        300: resultsScreenData.Hit300,
-        geki: resultsScreenData.HitGeki,
-        100: resultsScreenData.Hit100,
-        katu: resultsScreenData.HitKatu,
-        50: resultsScreenData.Hit50,
-        0: resultsScreenData.HitMiss
+        300: resultScreen.hit300,
+        geki: resultScreen.hitGeki,
+        100: resultScreen.hit100,
+        katu: resultScreen.hitKatu,
+        50: resultScreen.hit50,
+        0: resultScreen.hitMiss,
+        sliderEndHits: resultScreen.sliderEndHits,
+        sliderTickHits: resultScreen.sliderTickHits
     };
 
     return {
+        client: ClientType[osuInstance.client],
         state: {
-            number: allTimesData.Status,
-            name: GameState[allTimesData.Status] || ''
+            number: global.status,
+            name: GameState[global.status] || ''
         },
         session: {
-            playTime: allTimesData.GameTime,
+            playTime: global.gameTime,
             playCount: 0 // need counting
         },
         settings: {
-            interfaceVisible: allTimesData.ShowInterface,
-            replayUIVisible: allTimesData.isReplayUiHidden === false,
+            interfaceVisible: global.showInterface,
+            replayUIVisible: global.isReplayUiHidden === false,
             chatVisibilityStatus: {
-                number: allTimesData.ChatStatus,
-                name: ChatStatus[allTimesData.ChatStatus] || ''
+                number: global.chatStatus,
+                name: ChatStatus[global.chatStatus] || ''
             },
 
             leaderboard: {
-                visible: gamePlayData.Leaderboard
-                    ? gamePlayData.Leaderboard.isScoreboardVisible
-                    : false,
+                visible: gameplay.isLeaderboardVisible,
                 type: {
                     number: settings.leaderboardType,
                     name: LeaderboardType[settings.leaderboardType] || ''
@@ -151,7 +159,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 number: settings.progressBarType,
                 name: ProgressBarType[settings.progressBarType] || ''
             },
-            bassDensity: bassDensityData.density,
+            bassDensity: bassDensity.density,
 
             resolution: settings.resolution,
             client: settings.client,
@@ -178,8 +186,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             skin: settings.skin,
             mode: {
-                number: menuData.MenuGameMode,
-                name: Modes[menuData.MenuGameMode] || ''
+                number: menu.gamemode,
+                name: Rulesets[menu.gamemode] || ''
             },
             audio: settings.audio,
             background: settings.background,
@@ -188,131 +196,130 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         },
         profile: {
             userStatus: {
-                number: userProfile.rawLoginStatus,
-                name: UserLoginStatus[userProfile.rawLoginStatus] || ''
+                number: user.rawLoginStatus,
+                name: UserLoginStatus[user.rawLoginStatus] || ''
             },
             banchoStatus: {
-                number: userProfile.rawBanchoStatus,
-                name: BanchoStatusEnum[userProfile.rawBanchoStatus] || ''
+                number: user.rawBanchoStatus,
+                name: BanchoStatus[user.rawBanchoStatus] || ''
             },
-            id: userProfile.id,
-            name: userProfile.name,
+            id: user.id,
+            name: user.name,
             mode: {
-                number: userProfile.playMode,
-                name: Modes[userProfile.playMode] || ''
+                number: user.playMode,
+                name: Rulesets[user.playMode] || ''
             },
 
-            rankedScore: userProfile.rankedScore,
-            level: userProfile.level,
+            rankedScore: user.rankedScore,
+            level: user.level,
 
-            accuracy: userProfile.accuracy,
-            pp: userProfile.performancePoints,
-            playCount: userProfile.playCount,
-            globalRank: userProfile.rank,
+            accuracy: user.accuracy,
+            pp: user.performancePoints,
+            playCount: user.playCount,
+            globalRank: user.rank,
 
             countryCode: {
-                number: userProfile.countryCode,
-                name: CountryCodes[userProfile.countryCode]?.toUpperCase() || ''
+                number: user.countryCode,
+                name: CountryCodes[user.countryCode]?.toUpperCase() || ''
             },
 
-            backgroundColour: userProfile.backgroundColour?.toString(16)
+            backgroundColour: user.backgroundColour?.toString(16)
         },
         beatmap: {
             isConvert:
-                beatmapPpData.Mode === 0
-                    ? beatmapPpData.Mode !== currentMode
-                    : false,
+                beatmapPP.mode === 0 ? beatmapPP.mode !== currentMode : false,
             time: {
-                live: allTimesData.PlayTime,
-                firstObject: beatmapPpData.timings.firstObj,
-                lastObject: beatmapPpData.timings.full,
-                mp3Length: menuData.MP3Length
+                live: global.playTime,
+                firstObject: beatmapPP.timings.firstObj,
+                lastObject: beatmapPP.timings.full,
+                mp3Length: menu.mp3Length
             },
             status: {
-                number: menuData.RankedStatus,
-                name: BeatmapStatuses[menuData.RankedStatus || -1] || ''
+                number: menu.rankedStatus,
+                name: StableBeatmapStatuses[menu.rankedStatus || -1] || ''
             },
-            checksum: menuData.MD5,
+            checksum: menu.checksum,
 
-            id: menuData.MapID,
-            set: menuData.SetID,
+            id: menu.mapID,
+            set: menu.setID,
 
             mode: {
-                number: beatmapPpData.Mode,
-                name: Modes[beatmapPpData.Mode] || ''
+                number: beatmapPP.mode,
+                name: Rulesets[beatmapPP.mode] || ''
             },
 
-            artist: menuData.Artist,
-            artistUnicode: menuData.ArtistOriginal,
-            title: menuData.Title,
-            titleUnicode: menuData.TitleOriginal,
+            artist: menu.artist,
+            artistUnicode: menu.artistOriginal,
+            title: menu.title,
+            titleUnicode: menu.titleOriginal,
 
-            mapper: menuData.Creator,
+            mapper: menu.creator,
 
-            version: menuData.Difficulty,
+            version: menu.difficulty,
 
-            stats: buildBeatmapStats(beatmapPpData, menuData)
+            stats: buildBeatmapStats(beatmapPP, menu)
         },
-        play: buildPlay(gamePlayData, beatmapPpData, currentMods),
-        leaderboard: gamePlayData.Leaderboard
-            ? gamePlayData.Leaderboard.leaderBoard.map((slot) =>
-                  convertMemoryPlayerToResult(slot, Modes[gamePlayData.Mode])
-              )
-            : [],
+        play: buildPlay(gameplay, beatmapPP, currentMods),
+        leaderboard: gameplay.leaderboardScores.map((slot) =>
+            convertMemoryPlayerToResult(slot, Rulesets[gameplay.mode])
+        ),
         performance: {
-            accuracy: beatmapPpData.ppAcc,
-            graph: beatmapPpData.strainsAll
+            accuracy: beatmapPP.ppAcc,
+            graph: beatmapPP.strainsAll
         },
         resultsScreen: {
-            scoreId: resultsScreenData.OnlineId,
+            scoreId: resultScreen.onlineId,
 
-            playerName: resultsScreenData.PlayerName,
+            playerName: resultScreen.playerName,
 
             mode: {
-                number: resultsScreenData.Mode,
-                name: Modes[resultsScreenData.Mode] || ''
+                number: resultScreen.mode,
+                name: Rulesets[resultScreen.mode] || ''
             },
 
-            score: resultsScreenData.Score,
-            accuracy: resultsScreenData.Accuracy,
+            score: resultScreen.score,
+            accuracy: resultScreen.accuracy,
 
-            name: resultsScreenData.PlayerName, // legacy, remove it later
+            name: resultScreen.playerName, // legacy, remove it later
             hits: resultScreenHits,
             mods: {
-                number: resultsScreenData.Mods,
-                name: getOsuModsString(resultsScreenData.Mods)
+                checksum: resultScreen.mods.checksum,
+                number: resultScreen.mods.number,
+                name: resultScreen.mods.name,
+                array: resultScreen.mods.array,
+                rate: resultScreen.mods.rate
             },
-            maxCombo: resultsScreenData.MaxCombo,
-            rank: resultsScreenData.Grade,
+            maxCombo: resultScreen.maxCombo,
+            rank: resultScreen.grade,
             pp: {
-                current: resultsScreenData.pp,
-                fc: resultsScreenData.fcPP
+                current: resultScreen.pp,
+                fc: resultScreen.fcPP
             },
-            createdAt: resultsScreenData.Date
+            createdAt: resultScreen.date
         },
         folders: {
-            game: allTimesData.GameFolder,
-            skin: allTimesData.SkinFolder,
-            songs: allTimesData.SongsFolder,
-            beatmap: menuData.Folder
+            game: global.gameFolder,
+            skin: global.skinFolder,
+            songs: global.songsFolder,
+            beatmap: menu.folder
         },
         files: {
-            beatmap: menuData.Path,
-            background: menuData.BackgroundFilename,
-            audio: menuData.AudioFilename
+            beatmap: menu.filename,
+            background: menu.backgroundFilename,
+            audio: menu.audioFilename
         },
         directPath: {
-            beatmapFile: path.join(menuData.Folder || '', menuData.Path || ''),
+            beatmapFile: path.join(menu.folder || '', menu.filename || ''),
             beatmapBackground: path.join(
-                menuData.Folder || '',
-                menuData.BackgroundFilename || ''
+                menu.folder || '',
+                menu.backgroundFilename || ''
             ),
             beatmapAudio: path.join(
-                menuData.Folder || '',
-                menuData.AudioFilename || ''
+                menu.folder || '',
+                menu.audioFilename || ''
             ),
-            beatmapFolder: menuData.Folder,
-            skinFolder: allTimesData.SkinFolder
+            beatmapFolder: menu.folder,
+            skinFolder: global.skinFolder
         },
 
         tourney: buildTourneyData(instanceManager)
@@ -337,23 +344,27 @@ const buildTourneyData = (
         .sort((a, b) => a.ipcId - b.ipcId)
         .map((instance, iterator): TourneyClients => {
             const {
-                allTimesData,
-                gamePlayData,
-                menuData,
-                tourneyUserProfileData,
-                beatmapPpData
+                global,
+                gameplay,
+                resultScreen,
+                menu,
+                tourneyManager,
+                beatmapPP
             } = instance.getServices([
-                'allTimesData',
-                'gamePlayData',
-                'menuData',
-                'tourneyUserProfileData',
-                'beatmapPpData'
+                'global',
+                'gameplay',
+                'menu',
+                'resultScreen',
+                'tourneyManager',
+                'beatmapPP'
             ]);
 
             const currentMods =
-                allTimesData.Status === 2 || allTimesData.Status === 7
-                    ? gamePlayData.Mods
-                    : allTimesData.MenuMods;
+                global.status === GameState.play
+                    ? gameplay.mods
+                    : global.status === GameState.resultScreen
+                      ? resultScreen.mods
+                      : global.menuMods;
 
             const spectatorTeam =
                 iterator < osuTourneyClients.length / 2 ? 'left' : 'right';
@@ -362,27 +373,27 @@ const buildTourneyData = (
                 ipcId: instance.ipcId,
                 team: spectatorTeam,
                 user: {
-                    id: tourneyUserProfileData.UserID,
-                    name: tourneyUserProfileData.Name,
-                    country: tourneyUserProfileData.Country,
-                    accuracy: tourneyUserProfileData.Accuracy,
-                    rankedScore: tourneyUserProfileData.RankedScore,
-                    playCount: tourneyUserProfileData.PlayCount,
-                    globalRank: tourneyUserProfileData.GlobalRank,
-                    totalPP: tourneyUserProfileData.PP
+                    id: tourneyManager.userID,
+                    name: tourneyManager.userName,
+                    country: tourneyManager.userCountry,
+                    accuracy: tourneyManager.userAccuracy,
+                    rankedScore: tourneyManager.userRankedScore,
+                    playCount: tourneyManager.userPlayCount,
+                    globalRank: tourneyManager.userGlobalRank,
+                    totalPP: tourneyManager.userPP
                 },
                 beatmap: {
-                    stats: buildBeatmapStats(beatmapPpData, menuData)
+                    stats: buildBeatmapStats(beatmapPP, menu)
                 },
-                play: buildPlay(gamePlayData, beatmapPpData, currentMods)
+                play: buildPlay(gameplay, beatmapPP, currentMods)
             };
         });
 
-    const { tourneyManagerData } = osuTourneyManager[0].getServices([
-        'tourneyManagerData'
+    const { tourneyManager } = osuTourneyManager[0].getServices([
+        'tourneyManager'
     ]);
 
-    const mappedChat = tourneyManagerData.Messages.map(
+    const mappedChat = tourneyManager.messages.map(
         (message): TourneyChatMessages => {
             const ipcClient = mappedOsuTourneyClients.find(
                 (client) => client.user.name === message.name
@@ -402,189 +413,192 @@ const buildTourneyData = (
     );
 
     return {
-        scoreVisible: tourneyManagerData.ScoreVisible,
-        starsVisible: tourneyManagerData.StarsVisible,
+        scoreVisible: tourneyManager.scoreVisible,
+        starsVisible: tourneyManager.starsVisible,
 
-        ipcState: tourneyManagerData.IPCState,
-        bestOF: tourneyManagerData.BestOf,
+        ipcState: tourneyManager.ipcState,
+        bestOF: tourneyManager.bestOf,
         team: {
-            left: tourneyManagerData.FirstTeamName,
-            right: tourneyManagerData.SecondTeamName
+            left: tourneyManager.firstTeamName,
+            right: tourneyManager.secondTeamName
         },
 
         points: {
-            left: tourneyManagerData.LeftStars,
-            right: tourneyManagerData.RightStars
+            left: tourneyManager.leftStars,
+            right: tourneyManager.rightStars
         },
 
         chat: mappedChat,
 
         totalScore: {
-            left: tourneyManagerData.FirstTeamScore,
-            right: tourneyManagerData.SecondTeamScore
+            left: tourneyManager.firstTeamScore,
+            right: tourneyManager.secondTeamScore
         },
         clients: mappedOsuTourneyClients
     };
 };
 
-function buildBeatmapStats(beatmapPpData: BeatmapPPData, menuData: MenuData) {
+function buildBeatmapStats(beatmapPP: BeatmapPP, menu: Menu) {
     return {
         stars: {
-            live: fixDecimals(beatmapPpData.currAttributes.stars),
-            aim: beatmapPpData.calculatedMapAttributes.aim
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.aim)
+            live: fixDecimals(beatmapPP.currAttributes.stars),
+            aim: beatmapPP.calculatedMapAttributes.aim
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.aim)
                 : undefined,
-            speed: beatmapPpData.calculatedMapAttributes.speed
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.speed)
+            speed: beatmapPP.calculatedMapAttributes.speed
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.speed)
                 : undefined,
-            flashlight: beatmapPpData.calculatedMapAttributes.flashlight
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.flashlight)
+            flashlight: beatmapPP.calculatedMapAttributes.flashlight
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.flashlight)
                 : undefined,
-            sliderFactor: beatmapPpData.calculatedMapAttributes.sliderFactor
-                ? fixDecimals(
-                      beatmapPpData.calculatedMapAttributes.sliderFactor
-                  )
+            sliderFactor: beatmapPP.calculatedMapAttributes.sliderFactor
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.sliderFactor)
                 : undefined,
-            stamina: beatmapPpData.calculatedMapAttributes.stamina
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.stamina)
+            stamina: beatmapPP.calculatedMapAttributes.stamina
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.stamina)
                 : undefined,
-            rhythm: beatmapPpData.calculatedMapAttributes.rhythm
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.rhythm)
+            rhythm: beatmapPP.calculatedMapAttributes.rhythm
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.rhythm)
                 : undefined,
-            color: beatmapPpData.calculatedMapAttributes.color
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.color)
+            color: beatmapPP.calculatedMapAttributes.color
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.color)
                 : undefined,
-            peak: beatmapPpData.calculatedMapAttributes.peak
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.peak)
+            peak: beatmapPP.calculatedMapAttributes.peak
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.peak)
                 : undefined,
-            hitWindow: beatmapPpData.calculatedMapAttributes.hitWindow
-                ? fixDecimals(beatmapPpData.calculatedMapAttributes.hitWindow)
+            hitWindow: beatmapPP.calculatedMapAttributes.hitWindow
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.hitWindow)
                 : undefined,
-            total: fixDecimals(beatmapPpData.calculatedMapAttributes.fullStars)
+            total: fixDecimals(beatmapPP.calculatedMapAttributes.fullStars)
         },
 
         ar: {
-            original: fixDecimals(menuData.AR),
-            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.ar)
+            original: fixDecimals(menu.ar),
+            converted: fixDecimals(beatmapPP.calculatedMapAttributes.ar)
         },
         cs: {
-            original: fixDecimals(menuData.CS),
-            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.cs)
+            original: fixDecimals(menu.cs),
+            converted: fixDecimals(beatmapPP.calculatedMapAttributes.cs)
         },
         od: {
-            original: fixDecimals(menuData.OD),
-            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.od)
+            original: fixDecimals(menu.od),
+            converted: fixDecimals(beatmapPP.calculatedMapAttributes.od)
         },
         hp: {
-            original: fixDecimals(menuData.HP),
-            converted: fixDecimals(beatmapPpData.calculatedMapAttributes.hp)
+            original: fixDecimals(menu.hp),
+            converted: fixDecimals(beatmapPP.calculatedMapAttributes.hp)
         },
 
         bpm: {
-            realtime: fixDecimals(beatmapPpData.realtimeBPM),
-            common: fixDecimals(beatmapPpData.commonBPM),
-            min: fixDecimals(beatmapPpData.minBPM),
-            max: fixDecimals(beatmapPpData.maxBPM)
+            realtime: fixDecimals(beatmapPP.realtimeBPM),
+            common: fixDecimals(beatmapPP.commonBPM),
+            min: fixDecimals(beatmapPP.minBPM),
+            max: fixDecimals(beatmapPP.maxBPM)
         },
 
         objects: {
-            circles: beatmapPpData.calculatedMapAttributes.circles,
-            sliders: beatmapPpData.calculatedMapAttributes.sliders,
-            spinners: beatmapPpData.calculatedMapAttributes.spinners,
-            holds: beatmapPpData.calculatedMapAttributes.holds,
+            circles: beatmapPP.calculatedMapAttributes.circles,
+            sliders: beatmapPP.calculatedMapAttributes.sliders,
+            spinners: beatmapPP.calculatedMapAttributes.spinners,
+            holds: beatmapPP.calculatedMapAttributes.holds,
             total:
-                beatmapPpData.calculatedMapAttributes.circles +
-                beatmapPpData.calculatedMapAttributes.sliders +
-                beatmapPpData.calculatedMapAttributes.spinners +
-                beatmapPpData.calculatedMapAttributes.holds
+                beatmapPP.calculatedMapAttributes.circles +
+                beatmapPP.calculatedMapAttributes.sliders +
+                beatmapPP.calculatedMapAttributes.spinners +
+                beatmapPP.calculatedMapAttributes.holds
         },
 
-        maxCombo: beatmapPpData.calculatedMapAttributes.maxCombo
+        maxCombo: beatmapPP.calculatedMapAttributes.maxCombo
     };
 }
 
 function buildPlay(
-    gamePlayData: GamePlayData,
-    beatmapPpData: BeatmapPPData,
-    currentMods: number
+    gameplay: Gameplay,
+    beatmapPP: BeatmapPP,
+    currentMods: CalculateMods
 ) {
     return {
-        playerName: gamePlayData.PlayerName,
+        playerName: gameplay.playerName,
 
         mode: {
-            number: gamePlayData.Mode,
-            name: Modes[gamePlayData.Mode] || ''
+            number: gameplay.mode,
+            name: Rulesets[gameplay.mode] || ''
         },
 
-        score: gamePlayData.Score,
-        accuracy: gamePlayData.Accuracy,
+        score: gameplay.score,
+        accuracy: gameplay.accuracy,
 
         healthBar: {
-            normal: (gamePlayData.PlayerHP / 200) * 100,
-            smooth: (gamePlayData.PlayerHPSmooth / 200) * 100
+            normal: (gameplay.playerHP / 200) * 100,
+            smooth: (gameplay.playerHPSmooth / 200) * 100
         },
 
         hits: {
-            300: gamePlayData.Hit300,
-            geki: gamePlayData.HitGeki,
-            100: gamePlayData.Hit100,
-            katu: gamePlayData.HitKatu,
-            50: gamePlayData.Hit50,
-            0: gamePlayData.HitMiss,
-            sliderBreaks: gamePlayData.HitSB
+            300: gameplay.hit300,
+            geki: gameplay.hitGeki,
+            100: gameplay.hit100,
+            katu: gameplay.hitKatu,
+            50: gameplay.hit50,
+            0: gameplay.hitMiss,
+            sliderBreaks: gameplay.hitSB,
+            sliderEndHits: gameplay.sliderEndHits,
+            sliderTickHits: gameplay.sliderTickHits
         },
 
-        hitErrorArray: gamePlayData.HitErrors,
+        hitErrorArray: gameplay.hitErrors,
 
         combo: {
-            current: gamePlayData.Combo,
-            max: gamePlayData.MaxCombo
+            current: gameplay.combo,
+            max: gameplay.maxCombo
         },
         mods: {
-            number: currentMods,
-            name: getOsuModsString(currentMods)
+            checksum: currentMods.checksum,
+            number: currentMods.number,
+            name: currentMods.name,
+            array: currentMods.array,
+            rate: currentMods.rate
         },
         rank: {
-            current: gamePlayData.GradeCurrent,
-            maxThisPlay: gamePlayData.GradeExpected
+            current: gameplay.gradeCurrent,
+            maxThisPlay: gameplay.gradeExpected
         },
         pp: {
-            current: fixDecimals(beatmapPpData.currAttributes.pp),
-            fc: fixDecimals(beatmapPpData.currAttributes.fcPP),
+            current: fixDecimals(beatmapPP.currAttributes.pp),
+            fc: fixDecimals(beatmapPP.currAttributes.fcPP),
             maxAchievedThisPlay: fixDecimals(
-                beatmapPpData.currAttributes.maxThisPlayPP
+                beatmapPP.currAttributes.maxThisPlayPP
             ),
             detailed: {
                 current: {
-                    aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
-                    speed: fixDecimals(beatmapPpData.currPPAttributes.ppSpeed),
+                    aim: fixDecimals(beatmapPP.currPPAttributes.ppAim),
+                    speed: fixDecimals(beatmapPP.currPPAttributes.ppSpeed),
                     accuracy: fixDecimals(
-                        beatmapPpData.currPPAttributes.ppAccuracy
+                        beatmapPP.currPPAttributes.ppAccuracy
                     ),
                     difficulty: fixDecimals(
-                        beatmapPpData.currPPAttributes.ppDifficulty
+                        beatmapPP.currPPAttributes.ppDifficulty
                     ),
                     flashlight: fixDecimals(
-                        beatmapPpData.currPPAttributes.ppFlashlight
+                        beatmapPP.currPPAttributes.ppFlashlight
                     ),
-                    total: fixDecimals(beatmapPpData.currAttributes.pp)
+                    total: fixDecimals(beatmapPP.currAttributes.pp)
                 },
                 fc: {
-                    aim: fixDecimals(beatmapPpData.currPPAttributes.ppAim),
-                    speed: fixDecimals(beatmapPpData.currPPAttributes.ppSpeed),
+                    aim: fixDecimals(beatmapPP.currPPAttributes.ppAim),
+                    speed: fixDecimals(beatmapPP.currPPAttributes.ppSpeed),
                     accuracy: fixDecimals(
-                        beatmapPpData.currPPAttributes.ppAccuracy
+                        beatmapPP.currPPAttributes.ppAccuracy
                     ),
                     difficulty: fixDecimals(
-                        beatmapPpData.currPPAttributes.ppDifficulty
+                        beatmapPP.currPPAttributes.ppDifficulty
                     ),
                     flashlight: fixDecimals(
-                        beatmapPpData.currPPAttributes.ppFlashlight
+                        beatmapPP.currPPAttributes.ppFlashlight
                     ),
-                    total: fixDecimals(beatmapPpData.currAttributes.fcPP)
+                    total: fixDecimals(beatmapPP.currAttributes.fcPP)
                 }
             }
         },
-        unstableRate: gamePlayData.UnstableRate
+        unstableRate: gameplay.unstableRate
     };
 }

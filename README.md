@@ -16,8 +16,10 @@
 
 
 ```text
-Eponymous software for reading osu! memory, accounting for most of gosumemory's issues
+Tosu is a memory reader for osu! that sends data to overlays (aka pp counters) via WebSocket API, with extra features.
 ```
+> [!NOTE]
+> Supports stable and osu! lazer. <br> Compatible with _**gosumemory**_ and _**streamCompanion**_ overlays.
 
 
 <div  align="center">
@@ -28,7 +30,7 @@ Eponymous software for reading osu! memory, accounting for most of gosumemory's 
 </div>
 
 
-Instruction
+Installation guide
 ---
 1. Download [tosu](https://github.com/tosuapp/tosu/releases/latest)
 2. Extract tosu.exe to a `Folder`
@@ -44,9 +46,11 @@ Instruction
 Features
 ---
 - [x] All _**Gamemodes**_ are supported
-- [x] Gosumemory _**compatible**_ api
+- [x] gosuMemory _**compatible**_ api
+- [x] streamCompanion _**compatible**_ api
+- [x] Lazer support
 - [X] Brand _**new api**_ for websocket
-- [x] _**In-game**_ overlay (based on gosumemory closed overlay injection)
+- [x] _**In-game**_ overlay, allow adding multiple overlays (pp counters)
 - [x] _**Available**_ websocket data:
   - Settings
   - Gameplay data
@@ -67,26 +71,35 @@ Features
 
 In-game overlay
 ---
-- To enable it, you need to edit `tosu.env`, and turn on `ENABLE_GOSU_OVERLAY=true` (make it equal `true`)
-- Tutorial: [link](https://github.com/tosuapp/tosu/wiki/How-to-enable-ingame-overlay)
+- To enable it, you need to edit `tosu.env`, and turn on `ENABLE_INGAME_OVERLAY=true` (make it equal `true`)
+- Tutorial: TBA
 ---
 
 
 <br>
 
-Routes
+API
 ---
-gosu compatible api
 - `/` - List of all counters you have
+
+gosu compatible api
 - `/json` - Example of `/ws` response
 - `/ws` - [response example](https://github.com/tosuapp/tosu/wiki/v1-websocket-api-response)
 - `/Songs/{path}` - Show content of the file, or show list of files for a folder
+
+streamCompanion compatible api
+- `/json/sc` - Example of `/tokens` response
+- `/tokens` - [response example](https://github.com/tosuapp/tosu/wiki/v1-websocket-api-response)
+- `/backgroundImage` - Current beatmap background
 
 v2 _**(tosu own api)**_
 - `/json/v2` - Example of `/websocket/v2` response
 - `/websocket/v2` - [response example](https://github.com/tosuapp/tosu/wiki/v2-websocket-api-response)
 - `/websocket/v2/precise` - [response example](https://github.com/tosuapp/tosu/wiki/v2-precise-websocket-api-response)
 - `/files/beatmap/{path}` - same as `/Songs/{path}`
+- `/files/beatmap/background` - Background for current beatmap
+- `/files/beatmap/audio` - Audio for current beatmap
+- `/files/beatmap/file` - .osu file for current beatmap
 - `/files/skin/{path}` - similar as `/files/beatmap/{path}`, but for a skin
 
 api
@@ -95,14 +108,17 @@ api
   - BY DEFAULT IT USES CURRENT BEATMAP (:))
   - All parameters are optional
   - `path` - Path to .osu file. Example: C:/osu/Songs/beatmap/file.osu
-  - `mode` - Osu = 0, Taiko = 1, Catch = 2, Mania = 3
-  - `mods` - Mods id. Example: 64 - DT
+  - `lazer` - true or false
+  - `mode` - osu = 0, taiko = 1, catch = 2, mania = 3
+  - `mods` - Mods id or Array of mods. Example: 64 - DT or [ { acronym: "DT", settings": { speed_change: 1.3 } } ]
   - `acc` - Accuracy % from 0 to 100
   - `nGeki` - Amount of Geki (300g / MAX)
   - `nKatu` - Amount of Katu (100k / 200)
   - `n300` - Amount of 300
   - `n100` - Amount of 100
   - `n50` - Amount of 50
+  - `sliderEndHits` - Amount of slider ends hits (lazer only)
+  - `sliderTickHits` - Amount of slider ticks hits (lazer only)
   - `nMisses` - Amount of Misses
   - `combo` - combo
   - `passedObjects` - Sum of nGeki, nKatu, n300, n100, n50, nMisses
@@ -120,13 +136,25 @@ Support
 
 <br />
 
-## Author
-👤 **Mikhail Babynichev**
+## Maintainers
+
+🐱‍👓 **Mikhail Babynichev**
+* _**LEADMF**_
 * Website: http://kotrik.ru
 * Twitter: [@kotrik0](https://twitter.com/kotrik0)
 * Github: [@KotRikD](https://github.com/KotRikD)
+<br>
 
-Special thanks to [@xxCherry](https://github.com/xxCherry), for providing memory reading library
+🍒 **Cherry**
+* _**Memory guy**_
+* Github: [@xxCherry](https://github.com/xxCherry)
+<br>
+
+😪 **ck**
+* _**headache provider**_
+* Website: https://osuck.net
+* Github: [@cyperdark](https://github.com/cyperdark)
+
 
 <br />
 

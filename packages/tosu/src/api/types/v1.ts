@@ -30,6 +30,7 @@ interface BeatmapStats {
     HP: number;
     SR: number;
     BPM: {
+        realtime: number;
         common: number;
         min: number;
         max: number;
@@ -83,6 +84,11 @@ interface PP {
     '97': number;
     '96': number;
     '95': number;
+    '94': number;
+    '93': number;
+    '92': number;
+    '91': number;
+    '90': number;
     strains: number[];
     strainsAll: BeatmapStrains;
 }
@@ -137,9 +143,7 @@ export interface InMenuValues {
          */
         bassDensity: number;
     };
-    // TODO: Make enum for osu in-game statuses
     state: number;
-    // TODO: Make enum for osu in-game modes
     gameMode: number;
     isChatEnabled: number;
     bm: Beatmap;
@@ -190,7 +194,6 @@ interface TourneyHits
     > {}
 
 export interface GameplayValues {
-    // TODO: Make enum for osu in-game modes
     gameMode: number;
     name: string;
     score: number;
@@ -315,6 +318,7 @@ export interface UserProfileAnswer {
 }
 
 export interface GosuCompatibleApi {
+    client: string;
     settings: InSettingsValues;
     menu: InMenuValues;
     gameplay: GameplayValues;

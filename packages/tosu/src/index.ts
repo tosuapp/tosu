@@ -3,7 +3,7 @@ import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
 import { Process } from 'tsprocess/dist/process';
 
-import { InstanceManager } from './objects/instanceManager/instanceManager';
+import { InstanceManager } from '@/instances/manager';
 
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
@@ -41,4 +41,5 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
     httpServer.start();
     instanceManager.runWatcher();
+    instanceManager.runDetemination();
 })();

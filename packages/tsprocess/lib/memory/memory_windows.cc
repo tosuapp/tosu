@@ -25,7 +25,7 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
 
   MEMORY_BASIC_INFORMATION info;
   for (uint8_t *address = 0; VirtualQueryEx(process, address, &info, sizeof(info)) != 0; address += info.RegionSize) {
-    if ((info.State & MEM_COMMIT) == 0 || (info.Protect & (PAGE_EXECUTE_READWRITE)) == 0) {
+    if ((info.State & MEM_COMMIT) == 0 || (info.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE)) == 0) {
       continue;
     }
 
@@ -56,7 +56,7 @@ std::vector<uint32_t> memory::find_processes(const std::string_view process_name
 }
 
 void *memory::open_process(uint32_t id) {
-  return OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
+  return OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, id);
 }
 
 bool memory::is_process_exist(void *handle) {
@@ -65,6 +65,19 @@ bool memory::is_process_exist(void *handle) {
     return returnCode == STILL_ACTIVE;
   }
   return false;
+}
+
+bool memory::is_process_64bit(uint32_t id) {
+  HANDLE process_handle = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, id);
+  BOOL is_wow64 = FALSE;
+
+  if (!IsWow64Process(process_handle, &is_wow64)) {
+    DWORD error = GetLastError();
+    std::cerr << "Failed to determine process bitness, error: " << error << std::endl;
+    return false;
+  }
+
+  return !is_wow64;
 }
 
 std::string memory::get_process_path(void *handle) {
@@ -109,6 +122,14 @@ std::string memory::get_process_command_line(void *process) {
   }
 
   return commandLine;
+}
+
+void *memory::get_foreground_window_process() {
+  DWORD process_id;
+
+  GetWindowThreadProcessId(GetForegroundWindow(), &process_id);
+
+  return reinterpret_cast<void *>(process_id);
 }
 
 #endif

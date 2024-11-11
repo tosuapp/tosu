@@ -14,8 +14,13 @@ import path from 'path';
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
 
+const platform = platformResolver(process.platform);
+
 const fileDestination = path.join(getProgramPath(), 'update.zip');
-const backupExecutablePath = path.join(getProgramPath(), 'tosu_old.exe');
+const backupExecutablePath = path.join(
+    getProgramPath(),
+    `tosu_old${platform.fileType}`
+);
 
 const deleteNotLocked = async (filePath: string) => {
     try {
@@ -36,9 +41,7 @@ export const checkUpdates = async () => {
     wLogger.info('Checking updates');
 
     try {
-        const { platformType } = platformResolver(process.platform);
-
-        if (platformType === '') {
+        if (platform.type === 'unknown') {
             wLogger.warn(
                 `Unsupported platform (${process.platform}). Unable to run updater`
             );
@@ -69,7 +72,7 @@ export const checkUpdates = async () => {
             return new Error('Version the same');
         }
 
-        return { assets, versionName, platformType };
+        return { assets, versionName };
     } catch (exc) {
         wLogger.error(`checkUpdates`, (exc as any).message);
         wLogger.debug(exc);
@@ -88,7 +91,7 @@ export const autoUpdater = async () => {
             return check;
         }
 
-        const { assets, versionName, platformType } = check;
+        const { assets, versionName } = check;
         if (versionName.includes(currentVersion)) {
             wLogger.info(`You're using latest version v${currentVersion}`);
 
@@ -104,10 +107,10 @@ export const autoUpdater = async () => {
         }
 
         const findAsset = assets.find(
-            (r) => r.name.includes(platformType) && r.name.endsWith('.zip')
+            (r) => r.name.includes(platform.type) && r.name.endsWith('.zip')
         );
         if (!findAsset) {
-            wLogger.info(`Files to update not found (${platformType})`);
+            wLogger.info(`Files to update not found (${platform.type})`);
             return 'noFiles';
         }
 
