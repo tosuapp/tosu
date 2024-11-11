@@ -814,14 +814,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     configOffsets(address: number, list: ConfigList): IOffsets {
-        console.log(address, list);
-
         throw new Error('Lazer:configOffsets not implemented.');
     }
 
     bindingsOffsets(address: number, list: BindingsList): IOffsets {
-        console.log(address, list);
-
         throw new Error('Lazer:bindingsOffsets not implemented.');
     }
 
@@ -830,12 +826,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         position: number,
         list: ConfigList
     ): IConfigValue {
-        console.log(address, position, list);
         throw new Error('Lazer:configValue not implemented.');
     }
 
     bindingValue(address: number, position: number): IBindingValue {
-        console.log(address, position);
         throw new Error('Lazer:bindingValue not implemented.');
     }
 
@@ -1866,8 +1860,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat {
-        console.log(messages);
-
         throw new Error('Lazer:tourneyChat not implemented.');
     }
 
