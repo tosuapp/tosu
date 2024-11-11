@@ -540,15 +540,15 @@ const app = createApp({
 
 
     window.addEventListener('keydown', (event) => {
-      const key = event.code || event.key;
-      if (key == 'Delete' && hovered_index > -1) {
+      const key = (event.code || event.key).toLowerCase();
+      if (key == 'delete' && hovered_index > -1) {
         remove_overlay(hovered_index);
 
         hovered_index = -1;
       };
 
 
-      if ((key == 'KeyC' || key == 'c') && event.ctrlKey) {
+      if ((key == 'keyc' || key == 'c') && event.ctrlKey) {
         let element;
         if (context_overlay.value.index > -1 && overlay_ctx.value) {
           element = overlay_ctx.value;
@@ -569,7 +569,7 @@ const app = createApp({
         }, 200);
       };
 
-      if ((key == 'KeyV' || key == 'v') && event.ctrlKey) {
+      if ((key == 'keyv' || key == 'v') && event.ctrlKey) {
         let element;
         if (context_overlay.value.index > -1 && overlay_ctx.value) {
           element = overlay_ctx.value;
