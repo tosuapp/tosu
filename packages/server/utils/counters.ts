@@ -146,11 +146,21 @@ function rebuildJSON({
 
         try {
             if (query != null) {
+                let isCompatibleFilter = false;
+                if (
+                    query.toLowerCase() === 'sc' &&
+                    item.compatiblewith?.some((r) =>
+                        r.toLowerCase().includes('streamcompanion')
+                    )
+                )
+                    isCompatibleFilter = true;
+
                 if (
                     !(
                         item.name.toLowerCase().includes(query) ||
                         item.name.toLowerCase().includes(query)
-                    )
+                    ) &&
+                    isCompatibleFilter !== true
                 ) {
                     continue;
                 }

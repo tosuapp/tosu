@@ -44,7 +44,7 @@ export interface ICounter {
     settings: ISettings[];
 
     usecase?: string;
-    compatiblewith?: string;
+    compatiblewith?: string[];
     assets?: {
         type: string;
         url: string;
