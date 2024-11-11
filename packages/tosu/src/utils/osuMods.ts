@@ -85,6 +85,12 @@ export const calculateMods = (
         const array =
             name.match(/.{1,2}/g)?.map((r) => ({ acronym: r.toUpperCase() })) ||
             [];
+
+        const DT = array.some((r) => r.acronym === 'DT' || r.acronym === 'NC');
+        const HT = array.some((r) => r.acronym === 'HT' || r.acronym === 'DC');
+
+        if (speedChange === 1 && DT) speedChange = 1.5;
+        if (speedChange === 1 && HT) speedChange = 0.75;
         return {
             checksum: textMD5(JSON.stringify(array)),
             number: mods,
@@ -268,6 +274,12 @@ export const calculateMods = (
     const settingsSpeedChange = (ModsLazer as any).find(
         (r) => typeof r.settings?.speed_change === 'number'
     )?.settings?.speed_change;
+
+    const DT = ModsLazer.some((r) => r.acronym === 'DT' || r.acronym === 'NC');
+    const HT = ModsLazer.some((r) => r.acronym === 'HT' || r.acronym === 'DC');
+
+    if (speedChange === 1 && DT) speedChange = 1.5;
+    if (speedChange === 1 && HT) speedChange = 0.75;
 
     return {
         checksum: textMD5(JSON.stringify(ModsLazer)),
