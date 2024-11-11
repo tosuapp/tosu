@@ -409,7 +409,10 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
                 return;
             }
 
-            let html = content.replace('{{LIST}}', build || emptyNotice);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', ` (${array.length})`)
+                .replace('{{AVAILABLE_AMOUNT}}', ``)
+                .replace('{{LIST}}', build || emptyNotice);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -430,6 +433,8 @@ export async function buildExternalCounters(
     query?: string
 ) {
     let text = '';
+    let totalLocal = 0;
+    let totalAvailable = 0;
 
     try {
         const request: any = await fetch('https://osuck.net/tosu/api.json');
@@ -467,6 +472,9 @@ export async function buildExternalCounters(
         }
 
         text = build;
+
+        totalLocal = exists.length;
+        totalAvailable = json.length;
     } catch (error) {
         wLogger.error((error as any).message);
         wLogger.debug(error);
@@ -498,7 +506,10 @@ export async function buildExternalCounters(
             let responseHTML = submitCounterHTML;
             responseHTML += text || noMoreCounters;
 
-            let html = content.replace('{{LIST}}', responseHTML);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', ` (${totalLocal})`)
+                .replace('{{AVAILABLE_AMOUNT}}', ` (${totalAvailable})`)
+                .replace('{{LIST}}', responseHTML);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -746,7 +757,10 @@ export function buildSettings(res: http.ServerResponse) {
                 return;
             }
 
-            let html = content.replace('{{LIST}}', settings);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', '')
+                .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{LIST}}', settings);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -788,7 +802,10 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 return;
             }
 
-            let html = content.replace('{{LIST}}', pageContent);
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', '')
+                .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{LIST}}', pageContent);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
