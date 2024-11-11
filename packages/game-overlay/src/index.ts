@@ -64,7 +64,7 @@ export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
                 ),
                 [p.id.toString()],
                 {
-                    cwd: gameOverlayPath,
+                    cwd: path.join(gameOverlayPath, Bitness[bitness]),
                     windowsHide: true
                 }
             );

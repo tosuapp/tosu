@@ -142,9 +142,11 @@ export class Gameplay extends AbstractState {
     }
 
     resetQuick() {
-        wLogger.debug('GD(resetQuick) Reset ');
+        wLogger.debug('GD(resetQuick) Reset');
 
         this.previousPassedObjects = 0;
+        this.gradualPerformance = undefined;
+        this.performanceAttributes = undefined;
     }
 
     resetKeyOverlay() {
