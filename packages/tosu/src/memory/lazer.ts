@@ -417,8 +417,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private readStatisticsDict(statisticsDict: number) {
-        const statisticsCount = this.process.readInt(statisticsDict + 0x38);
-
         const statistics: Statistics = {
             miss: 0,
             meh: 0,
@@ -438,6 +436,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             sliderTailHit: 0,
             legacyComboIncrease: 0
         };
+
+        if (!statisticsDict) {
+            return statistics;
+        }
+
+        const statisticsCount = this.process.readInt(statisticsDict + 0x38);
 
         const statisticsEntries = this.process.readIntPtr(
             statisticsDict + 0x10
@@ -813,23 +817,23 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         throw new Error('Lazer:settingsPointers not implemented.');
     }
 
-    configOffsets(address: number, list: ConfigList): IOffsets {
+    configOffsets(_address: number, _list: ConfigList): IOffsets {
         throw new Error('Lazer:configOffsets not implemented.');
     }
 
-    bindingsOffsets(address: number, list: BindingsList): IOffsets {
+    bindingsOffsets(_address: number, _list: BindingsList): IOffsets {
         throw new Error('Lazer:bindingsOffsets not implemented.');
     }
 
     configValue(
-        address: number,
-        position: number,
-        list: ConfigList
+        _address: number,
+        _position: number,
+        _list: ConfigList
     ): IConfigValue {
         throw new Error('Lazer:configValue not implemented.');
     }
 
-    bindingValue(address: number, position: number): IBindingValue {
+    bindingValue(_address: number, _position: number): IBindingValue {
         throw new Error('Lazer:bindingValue not implemented.');
     }
 
@@ -1859,7 +1863,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         throw new Error('Lazer:tourney not implemented.');
     }
 
-    tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat {
+    tourneyChat(_messages: ITourneyManagerChatItem[]): ITourneyChat {
         throw new Error('Lazer:tourneyChat not implemented.');
     }
 
