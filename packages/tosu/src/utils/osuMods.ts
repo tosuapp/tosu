@@ -34,7 +34,11 @@ export const modsName = (modsNumber: number, order?: boolean): string => {
             (a, b) => ModsOrder[a.toLowerCase()] - ModsOrder[b.toLowerCase()]
         );
 
-        const converted = convertedParts.join('');
+        const converted = convertedParts
+            .join('')
+            .replace('DTNC', 'NC')
+            .replace('SDPF', 'PF')
+            .replace('ATCN', 'CN');
         return converted;
     }
 
@@ -48,7 +52,10 @@ export const modsName = (modsNumber: number, order?: boolean): string => {
         if (bit === 0) break;
     }
 
-    return convertedParts;
+    return convertedParts
+        .replace('DTNC', 'NC')
+        .replace('SDPF', 'PF')
+        .replace('ATCN', 'CN');
 };
 
 /**
@@ -265,7 +272,11 @@ export const calculateMods = (
     return {
         checksum: textMD5(JSON.stringify(ModsLazer)),
         number: modsID,
-        name: convertedParts.join(''),
+        name: convertedParts
+            .join('')
+            .replace('DTNC', 'NC')
+            .replace('SDPF', 'PF')
+            .replace('ATCN', 'CN'),
         array: ModsLazer,
         rate: settingsSpeedChange || speedChange
     };

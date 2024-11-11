@@ -41,7 +41,8 @@ export const bitValues = [
     '1K',
     '3K',
     '2K',
-    'v2'
+    'v2',
+    'MR'
 ];
 
 export type ModsAcronyms =
