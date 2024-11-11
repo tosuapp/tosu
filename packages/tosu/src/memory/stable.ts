@@ -793,7 +793,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
 
             if (checksum === previousChecksum || !filename.endsWith('.osu')) {
-                return '';
+                return gamemode;
             }
 
             const plays = this.process.readInt(

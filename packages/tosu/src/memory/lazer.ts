@@ -1804,18 +1804,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         };
     }
 
-    private lastGamemode = 0;
-
     menu(previousChecksum: string): IMenu {
         const beatmap = this.currentBeatmap();
         const checksum = this.process.readSharpStringPtr(beatmap.info + 0x58);
 
         const gamemode = this.readGamemode();
-        if (checksum === previousChecksum && gamemode === this.lastGamemode) {
-            return '';
+        if (checksum === previousChecksum) {
+            return gamemode;
         }
-
-        this.lastGamemode = gamemode;
 
         const metadata = this.process.readIntPtr(beatmap.info + 0x30);
         const difficulty = this.process.readIntPtr(beatmap.info + 0x28);

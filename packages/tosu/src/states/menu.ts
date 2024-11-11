@@ -40,9 +40,11 @@ export class Menu extends AbstractState {
                 wLogger.debug(`MD(updateState) ${result}`);
                 return 'not-ready';
             }
-
-            // update gamemoe in menu, even if beatmap is the same
-            this.gamemode = result.gamemode;
+            if (typeof result === 'number') {
+                // update gamemoe in menu, even if beatmap is the same
+                this.gamemode = result;
+                return;
+            }
 
             if (
                 this.pendingChecksum !== result.checksum &&
@@ -62,6 +64,8 @@ export class Menu extends AbstractState {
             ) {
                 return;
             }
+
+            this.gamemode = result.gamemode;
 
             // MD5 hasn't changed in over NEW_MAP_COMMIT_DELAY, commit to new map
             this.checksum = result.checksum;

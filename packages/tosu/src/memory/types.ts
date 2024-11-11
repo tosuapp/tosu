@@ -141,6 +141,7 @@ export type IMenu =
           objectCount: number;
       }
     | string
+    | number
     | Error;
 
 export type IMP3Length = number | Error;
