@@ -1725,18 +1725,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     modList.push(
                         this.readMod(acronym as any, selectedModsItems[i])
                     );
-                } else console.log(type.toString(16), acronym);
+                }
             }
 
             let mods = calculateMods(modList);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
-            if (
-                JSON.stringify(this.menuMods.array) !==
-                JSON.stringify(mods.array)
-            )
-                console.log(mods.array);
             this.menuMods = mods;
         }
 

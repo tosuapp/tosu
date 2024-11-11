@@ -497,11 +497,9 @@ export class Settings extends AbstractState {
 
                     const bindable = this.bindingList[result.key];
                     if (bindable === null || bindable === undefined) {
-                        // console.log('binding', key);
                         continue;
                     }
 
-                    // console.log(position, Bindings[key], VirtualKeyCode[value]);
                     bindable.setValue(result.value);
 
                     this.resetReportCount(

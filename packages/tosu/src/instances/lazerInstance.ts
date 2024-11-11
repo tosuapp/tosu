@@ -146,13 +146,6 @@ export class LazerInstance extends AbstractInstance {
                         gameplay.updateState();
 
                         // support replay rewind
-                        console.log(
-                            'yes',
-                            this.previousCombo > gameplay.combo,
-                            this.previousCombo,
-                            gameplay.combo
-                        );
-
                         if (this.previousCombo > gameplay.combo) {
                             gameplay.resetQuick();
                         }

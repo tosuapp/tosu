@@ -314,7 +314,6 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const bindable = this.process.readInt(offset + 0x4);
 
             if (!list[key]) {
-                // console.log('config', key);
                 return null;
             }
 

@@ -93,8 +93,6 @@ export class Menu extends AbstractState {
 
             this.previousMD5 = this.checksum;
 
-            console.log(result);
-
             this.resetReportCount('MB(updateState)');
         } catch (exc) {
             this.reportError(
