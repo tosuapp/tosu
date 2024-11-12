@@ -2,6 +2,66 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/tosuapp/tosu/compare/v3.6.0...v4.0.0) (2024-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* Detect process bitness
+
+### Features
+
+* add lazer placeholder ([a701b52](https://github.com/tosuapp/tosu/commit/a701b52a2a55e7e165a9e74c67efc35e036c98a7))
+* add lazer placeholder ([2e9bf29](https://github.com/tosuapp/tosu/commit/2e9bf29e5f9bf8f066836fcaee497337675a8f6f))
+* Added compability api for `StreamCompanion` ([04cc3c6](https://github.com/tosuapp/tosu/commit/04cc3c6bc30462187e1fcd07892599ff22b15c0c))
+* Added CSR Rework ([9c43f4e](https://github.com/tosuapp/tosu/commit/9c43f4ea3cb482ffcc3c383b233a88e2fbd8da77))
+* Allow running both lazer and stable, and change data accordingly ([c6204ba](https://github.com/tosuapp/tosu/commit/c6204ba90c1715a0fc4da20a314a8e2b13c20be1))
+* Check for updates on `Installed` tab ([a97006e](https://github.com/tosuapp/tosu/commit/a97006e1e0e4ea777ec2ee078ca43c596b6670ec))
+* classic scoring mode ([2378fc6](https://github.com/tosuapp/tosu/commit/2378fc6f23becbdfe4b483ae0cd0b93e58e86ed0))
+* implement some of LazerMemory ([cb04d5d](https://github.com/tosuapp/tosu/commit/cb04d5dd3d7a5892df78820c7bad9306d6d717ab))
+* implement some of LazerMemory ([a09d101](https://github.com/tosuapp/tosu/commit/a09d1010c00bba431080053dcc8fb7d78270c249))
+* initial lazer gameplay impl ([3a87216](https://github.com/tosuapp/tosu/commit/3a87216eeb3be9f4ed53992aecb21ccbb0756559))
+* initial lazer gameplay impl ([70edcb5](https://github.com/tosuapp/tosu/commit/70edcb58d9e2ee4b0758cd09aa3485c4116b7710))
+* lazer hit errors ([556a6a0](https://github.com/tosuapp/tosu/commit/556a6a0722168083f6f3446ba88b24915600a72f))
+* lazer hit errors ([fea6540](https://github.com/tosuapp/tosu/commit/fea6540a2d9a737a1efce805bbd852335397c34b))
+* lazer key overlay ([c2a1776](https://github.com/tosuapp/tosu/commit/c2a1776bb6704db25021b80b2b5fd39e2fe65f8e))
+* lazer key overlay ([64380b9](https://github.com/tosuapp/tosu/commit/64380b9d6bc4ca4736183861ae009a1f254dd674))
+* lazer leaderboard ([60892f6](https://github.com/tosuapp/tosu/commit/60892f620d4b006f0a475edd7c5082cb64998861))
+* lazer leaderboard ([2ded46a](https://github.com/tosuapp/tosu/commit/2ded46a18cc7305bc8329682c473ef4f7a7c6d0e))
+* lazer menu mods ([e744945](https://github.com/tosuapp/tosu/commit/e74494574af3174246c4c602d1f2dc934938e200))
+* lazer menu mods ([be8a2c7](https://github.com/tosuapp/tosu/commit/be8a2c76ba3234fcbf764595fa785ad05f4313fb))
+* lazer mods settings ([c37db5d](https://github.com/tosuapp/tosu/commit/c37db5de36fd317664bd4ca76778f98685ca0026))
+* lazer result screen ([57aa2de](https://github.com/tosuapp/tosu/commit/57aa2de74ebde33b85a84f7208ac93f45109c561))
+* lazer result screen ([7793e33](https://github.com/tosuapp/tosu/commit/7793e33fe311954dd248cb0a95f2ca6a888e26cc))
+* lazer user ([9592f17](https://github.com/tosuapp/tosu/commit/9592f17a5af6d601d51db7f4716b8844fec0d471))
+* New ingame overlay ([bc99ba5](https://github.com/tosuapp/tosu/commit/bc99ba509ac50757786b46edd3cb35dad3b92d6b))
+* New shortcut routes for beatmap files ([4a2480e](https://github.com/tosuapp/tosu/commit/4a2480eb13e994e2e1a0b928c41bac7e25cfab3d))
+* Show amount of pp counters in installed and available ([f5512d1](https://github.com/tosuapp/tosu/commit/f5512d1a72212767b1d6c6abe78179ae3dc9d686))
+
+
+### Bug Fixes
+
+* br mod settings ([12d3c0b](https://github.com/tosuapp/tosu/commit/12d3c0b99288c18e144bf683c5f65cd19b197f3b))
+* check if statistics dict is not null ([3dc1948](https://github.com/tosuapp/tosu/commit/3dc19481b5e9df23ec3800ebe85d20cd4af006cf))
+* failing to read ptr on replay watching ([f60bc44](https://github.com/tosuapp/tosu/commit/f60bc44ab70847000b09ad44878411e5af014730))
+* failing to read ptr on replay watching ([edd31ab](https://github.com/tosuapp/tosu/commit/edd31ab305a788696b4dd93a700ab1592deb706c))
+* Fix beatmap gamemode & New field `isConvert` in v2 api ([6331b4f](https://github.com/tosuapp/tosu/commit/6331b4f40f2f899ff28f9e759e22f588a75e1af9))
+* isWatchingReplay is not actually replayMode ([348b79b](https://github.com/tosuapp/tosu/commit/348b79bb52812bb46b514de91b2df3e3b173a599))
+* isWatchingReplay is not actually replayMode ([4ba6218](https://github.com/tosuapp/tosu/commit/4ba621819adae201e624c94e68ce4273beb30dd9))
+* mod mapping reading ([cb95a07](https://github.com/tosuapp/tosu/commit/cb95a074978fa0c328fc5fa303074acd1bea0088))
+* reading online scores statistics ([4d105b3](https://github.com/tosuapp/tosu/commit/4d105b3ee3738da808c006dd814528b4fd36eaaf))
+* reading online scores statistics ([602fdfd](https://github.com/tosuapp/tosu/commit/602fdfd69511f1d7258bee9df0828262daec7abd))
+* reading user pp ([d47cec4](https://github.com/tosuapp/tosu/commit/d47cec43a21985d497e3897cbe25bfcd811ca2ea))
+* selected mods are either list or array ([c8ef7ef](https://github.com/tosuapp/tosu/commit/c8ef7ef56e567ef56cdf37246714ddc6716ec96e))
+* stable leaderboard throws when no leaderboard ([b66ebc2](https://github.com/tosuapp/tosu/commit/b66ebc295be771775fafbf9ab4047fc91e8bc415))
+* stable leaderboard throws when no leaderboard ([05710f8](https://github.com/tosuapp/tosu/commit/05710f842e98a390e1c0a16340a79f5fa975e2cd))
+* trying to read player on result screen ([5350c5e](https://github.com/tosuapp/tosu/commit/5350c5e61b29f85730e88a5d73d3e5b24740e3d5))
+* update overlay link ([c2178e9](https://github.com/tosuapp/tosu/commit/c2178e9d5e0097e3a52364b93a687351595c56b4))
+* Use platform file extension instead of .exe ([60368d7](https://github.com/tosuapp/tosu/commit/60368d765cf84165b1819504d9d380b967bece85))
+
+
+* Detect process bitness ([90881ef](https://github.com/tosuapp/tosu/commit/90881efad98fbf19e9431658a4d1068ea6938f79))
+
 ## [3.6.0](https://github.com/tosuapp/tosu/compare/v3.5.2...v3.6.0) (2024-10-31)
 
 
