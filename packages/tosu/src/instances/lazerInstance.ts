@@ -83,7 +83,7 @@ export class LazerInstance extends AbstractInstance {
                     this.previousMP3Length !== menu.mp3Length;
                 if (global.gameFolder && this.previousState !== currentState) {
                     const metadataUpdate = beatmapPP.updateMapMetadata(
-                        currentMods.array,
+                        currentMods,
                         currentMode,
                         true
                     );
