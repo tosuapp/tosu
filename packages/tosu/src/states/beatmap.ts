@@ -359,6 +359,9 @@ export class BeatmapPP extends AbstractState {
             );
 
             const attributes = new rosu.BeatmapAttributesBuilder({
+                isConvert:
+                    this.beatmap.mode === 0 &&
+                    this.beatmap.mode !== currentMode,
                 map: this.beatmap,
                 mods: currentMods.array,
                 mode: currentMode
