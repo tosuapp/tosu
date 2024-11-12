@@ -25,7 +25,6 @@ import {
 import { InstanceManager } from '@/instances/manager';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
-import { Menu } from '@/states/menu';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
@@ -257,7 +256,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             version: menu.difficulty,
 
-            stats: buildBeatmapStats(beatmapPP, menu)
+            stats: buildBeatmapStats(beatmapPP)
         },
         play: buildPlay(gameplay, beatmapPP, currentMods),
         leaderboard: gameplay.leaderboardScores.map((slot) =>
@@ -347,13 +346,11 @@ const buildTourneyData = (
                 global,
                 gameplay,
                 resultScreen,
-                menu,
                 tourneyManager,
                 beatmapPP
             } = instance.getServices([
                 'global',
                 'gameplay',
-                'menu',
                 'resultScreen',
                 'tourneyManager',
                 'beatmapPP'
@@ -383,7 +380,7 @@ const buildTourneyData = (
                     totalPP: tourneyManager.userPP
                 },
                 beatmap: {
-                    stats: buildBeatmapStats(beatmapPP, menu)
+                    stats: buildBeatmapStats(beatmapPP)
                 },
                 play: buildPlay(gameplay, beatmapPP, currentMods)
             };
@@ -438,7 +435,7 @@ const buildTourneyData = (
     };
 };
 
-function buildBeatmapStats(beatmapPP: BeatmapPP, menu: Menu) {
+function buildBeatmapStats(beatmapPP: BeatmapPP) {
     return {
         stars: {
             live: fixDecimals(beatmapPP.currAttributes.stars),
@@ -473,20 +470,28 @@ function buildBeatmapStats(beatmapPP: BeatmapPP, menu: Menu) {
         },
 
         ar: {
-            original: fixDecimals(menu.ar),
-            converted: fixDecimals(beatmapPP.calculatedMapAttributes.ar)
+            original: fixDecimals(beatmapPP.calculatedMapAttributes.ar),
+            converted: fixDecimals(
+                beatmapPP.calculatedMapAttributes.arConverted
+            )
         },
         cs: {
-            original: fixDecimals(menu.cs),
-            converted: fixDecimals(beatmapPP.calculatedMapAttributes.cs)
+            original: fixDecimals(beatmapPP.calculatedMapAttributes.cs),
+            converted: fixDecimals(
+                beatmapPP.calculatedMapAttributes.csConverted
+            )
         },
         od: {
-            original: fixDecimals(menu.od),
-            converted: fixDecimals(beatmapPP.calculatedMapAttributes.od)
+            original: fixDecimals(beatmapPP.calculatedMapAttributes.od),
+            converted: fixDecimals(
+                beatmapPP.calculatedMapAttributes.odConverted
+            )
         },
         hp: {
-            original: fixDecimals(menu.hp),
-            converted: fixDecimals(beatmapPP.calculatedMapAttributes.hp)
+            original: fixDecimals(beatmapPP.calculatedMapAttributes.hp),
+            converted: fixDecimals(
+                beatmapPP.calculatedMapAttributes.hpConverted
+            )
         },
 
         bpm: {

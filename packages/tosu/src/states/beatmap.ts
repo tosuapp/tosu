@@ -13,7 +13,7 @@ import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals } from '@/utils/converters';
-import { ModsLazer } from '@/utils/osuMods.types';
+import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -31,9 +31,13 @@ interface BeatmapPPAcc {
 
 interface BeatmapAttributes {
     ar: number;
+    arConverted: number;
     cs: number;
+    csConverted: number;
     hp: number;
+    hpConverted: number;
     od: number;
+    odConverted: number;
     circles: number;
     sliders: number;
     spinners: number;
@@ -153,9 +157,13 @@ export class BeatmapPP extends AbstractState {
         };
         this.calculatedMapAttributes = {
             ar: 0.0,
+            arConverted: 0.0,
             cs: 0.0,
+            csConverted: 0.0,
             hp: 0.0,
+            hpConverted: 0.0,
             od: 0.0,
+            odConverted: 0.0,
             circles: 0,
             sliders: 0,
             spinners: 0,
@@ -268,7 +276,7 @@ export class BeatmapPP extends AbstractState {
     }
 
     updateMapMetadata(
-        currentMods: ModsLazer,
+        currentMods: CalculateMods,
         currentMode: number,
         lazerByPass: boolean = false
     ) {
@@ -332,7 +340,7 @@ export class BeatmapPP extends AbstractState {
                     `BPPD(updateMapMetadata) Can't get map`,
                     {
                         mapPath,
-                        currentMods,
+                        currentMods: currentMods.array,
                         currentMode
                     },
                     (error as Error).stack
@@ -351,18 +359,21 @@ export class BeatmapPP extends AbstractState {
             );
 
             const attributes = new rosu.BeatmapAttributesBuilder({
+                isConvert:
+                    this.beatmap.mode === 0 &&
+                    this.beatmap.mode !== currentMode,
                 map: this.beatmap,
-                mods: currentMods,
+                mods: currentMods.array,
                 mode: currentMode
             }).build();
 
             const fcPerformance = new rosu.Performance({
-                mods: currentMods,
+                mods: currentMods.array,
                 lazer: this.game.client === ClientType.lazer
             }).calculate(this.beatmap);
 
             this.performanceAttributes = fcPerformance;
-            this.clockRate = attributes.clockRate;
+            this.clockRate = currentMods.rate;
 
             if (config.calculatePP) {
                 const ppAcc = {};
@@ -370,7 +381,7 @@ export class BeatmapPP extends AbstractState {
                     100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
                 ]) {
                     const calculate = new rosu.Performance({
-                        mods: currentMods,
+                        mods: currentMods.array,
                         accuracy: acc,
                         lazer: this.game.client === ClientType.lazer
                     }).calculate(fcPerformance);
@@ -465,10 +476,14 @@ export class BeatmapPP extends AbstractState {
             );
 
             this.calculatedMapAttributes = {
-                ar: attributes.ar,
-                cs: attributes.cs,
-                od: attributes.od,
-                hp: attributes.hp,
+                ar: this.beatmap.ar,
+                arConverted: attributes.ar,
+                cs: this.beatmap.cs,
+                csConverted: attributes.cs,
+                od: this.beatmap.od,
+                odConverted: attributes.od,
+                hp: this.beatmap.hp,
+                hpConverted: attributes.hp,
                 circles: this.lazerBeatmap.hittable,
                 sliders: this.lazerBeatmap.slidable,
                 spinners: this.lazerBeatmap.spinnable,

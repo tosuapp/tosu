@@ -75,17 +75,17 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         liveStarRating: fixDecimals(beatmapPP.currAttributes.stars),
         mStars: fixDecimals(beatmapPP.calculatedMapAttributes.fullStars),
 
-        ar: fixDecimals(menu.ar),
-        mAR: fixDecimals(beatmapPP.calculatedMapAttributes.ar),
+        ar: fixDecimals(beatmapPP.calculatedMapAttributes.ar),
+        mAR: fixDecimals(beatmapPP.calculatedMapAttributes.arConverted),
 
-        od: fixDecimals(menu.od),
-        mOD: fixDecimals(beatmapPP.calculatedMapAttributes.od),
+        od: fixDecimals(beatmapPP.calculatedMapAttributes.od),
+        mOD: fixDecimals(beatmapPP.calculatedMapAttributes.odConverted),
 
-        cs: fixDecimals(menu.cs),
-        mCS: fixDecimals(beatmapPP.calculatedMapAttributes.cs),
+        cs: fixDecimals(beatmapPP.calculatedMapAttributes.cs),
+        mCS: fixDecimals(beatmapPP.calculatedMapAttributes.csConverted),
 
-        hp: fixDecimals(menu.hp),
-        mHP: fixDecimals(beatmapPP.calculatedMapAttributes.hp),
+        hp: fixDecimals(beatmapPP.calculatedMapAttributes.hp),
+        mHP: fixDecimals(beatmapPP.calculatedMapAttributes.hpConverted),
 
         currentBpm: Math.round(beatmapPP.realtimeBPM),
         bpm: Math.round(beatmapPP.commonBPM),

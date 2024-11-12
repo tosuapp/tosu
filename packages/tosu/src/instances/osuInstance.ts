@@ -105,7 +105,7 @@ export class OsuInstance extends AbstractInstance {
                         this.previousState !== currentState
                     ) {
                         const metadataUpdate = beatmapPP.updateMapMetadata(
-                            currentMods.array,
+                            currentMods,
                             currentMode
                         );
                         if (metadataUpdate === 'not-ready') {

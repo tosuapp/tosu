@@ -109,10 +109,18 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                     difficulty: menu.difficulty
                 },
                 stats: {
-                    AR: fixDecimals(beatmapPP.calculatedMapAttributes.ar),
-                    CS: fixDecimals(beatmapPP.calculatedMapAttributes.cs),
-                    OD: fixDecimals(beatmapPP.calculatedMapAttributes.od),
-                    HP: fixDecimals(beatmapPP.calculatedMapAttributes.hp),
+                    AR: fixDecimals(
+                        beatmapPP.calculatedMapAttributes.arConverted
+                    ),
+                    CS: fixDecimals(
+                        beatmapPP.calculatedMapAttributes.csConverted
+                    ),
+                    OD: fixDecimals(
+                        beatmapPP.calculatedMapAttributes.odConverted
+                    ),
+                    HP: fixDecimals(
+                        beatmapPP.calculatedMapAttributes.hpConverted
+                    ),
                     SR: fixDecimals(beatmapPP.currAttributes.stars),
                     BPM: {
                         realtime: fixDecimals(beatmapPP.realtimeBPM),
@@ -128,10 +136,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                     fullSR: fixDecimals(
                         beatmapPP.calculatedMapAttributes.fullStars
                     ),
-                    memoryAR: fixDecimals(menu.ar),
-                    memoryCS: fixDecimals(menu.cs),
-                    memoryOD: fixDecimals(menu.od),
-                    memoryHP: fixDecimals(menu.hp)
+                    memoryAR: fixDecimals(beatmapPP.calculatedMapAttributes.ar),
+                    memoryCS: fixDecimals(beatmapPP.calculatedMapAttributes.cs),
+                    memoryOD: fixDecimals(beatmapPP.calculatedMapAttributes.od),
+                    memoryHP: fixDecimals(beatmapPP.calculatedMapAttributes.hp)
                 },
                 path: {
                     full: path.join(
