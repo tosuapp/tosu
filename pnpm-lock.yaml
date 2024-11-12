@@ -72,8 +72,8 @@ importers:
   packages/server:
     dependencies:
       '@kotrikd/rosu-pp':
-        specifier: 2.0.0-alpha.9
-        version: 2.0.0-alpha.9
+        specifier: 2.0.0-alpha.10
+        version: 2.0.0-alpha.10
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -94,8 +94,8 @@ importers:
   packages/tosu:
     dependencies:
       '@kotrikd/rosu-pp':
-        specifier: 2.0.0-alpha.9
-        version: 2.0.0-alpha.9
+        specifier: 2.0.0-alpha.10
+        version: 2.0.0-alpha.10
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -313,8 +313,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@kotrikd/rosu-pp@2.0.0-alpha.9':
-    resolution: {integrity: sha512-tEHeyaFzx9zGr9ENYRsnR/ZdzLLtldGEKrOO1jXKNwLsQx2mP3E9czElwC2hKHFvFz/8C6Byjo464u4FJMO6KQ==}
+  '@kotrikd/rosu-pp@2.0.0-alpha.10':
+    resolution: {integrity: sha512-fzqaNXEkImdR1Dq8kvymITZwyQV+OatZCGoXgFMvNd7p4X2AoDCeB5g0CQdaKVsYTmlPLaAYbOZzYGfkDn/Aow==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2861,7 +2861,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  '@kotrikd/rosu-pp@2.0.0-alpha.9': {}
+  '@kotrikd/rosu-pp@2.0.0-alpha.10': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

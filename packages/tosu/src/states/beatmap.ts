@@ -13,7 +13,7 @@ import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals } from '@/utils/converters';
-import { CalculateMods, ModsLazer, OsuMods } from '@/utils/osuMods.types';
+import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -358,6 +358,12 @@ export class BeatmapPP extends AbstractState {
                 `BPPD(updateMapMetadata) [${totalTime}ms] Spend on opening beatmap`
             );
 
+            const attributes = new rosu.BeatmapAttributesBuilder({
+                map: this.beatmap,
+                mods: currentMods.array,
+                mode: currentMode
+            }).build();
+
             const fcPerformance = new rosu.Performance({
                 mods: currentMods.array,
                 lazer: this.game.client === ClientType.lazer
@@ -466,22 +472,15 @@ export class BeatmapPP extends AbstractState {
                 )}ms] Total spent time`
             );
 
-            const csMultiply =
-                (currentMods.number & OsuMods.HardRock) > 0
-                    ? 1.3
-                    : (currentMods.number & OsuMods.Easy) > 0
-                      ? 0.5
-                      : 1;
-
             this.calculatedMapAttributes = {
                 ar: this.beatmap.ar,
-                arConverted: fcPerformance.difficulty.ar || -1,
+                arConverted: attributes.ar,
                 cs: this.beatmap.cs,
-                csConverted: +(this.beatmap.cs * csMultiply).toFixed(2),
+                csConverted: attributes.cs,
                 od: this.beatmap.od,
-                odConverted: fcPerformance.difficulty.od || -1,
+                odConverted: attributes.od,
                 hp: this.beatmap.hp,
-                hpConverted: fcPerformance.difficulty.hp || -1,
+                hpConverted: attributes.hp,
                 circles: this.lazerBeatmap.hittable,
                 sliders: this.lazerBeatmap.slidable,
                 spinners: this.lazerBeatmap.spinnable,
@@ -499,6 +498,8 @@ export class BeatmapPP extends AbstractState {
                 peak: fcPerformance.difficulty.peak,
                 hitWindow: fcPerformance.difficulty.hitWindow
             };
+
+            attributes.free();
 
             this.resetReportCount('BPPD(updateMapMetadata)');
         } catch (exc) {
