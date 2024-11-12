@@ -31,7 +31,10 @@ export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
             );
 
             await mkdir(gameOverlayPath, { recursive: true });
-            await downloadFile('https://tosu.app/overlay.zip', archivePath);
+            await downloadFile(
+                'https://dl.kotworks.cyou/tosu/overlay.zip',
+                archivePath
+            );
 
             await unzip(archivePath, gameOverlayPath);
             await rm(archivePath);
