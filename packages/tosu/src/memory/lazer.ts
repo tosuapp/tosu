@@ -257,8 +257,16 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         inlined: boolean = false,
         structSize: number = 8
     ): number[] {
-        const size = this.process.readInt(list + 0x10);
-        const items = this.process.readIntPtr(list + 0x8);
+        let isArray = false;
+
+        // another hacky check :D
+        // 0x10 is _items in List and length in array
+        if (this.process.readInt(list + 0x10) > 10000000) {
+            isArray = true;
+        }
+
+        const size = this.process.readInt(list + (isArray ? 0x8 : 0x10));
+        const items = isArray ? list : this.process.readIntPtr(list + 0x8);
 
         return this.readItems(items, size, inlined, structSize);
     }
