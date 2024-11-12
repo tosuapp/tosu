@@ -283,7 +283,7 @@ function rebuildJSON({
                 ${downloadBtn}
             </div>`;
 
-            const localButtons = `<div class="calu buttons-group flexer indent-left" n="${item.name}" v="${item.version}">
+            const localButtons = `<div class="calu buttons-group flexer indent-left" n="${item.name}" a="${item.author}" v="${item.version}">
                 ${settingsBuilderBtn}
                 ${settingsBtn}
                 <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
