@@ -29,7 +29,7 @@ ALLOWED_IPS=127.0.0.1,localhost
 # Once in what value, the programme should read the game values (in milliseconds)
 POLL_RATE=100
 # Once per value, the programme should read the values of keys K1/K2/M1/M2 (in milliseconds)
-PRECISE_DATA_POLL_RATE=100
+PRECISE_DATA_POLL_RATE=10
 
 # Shows !mp commands (messages starting with '!mp') in tournament manager chat (hidden by default)
 SHOW_MP_COMMANDS=false
@@ -70,7 +70,7 @@ export const config = {
     preciseDataPollRate: Number(
         process.env.PRECISE_DATA_POLL_RATE ||
             process.env.KEYOVERLAY_POLL_RATE ||
-            '100'
+            '10'
     ),
     showMpCommands: (process.env.SHOW_MP_COMMANDS || '') === 'true',
     serverIP: process.env.SERVER_IP || '127.0.0.1',
@@ -110,7 +110,7 @@ export const updateConfigFile = () => {
 
     if (!process.env.PRECISE_DATA_POLL_RATE) {
         newOptions += 'PRECISE_DATA_POLL_RATE, ';
-        fs.appendFileSync(configPath, '\n\nPRECISE_DATA_POLL_RATE=100', 'utf8');
+        fs.appendFileSync(configPath, '\n\nPRECISE_DATA_POLL_RATE=10', 'utf8');
     }
 
     if (!process.env.SHOW_MP_COMMANDS) {
@@ -214,7 +214,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const enableKeyOverlay = (parsed.ENABLE_KEY_OVERLAY || '') === 'true';
     const pollRate = Number(parsed.POLL_RATE || '100');
     const preciseDataPollRate = Number(
-        parsed.PRECISE_DATA_POLL_RATE || parsed.KEYOVERLAY_POLL_RATE || '100'
+        parsed.PRECISE_DATA_POLL_RATE || parsed.KEYOVERLAY_POLL_RATE || '10'
     );
     const showMpCommands = (parsed.SHOW_MP_COMMANDS || '') === 'true';
     const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
@@ -251,7 +251,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     ) {
         config.pollRate = pollRate >= 0 ? pollRate : 100;
         config.preciseDataPollRate =
-            preciseDataPollRate >= 0 ? preciseDataPollRate : 100;
+            preciseDataPollRate >= 0 ? preciseDataPollRate : 10;
         httpServer.restartWS();
     }
 
