@@ -91,13 +91,49 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         4: 7
     };
 
+    private updateGameBaseAddress() {
+        const oldAddress = this.gameBaseAddress;
+
+        const spectatorClient = this.getPattern('spectatorClient');
+        this.gameBaseAddress = this.process.readIntPtr(
+            this.process.readIntPtr(spectatorClient + 0x90) + 0x90
+        );
+
+        wLogger.debug(
+            'GameBase address - old:',
+            oldAddress.toString(16),
+            'new:',
+            this.gameBaseAddress.toString(16)
+        );
+    }
+
+    private checkIfGameBase(address: number): boolean {
+        const vtable = this.process.readIntPtr(address);
+
+        if (!vtable) {
+            return false;
+        }
+
+        // might potentially change
+        return this.process.readLong(vtable) === 7559159218176;
+    }
+
     private gameBase() {
         if (!this.gameBaseAddress) {
-            const spectatorClient = this.getPattern('spectatorClient');
+            this.updateGameBaseAddress();
+        }
 
-            this.gameBaseAddress = this.process.readIntPtr(
-                this.process.readIntPtr(spectatorClient + 0x90) + 0x90
+        // Check if gamebase instance is valid
+        if (!this.checkIfGameBase(this.gameBaseAddress)) {
+            wLogger.debug('GameBase has been reset');
+
+            const scanPattern = this.scanPatterns.spectatorClient;
+            this.setPattern(
+                'spectatorClient',
+                this.process.scanSync(scanPattern.pattern) + scanPattern.offset!
             );
+
+            this.updateGameBaseAddress();
         }
 
         return this.gameBaseAddress;
