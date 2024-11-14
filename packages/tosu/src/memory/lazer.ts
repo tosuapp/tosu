@@ -101,7 +101,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         wLogger.debug(
             'GameBase address - old:',
-            oldAddress.toString(16),
+            oldAddress?.toString(16),
             'new:',
             this.gameBaseAddress.toString(16)
         );
