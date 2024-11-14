@@ -12,7 +12,7 @@ input[type="number"].input2 {
     font-size: inherit;
     font-weight: inherit;
     color: var(--background-1);
-    width: 3.7em;
+    width: 6.5em;
     height: 28px;
     background: var(--button-open);
     padding: 0.1em 0.3em;
@@ -239,7 +239,7 @@ iframe {
 }
 
 .cm-label {
-    grid-template-columns: 3.4em 3.7em 9em;
+    grid-template-columns: 3.4em auto 9em;
     align-items: center;
     display: grid;
     gap: 0.5em;
