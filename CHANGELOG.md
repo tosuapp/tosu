@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.1](https://github.com/tosuapp/tosu/compare/v4.0.0...v4.0.1) (2024-11-14)
+
+
+### Bug Fixes
+
+* Extend text box size to fit in decimals ([a081abd](https://github.com/tosuapp/tosu/commit/a081abdc40f7d729bb61faa0a9225f5981b4e49a))
+* Fix -1pp on some of SC overlays ([24d0caf](https://github.com/tosuapp/tosu/commit/24d0caf3a826638a46fc896762975623ab869557))
+* Fix updating same name counters ([bba98e4](https://github.com/tosuapp/tosu/commit/bba98e4ff7689fe88434563937eabcdd683c7fff))
+* Fix wrong pp in result screen ([7ee40e1](https://github.com/tosuapp/tosu/commit/7ee40e19133bb3fd05caf192a228ad6bf799250e))
+* Hide settings pop-up when exiting overlay editing ([c19d1fc](https://github.com/tosuapp/tosu/commit/c19d1fc9ebca68367ab4fa0eebbac81e357cfd6e))
+* reset gamebase if it's invalid ([69e52f5](https://github.com/tosuapp/tosu/commit/69e52f578c5123c22971e7cc7f77396a66057e28))
+
 ## [4.0.0](https://github.com/tosuapp/tosu/compare/v3.6.0...v4.0.0) (2024-11-12)
 
 
