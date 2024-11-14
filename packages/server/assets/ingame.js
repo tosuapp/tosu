@@ -631,6 +631,10 @@ const app = createApp({
       }
       else if (data.data == 'editingEnded') {
         is_edit.value = false;
+
+        context_empty.value._ = false;
+        context_overlay.value._ = false;
+        closeModal_func(null);
       };
     });
 

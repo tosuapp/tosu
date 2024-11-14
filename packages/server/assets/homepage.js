@@ -1515,6 +1515,7 @@ document.addEventListener('keydown', (event) => {
 
 window.onload = async () => {
   try {
+    window.closeModal_func = closeModal;
     const requst = await fetch('https://osuck.net/tosu/api.json');
     const json = await requst.json();
 
@@ -1522,9 +1523,8 @@ window.onload = async () => {
     for (let i = 0; i < installed.length; i++) {
       const counter = installed[i];
 
-      const find = json.find(r => r.name == counter.attributes.getNamedItem('n')?.value);
+      const find = json.find(r => r.name.toLowerCase() == counter.attributes.getNamedItem('n')?.value.toLowerCase() && r.author.toLowerCase() == counter.attributes.getNamedItem('a')?.value.toLowerCase());
       if (!find) continue;
-
 
       const updatable = counter.attributes.getNamedItem('v')?.value != find.version;
       if (!updatable) continue;
