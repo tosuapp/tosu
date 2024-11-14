@@ -634,6 +634,7 @@ const app = createApp({
 
         context_empty.value._ = false;
         context_overlay.value._ = false;
+        closeModal_func(null);
       };
     });
 
