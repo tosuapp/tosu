@@ -1516,7 +1516,7 @@ document.addEventListener('keydown', (event) => {
 window.onload = async () => {
   try {
     window.closeModal_func = closeModal;
-    const requst = await fetch('https://osuck.net/tosu/api.json');
+    const requst = await fetch('https://tosu.app/api.json');
     const json = await requst.json();
 
     const installed = document.querySelectorAll('.calu');
