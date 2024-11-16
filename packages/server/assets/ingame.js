@@ -232,6 +232,12 @@ const app = createApp({
     };
 
 
+    function round_up(value) {
+      if (value == null || value == '') return 0;
+
+      const num = parseFloat(value);
+      return Number.isFinite(num) ? +num.toFixed(4) : 0;
+    };
 
     function side_decide(event, is_resize) {
       if (is_dragging && is_resize != true) return;
@@ -308,7 +314,7 @@ const app = createApp({
         const scale = initial_scale + offset_x / client_rect.width;
         if (scale < 0.1) return;
 
-        find.scale = scale;
+        find.scale = round_up(scale);
         return;
       };
 
@@ -322,8 +328,8 @@ const app = createApp({
 
 
         if (width >= 10 && left + width <= max_width.value) {
-          find.left = Math.max(0, left);
-          find.width = Math.max(10, width / initial_scale);
+          find.left = round_up(Math.max(0, left));
+          find.width = round_up(Math.max(10, width / initial_scale));
 
           // element.style.left = `${Math.max(0, left)}px`;
           // element.style.width = `${Math.max(10, width / initial_scale)}px`;
@@ -334,7 +340,7 @@ const app = createApp({
       else if (resize_direction.right) {
         const width = initial_width + offset_x;
         if (initial_left + width <= max_width.value) {
-          find.width = Math.max(10, width / initial_scale);
+          find.width = round_up(Math.max(10, width / initial_scale));
           // element.style.width = `${Math.max(10, width / initial_scale)}px`;
 
           // console.log('right', initial_scale, element.style.width);
@@ -347,8 +353,8 @@ const app = createApp({
         const top = initial_top + offset_y;
 
         if (height >= 10 && top + height <= max_height.value) {
-          find.height = Math.max(10, height / initial_scale);
-          find.top = Math.max(0, top);
+          find.height = round_up(Math.max(10, height / initial_scale));
+          find.top = round_up(Math.max(0, top));
           // element.style.height = `${Math.max(10, height / initial_scale)}px`;
           // element.style.top = `${Math.max(0, top)}px`;
 
@@ -358,7 +364,7 @@ const app = createApp({
       else if (resize_direction.bottom) {
         const height = initial_height + offset_y;
         if (initial_top + height <= max_height.value) {
-          find.height = Math.max(10, height / initial_scale);
+          find.height = round_up(Math.max(10, height / initial_scale));
           // element.style.height = `${Math.max(10, height / initial_scale)}px`;
 
           // console.log('bottom', initial_scale, element.style.height);
@@ -436,8 +442,8 @@ const app = createApp({
         return;
       };
 
-      find.top = Math.max(0, Math.min(max_height.value - element_height, initial_top + offset_y));
-      find.left = Math.max(0, Math.min(max_width.value - element_width, initial_left + offset_x));
+      find.top = round_up(Math.max(0, Math.min(max_height.value - element_height, initial_top + offset_y)));
+      find.left = round_up(Math.max(0, Math.min(max_width.value - element_width, initial_left + offset_x)));
 
       // console.log('move', { offset_x, offset_y, element_width, element_height });
     });
@@ -738,6 +744,7 @@ const app = createApp({
       side_decide, enable_drag, stop_drag,
       add_overlay, reset_overlay, remove_overlay,
       reset_hover,
+      round_up,
     };
   },
 });
