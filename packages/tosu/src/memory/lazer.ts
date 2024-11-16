@@ -108,14 +108,18 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private checkIfGameBase(address: number): boolean {
-        const vtable = this.process.readIntPtr(address);
+        try {
+            const vtable = this.process.readIntPtr(address);
 
-        if (!vtable) {
+            if (!vtable) {
+                return false;
+            }
+
+            // might potentially change
+            return this.process.readLong(vtable) === 7559159218176;
+        } catch {
             return false;
         }
-
-        // might potentially change
-        return this.process.readLong(vtable) === 7559159218176;
     }
 
     private gameBase() {
