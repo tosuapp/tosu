@@ -447,7 +447,7 @@ export async function buildExternalCounters(
     let totalAvailable = 0;
 
     try {
-        const request: any = await fetch('https://osuck.net/tosu/api.json');
+        const request: any = await fetch('https://tosu.app/api.json');
         const json: ICounter[] = await request.json();
 
         const exists = getLocalCounters();
