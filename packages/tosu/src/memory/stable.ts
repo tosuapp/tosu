@@ -1024,7 +1024,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 }
             }
 
-            return [];
+            return 'skip';
         } catch (error) {
             return error as Error;
         }
