@@ -45,7 +45,7 @@ Installation guide
 
 Features
 ---
-- [x] All _**Gamemodes**_ are supported
+- [x] All _**Gamemodes**_ are supported. Using [rosu-pp](https://github.com/MaxOhn/rosu-pp) for pp calculations
 - [x] gosuMemory _**compatible**_ api
 - [x] streamCompanion _**compatible**_ api
 - [x] Lazer support
