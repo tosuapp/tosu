@@ -66,7 +66,7 @@ export const config = {
     debugLogging: (process.env.DEBUG_LOG || '') === 'true',
     calculatePP: (process.env.CALCULATE_PP || '') === 'true',
     enableKeyOverlay: (process.env.ENABLE_KEY_OVERLAY || '') === 'true',
-    pollRate: Number(process.env.POLL_RATE || '500'),
+    pollRate: Number(process.env.POLL_RATE || '100'),
     preciseDataPollRate: Number(
         process.env.PRECISE_DATA_POLL_RATE ||
             process.env.KEYOVERLAY_POLL_RATE ||
@@ -249,7 +249,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.pollRate !== pollRate ||
         config.preciseDataPollRate !== preciseDataPollRate
     ) {
-        config.pollRate = pollRate >= 0 ? pollRate : 100;
+        config.pollRate = pollRate >= 100 ? pollRate : 100;
         config.preciseDataPollRate =
             preciseDataPollRate >= 0 ? preciseDataPollRate : 10;
         httpServer.restartWS();
