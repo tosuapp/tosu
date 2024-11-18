@@ -606,7 +606,7 @@ export function buildSettings(res: http.ServerResponse) {
             inputHTML
                 .replace('{TYPE}', 'number')
                 .replace(/{ID}/gm, 'POLL_RATE')
-                .replace('{ADDON}', config.pollRate ? 'min="0"' : '')
+                .replace('{ADDON}', config.pollRate ? 'min="100"' : '')
                 .replace('{VALUE}', `${config.pollRate}`)
         );
 
