@@ -400,7 +400,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const modAcronyms = JSON.parse(jsonString) as Mod[];
 
-        let mods = calculateMods(modAcronyms);
+        let mods = calculateMods(modAcronyms, true);
         if (mods instanceof Error)
             mods = Object.assign({}, defaultCalculatedMods);
 
@@ -1774,7 +1774,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 }
             }
 
-            let mods = calculateMods(modList);
+            let mods = calculateMods(modList, true);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 

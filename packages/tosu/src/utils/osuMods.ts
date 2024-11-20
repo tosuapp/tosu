@@ -31,7 +31,9 @@ export const modsName = (modsNumber: number, order?: boolean): string => {
         }
 
         convertedParts.sort(
-            (a, b) => ModsOrder[a.toLowerCase()] - ModsOrder[b.toLowerCase()]
+            (a, b) =>
+                (ModsOrder[a.toLowerCase()] || 99) -
+                (ModsOrder[b.toLowerCase()] || 99)
         );
 
         const converted = convertedParts

@@ -412,7 +412,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 this.process.readInt(resultScreenBase + 0xa0)
             ).toISOString();
 
-            let mods = calculateMods(modsInt);
+            let mods = calculateMods(modsInt, true);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
@@ -529,7 +529,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 maxCombo = this.process.readShort(scoreBase + 0x68);
             }
 
-            let mods = calculateMods(modsInt);
+            let mods = calculateMods(modsInt, true);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
@@ -738,7 +738,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 );
             }
 
-            let mods = calculateMods(menuMods);
+            let mods = calculateMods(menuMods, true);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
@@ -1140,7 +1140,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
         const modsInt = modsXor1 ^ modsXor2;
 
-        let mods = calculateMods(modsInt);
+        let mods = calculateMods(modsInt, true);
         if (mods instanceof Error)
             mods = Object.assign({}, defaultCalculatedMods);
 
