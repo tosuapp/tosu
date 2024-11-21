@@ -332,7 +332,30 @@ const buildTourneyData = (
         instanceManager.osuInstances
     ).filter((instance) => instance.isTourneyManager);
     if (osuTourneyManager.length < 1) {
-        return undefined;
+        return {
+            scoreVisible: false,
+            starsVisible: false,
+
+            ipcState: 0,
+            bestOF: 0,
+            team: {
+                left: '',
+                right: ''
+            },
+
+            points: {
+                left: 0,
+                right: 0
+            },
+
+            chat: [],
+
+            totalScore: {
+                left: 0,
+                right: 0
+            },
+            clients: []
+        };
     }
 
     const osuTourneyClients = Object.values(
