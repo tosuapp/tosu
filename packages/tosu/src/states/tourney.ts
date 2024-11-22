@@ -75,6 +75,7 @@ export class TourneyManager extends AbstractState {
 
             const messages = this.game.memory.tourneyChat(this.messages);
             if (messages instanceof Error) throw Error;
+            if (!Array.isArray(messages)) return;
 
             this.messages = messages;
 
