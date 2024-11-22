@@ -3,6 +3,7 @@ import { textMD5 } from '@tosu/common';
 import {
     CalculateMods,
     IMods,
+    ModsLazer,
     ModsOrder,
     bitValues
 } from '@/utils/osuMods.types';
@@ -299,3 +300,14 @@ export const calculateMods = (
         rate: settingsSpeedChange || speedChange
     };
 };
+
+export function removeDebuffMods(mods: ModsLazer) {
+    try {
+        const _mods = mods.filter(
+            (r) => !(r.acronym === 'RX' || r.acronym === 'AP')
+        );
+        return _mods;
+    } catch (error) {
+        return mods;
+    }
+}

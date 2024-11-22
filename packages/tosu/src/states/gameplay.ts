@@ -5,7 +5,7 @@ import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
 import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
-import { defaultCalculatedMods } from '@/utils/osuMods';
+import { defaultCalculatedMods, removeDebuffMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
 const defaultLBPlayer = {
@@ -442,7 +442,7 @@ export class Gameplay extends AbstractState {
                     this.performanceAttributes.free();
 
                 const difficulty = new rosu.Difficulty({
-                    mods: this.mods.array,
+                    mods: removeDebuffMods(this.mods.array),
                     lazer: this.game.client === ClientType.lazer
                 });
                 this.gradualPerformance = new rosu.GradualPerformance(
@@ -451,7 +451,7 @@ export class Gameplay extends AbstractState {
                 );
 
                 this.performanceAttributes = new rosu.Performance({
-                    mods: this.mods.array,
+                    mods: removeDebuffMods(this.mods.array),
                     lazer: this.game.client === ClientType.lazer
                 }).calculate(currentBeatmap);
 
@@ -496,7 +496,7 @@ export class Gameplay extends AbstractState {
             )!;
 
             const fcPerformance = new rosu.Performance({
-                mods: this.mods.array,
+                mods: removeDebuffMods(this.mods.array),
                 misses: 0,
                 accuracy: this.accuracy,
                 lazer: this.game.client === ClientType.lazer
