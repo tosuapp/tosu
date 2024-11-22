@@ -162,7 +162,7 @@ export type ITourney =
     | string
     | Error;
 
-export type ITourneyChat = ITourneyManagerChatItem[] | Error | string;
+export type ITourneyChat = ITourneyManagerChatItem[] | Error | boolean;
 
 export type ITourneyUser =
     | {
