@@ -23,7 +23,7 @@ CALCULATE_PP=true
 ENABLE_KEY_OVERLAY=true
 ENABLE_AUTOUPDATE=true
 
-ALLOWED_IPS=127.0.0.1,localhost
+ALLOWED_IPS=127.0.0.1,localhost,absolute
 
 # Reference: 1 second = 1000 milliseconds
 # Once in what value, the programme should read the game values (in milliseconds)
@@ -78,7 +78,7 @@ export const config = {
     staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
     enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
     enableIngameOverlay: (process.env.ENABLE_INGAME_OVERLAY || '') === 'true',
-    allowedIPs: process.env.ALLOWED_IPS || '',
+    allowedIPs: process.env.ALLOWED_IPS || '127.0.0.1,localhost,absolute',
     timestamp: 0,
     currentVersion: '',
     updateVersion: '',
@@ -156,7 +156,7 @@ export const updateConfigFile = () => {
         newOptions += 'ALLOWED_IPS, ';
         fs.appendFileSync(
             configPath,
-            '\nALLOWED_IPS=127.0.0.1,localhost',
+            '\nALLOWED_IPS=127.0.0.1,localhost,absolute',
             'utf8'
         );
     }
@@ -220,7 +220,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
     const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
     const enableIngameOverlay = (parsed.ENABLE_INGAME_OVERLAY || '') === 'true';
-    const allowedIPs = parsed.ALLOWED_IPS || '';
+    const allowedIPs = parsed.ALLOWED_IPS || '127.0.0.1,localhost,absolute';
 
     // determine whether config actually was updated or not
     updated =

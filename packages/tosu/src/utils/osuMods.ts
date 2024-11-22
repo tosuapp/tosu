@@ -30,8 +30,11 @@ export const modsName = (modsNumber: number, order?: boolean): string => {
             if (bit === 0) break;
         }
 
+        // 99 - put at the end
         convertedParts.sort(
-            (a, b) => ModsOrder[a.toLowerCase()] - ModsOrder[b.toLowerCase()]
+            (a, b) =>
+                (ModsOrder[a.toLowerCase()] || 99) -
+                (ModsOrder[b.toLowerCase()] || 99)
         );
 
         const converted = convertedParts
@@ -252,8 +255,11 @@ export const calculateMods = (
         }
     }
 
+    // 99 - put at the end
     convertedParts.sort(
-        (a, b) => ModsOrder[a.toLowerCase()] - ModsOrder[b.toLowerCase()]
+        (a, b) =>
+            (ModsOrder[a.toLowerCase()] || 99) -
+            (ModsOrder[b.toLowerCase()] || 99)
     );
 
     const ModsLazer = Array.isArray(mods)
