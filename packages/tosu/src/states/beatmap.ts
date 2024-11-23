@@ -13,6 +13,7 @@ import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals } from '@/utils/converters';
+import { removeDebuffMods } from '@/utils/osuMods';
 import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
@@ -363,12 +364,12 @@ export class BeatmapPP extends AbstractState {
                     this.beatmap.mode === 0 &&
                     this.beatmap.mode !== currentMode,
                 map: this.beatmap,
-                mods: currentMods.array,
+                mods: removeDebuffMods(currentMods.array),
                 mode: currentMode
             }).build();
 
             const fcPerformance = new rosu.Performance({
-                mods: currentMods.array,
+                mods: removeDebuffMods(currentMods.array),
                 lazer: this.game.client === ClientType.lazer
             }).calculate(this.beatmap);
 
@@ -381,7 +382,7 @@ export class BeatmapPP extends AbstractState {
                     100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
                 ]) {
                     const calculate = new rosu.Performance({
-                        mods: currentMods.array,
+                        mods: removeDebuffMods(currentMods.array),
                         accuracy: acc,
                         lazer: this.game.client === ClientType.lazer
                     }).calculate(fcPerformance);
@@ -527,7 +528,7 @@ export class BeatmapPP extends AbstractState {
             };
 
             const difficulty = new rosu.Difficulty({
-                mods: currentMods,
+                mods: removeDebuffMods(currentMods),
                 lazer: this.game.client === ClientType.lazer
             });
             const strains = difficulty.strains(this.beatmap);

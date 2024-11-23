@@ -4,7 +4,7 @@ import { ClientType, wLogger } from '@tosu/common';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
-import { defaultCalculatedMods } from '@/utils/osuMods';
+import { defaultCalculatedMods, removeDebuffMods } from '@/utils/osuMods';
 import { CalculateMods } from '@/utils/osuMods.types';
 
 export class ResultScreen extends AbstractState {
@@ -138,7 +138,7 @@ export class ResultScreen extends AbstractState {
 
             const scoreParams: rosu.PerformanceArgs = {
                 combo: this.maxCombo,
-                mods: this.mods.array,
+                mods: removeDebuffMods(this.mods.array),
                 misses: this.hitMiss,
                 n50: this.hit50,
                 n100: this.hit100,
@@ -154,7 +154,7 @@ export class ResultScreen extends AbstractState {
                 currentBeatmap
             );
             const fcPerformance = new rosu.Performance({
-                mods: this.mods.array,
+                mods: removeDebuffMods(this.mods.array),
                 misses: 0,
                 accuracy: this.accuracy
             }).calculate(curPerformance);
