@@ -221,7 +221,8 @@ export interface Hits {
     katu: number;
     sliderBreaks: number;
     sliderEndHits: number;
-    sliderTickHits: number;
+    smallTickHits: number;
+    largeTickHits: number;
 }
 
 export interface Combo {
@@ -364,7 +365,8 @@ export interface Hits3 {
     geki: number;
     katu: number;
     sliderEndHits: number;
-    sliderTickHits: number;
+    smallTickHits: number;
+    largeTickHits: number;
 }
 
 export interface Folders {

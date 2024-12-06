@@ -451,14 +451,10 @@ export default function buildBaseApi(server: Server) {
             if (query.acc !== undefined) params.accuracy = +query.acc;
             if (query.sliderEndHits !== undefined)
                 params.sliderEndHits = +query.sliderEndHits;
-            if (query.sliderTickHits !== undefined)
-                params.sliderTickHits = +query.sliderTickHits;
-
-            if (
-                params.sliderEndHits === undefined &&
-                params.sliderTickHits === undefined
-            )
-                params.lazer = false;
+            if (query.smallTickHits !== undefined)
+                params.smallTickHits = +query.smallTickHits;
+            if (query.largeTickHits !== undefined)
+                params.largeTickHits = +query.largeTickHits;
 
             const calculate = new rosu.Performance(params).calculate(beatmap);
             sendJson(res, calculate);

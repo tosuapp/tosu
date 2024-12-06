@@ -125,7 +125,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         50: resultScreen.hit50,
         0: resultScreen.hitMiss,
         sliderEndHits: resultScreen.sliderEndHits,
-        sliderTickHits: resultScreen.sliderTickHits
+        smallTickHits: resultScreen.smallTickHits,
+        largeTickHits: resultScreen.largeTickHits
     };
 
     return {
@@ -570,7 +571,8 @@ function buildPlay(
             0: gameplay.hitMiss,
             sliderBreaks: gameplay.hitSB,
             sliderEndHits: gameplay.sliderEndHits,
-            sliderTickHits: gameplay.sliderTickHits
+            smallTickHits: gameplay.smallTickHits,
+            largeTickHits: gameplay.largeTickHits
         },
 
         hitErrorArray: gameplay.hitErrors,

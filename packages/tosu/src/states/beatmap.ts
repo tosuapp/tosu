@@ -500,7 +500,7 @@ export class BeatmapPP extends AbstractState {
                 rhythm: fcPerformance.difficulty.rhythm,
                 color: fcPerformance.difficulty.color,
                 peak: fcPerformance.difficulty.peak,
-                hitWindow: fcPerformance.difficulty.hitWindow
+                hitWindow: fcPerformance.difficulty.greatHitWindow
             };
 
             attributes.free();

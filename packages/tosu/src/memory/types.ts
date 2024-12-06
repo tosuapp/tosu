@@ -63,7 +63,8 @@ export type IResultScreen =
           hitKatu: number;
           hitMiss: number;
           sliderEndHits: number;
-          sliderTickHits: number;
+          smallTickHits: number;
+          largeTickHits: number;
           date: string;
       }
     | string
@@ -85,7 +86,8 @@ export type IScore = {
     hitKatu: number;
     hitMiss: number;
     sliderEndHits: number;
-    sliderTickHits: number;
+    smallTickHits: number;
+    largeTickHits: number;
     combo: number;
     maxCombo: number;
     pp?: number;
