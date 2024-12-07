@@ -1146,7 +1146,16 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         if (mods instanceof Error)
             mods = Object.assign({}, defaultCalculatedMods);
 
+        const scoreAddr = this.process.readIntPtr(base + 0x20);
+        let userId = 0;
+        if (scoreAddr !== 0) {
+            userId = this.process.readInt(
+                this.process.readIntPtr(scoreAddr + 0x48) + 0x70
+            );
+        }
+
         return {
+            userId,
             name: this.process.readSharpString(
                 this.process.readInt(base + 0x8)
             ),
