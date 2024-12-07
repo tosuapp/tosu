@@ -15,6 +15,7 @@ export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
 
 export interface TosuAPi {
     client: string;
+    serverEndpoint: string;
     state: NumberName;
     session: Session;
     settings: Settings;
