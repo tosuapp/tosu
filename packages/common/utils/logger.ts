@@ -57,11 +57,11 @@ export const wLogger = {
         const coloredText = colorText('warn');
         console.log(coloredText, ...args);
 
-        if (config.debugLogging === true) writeLog('error', args);
+        if (config.debugLogging === true) writeLog('warn', args);
     }
 };
 
-function writeLog(type: string, ...args) {
+function writeLog(type: string, ...args: any[]) {
     if (config.logsPath === '') {
         const logsPath = path.join(getProgramPath(), 'logs');
         if (!fs.existsSync(logsPath))
