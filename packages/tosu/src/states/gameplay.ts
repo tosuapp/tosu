@@ -44,7 +44,8 @@ export class Gameplay extends AbstractState {
     hitKatu: number;
     hitMiss: number;
     sliderEndHits: number;
-    sliderTickHits: number;
+    smallTickHits: number;
+    largeTickHits: number;
     hitMissPrev: number;
     hitUR: number;
     hitSB: number;
@@ -87,7 +88,8 @@ export class Gameplay extends AbstractState {
         this.hitKatu = 0;
         this.hitMiss = 0;
         this.sliderEndHits = 0;
-        this.sliderTickHits = 0;
+        this.smallTickHits = 0;
+        this.largeTickHits = 0;
         this.hitMissPrev = 0;
         this.hitUR = 0.0;
         this.hitSB = 0;
@@ -203,7 +205,8 @@ export class Gameplay extends AbstractState {
             this.hitKatu = result.hitKatu;
             this.hitMiss = result.hitMiss;
             this.sliderEndHits = result.sliderEndHits;
-            this.sliderTickHits = result.sliderTickHits;
+            this.smallTickHits = result.smallTickHits;
+            this.largeTickHits = result.largeTickHits;
 
             this.combo = result.combo;
             this.maxCombo = result.maxCombo;
@@ -487,7 +490,8 @@ export class Gameplay extends AbstractState {
                 nKatu: this.hitKatu,
                 nGeki: this.hitGeki,
                 sliderEndHits: this.sliderEndHits,
-                sliderTickHits: this.sliderTickHits
+                osuSmallTickHits: this.smallTickHits,
+                osuLargeTickHits: this.largeTickHits
             };
 
             const currPerformance = this.gradualPerformance.nth(

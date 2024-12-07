@@ -21,7 +21,8 @@ export class ResultScreen extends AbstractState {
     hitKatu: number;
     hitMiss: number;
     sliderEndHits: number;
-    sliderTickHits: number;
+    smallTickHits: number;
+    largeTickHits: number;
     grade: string;
     date: string;
     accuracy: number;
@@ -52,7 +53,8 @@ export class ResultScreen extends AbstractState {
         this.hitKatu = 0;
         this.hitMiss = 0;
         this.sliderEndHits = 0;
-        this.sliderTickHits = 0;
+        this.smallTickHits = 0;
+        this.largeTickHits = 0;
         this.grade = '';
         this.date = '';
         this.accuracy = 0;
@@ -84,7 +86,8 @@ export class ResultScreen extends AbstractState {
             this.hitKatu = result.hitKatu;
             this.hitMiss = result.hitMiss;
             this.sliderEndHits = result.sliderEndHits;
-            this.sliderTickHits = result.sliderTickHits;
+            this.smallTickHits = result.smallTickHits;
+            this.largeTickHits = result.largeTickHits;
             this.date = result.date;
 
             const hits = {
@@ -146,7 +149,8 @@ export class ResultScreen extends AbstractState {
                 nKatu: this.hitKatu,
                 nGeki: this.hitGeki,
                 sliderEndHits: this.sliderEndHits,
-                sliderTickHits: this.sliderTickHits,
+                smallTickHits: this.smallTickHits,
+                largeTickHits: this.largeTickHits,
                 lazer: this.game.client === ClientType.lazer
             };
 

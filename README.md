@@ -118,7 +118,8 @@ api
   - `n100` - Amount of 100
   - `n50` - Amount of 50
   - `sliderEndHits` - Amount of slider ends hits (lazer only)
-  - `sliderTickHits` - Amount of slider ticks hits (lazer only)
+  - `smallTickHits` - Amount of slider small ticks hits (lazer only)
+  - `largeTickHits` - Amount of slider large ticks hits (lazer only)
   - `nMisses` - Amount of Misses
   - `combo` - combo
   - `passedObjects` - Sum of nGeki, nKatu, n300, n100, n50, nMisses
