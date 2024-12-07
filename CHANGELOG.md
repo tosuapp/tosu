@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.1](https://github.com/tosuapp/tosu/compare/v4.1.0...v4.1.1) (2024-12-07)
+
+
+### Bug Fixes
+
+* Fix naming for new fields ([4dbd01f](https://github.com/tosuapp/tosu/commit/4dbd01f016be3448c8e4082952d71e8e536f5426))
+
 ## [4.1.0](https://github.com/tosuapp/tosu/compare/v4.0.1...v4.1.0) (2024-12-07)
 
 
