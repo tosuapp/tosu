@@ -100,6 +100,10 @@ export class InstanceManager {
                     osuInstance.setIsTourneySpectator(true);
                 }
 
+                if (args.devserver && args.devserver.length > 0) {
+                    osuInstance.setCustomServerEndpoint(args.devserver);
+                }
+
                 osuInstance.emitter.on(
                     'onDestroy',
                     this.onProcessDestroy.bind(this)

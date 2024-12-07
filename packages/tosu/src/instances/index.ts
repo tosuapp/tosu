@@ -36,6 +36,7 @@ export abstract class AbstractInstance {
     abstract memory: AbstractMemory<Record<string, number>>;
     abstract gameOverlayAllowed: boolean;
     client: ClientType;
+    customServerEndpoint: string;
 
     pid: number;
     process: Process;
@@ -212,6 +213,10 @@ export abstract class AbstractInstance {
 
     setIsTourneySpectator(newVal: boolean) {
         this.isTourneySpectator = newVal;
+    }
+
+    setCustomServerEndpoint(server: string) {
+        this.customServerEndpoint = server;
     }
 
     getState(instanceManager: InstanceManager) {

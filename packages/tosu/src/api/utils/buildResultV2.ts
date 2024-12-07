@@ -131,6 +131,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
     return {
         client: ClientType[osuInstance.client],
+        serverEndpoint: osuInstance.customServerEndpoint ?? 'ppy.sh',
         state: {
             number: global.status,
             name: GameState[global.status] || ''
