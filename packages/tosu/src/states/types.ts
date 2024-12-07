@@ -32,6 +32,7 @@ export interface KeyOverlay {
 }
 
 export interface LeaderboardPlayer {
+    userId: number;
     name: string;
     score: number;
     combo: number;

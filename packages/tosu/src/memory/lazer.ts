@@ -540,10 +540,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
         const username = this.process.readSharpStringPtr(realmUser + 0x18);
+        const userId = this.process.readInt(realmUser + 0x28);
 
         const statistics = this.readStatistics(scoreInfo);
 
         return {
+            userId,
             name: username,
             mods,
             score: this.process.readLong(scoreInfo + 0x98),

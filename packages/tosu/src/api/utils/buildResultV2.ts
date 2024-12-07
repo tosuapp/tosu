@@ -49,6 +49,7 @@ const convertMemoryPlayerToResult = (
         position: memoryPlayer.position,
         team: memoryPlayer.team,
 
+        userId: memoryPlayer.userId,
         name: memoryPlayer.name,
 
         score: memoryPlayer.score,
