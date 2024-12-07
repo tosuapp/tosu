@@ -15,7 +15,7 @@ export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
 
 export interface TosuAPi {
     client: string;
-    serverEndpoint: string;
+    server: string;
     state: NumberName;
     session: Session;
     settings: Settings;
@@ -266,7 +266,7 @@ export interface Leaderboard {
     isFailed: boolean;
     position: number;
     team: number;
-    userId: number;
+    id: number;
     name: string;
     score: number;
     accuracy: number;

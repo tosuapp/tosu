@@ -49,7 +49,7 @@ const convertMemoryPlayerToResult = (
         position: memoryPlayer.position,
         team: memoryPlayer.team,
 
-        userId: memoryPlayer.userId,
+        id: memoryPlayer.userId,
         name: memoryPlayer.name,
 
         score: memoryPlayer.score,
@@ -132,7 +132,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
     return {
         client: ClientType[osuInstance.client],
-        serverEndpoint: osuInstance.customServerEndpoint ?? 'ppy.sh',
+        server: osuInstance.customServerEndpoint ?? 'ppy.sh',
         state: {
             number: global.status,
             name: GameState[global.status] || ''
