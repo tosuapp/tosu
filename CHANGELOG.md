@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.1.0](https://github.com/tosuapp/tosu/compare/v4.0.1...v4.1.0) (2024-12-07)
+
+
+### Features
+
+* read devserver argument ([149dbec](https://github.com/tosuapp/tosu/commit/149dbec4882b5a8ac5cc73c14fccff23edd0d753))
+* read user leaderboard id ([27477b3](https://github.com/tosuapp/tosu/commit/27477b3c7c62d4cb63e6e7cac43fc3123d2f69ff))
+
+
+### Bug Fixes
+
+* fix unnecessary tournament chat reset ([a144e45](https://github.com/tosuapp/tosu/commit/a144e455137e1ea68813238f4707c3a692c39740))
+* Remove gosu approach to send undefined for tourney field, if clients are not ready ([ffa6017](https://github.com/tosuapp/tosu/commit/ffa6017dadd7f4f7d0a7a684b5f80ca99254638e))
+* Remove RX and AP from pp and attributes calculation ([a6d74a6](https://github.com/tosuapp/tosu/commit/a6d74a618c9528e25edf5c278c1d67d77432257e))
+* Switch api URL ([cc7ead6](https://github.com/tosuapp/tosu/commit/cc7ead635fe1648bc8898d1cc8366b0ce5be1852))
+* try fixing game base checker ([eb2d3c3](https://github.com/tosuapp/tosu/commit/eb2d3c385fd266059dabf26f291bc321930ab43c))
+* Update rosu-pp to version 2.0.0 ([b03e853](https://github.com/tosuapp/tosu/commit/b03e85349b847359b01cdb938a6a71d72ba7316a))
+
 ### [4.0.1](https://github.com/tosuapp/tosu/compare/v4.0.0...v4.0.1) (2024-11-14)
 
 
