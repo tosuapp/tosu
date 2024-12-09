@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.2](https://github.com/tosuapp/tosu/compare/v4.1.1...v4.1.2) (2024-12-09)
+
+
+### Bug Fixes
+
+* Do not create empty folder before extracting & send actual error ([95b0419](https://github.com/tosuapp/tosu/commit/95b04192b3d46416646799abea392fa425da0dd5))
+* trying to read intptr 0 ([9c5cf6e](https://github.com/tosuapp/tosu/commit/9c5cf6e20b9c7fb904ed0968731042033280dc1b))
+* Update logs ([9a42746](https://github.com/tosuapp/tosu/commit/9a42746f6ce0b7250e4a39110771063c827305b1))
+
 ### [4.1.1](https://github.com/tosuapp/tosu/compare/v4.1.0...v4.1.1) (2024-12-07)
 
 
