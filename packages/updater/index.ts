@@ -25,24 +25,25 @@ const backupExecutablePath = path.join(
 const deleteNotLocked = async (filePath: string) => {
     try {
         await fs.promises.unlink(filePath);
-    } catch (err: any) {
-        if (err.code === 'EPERM') {
+    } catch (err) {
+        if ((err as any).code === 'EPERM') {
             await sleep(1000);
             deleteNotLocked(filePath);
             return;
         }
 
-        wLogger.error(err.message);
-        wLogger.debug(err);
+        wLogger.error('[updater]', 'deleteNotLocked', (err as any).message);
+        wLogger.debug('[updater]', 'deleteNotLocked', err);
     }
 };
 
 export const checkUpdates = async () => {
-    wLogger.info('Checking updates');
+    wLogger.info('[updater]', 'Checking updates');
 
     try {
         if (platform.type === 'unknown') {
             wLogger.warn(
+                '[updater]',
                 `Unsupported platform (${process.platform}). Unable to run updater`
             );
 
@@ -67,15 +68,18 @@ export const checkUpdates = async () => {
         config.updateVersion = versionName || currentVersion;
 
         if (versionName === null || versionName === undefined) {
-            wLogger.info(`Failed to check updates v${currentVersion}`);
+            wLogger.info(
+                '[updater]',
+                `Failed to check updates v${currentVersion}`
+            );
 
             return new Error('Version the same');
         }
 
         return { assets, versionName };
     } catch (exc) {
-        wLogger.error(`checkUpdates`, (exc as any).message);
-        wLogger.debug(exc);
+        wLogger.error('[updater]', `checkUpdates`, (exc as any).message);
+        wLogger.debug('[updater]', `checkUpdates`, exc);
 
         config.currentVersion = currentVersion;
         config.updateVersion = currentVersion;
@@ -93,7 +97,10 @@ export const autoUpdater = async () => {
 
         const { assets, versionName } = check;
         if (versionName.includes(currentVersion)) {
-            wLogger.info(`You're using latest version v${currentVersion}`);
+            wLogger.info(
+                '[updater]',
+                `You're using latest version v${currentVersion}`
+            );
 
             if (fs.existsSync(fileDestination)) {
                 await deleteNotLocked(fileDestination);
@@ -110,7 +117,10 @@ export const autoUpdater = async () => {
             (r) => r.name.includes(platform.type) && r.name.endsWith('.zip')
         );
         if (!findAsset) {
-            wLogger.info(`Files to update not found (${platform.type})`);
+            wLogger.info(
+                '[updater]',
+                `Files to update not found (${platform.type})`
+            );
             return 'noFiles';
         }
 
@@ -124,7 +134,7 @@ export const autoUpdater = async () => {
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
         await unzip(downloadAsset, getProgramPath());
 
-        wLogger.info('Restarting program');
+        wLogger.info('[updater]', 'Restarting program');
 
         spawn(`"${process.argv[0]}"`, process.argv.slice(1), {
             detached: true,
@@ -132,14 +142,14 @@ export const autoUpdater = async () => {
             stdio: 'ignore'
         }).unref();
 
-        wLogger.info('Closing program');
+        wLogger.info('[updater]', 'Closing program');
 
         await sleep(1000);
 
         process.exit();
     } catch (exc) {
-        wLogger.error('autoUpdater', (exc as any).message);
-        wLogger.debug('autoUpdater', exc);
+        wLogger.error('[updater]', 'autoUpdater', (exc as any).message);
+        wLogger.debug('[updater]', 'autoUpdater', exc);
 
         return exc;
     }

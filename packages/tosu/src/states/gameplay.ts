@@ -76,7 +76,11 @@ export class Gameplay extends AbstractState {
     }
 
     init(isRetry?: boolean, from?: string) {
-        wLogger.debug(`GD(init) Reset (${isRetry} - ${from})`);
+        wLogger.debug(
+            ClientType[this.game.client],
+            this.game.pid,
+            `gameplay init (${isRetry} - ${from})`
+        );
 
         this.hitErrors = [];
         this.maxCombo = 0;
@@ -144,7 +148,11 @@ export class Gameplay extends AbstractState {
     }
 
     resetQuick() {
-        wLogger.debug('GD(resetQuick) Reset');
+        wLogger.debug(
+            ClientType[this.game.client],
+            this.game.pid,
+            `gameplay resetQuick`
+        );
 
         this.previousPassedObjects = 0;
         this.gradualPerformance = undefined;
@@ -156,7 +164,11 @@ export class Gameplay extends AbstractState {
             return;
         }
 
-        wLogger.debug('GD(resetKeyOverlay) Reset');
+        wLogger.debug(
+            ClientType[this.game.client],
+            this.game.pid,
+            `gameplay resetKeyOverlay`
+        );
 
         this.keyOverlay.K1Pressed = false;
         this.keyOverlay.K2Pressed = false;
@@ -181,7 +193,12 @@ export class Gameplay extends AbstractState {
             const result = this.game.memory.gameplay();
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
-                wLogger.debug(`GD(updateState) ${result}`);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateState`,
+                    result
+                );
                 return 'not-ready';
             }
 
@@ -244,14 +261,22 @@ export class Gameplay extends AbstractState {
             this.updateStarsAndPerformance();
             this.updateLeaderboard();
 
-            this.resetReportCount('GD(updateState)');
+            this.resetReportCount('gameplay updateState');
         } catch (exc) {
             this.reportError(
-                'GD(updateState)',
+                'gameplay updateState',
                 10,
-                `GD(updateState) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateState`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateState`,
+                exc
+            );
         }
     }
 
@@ -262,7 +287,12 @@ export class Gameplay extends AbstractState {
             if (typeof result === 'string') {
                 if (result === '') return;
 
-                wLogger.debug(`GD(updateKeyOverlay)`, result);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateKeyOverlay`,
+                    result
+                );
                 return 'not-ready';
             }
 
@@ -288,18 +318,31 @@ export class Gameplay extends AbstractState {
 
             const keysLine = `${this.keyOverlay.K1Count}:${this.keyOverlay.K2Count}:${this.keyOverlay.M1Count}:${this.keyOverlay.M2Count}`;
             if (this.cachedkeys !== keysLine) {
-                wLogger.debug(`GD(updateKeyOverlay) updated ${keysLine}`);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateKeyOverlay`,
+                    keysLine
+                );
                 this.cachedkeys = keysLine;
             }
 
-            this.resetReportCount('GD(updateKeyOverlay)');
+            this.resetReportCount('gameplay updateKeyOverlay');
         } catch (exc) {
             this.reportError(
-                'GD(updateKeyOverlay)',
+                'gameplay updateKeyOverlay',
                 10,
-                `GD(updateKeyOverlay) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateKeyOverlay`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateKeyOverlay`,
+                exc
+            );
         }
     }
 
@@ -310,20 +353,34 @@ export class Gameplay extends AbstractState {
             if (typeof result === 'string') {
                 if (result === '') return;
 
-                wLogger.debug(`GD(updateHitErrors)`, result);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateHitErrors`,
+                    result
+                );
+
                 return 'not-ready';
             }
 
             this.hitErrors = result;
 
-            this.resetReportCount('GD(updateHitErrors)');
+            this.resetReportCount('gameplay updateHitErrors');
         } catch (exc) {
             this.reportError(
-                'GD(updateHitErrors)',
+                'gameplay updateHitErrors',
                 50,
-                `GD(updateHitErrors) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateHitErrors`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateHitErrors`,
+                exc
+            );
         }
     }
 
@@ -389,14 +446,22 @@ export class Gameplay extends AbstractState {
                 result[1] || Object.assign({}, defaultLBPlayer);
             this.leaderboardScores = result[2];
 
-            this.resetReportCount('GD(updateLeaderboard)');
+            this.resetReportCount('gameplay updateLeaderboard');
         } catch (exc) {
             this.reportError(
-                'GD(updateLeaderboard)',
+                'gameplay updateLeaderboard',
                 10,
-                `GD(updateLeaderboard) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateLeaderboard`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateLeaderboard`,
+                exc
+            );
         }
     }
 
@@ -405,7 +470,9 @@ export class Gameplay extends AbstractState {
             const t1 = performance.now();
             if (!config.calculatePP) {
                 wLogger.debug(
-                    'GD(updateStarsAndPerformance) pp calculation disabled'
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance pp calculation disabled`
                 );
                 return;
             }
@@ -418,7 +485,9 @@ export class Gameplay extends AbstractState {
 
             if (!global.gameFolder) {
                 wLogger.debug(
-                    'GD(updateStarsAndPerformance) game folder not found'
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance game folder not found`
                 );
                 return;
             }
@@ -426,7 +495,9 @@ export class Gameplay extends AbstractState {
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
             if (!currentBeatmap) {
                 wLogger.debug(
-                    "GD(updateStarsAndPerformance) can't get current map"
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance can't get current map`
                 );
                 return;
             }
@@ -463,7 +534,10 @@ export class Gameplay extends AbstractState {
 
             if (!this.gradualPerformance || !this.performanceAttributes) {
                 wLogger.debug(
-                    `GD(updateStarsAndPerformance) One of things not ready. GP:${this.gradualPerformance === undefined} - PA:${this.performanceAttributes === undefined}`
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance One of the things not ready`,
+                    `gradual: ${this.gradualPerformance === undefined} - attributes: ${this.performanceAttributes === undefined}`
                 );
                 return;
             }
@@ -524,17 +598,28 @@ export class Gameplay extends AbstractState {
             this.previousPassedObjects = passedObjects;
 
             wLogger.debug(
-                `GD(updateStarsAndPerformance) [${(t2 - t1).toFixed(2)}ms] elapsed time`
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateStarsAndPerformance`,
+                `[${(t2 - t1).toFixed(2)}ms] elapsed time`
             );
 
-            this.resetReportCount('GD(updateStarsAndPerformance)');
+            this.resetReportCount('gameplay updateStarsAndPerformance');
         } catch (exc) {
             this.reportError(
-                'GD(updateStarsAndPerformance)',
+                'gameplay updateStarsAndPerformance',
                 10,
-                `GD(updateStarsAndPerformance) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateStarsAndPerformance`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateStarsAndPerformance`,
+                exc
+            );
         }
     }
 }

@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { ClientType, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
@@ -53,12 +53,21 @@ export class TourneyManager extends AbstractState {
 
     updateState() {
         try {
-            wLogger.debug('TMD(updateState) Starting');
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `tourney updateState starting`
+            );
 
             const result = this.game.memory.tourney();
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
-                wLogger.debug(`TMD(updateState) ${result}`);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `tourney updateState`,
+                    result
+                );
                 return 'not-ready';
             }
 
@@ -79,14 +88,22 @@ export class TourneyManager extends AbstractState {
 
             this.messages = messages;
 
-            this.resetReportCount('TMD(updateState)');
+            this.resetReportCount('tourney updateState');
         } catch (exc) {
             this.reportError(
-                'TMD(updateState)',
+                'tourney updateState',
                 10,
-                `TMD(updateState) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `tourney updateState`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `tourney updateState`,
+                exc
+            );
         }
     }
 
@@ -100,15 +117,18 @@ export class TourneyManager extends AbstractState {
             const result = this.game.memory.tourneyUser();
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
-                wLogger.debug(`TUPD(updateState) ${result}`);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `tourney updateUser`,
+                    result
+                );
                 this.reset();
 
                 if (gameplay.isDefaultState === true) return;
                 gameplay.init(undefined, 'tourney');
                 return;
             }
-
-            this.resetReportCount('TUPD(updateState) Slot');
 
             this.userAccuracy = result.accuracy;
             this.userRankedScore = result.rankedScore;
@@ -120,14 +140,22 @@ export class TourneyManager extends AbstractState {
 
             this.isDefaultState = false;
 
-            this.resetReportCount('TUPD(updateState)');
+            this.resetReportCount('tourney updateUser');
         } catch (exc) {
             this.reportError(
-                'TUPD(updateState)',
+                'tourney updateUser',
                 10,
-                `TUPD(updateState) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `tourney updateUser`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `tourney updateUser`,
+                exc
+            );
         }
     }
 }

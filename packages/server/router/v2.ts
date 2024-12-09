@@ -1,4 +1,3 @@
-import { wLogger } from '@tosu/common';
 import path from 'path';
 
 import { HttpServer, sendJson } from '../index';
@@ -11,12 +10,11 @@ export default function buildV2Api(app: HttpServer) {
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
+            throw new Error('osu is not ready/running');
         }
 
         const json = osuInstance.getStateV2(req.instanceManager);
-        sendJson(res, json);
+        return sendJson(res, json);
     });
 
     app.route('/json/v2/precise', 'GET', (req, res) => {
@@ -24,12 +22,11 @@ export default function buildV2Api(app: HttpServer) {
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
-            res.statusCode = 500;
-            return sendJson(res, { error: 'not_ready' });
+            throw new Error('osu is not ready/running');
         }
 
         const json = osuInstance.getPreciseData(req.instanceManager);
-        sendJson(res, json);
+        return sendJson(res, json);
     });
 
     app.route(
@@ -39,77 +36,50 @@ export default function buildV2Api(app: HttpServer) {
     );
 
     app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
-        try {
-            const url = req.pathname || '/';
-
-            const osuInstance: any = req.instanceManager.getInstance(
-                req.instanceManager.focusedClient
-            );
-            if (!osuInstance) {
-                res.statusCode = 500;
-                return sendJson(res, { error: 'not_ready' });
-            }
-            const global = osuInstance.get('global');
-            if (global.songsFolder === '') {
-                res.statusCode = 500;
-                return sendJson(res, { error: 'not_ready' });
-            }
-
-            directoryWalker({
-                res,
-                baseUrl: url,
-                pathname: req.params.filePath,
-                folderPath: global.songsFolder
-            });
-        } catch (error) {
-            wLogger.error((error as any).message);
-            wLogger.debug(error);
-
-            return sendJson(res, {
-                error: (error as any).message
-            });
+        const url = req.pathname || '/';
+        const osuInstance: any = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
+        if (!osuInstance) {
+            throw new Error('osu is not ready/running');
         }
+        const global = osuInstance.get('global');
+        if (global.songsFolder === '') {
+            throw new Error('osu is not ready/running');
+        }
+
+        directoryWalker({
+            res,
+            baseUrl: url,
+            pathname: req.params.filePath,
+            folderPath: global.songsFolder
+        });
     });
 
     app.route(/^\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
-        try {
-            const url = req.pathname || '/';
+        const url = req.pathname || '/';
 
-            const osuInstance: any = req.instanceManager.getInstance(
-                req.instanceManager.focusedClient
-            );
-            if (!osuInstance) {
-                res.statusCode = 500;
-                return sendJson(res, { error: 'not_ready' });
-            }
-
-            const global = osuInstance.get('global');
-            if (
-                (global.gameFolder === '' && global.skinFolder === '') ||
-                (global.gameFolder == null && global.skinFolder == null)
-            ) {
-                res.statusCode = 500;
-                return sendJson(res, { error: 'not_ready' });
-            }
-
-            const folder = path.join(
-                global.gameFolder,
-                'Skins',
-                global.skinFolder
-            );
-            directoryWalker({
-                res,
-                baseUrl: url,
-                pathname: req.params.filePath,
-                folderPath: folder
-            });
-        } catch (error) {
-            wLogger.error((error as any).message);
-            wLogger.debug(error);
-
-            return sendJson(res, {
-                error: (error as any).message
-            });
+        const osuInstance: any = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
+        if (!osuInstance) {
+            throw new Error('osu is not ready/running');
         }
+
+        const global = osuInstance.get('global');
+        if (
+            (global.gameFolder === '' && global.skinFolder === '') ||
+            (global.gameFolder == null && global.skinFolder == null)
+        ) {
+            throw new Error('osu is not ready/running');
+        }
+
+        const folder = path.join(global.gameFolder, 'Skins', global.skinFolder);
+        directoryWalker({
+            res,
+            baseUrl: url,
+            pathname: req.params.filePath,
+            folderPath: folder
+        });
     });
 }
