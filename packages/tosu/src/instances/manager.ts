@@ -117,8 +117,8 @@ export class InstanceManager {
                 osuInstance.start();
             }
         } catch (exc) {
-            wLogger.error('[manager]', 'handleProcesses', (exc as any).message);
-            wLogger.debug('[manager]', 'handleProcesses', exc);
+            wLogger.error('InstanceManager', (exc as any).message);
+            wLogger.debug(exc);
         }
     }
 

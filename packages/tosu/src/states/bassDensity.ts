@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
@@ -10,15 +10,7 @@ export class BassDensity extends AbstractState {
     updateState() {
         try {
             const audioVelocityBase = this.game.memory.audioVelocityBase();
-            if (typeof audioVelocityBase === 'string') {
-                wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    'resolvePatterns',
-                    audioVelocityBase
-                );
-                return;
-            }
+            if (audioVelocityBase === null) return;
 
             let bass = 0.0;
             let currentAudioVelocity = this.currentAudioVelocity;
@@ -45,22 +37,14 @@ export class BassDensity extends AbstractState {
             this.currentAudioVelocity = currentAudioVelocity;
             this.density = (1 + currentAudioVelocity) * 0.5;
 
-            this.resetReportCount('BassDensity updateState');
+            this.resetReportCount('BassDensity(updateState)');
         } catch (exc) {
             this.reportError(
-                'BassDensity updateState',
+                'BassDensity(updateState)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                'BassDensity updateState',
-                (exc as Error).message
+                `BassDensity(updateState) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                'BassDensity updateState',
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 }

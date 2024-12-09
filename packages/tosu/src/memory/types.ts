@@ -10,7 +10,7 @@ export type ScanPatterns = {
     };
 };
 
-export type IAudioVelocityBase = number[] | string;
+export type IAudioVelocityBase = number[] | null;
 
 export type IUser =
     | Error

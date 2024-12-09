@@ -38,11 +38,7 @@ export class ResultScreen extends AbstractState {
     }
 
     init() {
-        wLogger.debug(
-            ClientType[this.game.client],
-            this.game.pid,
-            `resultScreen init`
-        );
+        wLogger.debug('RSD(init) Reset');
 
         this.onlineId = 0;
         this.playerName = '';
@@ -73,12 +69,7 @@ export class ResultScreen extends AbstractState {
             const result = this.game.memory.resultScreen();
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
-                wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `resultScreen updateState`,
-                    result
-                );
+                wLogger.debug(`RSD(updateState) ${result}`);
                 return 'not-ready';
             }
 
@@ -119,22 +110,14 @@ export class ResultScreen extends AbstractState {
                 hits
             });
 
-            this.resetReportCount('resultScreen updateState');
+            this.resetReportCount('RSD(updateState)');
         } catch (exc) {
             this.reportError(
-                'resultScreen updateState',
+                'RSD(updateState)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `resultScreen updateState`,
-                (exc as any).message
+                `RSD(updateState) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `resultScreen updateState`,
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 
@@ -152,11 +135,7 @@ export class ResultScreen extends AbstractState {
 
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
             if (!currentBeatmap) {
-                wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `resultScreen updatePerformance can't get current map`
-                );
+                wLogger.debug("RSD(updatePerformance) can't get current map");
                 return;
             }
 
@@ -191,22 +170,14 @@ export class ResultScreen extends AbstractState {
             fcPerformance.free();
 
             this.previousBeatmap = key;
-            this.resetReportCount('resultScreen updatePerformance');
+            this.resetReportCount('RSD(updatePerformance)');
         } catch (exc) {
             this.reportError(
-                'resultScreen updatePerformance',
+                'RSD(updatePerformance)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `resultScreen updatePerformance`,
-                (exc as any).message
+                `RSD(updatePerformance) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `resultScreen updatePerformance`,
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 }

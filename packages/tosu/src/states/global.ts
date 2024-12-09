@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 import { defaultCalculatedMods } from '@/utils/osuMods';
@@ -40,13 +40,7 @@ export class Global extends AbstractState {
             if (typeof result === 'string') {
                 if (result === '') return;
 
-                wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `global updateState`,
-                    result
-                );
-
+                wLogger.debug(`Global(updateState)`, result);
                 return 'not-ready';
             }
 
@@ -63,22 +57,14 @@ export class Global extends AbstractState {
             this.skinFolder = result.skinFolder;
             this.memorySongsFolder = result.memorySongsFolder;
 
-            this.resetReportCount('global updateState');
+            this.resetReportCount('ATD(updateState)');
         } catch (exc) {
             this.reportError(
-                'global updateState',
+                'ATD(updateState)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `global updateState`,
-                (exc as any).message
+                `ATD(updateState) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `global updateState`,
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 
@@ -89,22 +75,14 @@ export class Global extends AbstractState {
 
             this.playTime = result.time;
 
-            this.resetReportCount('global updatePreciseState');
+            this.resetReportCount('ATD(updatePreciseState)');
         } catch (exc) {
             this.reportError(
-                'global updatePreciseState',
+                'ATD(updatePreciseState)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `global updatePreciseState`,
-                (exc as any).message
+                `ATD(updatePreciseState) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `global updatePreciseState`,
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 }

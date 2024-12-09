@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states/index';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
@@ -452,42 +452,26 @@ export class Settings extends AbstractState {
                     this.configList[result.key].setValue(result.value);
 
                     this.resetReportCount(
-                        `settings updateConfigState [${position}]`
+                        `ATD(updateConfigState)[${position}]`
                     );
                 } catch (exc) {
                     this.reportError(
-                        `settings updateConfigState [${position}]`,
+                        `ATD(updateConfigState)[${position}]`,
                         10,
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateConfigState [${position}]`,
-                        (exc as any).message
+                        `ATD(updateConfigState)[${position}] ${(exc as any).message}`
                     );
-                    wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateConfigState [${position}]`,
-                        exc
-                    );
+                    wLogger.debug(exc);
                 }
             }
 
-            this.resetReportCount('settings updateConfigState');
+            this.resetReportCount('ATD(updateConfigState)');
         } catch (exc) {
             this.reportError(
-                'settings updateConfigState',
+                'ATD(updateConfigState)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `settings updateConfigState`,
-                (exc as any).message
+                `ATD(updateConfigState) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `settings updateConfigState`,
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 
@@ -519,42 +503,26 @@ export class Settings extends AbstractState {
                     bindable.setValue(result.value);
 
                     this.resetReportCount(
-                        `settings updateBindingState [${position}]`
+                        `ATD(updateBindingState)[${position}]`
                     );
                 } catch (exc) {
                     this.reportError(
-                        `settings updateBindingState [${position}]`,
+                        `ATD(updateBindingState)[${position}]`,
                         10,
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateBindingState [${position}]`,
-                        (exc as any).message
+                        `ATD(updateBindingState)[${position}] ${(exc as any).message}`
                     );
-                    wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateBindingState [${position}]`,
-                        exc
-                    );
+                    wLogger.debug(exc);
                 }
             }
 
-            this.resetReportCount('settings updateBindingState');
+            this.resetReportCount('ATD(updateBindingState)');
         } catch (exc) {
             this.reportError(
-                'settings updateBindingState',
+                'ATD(updateBindingState)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `settings updateBindingState`,
-                (exc as any).message
+                `ATD(updateBindingState) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `settings updateBindingState`,
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 
@@ -566,22 +534,14 @@ export class Settings extends AbstractState {
             this.updateConfigState(pointers.config);
             this.updateBindingState(pointers.binding);
 
-            this.resetReportCount('settings updatestate');
+            this.resetReportCount('SETTINGS(updatestate)');
         } catch (exc) {
             this.reportError(
-                'settings updatestate',
+                'SETTINGS(updatestate)',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `settings updatestate`,
-                (exc as any).message
+                `SETTINGS(updatestate) ${(exc as any).message}`
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `settings updatestate`,
-                exc
-            );
+            wLogger.debug(exc);
         }
     }
 }

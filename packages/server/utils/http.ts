@@ -2,8 +2,6 @@ import { config, wLogger } from '@tosu/common';
 import { exec } from 'child_process';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
-import { sendJson } from './index';
-
 export interface ExtendedIncomingMessage extends IncomingMessage {
     instanceManager: any;
     body: string;
@@ -43,12 +41,12 @@ export class HttpServer {
 
         this.server.on('error', (err) => {
             if (err.message.includes('getaddrinfo')) {
-                wLogger.warn('server', 'Incorrect server ip or url');
+                wLogger.warn('Incorrect server ip or url');
                 return;
             }
 
-            wLogger.error('[server]', err.message);
-            wLogger.debug('[server]', err);
+            wLogger.error(`[server] ${err.message}`);
+            wLogger.debug(err);
         });
     }
 
@@ -84,18 +82,15 @@ export class HttpServer {
         let body = '';
 
         res.on('finish', () => {
-            const elapsedTime = (performance.now() - startTime).toFixed(2);
+            const finishTime = performance.now();
             wLogger.debug(
-                `[request]`,
-                `${elapsedTime}ms`,
-                req.method,
-                res.statusCode,
-                res.getHeader('content-type'),
-                req.url
+                `[${(finishTime - startTime).toFixed(2)}ms] ${req.method} ${
+                    res.statusCode
+                } ${res.getHeader('content-type')} ${req.url}`
             );
         });
 
-        const next = (index: number) => {
+        const next = (index) => {
             if (index < this.middlewares.length) {
                 const savedIndex = index;
                 const middleware = this.middlewares[index++];
@@ -104,13 +99,8 @@ export class HttpServer {
                     middleware(req, res, () => {
                         next(savedIndex + 1);
                     });
-                } catch (exc) {
-                    wLogger.error(
-                        '[server]',
-                        'middleware',
-                        (exc as Error).message
-                    );
-                    wLogger.debug('[server]', 'middleware', exc);
+                } catch (error) {
+                    wLogger.error('middleware error', error);
                 }
                 return;
             }
@@ -178,20 +168,7 @@ export class HttpServer {
             }
 
             if (!routeExists) continue;
-            try {
-                return route.handler(req, res);
-            } catch (exc) {
-                const message =
-                    typeof exc === 'string' ? exc : (exc as Error).message;
-
-                res.statusCode = 500;
-                res.statusMessage = message;
-
-                wLogger.error(parsedURL.pathname, message);
-                wLogger.debug(parsedURL.pathname, exc);
-
-                return sendJson(res, { error: message });
-            }
+            return route.handler(req, res);
         }
 
         res.statusCode = 404;
@@ -201,10 +178,7 @@ export class HttpServer {
     listen(port: number, hostname: string) {
         this.server.listen(port, hostname, () => {
             const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
-            wLogger.info(
-                '[server]',
-                `Dashboard started on http://${ip}:${port}`
-            );
+            wLogger.info(`Web server started on http://${ip}:${port}`);
 
             if (config.openDashboardOnStartup === true) {
                 const command =

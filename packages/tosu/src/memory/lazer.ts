@@ -100,10 +100,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         wLogger.debug(
-            'lazer',
-            this.pid,
-            'updateGameBaseAddress',
-            `${oldAddress?.toString(16)} => ${this.gameBaseAddress.toString(16)}`
+            'GameBase address - old:',
+            oldAddress?.toString(16),
+            'new:',
+            this.gameBaseAddress.toString(16)
         );
     }
 
@@ -129,7 +129,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         // Check if gamebase instance is valid
         if (!this.checkIfGameBase(this.gameBaseAddress)) {
-            wLogger.debug('lazer', this.pid, 'GameBase has been reset');
+            wLogger.debug('GameBase has been reset');
 
             const scanPattern = this.scanPatterns.spectatorClient;
             this.setPattern(
@@ -358,12 +358,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private initModMapping(gamemode: number) {
         if (!ModsCategories[gamemode]) {
-            wLogger.warn(
-                'lazer',
-                this.pid,
-                'initModMapping',
-                `Unknown mods gamemode: ${gamemode}`
-            );
+            wLogger.warn(`Unknown mods gamemode`, gamemode);
             return;
         }
 
@@ -1748,15 +1743,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!this.modMappings.has(gamemode.toString())) {
             try {
                 this.initModMapping(gamemode);
-            } catch (exc) {
-                wLogger.error(
-                    'lazer',
-                    this.pid,
-                    'global',
-                    'mods',
-                    (exc as Error).message
-                );
-                wLogger.debug('lazer', this.pid, 'global', 'mods', exc);
+            } catch (error) {
+                wLogger.debug('lazer-global', error);
             }
         }
 

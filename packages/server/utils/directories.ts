@@ -147,8 +147,8 @@ export function addCounterMetadata(html: string, filePath: string) {
 
         return html;
     } catch (error) {
-        wLogger.error('addCounterMetadata', (error as any).message);
-        wLogger.debug('addCounterMetadata', error);
+        wLogger.error((error as any).message);
+        wLogger.debug(error);
 
         return '';
     }

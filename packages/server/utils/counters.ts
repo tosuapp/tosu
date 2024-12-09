@@ -317,8 +317,8 @@ function rebuildJSON({
                 .replace('{GALLERY}', gallery)
                 .replace('{FOOTER}', footer);
         } catch (error) {
-            wLogger.error('rebuildJSON', item.name, (error as any).message);
-            wLogger.debug('rebuildJSON', item.name, error);
+            wLogger.error(`rebuild(${item.name})`, (error as any).message);
+            wLogger.debug(error);
         }
     }
 
@@ -384,9 +384,8 @@ export function getLocalCounters(): ICounter[] {
         const array = countersListTXT.map((r) => parseTXT(r));
         return array.concat(arrayOfLocal).filter((r) => r.name !== '');
     } catch (error) {
-        wLogger.error('getLocalCounters', (error as any).message);
-        wLogger.debug('getLocalCounters', error);
-
+        wLogger.error((error as any).message);
+        wLogger.debug(error);
         return [];
     }
 }
@@ -411,7 +410,7 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildLocalCounters', 'homepage read', err);
+                wLogger.debug(err);
                 res.writeHead(404, {
                     'Content-Type': 'text/html'
                 });
@@ -487,8 +486,8 @@ export async function buildExternalCounters(
         totalLocal = exists.length;
         totalAvailable = json.length;
     } catch (error) {
-        wLogger.error('buildExternalCounters', (error as any).message);
-        wLogger.debug('buildExternalCounters', error);
+        wLogger.error((error as any).message);
+        wLogger.debug(error);
 
         if (query != null) {
             res.writeHead(200, {
@@ -505,8 +504,10 @@ export async function buildExternalCounters(
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildExternalCounters', 'homepage read', err);
-                res.writeHead(404, { 'Content-Type': 'text/html' });
+                wLogger.debug(err);
+                res.writeHead(404, {
+                    'Content-Type': 'text/html'
+                });
 
                 res.end('<html>page not found</html>');
                 return;
@@ -757,8 +758,10 @@ export function buildSettings(res: http.ServerResponse) {
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildSettings', 'homepage read', err);
-                res.writeHead(404, { 'Content-Type': 'text/html' });
+                wLogger.debug(err);
+                res.writeHead(404, {
+                    'Content-Type': 'text/html'
+                });
 
                 res.end('<html>page not found</html>');
                 return;
@@ -800,8 +803,10 @@ export function buildInstructionLocal(res: http.ServerResponse) {
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildInstructionLocal', 'homepage read', err);
-                res.writeHead(404, { 'Content-Type': 'text/html' });
+                wLogger.debug(err);
+                res.writeHead(404, {
+                    'Content-Type': 'text/html'
+                });
 
                 res.end('<html>page not found</html>');
                 return;

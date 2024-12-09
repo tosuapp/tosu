@@ -7,11 +7,12 @@ export default function buildSCApi(app: HttpServer) {
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
-            throw new Error('osu is not ready/running');
+            res.statusCode = 500;
+            return sendJson(res, { error: 'not_ready' });
         }
 
         const json = osuInstance.getStateSC(req.instanceManager);
-        return sendJson(res, json);
+        sendJson(res, json);
     });
 
     app.route('/backgroundImage', 'GET', (req, res) =>

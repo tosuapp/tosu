@@ -149,7 +149,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             this.process.readInt(this.getPattern('rulesetsAddr') - 0xb) + 0x4
         );
 
-        if (rulesetAddr === 0) return 'rulesetAddr is zero';
+        if (rulesetAddr === 0) {
+            wLogger.debug('BDD(updateState) rulesetAddr is zero');
+            return null;
+        }
 
         // [Ruleset + 0x44] + 0x10
         const audioVelocityBase = this.process.readInt(
@@ -157,8 +160,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         );
 
         const bassDensityLength = this.process.readInt(audioVelocityBase + 0x4);
-        if (bassDensityLength < 40)
-            return 'bassDensity length less than 40 (basically it have 1024 values)';
+        if (bassDensityLength < 40) {
+            wLogger.debug(
+                'BDD(updateState) bassDensity length less than 40 (basically it have 1024 values)'
+            );
+            return null;
+        }
 
         const result: number[] = [];
         for (let i = 0; i < 40; i++) {
@@ -257,7 +264,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
                     result.push(i);
                 } catch (exc) {
-                    wLogger.debug('stable', this.pid, 'configOffsets', exc);
+                    wLogger.debug(exc);
                 }
             }
 
@@ -283,7 +290,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
                     result.push(i);
                 } catch (exc) {
-                    wLogger.debug('stable', this.pid, 'bindingsOffsets', exc);
+                    wLogger.debug(exc);
                 }
             }
 
@@ -375,6 +382,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
             const resultScreenBase = this.process.readInt(rulesetAddr + 0x38);
             if (resultScreenBase === 0) {
+                wLogger.debug('RSD(updateState) ');
                 return 'resultScreenBase is zero';
             }
 
@@ -773,7 +781,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const baseAddr = this.getPattern('baseAddr');
 
             const beatmapAddr = this.process.readPointer(baseAddr - 0xc);
-            if (beatmapAddr === 0) return 'beatmapAddr is 0';
+            if (beatmapAddr === 0) {
+                return 'beatmapAddr is 0';
+            }
 
             const gamemode = this.process.readPointer(baseAddr - 0x33);
             const checksum = this.process.readSharpString(
@@ -877,7 +887,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const rulesetAddr = this.process.readInt(
                 this.process.readInt(address - 0xb) + 0x4
             );
-            if (rulesetAddr === 0) return 'RulesetAddr is 0';
+            if (rulesetAddr === 0) {
+                return 'RulesetAddr is 0';
+            }
 
             const teamLeftBase = this.process.readInt(rulesetAddr + 0x1c);
             const teamRightBase = this.process.readInt(rulesetAddr + 0x20);
@@ -971,10 +983,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         continue;
                     }
 
-                    for (let m = 0; m < messagesSize; m++) {
+                    for (let i = 0; i < messagesSize; i++) {
                         try {
                             const current =
-                                messagesItems + this.getLeaderStart() + 0x4 * m;
+                                messagesItems + this.getLeaderStart() + 0x4 * i;
                             const currentItem = this.process.readInt(current);
 
                             // [Base + 0x4]
@@ -1004,25 +1016,13 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                                 content
                             });
                         } catch (exc) {
-                            wLogger.debug(
-                                'stable',
-                                this.pid,
-                                'tourneyChat',
-                                `message loop ${m}`,
-                                exc
-                            );
+                            wLogger.debug(exc);
                         }
                     }
 
                     return result;
                 } catch (exc) {
-                    wLogger.debug(
-                        'stable',
-                        this.pid,
-                        'tourneyChat',
-                        `chat loop ${i}`,
-                        exc
-                    );
+                    wLogger.debug(exc);
                 }
             }
 
@@ -1037,7 +1037,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const address = this.process.readPointer(
                 this.getPattern('spectatingUserPtr')
             );
-            if (!address) return 'Slot is not equiped';
+            if (!address) {
+                return 'Slot is not equiped';
+            }
 
             const userAccuracy = this.process.readDouble(address + 0x4);
             const userRankedScore = this.process.readLong(address + 0xc);

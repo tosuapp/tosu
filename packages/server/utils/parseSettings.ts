@@ -31,6 +31,7 @@ export function parseCounterSettings(
     try {
         // copy legacy settings instead of moving/renaming, because some could have their static folder on other drive
         if (fs.existsSync(legacySettingsValuesPath)) {
+            // wLogger.warn('counter-settings', 'copied legacy settings to new folder', decodeURI(folderName));
             fs.copyFileSync(legacySettingsValuesPath, settingsValuesPath);
             fs.renameSync(
                 legacySettingsValuesPath,
@@ -204,8 +205,11 @@ export function parseCounterSettings(
 
         return new Error('Undefined action to parse counter settings');
     } catch (exc) {
-        wLogger.error('parseCounterSettings', (exc as any).message);
-        wLogger.debug('parseCounterSettings', { staticPath, folderName }, exc);
+        wLogger.error(`parseCounterSettings: ${(exc as any).message}`);
+        wLogger.debug(exc, {
+            staticPath,
+            folderName
+        });
 
         return new Error(`parseCounterSettings Error: ${(exc as any).message}`);
     }
