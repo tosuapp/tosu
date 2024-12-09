@@ -778,7 +778,7 @@ app.mount('.main');
  */
 
 /**
- * @typedef {'text' | 'color' | 'number' | 'checkbox' | 'button' | 'options' | 'commands' | 'textarea' | 'password'} ISettingsType - The type of a setting.
+ * @typedef {'text' | 'color' | 'number' | 'checkbox' | 'button' | 'options' | 'commands' | 'textarea' | 'password' | 'header'} ISettingsType - The type of a setting.
  */
 
 /**
