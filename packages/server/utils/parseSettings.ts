@@ -150,6 +150,12 @@ export function parseCounterSettings(
                             break;
                         }
 
+                        // headers are meant to be in the settings page only
+                        case 'header': {
+                            delete values[setting.uniqueID];
+                            break;
+                        }
+
                         default: {
                             values[setting.uniqueID] = value;
                             break;
