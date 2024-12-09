@@ -49,7 +49,7 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
                 );
                 if (result instanceof Error) {
                     message = {
-                        error: result.name
+                        error: result.message
                     };
                     break;
                 }

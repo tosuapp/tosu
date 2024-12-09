@@ -107,6 +107,7 @@ export default function buildBaseApi(server: Server) {
                     })
                     .catch((reason) => {
                         fs.unlinkSync(tempPath);
+
                         wLogger.error(
                             '[overlay-unzip]',
                             folderName,
@@ -115,7 +116,7 @@ export default function buildBaseApi(server: Server) {
                         wLogger.debug('[overlay-unzip]', folderName, reason);
 
                         sendJson(res, {
-                            error: reason
+                            error: (reason as Error).message
                         });
                     });
             };
@@ -131,7 +132,7 @@ export default function buildBaseApi(server: Server) {
                     wLogger.debug(`[overlay-download]`, folderName, reason);
 
                     sendJson(res, {
-                        error: reason
+                        error: (reason as Error).message
                     });
                 });
         }
@@ -241,7 +242,7 @@ export default function buildBaseApi(server: Server) {
                 wLogger.debug(`[overlay-settings]`, folderName, settings);
 
                 return sendJson(res, {
-                    error: settings.name
+                    error: settings.message
                 });
             }
 
@@ -285,7 +286,7 @@ export default function buildBaseApi(server: Server) {
                     );
 
                     return sendJson(res, {
-                        error: result.name
+                        error: result.message
                     });
                 }
 
