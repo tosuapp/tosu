@@ -5,7 +5,7 @@ import { parseCounterSettings } from './parseSettings';
 import { ModifiedWebsocket } from './socket';
 
 export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
-    wLogger.debug(`WS_COMMANDS >>>`, data);
+    wLogger.debug('[ws]', `commands`, data);
     if (!data.includes(':')) {
         return;
     }
@@ -57,10 +57,12 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
                 message = result.values;
             } catch (exc) {
                 wLogger.error(
-                    `WS_COMMANDS(getSettings) >>>`,
-                    (exc as any).message
+                    '[ws]',
+                    `commands`,
+                    command,
+                    (exc as Error).message
                 );
-                wLogger.debug(exc);
+                wLogger.debug('[ws]', `commands`, command, exc);
             }
 
             break;
@@ -69,8 +71,13 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
         case 'applyFilters': {
             const json = JsonSafeParse(payload, new Error('Broken json'));
             if (json instanceof Error) {
-                wLogger.error(`applyFilter >>>`, (json as any).message);
-                wLogger.debug(json);
+                wLogger.error(
+                    '[ws]',
+                    `commands`,
+                    command,
+                    (json as Error).message
+                );
+                wLogger.debug('[ws]', `commands`, command, json);
                 return;
             }
 
@@ -87,10 +94,12 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
                 return;
             } catch (exc) {
                 wLogger.error(
-                    `WS_COMMANDS(applyFilter) >>>`,
-                    (exc as any).message
+                    '[ws]',
+                    `commands`,
+                    command,
+                    (exc as Error).message
                 );
-                wLogger.debug(exc);
+                wLogger.debug('[ws]', `commands`, command, exc);
             }
         }
     }
@@ -103,7 +112,7 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             })
         );
     } catch (exc) {
-        wLogger.error(`WS_COMMANDS(sending) >>>`, (exc as any).message);
-        wLogger.debug(exc);
+        wLogger.error('[ws]', `commands-send`, (exc as Error).message);
+        wLogger.debug('[ws]', `commands-send`, exc);
     }
 }

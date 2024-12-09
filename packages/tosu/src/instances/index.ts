@@ -131,8 +131,20 @@ export abstract class AbstractInstance {
             }
 
             return true;
-        } catch (error) {
-            wLogger.debug(`MP(resolvePatterns)[${this.pid}]`, error);
+        } catch (exc) {
+            wLogger.error(
+                ClientType[this.client],
+                this.pid,
+                'resolvePatterns',
+                (exc as Error).message
+            );
+            wLogger.debug(
+                ClientType[this.client],
+                this.pid,
+                'resolvePatterns',
+                exc
+            );
+
             return false;
         }
     }
@@ -148,19 +160,28 @@ export abstract class AbstractInstance {
                     throw new Error('Memory resolve failed');
                 }
 
-                wLogger.debug(
-                    `[${this.pid} ${this.client}] Took ${(performance.now() - s1).toFixed(2)} ms to scan patterns`
+                const elapsedTime = `${(performance.now() - s1).toFixed(2)}ms`;
+                wLogger.info(
+                    ClientType[this.client],
+                    this.pid,
+                    `All patterns resolved within ${elapsedTime}`
                 );
 
-                wLogger.info(
-                    `[${this.pid} ${this.client}] ALL PATTERNS ARE RESOLVED, STARTING WATCHING THE DATA`
-                );
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    `[${this.pid} ${this.client}] PATTERN SCANNING FAILED, TRYING ONE MORE TIME...`
+                    ClientType[this.client],
+                    this.pid,
+                    'Pattern scanning failed, Trying one more time...',
+                    (exc as Error).message
                 );
-                wLogger.debug(exc);
+                wLogger.debug(
+                    ClientType[this.client],
+                    this.pid,
+                    'Pattern scanning failed, Trying one more time...',
+                    exc
+                );
+
                 this.emitter.emit('onResolveFailed', this.pid);
                 return;
             }
@@ -179,7 +200,18 @@ export abstract class AbstractInstance {
             const result = await injectGameOverlay(this.process, this.bitness);
             this.isGameOverlayInjected = result === true;
         } catch (exc) {
-            wLogger.debug(`instance(injectGameOverlay)`, exc);
+            wLogger.error(
+                ClientType[this.client],
+                this.pid,
+                'injectGameOverlay',
+                (exc as Error).message
+            );
+            wLogger.debug(
+                ClientType[this.client],
+                this.pid,
+                'injectGameOverlay',
+                exc
+            );
         }
     }
 
@@ -197,11 +229,14 @@ export abstract class AbstractInstance {
         if (this.isDestroyed === true) return;
 
         if (!Process.isProcessExist(this.process.handle)) {
-            this.isDestroyed = true;
             wLogger.warn(
-                `OI(watchProcessHealth) osu!.exe at ${this.pid} got destroyed `
+                ClientType[this.client],
+                this.pid,
+                'osu!.exe got destroyed'
             );
+
             this.emitter.emit('onDestroy', this.pid);
+            this.isDestroyed = true;
         }
 
         setTimeout(this.watchProcessHealth, config.pollRate);

@@ -1,4 +1,11 @@
-import { Bitness, GameState, config, sleep, wLogger } from '@tosu/common';
+import {
+    Bitness,
+    ClientType,
+    GameState,
+    config,
+    sleep,
+    wLogger
+} from '@tosu/common';
 
 import { LazerMemory } from '@/memory/lazer';
 import { Gameplay } from '@/states/gameplay';
@@ -18,7 +25,7 @@ export class LazerInstance extends AbstractInstance {
     }
 
     async regularDataLoop(): Promise<void> {
-        wLogger.debug('SM(lazer:startDataLoop) starting');
+        wLogger.debug(ClientType[this.client], this.pid, 'regularDataLoop');
 
         const { global, menu, beatmapPP, gameplay, resultScreen, user } =
             this.getServices([
@@ -168,10 +175,19 @@ export class LazerInstance extends AbstractInstance {
 
                 await sleep(config.pollRate);
             } catch (exc) {
-                wLogger.debug(`SM(startDataLoop)[${this.pid}]`, exc);
                 wLogger.error(
-                    `SM(startDataLoop)[${this.pid}]`,
-                    (exc as any).message
+                    ClientType[this.client],
+                    this.pid,
+                    'regularDataLoop',
+                    'error within a loop',
+                    (exc as Error).message
+                );
+                wLogger.debug(
+                    ClientType[this.client],
+                    this.pid,
+                    'regularDataLoop',
+                    'error within a loop',
+                    exc
                 );
             }
         }

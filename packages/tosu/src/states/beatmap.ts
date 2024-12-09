@@ -226,19 +226,27 @@ export class BeatmapPP extends AbstractState {
             };
         } catch (exc) {
             wLogger.error(
-                `BPPD(updatePPAttributes)-${type}`,
-                (exc as any).message
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updatePPAttributes(${type})`,
+                (exc as Error).message
             );
-            wLogger.debug(`BPPD(updatePPAttributes)-${type}`, exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updatePPAttributes(${type})`,
+                exc
+            );
         }
     }
 
     updateCurrentAttributes(stars: number, pp: number) {
         if (this.currAttributes.pp.toFixed(2) !== pp.toFixed(2)) {
             wLogger.debug(
-                `BPPD(updateCurrentAttributes) maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(
-                    2
-                )} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateCurrentAttributes`,
+                `maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(2)} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
             );
         }
         const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
@@ -288,7 +296,10 @@ export class BeatmapPP extends AbstractState {
 
             if (menu.folder === '' && !lazerByPass) {
                 wLogger.debug(
-                    `BPPD(updateMapMetadata) Skip osu! music theme file`,
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmapPP updateMapMetadata`,
+                    `Skip osu! music theme file`,
                     {
                         SongsFolder: global.songsFolder,
                         Folder: menu.folder,
@@ -299,11 +310,17 @@ export class BeatmapPP extends AbstractState {
             }
 
             if (!menu.filename) {
-                wLogger.debug(`BPPD(updateMapMetadata) Skip new map creation`, {
-                    SongsFolder: global.songsFolder,
-                    Folder: menu.folder,
-                    Path: menu.filename
-                });
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmapPP updateMapMetadata`,
+                    `Skip new map creation`,
+                    {
+                        SongsFolder: global.songsFolder,
+                        Folder: menu.folder,
+                        Path: menu.filename
+                    }
+                );
                 return;
             }
 
@@ -321,7 +338,10 @@ export class BeatmapPP extends AbstractState {
                 } catch (exc) {
                     this.beatmap = undefined;
                     wLogger.debug(
-                        `BPPD(updateMapMetadata) unable to free beatmap`,
+                        ClientType[this.game.client],
+                        this.game.pid,
+                        `beatmapPP updateMapMetadata`,
+                        `unable to free beatmap`,
                         exc
                     );
                 }
@@ -332,13 +352,19 @@ export class BeatmapPP extends AbstractState {
                 } catch (exc) {
                     this.performanceAttributes = undefined;
                     wLogger.debug(
-                        `BPPD(updateMapMetadata) unable to free PerformanceAttributes`,
+                        ClientType[this.game.client],
+                        this.game.pid,
+                        `beatmapPP updateMapMetadata`,
+                        `unable to free PerformanceAttributes`,
                         exc
                     );
                 }
             } catch (error) {
                 wLogger.debug(
-                    `BPPD(updateMapMetadata) Can't get map`,
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmapPP updateMapMetadata`,
+                    `Can't get map`,
                     {
                         mapPath,
                         currentMods: currentMods.array,
@@ -356,7 +382,10 @@ export class BeatmapPP extends AbstractState {
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${totalTime}ms] Spend on opening beatmap`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateMapMetadata`,
+                `[${totalTime}ms] Spend on opening beatmap`
             );
 
             const attributes = new rosu.BeatmapAttributesBuilder({
@@ -396,9 +425,10 @@ export class BeatmapPP extends AbstractState {
 
             const calculationTime = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${(
-                    calculationTime - beatmapCheckTime
-                ).toFixed(2)}ms] Spend on attributes & strains calculation`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateMapMetadata`,
+                `[${(calculationTime - beatmapCheckTime).toFixed(2)}ms] Spend on attributes & strains calculation`
             );
 
             try {
@@ -451,29 +481,39 @@ export class BeatmapPP extends AbstractState {
                 this.timingPoints =
                     this.lazerBeatmap.controlPoints.timingPoints;
 
-                this.resetReportCount('BPPD(updateMapMetadataTimings)');
+                this.resetReportCount('beatmapPP updateMapMetadataTimings');
             } catch (exc) {
                 this.reportError(
-                    'BPPD(updateMapMetadataTimings)',
+                    'beatmapPP updateMapMetadataTimings',
                     10,
-                    `BPPD(updateMapMetadataTimings) ${(exc as any).message}`
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmapPP updateMapMetadata`,
+                    (exc as any).message
                 );
-                wLogger.debug(exc);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmapPP updateMapMetadata`,
+                    exc
+                );
                 return;
             }
 
             const beatmapParseTime = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${(
-                    beatmapParseTime - calculationTime
-                ).toFixed(2)}ms] Spend on parsing beatmap`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateMapMetadata`,
+                `[${(beatmapParseTime - calculationTime).toFixed(2)}ms] Spend on parsing beatmap`
             );
 
             const endTime = performance.now();
             wLogger.debug(
-                `BPPD(updateMapMetadata) [${(endTime - startTime).toFixed(
-                    2
-                )}ms] Total spent time`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateMapMetadata`,
+                `[${(endTime - startTime).toFixed(2)}ms] Total spent time`
             );
 
             this.calculatedMapAttributes = {
@@ -505,14 +545,22 @@ export class BeatmapPP extends AbstractState {
 
             attributes.free();
 
-            this.resetReportCount('BPPD(updateMapMetadata)');
+            this.resetReportCount('beatmapPP updateMapMetadata');
         } catch (exc) {
             this.reportError(
-                'BPPD(updateMapMetadata)',
+                'beatmapPP updateMapMetadata',
                 10,
-                `BPPD(updateMapMetadata) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateMapMetadata`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateMapMetadata`,
+                exc
+            );
         }
     }
 
@@ -632,7 +680,10 @@ export class BeatmapPP extends AbstractState {
 
             const endTIme = performance.now();
             wLogger.debug(
-                `BPPD(updateGraph) [${(endTIme - startTime).toFixed(2)}ms] Spend on processing graph strains`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateGraph`,
+                `[${(endTIme - startTime).toFixed(2)}ms] Spend on processing graph strains`
             );
 
             for (let i = 0; i < LEFT_OFFSET; i++) {
@@ -660,14 +711,22 @@ export class BeatmapPP extends AbstractState {
 
             strains.free();
 
-            this.resetReportCount('BPPD(updateGraph)');
+            this.resetReportCount('beatmapPP updateGraph');
         } catch (exc) {
             this.reportError(
-                'BPPD(updateGraph)',
+                'beatmapPP updateGraph',
                 10,
-                `BPPD(updateGraph) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateGraph`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateGraph`,
+                exc
+            );
         }
     }
 
@@ -689,7 +748,10 @@ export class BeatmapPP extends AbstractState {
             const beatmapParseTime = performance.now();
             const totalTime = (beatmapParseTime - startTime).toFixed(2);
             wLogger.debug(
-                `(updateEditorPP) Spend:${totalTime}ms on beatmap parsing`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateEditorPP`,
+                `${totalTime}ms Spend on beatmap parsing`
             );
 
             const passedObjects = this.lazerBeatmap.hitObjects.filter(
@@ -710,21 +772,30 @@ export class BeatmapPP extends AbstractState {
                     : curPerformance.difficulty.stars;
 
             wLogger.debug(
-                `(updateEditorPP) Spend:${(
-                    calculateTime - beatmapParseTime
-                ).toFixed(2)}ms on calculating performance`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateEditorPP`,
+                `${(calculateTime - beatmapParseTime).toFixed(2)}ms Spend on calculating performance`
             );
 
             curPerformance.free();
 
-            this.resetReportCount('BPPD(updateEditorPP)');
+            this.resetReportCount('beatmapPP updateEditorPP');
         } catch (exc) {
             this.reportError(
-                'BPPD(updateEditorPP)',
+                'beatmapPP updateEditorPP',
                 10,
-                `BPPD(updateEditorPP) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateEditorPP`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapPP updateEditorPP`,
+                exc
+            );
         }
     }
 
