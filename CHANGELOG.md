@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.2](https://github.com/tosuapp/tosu/compare/v4.1.1...v4.1.2) (2024-12-09)
+
+
+### Bug Fixes
+
+* trying to read intptr 0 ([9c5cf6e](https://github.com/tosuapp/tosu/commit/9c5cf6e20b9c7fb904ed0968731042033280dc1b))
+
 ### [4.1.1](https://github.com/tosuapp/tosu/compare/v4.1.0...v4.1.1) (2024-12-07)
 
 
