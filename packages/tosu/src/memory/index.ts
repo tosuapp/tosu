@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { ClientType, wLogger } from '@tosu/common';
 import { platform } from 'process';
 import { Process } from 'tsprocess/dist/process';
 
@@ -76,9 +76,10 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
             wLogger.debug(
-                `SM(checkIsBasesValid)[${this.pid}] ${entry[0]}: ${entry[1]
-                    .toString(16)
-                    .toUpperCase()}`
+                ClientType[this.game.client],
+                this.pid,
+                'checkIsBasesValid',
+                `${entry[0]}: ${entry[1].toString(16).toUpperCase()}`
             )
         );
         return !Object.values(this.patterns).some((base) => base === 0);

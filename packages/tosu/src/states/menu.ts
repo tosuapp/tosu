@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { ClientType, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
@@ -37,7 +37,12 @@ export class Menu extends AbstractState {
             if (typeof result === 'string') {
                 if (result === '') return;
 
-                wLogger.debug(`MD(updateState) ${result}`);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `menu updateState`,
+                    result
+                );
                 return 'not-ready';
             }
             if (typeof result === 'number') {
@@ -93,14 +98,22 @@ export class Menu extends AbstractState {
 
             this.previousMD5 = this.checksum;
 
-            this.resetReportCount('MB(updateState)');
+            this.resetReportCount('menu updateState');
         } catch (exc) {
             this.reportError(
-                'MB(updateState)',
+                'menu updateState',
                 10,
-                `MB(updateState) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `menu updateState`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `menu updateState`,
+                exc
+            );
         }
     }
 
@@ -111,19 +124,33 @@ export class Menu extends AbstractState {
             if (typeof result === 'string') {
                 if (result === '') return;
 
-                wLogger.debug(`MD(updateState) ${result}`);
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `menu updateMP3Length`,
+                    result
+                );
+
                 return 'not-ready';
             }
 
             this.mp3Length = result;
-            this.resetReportCount('MB(updateMP3Length)');
+            this.resetReportCount('menu updateMP3Length');
         } catch (exc) {
             this.reportError(
-                'MB(updateMP3Length)',
+                'menu updateMP3Length',
                 10,
-                `MB(updateMP3Length) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `menu updateMP3Length`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `menu updateMP3Length`,
+                exc
+            );
         }
     }
 }
