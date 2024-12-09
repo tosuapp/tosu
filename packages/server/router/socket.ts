@@ -21,7 +21,7 @@ export default function buildSocket({
     app.server.on('upgrade', function (request, socket, head) {
         const allowed = isRequestAllowed(request);
         if (!allowed) {
-            wLogger.warn('External WebSocket request detected', request.url, {
+            wLogger.warn('[ws]', 'External request detected', request.url, {
                 address: request.socket.remoteAddress,
                 origin: request.headers.origin,
                 referer: request.headers.referer
@@ -96,11 +96,8 @@ export default function buildSocket({
                 );
             }
         } catch (exc) {
-            wLogger.error(
-                `websocket connection (${request.url}) >>>`,
-                (exc as any).message
-            );
-            wLogger.debug(exc);
+            wLogger.error('[ws]', request.url, (exc as any).message);
+            wLogger.debug('[ws]', request.url, exc);
         }
     });
 }

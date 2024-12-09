@@ -77,22 +77,18 @@ export class Websocket {
             ws.originAddress = request.headers.origin || '';
             ws.remoteAddress = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
 
-            wLogger.debug(`WS(CONNECTED) >>> ${ws.id}`);
+            wLogger.debug('[ws]', 'connected', ws.id);
 
             ws.on('close', (reason, description) => {
                 this.clients.delete(ws.id);
 
-                wLogger.debug(
-                    `WS(CLOSED) >>> ${ws.id}: ${reason} [${description}]`
-                );
+                wLogger.debug('[ws]', 'closed', ws.id, reason, description);
             });
 
             ws.on('error', (reason, description) => {
                 this.clients.delete(ws.id);
 
-                wLogger.debug(
-                    `WS(ERROR) >>> ${ws.id}: ${reason} [${description}]`
-                );
+                wLogger.debug('[ws]', 'error', ws.id, reason, description);
             });
 
             if (typeof this.onMessageCallback === 'function') {
@@ -153,8 +149,8 @@ export class Websocket {
                     client.send(message);
                 });
             } catch (error) {
-                wLogger.error((error as any).message);
-                wLogger.debug(error);
+                wLogger.error('[ws]', 'loop', (error as any).message);
+                wLogger.debug('[ws]', 'loop', error);
             }
         }, config[this.pollRateFieldName]);
     }

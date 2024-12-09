@@ -29,15 +29,15 @@ export const wLogger = {
         const coloredText = colorText('info');
         console.log(coloredText, ...args);
 
-        if (config.debugLogging === true) writeLog('info', args);
+        writeLog('info', args);
     },
     debug: (...args: any) => {
+        writeLog('debug', args);
+
         if (config.debugLogging !== true) return;
 
         const coloredText = colorText('debug');
         console.log(coloredText, ...args);
-
-        writeLog('debug', args);
     },
     debugError: (...args: any) => {
         if (config.debugLogging !== true) return;
@@ -45,19 +45,19 @@ export const wLogger = {
         const coloredText = colorText('debugError');
         console.log(coloredText, ...args);
 
-        if (config.debugLogging === true) writeLog('debugError', args);
+        writeLog('debugError', args);
     },
     error: (...args: any) => {
         const coloredText = colorText('error');
         console.log(coloredText, ...args);
 
-        if (config.debugLogging === true) writeLog('error', args);
+        writeLog('error', args);
     },
     warn: (...args: any) => {
         const coloredText = colorText('warn');
         console.log(coloredText, ...args);
 
-        if (config.debugLogging === true) writeLog('warn', args);
+        writeLog('warn', args);
     }
 };
 

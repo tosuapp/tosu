@@ -16,8 +16,8 @@ export const unzip = (zipPath: string, extractPath: string): Promise<string> =>
             zip.extractAllTo(extractPath, /* overwrite */ true);
             resolve(extractPath);
         } catch (error) {
-            wLogger.error((error as any).message);
-            wLogger.debug(error);
+            wLogger.error('[unzip]', (error as any).message);
+            wLogger.debug('[unzip]', error);
             reject(error);
         }
     });

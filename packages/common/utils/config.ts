@@ -162,7 +162,10 @@ export const updateConfigFile = () => {
     }
 
     if (newOptions !== '') {
-        wLogger.warn(`New options available in config: ${newOptions}\n`);
+        wLogger.warn(
+            '[config]',
+            `New options available in config: ${newOptions}\n`
+        );
     }
 };
 
@@ -200,7 +203,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 
     const { parsed, error } = dotenv.config({ path: configPath });
     if (error != null || parsed == null) {
-        wLogger.error(`Config ${status} failed`);
+        wLogger.error('[config]', `Config ${status} failed`);
         return;
     }
 
@@ -295,7 +298,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         fs.mkdirSync(staticPath);
     }
 
-    if (updated) wLogger.info(`Config ${status}ed`);
+    if (updated) wLogger.info('[config]', `Config ${status}ed`);
 };
 
 export const writeConfig = (httpServer: any, options: any) => {

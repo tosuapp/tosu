@@ -15,10 +15,8 @@ export default function buildAssetsApi(server: Server) {
             path.join(pkgAssetsPath, req.params.filePath),
             (err, content) => {
                 if (err) {
-                    wLogger.debug(err);
-                    res.writeHead(404, {
-                        'Content-Type': 'text/html'
-                    });
+                    wLogger.debug(`/assets/${req.params.filePath}`, err);
+                    res.writeHead(404, { 'Content-Type': 'text/html' });
 
                     res.end('<html>page not found</html>');
                     return;

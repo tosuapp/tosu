@@ -1,4 +1,4 @@
-import { wLogger } from '@tosu/common';
+import { ClientType, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
@@ -36,14 +36,22 @@ export class User extends AbstractState {
             this.backgroundColour = profile.backgroundColour;
             this.rawLoginStatus = profile.rawLoginStatus;
 
-            this.resetReportCount('User(updateState)');
+            this.resetReportCount('user updateState');
         } catch (exc) {
             this.reportError(
-                'User(updateState)',
+                'user updateState',
                 10,
-                `User(updateState) ${(exc as any).message}`
+                ClientType[this.game.client],
+                this.game.pid,
+                `user updateState`,
+                (exc as any).message
             );
-            wLogger.debug(exc);
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `user updateState`,
+                exc
+            );
         }
     }
 }
