@@ -165,6 +165,10 @@ export class LazerInstance extends AbstractInstance {
                         resultScreen.updatePerformance();
                         break;
 
+                    case GameState.selectMulti:
+                    case GameState.lobby:
+                        break;
+
                     default:
                         gameplay.init(undefined, `default-${global.status}`);
                         resultScreen.init();
