@@ -116,7 +116,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             // might potentially change
-            return this.process.readLong(vtable) === 7559159218176;
+            return this.process.readLong(vtable) === 7593518956544;
         } catch {
             return false;
         }
@@ -152,48 +152,54 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private screenStack() {
-        return this.process.readIntPtr(this.gameBase() + 0x5f0);
+        return this.process.readIntPtr(this.gameBase() + 0x5f8);
     }
 
+    // checks <game>k__BackingField
     private checkIfPlayer(address: number) {
-        return this.process.readIntPtr(address + 0x3f8) === this.gameBase();
+        return this.process.readIntPtr(address + 0x400) === this.gameBase();
     }
 
+    // Checks <api>k__BackingField and <StatisticsPanel>k__BackingField (to GameBase::<Storage>k__BackingField)
     private checkIfResultScreen(address: number) {
         return (
-            this.process.readIntPtr(address + 0x3b8) ===
+            this.process.readIntPtr(address + 0x3c0) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x3c0) !==
+            this.process.readIntPtr(address + 0x3c8) !==
                 this.process.readIntPtr(this.gameBase() + 0x440)
         );
     }
 
+    // checks <game>k__BackingField
     private checkIfSongSelect(address: number) {
-        return this.process.readIntPtr(address + 0x3b0) === this.gameBase();
+        return this.process.readIntPtr(address + 0x3b8) === this.gameBase();
     }
 
+    // checks <logo>k__BackingField and osuLogo
     private checkIfPlayerLoader(address: number) {
         return (
-            this.process.readIntPtr(address + 0x378) ===
-            this.process.readIntPtr(address + 0x468)
+            this.process.readIntPtr(address + 0x380) ===
+            this.process.readIntPtr(address + 0x480)
         );
     }
 
+    // Checks <api>k__BackingField and <realm>k__BackingField
     private checkIfEditor(address: number) {
         return (
-            this.process.readIntPtr(address + 0x430) ===
+            this.process.readIntPtr(address + 0x438) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x490) ===
-                this.process.readIntPtr(this.gameBase() + 0x430)
+            this.process.readIntPtr(address + 0x3b8) ===
+                this.process.readIntPtr(this.gameBase() + 0x4b8)
         );
     }
 
+    // Checks <API>k__BackingField and <client>k__BackingField
     private checkIfMulti(address: number) {
         return (
-            this.process.readIntPtr(address + 0x3c0) ===
+            this.process.readIntPtr(address + 0x3c8) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x338) ===
-                this.process.readIntPtr(this.gameBase() + 0x430)
+            this.process.readIntPtr(address + 0x3d8) ===
+                this.process.readIntPtr(this.gameBase() + 0x4a8)
         );
     }
 
@@ -246,7 +252,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!player) {
             return 0;
         }
-        return this.process.readIntPtr(player + 0x470);
+        return this.process.readIntPtr(player + 0x478);
     }
 
     private scoreInfo(player: number) {
@@ -755,33 +761,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (username === 'osu!salad') username = 'salad!';
         if (username === 'osu!topus') username = 'osu!topus!';
 
-        let pp = 0;
-
         let combo = 0;
 
         const player = this.player();
         if (player) {
-            const scoreProcessor = this.process.readIntPtr(player + 0x438);
+            const scoreProcessor = this.process.readIntPtr(player + 0x440);
 
             const comboBindable = this.process.readIntPtr(
                 scoreProcessor + 0x250
             );
 
             combo = this.process.readInt(comboBindable + 0x40);
-
-            const hudOverlay = this.process.readIntPtr(player + 0x450);
-            const mainComponents = this.readComponents(
-                this.process.readIntPtr(hudOverlay + 0x3b8)
-            );
-
-            const ppCounter = this.findPPCounter(
-                mainComponents,
-                scoreProcessor
-            );
-
-            if (ppCounter) {
-                pp = this.process.readInt(ppCounter + 0x324);
-            }
         }
 
         let score = this.process.readLong(scoreInfo + 0x98);
@@ -814,8 +804,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             smallTickHits: statistics.largeTickHit,
             largeTickHits: statistics.smallTickHit,
             combo,
-            maxCombo: this.process.readInt(scoreInfo + 0xc4),
-            pp
+            maxCombo: this.process.readInt(scoreInfo + 0xc4)
         };
     }
 
@@ -833,6 +822,24 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const user = this.process.readIntPtr(userBindable + 0x20);
 
         const statistics = this.process.readIntPtr(user + 0xa8);
+
+        if (statistics === 0) {
+            return {
+                id: 0,
+                name: 'Guest',
+                accuracy: 0,
+                rankedScore: 0,
+                level: 0,
+                playCount: 0,
+                playMode: 0,
+                rank: 0,
+                countryCode: 0,
+                performancePoints: 0,
+                rawBanchoStatus: 0,
+                backgroundColour: 0xffffffff,
+                rawLoginStatus: 0
+            };
+        }
 
         const ppDecimal = statistics + 0x60 + 0x8;
 
@@ -895,7 +902,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     resultScreen(): IResultScreen {
         const selectedScoreBindable = this.process.readIntPtr(
-            this.currentScreen + 0x390
+            this.currentScreen + 0x398
         );
 
         const scoreInfo = this.process.readIntPtr(selectedScoreBindable + 0x20);
@@ -1007,7 +1014,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             const player = this.player();
-            const hudOverlay = this.process.readIntPtr(player + 0x450);
+            const hudOverlay = this.process.readIntPtr(player + 0x458);
+
             const inputController = this.process.readIntPtr(hudOverlay + 0x348);
             const rulesetComponents = this.readComponents(
                 this.process.readIntPtr(hudOverlay + 0x3c0)
@@ -1126,7 +1134,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private hitEvents(): number[] {
         const player = this.player();
-        const scoreProcessor = this.process.readIntPtr(player + 0x438);
+        const scoreProcessor = this.process.readIntPtr(player + 0x440);
         const hitEventsList = this.process.readIntPtr(scoreProcessor + 0x288);
         const hitEvents = this.readListItems(hitEventsList, true, 0x40);
 
@@ -1804,6 +1812,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
         const isMulti = this.checkIfMulti(this.currentScreen);
+
         let status = 0;
 
         if (isPlaying || isPlayerLoader) {
@@ -1816,7 +1825,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             status = GameState.edit;
         } else if (isMulti) {
             const roomManager = this.process.readIntPtr(
-                this.currentScreen + 0x3b0
+                this.currentScreen + 0x3b8
             );
             const joinedRoomBindable = this.process.readIntPtr(
                 roomManager + 0x208
@@ -1833,7 +1842,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.isPlayerLoading = isPlayerLoader;
 
         if (isPlaying) {
-            const dependencies = this.process.readIntPtr(this.player() + 0x480);
+            const dependencies = this.process.readIntPtr(this.player() + 0x488);
             const cache = this.process.readIntPtr(dependencies + 0x8);
             const entries = this.process.readIntPtr(cache + 0x10);
             const drawableRuleset = this.process.readIntPtr(entries + 0x10);
