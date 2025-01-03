@@ -3,6 +3,7 @@ import {
     checkGameOverlayConfig,
     downloadFile,
     getProgramPath,
+    sleep,
     unzip,
     wLogger
 } from '@tosu/common';
@@ -57,6 +58,9 @@ export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
             );
             return false;
         }
+
+        // dum sleep to wait until all osu libraries are loaded?
+        await sleep(1000 * 10);
 
         return await new Promise((resolve) => {
             const child = execFile(
