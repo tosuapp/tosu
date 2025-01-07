@@ -84,7 +84,15 @@ jobs:
           signing-policy-slug: 'test-signing'
           github-artifact-id: '${{ steps.upload-artifact-windows.outputs.artifact-id }}'
           wait-for-completion: true
-          output-artifact-directory: '/tosu'
+          output-artifact-directory: '/signed'
+
+      - name: ✍️🚀 - Upload signed artifacts for windows
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with: {
+          name: "tosu-windows-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}-signed",
+          path: "signed/tosu-windows-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}.zip"
+        }
 
       # - name: 🚀 - Upload artifacts for mac
       #   if: matrix.os == 'macos-latest'
