@@ -81,7 +81,7 @@ jobs:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '5b025426-9c79-4f04-87e8-64cf64131d0b'
           project-slug: 'tosu'
-          signing-policy-slug: 'test-signing'
+          signing-policy-slug: 'release-signing'
           github-artifact-id: '${{ steps.upload-artifact-windows.outputs.artifact-id }}'
 
       # - name: 🚀 - Upload artifacts for mac

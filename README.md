@@ -135,6 +135,13 @@ Support
 - If you need help setting up this program or have any suggestions/comissions, feel free to go to the [discord](https://discord.gg/WX7BTs8kwh) channel above in the `🔵 tosu` section
 ---
 
+<br/>
+
+Sponsorship
+---
+| [![](./.github/sponsors/signpath.png)](https://signpath.io/) | Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
+| :----------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------: |
+
 <br />
 
 ## Maintainers
