@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.7](https://github.com/tosuapp/tosu/compare/v4.1.6...v4.1.7) (2025-01-16)
+
+
+### Bug Fixes
+
+* change configurationAddr and check for skinAddr is zero ([477a06c](https://github.com/tosuapp/tosu/commit/477a06c6167ef324ef597ce464e075b7f61a633b))
+
 ### [4.1.6](https://github.com/tosuapp/tosu/compare/v4.1.5...v4.1.6) (2025-01-08)
 
 ### [4.1.5](https://github.com/tosuapp/tosu/compare/v4.1.4...v4.1.5) (2025-01-07)
