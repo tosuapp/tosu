@@ -66,8 +66,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             pattern: '83 E0 20 85 C0 7E 2F'
         },
         configurationAddr: {
-            pattern: '7E 07 8D 65 F8 5E 5F 5D C3 E8',
-            offset: -0xd
+            pattern:
+                '8D 45 EC 50 8B 0D ?? ?? ?? ?? 8B D7 39 09 E8 ?? ?? ?? ?? 85 C0 74 ?? 8B 4D EC',
+            offset: 0x6
         },
         bindingsAddr: {
             pattern: '8D 7D D0 B9 08 00 00 00 33 C0 F3 AB 8B CE 89 4D DC B9',
@@ -727,9 +728,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             if (skinOsuAddr !== 0) {
                 const skinOsuBase = this.process.readInt(skinOsuAddr);
 
-                skinFolder = this.process.readSharpString(
-                    this.process.readInt(skinOsuBase + 0x44)
-                );
+                if (skinOsuBase !== 0) {
+                    skinFolder = this.process.readSharpString(
+                        this.process.readInt(skinOsuBase + 0x44)
+                    );
+                }
             }
 
             let mods = calculateMods(menuMods, true);
