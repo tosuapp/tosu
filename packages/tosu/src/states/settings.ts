@@ -446,8 +446,10 @@ export class Settings extends AbstractState {
                         position,
                         this.configList
                     );
-                    if (result === null) continue;
+
                     if (result instanceof Error) throw result;
+                    if (result === null || !result.key || !result.value)
+                        continue;
 
                     this.configList[result.key].setValue(result.value);
 
