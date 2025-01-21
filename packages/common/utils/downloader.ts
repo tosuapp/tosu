@@ -18,9 +18,7 @@ export const updateProgressBar = (
     const progressBar = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
 
     process.stdout.write(
-        `${coloredText} ${title}: [${progressBar}] ${(progress * 100).toFixed(
-            2
-        )}%${message}\r`
+        `${coloredText} ${title}: [${progressBar}] ${(progress * 100).toFixed(2)}%${message}\r`
     );
 
     if (progress === 1) {

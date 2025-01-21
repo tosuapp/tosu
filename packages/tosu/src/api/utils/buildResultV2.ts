@@ -32,7 +32,8 @@ import { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
-    gameMode: any
+    gameMode: any,
+    client: ClientType
 ): Leaderboard => {
     const hits = {
         300: memoryPlayer.h300,
@@ -53,7 +54,7 @@ const convertMemoryPlayerToResult = (
         name: memoryPlayer.name,
 
         score: memoryPlayer.score,
-        accuracy: calculateAccuracy({ hits, mode: gameMode }),
+        accuracy: calculateAccuracy({ _round: true, hits, mode: gameMode }),
 
         hits,
 
@@ -69,6 +70,7 @@ const convertMemoryPlayerToResult = (
             rate: memoryPlayer.mods.rate
         },
         rank: calculateGrade({
+            _lazer: client === ClientType.lazer,
             mods: memoryPlayer.mods.number,
             mode: gameMode,
             hits
@@ -263,7 +265,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         },
         play: buildPlay(gameplay, beatmapPP, currentMods),
         leaderboard: gameplay.leaderboardScores.map((slot) =>
-            convertMemoryPlayerToResult(slot, Rulesets[gameplay.mode])
+            convertMemoryPlayerToResult(
+                slot,
+                Rulesets[gameplay.mode],
+                osuInstance.client
+            )
         ),
         performance: {
             accuracy: beatmapPP.ppAcc,

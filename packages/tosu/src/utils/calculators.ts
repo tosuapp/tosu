@@ -5,8 +5,10 @@ import { OsuMods } from '@/utils/osuMods.types';
  */
 export const calculateAccuracy = ({
     hits,
-    mode
+    mode,
+    _round
 }: {
+    _round: boolean;
     hits: {
         300: any;
         100: any;
@@ -53,17 +55,20 @@ export const calculateAccuracy = ({
             break;
     }
 
-    return parseFloat(acc.toFixed(2));
+    if (_round === true) return parseFloat(acc.toFixed(2));
+    return acc;
 };
 
 /**
  * Used to calculate grade out of hits
  */
 export const calculateGrade = ({
+    _lazer,
     hits,
     mods,
     mode
 }: {
+    _lazer: boolean;
     hits: {
         300: number;
         100: number;
@@ -78,10 +83,7 @@ export const calculateGrade = ({
     let silver = false;
 
     if (typeof mods === 'string') {
-        silver =
-            mods.toLowerCase().indexOf('hd') > -1
-                ? true
-                : mods.toLowerCase().indexOf('fl') > -1;
+        silver = /hd|fl/i.test(mods.toLowerCase());
     }
 
     if (typeof mods === 'number') {
@@ -90,104 +92,130 @@ export const calculateGrade = ({
             (mods & OsuMods.Flashlight) === OsuMods.Flashlight;
     }
 
-    let total = 0;
-    let acc = 0.0;
-
-    let r300 = 0;
-    let r50 = 0;
-
+    const acc = calculateAccuracy({ hits, mode, _round: false }) / 100;
     let rank = '';
 
-    switch (mode) {
-        case 0:
-            total = hits[300] + hits[100] + hits[50] + hits[0];
-            acc =
-                total > 0
-                    ? (hits[50] * 50 + hits[100] * 100 + hits[300] * 300) /
-                      (total * 300)
-                    : 1;
+    if (_lazer === true) {
+        switch (mode) {
+            case 0:
+            case 1: {
+                if (acc === 1) rank = silver ? 'XH' : 'X';
+                else if (acc >= 0.95 && hits[0] === 0)
+                    rank = silver ? 'SH' : 'S';
+                else if (acc >= 0.9) rank = 'A';
+                else if (acc >= 0.8) rank = 'B';
+                else if (acc >= 0.7) rank = 'C';
+                else rank = 'D';
 
-            r300 = hits[300] / total;
-            r50 = hits[50] / total;
+                break;
+            }
 
-            if (r300 === 1) rank = silver ? 'XH' : 'X';
-            else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0) {
-                rank = silver ? 'SH' : 'S';
-            } else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) rank = 'A';
-            else if ((r300 > 0.7 && hits[0] === 0) || r300 > 0.8) rank = 'B';
-            else if (r300 > 0.6) rank = 'C';
-            else rank = 'D';
+            case 2: {
+                if (acc === 1) rank = silver ? 'XH' : 'X';
+                else if (acc >= 0.98) rank = silver ? 'SH' : 'S';
+                else if (acc >= 0.94) rank = 'A';
+                else if (acc >= 0.9) rank = 'B';
+                else if (acc >= 0.85) rank = 'C';
+                else rank = 'D';
 
-            break;
+                break;
+            }
 
-        case 1:
-            total = hits[300] + hits[100] + hits[50] + hits[0];
-            acc =
-                total > 0
-                    ? (hits[100] * 150 + hits[300] * 300) / (total * 300)
-                    : 1;
+            case 3: {
+                if (acc === 1) rank = silver ? 'XH' : 'X';
+                else if (acc >= 0.95) rank = silver ? 'SH' : 'S';
+                else if (acc >= 0.9) rank = 'A';
+                else if (acc >= 0.8) rank = 'B';
+                else if (acc >= 0.7) rank = 'C';
+                else rank = 'D';
 
-            r300 = hits[300] / total;
-            r50 = hits[50] / total;
+                break;
+            }
+        }
+    } else {
+        switch (mode) {
+            case 0: {
+                const total = hits[300] + hits[100] + hits[50] + hits[0];
+                if (total === 0) {
+                    rank = silver ? 'XH' : 'X';
+                    break;
+                }
 
-            if (r300 === 1) rank = silver ? 'XH' : 'X';
-            else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0) {
-                rank = silver ? 'SH' : 'S';
-            } else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) rank = 'A';
-            else if ((r300 > 0.7 && hits[0] === 0) || r300 > 0.8) rank = 'B';
-            else if (r300 > 0.6) rank = 'C';
-            else rank = 'D';
+                let r300 = 0;
+                let r50 = 0;
 
-            break;
+                r300 = hits[300] / total;
+                r50 = hits[50] / total;
 
-        case 2:
-            total = hits[300] + hits[100] + hits[50] + hits[0] + hits.katu;
-            acc = total > 0 ? (hits[50] + hits[100] + hits[300]) / total : 1;
+                if (r300 === 1) {
+                    rank = silver ? 'XH' : 'X';
+                } else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0) {
+                    rank = silver ? 'SH' : 'S';
+                } else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) {
+                    rank = 'A';
+                } else if ((r300 > 0.7 && hits[0] === 0) || r300 > 0.8) {
+                    rank = 'B';
+                } else if (r300 > 0.6) {
+                    rank = 'C';
+                } else {
+                    rank = 'D';
+                }
 
-            r300 = hits[300] / total;
-            r50 = hits[50] / total;
+                break;
+            }
 
-            if (acc === 1) rank = silver ? 'XH' : 'X';
-            else if (acc > 0.98) rank = silver ? 'SH' : 'S';
-            else if (acc > 0.94) rank = 'A';
-            else if (acc > 0.9) rank = 'B';
-            else if (acc > 0.85) rank = 'C';
-            else rank = 'D';
+            case 1: {
+                const total = hits[300] + hits[100] + hits[50] + hits[0];
+                if (total === 0) {
+                    rank = silver ? 'XH' : 'X';
+                    break;
+                }
 
-            break;
+                let r300 = 0;
+                let r50 = 0;
 
-        case 3:
-            total =
-                hits[300] +
-                hits[100] +
-                hits[50] +
-                hits[0] +
-                hits.geki +
-                hits.katu;
-            acc =
-                total > 0
-                    ? (hits[50] * 50 +
-                          hits[100] * 100 +
-                          hits.katu * 200 +
-                          (hits[300] + hits.geki) * 300) /
-                      (total * 300)
-                    : 1;
+                r300 = hits[300] / total;
+                r50 = hits[50] / total;
 
-            r300 = hits[300] / total;
-            r50 = hits[50] / total;
+                if (r300 === 1) {
+                    rank = silver ? 'XH' : 'X';
+                } else if (r300 > 0.9 && r50 < 0.01 && hits[0] === 0) {
+                    rank = silver ? 'SH' : 'S';
+                } else if ((r300 > 0.8 && hits[0] === 0) || r300 > 0.9) {
+                    rank = 'A';
+                } else if ((r300 > 0.7 && hits[0] === 0) || r300 > 0.8) {
+                    rank = 'B';
+                } else if (r300 > 0.6) {
+                    rank = 'C';
+                } else {
+                    rank = 'D';
+                }
 
-            if (acc === 1) rank = silver ? 'XH' : 'X';
-            else if (acc > 0.95) rank = silver ? 'SH' : 'S';
-            else if (acc > 0.9) rank = 'A';
-            else if (acc > 0.8) rank = 'B';
-            else if (acc > 0.7) rank = 'C';
-            else rank = 'D';
+                break;
+            }
 
-            break;
-    }
+            case 2: {
+                if (acc === 1) rank = silver ? 'XH' : 'X';
+                else if (acc > 0.98) rank = silver ? 'SH' : 'S';
+                else if (acc > 0.94) rank = 'A';
+                else if (acc > 0.9) rank = 'B';
+                else if (acc > 0.85) rank = 'C';
+                else rank = 'D';
 
-    if (total === 0) {
-        rank = silver ? 'XH' : 'X';
+                break;
+            }
+
+            case 3: {
+                if (acc === 1) rank = silver ? 'XH' : 'X';
+                else if (acc > 0.95) rank = silver ? 'SH' : 'S';
+                else if (acc > 0.9) rank = 'A';
+                else if (acc > 0.8) rank = 'B';
+                else if (acc > 0.7) rank = 'C';
+                else rank = 'D';
+
+                break;
+            }
+        }
     }
 
     return rank;
