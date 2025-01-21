@@ -117,6 +117,8 @@ export interface Profile {
 }
 
 export interface Beatmap {
+    isKiai: boolean;
+    isBreak: boolean;
     isConvert: boolean;
     time: BeatmapTime;
     status: NumberName;

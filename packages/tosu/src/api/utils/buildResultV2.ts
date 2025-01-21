@@ -230,6 +230,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             backgroundColour: user.backgroundColour?.toString(16)
         },
         beatmap: {
+            isKiai: beatmapPP.isKiai,
+            isBreak: beatmapPP.isBreak,
             isConvert:
                 beatmapPP.mode === 0 ? beatmapPP.mode !== currentMode : false,
             time: {

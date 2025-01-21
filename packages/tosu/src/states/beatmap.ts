@@ -1,11 +1,7 @@
 import rosu from '@kotrikd/rosu-pp';
 import { ClientType, config, wLogger } from '@tosu/common';
 import fs from 'fs';
-import {
-    BeatmapBreakEvent,
-    Beatmap as ParsedBeatmap,
-    TimingPoint
-} from 'osu-classes';
+import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 import path from 'path';
 
@@ -77,7 +73,21 @@ interface BeatmapPPTimings {
     full: number;
 }
 
+interface BreakPoint {
+    hasEffect: boolean;
+    start: number;
+    end: number;
+}
+
+interface KiaiPoint {
+    start: number;
+    end: number;
+}
+
 export class BeatmapPP extends AbstractState {
+    isKiai: boolean;
+    isBreak: boolean;
+
     beatmap?: rosu.Beatmap;
     lazerBeatmap?: ParsedBeatmap;
     performanceAttributes?: rosu.PerformanceAttributes;
@@ -123,7 +133,8 @@ export class BeatmapPP extends AbstractState {
     };
 
     timingPoints: TimingPoint[] = [];
-    breaks: BeatmapBreakEvent[] = [];
+    breaks: BreakPoint[] = [];
+    kiais: KiaiPoint[] = [];
 
     constructor(game: AbstractInstance) {
         super(game);
@@ -132,6 +143,9 @@ export class BeatmapPP extends AbstractState {
     }
 
     init() {
+        this.isKiai = false;
+        this.isBreak = false;
+
         this.strains = [];
         this.strainsAll = {
             series: [],
@@ -208,6 +222,7 @@ export class BeatmapPP extends AbstractState {
         };
         this.timingPoints = [];
         this.breaks = [];
+        this.kiais = [];
     }
 
     updatePPAttributes(
@@ -466,7 +481,11 @@ export class BeatmapPP extends AbstractState {
                 this.minBPM = Math.round(bpmMin * this.clockRate);
                 this.maxBPM = Math.round(bpmMax * this.clockRate);
 
-                this.breaks = this.lazerBeatmap.events.breaks;
+                this.breaks = this.lazerBeatmap.events.breaks.map((r) => ({
+                    hasEffect: r.hasEffect,
+                    start: r.startTime,
+                    end: r.endTime
+                }));
 
                 const firstObj = Math.round(
                     this.lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
@@ -480,6 +499,20 @@ export class BeatmapPP extends AbstractState {
 
                 this.timingPoints =
                     this.lazerBeatmap.controlPoints.timingPoints;
+
+                const kiais: KiaiPoint[] = [];
+                const points = this.lazerBeatmap.controlPoints.effectPoints;
+                for (let i = 0; i < points.length; i++) {
+                    const point = points[i];
+                    if (point.kiai === false) {
+                        kiais[kiais.length - 1].end = point.startTime;
+                        continue;
+                    }
+
+                    kiais.push({ start: point.startTime, end: -1 });
+                }
+
+                this.kiais = kiais;
 
                 this.resetReportCount('beatmapPP updateMapMetadataTimings');
             } catch (exc) {
@@ -799,17 +832,20 @@ export class BeatmapPP extends AbstractState {
         }
     }
 
-    updateRealTimeBPM(timeMS: number, multiply: number) {
+    updateEventsStatus(ms: number, multiply: number) {
         if (!this.lazerBeatmap) return;
 
         const bpm =
             this.lazerBeatmap.controlPoints.timingPoints
-                // @ts-ignore
+                // @ts-expect-error
                 .toReversed()
-                .find((r) => r.startTime <= timeMS && r.bpm !== 0)?.bpm ||
+                .find((r) => r.startTime <= ms && r.bpm !== 0)?.bpm ||
             this.lazerBeatmap.controlPoints.timingPoints[0]?.bpm ||
             0.0;
 
         this.realtimeBPM = Math.round(bpm * multiply);
+
+        this.isKiai = this.kiais.some((r) => ms >= r.start && ms <= r.end);
+        this.isBreak = this.breaks.some((r) => ms >= r.start && ms <= r.end);
     }
 }
