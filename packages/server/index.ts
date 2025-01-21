@@ -121,7 +121,6 @@ export class Server {
             }
 
             wLogger.warn('[request]', 'Unallowed request', req.url, {
-                address: req.socket.remoteAddress,
                 origin: req.headers.origin,
                 referer: req.headers.referer
             });

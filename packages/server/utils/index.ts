@@ -116,12 +116,29 @@ function isAllowedIP(url: string | undefined) {
 
     const allowedIPs = config.allowedIPs.split(',');
     try {
-        const parseURL = new URL(url);
-        return allowedIPs.some(
-            (r) =>
-                r.toLowerCase().trim() ===
-                parseURL.hostname.toLowerCase().trim()
-        );
+        const hostname = new URL(url).hostname.toLowerCase().trim();
+        return allowedIPs.some((pattern) => {
+            // compare IP's length and match wildcard like comparision
+            if (pattern.includes('*') && pattern.includes('.')) {
+                const patternLength = pattern.match(/\./g)?.length || 0;
+                const hostnameLength = hostname.match(/\./g)?.length || 0;
+
+                if (patternLength !== 3 || hostnameLength !== 3) return false;
+
+                const patternParts = pattern.split('.');
+                const hostnameParts = hostname.split('.');
+
+                const matches = hostnameParts.filter((r, index) => {
+                    if (patternParts[index] === '*') return true;
+
+                    return patternParts[index] === r;
+                });
+
+                return matches.length === 4;
+            }
+
+            return pattern.toLowerCase().trim() === hostname;
+        });
     } catch (error) {
         return allowedIPs.some(
             (r) => r.toLowerCase().trim() === url.toLowerCase().trim()

@@ -712,7 +712,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'ALLOWED_IPS')
         .replace(
             '{DESCRIPTION}',
-            `Specify IP's which allowed to change and access tosu API's`
+            `IP's or domain names, which allowed to change and access tosu API's.<br /><br />- Supports wildcard syntax: 192.*.60.*<br />- Compares against values printed out in «Unallowed request» message in console`
         )
         .replace(
             '{INPUT}',
