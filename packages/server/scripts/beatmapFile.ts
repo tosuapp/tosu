@@ -1,17 +1,15 @@
-import { ServerResponse } from 'http';
+import fs from 'fs';
+import type { ServerResponse } from 'http';
 import path from 'path';
 
-import { directoryWalker } from '../utils/directories';
-import { ExtendedIncomingMessage } from '../utils/http';
-import { sendJson } from '../utils/index';
+import type { ExtendedIncomingMessage } from '../utils/http';
+import { getContentType, sendJson } from '../utils/index';
 
 export function beatmapFileShortcut(
     req: ExtendedIncomingMessage,
     res: ServerResponse,
     beatmapFileType: 'audio' | 'background' | 'file'
 ) {
-    const url = req.pathname || '/';
-
     const osuInstance: any = req.instanceManager.getInstance(
         req.instanceManager.focusedClient
     );
@@ -40,10 +38,36 @@ export function beatmapFileShortcut(
         });
     }
 
-    directoryWalker({
-        res,
-        baseUrl: url,
-        pathname: fileName || '',
-        folderPath: folder
+    const filePath = path.join(folder, fileName);
+    const fileStat = fs.statSync(filePath);
+
+    if (req.headers.range) {
+        const range = req.headers.range.replace('bytes=', '').split('-');
+        const start = parseInt(range[0]);
+        const end = range[1] ? parseInt(range[1]) : fileStat.size - 1;
+
+        if (start >= fileStat.size || end >= fileStat.size) {
+            res.writeHead(416, {
+                'Content-Range': `bytes */${fileStat.size}`
+            });
+            return res.end();
+        }
+
+        res.writeHead(206, {
+            'Accept-Ranges': 'bytes',
+            'Content-Type': getContentType(fileName),
+            'Content-Range': `bytes ${start}-${end}/${fileStat.size}`,
+            'Content-Length': end - start + 1
+        });
+
+        fs.createReadStream(filePath, { start, end }).pipe(res);
+        return;
+    }
+
+    res.writeHead(200, {
+        'Content-Type': getContentType(fileName),
+        'Content-Length': fileStat.size
     });
+
+    fs.createReadStream(filePath).pipe(res);
 }
