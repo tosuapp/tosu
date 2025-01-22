@@ -6,9 +6,9 @@ import { OsuMods } from '@/utils/osuMods.types';
 export const calculateAccuracy = ({
     hits,
     mode,
-    _round
+    isRound
 }: {
-    _round: boolean;
+    isRound: boolean;
     hits: {
         300: any;
         100: any;
@@ -55,7 +55,7 @@ export const calculateAccuracy = ({
             break;
     }
 
-    if (_round === true) return parseFloat(acc.toFixed(2));
+    if (isRound === true) return parseFloat(acc.toFixed(2));
     return acc;
 };
 
@@ -63,12 +63,12 @@ export const calculateAccuracy = ({
  * Used to calculate grade out of hits
  */
 export const calculateGrade = ({
-    _lazer,
+    isLazer,
     hits,
     mods,
     mode
 }: {
-    _lazer: boolean;
+    isLazer: boolean;
     hits: {
         300: number;
         100: number;
@@ -92,10 +92,10 @@ export const calculateGrade = ({
             (mods & OsuMods.Flashlight) === OsuMods.Flashlight;
     }
 
-    const acc = calculateAccuracy({ hits, mode, _round: false }) / 100;
+    const acc = calculateAccuracy({ hits, mode, isRound: false }) / 100;
     let rank = '';
 
-    if (_lazer === true) {
+    if (isLazer === true) {
         switch (mode) {
             case 0:
             case 1: {

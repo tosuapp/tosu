@@ -54,7 +54,7 @@ const convertMemoryPlayerToResult = (
         name: memoryPlayer.name,
 
         score: memoryPlayer.score,
-        accuracy: calculateAccuracy({ _round: true, hits, mode: gameMode }),
+        accuracy: calculateAccuracy({ isRound: true, hits, mode: gameMode }),
 
         hits,
 
@@ -70,7 +70,7 @@ const convertMemoryPlayerToResult = (
             rate: memoryPlayer.mods.rate
         },
         rank: calculateGrade({
-            _lazer: client === ClientType.lazer,
+            isLazer: client === ClientType.lazer,
             mods: memoryPlayer.mods.number,
             mode: gameMode,
             hits
