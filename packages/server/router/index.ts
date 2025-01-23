@@ -436,6 +436,24 @@ export default function buildBaseApi(server: Server) {
         );
     });
 
+    server.app.route('/favicon.ico', 'GET', (req, res) => {
+        fs.readFile(path.join(pkgAssetsPath, 'favicon.ico'), (err, content) => {
+            if (err) {
+                wLogger.debug(`/${'favicon.ico'}`, err);
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+
+                res.end('<html>page not found</html>');
+                return;
+            }
+
+            res.writeHead(200, {
+                'Content-Type': 'image/vnd.microsoft.icon; charset=utf-8'
+            });
+
+            res.end(content);
+        });
+    });
+
     server.app.route(/.*/, 'GET', (req, res) => {
         const url = req.pathname || '/';
         const staticPath = getStaticPath();

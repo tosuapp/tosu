@@ -123,7 +123,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             acc[v] = value <= 0 ? 0 : value;
             return acc;
         }, {}),
-        mapBreaks: beatmapPP.breaks,
+        mapBreaks: beatmapPP.breaks.map((r) => ({
+            startTime: r.start,
+            endTime: r.end,
+            hasEffect: r.hasEffect
+        })),
         mapKiaiPoints: [], // TODO: add
         mapPosition: formatMilliseconds(global.playTime), // convert to osu format
         mapTimingPoints: beatmapPP.timingPoints.map((r) => ({

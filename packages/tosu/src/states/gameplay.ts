@@ -104,6 +104,7 @@ export class Gameplay extends AbstractState {
         this.accuracy = 100.0;
         this.unstableRate = 0;
         this.gradeCurrent = calculateGrade({
+            isLazer: this.game.client === ClientType.lazer,
             mods: this.mods.number,
             mode: this.mode,
             hits: {
@@ -410,6 +411,7 @@ export class Gameplay extends AbstractState {
             objectCount - this.hit300 - this.hit100 - this.hit50 - this.hitMiss;
 
         this.gradeCurrent = calculateGrade({
+            isLazer: this.game.client === ClientType.lazer,
             mods: this.mods.number,
             mode: this.mode,
             hits: {
@@ -423,6 +425,7 @@ export class Gameplay extends AbstractState {
         });
 
         this.gradeExpected = calculateGrade({
+            isLazer: this.game.client === ClientType.lazer,
             mods: this.mods.number,
             mode: this.mode,
             hits: {

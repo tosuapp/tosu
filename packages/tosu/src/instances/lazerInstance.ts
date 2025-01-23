@@ -108,7 +108,7 @@ export class LazerInstance extends AbstractInstance {
                     this.previousMP3Length = menu.mp3Length;
                 }
 
-                beatmapPP.updateRealTimeBPM(global.playTime, currentMods.rate);
+                beatmapPP.updateEventsStatus(global.playTime, currentMods.rate);
 
                 switch (global.status) {
                     case GameState.menu:

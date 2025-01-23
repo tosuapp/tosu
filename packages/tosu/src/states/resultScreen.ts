@@ -109,12 +109,14 @@ export class ResultScreen extends AbstractState {
             };
 
             this.grade = calculateGrade({
+                isLazer: this.game.client === ClientType.lazer,
                 mods: this.mods.number,
                 mode: this.mode,
                 hits
             });
 
             this.accuracy = calculateAccuracy({
+                isRound: true,
                 mode: this.mode,
                 hits
             });

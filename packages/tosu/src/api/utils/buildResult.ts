@@ -230,6 +230,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             name: resultScreen.playerName,
             score: resultScreen.score,
             accuracy: calculateAccuracy({
+                isRound: true,
                 hits: resultScreenHits,
                 mode: gameplay.mode
             }),

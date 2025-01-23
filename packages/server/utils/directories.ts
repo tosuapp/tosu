@@ -120,9 +120,7 @@ export function readDirectory(
         const html = folders.map((r) => {
             const slashAtTheEnd = getContentType(r) === '' ? '/' : '';
 
-            return `<li><a href="${
-                url === '/' ? '' : url
-            }${encodeURIComponent(r)}${slashAtTheEnd}">${r}</a></li>`;
+            return `<li><a href="${url === '/' ? '' : url}${encodeURIComponent(r)}${slashAtTheEnd}">${r}</a></li>`;
         });
 
         return callback(
