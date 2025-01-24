@@ -1875,8 +1875,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const checksum = this.process.readSharpStringPtr(beatmap.info + 0x58);
 
         const gamemode = this.readGamemode();
+        const rankedStatus = Number(
+            this.lazerToStableStatus[this.process.readInt(beatmap.info + 0x88)]
+        );
         if (checksum === previousChecksum) {
-            return gamemode;
+            return {
+                type: 'checksum',
+                gamemode,
+                rankedStatus
+            };
         }
 
         const metadata = this.process.readIntPtr(beatmap.info + 0x30);
@@ -1896,6 +1903,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         return {
+            type: 'update',
             gamemode,
             checksum,
             filename: this.toLazerPath(hash),
@@ -1915,11 +1923,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             difficulty: difficultyName,
             mapID: this.process.readInt(beatmap.info + 0x8c),
             setID: this.process.readInt(beatmap.setInfo + 0x30),
-            rankedStatus: Number(
-                this.lazerToStableStatus[
-                    this.process.readInt(beatmap.info + 0x88)
-                ]
-            ),
+            rankedStatus,
             objectCount: this.process.readInt(beatmap.info + 0x94)
         };
     }

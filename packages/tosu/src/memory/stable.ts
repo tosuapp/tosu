@@ -785,9 +785,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const filename = this.process.readSharpString(
                 this.process.readInt(beatmapAddr + 0x90)
             );
+            const rankedStatus = this.process.readInt(beatmapAddr + 0x12c);
 
             if (checksum === previousChecksum || !filename.endsWith('.osu')) {
-                return gamemode;
+                return {
+                    type: 'checksum',
+                    gamemode,
+                    rankedStatus
+                };
             }
 
             const plays = this.process.readInt(
@@ -827,10 +832,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
             const mapID = this.process.readInt(beatmapAddr + 0xc8);
             const setID = this.process.readInt(beatmapAddr + 0xcc);
-            const rankedStatus = this.process.readInt(beatmapAddr + 0x12c);
             const objectCount = this.process.readInt(beatmapAddr + 0xf8);
 
             return {
+                type: 'update',
                 gamemode,
                 checksum,
                 filename,
