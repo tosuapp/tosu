@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.2.0](https://github.com/tosuapp/tosu/compare/v4.1.7...v4.2.0) (2025-01-24)
+
+
+### Features
+
+* Add a new `header` setting type ([59a6f6d](https://github.com/tosuapp/tosu/commit/59a6f6d0b7dfc53762f041e6baf936a0c2a9ee6d))
+* Allow wildcard ip matching in `ALLOWED_IPS` ([25077ef](https://github.com/tosuapp/tosu/commit/25077eff00fb115d02c02190fb8c65c5fd67391e))
+* New values for `/websocket/v2`: `isBreak` & `isKiai` ([703162a](https://github.com/tosuapp/tosu/commit/703162a3a0e0b848e28ace2ae9cf08613659426c))
+
+
+### Bug Fixes
+
+* Support http range for `/files/beatmap/audio` ([e1f49c8](https://github.com/tosuapp/tosu/commit/e1f49c8888a892c42f35d2e74597fbbd533b2a3d))
+* Update beatmap status even if checksum is the same ([ee75d4a](https://github.com/tosuapp/tosu/commit/ee75d4a26c3972b2755df96503d2a455e59a4714))
+* update to lazer 2025.118.2 ([cf17d17](https://github.com/tosuapp/tosu/commit/cf17d1703664c15027ad4554d6513d82ba412d25))
+* Use lazer grade system for lazer client ([24d9e70](https://github.com/tosuapp/tosu/commit/24d9e70079f90bf3be8545e0b5c16bf4cdef4c59))
+
 ### [4.1.7](https://github.com/tosuapp/tosu/compare/v4.1.6...v4.1.7) (2025-01-16)
 
 
