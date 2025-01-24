@@ -45,9 +45,10 @@ export class Menu extends AbstractState {
                 );
                 return 'not-ready';
             }
-            if (typeof result === 'number') {
+            if (result.type === 'checksum') {
                 // update gamemoe in menu, even if beatmap is the same
-                this.gamemode = result;
+                this.gamemode = result.gamemode;
+                this.rankedStatus = result.rankedStatus;
                 return;
             }
 

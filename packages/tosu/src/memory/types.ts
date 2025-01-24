@@ -120,6 +120,7 @@ export type IGlobalPrecise = { time: number } | Error;
 
 export type IMenu =
     | {
+          type: 'update';
           gamemode: number;
           checksum: string;
           filename: string;
@@ -142,8 +143,12 @@ export type IMenu =
           rankedStatus: number;
           objectCount: number;
       }
+    | {
+          type: 'checksum';
+          gamemode: number;
+          rankedStatus: number;
+      }
     | string
-    | number
     | Error;
 
 export type IMP3Length = number | Error;
