@@ -116,7 +116,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             // might potentially change
-            return this.process.readLong(vtable) === 7593518956544;
+            return this.process.readLong(vtable) === 7627878694912;
         } catch {
             return false;
         }
