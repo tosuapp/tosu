@@ -42,7 +42,7 @@ export const resultItemHTML = `
 </div>`;
 
 export const settingsItemHTML = `
-<div class="si flexer {CLASSES}">
+<div class="si flexer">
   <div>
     <span class="flexer">
         {CHECKBOX}
