@@ -340,9 +340,9 @@ export class BeatmapPP extends AbstractState {
             }
 
             const mapPath = path.join(
-                global.songsFolder,
-                menu.folder,
-                menu.filename
+                global.songsFolder.trim(),
+                menu.folder.trim(),
+                menu.filename.trim()
             );
 
             try {
