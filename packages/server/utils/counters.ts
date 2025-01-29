@@ -692,7 +692,7 @@ export function buildSettings(res: http.ServerResponse) {
         )
         .replace('{CHECKBOX}', '');
 
-    const staticFolderPathtHTML = settingsItemHTML
+    const staticFolderPathHTML = settingsItemHTML
         .replace('{NAME}', 'STATIC_FOLDER_PATH')
         .replace(
             '{DESCRIPTION}',
@@ -768,6 +768,7 @@ export function buildSettings(res: http.ServerResponse) {
     <div></div>
     <div></div>
     ${staticFolderPathtHTML}
+    ${staticFolderPathHTML}
     ${saveSettingsButtonHTML}
     </div>`;
 
