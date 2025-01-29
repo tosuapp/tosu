@@ -42,19 +42,23 @@ export const resultItemHTML = `
 </div>`;
 
 export const settingsItemHTML = `
-<div class="si flexer {CLASSES}">
+<div class="si flexer">
   <div>
-    <h4>{NAME}</h4>
-    <p>{DESCRIPTION}</p>
+    <span class="flexer">
+        {CHECKBOX}
+        <h4>{NAME}</h4>
+    </span>
+    {INPUT}
   </div>
-  {INPUT}
+  <div>
+    <p>{DESCRIPTION}</p>
+</div>
 </div>`;
 
 export const checkboxHTML = `
 <label class="si-checkbox">
   <input type="checkbox" name="{NAME}" id="{ID}" {ADDON} value="{VALUE}" />
   <span class="checkmark"></span>
-  <span class="status"></span>
 </label>`;
 
 export const inputHTML =
