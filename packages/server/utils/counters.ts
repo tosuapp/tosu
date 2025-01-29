@@ -730,7 +730,7 @@ export function buildSettings(res: http.ServerResponse) {
             '{INPUT}',
             textareaHTML
                 .replace(/{ID}/gm, 'ALLOWED_IPS')
-                .replace('{ADDON}', 'rows="5"')
+                .replace('{ADDON}', 'rows="3"')
                 .replace('{VALUE}', `${config.allowedIPs}`)
         )
         .replace('{CHECKBOX}', '');
