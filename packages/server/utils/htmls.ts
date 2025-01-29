@@ -59,7 +59,6 @@ export const checkboxHTML = `
 <label class="si-checkbox">
   <input type="checkbox" name="{NAME}" id="{ID}" {ADDON} value="{VALUE}" />
   <span class="checkmark"></span>
-  <span class="status"></span>
 </label>`;
 
 export const inputHTML =
