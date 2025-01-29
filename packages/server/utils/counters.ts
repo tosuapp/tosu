@@ -742,33 +742,24 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{CHECKBOX}', '');
 
     const settings = `<div class="settings">
-    ${debugHTML}
-    <div></div>
-    <div></div>
     ${enableAutoUpdateHtml}
     ${openDashboardOnStartupHtml}
-    <div></div>
-    <div></div>
+    <div class="si-divider"></div>
     ${enableIngameOverlayHTML}
     ${enableKeyOverlayHTML}
-    <div></div>
-    <div></div>
+    <div class="si-divider"></div>
     ${calculatePPHTML}
     ${showMpCommandsHTML}
-    <div></div>
-    <div></div>
+    <div class="si-divider"></div>
     ${pollRateHTML}
     ${preciseDataPollRateHTML}
-    <div></div>
-    <div></div>
+    <div class="si-divider"></div>
     ${serverIPHTML}
     ${serverPortHTML}
-    <div></div>
     ${allowedIPsHTML}
-    <div></div>
-    <div></div>
-    ${staticFolderPathtHTML}
+    <div class="si-divider"></div>
     ${staticFolderPathHTML}
+    ${debugHTML}
     ${saveSettingsButtonHTML}
     </div>`;
 
