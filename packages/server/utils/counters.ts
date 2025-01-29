@@ -539,7 +539,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'DEBUG_LOG')
         .replace(
             '{DESCRIPTION}',
-            "Enables logs for tosu developers, not very intuitive for you, the end user.<br />best not to include without developer's request."
+            'Enable/disable the logging of additional debug information to the console.<br />Note: Devs might ask you to enabled this feature for debugging purposes.<br />Note: We suggest to keep this setting disabled while playing the game as it may cause performance issues.'
         )
         .replace(
             '{CHECKBOX}',
@@ -554,7 +554,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'CALCULATE_PP')
         .replace(
             '{DESCRIPTION}',
-            'Turns PP counting on/off. Very useful for tournament client, you only care about scoring and map stats for example'
+            'Enable/disable the real-time calculation of performance points.<br />Note: Useful to disable for tournament clients.'
         )
         .replace(
             '{CHECKBOX}',
@@ -569,7 +569,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'ENABLE_KEY_OVERLAY')
         .replace(
             '{DESCRIPTION}',
-            'Enables/disable reading of K1/K2/M1/M2 keys from osu'
+            'Enable/disable the retrieval of data from the key overlay. (K1/K2/M1/M2)'
         )
         .replace(
             '{CHECKBOX}',
@@ -585,7 +585,7 @@ export function buildSettings(res: http.ServerResponse) {
 
     const enableIngameOverlayHTML = settingsItemHTML
         .replace('{NAME}', 'ENABLE_INGAME_OVERLAY')
-        .replace('{DESCRIPTION}', 'Enables/disable in-game overlay')
+        .replace('{DESCRIPTION}', 'Enable/disable the in-game overlay.')
         .replace(
             '{CHECKBOX}',
             checkboxHTML
@@ -602,7 +602,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'POLL_RATE')
         .replace(
             '{DESCRIPTION}',
-            'Frequency in milliseconds for updating information.'
+            'Interval of time (in milliseconds) between the retrieval of general data.'
         )
         .replace(
             '{INPUT}',
@@ -618,7 +618,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'PRECISE_DATA_POLL_RATE')
         .replace(
             '{DESCRIPTION}',
-            'Frequency in milliseconds for updating precise information. (Key overlay and HitErrorData)'
+            'Interval of time (in milliseconds) between the retrieval of precise data. (HitErrorData, KeyOverlayData)'
         )
         .replace(
             '{INPUT}',
@@ -634,7 +634,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'ENABLE_AUTOUPDATE')
         .replace(
             '{DESCRIPTION}',
-            'Enable checking and updating tosu on startup'
+            'Enable/disable the automatic download of the latest stable version of tosu. (Source: GitHub Releases).'
         )
         .replace(
             '{CHECKBOX}',
@@ -650,7 +650,10 @@ export function buildSettings(res: http.ServerResponse) {
 
     const openDashboardOnStartupHtml = settingsItemHTML
         .replace('{NAME}', 'OPEN_DASHBOARD_ON_STARTUP')
-        .replace('{DESCRIPTION}', 'Open dashboard in browser on startup')
+        .replace(
+            '{DESCRIPTION}',
+            'Automatically open the dashboard in a browser tab when tosu starts.'
+        )
         .replace(
             '{CHECKBOX}',
             checkboxHTML
@@ -665,7 +668,7 @@ export function buildSettings(res: http.ServerResponse) {
 
     const serverIPHTML = settingsItemHTML
         .replace('{NAME}', 'SERVER_IP')
-        .replace('{DESCRIPTION}', 'The IP address for the API and WebSocket.')
+        .replace('{DESCRIPTION}', 'Host IP of the tosu local server. (API/WS)')
         .replace(
             '{INPUT}',
             inputHTML
@@ -678,7 +681,7 @@ export function buildSettings(res: http.ServerResponse) {
 
     const serverPortHTML = settingsItemHTML
         .replace('{NAME}', 'SERVER_PORT')
-        .replace('{DESCRIPTION}', 'The port for the API and WebSocket.')
+        .replace('{DESCRIPTION}', 'Web port of the tosu local server. (API/WS)')
         .replace(
             '{INPUT}',
             inputHTML
@@ -691,7 +694,10 @@ export function buildSettings(res: http.ServerResponse) {
 
     const staticFolderPathtHTML = settingsItemHTML
         .replace('{NAME}', 'STATIC_FOLDER_PATH')
-        .replace('{DESCRIPTION}', 'The directory path containing PP counters.')
+        .replace(
+            '{DESCRIPTION}',
+            'Path to the folder containing the pp counters.'
+        )
         .replace(
             '{INPUT}',
             inputHTML
@@ -706,7 +712,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'SHOW_MP_COMMANDS')
         .replace(
             '{DESCRIPTION}',
-            `Shows !mp commands (messages starting with '!mp') in tournament manager chat (hidden by default)`
+            `Show multiplayer commands in the tournament manager chat. (The ones starting with '!mp')<br />Note: Option disabled by default.`
         )
         .replace(
             '{CHECKBOX}',
@@ -724,7 +730,7 @@ export function buildSettings(res: http.ServerResponse) {
         .replace('{NAME}', 'ALLOWED_IPS')
         .replace(
             '{DESCRIPTION}',
-            `IP's or domain names, which allowed to change and access tosu API's.<br /><br />- Supports wildcard syntax: 192.*.60.*<br />- Compares against values printed out in «Unallowed request» message in console`
+            `Whitelist of IPs that are allowed to interact with the local tosu server.<br /><br />- Has wildcard syntax support (eg. 192.168.*.*)<br />- Matches against IPs that receive the "Unallowed Request" status.`
         )
         .replace(
             '{INPUT}',
