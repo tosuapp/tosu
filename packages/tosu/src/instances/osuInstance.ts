@@ -7,12 +7,12 @@ import {
     wLogger
 } from '@tosu/common';
 import fs from 'fs';
-import path from 'path';
 
 import { AbstractInstance } from '@/instances/index';
 import { StableMemory } from '@/memory/stable';
 import { Gameplay } from '@/states/gameplay';
 import { Global } from '@/states/global';
+import { cleanPath } from '@/utils/converters';
 
 export class OsuInstance extends AbstractInstance {
     gameOverlayAllowed = true;
@@ -61,14 +61,16 @@ export class OsuInstance extends AbstractInstance {
                 }
 
                 if (!global.gameFolder) {
-                    global.setGameFolder(this.path);
+                    global.setGameFolder(cleanPath(this.path));
 
                     // condition when user have different BeatmapDirectory in osu! config
-                    if (fs.existsSync(global.memorySongsFolder)) {
-                        global.setSongsFolder(global.memorySongsFolder);
+                    if (fs.existsSync(cleanPath(global.memorySongsFolder))) {
+                        global.setSongsFolder(
+                            cleanPath(global.memorySongsFolder)
+                        );
                     } else {
                         global.setSongsFolder(
-                            path.join(this.path, global.memorySongsFolder)
+                            cleanPath(this.path, global.memorySongsFolder)
                         );
                     }
                 }
