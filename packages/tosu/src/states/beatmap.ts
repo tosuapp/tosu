@@ -3,12 +3,11 @@ import { ClientType, config, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
-import path from 'path';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
-import { fixDecimals } from '@/utils/converters';
+import { cleanPath, fixDecimals } from '@/utils/converters';
 import { removeDebuffMods } from '@/utils/osuMods';
 import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
@@ -316,9 +315,9 @@ export class BeatmapPP extends AbstractState {
                     `beatmapPP updateMapMetadata`,
                     `Skip osu! music theme file`,
                     {
-                        SongsFolder: global.songsFolder,
-                        Folder: menu.folder,
-                        Path: menu.filename
+                        SongsFolder: cleanPath(global.songsFolder),
+                        Folder: cleanPath(menu.folder),
+                        Path: cleanPath(menu.filename)
                     }
                 );
                 return;
@@ -331,18 +330,18 @@ export class BeatmapPP extends AbstractState {
                     `beatmapPP updateMapMetadata`,
                     `Skip new map creation`,
                     {
-                        SongsFolder: global.songsFolder,
-                        Folder: menu.folder,
-                        Path: menu.filename
+                        SongsFolder: cleanPath(global.songsFolder),
+                        Folder: cleanPath(menu.folder),
+                        Path: cleanPath(menu.filename)
                     }
                 );
                 return;
             }
 
-            const mapPath = path.join(
-                global.songsFolder.trim(),
-                menu.folder.trim(),
-                menu.filename.trim()
+            const mapPath = cleanPath(
+                global.songsFolder,
+                menu.folder,
+                menu.filename
             );
 
             try {
