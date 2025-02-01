@@ -76,3 +76,19 @@ export const numberFromDecimal = (
 
     return value;
 };
+
+/**
+ * Joins multiple paths into a single path, replacing invalid Windows path characters in the process
+ *
+ * @param {...string[]} paths Paths to join
+ * @returns {string} Joined path
+ */
+export const cleanPath = (...paths: string[]): string => {
+    paths.map((path) =>
+        Buffer.from(path.trim())
+            .toString('utf8')
+            .replace(/[<>:"|?*]/g, '')
+    );
+
+    return paths.join(...paths);
+};
