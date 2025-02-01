@@ -87,7 +87,7 @@ export const cleanPath = (...paths: string[]): string => {
     paths = paths.map((path) =>
         Buffer.from(path.trim())
             .toString('utf8')
-            .replace(/[<>:"|?*]/g, '')
+            .replace(process.platform === 'win32' ? /[<>:"|?*]/g : /\//g, '')
     );
 
     return paths.join(...paths);
