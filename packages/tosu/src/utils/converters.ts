@@ -84,7 +84,7 @@ export const numberFromDecimal = (
  * @returns {string} Joined path
  */
 export const cleanPath = (...paths: string[]): string => {
-    paths.map((path) =>
+    paths = paths.map((path) =>
         Buffer.from(path.trim())
             .toString('utf8')
             .replace(/[<>:"|?*]/g, '')
