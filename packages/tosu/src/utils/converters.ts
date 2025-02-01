@@ -78,7 +78,7 @@ export const numberFromDecimal = (
 };
 
 /**
- * Joins multiple paths into a single path, replacing invalid Windows path characters in the process
+ * Joins multiple paths into a single path, replacing invalid path characters in the process.
  *
  * @param {...string[]} paths Paths to join
  * @returns {string} Joined path
