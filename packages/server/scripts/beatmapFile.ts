@@ -40,6 +40,12 @@ export function beatmapFileShortcut(
 
     const filePath = path.join(folder, fileName);
     const fileStat = fs.statSync(filePath);
+    if (!fileStat.isFile() || !fs.existsSync(filePath)) {
+        res.writeHead(404, {
+            'Content-Type': getContentType(fileName)
+        });
+        return res.end();
+    }
 
     if (req.headers.range) {
         const range = req.headers.range.replace('bytes=', '').split('-');
