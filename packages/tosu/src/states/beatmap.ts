@@ -3,12 +3,11 @@ import { ClientType, config, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
-import path from 'path';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
-import { fixDecimals } from '@/utils/converters';
+import { cleanPath, fixDecimals } from '@/utils/converters';
 import { removeDebuffMods } from '@/utils/osuMods';
 import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
@@ -339,10 +338,10 @@ export class BeatmapPP extends AbstractState {
                 return;
             }
 
-            const mapPath = path.join(
-                global.songsFolder.trim(),
-                menu.folder.trim(),
-                menu.filename.trim()
+            const mapPath = cleanPath(
+                global.songsFolder,
+                menu.folder,
+                menu.filename
             );
 
             try {
@@ -467,12 +466,13 @@ export class BeatmapPP extends AbstractState {
                 const { bpm, bpmMin, bpmMax } = this.lazerBeatmap;
 
                 if (
-                    this.lazerBeatmap.events.backgroundPath !==
+                    cleanPath(this.lazerBeatmap.events.backgroundPath || '') !==
                         menu.backgroundFilename &&
                     !lazerByPass
                 ) {
-                    menu.backgroundFilename =
-                        this.lazerBeatmap.events.backgroundPath || '';
+                    menu.backgroundFilename = cleanPath(
+                        this.lazerBeatmap.events.backgroundPath || ''
+                    );
                 }
 
                 this.previewtime = this.lazerBeatmap.general.previewTime;

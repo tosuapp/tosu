@@ -7,12 +7,12 @@ import {
     wLogger
 } from '@tosu/common';
 import fs from 'fs';
-import path from 'path';
 
 import { AbstractInstance } from '@/instances/index';
 import { StableMemory } from '@/memory/stable';
 import { Gameplay } from '@/states/gameplay';
 import { Global } from '@/states/global';
+import { cleanPath } from '@/utils/converters';
 
 export class OsuInstance extends AbstractInstance {
     gameOverlayAllowed = true;
@@ -68,7 +68,7 @@ export class OsuInstance extends AbstractInstance {
                         global.setSongsFolder(global.memorySongsFolder);
                     } else {
                         global.setSongsFolder(
-                            path.join(this.path, global.memorySongsFolder)
+                            cleanPath(this.path, global.memorySongsFolder)
                         );
                     }
                 }
