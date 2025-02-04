@@ -315,9 +315,9 @@ export class BeatmapPP extends AbstractState {
                     `beatmapPP updateMapMetadata`,
                     `Skip osu! music theme file`,
                     {
-                        SongsFolder: cleanPath(global.songsFolder),
-                        Folder: cleanPath(menu.folder),
-                        Path: cleanPath(menu.filename)
+                        SongsFolder: global.songsFolder,
+                        Folder: menu.folder,
+                        Path: menu.filename
                     }
                 );
                 return;
@@ -330,9 +330,9 @@ export class BeatmapPP extends AbstractState {
                     `beatmapPP updateMapMetadata`,
                     `Skip new map creation`,
                     {
-                        SongsFolder: cleanPath(global.songsFolder),
-                        Folder: cleanPath(menu.folder),
-                        Path: cleanPath(menu.filename)
+                        SongsFolder: global.songsFolder,
+                        Folder: menu.folder,
+                        Path: menu.filename
                     }
                 );
                 return;
