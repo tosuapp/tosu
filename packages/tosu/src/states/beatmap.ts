@@ -466,12 +466,13 @@ export class BeatmapPP extends AbstractState {
                 const { bpm, bpmMin, bpmMax } = this.lazerBeatmap;
 
                 if (
-                    this.lazerBeatmap.events.backgroundPath !==
+                    cleanPath(this.lazerBeatmap.events.backgroundPath || '') !==
                         menu.backgroundFilename &&
                     !lazerByPass
                 ) {
-                    menu.backgroundFilename =
-                        this.lazerBeatmap.events.backgroundPath || '';
+                    menu.backgroundFilename = cleanPath(
+                        this.lazerBeatmap.events.backgroundPath || ''
+                    );
                 }
 
                 this.previewtime = this.lazerBeatmap.general.previewTime;

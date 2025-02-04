@@ -10,7 +10,6 @@ import {
 import { LazerMemory } from '@/memory/lazer';
 import { Gameplay } from '@/states/gameplay';
 import { Global } from '@/states/global';
-import { cleanPath } from '@/utils/converters';
 
 import { AbstractInstance } from '.';
 
@@ -59,7 +58,7 @@ export class LazerInstance extends AbstractInstance {
 
                 if (!global.gameFolder) {
                     global.setGameFolder(this.path);
-                    global.setSongsFolder(cleanPath(global.memorySongsFolder));
+                    global.setSongsFolder(global.memorySongsFolder);
                 }
 
                 // update important data before doing rest

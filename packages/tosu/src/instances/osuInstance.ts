@@ -61,13 +61,11 @@ export class OsuInstance extends AbstractInstance {
                 }
 
                 if (!global.gameFolder) {
-                    global.setGameFolder(cleanPath(this.path));
+                    global.setGameFolder(this.path);
 
                     // condition when user have different BeatmapDirectory in osu! config
-                    if (fs.existsSync(cleanPath(global.memorySongsFolder))) {
-                        global.setSongsFolder(
-                            cleanPath(global.memorySongsFolder)
-                        );
+                    if (fs.existsSync(global.memorySongsFolder)) {
+                        global.setSongsFolder(global.memorySongsFolder);
                     } else {
                         global.setSongsFolder(
                             cleanPath(this.path, global.memorySongsFolder)
