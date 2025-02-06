@@ -2,24 +2,6 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [4.3.0](https://github.com/tosuapp/tosu/compare/v4.2.0...v4.3.0) (2025-02-05)
-
-
-### Features
-
-* Sanitize path at initialization for single responsibility. ([5cc517a](https://github.com/tosuapp/tosu/commit/5cc517ad58b353653207210daea1488089f67642))
-* Sanitize paths in beatmap states. ([9b07ac1](https://github.com/tosuapp/tosu/commit/9b07ac14a00a27a7ba422856ac93c14a059e24f6))
-* Sanitize paths in client instances. ([73ec0ff](https://github.com/tosuapp/tosu/commit/73ec0ff32b7cd0d3ed09d3d584d0c28c3b2c984b))
-* **tosu/utils:** Implement path sanitizer function. ([ec713a7](https://github.com/tosuapp/tosu/commit/ec713a73a1dab767a60f7745a60e32908e06eb6d))
-
-
-### Bug Fixes
-
-* Prevent sending file if it doesnt exists, or it's not a file ([4f252cd](https://github.com/tosuapp/tosu/commit/4f252cddaf477e305748e5f606956900f1a80e7a))
-* **tosu/utils:** Introduce platform-based invalid char removal. ([f67dc20](https://github.com/tosuapp/tosu/commit/f67dc2099f6dee51c1eb2100ab2ae65944cf201e))
-* **tosu/utils:** Remove os platform mention from function description. ([1117807](https://github.com/tosuapp/tosu/commit/1117807fb8a005cb3bd9fff51d9a3a4832fbc88e))
-* **tosu/utils:** Save array mapping to the original variable. ([172216d](https://github.com/tosuapp/tosu/commit/172216d15afc160c0441da6cc529a49755abba34))
-
 ## [4.2.0](https://github.com/tosuapp/tosu/compare/v4.1.7...v4.2.0) (2025-01-24)
 
 
