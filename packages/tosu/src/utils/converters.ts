@@ -1,3 +1,5 @@
+import { join } from 'path';
+
 const DOUBLE_POWERS_10 = [
     1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13,
     1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22, 1e23, 1e24, 1e25,
@@ -78,17 +80,28 @@ export const numberFromDecimal = (
 };
 
 /**
- * Joins multiple paths into a single path, replacing invalid path characters in the process.
+ * Joins multiple paths, sanitizing each parameter (like invalid windows characters, trailing spaces, etc.) before joining.
  *
- * @param {...string[]} paths Paths to join
- * @returns {string} Joined path
+ * @param {...string[]} paths Paths to sanitize and join.
+ * @returns {string} The joined & sanitized path.
  */
 export const cleanPath = (...paths: string[]): string => {
-    paths = paths.map((path) =>
-        Buffer.from(path.trim())
-            .toString('utf8')
-            .replace(process.platform === 'win32' ? /[<>:"|?*]/g : /\//g, '')
-    );
+    paths.map((p) => {
+        // Ensure UTF-8 encoding and trim whitespace
+        let cleaned = Buffer.from(p.trim(), 'utf-8').toString('utf-8');
 
-    return paths.join(...paths);
+        // Replace invalid OS-specific characters
+        cleaned = cleaned.replace(
+            process.platform === 'win32' ? /[<>:"/\\|?*]/g : /\//g,
+            ''
+        );
+
+        // On Windows, trim trailing dots and spaces
+        if (process.platform === 'win32')
+            cleaned = cleaned.replace(/[ .]+$/, '');
+
+        return cleaned;
+    });
+
+    return join(...paths);
 };
