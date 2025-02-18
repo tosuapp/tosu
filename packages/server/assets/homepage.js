@@ -630,6 +630,8 @@ const showSettings = {
   setup(props) {
     const is_ingame = window.location.pathname == '/api/ingame';
     const settings = ref([]);
+
+
     for (let i = 0; i < props.settings.length; i++) {
       const setting = props.settings[i];
       let value = props.values[setting.uniqueID] ?? setting.value;
@@ -648,6 +650,14 @@ const showSettings = {
 
             setting.value[cmd_ind][option.name] = modified ?? original;
           });
+        });
+
+
+        value.forEach((command) => {
+            const find = setting.value.find(r=> r[setting.uniqueCheck] == command[setting.uniqueCheck]);
+            if (find) return;
+
+            setting.value.push(command);
         });
 
 
