@@ -966,11 +966,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
     }
 
-    private readKeyCounter(keyCounter: number): KeyCounter {
-        const isActiveBindable = this.process.readIntPtr(keyCounter + 0x330);
-        const isActive = this.process.readByte(isActiveBindable + 0x40) === 1;
-
-        const trigger = this.process.readIntPtr(keyCounter + 0x328);
+    private readKeyTrigger(trigger: number): KeyCounter {
         const activationCountBindable = this.process.readIntPtr(
             trigger + 0x208
         );
@@ -978,22 +974,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             activationCountBindable + 0x40
         );
 
+        const isActive = this.process.readByte(trigger + 0x1f4) === 1;
+
         return {
             isPressed: isActive,
             count: activationCount
         };
-    }
-
-    private readKeyFlow(keyFlow: number): KeyCounter[] {
-        const keyCounters = this.readChildrenLazyList(keyFlow);
-
-        const result: KeyCounter[] = [];
-
-        for (const counter of keyCounters) {
-            result.push(this.readKeyCounter(counter));
-        }
-
-        return result;
     }
 
     keyOverlay(mode: number): IKeyOverlay {
@@ -1018,40 +1004,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             const inputController = this.process.readIntPtr(hudOverlay + 0x348);
 
-            const rulesetComponents = this.readComponents(
-                this.process.readIntPtr(hudOverlay + 0x3c0)
+            const triggersBindable = this.process.readIntPtr(
+                inputController + 0x200
             );
 
-            // try to look for legacy key overlay in ruleset components
-            let keyOverlay = this.findKeyOverlay(
-                rulesetComponents,
-                inputController
+            const triggerCollection = this.process.readIntPtr(
+                triggersBindable + 0x18
             );
 
-            // in case we don't have legacy key overlay displayed
-            // let's try to look for other key overlays in main components
-            if (!keyOverlay) {
-                const mainComponents = this.readComponents(
-                    this.process.readIntPtr(hudOverlay + 0x3b8)
-                );
+            const triggers = this.readListItems(triggerCollection);
 
-                keyOverlay = this.findKeyOverlay(
-                    mainComponents,
-                    inputController
-                );
-            }
-
-            // there's no key overlay currently being displayed
-            if (!keyOverlay) {
-                return emptyKeyOverlay;
-            }
-
-            const keyFlow = this.process.readIntPtr(keyOverlay + 0x350);
-
-            // available keys:
-            // 0 - k1/m1, 1 - k2/m2, 2 - smoke
-            const keyCounters = this.readKeyFlow(keyFlow);
-            if (keyCounters.length === 0) {
+            if (triggers.length === 0) {
                 return {
                     K1Pressed: false,
                     K1Count: 0,
@@ -1062,6 +1025,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     M2Pressed: false,
                     M2Count: 0
                 };
+            }
+
+            // available keys:
+            // 0 - k1/m1, 1 - k2/m2, 2 - smoke
+            const keyCounters: KeyCounter[] = [];
+
+            for (let i = 0; i < triggers.length; i++) {
+                keyCounters.push(this.readKeyTrigger(triggers[i]));
             }
 
             return {
