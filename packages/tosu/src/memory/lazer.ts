@@ -821,7 +821,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const userBindable = this.process.readIntPtr(api + 0x258);
         const user = this.process.readIntPtr(userBindable + 0x20);
 
-        const statistics = this.process.readIntPtr(user + 0xa8);
+        const statistics = this.process.readIntPtr(user + 0x98);
 
         if (statistics === 0) {
             return {
@@ -841,7 +841,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             };
         }
 
-        const ppDecimal = statistics + 0x60 + 0x8;
+        const ppDecimal = statistics + 0x68 + 0x8;
 
         // TODO: read ulong instead long
         const pp = numberFromDecimal(
@@ -850,21 +850,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.process.readInt(ppDecimal)
         );
 
-        let gamemode = Rulesets[this.process.readSharpStringPtr(user + 0x90)];
+        let gamemode = Rulesets[this.process.readSharpStringPtr(user + 0x80)];
 
         if (gamemode === undefined) {
             gamemode = -1;
         }
 
         return {
-            id: this.process.readInt(user + 0xf0),
+            id: this.process.readInt(user + 0xe0),
             name: this.process.readSharpStringPtr(user + 0x8),
-            accuracy: this.process.readDouble(statistics + 0x20),
-            rankedScore: this.process.readLong(statistics + 0x18),
-            level: this.process.readInt(statistics + 0x44),
-            playCount: this.process.readInt(statistics + 0x30),
+            accuracy: this.process.readDouble(statistics + 0x28),
+            rankedScore: this.process.readLong(statistics + 0x20),
+            level: this.process.readInt(statistics + 0x4c),
+            playCount: this.process.readInt(statistics + 0x38),
             playMode: gamemode,
-            rank: this.process.readInt(statistics + 0x4c + 0x4),
+            rank: this.process.readInt(statistics + 0x54 + 0x4),
             countryCode:
                 CountryCodes[
                     this.process.readSharpStringPtr(user + 0x20).toLowerCase()
@@ -1017,6 +1017,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const hudOverlay = this.process.readIntPtr(player + 0x450);
 
             const inputController = this.process.readIntPtr(hudOverlay + 0x348);
+
             const rulesetComponents = this.readComponents(
                 this.process.readIntPtr(hudOverlay + 0x3c0)
             );
