@@ -116,7 +116,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             // might potentially change
-            return this.process.readLong(vtable) === 7627878694912;
+            return this.process.readLong(vtable) === 7662238433280;
         } catch {
             return false;
         }
@@ -818,10 +818,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     user(): IUser {
         const api = this.process.readIntPtr(this.gameBase() + 0x438);
-        const userBindable = this.process.readIntPtr(api + 0x258);
+        const userBindable = this.process.readIntPtr(api + 0x250);
         const user = this.process.readIntPtr(userBindable + 0x20);
 
-        const statistics = this.process.readIntPtr(user + 0x98);
+        const statistics = this.process.readIntPtr(user + 0xa0);
 
         if (statistics === 0) {
             return {
@@ -850,14 +850,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.process.readInt(ppDecimal)
         );
 
-        let gamemode = Rulesets[this.process.readSharpStringPtr(user + 0x80)];
+        let gamemode = Rulesets[this.process.readSharpStringPtr(user + 0x88)];
 
         if (gamemode === undefined) {
             gamemode = -1;
         }
 
         return {
-            id: this.process.readInt(user + 0xe0),
+            id: this.process.readInt(user + 0xe8),
             name: this.process.readSharpStringPtr(user + 0x8),
             accuracy: this.process.readDouble(statistics + 0x28),
             rankedScore: this.process.readLong(statistics + 0x20),
