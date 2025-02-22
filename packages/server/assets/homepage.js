@@ -2,8 +2,12 @@ const { createApp, ref } = Vue;
 
 const queryParams = new URLSearchParams(window.location.search);
 
-const BACKUP_SERVER_IP = document.querySelector('#SERVER_IP')?.value;
-const BACKUP_SERVER_PORT = document.querySelector('#SERVER_PORT')?.value;
+const BACKUP_SERVER_IP = document.querySelector(
+    '*[data-id="SERVER_IP"] input'
+)?.value;
+const BACKUP_SERVER_PORT = document.querySelector(
+    '*[data-id="SERVER_PORT"] input'
+)?.value;
 
 const downloading = [];
 const tab = +(queryParams.get('tab') || 0);
@@ -869,6 +873,111 @@ document.querySelectorAll(`a`).forEach((r) => {
     r.classList.add('active');
 });
 
+document
+    .querySelectorAll('.switch input')
+    .forEach((s) =>
+        s.addEventListener('change', (e) => checkSettingsChanges())
+    );
+
+document.querySelectorAll('.number-input button.incr').forEach((b) =>
+    b.addEventListener('click', (event) => {
+        const inputEl = b.parentElement.querySelector('input');
+        const incrVal = event.shiftKey ? 10 : 1;
+
+        const max = Number(inputEl.max);
+        const currentValue = Number(inputEl.value);
+        const newValue = currentValue + incrVal;
+
+        inputEl.value = max && newValue > max ? max : newValue;
+
+        checkSettingsChanges();
+    })
+);
+
+document.querySelectorAll('.number-input button.decr').forEach((b) =>
+    b.addEventListener('click', (event) => {
+        const inputEl = b.parentElement.querySelector('input');
+        const decrVal = event.shiftKey ? 10 : 1;
+
+        const min = Number(inputEl.min);
+        const currentValue = Number(inputEl.value);
+        const newValue = currentValue - decrVal;
+
+        inputEl.value = min && newValue < min ? min : newValue;
+
+        checkSettingsChanges();
+    })
+);
+
+document.querySelectorAll('.number-input input').forEach((i) =>
+    i.addEventListener('change', (e) => {
+        const min = Number(e.target.min);
+        const max = Number(e.target.max);
+        const newValue = Number(e.target.value);
+
+        if (isNaN(newValue)) {
+            e.target.value = e.target.defaultValue;
+            return;
+        }
+
+        if (min && newValue < min) e.target.value = min;
+        if (max && newValue > max) e.target.value = max;
+
+        checkSettingsChanges();
+    })
+);
+
+document.querySelectorAll('.text-input input').forEach((i) =>
+    i.addEventListener('change', (e) => {
+        const settingId = e.target.parentElement.getAttribute('data-id');
+
+        if (settingId === 'SERVER_IP') {
+            const IPv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/g;
+
+            const newIp = e.target.value;
+            const isValidIp = IPv4Regex.test(newIp);
+
+            if (isValidIp === false) e.target.value = e.target.defaultValue;
+        } else if (settingId === 'SERVER_PORT') {
+            const newPort = Number(e.target.value);
+            const isInRange = newPort >= 1024 && newPort <= 65536;
+
+            if (isNaN(newPort) || isInRange === false)
+                e.target.value = e.target.defaultValue;
+        }
+
+        checkSettingsChanges();
+    })
+);
+
+document
+    .querySelectorAll('.textarea-input textarea')
+    .forEach((i) =>
+        i.addEventListener('change', (e) => checkSettingsChanges())
+    );
+
+document
+    .querySelector('.settings-save-button button')
+    .addEventListener('click', () => saveSettings());
+
+const checkSettingsChanges = () => {
+    const saveButton = document.querySelector('.settings-save-button');
+    const settings = document.querySelectorAll(
+        '.settings input, .settings textarea'
+    );
+
+    const hasChanges = Array.from(settings).some((s) => {
+        const currentValue = s.type === 'checkbox' ? s.checked : s.value;
+        return currentValue !== s.defaultValue;
+    });
+
+    if (hasChanges) {
+        saveButton.style.opacity = 1;
+        saveButton.classList.add('shake');
+        saveButton.querySelector('button').disabled = false;
+    }
+};
+
 function getSizeOfElement(div) {
     const [oldOpacity, oldPosition] = [div.style.opacity, div.style.position];
 
@@ -1183,55 +1292,32 @@ async function startSearch(search) {
     isSearching = false;
 }
 
-async function saveSettings(element) {
-    if (downloading.includes('save-settings')) return;
-    downloading.push('save-settings');
+async function saveSettings() {
+    if (downloading.includes('settings-save-button')) return;
+    downloading.push('settings-save-button');
 
     let redirect = false;
+    let settings = {};
 
-    const DEBUG_LOG = document.querySelector('#DEBUG_LOG');
-    const CALCULATE_PP = document.querySelector('#CALCULATE_PP');
-    const ENABLE_KEY_OVERLAY = document.querySelector('#ENABLE_KEY_OVERLAY');
-    const ENABLE_INGAME_OVERLAY = document.querySelector(
-        '#ENABLE_INGAME_OVERLAY'
-    );
-    const POLL_RATE = document.querySelector('#POLL_RATE');
-    const PRECISE_DATA_POLL_RATE = document.querySelector(
-        '#PRECISE_DATA_POLL_RATE'
-    );
-    const SERVER_IP = document.querySelector('#SERVER_IP');
-    const SERVER_PORT = document.querySelector('#SERVER_PORT');
-    const STATIC_FOLDER_PATH = document.querySelector('#STATIC_FOLDER_PATH');
-    const ENABLE_AUTOUPDATE = document.querySelector('#ENABLE_AUTOUPDATE');
-    const OPEN_DASHBOARD_ON_STARTUP = document.querySelector(
-        '#OPEN_DASHBOARD_ON_STARTUP'
-    );
-    const SHOW_MP_COMMANDS = document.querySelector('#SHOW_MP_COMMANDS');
-    const ALLOWED_IPS = document.querySelector('#ALLOWED_IPS');
+    document.querySelectorAll('.settings *[data-id]').forEach((s) => {
+        const input = s.querySelector('input, textarea');
+        if (!input) return;
+
+        const value = input.type == 'checkbox' ? input.checked : input.value;
+        const settingId = s.getAttribute('data-id');
+
+        settings[settingId] = value;
+    });
 
     if (
-        BACKUP_SERVER_IP != SERVER_IP.value ||
-        BACKUP_SERVER_PORT != SERVER_PORT.value
+        BACKUP_SERVER_IP != settings['SERVER_IP'] ||
+        BACKUP_SERVER_PORT != settings['SERVER_PORT']
     )
         redirect = true;
 
     const download = await fetch(`/api/settingsSave`, {
         method: 'POST',
-        body: JSON.stringify({
-            DEBUG_LOG: DEBUG_LOG.checked,
-            ENABLE_AUTOUPDATE: ENABLE_AUTOUPDATE.checked,
-            OPEN_DASHBOARD_ON_STARTUP: OPEN_DASHBOARD_ON_STARTUP.checked,
-            CALCULATE_PP: CALCULATE_PP.checked,
-            SHOW_MP_COMMANDS: SHOW_MP_COMMANDS.checked,
-            ENABLE_KEY_OVERLAY: ENABLE_KEY_OVERLAY.checked,
-            ENABLE_INGAME_OVERLAY: ENABLE_INGAME_OVERLAY.checked,
-            POLL_RATE: POLL_RATE.value,
-            PRECISE_DATA_POLL_RATE: PRECISE_DATA_POLL_RATE.value,
-            SERVER_IP: SERVER_IP.value,
-            SERVER_PORT: SERVER_PORT.value,
-            ALLOWED_IPS: ALLOWED_IPS.value,
-            STATIC_FOLDER_PATH: STATIC_FOLDER_PATH.value
-        })
+        body: JSON.stringify(settings)
     });
     const json = await download.json();
 
@@ -1243,41 +1329,41 @@ async function saveSettings(element) {
         }
 
         displayNotification({
-            element: element.parentElement.parentElement.parentElement,
+            element: document.querySelector('main'),
             text: `Error while opening: ${json.error}`,
             classes: ['red'],
             delay: 3000
         });
-
-        setTimeout(() => {
-            endDownload(element, 'save-settings', 'Save settings');
-            element.classList.remove('disable');
-        }, 300);
-        return;
     }
 
     displayNotification({
-        element: element.parentElement,
+        element: document.querySelector('.settings-save-button'),
         text: `Config has been saved`,
         classes: ['green'],
         delay: 3000
     });
 
-    if (redirect == true) {
-        const ip = SERVER_IP.value == '0.0.0.0' ? 'localhost' : SERVER_IP.value;
+    if (redirect === true) {
+        const ip =
+            settings['SERVER_IP'] === '0.0.0.0'
+                ? 'localhost'
+                : settings['SERVER_IP'];
 
         setTimeout(() => {
-            window.location.href = `http://${ip}:${SERVER_PORT.value}${window.location.pathname}${window.location.search}`;
+            window.location.href = `http://${ip}:${settings['SERVER_PORT']}${window.location.pathname}${window.location.search}`;
         }, 300);
-
-        element.classList.remove('disable');
-        return;
     }
 
-    setTimeout(() => {
-        endDownload(element, 'save-settings', 'Save settings');
-        element.classList.remove('disable');
-    }, 300);
+    const settingsButton = document.querySelector('.settings-save-button');
+
+    const index = downloading.indexOf('settings-save-button');
+    if (index == -1) return;
+
+    downloading.splice(index, 1);
+
+    settingsButton.style.opacity = '25%';
+    settingsButton.querySelector('button').disabled = true;
+    settingsButton.classList.remove('shake');
 }
 
 function displayModal(callback, id, classes) {
