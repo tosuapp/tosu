@@ -653,8 +653,11 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsNumberInputHTML
-                            .replace('{id}', 'POLL_RATE')
-                            .replace('{value}', config.pollRate.toString())
+                            .replace('{id}', 'PRECISE_POLL_RATE')
+                            .replace(
+                                '{value}',
+                                config.preciseDataPollRate.toString()
+                            )
                             .replace('{min}', '0')
                     )
             ]
