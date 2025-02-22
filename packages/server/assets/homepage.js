@@ -884,10 +884,11 @@ document.querySelectorAll('.number-input button.incr').forEach((b) =>
         const inputEl = b.parentElement.querySelector('input');
         const incrVal = event.shiftKey ? 10 : 1;
 
-        const max = Number(inputEl.max);
+        if (isNumberValid(inputEl.value) === false) return;
         const currentValue = Number(inputEl.value);
         const newValue = currentValue + incrVal;
 
+        const max = Number.isInteger(inputEl.max) ? Number(inputEl.max) : null;
         inputEl.value = max && newValue > max ? max : newValue;
 
         checkSettingsChanges();
@@ -899,10 +900,11 @@ document.querySelectorAll('.number-input button.decr').forEach((b) =>
         const inputEl = b.parentElement.querySelector('input');
         const decrVal = event.shiftKey ? 10 : 1;
 
-        const min = Number(inputEl.min);
+        if (isNumberValid(inputEl.value) === false) return;
         const currentValue = Number(inputEl.value);
         const newValue = currentValue - decrVal;
 
+        const min = isNumberValid(inputEl.min) ? Number(inputEl.min) : null;
         inputEl.value = min && newValue < min ? min : newValue;
 
         checkSettingsChanges();
@@ -911,14 +913,14 @@ document.querySelectorAll('.number-input button.decr').forEach((b) =>
 
 document.querySelectorAll('.number-input input').forEach((i) =>
     i.addEventListener('change', (e) => {
-        const min = Number(e.target.min);
-        const max = Number(e.target.max);
-        const newValue = Number(e.target.value);
-
-        if (isNaN(newValue)) {
+        if (isNumberValid(e.target.value) === false) {
             e.target.value = e.target.defaultValue;
             return;
         }
+
+        const newValue = Number(e.target.value);
+        const min = isNumberValid(e.target.min) ? Number(e.target.min) : null;
+        const max = isNumberValid(e.target.max) ? Number(e.target.max) : null;
 
         if (min && newValue < min) e.target.value = min;
         if (max && newValue > max) e.target.value = max;
@@ -959,6 +961,8 @@ document
 document
     .querySelector('.settings-save-button button')
     .addEventListener('click', () => saveSettings());
+
+const isNumberValid = (n) => !isNaN(n) && Number.isInteger(Number(n));
 
 const checkSettingsChanges = () => {
     const saveButton = document.querySelector('.settings-save-button');
