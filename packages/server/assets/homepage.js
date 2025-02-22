@@ -961,8 +961,8 @@ document
 document
     .querySelector('.settings-save-button button')
     .addEventListener('click', () => saveSettings());
-
-const isNumberValid = (n) => !isNaN(n) && Number.isInteger(Number(n));
+const isNumberValid = (n) =>
+    !isNaN(n) && Number(n) !== 0 && Number.isInteger(Number(n));
 
 const checkSettingsChanges = () => {
     const saveButton = document.querySelector('.settings-save-button');
