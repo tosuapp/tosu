@@ -572,63 +572,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         };
     }
 
-    private readChildrenLazyList(container: number) {
-        const children = this.process.readIntPtr(container + 0x310);
-        const source = this.process.readIntPtr(children + 0x8);
-        const list = this.process.readIntPtr(source + 0x8);
-
-        return this.readListItems(list);
-    }
-
-    private readChildren(container: number) {
-        const children = this.process.readIntPtr(container + 0x310);
-        const list = this.process.readIntPtr(children + 0x8);
-
-        return this.readListItems(list);
-    }
-
-    private readComponents(container: number): number[] {
-        const content = this.process.readIntPtr(container + 0x338);
-
-        return this.readChildren(content);
-    }
-
-    private isKeyOverlay(address: number, controller: number) {
-        return this.process.readIntPtr(address + 0x348) === controller;
-    }
-
-    private findKeyOverlay(components: number[], controller: number) {
-        let keyOverlay = 0;
-
-        for (let i = 0; i < components.length; i++) {
-            if (this.isKeyOverlay(components[i], controller)) {
-                keyOverlay = components[i];
-
-                break;
-            }
-        }
-
-        return keyOverlay;
-    }
-
-    private isPPCounter(address: number, processor: number) {
-        return this.process.readIntPtr(address + 0x340) === processor;
-    }
-
-    private findPPCounter(components: number[], processor: number) {
-        let keyOverlay = 0;
-
-        for (let i = 0; i < components.length; i++) {
-            if (this.isPPCounter(components[i], processor)) {
-                keyOverlay = components[i];
-
-                break;
-            }
-        }
-
-        return keyOverlay;
-    }
-
     private isScorableHitResult(result: LazerHitResults) {
         switch (result) {
             case LazerHitResults.legacyComboIncrease:
@@ -1933,7 +1876,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         const leaderboardScores = this.process.readIntPtr(
-            player + (this.replayMode ? 0x4e0 : 0x520)
+            player + (this.replayMode ? 0x4e8 : 0x520)
         );
 
         const items = this.readListItems(
