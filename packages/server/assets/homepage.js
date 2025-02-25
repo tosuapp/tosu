@@ -960,7 +960,7 @@ document
 
 document
     .querySelector('.settings-save-button button')
-    .addEventListener('click', () => saveSettings());
+    ?.addEventListener('click', () => saveSettings());
 const isNumberValid = (n) =>
     !isNaN(n) && Number(n) !== 0 && Number.isInteger(Number(n));
 
