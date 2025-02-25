@@ -1876,7 +1876,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         const leaderboardScores = this.process.readIntPtr(
-            player + (this.replayMode ? 0x4e0 : 0x520)
+            player + (this.replayMode ? 0x4e8 : 0x520)
         );
 
         const items = this.readListItems(
