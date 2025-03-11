@@ -181,7 +181,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const rawLoginStatus = this.process.readPointer(
                 this.getPattern('rawLoginStatusPtr')
             );
-            const rawBanchoStatus = this.process.readByte(profileBase + 0x88);
+            const rawBanchoStatus = this.process.readByte(profileBase + 0x8c);
 
             const name = this.process.readSharpString(
                 this.process.readInt(profileBase + 0x30)
@@ -193,10 +193,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const playCount = this.process.readInt(profileBase + 0x7c);
             const playMode = this.process.readInt(profileBase + 0x80);
             const rank = this.process.readInt(profileBase + 0x84);
-            const countryCode = this.process.readInt(profileBase + 0x98);
-            const performancePoints = this.process.readShort(
-                profileBase + 0x9c
-            );
+            const countryCode = this.process.readInt(profileBase + 0x9c);
+            const performancePoints = this.process.readUInt(profileBase + 0x88);
             // ARGB, to convert use UserProfile.backgroundColour.toString(16)
             const backgroundColour = this.process.readUInt(profileBase + 0xac);
 

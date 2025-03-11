@@ -308,7 +308,7 @@ export class BeatmapPP extends AbstractState {
 
             const { menu, global } = this.game.getServices(['menu', 'global']);
 
-            if (menu.folder === '' && !lazerByPass) {
+            if (menu.folder === '.' && !lazerByPass) {
                 wLogger.debug(
                     ClientType[this.game.client],
                     this.game.pid,
