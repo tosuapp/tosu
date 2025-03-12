@@ -194,7 +194,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const playMode = this.process.readInt(profileBase + 0x80);
             const rank = this.process.readInt(profileBase + 0x84);
             const countryCode = this.process.readInt(profileBase + 0x9c);
-            const performancePoints = this.process.readUInt(profileBase + 0x88);
+            const performancePoints = this.process.readInt(profileBase + 0x88);
             // ARGB, to convert use UserProfile.backgroundColour.toString(16)
             const backgroundColour = this.process.readUInt(profileBase + 0xac);
 
