@@ -48,7 +48,7 @@ interface BeatmapAttributes {
     stamina?: number | undefined;
     rhythm?: number | undefined;
     color?: number | undefined;
-    peak?: number | undefined;
+    reading?: number | undefined;
     hitWindow?: number | undefined;
 }
 
@@ -192,7 +192,7 @@ export class BeatmapPP extends AbstractState {
             stamina: 0.0,
             rhythm: 0.0,
             color: 0.0,
-            peak: 0.0,
+            reading: 0.0,
             hitWindow: 0.0
         };
         this.currAttributes = {
@@ -572,7 +572,7 @@ export class BeatmapPP extends AbstractState {
                 stamina: fcPerformance.difficulty.stamina,
                 rhythm: fcPerformance.difficulty.rhythm,
                 color: fcPerformance.difficulty.color,
-                peak: fcPerformance.difficulty.peak,
+                reading: fcPerformance.difficulty.reading,
                 hitWindow: fcPerformance.difficulty.greatHitWindow
             };
 

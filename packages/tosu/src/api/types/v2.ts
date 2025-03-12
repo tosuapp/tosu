@@ -155,7 +155,7 @@ export interface Stars {
     stamina: number | undefined;
     rhythm: number | undefined;
     color: number | undefined;
-    peak: number | undefined;
+    reading: number | undefined;
     hitWindow: number | undefined;
     total: number;
 }

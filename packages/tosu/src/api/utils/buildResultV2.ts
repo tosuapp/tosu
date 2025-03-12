@@ -494,8 +494,8 @@ function buildBeatmapStats(beatmapPP: BeatmapPP) {
             color: beatmapPP.calculatedMapAttributes.color
                 ? fixDecimals(beatmapPP.calculatedMapAttributes.color)
                 : undefined,
-            peak: beatmapPP.calculatedMapAttributes.peak
-                ? fixDecimals(beatmapPP.calculatedMapAttributes.peak)
+            reading: beatmapPP.calculatedMapAttributes.reading
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.reading)
                 : undefined,
             hitWindow: beatmapPP.calculatedMapAttributes.hitWindow
                 ? fixDecimals(beatmapPP.calculatedMapAttributes.hitWindow)
