@@ -6,7 +6,12 @@ import { getProgramPath } from './directories';
 import { checkGameOverlayConfig } from './ingame';
 import { wLogger } from './logger';
 
-const configPath = path.join(getProgramPath(), 'tsosu.env');
+const oldConfigPath = path.join(getProgramPath(), 'tsosu.env');
+const configPath = path.join(getProgramPath(), 'tosu.env');
+
+if (fs.existsSync(oldConfigPath) && !fs.existsSync(configPath)) {
+    fs.renameSync(oldConfigPath, configPath);
+}
 
 const createConfig = () => {
     if (!fs.existsSync(configPath)) {
