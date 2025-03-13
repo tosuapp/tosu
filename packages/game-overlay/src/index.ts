@@ -79,9 +79,16 @@ export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
                 wLogger.warn('[ingame-overlay] inject error', err);
                 resolve(false);
             });
-            child.on('exit', () => {
+            child.on('exit', (code) => {
+                if (code !== 0) {
+                    wLogger.error(
+                        `[ingame-overlay] Unknown exit code: ${code}`
+                    );
+                    return;
+                }
+
                 wLogger.warn(
-                    '[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor\n'
+                    `[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor\n`
                 );
                 resolve(true);
             });
