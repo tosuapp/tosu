@@ -62,6 +62,59 @@ export const inputHTML =
 
 export const textareaHTML = '<textarea id="{ID}" {ADDON}>{VALUE}</textarea>';
 
+export const settingsGroupHTML = `
+<div class="settings-item-group">
+  <p>{header}</p>
+    <div>
+      {items}
+    </div>
+</div>
+`;
+
+export const settingsItemHTMLv2 = `
+<div class="settings-item-v2">
+  <div>
+    {input-1}
+    <p>{name}</p>
+    {input-2}
+  </div>
+  {input-3}
+  <p>{description}</p>
+</div>
+`;
+
+export const settingsSwitchHTML = `
+<label class="switch" data-id="{id}">
+  <input type="checkbox" class="switch-thumb" {checked}>
+  <span class="switch-track"></span>
+</label>    
+`;
+export const settingsNumberInputHTML = `
+<div class="number-input" data-id="{id}">
+  <button title="[Click] decrements by 1\n[Shift + Click] by 10" class="decr">-</button>
+  <input type="number" value="{value}" min="{min}" max="{max}">
+  <button title="[Click] increments by 1\n[Shift + Click] by 10" class="incr">+</button>
+</div>
+`;
+
+export const settingsTextInputHTML = `
+<div class="text-input" data-id="{id}">
+  <input type="text" value="{value}">
+</div>
+`;
+
+export const settingsTextareaInputHTML = `
+<div class="textarea-input" data-id="{id}">
+  <textarea>{value}</textarea>
+</div>
+`;
+
+export const settingsSaveButtonHTMLv2 = `
+<div class="settings-save-button">
+    <button class="button" disabled>Save Settings</button>
+</div>
+`;
+
 export const saveSettingsButtonHTML =
     '<div class="flexer si-btn ssb"><button class="button save-button flexer"><span>Save settings</span></button></div>';
 
