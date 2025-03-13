@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.4.0](https://github.com/tosuapp/tosu/compare/v4.3.2...v4.4.0) (2025-03-13)
+
+
+### Features
+
+* (beta) Update pp calc ([529fe18](https://github.com/tosuapp/tosu/commit/529fe1888408c1654e5b54eac3640a4484e764fc))
+* because someone is pushing all the limits! ([9feb5ae](https://github.com/tosuapp/tosu/commit/9feb5ae5b22320027542cc35ff81e8ac770dfab7))
+* Rename .env file from `tsosu` to `tosu` ([8c3c9e6](https://github.com/tosuapp/tosu/commit/8c3c9e6d2700538847cdd69f72917e1716910cd0))
+
+
+### Bug Fixes
+
+* it's signed integer, not unsigned ([58e2c64](https://github.com/tosuapp/tosu/commit/58e2c64b73534551877a9a6c1161e74294837d40))
+* Print out exit code for ingame overlay ([d46ba1f](https://github.com/tosuapp/tosu/commit/d46ba1f67d649decd41d46944b948b5a9c752f89))
+
 ### [4.3.2](https://github.com/tosuapp/tosu/compare/v4.3.1...v4.3.2) (2025-02-25)
 
 ### [4.3.1](https://github.com/tosuapp/tosu/compare/v4.3.0...v4.3.1) (2025-02-21)
