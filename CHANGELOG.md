@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.4.1](https://github.com/tosuapp/tosu/compare/v4.4.0...v4.4.1) (2025-03-15)
+
+
+### Bug Fixes
+
+* osu on linux fix and bicycle for osu-winello ([15362f1](https://github.com/tosuapp/tosu/commit/15362f1ade9765c7d3146483380dac266062ab45))
+
 ## [4.4.0](https://github.com/tosuapp/tosu/compare/v4.3.2...v4.4.0) (2025-03-13)
 
 
