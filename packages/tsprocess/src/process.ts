@@ -1,4 +1,5 @@
-import { dirname as pathDirname } from 'path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname as pathDirname, join as pathJoin } from 'path';
 
 import ProcessUtils from '.';
 
@@ -55,11 +56,35 @@ export class Process {
             return pathDirname(ProcessUtils.getProcessPath(this.handle));
         }
 
-        // If using osu-winello
+        // If using wine (not symlinked into image)
         if (
             process.platform === 'linux' &&
             this.getProcessPath().match('wine-preloader')
         ) {
+            // bicycle for osu-winnello
+            // I swear a god, I will create a delete osu-winnello repo PR
+            // if you guys will break this
+            const homeEnv = process.env.HOME || '';
+            const xdgDataHome = process.env.XDG_DATA_HOME || '';
+            const shareFolder =
+                xdgDataHome !== ''
+                    ? xdgDataHome
+                    : pathJoin(homeEnv, '.local/share');
+            const osuWinelloPath = pathJoin(shareFolder, 'osuconfig/osupath');
+
+            if (existsSync(osuWinelloPath)) {
+                // osu-sinello script installation found
+                return readFileSync(osuWinelloPath, 'utf-8').trim();
+            }
+
+            const overridenOsuPath = process.env.TOSU_OSU_PATH || '';
+            if (overridenOsuPath !== '') {
+                // for other genius, who have their custom wine prefixes
+                // with symlinking or other breaking default cwd????
+                // tldr should be like: /home/kotrik/.local/share/osu-wine/osu!
+                return overridenOsuPath;
+            }
+
             return this.getProcessCommandLine()
                 .slice(2)
                 .replace(/\\/g, '/')

@@ -82,7 +82,9 @@ export class InstanceManager {
                 }
 
                 const isLazer =
-                    Process.isProcess64bit(processId) || lazerOnLinux;
+                    (Process.isProcess64bit(processId) &&
+                        process.platform !== 'linux') ||
+                    lazerOnLinux;
 
                 const osuInstance = isLazer
                     ? new LazerInstance(processId)
