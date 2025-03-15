@@ -137,6 +137,15 @@ Support
 
 <br/>
 
+Linux notice
+---
+- osu! stable build tested on [osu-winello script](https://github.com/NelloKudo/osu-winello/tree/main) with arch linux 2025.03.01 (latest confirmed that all works)
+- If you're using custom wine prefix with wine cwd breaking (your cwd is showing windows path instead of full linux one) please set `TOSU_OSU_PATH` in your bash/zsh profile (example `TOSU_OSU_PATH=/home/kotrik/.local/share/osu-wine/osu!`)
+- osu! lazer builds tested on AppImage from official osu repository and flatpak image
+---
+
+<br/>
+
 Sponsorship
 ---
 | [![](./.github/sponsors/signpath.png)](https://signpath.io/) | Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
