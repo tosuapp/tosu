@@ -307,6 +307,7 @@ export function removeDebuffMods(mods: ModsLazer) {
             (r) => !(r.acronym === 'RX' || r.acronym === 'AP')
         );
         return _mods;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         return mods;
     }
