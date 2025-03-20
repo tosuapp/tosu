@@ -81,6 +81,7 @@ export function sendJson(response: http.ServerResponse, json: object | any[]) {
 
     try {
         return response.end(JSON.stringify(json));
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         return response.end(JSON.stringify({ error: 'Json parsing error' }));
     }
@@ -139,6 +140,7 @@ function isAllowedIP(url: string | undefined) {
 
             return pattern.toLowerCase().trim() === hostname;
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         return allowedIPs.some(
             (r) => r.toLowerCase().trim() === url.toLowerCase().trim()

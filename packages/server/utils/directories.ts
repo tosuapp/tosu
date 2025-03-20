@@ -29,6 +29,7 @@ export function directoryWalker({
     let cleanedUrl;
     try {
         cleanedUrl = decodeURIComponent(pathname);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         res.writeHead(404, {
             'Content-Type': getContentType('file.txt')
