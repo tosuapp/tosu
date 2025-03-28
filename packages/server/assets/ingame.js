@@ -81,9 +81,9 @@ class WebSocketManager {
   };
 
   /**
-   * 
-   * @param {string} name 
-   * @param {string|Object} payload 
+   *
+   * @param {string} name
+   * @param {string|Object} payload
    */
   sendCommand(name, command, amountOfRetries = 1) {
     const that = this;
@@ -647,8 +647,8 @@ const app = createApp({
 
 
     /**
-     * 
-     * @param {ICounter} overlay 
+     *
+     * @param {ICounter} overlay
      */
     function add_overlay(overlay) {
       _id++;
@@ -800,7 +800,7 @@ app.mount('.main');
  */
 
 
-/** 
+/**
  * @typedef {string | { field: string; keys: Filters[] }} Filters
  */
 

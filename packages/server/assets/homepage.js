@@ -3,8 +3,8 @@ const { createApp, ref } = Vue;
 
 const queryParams = new URLSearchParams(window.location.search);
 
-const BACKUP_SERVER_IP = document.querySelector('#SERVER_IP')?.value;
-const BACKUP_SERVER_PORT = document.querySelector('#SERVER_PORT')?.value;
+const BACKUP_SERVER_IP = document.querySelector('*[data-id="SERVER_IP"] input')?.value;
+const BACKUP_SERVER_PORT = document.querySelector('*[data-id="SERVER_PORT"] input')?.value;
 
 
 const downloading = [];
@@ -654,10 +654,10 @@ const showSettings = {
 
 
         value.forEach((command) => {
-            const find = setting.value.find(r=> r[setting.uniqueCheck] == command[setting.uniqueCheck]);
-            if (find) return;
+          const find = setting.value.find(r => r[setting.uniqueCheck] == command[setting.uniqueCheck]);
+          if (find) return;
 
-            setting.value.push(command);
+          setting.value.push(command);
         });
 
 
@@ -862,6 +862,114 @@ document.querySelectorAll(`a`).forEach(r => {
 
   r.classList.add('active');
 });
+
+
+document.querySelectorAll('.switch input')
+  .forEach((s) => s.addEventListener('change', () => checkSettingsChanges()));
+
+document.querySelectorAll('.number-input button.incr')
+  .forEach((b) =>
+    b.addEventListener('click', (event) => {
+      const inputEl = b.parentElement.querySelector('input');
+      const incrVal = event.shiftKey ? 10 : 1;
+
+      if (isNumberValid(inputEl.value) === false) return;
+      const currentValue = Number(inputEl.value);
+      const newValue = currentValue + incrVal;
+
+      const max = Number.isInteger(inputEl.max) ? Number(inputEl.max) : null;
+      inputEl.value = max && newValue > max ? max : newValue;
+
+      checkSettingsChanges();
+    })
+  );
+
+document.querySelectorAll('.number-input button.decr')
+  .forEach((b) =>
+    b.addEventListener('click', (event) => {
+      const inputEl = b.parentElement.querySelector('input');
+      const decrVal = event.shiftKey ? 10 : 1;
+
+      if (isNumberValid(inputEl.value) === false) return;
+      const currentValue = Number(inputEl.value);
+      const newValue = currentValue - decrVal;
+
+      const min = isNumberValid(inputEl.min) ? Number(inputEl.min) : null;
+      inputEl.value = min && newValue < min ? min : newValue;
+
+      checkSettingsChanges();
+    })
+  );
+
+document.querySelectorAll('.number-input input').forEach((i) =>
+  i.addEventListener('change', (e) => {
+    if (isNumberValid(e.target.value) === false) {
+      e.target.value = e.target.defaultValue;
+      return;
+    }
+
+    const newValue = Number(e.target.value);
+    const min = isNumberValid(e.target.min) ? Number(e.target.min) : null;
+    const max = isNumberValid(e.target.max) ? Number(e.target.max) : null;
+
+    if (min && newValue < min) e.target.value = min;
+    if (max && newValue > max) e.target.value = max;
+
+    checkSettingsChanges();
+  })
+);
+
+document.querySelectorAll('.text-input input').forEach((i) =>
+  i.addEventListener('change', (e) => {
+    const settingId = e.target.parentElement.getAttribute('data-id');
+
+    if (settingId === 'SERVER_IP') {
+      const IPv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/g;
+
+      const newIp = e.target.value;
+      const isValidIp = IPv4Regex.test(newIp);
+
+      if (isValidIp === false) e.target.value = e.target.defaultValue;
+    } else if (settingId === 'SERVER_PORT') {
+      const newPort = Number(e.target.value);
+      const isInRange = newPort >= 1024 && newPort <= 65536;
+
+      if (isNaN(newPort) || isInRange === false)
+        e.target.value = e.target.defaultValue;
+    }
+
+    checkSettingsChanges();
+  })
+);
+
+document.querySelectorAll('.textarea-input textarea')
+  .forEach((i) => i.addEventListener('change', () => checkSettingsChanges()));
+
+document.querySelector('.settings-save-button button')
+  ?.addEventListener('click', () => saveSettings());
+
+const isNumberValid = (num) => {
+  if (typeof num === 'number') return num - num === 0;
+  if (typeof num === 'string' && num.trim() !== '') return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+
+  return false;
+};
+
+const checkSettingsChanges = () => {
+  const saveButton = document.querySelector('.settings-save-button');
+  const settings = document.querySelectorAll('.settings input, .settings textarea');
+
+  const hasChanges = Array.from(settings).some((s) => {
+    const currentValue = s.type === 'checkbox' ? s.checked : s.value;
+    return currentValue !== s.defaultValue;
+  });
+
+  if (hasChanges) {
+    saveButton.style.opacity = 1;
+    saveButton.classList.add('shake');
+    saveButton.querySelector('button').disabled = false;
+  }
+};
 
 
 function getSizeOfElement(div) {
@@ -1177,94 +1285,68 @@ async function startSearch(search) {
   isSearching = false;
 };
 
-async function saveSettings(element) {
-  if (downloading.includes('save-settings')) return;
-  downloading.push('save-settings');
+async function saveSettings() {
+  if (downloading.includes('settings-save-button')) return;
+  downloading.push('settings-save-button');
 
   let redirect = false;
+  let settings = {};
 
-  const DEBUG_LOG = document.querySelector('#DEBUG_LOG');
-  const CALCULATE_PP = document.querySelector('#CALCULATE_PP');
-  const ENABLE_KEY_OVERLAY = document.querySelector('#ENABLE_KEY_OVERLAY');
-  const ENABLE_INGAME_OVERLAY = document.querySelector('#ENABLE_INGAME_OVERLAY');
-  const POLL_RATE = document.querySelector('#POLL_RATE');
-  const PRECISE_DATA_POLL_RATE = document.querySelector('#PRECISE_DATA_POLL_RATE');
-  const SERVER_IP = document.querySelector('#SERVER_IP');
-  const SERVER_PORT = document.querySelector('#SERVER_PORT');
-  const STATIC_FOLDER_PATH = document.querySelector('#STATIC_FOLDER_PATH');
-  const ENABLE_AUTOUPDATE = document.querySelector('#ENABLE_AUTOUPDATE');
-  const OPEN_DASHBOARD_ON_STARTUP = document.querySelector('#OPEN_DASHBOARD_ON_STARTUP');
-  const SHOW_MP_COMMANDS = document.querySelector('#SHOW_MP_COMMANDS');
-  const ALLOWED_IPS = document.querySelector('#ALLOWED_IPS');
+  document.querySelectorAll('.settings *[data-id]').forEach((s) => {
+    const input = s.querySelector('input, textarea');
+    if (!input) return;
 
-  if (BACKUP_SERVER_IP != SERVER_IP.value || BACKUP_SERVER_PORT != SERVER_PORT.value)
-    redirect = true;
+    const value = input.type == 'checkbox' ? input.checked : input.value;
+    const settingId = s.getAttribute('data-id');
 
+    settings[settingId] = value;
+  });
+
+  if (BACKUP_SERVER_IP != settings['SERVER_IP'] || BACKUP_SERVER_PORT != settings['SERVER_PORT']) redirect = true;
 
   const download = await fetch(`/api/settingsSave`, {
     method: 'POST',
-    body: JSON.stringify({
-      DEBUG_LOG: DEBUG_LOG.checked,
-      ENABLE_AUTOUPDATE: ENABLE_AUTOUPDATE.checked,
-      OPEN_DASHBOARD_ON_STARTUP: OPEN_DASHBOARD_ON_STARTUP.checked,
-      CALCULATE_PP: CALCULATE_PP.checked,
-      SHOW_MP_COMMANDS: SHOW_MP_COMMANDS.checked,
-      ENABLE_KEY_OVERLAY: ENABLE_KEY_OVERLAY.checked,
-      ENABLE_INGAME_OVERLAY: ENABLE_INGAME_OVERLAY.checked,
-      POLL_RATE: POLL_RATE.value,
-      PRECISE_DATA_POLL_RATE: PRECISE_DATA_POLL_RATE.value,
-      SERVER_IP: SERVER_IP.value,
-      SERVER_PORT: SERVER_PORT.value,
-      ALLOWED_IPS: ALLOWED_IPS.value,
-      STATIC_FOLDER_PATH: STATIC_FOLDER_PATH.value,
-    }),
+    body: JSON.stringify(settings)
   });
   const json = await download.json();
 
   if (json.error != null) {
-    if (typeof json.error == 'object') {
-      try {
-        json.error = JSON.stringify(json.error);
-      } catch (error) { };
-    };
+    if (typeof json.error == 'object') try { json.error = JSON.stringify(json.error) } catch (error) { }
 
     displayNotification({
-      element: element.parentElement.parentElement.parentElement,
+      element: document.querySelector('main'),
       text: `Error while opening: ${json.error}`,
       classes: ['red'],
-      delay: 3000,
+      delay: 3000
     });
-
-    setTimeout(() => {
-      endDownload(element, 'save-settings', 'Save settings');
-      element.classList.remove('disable');
-    }, 300);
-    return;
-  };
+  }
 
   displayNotification({
-    element: element.parentElement,
+    element: document.querySelector('.settings-save-button'),
     text: `Config has been saved`,
     classes: ['green'],
-    delay: 3000,
+    delay: 3000
   });
 
-  if (redirect == true) {
-    const ip = SERVER_IP.value == '0.0.0.0' ? 'localhost' : SERVER_IP.value;
+  if (redirect === true) {
+    const ip = settings['SERVER_IP'] === '0.0.0.0' ? 'localhost' : settings['SERVER_IP'];
 
     setTimeout(() => {
-      window.location.href = `http://${ip}:${SERVER_PORT.value}${window.location.pathname}${window.location.search}`;
+      window.location.href = `http://${ip}:${settings['SERVER_PORT']}${window.location.pathname}${window.location.search}`;
     }, 300);
+  }
 
-    element.classList.remove('disable');
-    return;
-  };
+  const settingsButton = document.querySelector('.settings-save-button');
 
-  setTimeout(() => {
-    endDownload(element, 'save-settings', 'Save settings');
-    element.classList.remove('disable');
-  }, 300);
-};
+  const index = downloading.indexOf('settings-save-button');
+  if (index == -1) return;
+
+  downloading.splice(index, 1);
+
+  settingsButton.style.opacity = '25%';
+  settingsButton.querySelector('button').disabled = true;
+  settingsButton.classList.remove('shake');
+}
 
 function displayModal(callback, id, classes) {
   const div = document.createElement('div');
@@ -1556,7 +1638,7 @@ window.onload = async () => {
 };
 
 if (queryParams.has('ingame')) {
-    document.querySelector('.tabs')?.remove();
-    document.querySelector('.links')?.remove();
-    document.querySelector('.submit-counter')?.remove();
+  document.querySelector('.tabs')?.remove();
+  document.querySelector('.links')?.remove();
+  document.querySelector('.submit-counter')?.remove();
 };

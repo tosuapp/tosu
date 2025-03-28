@@ -15,21 +15,23 @@ import { ICounter, bodyPayload } from './counters.types';
 import {
     authorHTML,
     authorLinksHTML,
-    checkboxHTML,
     emptyCounters,
     emptyNotice,
     galleryImageHTML,
     iconsImages,
     iframeHTML,
-    inputHTML,
     metadataHTML,
     nameHTML,
     noMoreCounters,
     resultItemHTML,
-    saveSettingsButtonHTML,
-    settingsItemHTML,
-    submitCounterHTML,
-    textareaHTML
+    settingsGroupHTML,
+    settingsItemHTMLv2,
+    settingsNumberInputHTML,
+    settingsSaveButtonHTMLv2,
+    settingsSwitchHTML,
+    settingsTextInputHTML,
+    settingsTextareaInputHTML,
+    submitCounterHTML
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
 
@@ -535,222 +537,248 @@ export async function buildExternalCounters(
 }
 
 export function buildSettings(res: http.ServerResponse) {
-    const debugHTML = settingsItemHTML
-        .replace('{NAME}', 'DEBUG_LOG')
+    const generalGroup = settingsGroupHTML
+        .replace('{header}', 'General')
         .replace(
-            '{DESCRIPTION}',
-            "Enables logs for tosu developers, not very intuitive for you, the end user.<br />best not to include without developer's request."
-        )
-        .replace(
-            '{INPUT}',
-            checkboxHTML
-                .replace(/{ID}/gm, 'DEBUG_LOG')
-                .replace('{ADDON}', config.debugLogging ? 'checked="true"' : '')
-                .replace('{VALUE}', `${config.debugLogging}`)
+            '{items}',
+            [
+                settingsItemHTMLv2
+                    .replace('{name}', 'Auto Update Client')
+                    .replace(
+                        '{description}',
+                        'Check for updates on startup and automatically install newer versions if available.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'ENABLE_AUTOUPDATE')
+                            .replace(
+                                '{checked}',
+                                config.enableAutoUpdate ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
+
+                    .replace('{name}', 'Open Dashboard on Startup')
+                    .replace(
+                        '{description}',
+                        'Automatically open the tosu dashboard in your default browser on startup.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'OPEN_DASHBOARD_ON_STARTUP')
+                            .replace(
+                                '{checked}',
+                                config.openDashboardOnStartup ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'In-Game Overlay')
+                    .replace(
+                        '{description}',
+                        'Show the in-game overlay in the game.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'ENABLE_INGAME_OVERLAY')
+                            .replace(
+                                '{checked}',
+                                config.enableIngameOverlay ? 'checked' : ''
+                            )
+                    )
+            ]
+                .map((item) => item.replace(/\{[^}]*}/g, ''))
+                .join('\n')
         );
 
-    const calculatePPHTML = settingsItemHTML
-        .replace('{NAME}', 'CALCULATE_PP')
+    const dataGroup = settingsGroupHTML
+        .replace('{header}', 'Data Fetching')
         .replace(
-            '{DESCRIPTION}',
-            'Turns PP counting on/off. Very useful for tournament client, you only care about scoring and map stats for example'
-        )
-        .replace(
-            '{INPUT}',
-            checkboxHTML
-                .replace(/{ID}/gm, 'CALCULATE_PP')
-                .replace('{ADDON}', config.calculatePP ? 'checked="true"' : '')
-                .replace('{VALUE}', `${config.calculatePP}`)
+            '{items}',
+            [
+                settingsItemHTMLv2
+                    .replace('{name}', 'RT PP Calculation')
+                    .replace(
+                        '{description}',
+                        'Allow real-time calculation of performance points.<br>Useful to turn off for tournaments or users who do not care about pp.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'CALCULATE_PP')
+                            .replace(
+                                '{checked}',
+                                config.calculatePP ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
+
+                    .replace('{name}', 'Key Overlay Data')
+                    .replace(
+                        '{description}',
+                        'Allow retrieval of live keypress data for the [K1/K2/M1/M2] keys.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'ENABLE_KEY_OVERLAY')
+                            .replace(
+                                '{checked}',
+                                config.calculatePP ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Common Poll Rate')
+                    .replace(
+                        '{description}',
+                        'Interval of time, in milliseconds, between polling of general game data.'
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsNumberInputHTML
+                            .replace('{id}', 'POLL_RATE')
+                            .replace('{value}', config.pollRate.toString())
+                            .replace('{min}', '100')
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Precise Poll Rate')
+                    .replace(
+                        '{description}',
+                        'Interval of time, in milliseconds, between polling of precise game data. (KeyOverlayData, HitErrorData)'
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsNumberInputHTML
+                            .replace('{id}', 'PRECISE_POLL_RATE')
+                            .replace(
+                                '{value}',
+                                config.preciseDataPollRate.toString()
+                            )
+                            .replace('{min}', '0')
+                    )
+            ]
+                .map((item) => item.replace(/\{[^}]*}/g, ''))
+                .join('\n')
         );
 
-    const enableKeyOverlayHTML = settingsItemHTML
-        .replace('{NAME}', 'ENABLE_KEY_OVERLAY')
+    const serverGroup = settingsGroupHTML
+        .replace('{header}', 'Server')
         .replace(
-            '{DESCRIPTION}',
-            'Enables/disable reading of K1/K2/M1/M2 keys from osu'
-        )
-        .replace(
-            '{INPUT}',
-            checkboxHTML
-                .replace(/{ID}/gm, 'ENABLE_KEY_OVERLAY')
-                .replace(
-                    '{ADDON}',
-                    config.enableKeyOverlay ? 'checked="true"' : ''
-                )
-                .replace('{VALUE}', `${config.enableKeyOverlay}`)
+            '{items}',
+            [
+                "<div style='display: flex; flex-direction: row; gap: 4rem'>{items}</div>".replace(
+                    '{items}',
+                    [
+                        settingsItemHTMLv2
+                            .replace('{name}', 'Server IP')
+                            .replace(
+                                '{description}',
+                                'The server IP address tosu will listen on.'
+                            )
+                            .replace(
+                                '{input-2}',
+                                settingsTextInputHTML
+                                    .replace('{id}', 'SERVER_IP')
+                                    .replace(
+                                        '{value}',
+                                        config.serverIP.toString()
+                                    )
+                            ),
+                        settingsItemHTMLv2
+                            .replace('{name}', 'Server Port')
+                            .replace(
+                                '{description}',
+                                'The server port tosu will listen on.<br>Must be between 1024 and 65535.'
+                            )
+                            .replace(
+                                '{input-2}',
+                                settingsTextInputHTML
+                                    .replace('{id}', 'SERVER_PORT')
+                                    .replace(
+                                        '{value}',
+                                        config.serverPort.toString()
+                                    )
+                            )
+                    ]
+                        .map((item) => item.replace(/\{[^}]*}/g, ''))
+                        .join('\n')
+                ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Allowed IPs')
+                    .replace(
+                        '{description}',
+                        'A comma-separated list of IP addresses that are allowed to connect to the server.<br>Server IP is automatically added to the list. | Supports wildcard support (eg. 192.168.*.*)'
+                    )
+                    .replace(
+                        '{input-3}',
+                        settingsTextareaInputHTML
+                            .replace('{id}', 'ALLOWED_IPS')
+                            .replace('{value}', config.allowedIPs)
+                    )
+            ]
+                .map((item) => item.replace(/\{[^}]*}/g, ''))
+                .join('\n')
         );
 
-    const enableIngameOverlayHTML = settingsItemHTML
-        .replace('{NAME}', 'ENABLE_INGAME_OVERLAY')
-        .replace('{DESCRIPTION}', 'Enables/disable in-game overlay')
+    const advancedGroup = settingsGroupHTML
+        .replace('{header}', 'Advanced')
         .replace(
-            '{INPUT}',
-            checkboxHTML
-                .replace(/{ID}/gm, 'ENABLE_INGAME_OVERLAY')
-                .replace(
-                    '{ADDON}',
-                    config.enableIngameOverlay ? 'checked="true"' : ''
-                )
-                .replace('{VALUE}', `${config.enableIngameOverlay}`)
+            '{items}',
+            [
+                settingsItemHTMLv2
+                    .replace('{name}', 'Debugging Mode')
+                    .replace(
+                        '{description}',
+                        'Allow logging of additional verbose data to the console.<br>May cause performance issues: Please do not enable unless troubleshooting.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'DEBUG_LOG')
+                            .replace(
+                                '{checked}',
+                                config.debugLogging ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Show Multiplayer Commands')
+                    .replace(
+                        '{description}',
+                        'Show bancho multiplayer commands (!mp) in the tournament chat manager.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'SHOW_MP_COMMANDS')
+                            .replace(
+                                '{checked}',
+                                config.showMpCommands ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Counters Directory')
+                    .replace(
+                        '{description}',
+                        "Path to the folder containing the tosu counters. (named 'static' by default)"
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsTextInputHTML
+                            .replace('{id}', 'STATIC_FOLDER_PATH')
+                            .replace('{value}', config.staticFolderPath)
+                    )
+            ]
+                .map((item) => item.replace(/\{[^}]*}/g, ''))
+                .join('\n')
         );
 
-    const pollRateHTML = settingsItemHTML
-        .replace('{NAME}', 'POLL_RATE')
-        .replace(
-            '{DESCRIPTION}',
-            'Frequency in milliseconds for updating information.'
-        )
-        .replace(
-            '{INPUT}',
-            inputHTML
-                .replace('{TYPE}', 'number')
-                .replace(/{ID}/gm, 'POLL_RATE')
-                .replace('{ADDON}', config.pollRate ? 'min="100"' : '')
-                .replace('{VALUE}', `${config.pollRate}`)
-        );
+    const groups = [generalGroup, dataGroup, serverGroup, advancedGroup]
+        .map((item) => item.replace(/\{[^}]*}/g, ''))
+        .join('\n');
 
-    const preciseDataPollRateHTML = settingsItemHTML
-        .replace('{NAME}', 'PRECISE_DATA_POLL_RATE')
-        .replace(
-            '{DESCRIPTION}',
-            'Frequency in milliseconds for updating precise information. (Key overlay and HitErrorData)'
-        )
-        .replace(
-            '{INPUT}',
-            inputHTML
-                .replace('{TYPE}', 'number')
-                .replace(/{ID}/gm, 'PRECISE_DATA_POLL_RATE')
-                .replace('{ADDON}', config.preciseDataPollRate ? 'min="0"' : '')
-                .replace('{VALUE}', `${config.preciseDataPollRate}`)
-        );
-
-    const enableAutoUpdateHtml = settingsItemHTML
-        .replace('{NAME}', 'ENABLE_AUTOUPDATE')
-        .replace(
-            '{DESCRIPTION}',
-            'Enable checking and updating tosu on startup'
-        )
-        .replace(
-            '{INPUT}',
-            checkboxHTML
-                .replace(/{ID}/gm, 'ENABLE_AUTOUPDATE')
-                .replace(
-                    '{ADDON}',
-                    config.enableAutoUpdate ? 'checked="true"' : ''
-                )
-                .replace('{VALUE}', `${config.enableAutoUpdate}`)
-        );
-
-    const openDashboardOnStartupHtml = settingsItemHTML
-        .replace('{NAME}', 'OPEN_DASHBOARD_ON_STARTUP')
-        .replace('{DESCRIPTION}', 'Open dashboard in browser on startup')
-        .replace(
-            '{INPUT}',
-            checkboxHTML
-                .replace(/{ID}/gm, 'OPEN_DASHBOARD_ON_STARTUP')
-                .replace(
-                    '{ADDON}',
-                    config.openDashboardOnStartup ? 'checked="true"' : ''
-                )
-                .replace('{VALUE}', `${config.openDashboardOnStartup}`)
-        );
-
-    const serverIPHTML = settingsItemHTML
-        .replace('{NAME}', 'SERVER_IP')
-        .replace('{DESCRIPTION}', 'The IP address for the API and WebSocket.')
-        .replace(
-            '{INPUT}',
-            inputHTML
-                .replace('{TYPE}', 'text')
-                .replace(/{ID}/gm, 'SERVER_IP')
-                .replace('{ADDON}', config.serverIP ? 'min="0"' : '')
-                .replace('{VALUE}', `${config.serverIP}`)
-        );
-
-    const serverPortHTML = settingsItemHTML
-        .replace('{NAME}', 'SERVER_PORT')
-        .replace('{DESCRIPTION}', 'The port for the API and WebSocket.')
-        .replace(
-            '{INPUT}',
-            inputHTML
-                .replace('{TYPE}', 'number')
-                .replace(/{ID}/gm, 'SERVER_PORT')
-                .replace('{ADDON}', config.serverPort ? 'min="0"' : '')
-                .replace('{VALUE}', `${config.serverPort}`)
-        );
-
-    const staticFolderPathtHTML = settingsItemHTML
-        .replace('{NAME}', 'STATIC_FOLDER_PATH')
-        .replace('{DESCRIPTION}', 'The directory path containing PP counters.')
-        .replace(
-            '{INPUT}',
-            inputHTML
-                .replace('{TYPE}', 'text')
-                .replace(/{ID}/gm, 'STATIC_FOLDER_PATH')
-                .replace('{ADDON}', config.staticFolderPath ? 'min="0"' : '')
-                .replace('{VALUE}', `${config.staticFolderPath}`)
-        );
-
-    const showMpCommandsHTML = settingsItemHTML
-        .replace('{NAME}', 'SHOW_MP_COMMANDS')
-        .replace(
-            '{DESCRIPTION}',
-            `Shows !mp commands (messages starting with '!mp') in tournament manager chat (hidden by default)`
-        )
-        .replace(
-            '{INPUT}',
-            checkboxHTML
-                .replace(/{ID}/gm, 'SHOW_MP_COMMANDS')
-                .replace(
-                    '{ADDON}',
-                    config.showMpCommands ? 'checked="true"' : ''
-                )
-                .replace('{VALUE}', `${config.showMpCommands}`)
-        );
-
-    const allowedIPsHTML = settingsItemHTML
-        .replace('{NAME}', 'ALLOWED_IPS')
-        .replace(
-            '{DESCRIPTION}',
-            `IP's or domain names, which allowed to change and access tosu API's.<br /><br />- Supports wildcard syntax: 192.*.60.*<br />- Compares against values printed out in «Unallowed request» message in console`
-        )
-        .replace(
-            '{INPUT}',
-            textareaHTML
-                .replace(/{ID}/gm, 'ALLOWED_IPS')
-                .replace('{ADDON}', 'rows="5"')
-                .replace('{VALUE}', `${config.allowedIPs}`)
-        );
-
-    const settings = `<div class="settings">
-    ${debugHTML}
-    <div></div>
-    <div></div>
-    ${enableAutoUpdateHtml}
-    ${openDashboardOnStartupHtml}
-    <div></div>
-    <div></div>
-    ${enableIngameOverlayHTML}
-    ${enableKeyOverlayHTML}
-    <div></div>
-    <div></div>
-    ${calculatePPHTML}
-    ${showMpCommandsHTML}
-    <div></div>
-    <div></div>
-    ${pollRateHTML}
-    ${preciseDataPollRateHTML}
-    <div></div>
-    <div></div>
-    ${serverIPHTML}
-    ${serverPortHTML}
-    <div></div>
-    ${allowedIPsHTML}
-    <div></div>
-    <div></div>
-    ${staticFolderPathtHTML}
-    ${saveSettingsButtonHTML}
-    </div>`;
+    const settingsPage = `<div class="settings">${groups} ${settingsSaveButtonHTMLv2}</div>`;
 
     fs.readFile(
         path.join(pkgAssetsPath, 'homepage.html'),
@@ -767,7 +795,7 @@ export function buildSettings(res: http.ServerResponse) {
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', '')
                 .replace('{{AVAILABLE_AMOUNT}}', '')
-                .replace('{{LIST}}', settings);
+                .replace('{{LIST}}', settingsPage);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
