@@ -116,6 +116,8 @@ function isAllowedIP(url: string | undefined) {
     if (!url) return false;
 
     const allowedIPs = config.allowedIPs.split(',');
+    allowedIPs.push(config.serverIP);
+
     try {
         const hostname = new URL(url).hostname.toLowerCase().trim();
         return allowedIPs.some((pattern) => {
