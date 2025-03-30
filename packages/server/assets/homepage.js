@@ -1110,6 +1110,10 @@ async function downloadCounter(element, id, update) {
   });
 
   endDownload(element, id, 'Downloaded');
+
+  setTimeout(() => {
+    window.location.reload(true)
+  }, 1000);
 };
 
 function displayNotification({ element, text, classes, delay }) {
@@ -1149,7 +1153,34 @@ function displayNotification({ element, text, classes, delay }) {
 };
 
 function copyText(element) {
-  navigator.clipboard.writeText(element.attributes.nfv.value).then(() => {
+  const text = element.attributes.nfv.value;
+  if (navigator.clipboard == undefined) {
+    const tempTextArea = document.createElement("textarea");
+    tempTextArea.style.position = "fixed";
+    tempTextArea.style.left = "-9999px";
+    tempTextArea.value = text;
+
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+
+    try {
+      document.execCommand('copy');
+      displayNotification({
+        element,
+        text: `${element.attributes.nft.value} copied`,
+        classes: ['green'],
+        delay: 700,
+      });
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+    }
+
+    document.body.removeChild(tempTextArea);
+    return;
+  };
+
+
+  navigator.clipboard.writeText(text).then(() => {
     displayNotification({
       element,
       text: `${element.attributes.nft.value} copied`,
