@@ -125,7 +125,7 @@ export class Server {
                 referer: req.headers.referer
             });
 
-            res.statusCode = 404;
+            res.statusCode = 403;
             res.end('Not Found');
         });
 

@@ -135,10 +135,12 @@ export function saveSettings(folderName: string, payload: bodyPayload[]) {
 
 function rebuildJSON({
     array,
+    address,
     external,
     query
 }: {
     array: ICounter[];
+    address: string | undefined;
     external?: boolean;
     query?: string;
 }) {
@@ -206,12 +208,12 @@ function rebuildJSON({
                 .join(' ');
 
             const ip =
-                config.serverIP === '0.0.0.0' ? 'localhost' : config.serverIP;
+                config.serverIP === '0.0.0.0' ? '127.0.0.1' : config.serverIP;
 
             const iframe = iframeHTML
                 .replace(
                     '{URL}',
-                    `http://${ip}:${config.serverPort}/${item.folderName}/`
+                    `http://${address || ip}:${config.serverPort}/${item.folderName}/`
                 )
                 .replace(
                     '{WIDTH}',
@@ -236,7 +238,7 @@ function rebuildJSON({
             const metadata = metadataHTML
                 .replace(
                     '{COPY_URL}',
-                    `http://${config.serverIP}:${config.serverPort}/${item.folderName}/`
+                    `http://${address || ip}:${config.serverPort}/${item.folderName}/`
                 )
                 .replace('{TEXT_URL}', `/${item.folderName}/`)
                 .replace(
@@ -393,10 +395,15 @@ export function getLocalCounters(): ICounter[] {
     }
 }
 
-export function buildLocalCounters(res: http.ServerResponse, query?: string) {
+export function buildLocalCounters(
+    res: http.ServerResponse,
+    address: string | undefined,
+    query?: string
+) {
     const array = getLocalCounters();
     const build = rebuildJSON({
         array,
+        address,
         external: false,
         query
     });
@@ -443,6 +450,7 @@ export function buildLocalCounters(res: http.ServerResponse, query?: string) {
 
 export async function buildExternalCounters(
     res: http.ServerResponse,
+    address: string | undefined,
     query?: string
 ) {
     let text = '';
@@ -473,6 +481,7 @@ export async function buildExternalCounters(
 
         const build = rebuildJSON({
             array,
+            address,
             external: true,
             query
         });

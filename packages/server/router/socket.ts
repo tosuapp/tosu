@@ -27,7 +27,7 @@ export default function buildSocket({
                 referer: request.headers.referer
             });
 
-            socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+            socket.write('HTTP/1.1 403 Not Found\r\n\r\n');
             socket.destroy();
             return;
         }
