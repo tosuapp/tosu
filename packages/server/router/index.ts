@@ -54,11 +54,16 @@ export default function buildBaseApi(server: Server) {
                 .replace(/[^a-z0-9A-Z]/, '')
                 .toLowerCase();
 
+            const parseAddress = new URL(
+                `http://${req.headers.host}/` ||
+                    req.headers.referer ||
+                    `http://${req.socket.remoteAddress}/`
+            );
             if (req.query?.tab === '1') {
-                return buildExternalCounters(res, query);
+                return buildExternalCounters(res, parseAddress.hostname, query);
             }
 
-            return buildLocalCounters(res, query);
+            return buildLocalCounters(res, parseAddress.hostname, query);
         }
     );
 
@@ -459,8 +464,14 @@ export default function buildBaseApi(server: Server) {
         const staticPath = getStaticPath();
 
         if (url === '/') {
+            const parseAddress = new URL(
+                `http://${req.headers.host}/` ||
+                    req.headers.referer ||
+                    `http://${req.socket.remoteAddress}/`
+            );
+
             if (req.query?.tab === '1') {
-                return buildExternalCounters(res);
+                return buildExternalCounters(res, parseAddress.hostname);
             }
 
             if (req.query?.tab === '2') {
@@ -471,7 +482,7 @@ export default function buildBaseApi(server: Server) {
                 return buildInstructionLocal(res);
             }
 
-            return buildLocalCounters(res);
+            return buildLocalCounters(res, parseAddress.hostname);
         }
 
         const extension = path.extname(url);
