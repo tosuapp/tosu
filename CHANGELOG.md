@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.4.2](https://github.com/tosuapp/tosu/compare/v4.4.1...v4.4.2) (2025-04-01)
+
+
+### Bug Fixes
+
+* Fix wrong ip address for overlay preview ([e02466f](https://github.com/tosuapp/tosu/commit/e02466f254ad7f8512ef658b7a1f04380f35c820))
+
 ### [4.4.1](https://github.com/tosuapp/tosu/compare/v4.4.0...v4.4.1) (2025-03-15)
 
 
