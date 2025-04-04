@@ -163,32 +163,32 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     // Checks <api>k__BackingField and <StatisticsPanel>k__BackingField (to GameBase::<Storage>k__BackingField)
     private checkIfResultScreen(address: number) {
         return (
-            this.process.readIntPtr(address + 0x3c0) ===
+            this.process.readIntPtr(address + 0x408) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x3c8) !==
-                this.process.readIntPtr(this.gameBase() + 0x440)
+            this.process.readIntPtr(address + 0x348) !==
+                this.process.readIntPtr(this.gameBase() + 0x450)
         );
     }
 
     // checks <game>k__BackingField
     private checkIfSongSelect(address: number) {
-        return this.process.readIntPtr(address + 0x3b8) === this.gameBase();
+        return this.process.readIntPtr(address + 0x3c0) === this.gameBase();
     }
 
     // checks <logo>k__BackingField and osuLogo
     private checkIfPlayerLoader(address: number) {
         return (
             this.process.readIntPtr(address + 0x380) ===
-            this.process.readIntPtr(address + 0x480)
+            this.process.readIntPtr(address + 0x478)
         );
     }
 
     // Checks <api>k__BackingField and <realm>k__BackingField
     private checkIfEditor(address: number) {
         return (
-            this.process.readIntPtr(address + 0x438) ===
+            this.process.readIntPtr(address + 0x448) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x3b8) ===
+            this.process.readIntPtr(address + 0x3c0) ===
                 this.process.readIntPtr(this.gameBase() + 0x4b8)
         );
     }
@@ -196,9 +196,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     // Checks <API>k__BackingField and <client>k__BackingField
     private checkIfMulti(address: number) {
         return (
-            this.process.readIntPtr(address + 0x3c8) ===
+            this.process.readIntPtr(address + 0x3c0) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x3d8) ===
+            this.process.readIntPtr(address + 0x3d0) ===
                 this.process.readIntPtr(this.gameBase() + 0x4a8)
         );
     }
@@ -1739,15 +1739,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         } else if (isEditor) {
             status = GameState.edit;
         } else if (isMulti) {
-            const roomManager = this.process.readIntPtr(
-                this.currentScreen + 0x3b8
+            const multiplayerClient = this.process.readIntPtr(
+                this.currentScreen + 0x3d0
             );
-            const joinedRoomBindable = this.process.readIntPtr(
-                roomManager + 0x208
-            );
-            const room = this.process.readIntPtr(joinedRoomBindable + 0x20);
 
-            if (room) {
+            const currentRoom = this.process.readIntPtr(
+                multiplayerClient + 0x298
+            );
+
+            if (currentRoom) {
                 status = GameState.lobby;
             } else {
                 status = GameState.selectMulti;
