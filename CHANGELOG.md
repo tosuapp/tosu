@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.4.3](https://github.com/tosuapp/tosu/compare/v4.4.2...v4.4.3) (2025-04-09)
+
+
+### Bug Fixes
+
+* Bump rosu version ([ceb9c8d](https://github.com/tosuapp/tosu/commit/ceb9c8dd7261aac619a955947d33d0a4a488e708))
+* update offsets for fields to fix states ([1f7ac64](https://github.com/tosuapp/tosu/commit/1f7ac64fb130a4f5628cf417f650786510bd3b9f))
+
 ### [4.4.2](https://github.com/tosuapp/tosu/compare/v4.4.1...v4.4.2) (2025-04-01)
 
 
