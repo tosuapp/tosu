@@ -502,9 +502,8 @@ export class BeatmapPP extends AbstractState {
 
                 const kiais: KiaiPoint[] = [];
                 const points = this.lazerBeatmap.controlPoints.effectPoints;
-                for (let i = 0; i < points.length; i++) {
-                    const point = points[i];
-                    if (point.kiai === false) {
+                for (const point of points) {
+                    if (point.kiai === false && kiais.length > 0) {
                         kiais[kiais.length - 1].end = point.startTime;
                         continue;
                     }
