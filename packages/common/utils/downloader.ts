@@ -49,7 +49,10 @@ export const downloadFile = (
             headers: {
                 Accept: 'application/octet-stream',
                 'User-Agent': '@tosuapp/tosu'
-            }
+            },
+            agent: new https.Agent({
+                secureOptions: require('node:crypto').constants.SSL_OP_ALL
+            })
         };
 
         // find url
