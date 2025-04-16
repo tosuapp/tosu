@@ -1,4 +1,4 @@
-export const argumetsParser = (argumentsString: string[] | string) => {
+export const argumentsParser = (argumentsString: string[] | string) => {
     const args: { [key: string]: any } = {};
 
     if (typeof argumentsString === 'string') {
