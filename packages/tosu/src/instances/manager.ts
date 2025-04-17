@@ -1,7 +1,7 @@
 import {
     ClientType,
     Platform,
-    argumetsParser,
+    argumentsParser,
     platformResolver,
     wLogger
 } from '@tosu/common';
@@ -91,7 +91,7 @@ export class InstanceManager {
                     : new OsuInstance(processId);
                 const cmdLine = osuInstance.process.getProcessCommandLine();
 
-                const args = argumetsParser(cmdLine);
+                const args = argumentsParser(cmdLine);
                 if (args.tournament !== null && args.tournament !== undefined) {
                     // skip the lazer tournament client
                     continue;

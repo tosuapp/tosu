@@ -1,4 +1,9 @@
-import { argumetsParser, config, wLogger, watchConfigFile } from '@tosu/common';
+import {
+    argumentsParser,
+    config,
+    wLogger,
+    watchConfigFile
+} from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
 import { homedir } from 'node:os';
@@ -21,7 +26,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
     watchConfigFile({ httpServer, initial: true });
 
-    const { update } = argumetsParser(process.argv);
+    const { update } = argumentsParser(process.argv);
 
     const isDev = process.env.NODE_ENV === 'development';
     const isConfigUpdate = config.enableAutoUpdate === true;
