@@ -65,7 +65,10 @@ export class InstanceManager {
 
     private handleProcesses() {
         try {
-            let osuProcesses = Process.findProcesses('osu!.exe');
+            let osuProcesses: number[] = [];
+            for (const processName of ['osu!.exe', 'osulazer.exe']) {
+                osuProcesses.push(...Process.findProcesses(processName))
+            }
 
             let lazerOnLinux = false;
 
