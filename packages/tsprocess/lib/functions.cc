@@ -300,10 +300,10 @@ Napi::Value find_processes(const Napi::CallbackInfo &args) {
 
   for (size_t i = 0; i < process_array.Length(); i++) {
     Napi::Value value = process_array[i];
-    try {
+    if (value.IsString()) {
         std::string name = value.As<Napi::String>().Utf8Value();
         process_names.push_back(name);
-    } catch (const Napi::TypeError& e) {}
+    }
   }
 
   auto processes = memory::find_processes(process_names);
