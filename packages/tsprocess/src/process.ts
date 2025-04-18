@@ -31,8 +31,8 @@ export class Process {
         this.bitness = bitness;
     }
 
-    static findProcesses(imageName: string): number[] {
-        return ProcessUtils.findProcesses(imageName);
+    static findProcesses(names: string[]): number[] {
+        return ProcessUtils.findProcesses(names);
     }
 
     static isProcessExist(pid: number): boolean {

@@ -295,8 +295,18 @@ Napi::Value find_processes(const Napi::CallbackInfo &args) {
     return env.Null();
   }
 
-  auto process_name = args[0].As<Napi::String>().Utf8Value();
-  auto processes = memory::find_processes(process_name);
+  Napi::Array process_array = args[0].As<Napi::Array>();
+  std::vector<std::string> process_names;
+
+  for (size_t i = 0; i < process_array.Length(); i++) {
+    Napi::Value value = process_array[i];
+    try {
+        std::string name = value.As<Napi::String>().Utf8Value();
+        process_names.push_back(name);
+    } catch (const Napi::TypeError& e) {}
+  }
+
+  auto processes = memory::find_processes(process_names);
 
   auto arr = Napi::Array::New(env, processes.size());
   for (size_t i = 0; i < processes.size(); i++) {

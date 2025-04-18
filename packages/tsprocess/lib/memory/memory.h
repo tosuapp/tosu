@@ -29,7 +29,7 @@ namespace memory {
 
 std::vector<MemoryRegion> query_regions(void *process);
 
-std::vector<uint32_t> find_processes(const std::string_view process_name);
+std::vector<uint32_t> find_processes(const std::vector<std::string>& process_names);
 
 void *open_process(uint32_t id);
 bool is_process_64bit(uint32_t id);

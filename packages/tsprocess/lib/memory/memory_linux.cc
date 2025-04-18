@@ -23,7 +23,7 @@ std::string read_file(const std::string &path) {
 
 }  // namespace
 
-std::vector<uint32_t> memory::find_processes(const std::string_view process_name) {
+std::vector<uint32_t> memory::find_processes(const std::vector<std::string>& process_names) {
   std::vector<uint32_t> process_ids;
   const auto dir = opendir("/proc");
   if (dir) {
@@ -35,8 +35,12 @@ std::vector<uint32_t> memory::find_processes(const std::string_view process_name
           const auto pid = std::stoi(pid_str);
           const auto cmdline_path = "/proc/" + pid_str + "/comm";
           const auto cmdline = read_file(cmdline_path);
-          if (cmdline.find(process_name) != std::string::npos) {
-            process_ids.push_back(pid);
+          
+          // Check if the process name matches any in the provided list
+          for (const auto& process_name : process_names) {
+            if (cmdline.find(process_name) != std::string::npos) {
+              process_ids.push_back(pid);
+            }
           }
         }
       }
