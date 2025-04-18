@@ -15,6 +15,7 @@ import { OsuInstance } from './osuInstance';
 export class InstanceManager {
     platformType: Platform;
     focusedClient: ClientType;
+    gameFocused: boolean;
 
     osuInstances: {
         [key: number]: AbstractInstance;
@@ -143,6 +144,7 @@ export class InstanceManager {
             (r) => r.pid === focusedPID
         );
         if (instance) this.focusedClient = instance.client;
+        this.gameFocused = instance !== undefined;
 
         if (this.focusedClient === undefined) {
             this.focusedClient =

@@ -71,6 +71,9 @@ export type IResultScreen =
     | Error;
 
 export type IScore = {
+    paused: boolean;
+    replayMode: boolean;
+    replayStreaming: boolean;
     retries: number;
     playerName: string;
     mods: CalculateMods;

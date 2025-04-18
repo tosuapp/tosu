@@ -18,6 +18,7 @@ import path from 'path';
 import {
     ApiAnswer,
     Leaderboard,
+    Play,
     Tourney,
     TourneyChatMessages,
     TourneyClients
@@ -28,7 +29,7 @@ import { Gameplay } from '@/states/gameplay';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { CalculateMods } from '@/utils/osuMods.types';
+import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
@@ -133,6 +134,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     };
 
     return {
+        focused: instanceManager.gameFocused,
         client: ClientType[osuInstance.client],
         server: osuInstance.customServerEndpoint ?? 'ppy.sh',
         state: {
@@ -265,7 +267,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             stats: buildBeatmapStats(beatmapPP)
         },
-        play: buildPlay(gameplay, beatmapPP, currentMods),
+        play: buildPlay(gameplay, beatmapPP, currentMods, global.status),
         leaderboard: gameplay.leaderboardScores.map((slot) =>
             convertMemoryPlayerToResult(
                 slot,
@@ -416,7 +418,7 @@ const buildTourneyData = (
                 beatmap: {
                     stats: buildBeatmapStats(beatmapPP)
                 },
-                play: buildPlay(gameplay, beatmapPP, currentMods)
+                play: buildPlay(gameplay, beatmapPP, currentMods, global.status)
             };
         });
 
@@ -554,9 +556,21 @@ function buildBeatmapStats(beatmapPP: BeatmapPP) {
 function buildPlay(
     gameplay: Gameplay,
     beatmapPP: BeatmapPP,
-    currentMods: CalculateMods
-) {
+    currentMods: CalculateMods,
+    gameState: number
+): Play {
+    const state =
+        gameplay.replayMode ||
+        (gameplay.mods.number & OsuMods.Autoplay) === OsuMods.Autoplay
+            ? 'watching'
+            : gameplay.replayStreaming
+              ? 'spectating'
+              : 'playing';
+
     return {
+        state: gameState === 2 ? state : 'idle',
+        isPaused: gameplay.paused,
+
         playerName: gameplay.playerName,
 
         mode: {
