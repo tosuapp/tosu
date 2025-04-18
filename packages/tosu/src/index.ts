@@ -44,19 +44,22 @@ const currentVersion = require(process.cwd() + '/_version.js');
     }
 
     if (process.platform === 'win32') {
-        const currentPath = getProgramPath().toLowerCase();
-        if (currentPath.includes('temp') && currentPath.includes('appdata')) {
+        const currentPath = getProgramPath();
+        if (process.env.TEMP && currentPath.startsWith(process.env.TEMP)) {
             wLogger.warn(
-                'Do not run tosu in temp folder. Incase if you running it from archive, please extract tosu from archive (aka .zip)'
+                'Incase if you running tosu from archive, please extract it to a folder'
             );
             return;
         }
 
-        if (currentPath.includes('onedrive')) {
+        if (
+            process.env.OneDrive &&
+            currentPath.startsWith(process.env.OneDrive)
+        ) {
             wLogger.warn(
                 'tosu cannot run from a OneDrive folder due to potential sync conflicts and performance issues.'
             );
-            wLogger.warn('Please move tosu to a desktop, or somewhere else.');
+            wLogger.warn('Please move tosu to different folder');
             return;
         }
     }
