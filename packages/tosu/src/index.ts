@@ -1,13 +1,12 @@
 import {
     argumentsParser,
     config,
+    getProgramPath,
     wLogger,
     watchConfigFile
 } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
-import { homedir } from 'node:os';
-import { resolve } from 'path';
 import { Process } from 'tsprocess/dist/process';
 
 import { InstanceManager } from '@/instances/manager';
@@ -44,34 +43,27 @@ const currentVersion = require(process.cwd() + '/_version.js');
         }
     }
 
-    let isInOneDrive = false;
     if (process.platform === 'win32') {
-        const currentPath = resolve().toLowerCase();
-        const homeDir = homedir().toLowerCase();
+        const currentPath = getProgramPath().toLowerCase();
+        if (currentPath.includes('temp') && currentPath.includes('appdata')) {
+            wLogger.warn(
+                'Do not run tosu in temp folder. Incase if you running it from archive, please extract tosu from archive (aka .zip)'
+            );
+            return;
+        }
 
-        // NOTE: The listed strings are only the default OneDrive paths.
-        const oneDrivePaths = [
-            'OneDrive',
-            'OneDrive - Personal',
-            'OneDrive - Business',
-            'OneDrive for Business'
-        ].map((path) => resolve(homeDir, path).toLowerCase());
-
-        isInOneDrive = oneDrivePaths.some((path) =>
-            currentPath.startsWith(path)
-        );
+        if (currentPath.includes('onedrive')) {
+            wLogger.warn(
+                'tosu cannot run from a OneDrive folder due to potential sync conflicts and performance issues.'
+            );
+            wLogger.warn('Please move tosu to a desktop, or somewhere else.');
+            return;
+        }
     }
 
-    if (isInOneDrive === false) {
-        wLogger.info('Searching for osu!');
+    wLogger.info('Searching for osu!');
 
-        httpServer.start();
-        instanceManager.runWatcher();
-        instanceManager.runDetemination();
-    } else {
-        wLogger.warn(
-            'tosu cannot run from a OneDrive folder due to potential sync conflicts and performance issues.'
-        );
-        wLogger.warn('Please move the application to a local folder');
-    }
+    httpServer.start();
+    instanceManager.runWatcher();
+    instanceManager.runDetemination();
 })();
