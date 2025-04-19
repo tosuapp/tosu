@@ -116,7 +116,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             // might potentially change
-            return this.process.readLong(vtable) === 7662238433280;
+            return this.process.readLong(vtable) === 7696598171648;
         } catch {
             return false;
         }
@@ -152,12 +152,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private screenStack() {
-        return this.process.readIntPtr(this.gameBase() + 0x5f8);
+        return this.process.readIntPtr(this.gameBase() + 0x600);
     }
 
     // checks <game>k__BackingField
     private checkIfPlayer(address: number) {
-        return this.process.readIntPtr(address + 0x3f8) === this.gameBase();
+        return this.process.readIntPtr(address + 0x400) === this.gameBase();
     }
 
     // Checks <api>k__BackingField and <StatisticsPanel>k__BackingField (to GameBase::<Storage>k__BackingField)
@@ -252,7 +252,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!player) {
             return 0;
         }
-        return this.process.readIntPtr(player + 0x470);
+        return this.process.readIntPtr(player + 0x480);
     }
 
     private scoreInfo(player: number) {
@@ -419,7 +419,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private beatmapClock() {
-        return this.process.readIntPtr(this.gameBase() + 0x4c8);
+        return this.process.readIntPtr(this.gameBase() + 0x4d0);
     }
 
     private finalClockSource() {
@@ -708,7 +708,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const player = this.player();
         if (player) {
-            const scoreProcessor = this.process.readIntPtr(player + 0x438);
+            const scoreProcessor = this.process.readIntPtr(player + 0x448);
 
             const comboBindable = this.process.readIntPtr(
                 scoreProcessor + 0x250
@@ -943,7 +943,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             const player = this.player();
-            const hudOverlay = this.process.readIntPtr(player + 0x450);
+            const hudOverlay = this.process.readIntPtr(player + 0x460);
 
             const inputController = this.process.readIntPtr(hudOverlay + 0x348);
 
@@ -1049,7 +1049,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private hitEvents(): number[] {
         const player = this.player();
-        const scoreProcessor = this.process.readIntPtr(player + 0x438);
+        const scoreProcessor = this.process.readIntPtr(player + 0x448);
         const hitEventsList = this.process.readIntPtr(scoreProcessor + 0x288);
         const hitEvents = this.readListItems(hitEventsList, true, 0x40);
 
@@ -1757,7 +1757,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.isPlayerLoading = isPlayerLoader;
 
         if (isPlaying) {
-            const dependencies = this.process.readIntPtr(this.player() + 0x480);
+            const dependencies = this.process.readIntPtr(this.player() + 0x490);
             const cache = this.process.readIntPtr(dependencies + 0x8);
             const entries = this.process.readIntPtr(cache + 0x10);
             const drawableRuleset = this.process.readIntPtr(entries + 0x10);
@@ -1875,20 +1875,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             -1
         );
 
-        const leaderboardScores = this.process.readIntPtr(
-            player + (this.replayMode ? 0x4e8 : 0x520)
-        );
+        // TODO: update once I bother todo it :)
+        // const leaderboardScores = this.process.readIntPtr(
+        //     player + (this.replayMode ? 0x4e8 : 0x520)
+        // );
 
-        const items = this.readListItems(
-            this.process.readIntPtr(leaderboardScores + 0x18)
-        );
+        // const items = this.readListItems(
+        //     this.process.readIntPtr(leaderboardScores + 0x18)
+        // );
 
-        const scores: LeaderboardPlayer[] = [];
+        // const scores: LeaderboardPlayer[] = [];
 
-        for (let i = 0; i < items.length; i++) {
-            scores.push(this.readLeaderboardScore(items[i], i));
-        }
+        // for (let i = 0; i < items.length; i++) {
+        //     scores.push(this.readLeaderboardScore(items[i], i));
+        // }
 
-        return [true, personalScore, scores];
+        return [true, personalScore, []];
     }
 }
