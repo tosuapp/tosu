@@ -87,7 +87,8 @@ export const config = {
     timestamp: 0,
     currentVersion: '',
     updateVersion: '',
-    logsPath: ''
+    logsPath: '',
+    ingameOverlayStatus: { 32: '', 64: '' }
 };
 
 export const updateConfigFile = () => {
