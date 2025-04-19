@@ -1,6 +1,7 @@
 import {
     Bitness,
     checkGameOverlayConfig,
+    config,
     downloadFile,
     getProgramPath,
     sleep,
@@ -60,9 +61,16 @@ export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
         }
 
         // dum sleep to wait until all osu libraries are loaded?
-        await sleep(1000 * 10);
+        await sleep(1000 * 2);
 
-        return await new Promise((resolve) => {
+        // incase if in-game overlay already injected
+        if (config.ingameOverlayStatus[bitness] === 'started') {
+            wLogger.debug(`[ingame-overlay] Already started`);
+            return true;
+        }
+
+        return new Promise((resolve) => {
+            let error = false;
             const child = execFile(
                 path.join(
                     gameOverlayPath,
@@ -76,6 +84,9 @@ export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
                 }
             );
             child.on('error', (err) => {
+                error = true;
+                config.ingameOverlayStatus[bitness] = 'error';
+
                 wLogger.warn('[ingame-overlay] inject error', err);
                 resolve(false);
             });
@@ -86,10 +97,11 @@ export const injectGameOverlay = async (p: Process, bitness: Bitness) => {
                     );
                     return;
                 }
+                if (error) return;
 
-                wLogger.warn(
-                    `[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor\n`
-                );
+                config.ingameOverlayStatus[bitness] = 'starting';
+                wLogger.info(`[ingame-overlay] Starting in-game overlay...`);
+
                 resolve(true);
             });
         });

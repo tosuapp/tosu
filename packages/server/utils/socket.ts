@@ -27,6 +27,8 @@ export class Websocket {
         socket: ModifiedWebsocket
     ) => void;
 
+    private onConnectionCallback: (id: string) => void;
+
     loopInterval: NodeJS.Timeout;
 
     socket: WebSocket.Server;
@@ -36,7 +38,8 @@ export class Websocket {
         instanceManager,
         pollRateFieldName,
         stateFunctionName,
-        onMessageCallback
+        onMessageCallback,
+        onConnectionCallback
     }: {
         instanceManager: any;
         pollRateFieldName: string;
@@ -46,6 +49,7 @@ export class Websocket {
             | 'getPreciseData'
             | string;
         onMessageCallback?: (data: string, socket: ModifiedWebsocket) => void;
+        onConnectionCallback?: (id: string) => void;
     }) {
         this.socket = new WebSocket.Server({ noServer: true });
 
@@ -55,6 +59,9 @@ export class Websocket {
 
         if (typeof onMessageCallback === 'function') {
             this.onMessageCallback = onMessageCallback;
+        }
+        if (typeof onConnectionCallback === 'function') {
+            this.onConnectionCallback = onConnectionCallback;
         }
 
         this.handle = this.handle.bind(this);
@@ -98,6 +105,9 @@ export class Websocket {
             }
 
             this.clients.set(ws.id, ws);
+            if (typeof this.onConnectionCallback === 'function') {
+                this.onConnectionCallback(ws.id);
+            }
         });
 
         // resend commands internally "this.socket.emit"

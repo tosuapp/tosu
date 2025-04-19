@@ -1,4 +1,4 @@
-import { Bitness, ClientType, config, wLogger } from '@tosu/common';
+import { Bitness, ClientType, config, sleep, wLogger } from '@tosu/common';
 import { injectGameOverlay } from '@tosu/game-overlay';
 import EventEmitter from 'events';
 import { Process } from 'tsprocess/dist/process';
@@ -200,6 +200,23 @@ export abstract class AbstractInstance {
         try {
             const result = await injectGameOverlay(this.process, this.bitness);
             this.isGameOverlayInjected = result === true;
+
+            if (result === false) return; // incase if overlay already reported an issue
+            await sleep(10_000);
+
+            if (
+                config.ingameOverlayStatus[this.bitness] === 'started' ||
+                this.isDestroyed === true
+            ) {
+                wLogger.debug(
+                    '[ingame-overlay] Already started or osu is destroyed.'
+                );
+                return;
+            }
+
+            wLogger.error(
+                '[ingame-overlay] Ingame overlay not connected after 10 seconds.'
+            );
         } catch (exc) {
             wLogger.error(
                 ClientType[this.client],
@@ -238,6 +255,8 @@ export abstract class AbstractInstance {
 
             this.emitter.emit('onDestroy', this.pid);
             this.isDestroyed = true;
+
+            config.ingameOverlayStatus[this.bitness] = '';
         }
 
         setTimeout(this.watchProcessHealth, config.pollRate);
