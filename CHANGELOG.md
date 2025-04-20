@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.5.0](https://github.com/tosuapp/tosu/compare/v4.4.3...v4.5.0) (2025-04-20)
+
+
+### Features
+
+* Check if in-game overlay actually connected ([b3b7169](https://github.com/tosuapp/tosu/commit/b3b71697c1d7f8007189675ca8d4d38421d391d0))
+* Disallow tosu startup under OneDrive directories. ([4d144cd](https://github.com/tosuapp/tosu/commit/4d144cdc10800115ff8ed9bf32f79af8c6bb014d))
+
+
+### Bug Fixes
+
+* add osulazer.exe as whitelisted executable name ([a3cb124](https://github.com/tosuapp/tosu/commit/a3cb12486e733b9cb1a35e7b71ca28dcb0b7c324))
+* Allow multiple process names for `findProcesses` ([a779c7b](https://github.com/tosuapp/tosu/commit/a779c7b943ebfb4428d585151bc76e53f1682b16))
+* Loosen TLS handshake restrictions when downloading the ingame overlay. ([5b84b63](https://github.com/tosuapp/tosu/commit/5b84b63195b59ff00cc8ca6724dcb41148d68030))
+* Prevent error when setting `end` of non-existent kiai ([9091ab1](https://github.com/tosuapp/tosu/commit/9091ab13cdd43d296440c8f7e45a0ee45c8baae7))
+* Typo in `arguments.ts` ([fb20c50](https://github.com/tosuapp/tosu/commit/fb20c50d4e1d05cd829933365fca141b959b6de9))
+* Update onedrive check method & Warn users to extract tosu from archive ([40dcad9](https://github.com/tosuapp/tosu/commit/40dcad9851a8c4412ed98234790c83c424421bd0))
+
 ### [4.4.3](https://github.com/tosuapp/tosu/compare/v4.4.2...v4.4.3) (2025-04-09)
 
 
