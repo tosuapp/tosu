@@ -58,7 +58,9 @@ export class Server {
             pollRateFieldName: '',
             stateFunctionName: '',
             onMessageCallback: handleSocketCommands,
-            onConnectionCallback: () => {
+            onConnectionCallback: (_, url) => {
+                if (url !== '/websocket/commands?l=__ingame__') return;
+
                 const clients = Object.values(
                     this.instanceManager.osuInstances
                 ).map((r: any) => r.bitness);
@@ -68,7 +70,7 @@ export class Server {
                     config.ingameOverlayStatus[64] = 'started';
 
                 wLogger.warn(
-                    `[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor\n`
+                    `[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor`
                 );
             }
         });
