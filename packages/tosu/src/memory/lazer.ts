@@ -19,6 +19,7 @@ import type {
     IGlobalPrecise,
     IHitErrors,
     IKeyOverlay,
+    ILazerSpectator,
     ILeaderboard,
     IMP3Length,
     IMenu,
@@ -1727,6 +1728,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
         const isMulti = this.checkIfMulti(this.currentScreen);
+        const isMultiSpectating = false;
 
         let status = 0;
 
@@ -1749,6 +1751,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             if (currentRoom) {
                 status = GameState.lobby;
+
+                // isMultiSpectating = <reading isSpectate>
             } else {
                 status = GameState.selectMulti;
             }
@@ -1771,6 +1775,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             isReplayUiHidden: false,
             showInterface: false,
             chatStatus: 0,
+            isMultiSpectating,
             status,
             gameTime: 0,
             menuMods: this.menuMods,
@@ -1891,5 +1896,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         // }
 
         return [true, personalScore, []];
+    }
+
+    readSpectatingData(): ILazerSpectator {
+        return undefined;
     }
 }

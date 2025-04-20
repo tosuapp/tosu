@@ -13,6 +13,7 @@ import { BassDensity } from '@/states/bassDensity';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
 import { Global } from '@/states/global';
+import { LazerMultiSpectating } from '@/states/lazerMultiSpectating';
 import { Menu } from '@/states/menu';
 import { ResultScreen } from '@/states/resultScreen';
 import { Settings } from '@/states/settings';
@@ -31,6 +32,7 @@ export interface DataRepoList {
     resultScreen: ResultScreen;
     tourneyManager: TourneyManager;
     user: User;
+    lazerMultiSpectating: LazerMultiSpectating;
 }
 
 export abstract class AbstractInstance {
@@ -79,6 +81,7 @@ export abstract class AbstractInstance {
         this.set('resultScreen', new ResultScreen(this));
         this.set('tourneyManager', new TourneyManager(this));
         this.set('user', new User(this));
+        this.set('lazerMultiSpectating', new LazerMultiSpectating(this));
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
         this.preciseDataLoop = this.preciseDataLoop.bind(this);

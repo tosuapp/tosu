@@ -102,6 +102,7 @@ export type IGlobal =
     | {
           isWatchingReplay: boolean;
           isReplayUiHidden: boolean;
+          isMultiSpectating: boolean;
 
           showInterface: boolean;
           chatStatus: number;
@@ -188,3 +189,17 @@ export type ITourneyUser =
 export type ILeaderboard =
     | [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]]
     | Error;
+
+export interface ILazerSpectatorEntry {
+    team: 'red' | 'blue';
+    user: IUser;
+    resultScreen: IResultScreen | undefined;
+    score: IScore | undefined;
+}
+
+export type ILazerSpectator =
+    | {
+          chat: ITourneyManagerChatItem;
+          spectatingClients: ILazerSpectatorEntry[];
+      }
+    | undefined;

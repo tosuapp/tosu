@@ -27,18 +27,26 @@ export class LazerInstance extends AbstractInstance {
     async regularDataLoop(): Promise<void> {
         wLogger.debug(ClientType[this.client], this.pid, 'regularDataLoop');
 
-        const { global, menu, beatmapPP, gameplay, resultScreen, user } =
-            this.getServices([
-                'global',
-                'menu',
-                'bassDensity',
-                'beatmapPP',
-                'gameplay',
-                'resultScreen',
-                'settings',
-                'tourneyManager',
-                'user'
-            ]);
+        const {
+            global,
+            menu,
+            beatmapPP,
+            gameplay,
+            resultScreen,
+            user,
+            lazerMultiSpectating
+        } = this.getServices([
+            'global',
+            'menu',
+            'bassDensity',
+            'beatmapPP',
+            'gameplay',
+            'resultScreen',
+            'settings',
+            'tourneyManager',
+            'user',
+            'lazerMultiSpectating'
+        ]);
 
         while (!this.isDestroyed) {
             try {
@@ -167,6 +175,10 @@ export class LazerInstance extends AbstractInstance {
 
                     case GameState.selectMulti:
                     case GameState.lobby:
+                        if (global.isMultiSpectating) {
+                            lazerMultiSpectating.updateState();
+                        }
+
                         break;
 
                     default:
