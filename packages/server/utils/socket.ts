@@ -27,7 +27,7 @@ export class Websocket {
         socket: ModifiedWebsocket
     ) => void;
 
-    private onConnectionCallback: (id: string) => void;
+    private onConnectionCallback: (id: string, url: string | undefined) => void;
 
     loopInterval: NodeJS.Timeout;
 
@@ -49,7 +49,7 @@ export class Websocket {
             | 'getPreciseData'
             | string;
         onMessageCallback?: (data: string, socket: ModifiedWebsocket) => void;
-        onConnectionCallback?: (id: string) => void;
+        onConnectionCallback?: (id: string, url: string | undefined) => void;
     }) {
         this.socket = new WebSocket.Server({ noServer: true });
 
@@ -106,7 +106,7 @@ export class Websocket {
 
             this.clients.set(ws.id, ws);
             if (typeof this.onConnectionCallback === 'function') {
-                this.onConnectionCallback(ws.id);
+                this.onConnectionCallback(ws.id, request.url);
             }
         });
 
