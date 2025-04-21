@@ -20,6 +20,7 @@ import type {
     IHitErrors,
     IKeyOverlay,
     ILazerSpectator,
+    ILazerSpectatorEntry,
     ILeaderboard,
     IMP3Length,
     IMenu,
@@ -35,6 +36,7 @@ import type {
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { LeaderboardPlayer, Statistics } from '@/states/types';
 import { netDateBinaryToDate, numberFromDecimal } from '@/utils/converters';
+import { MultiplayerUserState } from '@/utils/multiplayer.types';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import {
     CalculateMods,
@@ -195,13 +197,62 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     // Checks <API>k__BackingField and <client>k__BackingField
-    private checkIfMulti(address: number) {
+    private checkIfMultiSelect(address: number) {
+        const multiplayerClient = this.multiplayerClient();
+        const isConnectedBindable = this.process.readIntPtr(
+            multiplayerClient + 0x2d8
+        );
+
+        const isConnected =
+            this.process.readByte(isConnectedBindable + 0x40) === 1;
+
+        if (!isConnected) {
+            return false;
+        }
+
+        const currentRoom = this.process.readIntPtr(multiplayerClient + 0x288);
+
         return (
+            !currentRoom &&
             this.process.readIntPtr(address + 0x3c0) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
             this.process.readIntPtr(address + 0x3d0) ===
-                this.process.readIntPtr(this.gameBase() + 0x4a8)
+                this.process.readIntPtr(this.gameBase() + 0x4b0)
         );
+    }
+
+    private checkIfMulti() {
+        const multiplayerClient = this.multiplayerClient();
+        const isConnectedBindable = this.process.readIntPtr(
+            multiplayerClient + 0x2d8
+        );
+
+        const isConnected =
+            this.process.readByte(isConnectedBindable + 0x40) === 1;
+
+        if (!isConnected) {
+            return false;
+        }
+
+        const currentRoom = this.process.readIntPtr(multiplayerClient + 0x288);
+
+        return currentRoom;
+    }
+
+    // <logo>k__BackingField / <spectatorClient>k__BackingField / <multiplayerClient>k__BackingField
+    private checkIfMultiSpectator(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x380) ===
+                this.process.readIntPtr(this.gameBase() + 0x638) &&
+            this.process.readIntPtr(address + 0x3b0) ===
+                this.process.readIntPtr(this.gameBase() + 0x4a8) &&
+            this.process.readIntPtr(address + 0x400) ===
+                this.process.readIntPtr(this.gameBase() + 0x4b0)
+        );
+    }
+
+    private multiplayerClient() {
+        return this.process.readIntPtr(this.gameBase() + 0x4b0);
     }
 
     private getCurrentScreen() {
@@ -689,7 +740,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private readScore(
         scoreInfo: number,
         health: number = 0,
-        retries: number = 0
+        retries: number = 0,
+        combo?: number
     ): IGameplay {
         const statistics = this.readStatistics(scoreInfo);
 
@@ -705,10 +757,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (username === 'osu!salad') username = 'salad!';
         if (username === 'osu!topus') username = 'osu!topus!';
 
-        let combo = 0;
-
         const player = this.player();
-        if (player) {
+        if (!combo && player) {
             const scoreProcessor = this.process.readIntPtr(player + 0x448);
 
             const comboBindable = this.process.readIntPtr(
@@ -716,6 +766,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             );
 
             combo = this.process.readInt(comboBindable + 0x40);
+        }
+
+        if (!combo) {
+            combo = 0;
         }
 
         let score = this.process.readLong(scoreInfo + 0x98);
@@ -760,14 +814,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return [];
     }
 
-    user(): IUser {
-        const api = this.process.readIntPtr(this.gameBase() + 0x438);
-        const userBindable = this.process.readIntPtr(api + 0x250);
-        const user = this.process.readIntPtr(userBindable + 0x20);
+    readUser(user: number) {
+        const userId = this.process.readInt(user + 0xe8);
 
-        const statistics = this.process.readIntPtr(user + 0xa0);
-
-        if (statistics === 0) {
+        if (userId === 0) {
             return {
                 id: 0,
                 name: 'Guest',
@@ -785,14 +835,31 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             };
         }
 
-        const ppDecimal = statistics + 0x68 + 0x8;
+        const statistics = this.process.readIntPtr(user + 0xa0);
 
-        // TODO: read ulong instead long
-        const pp = numberFromDecimal(
-            this.process.readLong(ppDecimal + 0x8),
-            this.process.readUInt(ppDecimal + 0x4),
-            this.process.readInt(ppDecimal)
-        );
+        let pp = 0;
+        let accuracy = 0;
+        let rankedScore = 0;
+        let level = 0;
+        let playCount = 0;
+        let rank = 0;
+
+        if (statistics) {
+            const ppDecimal = statistics + 0x68 + 0x8;
+
+            // TODO: read ulong instead long
+            pp = numberFromDecimal(
+                this.process.readLong(ppDecimal + 0x8),
+                this.process.readUInt(ppDecimal + 0x4),
+                this.process.readInt(ppDecimal)
+            );
+
+            accuracy = this.process.readDouble(statistics + 0x28);
+            rankedScore = this.process.readLong(statistics + 0x20);
+            level = this.process.readInt(statistics + 0x4c);
+            playCount = this.process.readInt(statistics + 0x38);
+            rank = this.process.readInt(statistics + 0x54 + 0x4);
+        }
 
         let gamemode = Rulesets[this.process.readSharpStringPtr(user + 0x88)];
 
@@ -801,14 +868,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return {
-            id: this.process.readInt(user + 0xe8),
+            id: userId,
             name: this.process.readSharpStringPtr(user + 0x8),
-            accuracy: this.process.readDouble(statistics + 0x28),
-            rankedScore: this.process.readLong(statistics + 0x20),
-            level: this.process.readInt(statistics + 0x4c),
-            playCount: this.process.readInt(statistics + 0x38),
+            accuracy,
+            rankedScore,
+            level,
+            playCount,
             playMode: gamemode,
-            rank: this.process.readInt(statistics + 0x54 + 0x4),
+            rank,
             countryCode:
                 CountryCodes[
                     this.process.readSharpStringPtr(user + 0x20).toLowerCase()
@@ -818,6 +885,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             backgroundColour: 0xffffffff,
             rawLoginStatus: 0
         };
+    }
+
+    user(): IUser {
+        const api = this.process.readIntPtr(this.gameBase() + 0x438);
+        const userBindable = this.process.readIntPtr(api + 0x250);
+        const user = this.process.readIntPtr(userBindable + 0x20);
+
+        return this.readUser(user);
     }
 
     settingsPointers(): ISettingsPointers {
@@ -844,31 +919,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         throw new Error('Lazer:bindingValue not implemented.');
     }
 
-    resultScreen(): IResultScreen {
-        const selectedScoreBindable = this.process.readIntPtr(
-            this.currentScreen + 0x398
-        );
-
-        const scoreInfo = this.process.readIntPtr(selectedScoreBindable + 0x20);
-
+    buildResultScreen(
+        scoreInfo: number,
+        onlineId: number = -1,
+        date: string = new Date().toISOString()
+    ): IResultScreen {
         const score = this.readScore(scoreInfo);
 
         if (score instanceof Error) throw score;
         if (typeof score === 'string') {
             return 'not-ready';
         }
-
-        const onlineId = Math.max(
-            this.process.readLong(this.currentScreen + 0xb0),
-            this.process.readLong(this.currentScreen + 0xb8)
-        );
-
-        const scoreDate = scoreInfo + 0x100;
-
-        const date = netDateBinaryToDate(
-            this.process.readInt(scoreDate + 0x4),
-            this.process.readInt(scoreDate)
-        ).toISOString();
 
         return {
             onlineId,
@@ -888,6 +949,30 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             largeTickHits: score.largeTickHits,
             date
         };
+    }
+
+    resultScreen(): IResultScreen {
+        const selectedScoreBindable = this.process.readIntPtr(
+            this.currentScreen + 0x398
+        );
+
+        const scoreInfo = this.process.readIntPtr(selectedScoreBindable + 0x20);
+
+        const onlineId = Math.max(
+            this.process.readLong(this.currentScreen + 0xb0),
+            this.process.readLong(this.currentScreen + 0xb8)
+        );
+
+        const scoreDate = scoreInfo + 0x100;
+
+        return this.buildResultScreen(
+            scoreInfo,
+            onlineId,
+            netDateBinaryToDate(
+                this.process.readInt(scoreDate + 0x4),
+                this.process.readInt(scoreDate)
+            ).toISOString()
+        );
     }
 
     gameplay(): IGameplay {
@@ -1727,8 +1812,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const isSongSelect = this.checkIfSongSelect(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
-        const isMulti = this.checkIfMulti(this.currentScreen);
-        const isMultiSpectating = false;
+        const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
+        const isMulti = this.checkIfMulti();
+
+        let isMultiSpectating = false;
 
         let status = 0;
 
@@ -1740,21 +1827,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             status = GameState.resultScreen;
         } else if (isEditor) {
             status = GameState.edit;
+        } else if (isMultiSelect) {
+            status = GameState.selectMulti;
         } else if (isMulti) {
-            const multiplayerClient = this.process.readIntPtr(
-                this.currentScreen + 0x3d0
-            );
+            const multiplayerClient = this.multiplayerClient();
 
             const currentRoom = this.process.readIntPtr(
-                multiplayerClient + 0x298
+                multiplayerClient + 0x288
             );
 
             if (currentRoom) {
                 status = GameState.lobby;
 
-                // isMultiSpectating = <reading isSpectate>
-            } else {
-                status = GameState.selectMulti;
+                isMultiSpectating = this.checkIfMultiSpectator(
+                    this.currentScreen
+                );
             }
         }
 
@@ -1899,6 +1986,89 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     readSpectatingData(): ILazerSpectator {
-        return undefined;
+        const multiSpectatorScreen = this.currentScreen;
+
+        const spectatingClients: ILazerSpectatorEntry[] = [];
+
+        const gameplayStates = this.process.readIntPtr(
+            multiSpectatorScreen + 0x3e0
+        );
+        const gameplayStatesEntries = this.process.readIntPtr(
+            gameplayStates + 0x10
+        );
+        const gameplayStatesCount = this.process.readInt(gameplayStates + 0x38);
+
+        const userStates: Record<
+            number,
+            { team: 'red' | 'blue'; state: MultiplayerUserState }
+        > = {};
+
+        const multiplayerUsers = this.process.readIntPtr(
+            multiSpectatorScreen + 0x448
+        );
+        const multiplayerUsersCount = this.process.readInt(
+            multiplayerUsers + 0x8
+        );
+
+        for (let i = 0; i < multiplayerUsersCount; i++) {
+            const current = this.process.readIntPtr(
+                multiplayerUsers + 0x10 + 0x8 * i
+            );
+
+            const userId = this.process.readInt(current + 0x28);
+            const matchState = this.process.readIntPtr(current + 0x18);
+
+            const teamId = this.process.readInt(matchState + 0x8);
+            const team = teamId === 0 ? 'red' : 'blue';
+
+            const state = this.process.readInt(current + 0x2c);
+
+            userStates[userId] = {
+                team,
+                state
+            };
+        }
+
+        for (let i = 0; i < gameplayStatesCount; i++) {
+            const current = gameplayStatesEntries + 0x10 + 0x18 * i;
+
+            const state = this.process.readIntPtr(current);
+
+            const score = this.process.readIntPtr(state + 0x8);
+            const scoreInfo = this.process.readIntPtr(score + 0x8);
+            const gameplayScore = this.readScore(scoreInfo);
+
+            const apiUser = this.process.readIntPtr(scoreInfo + 0x68);
+            const user = this.readUser(apiUser);
+
+            if (gameplayScore instanceof Error) {
+                throw gameplayScore;
+            }
+
+            if (typeof gameplayScore === 'string') {
+                return undefined;
+            }
+
+            const userState = userStates[user.id];
+
+            spectatingClients.push({
+                team: userState.team,
+                user,
+                score: gameplayScore,
+                resultScreen:
+                    userState.state === MultiplayerUserState.Results
+                        ? this.buildResultScreen(scoreInfo)
+                        : undefined
+            });
+        }
+
+        // const multiplayerClient = this.multiplayerClient();
+
+        // const room = this.process.readIntPtr(multiplayerClient + 0x288);
+
+        // const roomId = this.process.readInt(room + 0x38);
+        // const channelId = this.process.readInt(room + 0x44);
+
+        return { chat: [], spectatingClients };
     }
 }

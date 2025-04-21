@@ -100,6 +100,11 @@ export class InstanceManager {
                     continue;
                 }
 
+                if (args['debug-client-id']) {
+                    // skip lazer debug clients
+                    continue;
+                }
+
                 if (!isNaN(parseFloat(args.spectateclient))) {
                     osuInstance.setTourneyIpcId(args.spectateclient);
                     osuInstance.setIsTourneySpectator(true);

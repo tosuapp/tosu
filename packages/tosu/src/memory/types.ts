@@ -199,7 +199,7 @@ export interface ILazerSpectatorEntry {
 
 export type ILazerSpectator =
     | {
-          chat: ITourneyManagerChatItem;
+          chat: ITourneyManagerChatItem[];
           spectatingClients: ILazerSpectatorEntry[];
       }
     | undefined;
