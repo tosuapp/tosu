@@ -25,7 +25,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
     watchConfigFile({ httpServer, initial: true });
 
-    const { update } = argumentsParser(process.argv);
+    const { update, onedrive: onedriveBypass } = argumentsParser(process.argv);
 
     const isDev = process.env.NODE_ENV === 'development';
     const isConfigUpdate = config.enableAutoUpdate === true;
@@ -53,6 +53,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
         }
 
         if (
+            onedriveBypass !== true &&
             process.env.OneDrive &&
             currentPath.startsWith(process.env.OneDrive)
         ) {
