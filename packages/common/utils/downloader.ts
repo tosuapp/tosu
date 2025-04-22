@@ -45,14 +45,15 @@ export const downloadFile = (
     destination: string
 ): Promise<string> =>
     new Promise((resolve, reject) => {
-        const options = {
+        const options: https.RequestOptions = {
             headers: {
                 Accept: 'application/octet-stream',
                 'User-Agent': '@tosuapp/tosu'
             },
             agent: new https.Agent({
                 secureOptions: require('node:crypto').constants.SSL_OP_ALL
-            })
+            }),
+            minVersion: 'TLSv1.2'
         };
 
         // find url
