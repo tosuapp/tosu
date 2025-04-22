@@ -51,9 +51,12 @@ export const downloadFile = (
                 'User-Agent': '@tosuapp/tosu'
             },
             agent: new https.Agent({
-                secureOptions: require('node:crypto').constants.SSL_OP_ALL
+                secureOptions: require('node:crypto').constants.SSL_OP_ALL,
+                minVersion: 'TLSv1.2',
+                maxVersion: 'TLSv1.3'
             }),
-            minVersion: 'TLSv1.2'
+            minVersion: 'TLSv1.2',
+            maxVersion: 'TLSv1.3'
         };
 
         wLogger.info(`[request] request to ${url}`);
