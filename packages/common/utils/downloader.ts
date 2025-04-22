@@ -1,7 +1,7 @@
 import fs from 'fs';
 import https from 'https';
 
-import { colorText } from './logger';
+import { colorText, wLogger } from './logger';
 
 const progressBarWidth = 40;
 
@@ -56,6 +56,7 @@ export const downloadFile = (
             minVersion: 'TLSv1.2'
         };
 
+        wLogger.info(`[request] request to ${url}`);
         // find url
         https
             .get(url, options, (response) => {
