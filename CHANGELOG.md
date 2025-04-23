@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.1](https://github.com/tosuapp/tosu/compare/v4.5.0...v4.5.1) (2025-04-23)
+
+
+### Features
+
+* Allow bypassing onedrive check ([262a119](https://github.com/tosuapp/tosu/commit/262a119d4a6c7e7c2a8373863f85518bbd95a1d9))
+
+
+### Bug Fixes
+
+* Fix spam of ingame logs ([f6b87ea](https://github.com/tosuapp/tosu/commit/f6b87ea01c50b3dfd5e49a043b95df16ef4f2f35))
+
 ## [4.5.0](https://github.com/tosuapp/tosu/compare/v4.4.3...v4.5.0) (2025-04-20)
 
 
