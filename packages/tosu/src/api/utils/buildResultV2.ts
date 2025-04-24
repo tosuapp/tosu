@@ -22,7 +22,9 @@ import {
     TourneyChatMessages,
     TourneyClients
 } from '@/api/types/v2';
+import { LazerInstance } from '@/instances/lazerInstance';
 import { InstanceManager } from '@/instances/manager';
+import { IUserProtected } from '@/memory/types';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
@@ -332,7 +334,229 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             skinFolder: global.skinFolder
         },
 
-        tourney: buildTourneyData(instanceManager)
+        tourney:
+            osuInstance instanceof LazerInstance && global.isMultiSpectating
+                ? buildLazerTourneyData(osuInstance)
+                : buildTourneyData(instanceManager)
+    };
+};
+
+const buildLazerTourneyData = (
+    osuInstance: LazerInstance
+): Tourney | undefined => {
+    const { global, lazerMultiSpectating } = osuInstance.getServices([
+        'global',
+        'lazerMultiSpectating'
+    ]);
+
+    if (!lazerMultiSpectating.lazerSpectatingData) {
+        return undefined;
+    }
+
+    return {
+        scoreVisible: global.status === GameState.lobby,
+        starsVisible: false,
+
+        ipcState: global.status,
+        bestOF: 0,
+        team: {
+            left: '',
+            right: ''
+        },
+
+        points: {
+            left: 0,
+            right: 0
+        },
+
+        chat: [],
+
+        totalScore: {
+            left: lazerMultiSpectating.lazerSpectatingData.spectatingClients
+                .filter((client) => client.team === 'red')
+                .reduce((pv, cv) => (pv += cv.score?.score || 0), 0),
+            right: lazerMultiSpectating.lazerSpectatingData.spectatingClients
+                .filter((client) => client.team === 'blue')
+                .reduce((pv, cv) => (pv += cv.score?.score || 0), 0)
+        },
+
+        clients: lazerMultiSpectating.lazerSpectatingData.spectatingClients.map(
+            (client, index) => {
+                const currentGrade = calculateGrade({
+                    isLazer: true,
+                    mods: client.score!.mods.number,
+                    mode: client.score!.mode,
+                    hits: {
+                        300: client.score!.hit300,
+                        geki: 0,
+                        100: client.score!.hit100,
+                        katu: 0,
+                        50: client.score!.hit50,
+                        0: client.score!.hitMiss
+                    }
+                });
+
+                const currentMods =
+                    global.status === GameState.play
+                        ? client.score!.mods
+                        : global.status === GameState.resultScreen
+                          ? ((client.resultScreen! as any)
+                                .mods as CalculateMods)
+                          : global.menuMods;
+
+                return {
+                    ipcId: index,
+                    team: client.team === 'red' ? 'left' : 'right',
+
+                    user: {
+                        id: (client.user as IUserProtected).id,
+                        name: client.user.name,
+                        country:
+                            CountryCodes[
+                                (client.user as IUserProtected).countryCode
+                            ]?.toUpperCase() || '',
+                        accuracy: (client.user as IUserProtected).accuracy,
+                        rankedScore: (client.user as IUserProtected)
+                            .rankedScore,
+                        playCount: (client.user as IUserProtected).playCount,
+                        globalRank: (client.user as IUserProtected).rank,
+                        totalPP: (client.user as IUserProtected)
+                            .performancePoints
+                    },
+
+                    beatmap: {
+                        stats: {
+                            // not supported start
+                            stars: {
+                                live: 0,
+                                aim: 0,
+                                speed: 0,
+                                flashlight: 0,
+                                sliderFactor: 0,
+                                stamina: 0,
+                                rhythm: 0,
+                                color: 0,
+                                reading: 0,
+                                hitWindow: 0,
+                                total: 0
+                            },
+
+                            ar: {
+                                original: 0,
+                                converted: 0
+                            },
+                            cs: {
+                                original: 0,
+                                converted: 0
+                            },
+                            od: {
+                                original: 0,
+                                converted: 0
+                            },
+                            hp: {
+                                original: 0,
+                                converted: 0
+                            },
+
+                            bpm: {
+                                realtime: 0,
+                                common: 0,
+                                min: 0,
+                                max: 0
+                            },
+
+                            objects: {
+                                circles: 0,
+                                sliders: 0,
+                                spinners: 0,
+                                holds: 0,
+                                total: 0
+                            },
+
+                            maxCombo: 0
+                            // not supported end
+                        }
+                    },
+
+                    play: {
+                        playerName: client.score!.playerName,
+
+                        mode: {
+                            number: client.score!.mode,
+                            name: Rulesets[client.score!.mode] || ''
+                        },
+
+                        score: client.score!.score,
+                        accuracy: client.score!.accuracy,
+
+                        healthBar: {
+                            normal: (client.score!.playerHP / 200) * 100,
+                            smooth: (client.score!.playerHPSmooth / 200) * 100
+                        },
+
+                        hits: {
+                            300: client.score!.hit300,
+                            geki: client.score!.hitGeki,
+                            100: client.score!.hit100,
+                            katu: client.score!.hitKatu,
+                            50: client.score!.hit50,
+                            0: client.score!.hitMiss,
+                            sliderEndHits: client.score!.sliderEndHits,
+                            smallTickHits: client.score!.smallTickHits,
+                            largeTickHits: client.score!.largeTickHits,
+                            // TODO: ADD SLIDERBREAKS
+                            sliderBreaks: 0
+                        },
+
+                        // not supported
+                        hitErrorArray: [],
+
+                        combo: {
+                            current: client.score!.combo,
+                            max: client.score!.maxCombo
+                        },
+                        mods: {
+                            checksum: currentMods.checksum,
+                            number: currentMods.number,
+                            name: currentMods.name,
+                            array: currentMods.array,
+                            rate: currentMods.rate
+                        },
+                        rank: {
+                            current: currentGrade,
+                            maxThisPlay: currentGrade
+                        },
+
+                        // not supported start
+                        pp: {
+                            current: fixDecimals(client!.score!.pp || 0),
+                            fc: 0,
+                            maxAchievedThisPlay: 0,
+                            detailed: {
+                                current: {
+                                    aim: 0,
+                                    speed: 0,
+                                    accuracy: 0,
+                                    difficulty: 0,
+                                    flashlight: 0,
+                                    total: 0
+                                },
+                                fc: {
+                                    aim: 0,
+                                    speed: 0,
+                                    accuracy: 0,
+                                    difficulty: 0,
+                                    flashlight: 0,
+                                    total: 0
+                                }
+                            }
+                        },
+                        unstableRate: 0
+                        // not supported end
+                    }
+                };
+            }
+        )
     };
 };
 
