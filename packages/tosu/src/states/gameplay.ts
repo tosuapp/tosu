@@ -574,12 +574,21 @@ export class Gameplay extends AbstractState {
             const currPerformance = this.gradualPerformance.nth(
                 scoreParams,
                 offset - 1
-            )!;
+            );
 
             const fcPerformance = new rosu.Performance({
                 mods: removeDebuffMods(this.mods.array),
                 misses: 0,
                 accuracy: this.accuracy,
+                lazer: this.game.client === ClientType.lazer
+            }).calculate(this.performanceAttributes);
+
+            const maxAchievablePerformance = new rosu.Performance({
+                misses: this.hitMiss,
+                n50: this.hit50,
+                n100: this.hit100,
+                combo: this.maxCombo,
+                mods: removeDebuffMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             }).calculate(this.performanceAttributes);
             const t2 = performance.now();
@@ -596,6 +605,15 @@ export class Gameplay extends AbstractState {
             if (fcPerformance) {
                 beatmapPP.currAttributes.fcPP = fcPerformance.pp;
                 beatmapPP.updatePPAttributes('fc', fcPerformance);
+            }
+
+            if (maxAchievablePerformance) {
+                beatmapPP.currAttributes.maxAchievable =
+                    maxAchievablePerformance.pp;
+                beatmapPP.updatePPAttributes(
+                    'maxAchievable',
+                    maxAchievablePerformance
+                );
             }
 
             this.previousPassedObjects = passedObjects;

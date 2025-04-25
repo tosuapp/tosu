@@ -829,9 +829,8 @@ function buildPlay(
         pp: {
             current: fixDecimals(beatmapPP.currAttributes.pp),
             fc: fixDecimals(beatmapPP.currAttributes.fcPP),
-            maxAchievedThisPlay: fixDecimals(
-                beatmapPP.currAttributes.maxThisPlayPP
-            ),
+            maxAchieved: fixDecimals(beatmapPP.currAttributes.maxAchieved),
+            maxAchievable: fixDecimals(beatmapPP.currAttributes.maxAchievable),
             detailed: {
                 current: {
                     aim: fixDecimals(beatmapPP.currPPAttributes.ppAim),

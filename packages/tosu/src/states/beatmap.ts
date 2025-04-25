@@ -64,7 +64,8 @@ interface BeatmapPPCurrentAttributes {
     stars: number;
     pp: number;
     fcPP: number;
-    maxThisPlayPP: number;
+    maxAchieved: number;
+    maxAchievable: number;
 }
 
 interface BeatmapPPTimings {
@@ -106,7 +107,8 @@ export class BeatmapPP extends AbstractState {
     currAttributes: BeatmapPPCurrentAttributes = {
         stars: 0.0,
         pp: 0.0,
-        maxThisPlayPP: 0.0,
+        maxAchieved: 0.0,
+        maxAchievable: 0.0,
         fcPP: 0.0
     };
 
@@ -198,7 +200,8 @@ export class BeatmapPP extends AbstractState {
         this.currAttributes = {
             stars: 0.0,
             pp: 0.0,
-            maxThisPlayPP: 0.0,
+            maxAchieved: 0.0,
+            maxAchievable: 0.0,
             fcPP: 0.0
         };
         this.currPPAttributes = {
@@ -225,11 +228,12 @@ export class BeatmapPP extends AbstractState {
     }
 
     updatePPAttributes(
-        type: 'curr' | 'fc',
+        type: 'curr' | 'fc' | 'maxAchievable',
         attributes: rosu.PerformanceAttributes
     ) {
         try {
-            if (type !== 'curr' && type !== 'fc') return;
+            if (type !== 'curr' && type !== 'fc' && type !== 'maxAchievable')
+                return;
 
             this[`${type}PPAttributes`] = {
                 ppAccuracy: attributes.ppAccuracy || 0.0,
@@ -255,26 +259,28 @@ export class BeatmapPP extends AbstractState {
     }
 
     updateCurrentAttributes(stars: number, pp: number) {
+        const maxAchieved = Math.max(pp, this.currAttributes.maxAchieved);
+
         if (this.currAttributes.pp.toFixed(2) !== pp.toFixed(2)) {
             wLogger.debug(
                 ClientType[this.game.client],
                 this.game.pid,
                 `beatmapPP updateCurrentAttributes`,
-                `maxPP -> ${this.currAttributes.maxThisPlayPP.toFixed(2)} pp -> ${pp.toFixed(2)} stars -> ${stars.toFixed(2)}`
+                `maxAchieved -> ${this.currAttributes.maxAchieved.toFixed(2)} | currentPP -> ${pp.toFixed(2)} | stars -> ${stars.toFixed(2)}`
             );
         }
-        const maxThisPlayPP = Math.max(pp, this.currAttributes.maxThisPlayPP);
 
         this.currAttributes.stars = stars;
         this.currAttributes.pp = pp;
-        this.currAttributes.maxThisPlayPP = maxThisPlayPP;
+        this.currAttributes.maxAchieved = maxAchieved;
     }
 
     resetAttributes() {
         this.currAttributes = {
             stars: 0.0,
             pp: 0.0,
-            maxThisPlayPP: 0.0,
+            maxAchieved: 0.0,
+            maxAchievable: 0.0,
             fcPP: this.ppAcc[100] || 0.0
         };
 
