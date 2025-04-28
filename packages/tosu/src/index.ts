@@ -11,6 +11,8 @@ import { Process } from 'tsprocess/dist/process';
 
 import { InstanceManager } from '@/instances/manager';
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
 

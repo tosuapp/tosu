@@ -6,7 +6,7 @@
     "scripts": {
         "genver": "npx genversion _version.js",
         "ts:run": "cross-env NODE_ENV=development ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
-        "ts:compile": "ncc build src/index.ts -o dist -m -d",
+        "ts:compile": "ncc build src/index.ts -o dist -m -d --target es2022",
         "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
         "compile:prepare-htmls": "cp -rf node_modules/@tosu/server/assets ./dist",
         "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts",
