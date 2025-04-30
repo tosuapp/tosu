@@ -301,14 +301,14 @@ export class BeatmapPP extends AbstractState {
     updateMapMetadata(
         currentMods: CalculateMods,
         currentMode: number,
-        lazerByPass: boolean = false
+        lazerBypass: boolean = false
     ) {
         try {
             const startTime = performance.now();
 
             const { menu, global } = this.game.getServices(['menu', 'global']);
 
-            if (menu.folder === '.' && !lazerByPass) {
+            if (menu.folder === '.' && !lazerBypass) {
                 wLogger.debug(
                     ClientType[this.game.client],
                     this.game.pid,
@@ -343,6 +343,10 @@ export class BeatmapPP extends AbstractState {
                 menu.folder,
                 menu.filename
             );
+
+            if (!menu.folder || !menu.filename) {
+                return 'not-ready';
+            }
 
             try {
                 this.beatmapContent = fs.readFileSync(mapPath, 'utf8');
@@ -468,7 +472,7 @@ export class BeatmapPP extends AbstractState {
                 if (
                     cleanPath(this.lazerBeatmap.events.backgroundPath || '') !==
                         menu.backgroundFilename &&
-                    !lazerByPass
+                    !lazerBypass
                 ) {
                     menu.backgroundFilename = cleanPath(
                         this.lazerBeatmap.events.backgroundPath || ''
