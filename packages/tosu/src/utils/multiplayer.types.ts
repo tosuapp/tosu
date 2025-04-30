@@ -9,3 +9,5 @@ export enum MultiplayerUserState {
     Results,
     Spectating
 }
+
+export type MultiplayerTeamType = 'red' | 'blue' | 'none';

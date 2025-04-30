@@ -1,5 +1,6 @@
 import { ITourneyManagerChatItem } from '@/states/tourney';
 import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
+import { MultiplayerTeamType } from '@/utils/multiplayer.types';
 import { CalculateMods } from '@/utils/osuMods.types';
 
 export type ScanPatterns = {
@@ -191,7 +192,7 @@ export type ILeaderboard =
     | Error;
 
 export interface ILazerSpectatorEntry {
-    team: 'red' | 'blue';
+    team: MultiplayerTeamType;
     user: IUser;
     resultScreen: IResultScreen | undefined;
     score: IScore | undefined;

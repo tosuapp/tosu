@@ -36,7 +36,10 @@ import type {
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { LeaderboardPlayer, Statistics } from '@/states/types';
 import { netDateBinaryToDate, numberFromDecimal } from '@/utils/converters';
-import { MultiplayerUserState } from '@/utils/multiplayer.types';
+import {
+    MultiplayerTeamType,
+    MultiplayerUserState
+} from '@/utils/multiplayer.types';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import {
     CalculateMods,
@@ -47,7 +50,7 @@ import {
 import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 type LazerPatternData = {
-    spectatorClient: number;
+    sessionIdleTracker: number;
 };
 
 interface KeyCounter {
@@ -57,10 +60,9 @@ interface KeyCounter {
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private scanPatterns: ScanPatterns = {
-        spectatorClient: {
-            pattern:
-                '3F 00 00 80 3F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 00 00 80 3F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ?? 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00',
-            offset: -0x16f
+        sessionIdleTracker: {
+            pattern: '00 00 00 00 80 4F 12 41', // aka 300000 in double
+            offset: -0x208
         }
     };
 
@@ -79,7 +81,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private gameBaseAddress: number;
 
     patterns: LazerPatternData = {
-        spectatorClient: 0
+        sessionIdleTracker: 0
     };
 
     private lazerToStableStatus = {
@@ -97,9 +99,25 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private updateGameBaseAddress() {
         const oldAddress = this.gameBaseAddress;
 
-        const spectatorClient = this.getPattern('spectatorClient');
+        const sessionIdleTracker = this.getPattern('sessionIdleTracker');
+
+        // this is why we like lazer more than stable (we can get everything from one place)
         this.gameBaseAddress = this.process.readIntPtr(
-            this.process.readIntPtr(spectatorClient + 0x90) + 0x90
+            this.process.readIntPtr(
+                this.process.readIntPtr(
+                    this.process.readIntPtr(
+                        this.process.readIntPtr(
+                            this.process.readIntPtr(
+                                this.process.readIntPtr(
+                                    this.process.readIntPtr(
+                                        sessionIdleTracker + 0x90
+                                    ) + 0x90
+                                ) + 0x90
+                            ) + 0x90
+                        ) + 0x90
+                    ) + 0x90
+                ) + 0x90
+            ) + 0x340
         );
 
         wLogger.debug(
@@ -134,9 +152,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!this.checkIfGameBase(this.gameBaseAddress)) {
             wLogger.debug('lazer', this.pid, 'GameBase has been reset');
 
-            const scanPattern = this.scanPatterns.spectatorClient;
+            const scanPattern = this.scanPatterns.sessionIdleTracker;
             this.setPattern(
-                'spectatorClient',
+                'sessionIdleTracker',
                 this.process.scanSync(scanPattern.pattern) + scanPattern.offset!
             );
 
@@ -163,11 +181,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(address + 0x400) === this.gameBase();
     }
 
-    // Checks <api>k__BackingField and <StatisticsPanel>k__BackingField (to GameBase::<Storage>k__BackingField)
+    // Checks <leaderboardManager>k__BackingField and <StatisticsPanel>k__BackingField (to GameBase::<Storage>k__BackingField)
     private checkIfResultScreen(address: number) {
         return (
             this.process.readIntPtr(address + 0x408) ===
-                this.process.readIntPtr(this.gameBase() + 0x438) &&
+                this.process.readIntPtr(this.gameBase() + 0x490) &&
             this.process.readIntPtr(address + 0x348) !==
                 this.process.readIntPtr(this.gameBase() + 0x450)
         );
@@ -2000,26 +2018,35 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const userStates: Record<
             number,
-            { team: 'red' | 'blue'; state: MultiplayerUserState }
+            { team: MultiplayerTeamType; state: MultiplayerUserState }
         > = {};
 
-        const multiplayerUsers = this.process.readIntPtr(
-            multiSpectatorScreen + 0x448
+        const multiplayerClient = this.multiplayerClient();
+
+        const room = this.process.readIntPtr(multiplayerClient + 0x288);
+
+        const multiplayerUsers = this.process.readIntPtr(room + 0x10);
+        const multiplayerUsersItems = this.process.readIntPtr(
+            multiplayerUsers + 0x8
         );
         const multiplayerUsersCount = this.process.readInt(
-            multiplayerUsers + 0x8
+            multiplayerUsers + 0x10
         );
 
         for (let i = 0; i < multiplayerUsersCount; i++) {
             const current = this.process.readIntPtr(
-                multiplayerUsers + 0x10 + 0x8 * i
+                multiplayerUsersItems + 0x10 + 0x8 * i
             );
 
             const userId = this.process.readInt(current + 0x28);
             const matchState = this.process.readIntPtr(current + 0x18);
 
-            const teamId = this.process.readInt(matchState + 0x8);
-            const team = teamId === 0 ? 'red' : 'blue';
+            let team: MultiplayerTeamType = 'none';
+
+            if (matchState) {
+                const teamId = this.process.readInt(matchState + 0x8);
+                team = teamId === 0 ? 'red' : 'blue';
+            }
 
             const state = this.process.readInt(current + 0x2c);
 
