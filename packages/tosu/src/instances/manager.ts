@@ -89,10 +89,7 @@ export class InstanceManager {
                         process.platform !== 'linux') ||
                     lazerOnLinux;
 
-                const osuInstance = isLazer
-                    ? new LazerInstance(processId)
-                    : new OsuInstance(processId);
-                const cmdLine = osuInstance.process.getProcessCommandLine();
+                const cmdLine = Process.getProcessCommandLine(processId);
 
                 const args = argumentsParser(cmdLine);
                 if (args.tournament !== null && args.tournament !== undefined) {
@@ -104,6 +101,10 @@ export class InstanceManager {
                     // skip lazer debug clients
                     continue;
                 }
+
+                const osuInstance = isLazer
+                    ? new LazerInstance(processId)
+                    : new OsuInstance(processId);
 
                 if (!isNaN(parseFloat(args.spectateclient))) {
                     osuInstance.setTourneyIpcId(args.spectateclient);

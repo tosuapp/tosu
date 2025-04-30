@@ -35,7 +35,7 @@ std::vector<MemoryRegion> memory::query_regions(void *process) {
   return regions;
 }
 
-std::vector<uint32_t> memory::find_processes(const std::vector<std::string>& process_names) {
+std::vector<uint32_t> memory::find_processes(const std::vector<std::string> &process_names) {
   PROCESSENTRY32 processEntry;
   processEntry.dwSize = sizeof(PROCESSENTRY32);
 
@@ -44,7 +44,7 @@ std::vector<uint32_t> memory::find_processes(const std::vector<std::string>& pro
   HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
   if (Process32First(snapshot, &processEntry)) {
     do {
-      for (const auto& process_name : process_names) {
+      for (const auto &process_name : process_names) {
         if (process_name == processEntry.szExeFile) {
           processes.push_back(processEntry.th32ProcessID);
         }
@@ -59,6 +59,10 @@ std::vector<uint32_t> memory::find_processes(const std::vector<std::string>& pro
 
 void *memory::open_process(uint32_t id) {
   return OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, id);
+}
+
+void memory::close_handle(void *handle) {
+  CloseHandle(handle);
 }
 
 bool memory::is_process_exist(void *handle) {

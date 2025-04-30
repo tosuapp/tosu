@@ -301,8 +301,8 @@ Napi::Value find_processes(const Napi::CallbackInfo &args) {
   for (size_t i = 0; i < process_array.Length(); i++) {
     Napi::Value value = process_array[i];
     if (value.IsString()) {
-        std::string name = value.As<Napi::String>().Utf8Value();
-        process_names.push_back(name);
+      std::string name = value.As<Napi::String>().Utf8Value();
+      process_names.push_back(name);
     }
   }
 
@@ -325,6 +325,20 @@ Napi::Value open_process(const Napi::CallbackInfo &args) {
 
   auto process_id = args[0].As<Napi::Number>().Int64Value();
   return Napi::Number::New(env, reinterpret_cast<uint64_t>(memory::open_process(process_id)));
+}
+
+Napi::Value close_handle(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() < 1) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
+
+  memory::close_handle(handle);
+
+  return env.Undefined();
 }
 
 Napi::Value is_process_exist(const Napi::CallbackInfo &args) {
@@ -508,6 +522,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["scan"] = Napi::Function::New(env, scan);
   exports["batchScan"] = Napi::Function::New(env, batch_scan);
   exports["openProcess"] = Napi::Function::New(env, open_process);
+  exports["closeHandle"] = Napi::Function::New(env, close_handle);
   exports["findProcesses"] = Napi::Function::New(env, find_processes);
   exports["isProcessExist"] = Napi::Function::New(env, is_process_exist);
   exports["isProcess64bit"] = Napi::Function::New(env, is_process_64bit);

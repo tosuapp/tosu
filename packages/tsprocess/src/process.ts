@@ -51,6 +51,24 @@ export class Process {
         return ProcessUtils.getForegroundWindowProcess();
     }
 
+    static openProcess(id: number) {
+        return ProcessUtils.openProcess(id);
+    }
+
+    static getProcessCommandLine(id: number) {
+        const handle = this.openProcess(id);
+
+        const commandLine = ProcessUtils.getProcessCommandLine(handle);
+
+        this.closeHandle(handle);
+
+        return commandLine;
+    }
+
+    static closeHandle(handle: number): void {
+        return ProcessUtils.closeHandle(handle);
+    }
+
     get path(): string {
         if (process.platform === 'win32') {
             return pathDirname(ProcessUtils.getProcessPath(this.handle));
