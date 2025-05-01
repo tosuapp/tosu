@@ -96,7 +96,10 @@ export const autoUpdater = async () => {
         }
 
         const { assets, versionName } = check;
-        if (versionName.includes(currentVersion)) {
+        if (
+            versionName.includes(currentVersion) ||
+            currentVersion.includes('-forced')
+        ) {
             wLogger.info(
                 '[updater]',
                 `You're using latest version v${currentVersion}`
