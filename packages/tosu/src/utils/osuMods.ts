@@ -268,15 +268,19 @@ export const calculateMods = (
         : ModsArray.map((r) => ({ acronym: r.toUpperCase() }));
 
     // Fixing 4.50000003 numbers
-    (ModsLazer as any[]).forEach((r, ind) =>
+    (ModsLazer as any[]).forEach((r, ind) => {
         Object.entries(r.settings || {}).forEach((s) =>
             typeof s[1] === 'number'
                 ? ((ModsLazer as any)[ind].settings[s[0]] = parseFloat(
                       s[1].toFixed(2)
                   ))
                 : ''
-        )
-    );
+        );
+
+        if (r.settings?.accuracy_judge_mode !== undefined)
+            r.settings.accuracy_judge_mode =
+                r.settings.accuracy_judge_mode.toString();
+    });
 
     const settingsSpeedChange = (ModsLazer as any).find(
         (r) => typeof r.settings?.speed_change === 'number'

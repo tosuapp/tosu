@@ -1243,9 +1243,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     minimum_accuracy: this.process.readDouble(
                         minimumAccuracyBindable + 0x40
                     ),
-                    accuracy_judge_mode: this.process.readInt(
-                        accuracyJudgeModeBindable + 0x40
-                    ),
+                    accuracy_judge_mode: this.process
+                        .readInt(accuracyJudgeModeBindable + 0x40)
+                        .toString(),
                     restart: this.process.readByte(restartBindable + 0x40) === 1
                 };
                 break;
