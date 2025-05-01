@@ -10,6 +10,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@tosu/common": "workspace:*"
+    "@tosu/common": "workspace:*",
+    "semver": "^7.7.1"
   }
 }
