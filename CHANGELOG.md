@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.2](https://github.com/tosuapp/tosu/compare/v4.5.1...v4.5.2) (2025-05-01)
+
+
+### Features
+
+* dont update forced builds ([5e97173](https://github.com/tosuapp/tosu/commit/5e9717342b7309ee7304439147b506b7bf72c9ef))
+* new semver parser to exclude dev builds and test much higher build ([12e8c64](https://github.com/tosuapp/tosu/commit/12e8c6442541817b7c95db773257a5cf9982898c))
+
+
+### Bug Fixes
+
+* rosu requires `accuracy_judge_mode` to be string ([ce1be9a](https://github.com/tosuapp/tosu/commit/ce1be9a5fca649412b97009461872a2373b3c1d2))
+
 ### [4.5.1](https://github.com/tosuapp/tosu/compare/v4.5.0...v4.5.1) (2025-04-23)
 
 
