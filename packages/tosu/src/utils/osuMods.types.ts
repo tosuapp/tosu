@@ -388,7 +388,7 @@ export interface AC {
     acronym: 'AC';
     settings?: {
         minimum_accuracy?: number;
-        accuracy_judge_mode?: number;
+        accuracy_judge_mode?: string;
         restart?: boolean;
     };
 }
