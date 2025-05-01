@@ -10,7 +10,6 @@ import {
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import semver from 'semver';
 
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
@@ -97,10 +96,7 @@ export const autoUpdater = async () => {
         }
 
         const { assets, versionName } = check;
-        if (
-            semver.gt(currentVersion, versionName) ||
-            versionName.includes(currentVersion)
-        ) {
+        if (versionName.includes(currentVersion)) {
             wLogger.info(
                 '[updater]',
                 `You're using latest version v${currentVersion}`
