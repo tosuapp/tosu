@@ -1,5 +1,6 @@
 import { ITourneyManagerChatItem } from '@/states/tourney';
 import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
+import { MultiplayerTeamType } from '@/utils/multiplayer.types';
 import { CalculateMods } from '@/utils/osuMods.types';
 
 export type ScanPatterns = {
@@ -12,23 +13,23 @@ export type ScanPatterns = {
 
 export type IAudioVelocityBase = number[] | string;
 
-export type IUser =
-    | Error
-    | {
-          name: string;
-          accuracy: number;
-          rankedScore: number;
-          id: number;
-          level: number;
-          playCount: number;
-          playMode: number;
-          rank: number;
-          countryCode: number;
-          performancePoints: number;
-          rawBanchoStatus: number;
-          backgroundColour: number;
-          rawLoginStatus: number;
-      };
+export interface IUserProtected {
+    name: string;
+    accuracy: number;
+    rankedScore: number;
+    id: number;
+    level: number;
+    playCount: number;
+    playMode: number;
+    rank: number;
+    countryCode: number;
+    performancePoints: number;
+    rawBanchoStatus: number;
+    backgroundColour: number;
+    rawLoginStatus: number;
+}
+
+export type IUser = Error | IUserProtected;
 
 export type ISettingsPointers = { config: number; binding: number } | Error;
 export type IOffsets = number[] | Error;
@@ -102,6 +103,7 @@ export type IGlobal =
     | {
           isWatchingReplay: boolean;
           isReplayUiHidden: boolean;
+          isMultiSpectating: boolean;
 
           showInterface: boolean;
           chatStatus: number;
@@ -188,3 +190,17 @@ export type ITourneyUser =
 export type ILeaderboard =
     | [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]]
     | Error;
+
+export interface ILazerSpectatorEntry {
+    team: MultiplayerTeamType;
+    user: IUser;
+    resultScreen: IResultScreen | undefined;
+    score: IScore | undefined;
+}
+
+export type ILazerSpectator =
+    | {
+          chat: ITourneyManagerChatItem[];
+          spectatingClients: ILazerSpectatorEntry[];
+      }
+    | undefined;

@@ -741,6 +741,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 isWatchingReplay,
                 isReplayUiHidden,
 
+                // lazer logic
+                isMultiSpectating: false,
+
                 showInterface,
                 chatStatus,
                 status,

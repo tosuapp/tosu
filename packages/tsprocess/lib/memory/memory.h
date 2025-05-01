@@ -29,9 +29,10 @@ namespace memory {
 
 std::vector<MemoryRegion> query_regions(void *process);
 
-std::vector<uint32_t> find_processes(const std::vector<std::string>& process_names);
+std::vector<uint32_t> find_processes(const std::vector<std::string> &process_names);
 
 void *open_process(uint32_t id);
+void close_handle(void *handle);
 bool is_process_64bit(uint32_t id);
 bool is_process_exist(void *process);
 std::string get_process_path(void *process);

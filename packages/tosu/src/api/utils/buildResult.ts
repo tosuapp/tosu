@@ -1,4 +1,4 @@
-import { ClientType, GameState } from '@tosu/common';
+import { ClientType, CountryCodes, GameState } from '@tosu/common';
 import path from 'path';
 
 import {
@@ -7,10 +7,13 @@ import {
     TourneyIpcClient,
     TourneyValues
 } from '@/api/types/v1';
+import { LazerInstance } from '@/instances/lazerInstance';
 import { InstanceManager } from '@/instances/manager';
+import { IUserProtected } from '@/memory/types';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
-import { calculateAccuracy } from '@/utils/calculators';
+import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
+import { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer
@@ -263,7 +266,136 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             rawBanchoStatus: user.rawBanchoStatus,
             backgroundColour: user.backgroundColour?.toString(16)
         },
-        tourney: buildTourneyData(instanceManager)
+        tourney:
+            osuInstance instanceof LazerInstance && global.isMultiSpectating
+                ? buildLazerTourneyData(osuInstance)
+                : buildTourneyData(instanceManager)
+    };
+};
+
+const buildLazerTourneyData = (
+    osuInstance: LazerInstance
+): TourneyValues | undefined => {
+    const { global, lazerMultiSpectating } = osuInstance.getServices([
+        'global',
+        'lazerMultiSpectating'
+    ]);
+
+    if (!lazerMultiSpectating.lazerSpectatingData) {
+        return undefined;
+    }
+
+    return {
+        manager: {
+            ipcState: global.status,
+            bestOF: 0,
+            teamName: {
+                left: '',
+                right: ''
+            },
+            stars: {
+                left: 0,
+                right: 0
+            },
+            bools: {
+                scoreVisible: global.status === GameState.lobby,
+                starsVisible: false
+            },
+            chat: [],
+            gameplay: {
+                score: {
+                    left: lazerMultiSpectating.lazerSpectatingData.spectatingClients
+                        .filter((client) => client.team === 'red')
+                        .reduce((pv, cv) => (pv += cv.score?.score || 0), 0),
+                    right: lazerMultiSpectating.lazerSpectatingData.spectatingClients
+                        .filter((client) => client.team === 'blue')
+                        .reduce((pv, cv) => (pv += cv.score?.score || 0), 0)
+                }
+            }
+        },
+        ipcClients:
+            lazerMultiSpectating.lazerSpectatingData.spectatingClients.map(
+                (client) => {
+                    const currentMods =
+                        global.status === GameState.play
+                            ? client.score!.mods
+                            : global.status === GameState.resultScreen
+                              ? ((client.resultScreen! as any)
+                                    .mods as CalculateMods)
+                              : global.menuMods;
+
+                    const currentGrade = calculateGrade({
+                        isLazer: true,
+                        mods: client.score!.mods.number,
+                        mode: client.score!.mode,
+                        hits: {
+                            300: client.score!.hit300,
+                            geki: 0,
+                            100: client.score!.hit100,
+                            katu: 0,
+                            50: client.score!.hit50,
+                            0: client.score!.hitMiss
+                        }
+                    });
+
+                    return {
+                        team: client.team === 'red' ? 'left' : 'right',
+                        spectating: {
+                            name: client.user.name,
+                            country:
+                                CountryCodes[
+                                    (client.user as IUserProtected).countryCode
+                                ]?.toUpperCase() || '',
+                            userID: (client.user as IUserProtected).id,
+                            accuracy: (client.user as IUserProtected).accuracy,
+                            rankedScore: (client.user as IUserProtected)
+                                .rankedScore,
+                            playCount: (client.user as IUserProtected)
+                                .playCount,
+                            globalRank: (client.user as IUserProtected).rank,
+                            totalPP: (client.user as IUserProtected)
+                                .performancePoints
+                        },
+                        gameplay: {
+                            gameMode: client.score!.mode,
+                            name: client.score!.playerName,
+                            score: client.score!.score,
+                            accuracy: client.score!.accuracy,
+                            combo: {
+                                current: client.score!.combo,
+                                max: client.score!.maxCombo
+                            },
+                            hp: {
+                                normal: client.score!.playerHP,
+                                smooth: client.score!.playerHPSmooth
+                            },
+                            hits: {
+                                300: client.score!.hit300,
+                                geki: client.score!.hitGeki,
+                                100: client.score!.hit100,
+                                katu: client.score!.hitKatu,
+                                50: client.score!.hit50,
+                                0: client.score!.hitMiss,
+                                // TODO: ADD SLIDERBREAKS
+                                sliderBreaks: 0,
+                                grade: {
+                                    current: currentGrade,
+                                    // not supported
+                                    maxThisPlay: ''
+                                },
+                                // not supported
+                                unstableRate: 0,
+                                // not supported
+                                hitErrorArray: []
+                            },
+                            mods: {
+                                num: currentMods.number,
+                                str: currentMods.name
+                            }
+                        }
+                    };
+                }
+            )
     };
 };
 

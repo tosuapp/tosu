@@ -8,6 +8,7 @@ import { CalculateMods } from '@/utils/osuMods.types';
 export class Global extends AbstractState {
     isWatchingReplay: boolean = false;
     isReplayUiHidden: boolean = false;
+    isMultiSpectating: boolean = false;
     showInterface: boolean = false;
 
     chatStatus: number = 0;
@@ -53,6 +54,7 @@ export class Global extends AbstractState {
 
             this.isWatchingReplay = result.isWatchingReplay;
             this.isReplayUiHidden = result.isReplayUiHidden;
+            this.isMultiSpectating = result.isMultiSpectating;
 
             this.showInterface = result.showInterface;
             this.chatStatus = result.chatStatus;
