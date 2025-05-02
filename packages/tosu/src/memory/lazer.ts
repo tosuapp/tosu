@@ -817,8 +817,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             hit50: statistics.meh,
             hitMiss: statistics.miss,
             sliderEndHits: statistics.sliderTailHit,
-            smallTickHits: statistics.largeTickHit,
-            largeTickHits: statistics.smallTickHit,
+            smallTickHits: statistics.smallTickHit,
+            largeTickHits: statistics.largeTickHit,
             combo,
             maxCombo: this.process.readInt(scoreInfo + 0xc4)
         };
