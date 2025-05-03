@@ -96,7 +96,7 @@ interface PP {
 interface GameplayPP {
     current: number;
     fc: number;
-    maxThisPlay: number;
+    maxAchieved: number;
 }
 
 export interface LeaderboardPlayer {
