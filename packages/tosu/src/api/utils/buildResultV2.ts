@@ -531,7 +531,8 @@ const buildLazerTourneyData = (
                         pp: {
                             current: fixDecimals(client!.score!.pp || 0),
                             fc: 0,
-                            maxAchievedThisPlay: 0,
+                            maxAchieved: 0,
+                            maxAchievable: 0,
                             detailed: {
                                 current: {
                                     aim: 0,
