@@ -428,6 +428,14 @@ export class BeatmapPP extends AbstractState {
                 for (const acc of [
                     100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
                 ]) {
+                    if (
+                        this.beatmap.mode === 3 &&
+                        this.game.client === ClientType.lazer
+                    ) {
+                        ppAcc[acc] = 0.0;
+                        continue;
+                    }
+
                     const calculate = new rosu.Performance({
                         mods: removeDebuffMods(currentMods.array),
                         accuracy: acc,
