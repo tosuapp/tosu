@@ -196,7 +196,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             pp: {
                 current: fixDecimals(beatmapPP.currAttributes.pp),
                 fc: fixDecimals(beatmapPP.currAttributes.fcPP),
-                maxThisPlay: fixDecimals(beatmapPP.currAttributes.maxThisPlayPP)
+                maxThisPlay: fixDecimals(beatmapPP.currAttributes.maxAchieved)
             },
             keyOverlay: {
                 k1: {

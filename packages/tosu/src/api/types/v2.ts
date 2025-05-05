@@ -241,7 +241,8 @@ export interface Rank {
 export interface Pp {
     current: number;
     fc: number;
-    maxAchievedThisPlay: number;
+    maxAchieved: number;
+    maxAchievable: number;
     detailed: detailedPp;
 }
 
