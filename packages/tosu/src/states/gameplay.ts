@@ -35,7 +35,6 @@ export class Gameplay extends AbstractState {
     mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
     hitErrors: number[];
     mode: number;
-    lostCombo: number;
     maxCombo: number;
     score: number;
     hit100: number;
@@ -85,7 +84,6 @@ export class Gameplay extends AbstractState {
 
         this.hitErrors = [];
         this.maxCombo = 0;
-        this.lostCombo = 0;
         this.score = 0;
         this.hit100 = 0;
         this.hit300 = 0;
@@ -251,9 +249,11 @@ export class Gameplay extends AbstractState {
             if (this.comboPrev > this.maxCombo) {
                 this.comboPrev = 0;
             }
-            if (this.combo < this.comboPrev) {
-                this.lostCombo += this.comboPrev;
-                if (this.hitMiss === this.hitMissPrev) this.hitSB += 1;
+            if (
+                this.combo < this.comboPrev &&
+                this.hitMiss === this.hitMissPrev
+            ) {
+                this.hitSB += 1;
             }
             this.hitMissPrev = this.hitMiss;
             this.comboPrev = this.combo;
@@ -574,33 +574,12 @@ export class Gameplay extends AbstractState {
             const currPerformance = this.gradualPerformance.nth(
                 scoreParams,
                 offset - 1
-            );
+            )!;
 
             const fcPerformance = new rosu.Performance({
                 mods: removeDebuffMods(this.mods.array),
                 misses: 0,
                 accuracy: this.accuracy,
-                lazer: this.game.client === ClientType.lazer
-            }).calculate(this.performanceAttributes);
-
-            const maxAchievablePerformance = new rosu.Performance({
-                combo: Math.max(
-                    this.maxCombo,
-                    this.performanceAttributes.state?.maxCombo! - this.lostCombo
-                ),
-                n300:
-                    this.performanceAttributes.state?.maxCombo! -
-                    this.hit100 -
-                    this.hit50 -
-                    this.hitMiss,
-                n100: this.hit100,
-                n50: this.hit50,
-                misses: this.hitMiss,
-                smallTickHits:
-                    this.performanceAttributes.state?.osuSmallTickHits,
-                largeTickHits:
-                    this.performanceAttributes.state?.osuLargeTickHits,
-                mods: removeDebuffMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             }).calculate(this.performanceAttributes);
             const t2 = performance.now();
@@ -617,15 +596,6 @@ export class Gameplay extends AbstractState {
             if (fcPerformance) {
                 beatmapPP.currAttributes.fcPP = fcPerformance.pp;
                 beatmapPP.updatePPAttributes('fc', fcPerformance);
-            }
-
-            if (maxAchievablePerformance) {
-                beatmapPP.currAttributes.maxAchievable =
-                    maxAchievablePerformance.pp;
-                beatmapPP.updatePPAttributes(
-                    'maxAchievable',
-                    maxAchievablePerformance
-                );
             }
 
             this.previousPassedObjects = passedObjects;
