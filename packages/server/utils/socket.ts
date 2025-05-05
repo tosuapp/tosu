@@ -1,4 +1,4 @@
-import { config, wLogger } from '@tosu/common';
+import { config, sleep, wLogger } from '@tosu/common';
 import WebSocket from 'ws';
 
 import { getUniqueID } from './hashing';
@@ -28,8 +28,6 @@ export class Websocket {
     ) => void;
 
     private onConnectionCallback: (id: string, url: string | undefined) => void;
-
-    loopInterval: NodeJS.Timeout;
 
     socket: WebSocket.Server;
     clients = new Map<string, ModifiedWebsocket>();
@@ -65,8 +63,7 @@ export class Websocket {
         }
 
         this.handle = this.handle.bind(this);
-        this.startLoop = this.startLoop.bind(this);
-        this.stopLoop = this.stopLoop.bind(this);
+        this.start = this.start.bind(this);
 
         this.handle();
     }
@@ -125,24 +122,25 @@ export class Websocket {
         });
 
         if (this.pollRateFieldName !== '') {
-            this.startLoop();
+            this.start();
         }
     }
 
-    startLoop() {
-        this.loopInterval = setInterval(() => {
+    async start() {
+        while (true) {
             try {
                 const osuInstance: any = this.instanceManager.getInstance(
                     this.instanceManager.focusedClient
                 );
                 if (!osuInstance || this.clients.size === 0) {
-                    return; // Exit the loop if conditions are not met
+                    await sleep(500);
+                    continue; // Exit the loop if conditions are not met
                 }
 
                 const buildedData = osuInstance[this.stateFunctionName](
                     this.instanceManager
                 );
-                const message = JSON.stringify(buildedData);
+                let message = '';
 
                 this.clients.forEach((client) => {
                     if (
@@ -156,17 +154,16 @@ export class Websocket {
                         return;
                     }
 
+                    if (!message) message = JSON.stringify(buildedData);
                     client.send(message);
                 });
             } catch (error) {
                 wLogger.error('[ws]', 'loop', (error as any).message);
                 wLogger.debug('[ws]', 'loop', error);
             }
-        }, config[this.pollRateFieldName]);
-    }
 
-    stopLoop() {
-        clearInterval(this.loopInterval);
+            await sleep(config[this.pollRateFieldName]);
+        }
     }
 
     applyFilter(filters: Filter[], data: any, value: any) {

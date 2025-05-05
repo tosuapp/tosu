@@ -97,18 +97,6 @@ export class Server {
         this.app.listen(config.serverPort, config.serverIP);
     }
 
-    restartWS() {
-        if (this.WS_V1) this.WS_V1.stopLoop();
-        if (this.WS_SC) this.WS_SC.stopLoop();
-        if (this.WS_V2) this.WS_V2.stopLoop();
-        if (this.WS_V2_PRECISE) this.WS_V2_PRECISE.stopLoop();
-
-        if (this.WS_V1) this.WS_V1.startLoop();
-        if (this.WS_SC) this.WS_SC.startLoop();
-        if (this.WS_V2) this.WS_V2.startLoop();
-        if (this.WS_V2_PRECISE) this.WS_V2_PRECISE.startLoop();
-    }
-
     middlewares() {
         const instanceManager = this.instanceManager;
 
