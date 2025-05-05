@@ -531,8 +531,7 @@ const buildLazerTourneyData = (
                         pp: {
                             current: fixDecimals(client!.score!.pp || 0),
                             fc: 0,
-                            maxAchieved: 0,
-                            maxAchievable: 0,
+                            maxAchievedThisPlay: 0,
                             detailed: {
                                 current: {
                                     aim: 0,
@@ -830,8 +829,9 @@ function buildPlay(
         pp: {
             current: fixDecimals(beatmapPP.currAttributes.pp),
             fc: fixDecimals(beatmapPP.currAttributes.fcPP),
-            maxAchieved: fixDecimals(beatmapPP.currAttributes.maxAchieved),
-            maxAchievable: fixDecimals(beatmapPP.currAttributes.maxAchievable),
+            maxAchievedThisPlay: fixDecimals(
+                beatmapPP.currAttributes.maxThisPlayPP
+            ),
             detailed: {
                 current: {
                     aim: fixDecimals(beatmapPP.currPPAttributes.ppAim),
