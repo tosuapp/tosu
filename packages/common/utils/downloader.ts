@@ -1,7 +1,7 @@
 import fs from 'fs';
 import https from 'https';
 
-import { colorText } from './logger';
+import { colorText, wLogger } from './logger';
 
 const progressBarWidth = 40;
 
@@ -45,16 +45,21 @@ export const downloadFile = (
     destination: string
 ): Promise<string> =>
     new Promise((resolve, reject) => {
-        const options = {
+        const options: https.RequestOptions = {
             headers: {
                 Accept: 'application/octet-stream',
                 'User-Agent': '@tosuapp/tosu'
             },
             agent: new https.Agent({
-                secureOptions: require('node:crypto').constants.SSL_OP_ALL
-            })
+                secureOptions: require('node:crypto').constants.SSL_OP_ALL,
+                minVersion: 'TLSv1.2',
+                maxVersion: 'TLSv1.3'
+            }),
+            minVersion: 'TLSv1.2',
+            maxVersion: 'TLSv1.3'
         };
 
+        wLogger.info(`[request] request to ${url}`);
         // find url
         https
             .get(url, options, (response) => {
