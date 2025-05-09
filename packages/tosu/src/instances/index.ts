@@ -1,6 +1,6 @@
 import { Bitness, ClientType, config, wLogger } from '@tosu/common';
 import EventEmitter from 'events';
-import { Process } from 'tsprocess/dist/process';
+import { Process } from 'tsprocess';
 
 import { buildResult } from '@/api/utils/buildResult';
 import { buildResult as buildResultSC } from '@/api/utils/buildResultSC';

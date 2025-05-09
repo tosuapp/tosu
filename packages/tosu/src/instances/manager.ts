@@ -7,7 +7,7 @@ import {
     wLogger
 } from '@tosu/common';
 import { runOverlay } from '@tosu/ingame-overlay-updater';
-import { Process } from 'tsprocess/dist/process';
+import { Process } from 'tsprocess';
 
 import { AbstractInstance } from '@/instances';
 

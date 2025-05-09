@@ -1,6 +1,6 @@
 import { promises as wql } from '@jellybrick/wql-process-monitor';
 import EventEmitter from 'node:events';
-import { Process } from 'tsprocess/dist/process';
+import { Process } from 'tsprocess';
 
 import { OverlayProcess } from './process';
 
