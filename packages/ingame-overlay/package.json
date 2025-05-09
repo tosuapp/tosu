@@ -1,0 +1,59 @@
+{
+  "name": "@tosu/ingame-overlay",
+  "version": "0.1.0",
+  "description": "High performance tosu ingame overlay",
+  "private": true,
+  "main": "./dist/main/index.js",
+  "scripts": {
+    "build": "electron-vite build",
+    "dev": "electron-vite dev",
+    "dist": "npm run build && electron-builder --windows"
+  },
+  "keywords": [],
+  "author": "storycraft <storycraft@pancake.sh>",
+  "dependencies": {
+    "@jellybrick/wql-process-monitor": "^1.4.8",
+    "asdf-overlay-node": "^0.3.0",
+    "tsprocess": "workspace:*"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.26.0",
+    "@types/node": "^22.15.14",
+    "electron": "^36.1.0",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^3.1.0",
+    "emittery": "^1.1.0",
+    "typescript": "^5.8.3"
+  },
+  "build": {
+    "productName": "tosu-ingame-overlay",
+    "asar": true,
+    "files": [
+      "dist"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "./asset/tosu.ico"
+    },
+    "portable": {
+      "artifactName": "tosu-ingame-overlay.exe"
+    },
+    "directories": {
+      "output": "./pack/",
+      "app": "."
+    },
+    "publish": {
+      "provider": "github"
+    }
+  },
+  "os": [
+    "win32"
+  ]
+}

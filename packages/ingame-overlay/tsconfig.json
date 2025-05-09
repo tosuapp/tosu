@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "Preserve",
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "allowArbitraryExtensions": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictFunctionTypes": true,
+    "baseUrl": ".",
+    "paths": {
+      "@asset/*": ["./asset/*"]
+    }
+  }
+}
