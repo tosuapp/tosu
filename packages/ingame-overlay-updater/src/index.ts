@@ -29,9 +29,9 @@ export const runOverlay = async () => {
         checkGameOverlayConfig();
 
         const gameOverlayPath = path.join(getProgramPath(), 'game-overlay');
-        if (existsSync(path.join(gameOverlayPath, '.version'))) {
+        if (existsSync(path.join(gameOverlayPath, 'version'))) {
             const overlayVersion = readFileSync(
-                path.join(gameOverlayPath, '.version'),
+                path.join(gameOverlayPath, 'version'),
                 'utf8'
             );
             if (overlayVersion !== currentVersion) {
