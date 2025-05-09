@@ -2,10 +2,10 @@ import {
     ClientType,
     Platform,
     argumentsParser,
+    config,
     platformResolver,
     wLogger
 } from '@tosu/common';
-import { config } from '@tosu/common';
 import { runOverlay } from '@tosu/ingame-overlay-updater';
 import { Process } from 'tsprocess/dist/process';
 

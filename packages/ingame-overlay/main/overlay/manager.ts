@@ -51,6 +51,7 @@ export class OverlayManager {
                     return;
                 }
 
+                // eslint-disable-next-line no-void
                 void this.addOverlay(id);
             }
         });
@@ -80,5 +81,5 @@ export class OverlayManager {
 }
 
 // fix wql
-// eslint-disable-next-line @typescript-eslint/no-deprecated
+// eslint-disable-next-line no-void
 void wql.createEventSink();

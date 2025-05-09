@@ -61,10 +61,6 @@ export class Server {
             onConnectionCallback: (_, url) => {
                 if (url !== '/websocket/commands?l=__ingame__') return;
 
-                const clients = Object.values(
-                    this.instanceManager.osuInstances
-                ).map((r: any) => r.bitness);
-
                 wLogger.warn(`[ingame-overlay] initialized successfully`);
             }
         });

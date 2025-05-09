@@ -20,7 +20,7 @@ export class OverlayProcess {
         });
 
         overlay.event.on('resized', (hwnd, width, height) => {
-            if (hwnd != this.hwnd) {
+            if (hwnd !== this.hwnd) {
                 return;
             }
 
@@ -41,6 +41,7 @@ export class OverlayProcess {
             }
 
             const texture = e.texture;
+            // eslint-disable-next-line no-void
             void (async () => {
                 try {
                     await overlay.updateShtex(
