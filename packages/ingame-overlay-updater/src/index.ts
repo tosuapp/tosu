@@ -21,7 +21,7 @@ export const runOverlay = async () => {
     try {
         if (process.platform !== 'win32') {
             wLogger.error(
-                '[ingame-overlay] Ingame overlay can run only under windows, sorry linux/darwin user!'
+                '[ingame-overlay] This feature is currently only available on the Windows platform'
             );
             return false;
         }
@@ -38,7 +38,7 @@ export const runOverlay = async () => {
                 await rm(gameOverlayPath, { recursive: true, force: true });
 
                 wLogger.warn(
-                    '[ingame-overlay] Ingame overlay version is not actual, removing game-ovlerlay folder for downloading new version'
+                    '[ingame-overlay] A newer version of the ingame overlay is available. Updating...'
                 );
             }
         }
@@ -70,7 +70,7 @@ export const runOverlay = async () => {
             if (!findAsset) {
                 wLogger.info(
                     '[ingame-overlay]',
-                    `Files to update not found (${platform.type})`
+                    `Could not find downloadable files for your operating system. (${platform.type})`
                 );
                 return;
             }
@@ -80,7 +80,7 @@ export const runOverlay = async () => {
             await unzip(archivePath, gameOverlayPath);
             await rm(archivePath);
 
-            wLogger.info('[ingame-overlay] Ingame overlay updated');
+            wLogger.info('[ingame-overlay] Ingame overlay downloaded');
         }
 
         // dum sleep to wait until all osu libraries are loaded?
@@ -111,7 +111,7 @@ export const runOverlay = async () => {
                 }
                 if (error) return;
 
-                wLogger.info(`[ingame-overlay] Starting in-game overlay...`);
+                wLogger.info(`[ingame-overlay] Overlay process started...`);
 
                 resolve(true);
             });
