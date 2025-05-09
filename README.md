@@ -146,10 +146,11 @@ Linux notice
 
 <br/>
 
-Sponsorship
+Sponsorship & Thank notice
 ---
 | [![](./.github/sponsors/signpath.png)](https://signpath.io/) | Free code signing on Windows provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/) |
 | :----------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------: |
+| tosu-ingame-overlay | Overlay provided by [storycraft](https://github.com/storycraft) |
 
 <br />
 

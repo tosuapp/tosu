@@ -1,5 +1,4 @@
-import { Bitness, ClientType, config, sleep, wLogger } from '@tosu/common';
-import { injectGameOverlay } from '@tosu/game-overlay';
+import { Bitness, ClientType, config, wLogger } from '@tosu/common';
 import EventEmitter from 'events';
 import { Process } from 'tsprocess/dist/process';
 
@@ -37,7 +36,6 @@ export interface DataRepoList {
 
 export abstract class AbstractInstance {
     abstract memory: AbstractMemory<Record<string, number>>;
-    abstract gameOverlayAllowed: boolean;
     client: ClientType;
     customServerEndpoint: string;
 
@@ -50,7 +48,6 @@ export abstract class AbstractInstance {
     isDestroyed: boolean = false;
     isTourneyManager: boolean = false;
     isTourneySpectator: boolean = false;
-    isGameOverlayInjected: boolean = false;
 
     ipcId: number = 0;
 
@@ -193,47 +190,6 @@ export abstract class AbstractInstance {
 
         this.initiateDataLoops();
         this.watchProcessHealth();
-        this.injectGameOverlay();
-    }
-
-    async injectGameOverlay() {
-        if (config.enableIngameOverlay !== true) return;
-        if (!this.gameOverlayAllowed) return;
-
-        try {
-            const result = await injectGameOverlay(this.process, this.bitness);
-            this.isGameOverlayInjected = result === true;
-
-            if (result === false) return; // incase if overlay already reported an issue
-            await sleep(10_000);
-
-            if (
-                config.ingameOverlayStatus[this.bitness] === 'started' ||
-                this.isDestroyed === true
-            ) {
-                wLogger.debug(
-                    '[ingame-overlay] Already started or osu is destroyed.'
-                );
-                return;
-            }
-
-            wLogger.error(
-                '[ingame-overlay] Ingame overlay not connected after 10 seconds.'
-            );
-        } catch (exc) {
-            wLogger.error(
-                ClientType[this.client],
-                this.pid,
-                'injectGameOverlay',
-                (exc as Error).message
-            );
-            wLogger.debug(
-                ClientType[this.client],
-                this.pid,
-                'injectGameOverlay',
-                exc
-            );
-        }
     }
 
     initiateDataLoops() {
@@ -258,8 +214,6 @@ export abstract class AbstractInstance {
 
             this.emitter.emit('onDestroy', this.pid);
             this.isDestroyed = true;
-
-            config.ingameOverlayStatus[this.bitness] = '';
         }
 
         setTimeout(this.watchProcessHealth, config.pollRate);

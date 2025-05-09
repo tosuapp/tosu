@@ -64,14 +64,8 @@ export class Server {
                 const clients = Object.values(
                     this.instanceManager.osuInstances
                 ).map((r: any) => r.bitness);
-                if (clients.includes(32))
-                    config.ingameOverlayStatus[32] = 'started';
-                if (clients.includes(64))
-                    config.ingameOverlayStatus[64] = 'started';
 
-                wLogger.warn(
-                    `[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor`
-                );
+                wLogger.warn(`[ingame-overlay] initialized successfully`);
             }
         });
 
