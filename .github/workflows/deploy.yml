@@ -68,7 +68,7 @@ jobs:
           mkdir packages/ingame-overlay/pack/github
 
           cp packages/ingame-overlay/pack/tosu-ingame-overlay.exe packages/ingame-overlay/pack/github
-          cp packages/tosu/_version.js packages/ingame-overlay/pack/github
+          sed -nE "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/p" packages/tosu/_version.js > packages/ingame-overlay/pack/github/.version
 
       - name: 🚀 - Upload artifacts for windows
         id: upload-artifact-windows
