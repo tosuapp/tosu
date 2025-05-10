@@ -1,6 +1,6 @@
 import { ClientType, wLogger } from '@tosu/common';
 import { platform } from 'process';
-import { Process } from 'tsprocess/dist/process';
+import { Process } from 'tsprocess';
 
 import type { AbstractInstance } from '@/instances';
 import type {

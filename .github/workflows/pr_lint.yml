@@ -22,7 +22,7 @@ jobs:
 
       - name: Install Deps 🔧
         run: |
-          npm install -g pnpm@9.12.1
+          npm install -g pnpm@10.10.0
           pnpm install --frozen-lockfile
 
       - name: Lint PR (prettier)

@@ -14,7 +14,6 @@ import { Global } from '@/states/global';
 import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
-    gameOverlayAllowed = true;
     memory: LazerMemory;
     previousCombo: number = 0;
 

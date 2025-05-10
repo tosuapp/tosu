@@ -1,3 +1,9 @@
 packages:
   # all packages in direct subdirs of packages/
   - 'packages/*'
+
+onlyBuiltDependencies:
+  - '@jellybrick/ffi-napi'
+  - '@jellybrick/ref-napi'
+  - electron
+  - esbuild

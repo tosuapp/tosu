@@ -140,8 +140,8 @@ const app = createApp({
       save_settings();
     }, 400);
 
-    const is_edit = ref(false);
-
+    const is_edit_available_by_default = new URL(location.href).searchParams.get('edit') === 'true';
+    const is_edit = ref(is_edit_available_by_default);
 
     const max_width = ref(window.innerWidth);
     const max_height = ref(window.innerHeight);

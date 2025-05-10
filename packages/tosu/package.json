@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "@tosu/common": "workspace:*",
-        "@tosu/game-overlay": "workspace:*",
+        "@tosu/ingame-overlay-updater": "workspace:*",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
         "osu-catch-stable": "^4.0.0",

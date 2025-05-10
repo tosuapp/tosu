@@ -61,7 +61,6 @@ input[type="range"].input2::-moz-range-thumb {
 
 html,
 body {
-    cursor: none;
     width: 100vw;
     height: 100vh;
 }

@@ -7,7 +7,7 @@ import {
 } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
-import { Process } from 'tsprocess/dist/process';
+import { Process } from 'tsprocess';
 
 import { InstanceManager } from '@/instances/manager';
 
