@@ -37,6 +37,7 @@ export const runOverlay = async () => {
             wLogger.warn(
                 '[ingame-overlay] Old version of the ingame overlay detected. Removing...'
             );
+            await rm(gameOverlayPath, { recursive: true, force: true });
         }
 
         if (existsSync(path.join(gameOverlayPath, 'version'))) {
@@ -44,7 +45,7 @@ export const runOverlay = async () => {
                 path.join(gameOverlayPath, 'version'),
                 'utf8'
             );
-            if (overlayVersion !== currentVersion) {
+            if (overlayVersion.trimEnd() !== currentVersion) {
                 await rm(gameOverlayPath, { recursive: true, force: true });
 
                 wLogger.warn(
@@ -94,7 +95,7 @@ export const runOverlay = async () => {
         }
 
         // dum sleep to wait until all osu libraries are loaded?
-        await sleep(1000 * 10);
+        await sleep(1000 * 3);
 
         return new Promise((resolve) => {
             let error = false;
