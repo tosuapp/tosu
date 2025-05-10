@@ -64,10 +64,7 @@ jobs:
       - name: 📦 - Prepare overlay for upload
         if: ${{ matrix.os == 'windows-latest' }}
         shell: bash
-        run: |
-          mkdir packages/ingame-overlay/pack/github
-          cp packages/ingame-overlay/pack/tosu-ingame-overlay.exe packages/ingame-overlay/pack/github
-          sed -nE "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/p" packages/tosu/_version.js > packages/ingame-overlay/pack/github/version
+        run: sed -nE "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/p" packages/tosu/_version.js > packages/ingame-overlay/pack/win-unpacked/version
 
       - name: 🚀 - Upload artifacts for windows
         id: upload-artifact-windows
@@ -83,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with: {
           name: "tosu-overlay-windows-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
-          path: packages/ingame-overlay/pack/github/*
+          path: packages/ingame-overlay/pack/win-unpacked/*
         }
 
       - name: 🚀 - Upload artifacts for linux

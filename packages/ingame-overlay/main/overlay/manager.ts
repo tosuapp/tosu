@@ -1,5 +1,7 @@
 import { promises as wql } from '@jellybrick/wql-process-monitor';
 import EventEmitter from 'node:events';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Process } from 'tsprocess';
 
 import { OverlayProcess } from './process';
@@ -42,10 +44,11 @@ export class OverlayManager {
         const signal = this.abortController.signal;
 
         const emitter = await wql.subscribe({
-            creation: true
+            creation: true,
+            deletion: true
         });
         emitter.on('creation', ([name, pid]) => {
-            if (name === 'osu!.exe') {
+            if (name === 'osu!.exe' || name === 'osulazer.exe') {
                 const id = Number.parseInt(pid);
                 if (isNaN(id)) {
                     return;
@@ -54,6 +57,25 @@ export class OverlayManager {
                 // eslint-disable-next-line no-void
                 void this.addOverlay(id);
             }
+        });
+        emitter.on('deletion', ([name, pid]) => {
+            fs.writeFileSync('debug.log', `deletion: ${name} ${pid}\n`);
+            Process.getProcessCommandLine(Number(pid)).then(
+                (cmdLine: string) => {
+                    fs.writeFileSync(
+                        'debug.log',
+                        `${path.join(cmdLine, '..', 'game-overlay')} ${process.cwd()}\n`
+                    );
+                    // C:/tosu/tosu.exe -> C:/tosu -> C:/tosu/game-overlay
+                    if (
+                        path.join(cmdLine, '..', 'game-overlay') ===
+                        process.cwd()
+                    ) {
+                        // Exit overlay if tosu is closed
+                        process.exit(0);
+                    }
+                }
+            );
         });
 
         const osuProcesses = Process.findProcesses([

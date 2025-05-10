@@ -1098,7 +1098,6 @@ packages:
 
   asdf-overlay-node@0.3.0:
     resolution: {integrity: sha512-ChJBYq9++2pSzhGWPAMXT/5R/VqNL3Mbykv4kb2xOnbmAsYK8BwNHrvNtoTLnZ4KyxBiq++lNjshN/avj+J8rw==}
-    cpu: [x64, arm64]
     os: [win32]
 
   assert-plus@1.0.0:

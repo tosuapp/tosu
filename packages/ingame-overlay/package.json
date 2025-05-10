@@ -35,16 +35,13 @@
     "win": {
       "target": [
         {
-          "target": "portable",
+          "target": "dir",
           "arch": [
             "x64"
           ]
         }
       ],
       "icon": "./asset/tosu.ico"
-    },
-    "portable": {
-      "artifactName": "tosu-ingame-overlay.exe"
     },
     "directories": {
       "output": "./pack/",

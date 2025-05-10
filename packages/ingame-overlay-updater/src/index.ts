@@ -29,6 +29,16 @@ export const runOverlay = async () => {
         checkGameOverlayConfig();
 
         const gameOverlayPath = path.join(getProgramPath(), 'game-overlay');
+        if (
+            existsSync(path.join(gameOverlayPath)) &&
+            !existsSync(path.join(gameOverlayPath, 'version'))
+        ) {
+            // old overlay detected, removing it
+            wLogger.warn(
+                '[ingame-overlay] Old version of the ingame overlay detected. Removing...'
+            );
+        }
+
         if (existsSync(path.join(gameOverlayPath, 'version'))) {
             const overlayVersion = readFileSync(
                 path.join(gameOverlayPath, 'version'),
