@@ -1,6 +1,5 @@
 import { promises as wql } from '@jellybrick/wql-process-monitor';
 import EventEmitter from 'node:events';
-import fs from 'node:fs';
 import path from 'node:path';
 import { Process } from 'tsprocess';
 
@@ -58,14 +57,9 @@ export class OverlayManager {
                 void this.addOverlay(id);
             }
         });
-        emitter.on('deletion', ([name, pid]) => {
-            fs.writeFileSync('debug.log', `deletion: ${name} ${pid}\n`);
+        emitter.on('deletion', ([_, pid]) => {
             Process.getProcessCommandLine(Number(pid)).then(
                 (cmdLine: string) => {
-                    fs.writeFileSync(
-                        'debug.log',
-                        `${path.join(cmdLine, '..', 'game-overlay')} ${process.cwd()}\n`
-                    );
                     // C:/tosu/tosu.exe -> C:/tosu -> C:/tosu/game-overlay
                     if (
                         path.join(cmdLine, '..', 'game-overlay') ===
