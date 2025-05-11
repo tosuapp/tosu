@@ -41,8 +41,7 @@ export class OverlayProcess {
             }
 
             const texture = e.texture;
-            // eslint-disable-next-line no-void
-            void (async () => {
+            (async () => {
                 try {
                     await overlay.updateShtex(
                         texture.textureInfo.sharedTextureHandle

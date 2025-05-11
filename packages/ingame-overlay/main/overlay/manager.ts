@@ -53,8 +53,7 @@ export class OverlayManager {
                     return;
                 }
 
-                // eslint-disable-next-line no-void
-                void this.addOverlay(id);
+                this.addOverlay(id);
             }
         });
         emitter.on('deletion', ([_, pid]) => {
@@ -97,5 +96,4 @@ export class OverlayManager {
 }
 
 // fix wql
-// eslint-disable-next-line no-void
-void wql.createEventSink();
+wql.createEventSink();

@@ -5,8 +5,7 @@ import path from 'path';
 import packageJSON from '../package.json';
 import { OverlayManager } from './overlay/manager';
 
-// eslint-disable-next-line no-void
-void (async () => {
+(async () => {
     try {
         await main();
     } finally {
