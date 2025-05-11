@@ -56,9 +56,10 @@ export default function buildBaseApi(server: Server) {
                 .toLowerCase();
 
             const parseAddress = new URL(
-                `http://${req.headers.host}/` ||
-                    req.headers.referer ||
-                    `http://${req.socket.remoteAddress}/`
+                req.headers.host
+                    ? `http://${req.headers.host}/`
+                    : req.headers.referer ||
+                      `http://${req.socket.remoteAddress}/`
             );
             if (req.query?.tab === '1') {
                 return buildExternalCounters(res, parseAddress.hostname, query);
@@ -462,47 +463,58 @@ export default function buildBaseApi(server: Server) {
 
     server.app.route(/.*/, 'GET', async (req, res) => {
         const url = req.pathname || '/';
-        const staticPath = getStaticPath();
+        try {
+            const staticPath = getStaticPath();
 
-        if (url === '/') {
-            const parseAddress = new URL(
-                `http://${req.headers.host}/` ||
-                    req.headers.referer ||
-                    `http://${req.socket.remoteAddress}/`
-            );
+            if (url === '/') {
+                const parseAddress = new URL(
+                    req.headers.host
+                        ? `http://${req.headers.host}/`
+                        : req.headers.referer ||
+                          `http://${req.socket.remoteAddress}/`
+                );
 
-            if (req.query?.tab === '1') {
-                return buildExternalCounters(res, parseAddress.hostname);
+                if (req.query?.tab === '1') {
+                    return buildExternalCounters(res, parseAddress.hostname);
+                }
+
+                if (req.query?.tab === '2') {
+                    return buildSettings(res);
+                }
+
+                if (req.query?.tab === '3') {
+                    return buildInstructionLocal(res);
+                }
+
+                if (req.query?.tab === '4') {
+                    return await buildOverlayConfig(res);
+                }
+
+                return buildLocalCounters(res, parseAddress.hostname);
             }
 
-            if (req.query?.tab === '2') {
-                return buildSettings(res);
+            const extension = path.extname(url);
+            if (extension === '' && !url.endsWith('/')) {
+                res.writeHead(301, { Location: url + '/' });
+                return res.end();
             }
 
-            if (req.query?.tab === '3') {
-                return buildInstructionLocal(res);
-            }
+            const selectIndexHTML = url.endsWith('/')
+                ? url + 'index.html'
+                : url;
+            directoryWalker({
+                _htmlRedirect: true,
+                res,
+                baseUrl: url,
+                pathname: selectIndexHTML,
+                folderPath: staticPath
+            });
+        } catch (error) {
+            wLogger.warn(`[server] ${url}`, (error as Error).message);
+            wLogger.debug(`[server] ${url}`, error);
 
-            if (req.query?.tab === '4') {
-                return await buildOverlayConfig(res);
-            }
-
-            return buildLocalCounters(res, parseAddress.hostname);
+            res.writeHead(404);
+            return res.end((error as Error).message || '');
         }
-
-        const extension = path.extname(url);
-        if (extension === '' && !url.endsWith('/')) {
-            res.writeHead(301, { Location: url + '/' });
-            return res.end();
-        }
-
-        const selectIndexHTML = url.endsWith('/') ? url + 'index.html' : url;
-        directoryWalker({
-            _htmlRedirect: true,
-            res,
-            baseUrl: url,
-            pathname: selectIndexHTML,
-            folderPath: staticPath
-        });
     });
 }

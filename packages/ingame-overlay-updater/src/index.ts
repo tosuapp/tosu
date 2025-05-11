@@ -97,6 +97,7 @@ export const runOverlay = async () => {
         // dum sleep to wait until all osu libraries are loaded?
         await sleep(1000 * 3);
 
+        wLogger.warn(`[ingame-overlay] Starting...`);
         return new Promise((resolve) => {
             let error = false;
             const child = execFile(
@@ -122,7 +123,7 @@ export const runOverlay = async () => {
                 }
                 if (error) return;
 
-                wLogger.info(`[ingame-overlay] Overlay process started...`);
+                wLogger.warn(`[ingame-overlay] Exited...`);
 
                 resolve(true);
             });

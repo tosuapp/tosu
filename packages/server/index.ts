@@ -61,7 +61,13 @@ export class Server {
             onConnectionCallback: (_, url) => {
                 if (url !== '/websocket/commands?l=__ingame__') return;
 
-                wLogger.warn(`[ingame-overlay] initialized successfully`);
+                const ip =
+                    config.serverIP === '0.0.0.0'
+                        ? 'localhost'
+                        : config.serverIP;
+                wLogger.warn(
+                    `[ingame-overlay] initialized successfully, setup it here: http://${ip}:${config.serverPort}/?tab=4`
+                );
             }
         });
 
