@@ -32,7 +32,7 @@
     "files": [
       "dist"
     ],
-    "electronLanguages": "",
+    "electronLanguages": "en-US",
     "win": {
       "target": [
         {
