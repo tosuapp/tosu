@@ -74,8 +74,7 @@ export const runOverlay = async () => {
 
             const findAsset = assets.find(
                 (r) =>
-                    r.name.includes('tosu-overlay') &&
-                    r.name.endsWith('.zip')
+                    r.name.includes('tosu-overlay') && r.name.endsWith('.zip')
             );
             if (!findAsset) {
                 wLogger.info(
