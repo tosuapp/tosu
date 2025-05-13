@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.6.0](https://github.com/tosuapp/tosu/compare/v4.5.2...v4.6.0) (2025-05-13)
+
+
+### Features
+
+* Implement `maxAchievable` pp value & modify `maxThisPlay`. ([7cc537a](https://github.com/tosuapp/tosu/commit/7cc537a5dca1dcba29427809aa56025147b309d0))
+* Implement `maxAchievable` pp value & modify `maxThisPlay`. ([77c8afa](https://github.com/tosuapp/tosu/commit/77c8afa3a6e175ad916e1a819d6f5b6f50b77213))
+* implement reading lazer multiplayer spectators ([e8e281e](https://github.com/tosuapp/tosu/commit/e8e281e0097b064b7b73e1ac16de71f9764f5ded))
+* implement storycraft overlay in tosu codebase ([f6bbfd2](https://github.com/tosuapp/tosu/commit/f6bbfd22eabee0c6efd72c14764895c662b896ac))
+* make temp page for overlay & dont pack overlay into portable exe ([add1eeb](https://github.com/tosuapp/tosu/commit/add1eeb8b8eea89f44c82ac565aed4695529017c))
+* output to api ([092dad8](https://github.com/tosuapp/tosu/commit/092dad82d1cc0c2df5ee23d63e58615164d63cf1))
+* proto for lazer multi ([566450e](https://github.com/tosuapp/tosu/commit/566450e8c38da09d93475b4a4723b411d27889ea))
+
+
+### Bug Fixes
+
+* Assume max lazer values & predict maximum achievable combo. ([5c502e1](https://github.com/tosuapp/tosu/commit/5c502e1926c997621649270b3d103e627d3a674e))
+* Assume max lazer values & predict maximum achievable combo. ([86e08dd](https://github.com/tosuapp/tosu/commit/86e08dd43a629c75ec86dd2e1b4138209ff39f3e))
+* Correct property value assignment to match gosu. ([7d6891e](https://github.com/tosuapp/tosu/commit/7d6891ea6d1e041766b05382a09fd60f6c083ec8))
+* don't make it as submodule ([faf0111](https://github.com/tosuapp/tosu/commit/faf0111b473c88b8e19dd9ddd8827a65f659422d))
+* don't try parsing the map if it doesn't exist ([b7b14ed](https://github.com/tosuapp/tosu/commit/b7b14ed396a86f2e7a9f520891a5f766ff6a51da))
+* eslint ([6aeaafe](https://github.com/tosuapp/tosu/commit/6aeaafef55d890eab7558dd5af0d004e21db79c0))
+* Fix things ([44be57e](https://github.com/tosuapp/tosu/commit/44be57ea5019d6610c11c027b686afbec6358fd5))
+* if lazer spectate crashed ([36fdbf0](https://github.com/tosuapp/tosu/commit/36fdbf0d750fd26e4d92642ccef01b83adbbf074))
+* lint & name convention ([d2345e5](https://github.com/tosuapp/tosu/commit/d2345e5cac4cf11fa54c335b9a15257267d09ec0))
+* pages don't load without en-US locale ([c4ee788](https://github.com/tosuapp/tosu/commit/c4ee7885bae7c5cfaf829516614f2c64539b7a38))
+* remove debug ([b4e0013](https://github.com/tosuapp/tosu/commit/b4e0013c6a0eddbb49d6ea223e8d00cda8774de8))
+* remove folder ([8a429f8](https://github.com/tosuapp/tosu/commit/8a429f8f423635594cc6a277cabbb67ea3ed6e45))
+* Rename properties `maxThisPlay` -> `maxAchieved`. ([b1d71d0](https://github.com/tosuapp/tosu/commit/b1d71d0dd8497164912f34af53a0b0492189941a))
+* Rename properties `maxThisPlay` -> `maxAchieved`. ([02bf591](https://github.com/tosuapp/tosu/commit/02bf591c6c4ab7bdf7c24654dfd03971d0fabf54))
+* Revert property renaming for api v1. ([f94f0c5](https://github.com/tosuapp/tosu/commit/f94f0c529329687423b1dc57895dd9dceb68cd7b))
+* Revert property renaming for api v1. ([8b4795f](https://github.com/tosuapp/tosu/commit/8b4795f2a33a6acf9c3dcd84c18e93765739f27f))
+* some issue with build ([4b29ee5](https://github.com/tosuapp/tosu/commit/4b29ee5c6913e6dc1c2e1b111ff6ea8f3d864743))
+* Swap tick hit assignments in lazer memory. ([7df1519](https://github.com/tosuapp/tosu/commit/7df15197b52fd468aba31023e030d6bcfdecc029))
+* temporary skip mania pp calculation outside gameplay state ([cfea532](https://github.com/tosuapp/tosu/commit/cfea532b86a18d5db8cca27529bdc4716e5cc7fa))
+* typo ([b94fe33](https://github.com/tosuapp/tosu/commit/b94fe3398911eab061940d095cbc0f21f228028a))
+* use for now that overlay only for windows ([1b0db56](https://github.com/tosuapp/tosu/commit/1b0db560af4ef6908d77d2c7d3daaff2ecb8e1a7))
+
 ### [4.5.2](https://github.com/tosuapp/tosu/compare/v4.5.1...v4.5.2) (2025-05-01)
 
 
