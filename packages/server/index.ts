@@ -61,16 +61,12 @@ export class Server {
             onConnectionCallback: (_, url) => {
                 if (url !== '/websocket/commands?l=__ingame__') return;
 
-                const clients = Object.values(
-                    this.instanceManager.osuInstances
-                ).map((r: any) => r.bitness);
-                if (clients.includes(32))
-                    config.ingameOverlayStatus[32] = 'started';
-                if (clients.includes(64))
-                    config.ingameOverlayStatus[64] = 'started';
-
+                const ip =
+                    config.serverIP === '0.0.0.0'
+                        ? 'localhost'
+                        : config.serverIP;
                 wLogger.warn(
-                    `[ingame-overlay] initialized successfully\nPress ctrl+shift+space in the game to enable in-game overlay editor`
+                    `[ingame-overlay] initialized successfully, setup it here: http://${ip}:${config.serverPort}/?tab=4`
                 );
             }
         });

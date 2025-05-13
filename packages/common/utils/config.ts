@@ -87,8 +87,7 @@ export const config = {
     timestamp: 0,
     currentVersion: '',
     updateVersion: '',
-    logsPath: '',
-    ingameOverlayStatus: { 32: '', 64: '' }
+    logsPath: ''
 };
 
 export const updateConfigFile = () => {
@@ -267,18 +266,12 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.enableIngameOverlay = enableIngameOverlay;
     checkGameOverlayConfig();
 
-    const osuInstance: any = httpServer.instanceManager.getInstance(
-        httpServer.instanceManager.focusedClient
-    );
-
     if (
-        osuInstance &&
-        osuInstance.isGameOverlayInjected !== true &&
-        osuInstance.gameOverlayAllowed === true &&
-        enableIngameOverlay === true &&
-        updated === true
+        enableIngameOverlay &&
+        !httpServer.instanceManager.overlayStarted &&
+        Object.keys(httpServer.instanceManager.osuInstances).length > 0
     ) {
-        osuInstance.injectGameOverlay();
+        httpServer.instanceManager.startOverlay();
     }
 
     if (enableGosuOverlay === true && !enableIngameOverlay) {

@@ -15,7 +15,6 @@ import { Global } from '@/states/global';
 import { cleanPath } from '@/utils/converters';
 
 export class OsuInstance extends AbstractInstance {
-    gameOverlayAllowed = true;
     memory: StableMemory;
 
     constructor(pid: number) {

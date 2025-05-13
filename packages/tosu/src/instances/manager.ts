@@ -2,10 +2,12 @@ import {
     ClientType,
     Platform,
     argumentsParser,
+    config,
     platformResolver,
     wLogger
 } from '@tosu/common';
-import { Process } from 'tsprocess/dist/process';
+import { runOverlay } from '@tosu/ingame-overlay-updater';
+import { Process } from 'tsprocess';
 
 import { AbstractInstance } from '@/instances';
 
@@ -19,6 +21,8 @@ export class InstanceManager {
     osuInstances: {
         [key: number]: AbstractInstance;
     };
+
+    overlayStarted: boolean = false;
 
     constructor() {
         this.osuInstances = {};
@@ -127,6 +131,14 @@ export class InstanceManager {
                 this.osuInstances[processId] = osuInstance;
                 osuInstance.start();
             }
+
+            if (
+                config.enableIngameOverlay &&
+                !this.overlayStarted &&
+                Object.keys(this.osuInstances).length > 0
+            ) {
+                this.startOverlay();
+            }
         } catch (exc) {
             wLogger.error('[manager]', 'handleProcesses', (exc as any).message);
             wLogger.debug('[manager]', 'handleProcesses', exc);
@@ -159,5 +171,10 @@ export class InstanceManager {
         }
 
         setTimeout(this.runDetemination, 100);
+    }
+
+    startOverlay() {
+        runOverlay();
+        this.overlayStarted = true;
     }
 }

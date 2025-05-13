@@ -47,7 +47,7 @@ jobs:
         with: { node-version: 20.11.1 }
 
       - name: 🛠️ - Install Deps
-        run: npm install -g pnpm@9.12.1 && pnpm install --frozen-lockfile
+        run: npm install -g pnpm@10.10.0 && pnpm install --frozen-lockfile
 
       - name: 📦 - Build (windows)
         if: ${{ matrix.os == 'windows-latest' }}
@@ -57,6 +57,15 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: pnpm build:linux
 
+      - name: 📦 - Build ingame-overlay (windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: pnpm build:overlay
+
+      - name: 📦 - Prepare overlay for upload
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash
+        run: sed -nE "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/p" packages/tosu/_version.js > packages/ingame-overlay/pack/win-unpacked/version
+
       - name: 🚀 - Upload artifacts for windows
         id: upload-artifact-windows
         if: ${{ matrix.os == 'windows-latest' }}
@@ -64,6 +73,14 @@ jobs:
         with: {
           name: "tosu-windows-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/tosu/dist/tosu.exe
+        }
+      
+      - name: 🚀 - Upload overlay artifacts for windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/upload-artifact@v4
+        with: {
+          name: "tosu-overlay-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
+          path: packages/ingame-overlay/pack/win-unpacked/*
         }
 
       - name: 🚀 - Upload artifacts for linux

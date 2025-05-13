@@ -187,8 +187,8 @@ export class HttpServer {
                 res.statusCode = 500;
                 res.statusMessage = message;
 
-                wLogger.error(parsedURL.pathname, message);
-                wLogger.debug(parsedURL.pathname, exc);
+                wLogger.warn(`[server] ${parsedURL.pathname}`, message);
+                wLogger.debug(`[server] ${parsedURL.pathname}`, exc);
 
                 return sendJson(res, { error: message });
             }

@@ -16,7 +16,11 @@ class WebSocketManager {
     let INTERVAL = '';
 
     const that = this;
-    this.sockets[url] = new WebSocket(`ws://${this.host}${url}?l=__ingame__`);
+    const parse_url = new URL(window.location.href);
+    let socket_url = `ws://${this.host}${url}?l=__ingame__`;
+    if (parse_url.searchParams.get('edit')) socket_url += `&iframe=true`;
+
+    this.sockets[url] = new WebSocket(socket_url);
 
     this.sockets[url].onopen = () => {
       console.log(`[OPEN] ${url}: Connected`);
@@ -140,8 +144,8 @@ const app = createApp({
       save_settings();
     }, 400);
 
-    const is_edit = ref(false);
-
+    const is_edit_available_by_default = new URL(location.href).searchParams.get('edit') === 'true';
+    const is_edit = ref(is_edit_available_by_default);
 
     const max_width = ref(window.innerWidth);
     const max_height = ref(window.innerHeight);
@@ -191,6 +195,9 @@ const app = createApp({
 
 
     watch(settings, settings_debounce);
+    watch(cursor_ctx, v=> {
+       if (v) v.style.opacity = 0;
+    });
     watchEffect(() => {
       document.body.style.setProperty('--w', `${max_width.value}px`);
       document.body.style.setProperty('--h', `${max_height.value}px`);
@@ -265,6 +272,7 @@ const app = createApp({
       else if (is_top || is_bottom) cursor.value.type = 'ns-resize';
       else cursor.value.type = 'move';
 
+      document.body.style.cursor = cursor.value.type;
 
       if (is_resizing) return;
 
