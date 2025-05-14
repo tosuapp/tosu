@@ -14,6 +14,7 @@ export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
 
 export interface TosuAPi {
+    focused: boolean;
     client: string;
     server: string;
     state: NumberName;
@@ -196,6 +197,9 @@ export interface Objects {
 }
 
 export interface Play {
+    state: 'idle' | 'playing' | 'watching' | 'spectating';
+    isPaused: boolean;
+
     playerName: string;
     mode: NumberName;
     score: number;
