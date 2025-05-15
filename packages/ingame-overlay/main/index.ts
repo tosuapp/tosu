@@ -18,6 +18,10 @@ async function main() {
         return;
     }
 
+    // disable view scaling on hidpi
+    app.commandLine.appendSwitch('high-dpi-support', '1');
+    app.commandLine.appendSwitch('force-device-scale-factor', '1');
+
     // prevent main process from exiting when all windows are closed
     app.on('window-all-closed', () => {});
 
