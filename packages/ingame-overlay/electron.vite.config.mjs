@@ -29,4 +29,15 @@ export default defineConfig({
     },
     assetsInclude: ['./asset/*'],
   },
+  preload: {
+    build: {
+      lib: {
+        entry: './preload/index.ts',
+        formats: ['cjs'],
+      },
+      outDir: 'dist/preload',
+      minify: true,
+    },
+    plugins: [bytecodePlugin()],
+  },
 });

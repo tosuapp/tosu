@@ -1,6 +1,9 @@
-import { Overlay, defaultDllDir, length } from 'asdf-overlay-node';
+import { Overlay, defaultDllDir, key, length } from 'asdf-overlay-node';
 import { BrowserWindow } from 'electron';
 import EventEmitter from 'node:events';
+import path from 'node:path';
+
+import { toKeyboardEvent, toMouseEvent } from './input';
 
 export type OverlayEventEmitter = EventEmitter<{
     destroyed: [];
@@ -16,7 +19,8 @@ export class OverlayProcess {
         readonly window: BrowserWindow
     ) {
         overlay.event.once('disconnected', () => {
-            this.destroy();
+            this.window.destroy();
+            this.event.emit('destroyed');
         });
 
         overlay.event.on('resized', (hwnd, width, height) => {
@@ -33,6 +37,30 @@ export class OverlayProcess {
                 height
             );
             this.window.setSize(width, height);
+        });
+
+        overlay.event.on('input_capture_start', () => {
+            window.webContents.send('inputCaptureStart');
+            window.focusOnWebView();
+        });
+
+        overlay.event.on('input_capture_end', () => {
+            window.webContents.send('inputCaptureEnd');
+            window.blurWebView();
+        });
+
+        overlay.event.on('cursor_input', (_, input) => {
+            const event = toMouseEvent(input);
+            if (event) {
+                window.webContents.sendInputEvent(event);
+            }
+        });
+
+        overlay.event.on('keyboard_input', (_, input) => {
+            const event = toKeyboardEvent(input);
+            if (event) {
+                window.webContents.sendInputEvent(event);
+            }
         });
 
         window.webContents.on('paint', (e) => {
@@ -61,8 +89,6 @@ export class OverlayProcess {
 
     destroy() {
         this.overlay.destroy();
-        this.window.destroy();
-        this.event.emit('destroyed');
     }
 
     static async initialize(pid: number): Promise<OverlayProcess> {
@@ -81,12 +107,20 @@ export class OverlayProcess {
         await overlay.setAnchor(length(0), length(0));
         await overlay.setMargin(length(0), length(0), length(0), length(0));
 
+        // TODO:: configurable input key bind
+        await overlay.setInputCaptureKeybind(hwnd, [
+            key(0x11), // Left Control
+            key(0x10), // Left Shift
+            key(0x20) // Space
+        ]);
+
         const window = new BrowserWindow({
             webPreferences: {
                 offscreen: {
                     useSharedTexture: true
                 },
-                transparent: true
+                transparent: true,
+                preload: path.join(__dirname, '../preload/index.js')
             },
             show: false
         });
