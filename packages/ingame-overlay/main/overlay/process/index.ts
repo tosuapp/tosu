@@ -63,27 +63,33 @@ export class OverlayProcess {
             }
         });
 
-        window.webContents.on('paint', (e) => {
+        window.webContents.on('paint', async (e) => {
             if (!e.texture) {
                 return;
             }
+            const info = e.texture.textureInfo;
+            const rect = info.metadata.captureUpdateRect ?? info.contentRect;
 
-            const texture = e.texture;
-            (async () => {
-                try {
-                    await overlay.updateShtex(
-                        texture.textureInfo.sharedTextureHandle
-                    );
-                } catch (e) {
-                    console.error(
-                        `error while updating overlay pid: ${pid.toString()}, err:`,
-                        e
-                    );
-                    this.destroy();
-                } finally {
-                    texture.release();
-                }
-            })();
+            try {
+                await overlay.updateShtex(
+                    info.codedSize.width,
+                    info.codedSize.height,
+                    info.sharedTextureHandle,
+                    {
+                        dstX: rect.x,
+                        dstY: rect.y,
+                        src: rect
+                    }
+                );
+            } catch (e) {
+                console.error(
+                    `error while updating overlay pid: ${pid.toString()}, err:`,
+                    e
+                );
+                this.destroy();
+            } finally {
+                e.texture.release();
+            }
         });
     }
 
