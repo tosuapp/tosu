@@ -38,6 +38,5 @@ export default defineConfig({
       outDir: 'dist/preload',
       minify: true,
     },
-    plugins: [bytecodePlugin()],
   },
 });
