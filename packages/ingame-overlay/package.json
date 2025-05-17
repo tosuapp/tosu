@@ -13,7 +13,7 @@
   "author": "storycraft <storycraft@pancake.sh>",
   "dependencies": {
     "@jellybrick/wql-process-monitor": "^1.4.8",
-    "asdf-overlay-node": "^0.5.2",
+    "asdf-overlay-node": "^0.5.3",
     "tsprocess": "workspace:*"
   },
   "devDependencies": {
@@ -23,7 +23,7 @@
     "electron-builder": "^26.0.12",
     "electron-vite": "^3.1.0",
     "emittery": "^1.1.0",
-    "node-abi": "3.75.0",
+    "node-abi": "^4.8.0",
     "typescript": "^5.8.3"
   },
   "build": {
