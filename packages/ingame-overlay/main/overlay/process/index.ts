@@ -3,7 +3,7 @@ import { BrowserWindow } from 'electron';
 import EventEmitter from 'node:events';
 import path from 'node:path';
 
-import { toKeyboardEvent, toMouseEvent } from './input';
+import { toCursor, toKeyboardEvent, toMouseEvent } from './input';
 
 export type OverlayEventEmitter = EventEmitter<{
     destroyed: [];
@@ -54,6 +54,10 @@ export class OverlayProcess {
             if (event) {
                 window.webContents.sendInputEvent(event);
             }
+        });
+
+        window.webContents.on('cursor-changed', (_, type) => {
+            overlay.setCaptureCursor(hwnd, toCursor(type));
         });
 
         overlay.event.on('keyboard_input', (_, input) => {

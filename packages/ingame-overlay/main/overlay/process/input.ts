@@ -1,3 +1,4 @@
+import { Cursor } from 'asdf-overlay-node';
 import { CursorInput, KeyboardInput } from 'asdf-overlay-node/input';
 import {
     KeyboardInputEvent,
@@ -98,6 +99,95 @@ export function toKeyboardEvent(
                 type: 'char',
                 keyCode: input.ch
             };
+    }
+}
+
+// https://www.electronjs.org/docs/latest/api/web-contents
+// https://developer.mozilla.org/ko/docs/Web/CSS/cursor
+export function toCursor(cursor: string): Cursor | undefined {
+    switch (cursor) {
+        case 'pointer':
+            return Cursor.Default;
+        case 'crosshair':
+            return Cursor.Crosshair;
+        case 'hand':
+            return Cursor.Pointer;
+        case 'text':
+            return Cursor.Text;
+        case 'wait':
+            return Cursor.Wait;
+        case 'help':
+            return Cursor.Help;
+        case 'e-resize':
+        case 'w-resize':
+        case 'ew-resize':
+            return Cursor.EastWestResize;
+        case 'n-resize':
+        case 's-resize':
+        case 'ns-resize':
+            return Cursor.NorthSouthResize;
+        case 'ne-resize':
+        case 'sw-resize':
+        case 'nesw-resize':
+            return Cursor.NorthEastSouthWestResize;
+        case 'nw-resize':
+        case 'se-resize':
+        case 'nwse-resize':
+            return Cursor.NorthWestSouthEastResize;
+        case 'col-resize':
+            return Cursor.ColResize;
+        case 'row-resize':
+            return Cursor.RowResize;
+        case 'm-panning':
+            return Cursor.PanMiddle;
+        case 'm-panning-vertical':
+            return Cursor.PanMiddleVertical;
+        case 'm-panning-horizontal':
+            return Cursor.PanMiddleHorizontal;
+        case 'e-panning':
+            return Cursor.PanEast;
+        case 'n-panning':
+            return Cursor.PanNorth;
+        case 'ne-panning':
+            return Cursor.PanNorthEast;
+        case 'nw-panning':
+            return Cursor.PanNorthWest;
+        case 's-panning':
+            return Cursor.PanSouth;
+        case 'se-panning':
+            return Cursor.PanSouthEast;
+        case 'sw-panning':
+            return Cursor.PanSouthWest;
+        case 'w-panning':
+            return Cursor.PanWest;
+        case 'move':
+            return Cursor.Move;
+        case 'vertical-text':
+            return Cursor.VerticalText;
+        case 'cell':
+            return Cursor.Cell;
+        case 'alias':
+            return Cursor.Alias;
+        case 'progress':
+            return Cursor.Progress;
+        case 'nodrop':
+        case 'not-allowed':
+            return Cursor.NotAllowed;
+        case 'copy':
+            return Cursor.Copy;
+        case 'none':
+            return;
+        case 'zoom-in':
+            return Cursor.ZoomIn;
+        case 'zoom-out':
+            return Cursor.ZoomOut;
+        case 'grab':
+            return Cursor.Grab;
+        case 'grabbing':
+            return Cursor.Grabbing;
+
+        default:
+            return Cursor.Default;
     }
 }
 
