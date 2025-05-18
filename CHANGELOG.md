@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.7.0](https://github.com/tosuapp/tosu/compare/v4.6.0...v4.7.0) (2025-05-18)
+
+
+### Features
+
+* ingame overlay configuration ([0f283aa](https://github.com/tosuapp/tosu/commit/0f283aa6dda3438eead6264ceee016aaa0816bb1))
+* proper cursor display ([08a4157](https://github.com/tosuapp/tosu/commit/08a415777cda1a5ce661ad9a9d2b24ee90755190))
+* update only changed area ([f21eb8a](https://github.com/tosuapp/tosu/commit/f21eb8a5d08ff6728d6c03c904eead4cc933ee29))
+* update version of ingame-overlay at the same time as tosu ([ef2ca1a](https://github.com/tosuapp/tosu/commit/ef2ca1ac9c5aa2a769ab6cbf4ce6d24c6725abbb))
+
+
+### Bug Fixes
+
+* disable chromium scaling on hidpi ([f17f394](https://github.com/tosuapp/tosu/commit/f17f394f3cfa66fcfb965c1060940fef4e65aabc))
+* preload script cannot be compiled to bytecode ([2aa2f76](https://github.com/tosuapp/tosu/commit/2aa2f7612148a84a4f48eed645ef6bd2ef17d0e1))
+
 ## [4.6.0](https://github.com/tosuapp/tosu/compare/v4.5.2...v4.6.0) (2025-05-13)
 
 
