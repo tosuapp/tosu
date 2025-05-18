@@ -70,8 +70,8 @@ importers:
         specifier: ^1.4.8
         version: 1.4.8
       asdf-overlay-node:
-        specifier: ^0.3.2
-        version: 0.3.2
+        specifier: ^0.5.4
+        version: 0.5.4
       tsprocess:
         specifier: workspace:*
         version: link:../tsprocess
@@ -95,8 +95,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       node-abi:
-        specifier: 3.75.0
-        version: 3.75.0
+        specifier: ^4.8.0
+        version: 4.8.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1096,8 +1096,8 @@ packages:
     resolution: {integrity: sha512-3CYzex9M9FGQjCGMGyi6/31c8GJbgb0qGyrx5HWxPd0aCwh4cB2YjMb2Xf9UuoogrMrlO9cTqnB5rI5GHZTcUA==}
     engines: {node: '>=0.10.0'}
 
-  asdf-overlay-node@0.3.2:
-    resolution: {integrity: sha512-m+zXm65LPvMaC0RkOgP635A1Z/za4bN0dUXjsubD0oc067Bc1FUcWbC4Zj/nZpBO/Bj4uYRd+aMzVcxWPJYUtw==}
+  asdf-overlay-node@0.5.4:
+    resolution: {integrity: sha512-eAxg78xLDZ0I27IbGJvWy2gwqL/VjvmK0u9HtDY7IzX/5YoCLUNBURiO8WTChrghvVoaCcD5H/ogfRNrWyRLWg==}
     cpu: [x64, arm64]
     os: [win32]
 
@@ -2868,13 +2868,13 @@ packages:
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
 
-  node-abi@3.56.0:
-    resolution: {integrity: sha512-fZjdhDOeRcaS+rcpve7XuwHBmktS1nS1gzgghwKUQQ8nTy2FdSDr6ZT8k6YhvlJeHmmQMYiT/IH9hfco5zeW2Q==}
-    engines: {node: '>=10'}
-
   node-abi@3.75.0:
     resolution: {integrity: sha512-OhYaY5sDsIka7H7AtijtI9jwGYLyl29eQn/W623DiN/MIv5sUqc4g7BIDThX+gb7di9f6xK02nkp8sdfFWZLTg==}
     engines: {node: '>=10'}
+
+  node-abi@4.8.0:
+    resolution: {integrity: sha512-+P1Mf1XNURT+wN9UK8cjtHSwmmG02iAsX0JaYDDdXgMUe5eybde3AKpGGxOrkDmPkuonYJ6WjIRrNVQe0kjmFg==}
+    engines: {node: '>=22.12.0'}
 
   node-addon-api@1.7.2:
     resolution: {integrity: sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==}
@@ -5083,7 +5083,7 @@ snapshots:
 
   arrify@1.0.1: {}
 
-  asdf-overlay-node@0.3.2: {}
+  asdf-overlay-node@0.5.4: {}
 
   assert-plus@1.0.0:
     optional: true
@@ -7156,11 +7156,11 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  node-abi@3.56.0:
+  node-abi@3.75.0:
     dependencies:
       semver: 7.7.1
 
-  node-abi@3.75.0:
+  node-abi@4.8.0:
     dependencies:
       semver: 7.7.1
 
@@ -7486,7 +7486,7 @@ snapshots:
       minimist: 1.2.8
       mkdirp-classic: 0.5.3
       napi-build-utils: 1.0.2
-      node-abi: 3.56.0
+      node-abi: 3.75.0
       pump: 3.0.0
       rc: 1.2.8
       simple-get: 4.0.1
