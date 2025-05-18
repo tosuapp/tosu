@@ -7,6 +7,10 @@
         {
             "filename": "packages/tosu/package.json",
             "type": "json"
+        },
+        {
+            "filename": "packages/ingame-overlay/package.json",
+            "type": "json"
         }
     ],
     "packageFiles": [
@@ -16,6 +20,10 @@
         },
         {
             "filename": "packages/tosu/package.json",
+            "type": "json"
+        },
+        {
+            "filename": "packages/ingame-overlay/package.json",
             "type": "json"
         }
     ]
