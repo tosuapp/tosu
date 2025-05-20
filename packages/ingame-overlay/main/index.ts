@@ -18,6 +18,8 @@ async function main() {
         return;
     }
 
+    // prefer discrete gpu on laptop
+    app.commandLine.appendSwitch('force_high_performance_gpu');
     // disable view scaling on hidpi
     app.commandLine.appendSwitch('high-dpi-support', '1');
     app.commandLine.appendSwitch('force-device-scale-factor', '1');
