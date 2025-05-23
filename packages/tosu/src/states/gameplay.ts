@@ -508,7 +508,7 @@ export class Gameplay extends AbstractState {
             const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.checksum}:${menu.mp3Length}`;
             const isUpdate = this.previousState !== currentState;
 
-            const commonOptions = {
+            const commonParams = {
                 mods: removeDebuffMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             };
@@ -519,33 +519,28 @@ export class Gameplay extends AbstractState {
                 !this.gradualPerformance ||
                 !this.performanceAttributes
             ) {
-                [this.gradualPerformance, this.performanceAttributes].forEach(
-                    (resource) => resource?.free()
-                );
+                this.gradualPerformance?.free();
+                this.performanceAttributes?.free();
 
-                const difficulty = new rosu.Difficulty(commonOptions);
+                const difficulty = new rosu.Difficulty(commonParams);
 
                 this.gradualPerformance = new rosu.GradualPerformance(
                     difficulty,
                     currentBeatmap
                 );
                 this.performanceAttributes = new rosu.Performance(
-                    commonOptions
+                    commonParams
                 ).calculate(currentBeatmap);
 
                 this.previousState = currentState;
             }
 
             if (!this.gradualPerformance || !this.performanceAttributes) {
-                const missingComponents = {
-                    gradualPerformance: !this.gradualPerformance,
-                    performanceAttributes: !this.performanceAttributes
-                };
                 wLogger.debug(
                     ClientType[this.game.client],
                     this.game.pid,
-                    'gameplay updateStarsAndPerformance: Missing required components',
-                    JSON.stringify(missingComponents)
+                    `gameplay updateStarsAndPerformance One of the things not ready`,
+                    `gradual: ${this.gradualPerformance === undefined} - attributes: ${this.performanceAttributes === undefined}`
                 );
                 return;
             }
@@ -618,23 +613,23 @@ export class Gameplay extends AbstractState {
                     this.performanceAttributes.state?.osuSmallTickHits,
                 largeTickHits:
                     this.performanceAttributes.state?.osuLargeTickHits,
-                ...commonOptions
+                ...commonParams
             };
 
-            const fcPerformance = new rosu.Performance({
-                ...calcOptions,
-                misses: 0
-            }).calculate(this.performanceAttributes);
+            calcOptions.misses = 0;
+            const fcPerformance = new rosu.Performance(calcOptions).calculate(
+                this.performanceAttributes
+            );
 
             if (fcPerformance) {
                 beatmapPP.currAttributes.fcPP = fcPerformance.pp;
                 beatmapPP.updatePPAttributes('fc', fcPerformance);
             }
 
-            const maxAchievablePerformance = new rosu.Performance({
-                ...calcOptions,
-                misses: this.hitMiss
-            }).calculate(this.performanceAttributes);
+            calcOptions.misses = this.hitMiss;
+            const maxAchievablePerformance = new rosu.Performance(
+                calcOptions
+            ).calculate(this.performanceAttributes);
 
             if (maxAchievablePerformance) {
                 beatmapPP.currAttributes.maxAchievable =
