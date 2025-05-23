@@ -1,4 +1,4 @@
-import rosu from '@kotrikd/rosu-pp';
+import rosu, { PerformanceArgs } from '@kotrikd/rosu-pp';
 import { ClientType, config, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
@@ -508,39 +508,44 @@ export class Gameplay extends AbstractState {
             const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.checksum}:${menu.mp3Length}`;
             const isUpdate = this.previousState !== currentState;
 
+            const commonOptions = {
+                mods: removeDebuffMods(this.mods.array),
+                lazer: this.game.client === ClientType.lazer
+            };
+
             // update precalculated attributes
             if (
                 isUpdate ||
                 !this.gradualPerformance ||
                 !this.performanceAttributes
             ) {
-                if (this.gradualPerformance) this.gradualPerformance.free();
-                if (this.performanceAttributes)
-                    this.performanceAttributes.free();
+                [this.gradualPerformance, this.performanceAttributes].forEach(
+                    (resource) => resource?.free()
+                );
 
-                const difficulty = new rosu.Difficulty({
-                    mods: removeDebuffMods(this.mods.array),
-                    lazer: this.game.client === ClientType.lazer
-                });
+                const difficulty = new rosu.Difficulty(commonOptions);
+
                 this.gradualPerformance = new rosu.GradualPerformance(
                     difficulty,
                     currentBeatmap
                 );
-
-                this.performanceAttributes = new rosu.Performance({
-                    mods: removeDebuffMods(this.mods.array),
-                    lazer: this.game.client === ClientType.lazer
-                }).calculate(currentBeatmap);
+                this.performanceAttributes = new rosu.Performance(
+                    commonOptions
+                ).calculate(currentBeatmap);
 
                 this.previousState = currentState;
             }
 
             if (!this.gradualPerformance || !this.performanceAttributes) {
+                const missingComponents = {
+                    gradualPerformance: !this.gradualPerformance,
+                    performanceAttributes: !this.performanceAttributes
+                };
                 wLogger.debug(
                     ClientType[this.game.client],
                     this.game.pid,
-                    `gameplay updateStarsAndPerformance One of the things not ready`,
-                    `gradual: ${this.gradualPerformance === undefined} - attributes: ${this.performanceAttributes === undefined}`
+                    'gameplay updateStarsAndPerformance: Missing required components',
+                    JSON.stringify(missingComponents)
                 );
                 return;
             }
@@ -558,52 +563,21 @@ export class Gameplay extends AbstractState {
             const offset = passedObjects - this.previousPassedObjects;
             if (offset <= 0) return;
 
-            const scoreParams: rosu.ScoreState = {
-                maxCombo: this.maxCombo,
-                misses: this.hitMiss,
-                n50: this.hit50,
-                n100: this.hit100,
-                n300: this.hit300,
-                nKatu: this.hitKatu,
-                nGeki: this.hitGeki,
-                sliderEndHits: this.sliderEndHits,
-                osuSmallTickHits: this.smallTickHits,
-                osuLargeTickHits: this.largeTickHits
-            };
-
             const currPerformance = this.gradualPerformance.nth(
-                scoreParams,
+                {
+                    maxCombo: this.maxCombo,
+                    misses: this.hitMiss,
+                    n50: this.hit50,
+                    n100: this.hit100,
+                    n300: this.hit300,
+                    nKatu: this.hitKatu,
+                    nGeki: this.hitGeki,
+                    sliderEndHits: this.sliderEndHits,
+                    osuSmallTickHits: this.smallTickHits,
+                    osuLargeTickHits: this.largeTickHits
+                },
                 offset - 1
             );
-
-            const fcPerformance = new rosu.Performance({
-                mods: removeDebuffMods(this.mods.array),
-                misses: 0,
-                accuracy: this.accuracy,
-                lazer: this.game.client === ClientType.lazer
-            }).calculate(this.performanceAttributes);
-
-            const maxAchievablePerformance = new rosu.Performance({
-                combo: Math.max(
-                    this.maxCombo,
-                    this.performanceAttributes.state?.maxCombo! - this.lostCombo
-                ),
-                n300:
-                    this.performanceAttributes.state?.maxCombo! -
-                    this.hit100 -
-                    this.hit50 -
-                    this.hitMiss,
-                n100: this.hit100,
-                n50: this.hit50,
-                misses: this.hitMiss,
-                smallTickHits:
-                    this.performanceAttributes.state?.osuSmallTickHits,
-                largeTickHits:
-                    this.performanceAttributes.state?.osuLargeTickHits,
-                mods: removeDebuffMods(this.mods.array),
-                lazer: this.game.client === ClientType.lazer
-            }).calculate(this.performanceAttributes);
-            const t2 = performance.now();
 
             if (currPerformance) {
                 beatmapPP.updateCurrentAttributes(
@@ -614,10 +588,53 @@ export class Gameplay extends AbstractState {
                 beatmapPP.updatePPAttributes('curr', currPerformance);
             }
 
+            const isMania = this.mode === 3;
+            const maxBeatmapCombo = (
+                isMania
+                    ? this.performanceAttributes.state?.nGeki
+                    : this.performanceAttributes.state?.maxCombo
+            )!;
+
+            const calcOptions: PerformanceArgs = {
+                combo: Math.max(
+                    this.maxCombo,
+                    maxBeatmapCombo - this.lostCombo
+                ),
+                nGeki: isMania
+                    ? maxBeatmapCombo -
+                      this.hit300 -
+                      this.hitKatu -
+                      this.hit100 -
+                      this.hit50 -
+                      this.hitMiss
+                    : 0,
+                n300: isMania
+                    ? this.hit300
+                    : maxBeatmapCombo - this.hit100 - this.hit50 - this.hitMiss,
+                nKatu: this.hitKatu,
+                n100: this.hit100,
+                n50: this.hit50,
+                smallTickHits:
+                    this.performanceAttributes.state?.osuSmallTickHits,
+                largeTickHits:
+                    this.performanceAttributes.state?.osuLargeTickHits,
+                ...commonOptions
+            };
+
+            const fcPerformance = new rosu.Performance({
+                ...calcOptions,
+                misses: 0
+            }).calculate(this.performanceAttributes);
+
             if (fcPerformance) {
                 beatmapPP.currAttributes.fcPP = fcPerformance.pp;
                 beatmapPP.updatePPAttributes('fc', fcPerformance);
             }
+
+            const maxAchievablePerformance = new rosu.Performance({
+                ...calcOptions,
+                misses: this.hitMiss
+            }).calculate(this.performanceAttributes);
 
             if (maxAchievablePerformance) {
                 beatmapPP.currAttributes.maxAchievable =
@@ -629,12 +646,11 @@ export class Gameplay extends AbstractState {
             }
 
             this.previousPassedObjects = passedObjects;
-
             wLogger.debug(
                 ClientType[this.game.client],
                 this.game.pid,
                 `gameplay updateStarsAndPerformance`,
-                `[${(t2 - t1).toFixed(2)}ms] elapsed time`
+                `[${(performance.now() - t1).toFixed(2)}ms] elapsed time`
             );
 
             this.resetReportCount('gameplay updateStarsAndPerformance');
