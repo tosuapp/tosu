@@ -13,7 +13,7 @@
   "author": "storycraft <storycraft@pancake.sh>",
   "dependencies": {
     "@jellybrick/wql-process-monitor": "^1.4.8",
-    "asdf-overlay-node": "^0.5.4",
+    "asdf-overlay-node": "^0.6.2",
     "tsprocess": "workspace:*"
   },
   "devDependencies": {
