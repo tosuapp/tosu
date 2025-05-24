@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.8.0](https://github.com/tosuapp/tosu/compare/v4.7.0...v4.8.0) (2025-05-24)
+
+
+### Features
+
+* update overlay, keybind ([be0f6e3](https://github.com/tosuapp/tosu/commit/be0f6e3701232aab3ee5d9e86e070dce538ef21b))
+
+
+### Bug Fixes
+
+* pp calc improvements ([28fefea](https://github.com/tosuapp/tosu/commit/28fefea01d2d1aed1f9a41581b35df2d16961681))
+* pp calc improvements ([4d38226](https://github.com/tosuapp/tosu/commit/4d38226007834b2a5763c27f2ed7080546851d0a))
+
 ## [4.7.0](https://github.com/tosuapp/tosu/compare/v4.6.0...v4.7.0) (2025-05-18)
 
 
