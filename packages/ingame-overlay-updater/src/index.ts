@@ -112,10 +112,10 @@ export const runOverlay = async () => {
                 wLogger.warn('[ingame-overlay] run error', err);
                 resolve(false);
             });
-            child.on('exit', (code) => {
+            child.on('exit', (code, signal) => {
                 if (code !== 0) {
                     wLogger.error(
-                        `[ingame-overlay] Unknown exit code: ${code}`
+                        `[ingame-overlay] Unknown exit code: ${code} ${signal ? `(${signal})` : ''}`
                     );
                     return;
                 }
