@@ -181,13 +181,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(address + 0x400) === this.gameBase();
     }
 
-    // Checks <leaderboardManager>k__BackingField and <StatisticsPanel>k__BackingField (to GameBase::<Storage>k__BackingField)
+    // Checks <api>k__BackingField -> GameBase::<API>k__BackingField and <logo>k__BackingField -> GameBase::osuLogo
     private checkIfResultScreen(address: number) {
         return (
-            this.process.readIntPtr(address + 0x408) ===
-                this.process.readIntPtr(this.gameBase() + 0x490) &&
-            this.process.readIntPtr(address + 0x348) !==
-                this.process.readIntPtr(this.gameBase() + 0x450)
+            this.process.readIntPtr(address + 0x410) ===
+                this.process.readIntPtr(this.gameBase() + 0x438) &&
+            this.process.readIntPtr(address + 0x380) ===
+                this.process.readIntPtr(this.gameBase() + 0x638)
         );
     }
 
