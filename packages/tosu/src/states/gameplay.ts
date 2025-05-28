@@ -602,7 +602,7 @@ export class Gameplay extends AbstractState {
                       this.hit100 -
                       this.hit50 -
                       this.hitMiss
-                    : 0,
+                    : this.hitGeki,
                 n300: isMania
                     ? this.hit300
                     : maxBeatmapCombo - this.hit100 - this.hit50 - this.hitMiss,
@@ -616,17 +616,6 @@ export class Gameplay extends AbstractState {
                 ...commonParams
             };
 
-            calcOptions.misses = 0;
-            const fcPerformance = new rosu.Performance(calcOptions).calculate(
-                this.performanceAttributes
-            );
-
-            if (fcPerformance) {
-                beatmapPP.currAttributes.fcPP = fcPerformance.pp;
-                beatmapPP.updatePPAttributes('fc', fcPerformance);
-            }
-
-            calcOptions.misses = this.hitMiss;
             const maxAchievablePerformance = new rosu.Performance(
                 calcOptions
             ).calculate(this.performanceAttributes);
@@ -638,6 +627,17 @@ export class Gameplay extends AbstractState {
                     'maxAchievable',
                     maxAchievablePerformance
                 );
+            }
+
+            calcOptions.misses = 0;
+            delete calcOptions.combo;
+            const fcPerformance = new rosu.Performance(calcOptions).calculate(
+                this.performanceAttributes
+            );
+
+            if (fcPerformance) {
+                beatmapPP.currAttributes.fcPP = fcPerformance.pp;
+                beatmapPP.updatePPAttributes('fc', fcPerformance);
             }
 
             this.previousPassedObjects = passedObjects;
