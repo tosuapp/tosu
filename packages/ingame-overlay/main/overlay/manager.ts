@@ -1,6 +1,5 @@
 import { promises as wql } from '@jellybrick/wql-process-monitor';
 import EventEmitter from 'node:events';
-import path from 'node:path';
 import { Process } from 'tsprocess';
 
 import { OverlayProcess } from './process';
@@ -43,8 +42,7 @@ export class OverlayManager {
         const signal = this.abortController.signal;
 
         const emitter = await wql.subscribe({
-            creation: true,
-            deletion: true
+            creation: true
         });
         emitter.on('creation', ([name, pid]) => {
             if (name === 'osu!.exe' || name === 'osulazer.exe') {
@@ -55,20 +53,6 @@ export class OverlayManager {
 
                 this.addOverlay(id);
             }
-        });
-        emitter.on('deletion', ([_, pid]) => {
-            Process.getProcessCommandLine(Number(pid)).then(
-                (cmdLine: string) => {
-                    // C:/tosu/tosu.exe -> C:/tosu -> C:/tosu/game-overlay
-                    if (
-                        path.join(cmdLine, '..', 'game-overlay') ===
-                        process.cwd()
-                    ) {
-                        // Exit overlay if tosu is closed
-                        process.exit(0);
-                    }
-                }
-            );
         });
 
         const osuProcesses = Process.findProcesses([
