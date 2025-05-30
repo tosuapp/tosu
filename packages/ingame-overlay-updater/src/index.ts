@@ -92,7 +92,12 @@ export async function runOverlay(): Promise<ChildProcess> {
             detached: false,
             stdio: ['ignore', 'overlapped', 'overlapped'],
             windowsHide: true,
-            shell: false
+            shell: false,
+            env: {
+                // Force nvidia optimus to prefer dedicated gpu
+                SHIM_MCCOMPAT: '0x800000001',
+                ...process.env
+            }
         }
     );
 
