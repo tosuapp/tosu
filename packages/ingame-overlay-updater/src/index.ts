@@ -3,7 +3,6 @@ import {
     downloadFile,
     getProgramPath,
     platformResolver,
-    sleep,
     unzip,
     wLogger
 } from '@tosu/common';
@@ -91,9 +90,6 @@ export const runOverlay = async () => {
 
             wLogger.info('[ingame-overlay] Ingame overlay downloaded');
         }
-
-        // dum sleep to wait until all osu libraries are loaded?
-        await sleep(1000 * 3);
 
         wLogger.warn(`[ingame-overlay] Starting...`);
         return new Promise((resolve) => {
