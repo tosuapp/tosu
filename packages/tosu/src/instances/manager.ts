@@ -145,14 +145,14 @@ export class InstanceManager {
     }
 
     async runWatcher() {
-        for (;;) {
+        while (true) {
             await this.handleProcesses();
             await setTimeout(1000);
         }
     }
 
     async runDetemination() {
-        for (;;) {
+        while (true) {
             if (!this.platformType) {
                 const platform = platformResolver(process.platform);
                 this.platformType = platform.type;
