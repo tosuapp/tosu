@@ -150,14 +150,11 @@ const app = createApp({
     const max_width = ref(window.innerWidth);
     const max_height = ref(window.innerHeight);
     const cursor = ref({
-      type: 'arrow',
-      x: 0,
-      y: 0,
+      type: 'default'
     });
 
     const empty_ctx = ref(null);
     const overlay_ctx = ref(null);
-    const cursor_ctx = ref(null);
 
 
 
@@ -195,8 +192,8 @@ const app = createApp({
 
 
     watch(settings, settings_debounce);
-    watch(cursor_ctx, v=> {
-       if (v) v.style.opacity = 0;
+    watchEffect(() => {
+      document.body.style.cursor = cursor.value.type;
     });
     watchEffect(() => {
       document.body.style.setProperty('--w', `${max_width.value}px`);
@@ -271,8 +268,6 @@ const app = createApp({
       else if (is_left || is_right) cursor.value.type = 'ew-resize';
       else if (is_top || is_bottom) cursor.value.type = 'ns-resize';
       else cursor.value.type = 'move';
-
-      document.body.style.cursor = cursor.value.type;
 
       if (is_resizing) return;
 
@@ -417,9 +412,6 @@ const app = createApp({
 
 
     window.addEventListener('mousemove', (event) => {
-      cursor.value.x = event.clientX;
-      cursor.value.y = event.clientY;
-
       if (is_resizing) return resizing(event);
       if (!is_dragging) return;
 
@@ -706,7 +698,7 @@ const app = createApp({
 
     function reset_hover() {
       hovered_index = -1;
-      cursor.value.type = 'arrow';
+      cursor.value.type = 'default';
     };
 
 
@@ -746,7 +738,7 @@ const app = createApp({
 
     return {
       max_width, max_height, cursor,
-      empty_ctx, overlay_ctx, cursor_ctx,
+      empty_ctx, overlay_ctx,
       available_overlays, overlays,
       context_empty, context_overlay,
       side_decide, enable_drag, stop_drag,

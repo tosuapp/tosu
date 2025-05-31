@@ -93,21 +93,6 @@ body.-editing {
     .overlay iframe {
         outline-color: var(--text-1);
     }
-
-    .custom-cursor {
-        opacity: 1;
-    }
-}
-
-.custom-cursor {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    background-size: cover;
-    pointer-events: none;
-    opacity: 0;
-    z-index: 10000;
-    transition: opacity 0.3s ease;
 }
 
 main.main {
