@@ -16,11 +16,6 @@
 
   <body class="ingame">
     <main class="main">
-      <div class="custom-cursor" :style="{
-        top: `${cursor.y}px`,
-        left: `${cursor.x}px`,
-        backgroundImage: `url('/assets/images/${cursor.type}.png')` 
-      }" ref="cursor_ctx"></div>
       <div
         v-if="context_empty._"
         class="context-menu ao"
