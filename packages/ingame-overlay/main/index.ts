@@ -15,6 +15,9 @@ import { OverlayManager } from './overlay/manager';
 
 async function main() {
     if (!app.requestSingleInstanceLock()) {
+        console.error(
+            'Ingame overlay is already running. Please check tray icon'
+        );
         return;
     }
 

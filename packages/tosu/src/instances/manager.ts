@@ -7,6 +7,8 @@ import {
     wLogger
 } from '@tosu/common';
 import { runOverlay } from '@tosu/ingame-overlay-updater';
+import { ChildProcess } from 'node:child_process';
+import { setTimeout } from 'node:timers/promises';
 import { Process } from 'tsprocess';
 
 import { AbstractInstance } from '@/instances';
@@ -22,13 +24,10 @@ export class InstanceManager {
         [key: number]: AbstractInstance;
     };
 
-    overlayStarted: boolean = false;
+    private overlayProcess: ChildProcess | null = null;
 
     constructor() {
         this.osuInstances = {};
-
-        this.runWatcher = this.runWatcher.bind(this);
-        this.runDetemination = this.runDetemination.bind(this);
     }
 
     /**
@@ -67,7 +66,7 @@ export class InstanceManager {
         delete this.osuInstances[pid];
     }
 
-    private handleProcesses() {
+    private async handleProcesses() {
         try {
             let osuProcesses = Process.findProcesses([
                 'osu!.exe',
@@ -134,10 +133,10 @@ export class InstanceManager {
 
             if (
                 config.enableIngameOverlay &&
-                !this.overlayStarted &&
+                !this.overlayProcess &&
                 Object.keys(this.osuInstances).length > 0
             ) {
-                this.startOverlay();
+                await this.startOverlay();
             }
         } catch (exc) {
             wLogger.error('[manager]', 'handleProcesses', (exc as any).message);
@@ -145,36 +144,62 @@ export class InstanceManager {
         }
     }
 
-    runWatcher() {
-        this.handleProcesses();
-
-        setTimeout(this.runWatcher, 1000);
+    async runWatcher() {
+        while (true) {
+            await this.handleProcesses();
+            await setTimeout(1000);
+        }
     }
 
-    runDetemination() {
-        if (!this.platformType) {
-            const platform = platformResolver(process.platform);
-            this.platformType = platform.type;
+    async runDetemination() {
+        while (true) {
+            if (!this.platformType) {
+                const platform = platformResolver(process.platform);
+                this.platformType = platform.type;
+            }
+
+            if (this.platformType !== 'windows') return;
+
+            const focusedPID = Process.getFocusedProcess();
+            const instance = Object.values(this.osuInstances).find(
+                (r) => r.pid === focusedPID
+            );
+            if (instance) this.focusedClient = instance.client;
+
+            if (this.focusedClient === undefined) {
+                this.focusedClient =
+                    this.getInstance()?.client || ClientType.stable;
+            }
+
+            await setTimeout(100);
         }
-
-        if (this.platformType !== 'windows') return;
-
-        const focusedPID = Process.getFocusedProcess();
-        const instance = Object.values(this.osuInstances).find(
-            (r) => r.pid === focusedPID
-        );
-        if (instance) this.focusedClient = instance.client;
-
-        if (this.focusedClient === undefined) {
-            this.focusedClient =
-                this.getInstance()?.client || ClientType.stable;
-        }
-
-        setTimeout(this.runDetemination, 100);
     }
 
-    startOverlay() {
-        runOverlay();
-        this.overlayStarted = true;
+    async startOverlay() {
+        try {
+            const child = await runOverlay();
+            child.on('error', (err) => {
+                this.overlayProcess = null;
+                wLogger.warn('[ingame-overlay]', 'run error', err);
+            });
+
+            child.on('exit', (code, signal) => {
+                this.overlayProcess = null;
+                if (code !== 0) {
+                    wLogger.error(
+                        '[ingame-overlay]',
+                        `Unknown exit code: ${code} ${signal ? `(${signal})` : ''}`
+                    );
+                    return;
+                }
+
+                wLogger.warn('[ingame-overlay]', 'Exited...');
+            });
+
+            this.overlayProcess = child;
+        } catch (exc) {
+            wLogger.error('[ingame-overlay]', (exc as any).message);
+            wLogger.debug('[ingame-overlay]', exc);
+        }
     }
 }
