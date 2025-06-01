@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.9.0](https://github.com/tosuapp/tosu/compare/v4.8.0...v4.9.0) (2025-06-01)
+
+
+### Features
+
+* force nvidia optimus to prefer dedicated gpu ([2d87d31](https://github.com/tosuapp/tosu/commit/2d87d31b4cb6c2c71b212d0fc883ea83d8533774))
+* redirect overlay logs to tosu console, properly start overlay process when overlay is not running ([0b40334](https://github.com/tosuapp/tosu/commit/0b40334d8843a978f21a2f0e3d4f6b344c7ccbb6))
+
+
+### Bug Fixes
+
+* Fixing pp fix ([43c047c](https://github.com/tosuapp/tosu/commit/43c047c0e470b23851bcdc15e5de30ae5df324b4))
+* in-game overlay crashing with no code. ([f370ad9](https://github.com/tosuapp/tosu/commit/f370ad9ef42936b53221be0747527c5a829aba69))
+* ingame overlay cursor ([1a393d0](https://github.com/tosuapp/tosu/commit/1a393d08c67a7df68d8d929d4f0a52c8c0e0c230))
+* update checkIfResultScreen ([816b339](https://github.com/tosuapp/tosu/commit/816b3392b1104dd51ad6b347871e2672d536dd0f))
+
 ## [4.8.0](https://github.com/tosuapp/tosu/compare/v4.7.0...v4.8.0) (2025-05-24)
 
 
