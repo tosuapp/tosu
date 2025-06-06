@@ -605,7 +605,12 @@ export class Gameplay extends AbstractState {
                     : this.hitGeki,
                 n300: isMania
                     ? this.hit300
-                    : maxBeatmapCombo - this.hit100 - this.hit50 - this.hitMiss,
+                    : maxBeatmapCombo -
+                      this.hit100 -
+                      this.hit50 -
+                      this.hitMiss -
+                      this.hitKatu -
+                      this.hitGeki,
                 nKatu: this.hitKatu,
                 n100: this.hit100,
                 n50: this.hit50,
