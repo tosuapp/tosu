@@ -137,7 +137,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             // might potentially change
-            return this.process.readLong(vtable) === 7696598171648;
+            return this.process.readLong(vtable) === 7730957910016;
         } catch {
             return false;
         }
@@ -1001,7 +1001,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const player = this.player();
         const scoreInfo = this.scoreInfo(player);
 
-        const healthProcessor = this.process.readIntPtr(player + 0x440);
+        const healthProcessor = this.process.readIntPtr(player + 0x450);
 
         const healthBindable = this.process.readIntPtr(healthProcessor + 0x230);
         const health = this.process.readDouble(healthBindable + 0x40); // 0..1
