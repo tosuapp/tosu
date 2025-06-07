@@ -545,12 +545,12 @@ export class Gameplay extends AbstractState {
 
             const passedObjects = calculatePassedObjects(
                 this.mode,
+                this.hitGeki,
                 this.hit300,
+                this.hitKatu,
                 this.hit100,
                 this.hit50,
-                this.hitMiss,
-                this.hitKatu,
-                this.hitGeki
+                this.hitMiss
             );
 
             const offset = passedObjects - this.previousPassedObjects;
@@ -558,16 +558,16 @@ export class Gameplay extends AbstractState {
 
             const currPerformance = this.gradualPerformance.nth(
                 {
-                    maxCombo: this.maxCombo,
-                    misses: this.hitMiss,
-                    n50: this.hit50,
-                    n100: this.hit100,
+                    nGeki: this.hitGeki,
                     n300: this.hit300,
                     nKatu: this.hitKatu,
-                    nGeki: this.hitGeki,
+                    n100: this.hit100,
+                    n50: this.hit50,
+                    misses: this.hitMiss,
                     sliderEndHits: this.sliderEndHits,
                     osuSmallTickHits: this.smallTickHits,
-                    osuLargeTickHits: this.largeTickHits
+                    osuLargeTickHits: this.largeTickHits,
+                    maxCombo: this.maxCombo
                 },
                 offset - 1
             );
@@ -581,42 +581,36 @@ export class Gameplay extends AbstractState {
                 beatmapPP.updatePPAttributes('curr', currPerformance);
             }
 
-            const isMania = this.mode === 3;
-            const HighestMaxJudgement = (
-                isMania
-                    ? this.performanceAttributes.state!.nGeki
-                    : this.performanceAttributes.state!.n300
-            )!;
+            const maxJudgementsAmount =
+                beatmapPP.calculatedMapAttributes.circles +
+                beatmapPP.calculatedMapAttributes.sliders +
+                beatmapPP.calculatedMapAttributes.spinners +
+                beatmapPP.calculatedMapAttributes.holds;
 
             const calcOptions: PerformanceArgs = {
-                combo: Math.max(
-                    this.performanceAttributes.state?.maxCombo ??
-                        0 - this.lostCombo,
-                    this.maxCombo
-                ),
-                nGeki: isMania
-                    ? HighestMaxJudgement -
-                      this.hit300 -
-                      this.hitKatu -
-                      this.hit100 -
-                      this.hit50 -
-                      this.hitMiss
-                    : this.hitGeki,
-                n300: isMania
-                    ? this.hit300
-                    : HighestMaxJudgement -
-                      this.hit100 -
-                      this.hit50 -
-                      this.hitMiss,
+                nGeki: this.hitGeki,
+                n300:
+                    maxJudgementsAmount -
+                    this.hit100 -
+                    this.hit50 -
+                    this.hitMiss,
                 nKatu: this.hitKatu,
                 n100: this.hit100,
                 n50: this.hit50,
-                smallTickHits:
-                    this.performanceAttributes.state?.osuSmallTickHits,
-                largeTickHits:
-                    this.performanceAttributes.state?.osuLargeTickHits,
+                misses: this.hitMiss,
+                sliderEndHits: this.sliderEndHits,
+                smallTickHits: this.smallTickHits,
+                largeTickHits: this.largeTickHits,
                 ...commonParams
             };
+            if (this.mode === 3) {
+                calcOptions.nGeki =
+                    maxJudgementsAmount -
+                    this.hit300 -
+                    this.hitKatu -
+                    this.hit100;
+                calcOptions.n300 = this.hit300;
+            }
 
             const maxAchievablePerformance = new rosu.Performance(
                 calcOptions
@@ -631,8 +625,17 @@ export class Gameplay extends AbstractState {
                 );
             }
 
+            if (this.mode === 3)
+                delete calcOptions.combo; // mania doesn't have a proper max combo value
+            else calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;
+            calcOptions.sliderEndHits =
+                this.performanceAttributes.state?.sliderEndHits;
+            calcOptions.smallTickHits =
+                this.performanceAttributes.state?.osuSmallTickHits;
+            calcOptions.largeTickHits =
+                this.performanceAttributes.state?.osuLargeTickHits;
             calcOptions.misses = 0;
-            delete calcOptions.combo;
+
             const fcPerformance = new rosu.Performance(calcOptions).calculate(
                 this.performanceAttributes
             );
