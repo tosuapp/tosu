@@ -35,7 +35,6 @@ export class Gameplay extends AbstractState {
     mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
     hitErrors: number[];
     mode: number;
-    lostCombo: number;
     maxCombo: number;
     score: number;
     hit100: number;
@@ -85,7 +84,6 @@ export class Gameplay extends AbstractState {
 
         this.hitErrors = [];
         this.maxCombo = 0;
-        this.lostCombo = 0;
         this.score = 0;
         this.hit100 = 0;
         this.hit300 = 0;
@@ -251,9 +249,11 @@ export class Gameplay extends AbstractState {
             if (this.comboPrev > this.maxCombo) {
                 this.comboPrev = 0;
             }
-            if (this.combo < this.comboPrev) {
-                this.lostCombo += this.comboPrev;
-                if (this.hitMiss === this.hitMissPrev) this.hitSB += 1;
+            if (
+                this.combo < this.comboPrev &&
+                this.hitMiss === this.hitMissPrev
+            ) {
+                this.hitSB += 1;
             }
             this.hitMissPrev = this.hitMiss;
             this.comboPrev = this.combo;
@@ -545,12 +545,12 @@ export class Gameplay extends AbstractState {
 
             const passedObjects = calculatePassedObjects(
                 this.mode,
-                this.hitGeki,
                 this.hit300,
-                this.hitKatu,
                 this.hit100,
                 this.hit50,
-                this.hitMiss
+                this.hitMiss,
+                this.hitKatu,
+                this.hitGeki
             );
 
             const offset = passedObjects - this.previousPassedObjects;
@@ -601,6 +601,7 @@ export class Gameplay extends AbstractState {
                 sliderEndHits: this.sliderEndHits,
                 smallTickHits: this.smallTickHits,
                 largeTickHits: this.largeTickHits,
+                combo: this.maxCombo,
                 ...commonParams
             };
             if (this.mode === 3) {
@@ -610,6 +611,7 @@ export class Gameplay extends AbstractState {
                     this.hitKatu -
                     this.hit100;
                 calcOptions.n300 = this.hit300;
+                delete calcOptions.combo;
             }
 
             const maxAchievablePerformance = new rosu.Performance(
@@ -625,9 +627,8 @@ export class Gameplay extends AbstractState {
                 );
             }
 
-            if (this.mode === 3)
-                delete calcOptions.combo; // mania doesn't have a proper max combo value
-            else calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;
+            if (this.mode !== 3)
+                calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;
             calcOptions.sliderEndHits =
                 this.performanceAttributes.state?.sliderEndHits;
             calcOptions.smallTickHits =
