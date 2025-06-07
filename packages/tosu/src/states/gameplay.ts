@@ -524,10 +524,8 @@ export class Gameplay extends AbstractState {
 
                 const difficulty = new rosu.Difficulty(commonParams);
 
-                this.gradualPerformance = new rosu.GradualPerformance(
-                    difficulty,
-                    currentBeatmap
-                );
+                this.gradualPerformance =
+                    difficulty.gradualPerformance(currentBeatmap);
                 this.performanceAttributes = new rosu.Performance(
                     commonParams
                 ).calculate(currentBeatmap);
