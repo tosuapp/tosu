@@ -582,19 +582,20 @@ export class Gameplay extends AbstractState {
             }
 
             const isMania = this.mode === 3;
-            const maxBeatmapCombo = (
+            const HighestMaxJudgement = (
                 isMania
-                    ? this.performanceAttributes.state?.nGeki
-                    : this.performanceAttributes.state?.maxCombo
+                    ? this.performanceAttributes.state!.nGeki
+                    : this.performanceAttributes.state!.n300
             )!;
 
             const calcOptions: PerformanceArgs = {
                 combo: Math.max(
-                    this.maxCombo,
-                    maxBeatmapCombo - this.lostCombo
+                    this.performanceAttributes.state?.maxCombo ??
+                        0 - this.lostCombo,
+                    this.maxCombo
                 ),
                 nGeki: isMania
-                    ? maxBeatmapCombo -
+                    ? HighestMaxJudgement -
                       this.hit300 -
                       this.hitKatu -
                       this.hit100 -
@@ -603,12 +604,10 @@ export class Gameplay extends AbstractState {
                     : this.hitGeki,
                 n300: isMania
                     ? this.hit300
-                    : maxBeatmapCombo -
+                    : HighestMaxJudgement -
                       this.hit100 -
                       this.hit50 -
-                      this.hitMiss -
-                      this.hitKatu -
-                      this.hitGeki,
+                      this.hitMiss,
                 nKatu: this.hitKatu,
                 n100: this.hit100,
                 n50: this.hit50,
