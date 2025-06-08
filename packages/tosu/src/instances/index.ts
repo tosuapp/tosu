@@ -1,4 +1,4 @@
-import { Bitness, ClientType, config, wLogger } from '@tosu/common';
+import { Bitness, ClientType, config, sleep, wLogger } from '@tosu/common';
 import EventEmitter from 'events';
 import { Process } from 'tsprocess';
 
@@ -193,30 +193,28 @@ export abstract class AbstractInstance {
     }
 
     initiateDataLoops() {
-        const { global, gameplay } = this.getServices(['global', 'gameplay']);
-
         this.regularDataLoop();
-        this.preciseDataLoop(global, gameplay);
+        this.preciseDataLoop();
     }
 
     abstract regularDataLoop(): void;
-    abstract preciseDataLoop(global: Global, gameplay: Gameplay): void;
+    abstract preciseDataLoop(): void;
 
-    watchProcessHealth() {
-        if (this.isDestroyed === true) return;
+    async watchProcessHealth() {
+        while (!this.isDestroyed) {
+            if (!Process.isProcessExist(this.process.handle)) {
+                wLogger.warn(
+                    ClientType[this.client],
+                    this.pid,
+                    'osu!.exe got destroyed'
+                );
 
-        if (!Process.isProcessExist(this.process.handle)) {
-            wLogger.warn(
-                ClientType[this.client],
-                this.pid,
-                'osu!.exe got destroyed'
-            );
+                this.emitter.emit('onDestroy', this.pid);
+                this.isDestroyed = true;
+            }
 
-            this.emitter.emit('onDestroy', this.pid);
-            this.isDestroyed = true;
+            await sleep(config.pollRate);
         }
-
-        setTimeout(this.watchProcessHealth, config.pollRate);
     }
 
     setTourneyIpcId(ipcId: number) {
