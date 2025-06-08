@@ -302,9 +302,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 case LazerSettings.ScoreDisplayMode:
                     config[key] = this.process.readInt(valueAddress);
                     break;
-                case LazerSettings.Skin:
-                    config[key] = this.process.readSharpString(valueAddress);
-                    break;
                 default:
                     continue;
             }
