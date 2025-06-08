@@ -1,4 +1,4 @@
-import { config, wLogger } from '@tosu/common';
+import { ClientType, config, isAllowedValue, wLogger } from '@tosu/common';
 
 import { AbstractMemory } from '@/memory';
 import type {
@@ -15,7 +15,7 @@ import type {
     IMenu,
     IOffsets,
     IResultScreen,
-    ISettingsPointers,
+    ISettings,
     ITourney,
     ITourneyChat,
     ITourneyUser,
@@ -24,9 +24,14 @@ import type {
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { LeaderboardPlayer } from '@/states/types';
+import { Bindings } from '@/utils/bindings';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
-import type { BindingsList, ConfigList } from '@/utils/settings.types';
+import type {
+    BindingsList,
+    ConfigList,
+    SettingsObject
+} from '@/utils/settings.types';
 
 export type OsuPatternData = {
     baseAddr: number;
@@ -45,6 +50,60 @@ export type OsuPatternData = {
     rawLoginStatusPtr: number;
     spectatingUserPtr: number;
     gameTimePtr: number;
+};
+
+const configList: ConfigList = {
+    VolumeUniversal: ['int', 'audio.volume.master'],
+    VolumeEffect: ['int', 'audio.volume.effect'],
+    VolumeMusic: ['int', 'audio.volume.music'],
+    _ReleaseStream: ['enum', 'client.branch'],
+    DimLevel: ['int', 'background.dim'],
+    ShowStoryboard: ['bool', 'background.storyboard'],
+    ScoreMeter: ['enum', 'scoreMeter.type'],
+    ScoreMeterScale: ['double', 'scoreMeter.size'],
+    Offset: ['int', 'audio.offset.universal'],
+    CursorSize: ['double', 'cursor.size'],
+    MouseSpeed: ['double', 'mouse.sensitivity'],
+    Fullscreen: ['bool', 'resolution.fullscreen'],
+    Width: ['int', 'resolution.width'],
+    Height: ['int', 'resolution.height'],
+    WidthFullscreen: ['int', 'resolution.widthFullscreen'],
+    HeightFullscreen: ['int', 'resolution.heightFullscreen'],
+    AutomaticCursorSizing: ['bool', 'cursor.autoSize'],
+    IgnoreBeatmapSamples: ['bool', 'audio.ignoreBeatmapSounds'],
+    SkinSamples: ['bool', 'audio.useSkinSamples'],
+    LastVersion: ['bstring', 'client.version'],
+    ManiaSpeedBPMScale: ['bool', 'mania.speedBPMScale'],
+    UsePerBeatmapManiaSpeed: ['bool', 'mania.usePerBeatmapSpeedScale'],
+    MouseDisableButtons: ['bool', 'mouse.disableButtons'],
+    MouseDisableWheel: ['bool', 'mouse.disableWheel'],
+    ProgressBarType: ['enum', 'progressBarType'],
+    RankType: ['enum', 'leaderboardType'],
+    UpdatePending: ['bool', 'client.updateAvailable'],
+
+    UseSkinCursor: ['bool', 'cursor.useSkinCursor'],
+    RawInput: ['bool', 'mouse.rawInput'],
+    TreeSortMode: ['enum', 'groupType'],
+    TreeSortMode2: ['enum', 'sortType'],
+    EditorDefaultSkin: ['bool', 'skin.useDefaultSkinInEditor'],
+    ComboColourSliderBall: ['bool', 'skin.tintSliderBall'],
+    IgnoreBeatmapSkins: ['bool', 'skin.ignoreBeatmapSkins'],
+    Skin: ['bstring', 'skin.name'],
+    UseTaikoSkin: ['bool', 'skin.useTaikoSkin']
+};
+
+const bindingList: BindingsList = {
+    [Bindings.OsuLeft]: ['int', 'keybinds.osu.k1'],
+    [Bindings.OsuRight]: ['int', 'keybinds.osu.k2'],
+    [Bindings.OsuSmoke]: ['int', 'keybinds.osu.smokeKey'],
+    [Bindings.FruitsDash]: ['int', 'keybinds.fruits.Dash'],
+    [Bindings.FruitsLeft]: ['int', 'keybinds.fruits.k1'],
+    [Bindings.FruitsRight]: ['int', 'keybinds.fruits.k2'],
+    [Bindings.TaikoInnerLeft]: ['int', 'keybinds.taiko.innerLeft'],
+    [Bindings.TaikoInnerRight]: ['int', 'keybinds.taiko.innerRight'],
+    [Bindings.TaikoOuterLeft]: ['int', 'keybinds.taiko.outerLeft'],
+    [Bindings.TaikoOuterRight]: ['int', 'keybinds.taiko.outerRight'],
+    [Bindings.QuickRetry]: ['int', 'keybinds.quickRetry']
 };
 
 export class StableMemory extends AbstractMemory<OsuPatternData> {
@@ -136,6 +195,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
     previousMP3Length: number = 0;
     previousTime: number = 0;
 
+    configPositions: number[] = [];
+    bindingPositions: number[] = [];
+
     getScanPatterns(): ScanPatterns {
         return this.scanPatterns;
     }
@@ -218,26 +280,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    settingsPointers(): ISettingsPointers {
-        try {
-            const { configurationAddr, bindingsAddr } = this.getPatterns([
-                'configurationAddr',
-                'bindingsAddr'
-            ]);
-
-            const configPointer = this.process.readPointer(configurationAddr);
-            const bindingPointer = this.process.readPointer(bindingsAddr);
-
-            return {
-                config: configPointer,
-                binding: bindingPointer
-            };
-        } catch (error) {
-            return error as Error;
-        }
-    }
-
-    configOffsets(address: number, list: ConfigList): IOffsets {
+    configOffsets(address: number): IOffsets {
         try {
             const result: number[] = [];
 
@@ -250,7 +293,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     const keyAddress = this.process.readInt(current);
                     const key = this.process.readSharpString(keyAddress);
 
-                    if (!(key in list)) {
+                    if (!(key in configList)) {
                         continue;
                     }
 
@@ -266,7 +309,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    bindingsOffsets(address: number, list: BindingsList): IOffsets {
+    bindingsOffsets(address: number): IOffsets {
         try {
             const result: number[] = [];
 
@@ -276,7 +319,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 const current = rawSharpDictionary[i];
                 try {
                     const key = this.process.readInt(current);
-                    if (!(key in list)) {
+                    if (!(key in bindingList)) {
                         continue;
                     }
 
@@ -292,11 +335,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    configValue(
-        address: number,
-        position: number,
-        list: ConfigList
-    ): IConfigValue {
+    configValue(address: number, position: number): IConfigValue {
         try {
             const offset =
                 this.process.readInt(address + 0x8) + 0x8 + 0x10 * position;
@@ -305,12 +344,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const key = this.process.readSharpString(keyAddress);
             const bindable = this.process.readInt(offset + 0x4);
 
-            if (!list[key]) {
+            if (!configList[key]) {
                 return null;
             }
 
             let value: any;
-            switch (list[key].type) {
+            switch (configList[key]?.[0]) {
                 case 'byte':
                     value = this.process.readByte(bindable + 0xc);
                     break;
@@ -1181,5 +1220,103 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             position: this.process.readInt(base + 0x2c),
             isPassing: Boolean(this.process.readByte(base + 0x4b))
         };
+    }
+
+    settings(): ISettings {
+        try {
+            const { configurationAddr: asd, bindingsAddr } = this.getPatterns([
+                'configurationAddr',
+                'bindingsAddr'
+            ]);
+
+            const configPointer = this.process.readPointer(asd);
+            const bindingPointer = this.process.readPointer(bindingsAddr);
+
+            if (this.configPositions.length === 0) {
+                const offsets = this.configOffsets(configPointer);
+                if (offsets instanceof Error) throw offsets;
+
+                this.configPositions = offsets;
+            }
+
+            if (this.bindingPositions.length === 0) {
+                const offsets = this.bindingsOffsets(bindingPointer);
+                if (offsets instanceof Error) throw offsets;
+
+                this.bindingPositions = offsets;
+            }
+
+            const settings: SettingsObject = {};
+            for (const position of this.configPositions) {
+                try {
+                    const result = this.configValue(configPointer, position);
+                    if (result instanceof Error) throw result;
+                    if (result === null || !result.key || !result.value)
+                        continue;
+
+                    const value = configList[result.key];
+                    if (!value || !isAllowedValue(value[0], result.value))
+                        continue;
+
+                    settings[value[1]] = result.value;
+
+                    this.game.resetReportCount(
+                        `settings updateConfigState [${position}]`
+                    );
+                } catch (exc) {
+                    this.game.reportError(
+                        `settings updateConfigState [${position}]`,
+                        10,
+                        ClientType[this.game.client],
+                        this.game.pid,
+                        `settings updateConfigState [${position}]`,
+                        (exc as any).message
+                    );
+                    wLogger.debug(
+                        ClientType[this.game.client],
+                        this.game.pid,
+                        `settings updateConfigState [${position}]`,
+                        exc
+                    );
+                }
+            }
+
+            for (const position of this.bindingPositions) {
+                try {
+                    const result = this.bindingValue(bindingPointer, position);
+                    if (result instanceof Error) throw result;
+                    if (!result.key || !result.value) continue;
+
+                    const value = bindingList[result.key];
+                    if (!value || !isAllowedValue(value[0], result.value))
+                        continue;
+
+                    settings[value[1]] = result.value;
+
+                    this.game.resetReportCount(
+                        `settings updateBindingState [${position}]`
+                    );
+                } catch (exc) {
+                    this.game.reportError(
+                        `settings updateBindingState [${position}]`,
+                        10,
+                        ClientType[this.game.client],
+                        this.game.pid,
+                        `settings updateBindingState [${position}]`,
+                        (exc as any).message
+                    );
+                    wLogger.debug(
+                        ClientType[this.game.client],
+                        this.game.pid,
+                        `settings updateBindingState [${position}]`,
+                        exc
+                    );
+                }
+            }
+
+            return settings;
+        } catch (error) {
+            return error as Error;
+        }
     }
 }

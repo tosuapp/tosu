@@ -35,6 +35,8 @@ export interface DataRepoList {
 }
 
 export abstract class AbstractInstance {
+    errorsCount: { [key: string | number]: number } = {};
+
     abstract memory: AbstractMemory<Record<string, number>>;
     client: ClientType;
     customServerEndpoint: string;
@@ -265,5 +267,29 @@ export abstract class AbstractInstance {
             },
             {} as Pick<DataRepoList, T[number]>
         );
+    }
+
+    reportError(id: string | number, maxAmount: number, ...args: any[]) {
+        this.errorsCount[id] = (this.errorsCount[id] || 0) + 1;
+
+        if (this.errorsCount[id] <= maxAmount) {
+            wLogger.debugError(...args);
+            return;
+        }
+
+        wLogger.error(...args);
+    }
+
+    resetReportCount(id: string | number) {
+        this.errorsCount[id] = 0;
+    }
+
+    preventThrow(callback) {
+        try {
+            const result = callback();
+            return result;
+        } catch (error) {
+            return error as Error;
+        }
     }
 }

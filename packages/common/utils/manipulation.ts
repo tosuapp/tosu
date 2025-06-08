@@ -16,3 +16,33 @@ export function formatMilliseconds(ms: number) {
 export function textMD5(text: string) {
     return crypto.createHash('md5').update(text).digest('hex');
 }
+
+export function isRealNumber(value: any) {
+    return typeof value === 'number' && !isNaN(value) && isFinite(value);
+}
+
+export function isAllowedValue(
+    type: 'bool' | 'byte' | 'int' | 'double' | 'string' | 'bstring' | 'enum',
+    value: any
+) {
+    if (type === 'int' || type === 'enum' || type === 'double')
+        return isRealNumber(value);
+    else if (type === 'bool') return typeof value === 'boolean';
+    else if (type === 'bstring' || type === 'string')
+        return typeof value === 'string';
+
+    return false;
+}
+
+export function setNestedValue(obj: any, path: string, value: any): boolean {
+    const paths = path.split('.');
+    if (paths.length === 1) {
+        if (typeof obj[paths[0]] === 'object') return false;
+        if (obj[paths[0]] === value) return false;
+
+        obj[paths[0]] = value;
+        return true;
+    }
+
+    return setNestedValue(obj[paths[0]], paths.slice(1).join('.'), value);
+}

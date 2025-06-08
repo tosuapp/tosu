@@ -1,7 +1,8 @@
-import { ITourneyManagerChatItem } from '@/states/tourney';
-import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
-import { MultiplayerTeamType } from '@/utils/multiplayer.types';
-import { CalculateMods } from '@/utils/osuMods.types';
+import type { ITourneyManagerChatItem } from '@/states/tourney';
+import type { KeyOverlay, LeaderboardPlayer } from '@/states/types';
+import type { MultiplayerTeamType } from '@/utils/multiplayer.types';
+import type { CalculateMods } from '@/utils/osuMods.types';
+import type { SettingsObject } from '@/utils/settings.types';
 
 export type ScanPatterns = {
     [k in keyof any]: {
@@ -204,3 +205,5 @@ export type ILazerSpectator =
           spectatingClients: ILazerSpectatorEntry[];
       }
     | undefined;
+
+export type ISettings = SettingsObject | Error;

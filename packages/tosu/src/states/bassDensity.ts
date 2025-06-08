@@ -45,9 +45,9 @@ export class BassDensity extends AbstractState {
             this.currentAudioVelocity = currentAudioVelocity;
             this.density = (1 + currentAudioVelocity) * 0.5;
 
-            this.resetReportCount('BassDensity updateState');
+            this.game.resetReportCount('BassDensity updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'BassDensity updateState',
                 10,
                 ClientType[this.game.client],

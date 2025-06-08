@@ -1,13 +1,16 @@
-export type ConfigList = Record<string, IConfigBindable>;
-export type BindingsList = Record<number, IBindable>;
+export type AllowedTypes =
+    | 'bool'
+    | 'byte'
+    | 'int'
+    | 'double'
+    | 'string'
+    | 'bstring'
+    | 'enum';
 
-export interface IBindable {
-    setValue: (value: any) => void;
-}
+export type ConfigList = Record<string, [AllowedTypes, valuePath: string]>;
+export type BindingsList = Record<number, [AllowedTypes, valuePath: string]>;
 
-export interface IConfigBindable extends IBindable {
-    type: 'bool' | 'byte' | 'int' | 'double' | 'string' | 'bstring' | 'enum';
-}
+export type SettingsObject = Record<string, string | number | boolean>;
 
 export interface Keybinds {
     osu: KeybindsOsu;

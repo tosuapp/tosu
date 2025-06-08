@@ -262,9 +262,9 @@ export class Gameplay extends AbstractState {
             this.updateStarsAndPerformance();
             this.updateLeaderboard();
 
-            this.resetReportCount('gameplay updateState');
+            this.game.resetReportCount('gameplay updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'gameplay updateState',
                 10,
                 ClientType[this.game.client],
@@ -328,9 +328,9 @@ export class Gameplay extends AbstractState {
                 this.cachedkeys = keysLine;
             }
 
-            this.resetReportCount('gameplay updateKeyOverlay');
+            this.game.resetReportCount('gameplay updateKeyOverlay');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'gameplay updateKeyOverlay',
                 10,
                 ClientType[this.game.client],
@@ -366,9 +366,9 @@ export class Gameplay extends AbstractState {
 
             this.hitErrors = result;
 
-            this.resetReportCount('gameplay updateHitErrors');
+            this.game.resetReportCount('gameplay updateHitErrors');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'gameplay updateHitErrors',
                 50,
                 ClientType[this.game.client],
@@ -449,9 +449,9 @@ export class Gameplay extends AbstractState {
                 result[1] || Object.assign({}, defaultLBPlayer);
             this.leaderboardScores = result[2];
 
-            this.resetReportCount('gameplay updateLeaderboard');
+            this.game.resetReportCount('gameplay updateLeaderboard');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'gameplay updateLeaderboard',
                 10,
                 ClientType[this.game.client],
@@ -654,9 +654,9 @@ export class Gameplay extends AbstractState {
                 `[${(performance.now() - t1).toFixed(2)}ms] elapsed time`
             );
 
-            this.resetReportCount('gameplay updateStarsAndPerformance');
+            this.game.resetReportCount('gameplay updateStarsAndPerformance');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'gameplay updateStarsAndPerformance',
                 10,
                 ClientType[this.game.client],

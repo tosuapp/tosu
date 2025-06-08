@@ -533,9 +533,11 @@ export class BeatmapPP extends AbstractState {
 
                 this.kiais = kiais;
 
-                this.resetReportCount('beatmapPP updateMapMetadataTimings');
+                this.game.resetReportCount(
+                    'beatmapPP updateMapMetadataTimings'
+                );
             } catch (exc) {
-                this.reportError(
+                this.game.reportError(
                     'beatmapPP updateMapMetadataTimings',
                     10,
                     ClientType[this.game.client],
@@ -598,9 +600,9 @@ export class BeatmapPP extends AbstractState {
 
             attributes.free();
 
-            this.resetReportCount('beatmapPP updateMapMetadata');
+            this.game.resetReportCount('beatmapPP updateMapMetadata');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'beatmapPP updateMapMetadata',
                 10,
                 ClientType[this.game.client],
@@ -764,9 +766,9 @@ export class BeatmapPP extends AbstractState {
 
             strains.free();
 
-            this.resetReportCount('beatmapPP updateGraph');
+            this.game.resetReportCount('beatmapPP updateGraph');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'beatmapPP updateGraph',
                 10,
                 ClientType[this.game.client],
@@ -833,9 +835,9 @@ export class BeatmapPP extends AbstractState {
 
             curPerformance.free();
 
-            this.resetReportCount('beatmapPP updateEditorPP');
+            this.game.resetReportCount('beatmapPP updateEditorPP');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'beatmapPP updateEditorPP',
                 10,
                 ClientType[this.game.client],

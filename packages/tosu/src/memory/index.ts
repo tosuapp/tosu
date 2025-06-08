@@ -5,8 +5,6 @@ import { Process } from 'tsprocess';
 import type { AbstractInstance } from '@/instances';
 import type {
     IAudioVelocityBase,
-    IBindingValue,
-    IConfigValue,
     IGameplay,
     IGlobal,
     IGlobalPrecise,
@@ -15,9 +13,8 @@ import type {
     ILeaderboard,
     IMP3Length,
     IMenu,
-    IOffsets,
     IResultScreen,
-    ISettingsPointers,
+    ISettings,
     ITourney,
     ITourneyChat,
     ITourneyUser,
@@ -25,7 +22,6 @@ import type {
     ScanPatterns
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
-import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract patterns: M;
@@ -50,16 +46,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract getScanPatterns(): ScanPatterns;
     abstract audioVelocityBase(): IAudioVelocityBase;
     abstract user(): IUser;
-    abstract settingsPointers(): ISettingsPointers;
-    abstract configOffsets(address: number, list: ConfigList): IOffsets;
-    abstract bindingsOffsets(address: number, list: BindingsList): IOffsets;
-    abstract configValue(
-        address: number,
-        position: number,
-        list: ConfigList
-    ): IConfigValue;
 
-    abstract bindingValue(address: number, position: number): IBindingValue;
     abstract resultScreen(): IResultScreen;
     abstract gameplay(): IGameplay;
     abstract keyOverlay(mode: number): IKeyOverlay;
@@ -109,4 +96,6 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     getLeaderStart() {
         return this.leaderStart;
     }
+
+    abstract settings(): ISettings;
 }

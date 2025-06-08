@@ -66,9 +66,9 @@ export class Global extends AbstractState {
             this.skinFolder = cleanPath(result.skinFolder);
             this.memorySongsFolder = cleanPath(result.memorySongsFolder);
 
-            this.resetReportCount('global updateState');
+            this.game.resetReportCount('global updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'global updateState',
                 10,
                 ClientType[this.game.client],
@@ -92,9 +92,9 @@ export class Global extends AbstractState {
 
             this.playTime = result.time;
 
-            this.resetReportCount('global updatePreciseState');
+            this.game.resetReportCount('global updatePreciseState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'global updatePreciseState',
                 10,
                 ClientType[this.game.client],

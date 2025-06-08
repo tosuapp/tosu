@@ -12,8 +12,6 @@ import path from 'path';
 import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
-    IBindingValue,
-    IConfigValue,
     IGameplay,
     IGlobal,
     IGlobalPrecise,
@@ -24,9 +22,8 @@ import type {
     ILeaderboard,
     IMP3Length,
     IMenu,
-    IOffsets,
     IResultScreen,
-    ISettingsPointers,
+    ISettings,
     ITourney,
     ITourneyChat,
     ITourneyUser,
@@ -47,7 +44,6 @@ import {
     ModsAcronyms,
     ModsCategories
 } from '@/utils/osuMods.types';
-import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 type LazerPatternData = {
     sessionIdleTracker: number;
@@ -911,30 +907,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const user = this.process.readIntPtr(userBindable + 0x20);
 
         return this.readUser(user);
-    }
-
-    settingsPointers(): ISettingsPointers {
-        throw new Error('Lazer:settingsPointers not implemented.');
-    }
-
-    configOffsets(_address: number, _list: ConfigList): IOffsets {
-        throw new Error('Lazer:configOffsets not implemented.');
-    }
-
-    bindingsOffsets(_address: number, _list: BindingsList): IOffsets {
-        throw new Error('Lazer:bindingsOffsets not implemented.');
-    }
-
-    configValue(
-        _address: number,
-        _position: number,
-        _list: ConfigList
-    ): IConfigValue {
-        throw new Error('Lazer:configValue not implemented.');
-    }
-
-    bindingValue(_address: number, _position: number): IBindingValue {
-        throw new Error('Lazer:bindingValue not implemented.');
     }
 
     buildResultScreen(
@@ -2101,5 +2073,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         // const channelId = this.process.readInt(room + 0x44);
 
         return { chat: [], spectatingClients };
+    }
+
+    settings(): ISettings {
+        throw new Error('Lazer:settings not implemented.');
     }
 }

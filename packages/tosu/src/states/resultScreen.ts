@@ -121,9 +121,9 @@ export class ResultScreen extends AbstractState {
                 hits
             });
 
-            this.resetReportCount('resultScreen updateState');
+            this.game.resetReportCount('resultScreen updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'resultScreen updateState',
                 10,
                 ClientType[this.game.client],
@@ -222,9 +222,9 @@ export class ResultScreen extends AbstractState {
             );
 
             this.previousBeatmap = key;
-            this.resetReportCount('resultScreen updatePerformance');
+            this.game.resetReportCount('resultScreen updatePerformance');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'resultScreen updatePerformance',
                 10,
                 ClientType[this.game.client],

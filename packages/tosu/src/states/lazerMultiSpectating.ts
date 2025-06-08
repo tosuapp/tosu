@@ -19,9 +19,9 @@ export class LazerMultiSpectating extends AbstractState {
                 this.game as LazerInstance
             ).memory.readSpectatingData();
 
-            this.resetReportCount('lazerMultiSpectating updateState');
+            this.game.resetReportCount('lazerMultiSpectating updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'lazerMultiSpectating updateState',
                 10,
                 ClientType[this.game.client],
