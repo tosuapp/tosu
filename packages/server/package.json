@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "npm run build && sass --style compressed --no-source-map ./assets/homepage.scss ./assets/homepage.min.css && postcss ./assets/homepage.min.css -o ./assets/homepage.min.css --use autoprefixer --no-map",
     "build": "tsc"
   },
   "dependencies": {
@@ -17,6 +17,9 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.18.0"
+    "@types/ws": "^8.18.0",
+    "autoprefixer": "^10.4.21",
+    "postcss-cli": "^11.0.1",
+    "sass": "^1.89.1"
   }
 }
