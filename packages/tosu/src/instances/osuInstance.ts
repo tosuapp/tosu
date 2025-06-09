@@ -10,8 +10,6 @@ import fs from 'fs';
 
 import { AbstractInstance } from '@/instances/index';
 import { StableMemory } from '@/memory/stable';
-import { Gameplay } from '@/states/gameplay';
-import { Global } from '@/states/global';
 import { cleanPath } from '@/utils/converters';
 
 export class OsuInstance extends AbstractInstance {
@@ -217,28 +215,46 @@ export class OsuInstance extends AbstractInstance {
         }
     }
 
-    preciseDataLoop(global: Global, gameplay: Gameplay) {
-        if (this.isDestroyed === true) return;
-        global.updatePreciseState();
+    async preciseDataLoop(): Promise<void> {
+        const { global, gameplay } = this.getServices(['global', 'gameplay']);
 
-        switch (global.status) {
-            case GameState.play:
-                if (global.playTime < 150) {
-                    break;
+        while (!this.isDestroyed) {
+            try {
+                global.updatePreciseState();
+
+                switch (global.status) {
+                    case GameState.play:
+                        if (global.playTime < 150) {
+                            break;
+                        }
+
+                        if (config.enableKeyOverlay) {
+                            gameplay.updateKeyOverlay();
+                        }
+                        gameplay.updateHitErrors();
+                        break;
+                    default:
+                        gameplay.resetKeyOverlay();
+                        break;
                 }
 
-                if (config.enableKeyOverlay) {
-                    gameplay.updateKeyOverlay();
-                }
-                gameplay.updateHitErrors();
-                break;
-            default:
-                gameplay.resetKeyOverlay();
-                break;
+                await sleep(config.preciseDataPollRate);
+            } catch (exc) {
+                wLogger.error(
+                    ClientType[this.client],
+                    this.pid,
+                    'preciseDataLoop',
+                    'error within a loop',
+                    (exc as Error).message
+                );
+                wLogger.debug(
+                    ClientType[this.client],
+                    this.pid,
+                    'preciseDataLoop',
+                    'error within a loop',
+                    exc
+                );
+            }
         }
-
-        setTimeout(() => {
-            this.preciseDataLoop(global, gameplay);
-        }, config.preciseDataPollRate);
     }
 }
