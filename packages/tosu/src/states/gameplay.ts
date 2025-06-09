@@ -35,7 +35,6 @@ export class Gameplay extends AbstractState {
     mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
     hitErrors: number[];
     mode: number;
-    lostCombo: number;
     maxCombo: number;
     score: number;
     hit100: number;
@@ -85,7 +84,6 @@ export class Gameplay extends AbstractState {
 
         this.hitErrors = [];
         this.maxCombo = 0;
-        this.lostCombo = 0;
         this.score = 0;
         this.hit100 = 0;
         this.hit300 = 0;
@@ -251,9 +249,11 @@ export class Gameplay extends AbstractState {
             if (this.comboPrev > this.maxCombo) {
                 this.comboPrev = 0;
             }
-            if (this.combo < this.comboPrev) {
-                this.lostCombo += this.comboPrev;
-                if (this.hitMiss === this.hitMissPrev) this.hitSB += 1;
+            if (
+                this.combo < this.comboPrev &&
+                this.hitMiss === this.hitMissPrev
+            ) {
+                this.hitSB += 1;
             }
             this.hitMissPrev = this.hitMiss;
             this.comboPrev = this.combo;
@@ -524,10 +524,8 @@ export class Gameplay extends AbstractState {
 
                 const difficulty = new rosu.Difficulty(commonParams);
 
-                this.gradualPerformance = new rosu.GradualPerformance(
-                    difficulty,
-                    currentBeatmap
-                );
+                this.gradualPerformance =
+                    difficulty.gradualPerformance(currentBeatmap);
                 this.performanceAttributes = new rosu.Performance(
                     commonParams
                 ).calculate(currentBeatmap);
@@ -560,16 +558,16 @@ export class Gameplay extends AbstractState {
 
             const currPerformance = this.gradualPerformance.nth(
                 {
-                    maxCombo: this.maxCombo,
-                    misses: this.hitMiss,
-                    n50: this.hit50,
-                    n100: this.hit100,
+                    nGeki: this.hitGeki,
                     n300: this.hit300,
                     nKatu: this.hitKatu,
-                    nGeki: this.hitGeki,
+                    n100: this.hit100,
+                    n50: this.hit50,
+                    misses: this.hitMiss,
                     sliderEndHits: this.sliderEndHits,
                     osuSmallTickHits: this.smallTickHits,
-                    osuLargeTickHits: this.largeTickHits
+                    osuLargeTickHits: this.largeTickHits,
+                    maxCombo: this.maxCombo
                 },
                 offset - 1
             );
@@ -583,38 +581,38 @@ export class Gameplay extends AbstractState {
                 beatmapPP.updatePPAttributes('curr', currPerformance);
             }
 
-            const isMania = this.mode === 3;
-            const maxBeatmapCombo = (
-                isMania
-                    ? this.performanceAttributes.state?.nGeki
-                    : this.performanceAttributes.state?.maxCombo
-            )!;
+            const maxJudgementsAmount =
+                beatmapPP.calculatedMapAttributes.circles +
+                beatmapPP.calculatedMapAttributes.sliders +
+                beatmapPP.calculatedMapAttributes.spinners +
+                beatmapPP.calculatedMapAttributes.holds;
 
             const calcOptions: PerformanceArgs = {
-                combo: Math.max(
-                    this.maxCombo,
-                    maxBeatmapCombo - this.lostCombo
-                ),
-                nGeki: isMania
-                    ? maxBeatmapCombo -
-                      this.hit300 -
-                      this.hitKatu -
-                      this.hit100 -
-                      this.hit50 -
-                      this.hitMiss
-                    : this.hitGeki,
-                n300: isMania
-                    ? this.hit300
-                    : maxBeatmapCombo - this.hit100 - this.hit50 - this.hitMiss,
+                nGeki: this.hitGeki,
+                n300:
+                    maxJudgementsAmount -
+                    this.hit100 -
+                    this.hit50 -
+                    this.hitMiss,
                 nKatu: this.hitKatu,
                 n100: this.hit100,
                 n50: this.hit50,
-                smallTickHits:
-                    this.performanceAttributes.state?.osuSmallTickHits,
-                largeTickHits:
-                    this.performanceAttributes.state?.osuLargeTickHits,
+                misses: this.hitMiss,
+                sliderEndHits: this.sliderEndHits,
+                smallTickHits: this.smallTickHits,
+                largeTickHits: this.largeTickHits,
+                combo: this.maxCombo,
                 ...commonParams
             };
+            if (this.mode === 3) {
+                calcOptions.nGeki =
+                    maxJudgementsAmount -
+                    this.hit300 -
+                    this.hitKatu -
+                    this.hit100;
+                calcOptions.n300 = this.hit300;
+                delete calcOptions.combo;
+            }
 
             const maxAchievablePerformance = new rosu.Performance(
                 calcOptions
@@ -629,8 +627,16 @@ export class Gameplay extends AbstractState {
                 );
             }
 
+            if (this.mode !== 3)
+                calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;
+            calcOptions.sliderEndHits =
+                this.performanceAttributes.state?.sliderEndHits;
+            calcOptions.smallTickHits =
+                this.performanceAttributes.state?.osuSmallTickHits;
+            calcOptions.largeTickHits =
+                this.performanceAttributes.state?.osuLargeTickHits;
             calcOptions.misses = 0;
-            delete calcOptions.combo;
+
             const fcPerformance = new rosu.Performance(calcOptions).calculate(
                 this.performanceAttributes
             );
