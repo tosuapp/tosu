@@ -13,3 +13,4 @@ _version.js
 **/tosu/game-overlay/
 logs/
 settings/
+packages/server/assets/homepage.min.css
