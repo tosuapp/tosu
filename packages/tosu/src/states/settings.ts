@@ -18,6 +18,7 @@ export class Settings extends AbstractState {
         ignoreBeatmapSounds: false,
         useSkinSamples: false,
         volume: {
+            masterInactive: 0,
             master: 0,
             music: 0,
             effect: 0
@@ -25,7 +26,13 @@ export class Settings extends AbstractState {
         offset: { universal: 0 }
     };
 
-    background: Background = { dim: 0, video: false, storyboard: false };
+    background: Background = {
+        storyboard: false,
+        video: false,
+        blur: 0,
+        dim: 0
+    };
+
     client: Client = { updateAvailable: false, branch: 0, version: '' };
     resolution: Resolution = {
         fullscreen: false,
@@ -36,7 +43,13 @@ export class Settings extends AbstractState {
     };
 
     scoreMeter: ScoreMeter = { type: 0, size: 0 };
-    cursor: Cursor = { useSkinCursor: false, autoSize: false, size: 0 };
+    cursor: Cursor = {
+        useSkinCursor: false,
+        autoSize: false,
+        size: 0,
+        menuSize: 0
+    };
+
     mouse: Mouse = {
         rawInput: false,
         disableButtons: false,

@@ -39,6 +39,7 @@ export interface KeybindsTaiko {
 }
 
 export interface Volume {
+    masterInactive: number;
     master: number;
     music: number;
     effect: number;
@@ -54,6 +55,7 @@ export interface Audio {
 export interface Background {
     storyboard: boolean;
     video: boolean;
+    blur: number;
     dim: number;
 }
 
@@ -83,6 +85,7 @@ export interface Offset {
 export interface Cursor {
     useSkinCursor: boolean;
     autoSize: boolean;
+    menuSize: number;
     size: number;
 }
 

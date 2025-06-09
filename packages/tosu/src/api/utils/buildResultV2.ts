@@ -5,6 +5,8 @@ import {
     CountryCodes,
     GameState,
     GroupType,
+    LazerBeatmapTabType,
+    LazerSortMode,
     LeaderboardType,
     ProgressBarType,
     Rulesets,
@@ -157,7 +159,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 visible: gameplay.isLeaderboardVisible,
                 type: {
                     number: settings.leaderboardType,
-                    name: LeaderboardType[settings.leaderboardType] || ''
+                    name:
+                        osuInstance.client === ClientType.lazer
+                            ? LazerBeatmapTabType[settings.leaderboardType] ||
+                              ''
+                            : LeaderboardType[settings.leaderboardType] || ''
                 }
             },
 
@@ -183,7 +189,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             sort: {
                 number: settings.sortType,
-                name: SortType[settings.sortType] || ''
+                name:
+                    osuInstance.client === ClientType.lazer
+                        ? LazerSortMode[settings.sortType] || ''
+                        : SortType[settings.sortType] || ''
             },
             group: {
                 number: settings.groupType,
