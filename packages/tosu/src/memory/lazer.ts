@@ -1133,8 +1133,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const scoreInfo = this.process.readIntPtr(selectedScoreBindable + 0x20);
 
         const onlineId = Math.max(
-            this.process.readLong(this.currentScreen + 0xb0),
-            this.process.readLong(this.currentScreen + 0xb8)
+            this.process.readLong(scoreInfo + 0xb0),
+            this.process.readLong(scoreInfo + 0xb8)
         );
 
         const scoreDate = scoreInfo + 0x100;
