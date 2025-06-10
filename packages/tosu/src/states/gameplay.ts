@@ -609,7 +609,9 @@ export class Gameplay extends AbstractState {
                     maxJudgementsAmount -
                     this.hit300 -
                     this.hitKatu -
-                    this.hit100;
+                    this.hit100 -
+                    this.hit50 -
+                    this.hitMiss;
                 calcOptions.n300 = this.hit300;
                 delete calcOptions.combo;
             }
@@ -627,15 +629,28 @@ export class Gameplay extends AbstractState {
                 );
             }
 
-            if (this.mode !== 3)
+            if (this.mode === 3) {
+                delete calcOptions.nGeki;
+                delete calcOptions.n300;
+                delete calcOptions.nKatu;
+                calcOptions.n100 = this.hit100;
+                calcOptions.n50 = this.hit50;
+                calcOptions.misses = this.hitMiss;
+                delete calcOptions.sliderEndHits;
+                delete calcOptions.smallTickHits;
+                delete calcOptions.largeTickHits;
+                calcOptions.accuracy = this.accuracy;
+            } else {
+                calcOptions.n300 = this.hit300 + this.hitMiss;
                 calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;
-            calcOptions.sliderEndHits =
-                this.performanceAttributes.state?.sliderEndHits;
-            calcOptions.smallTickHits =
-                this.performanceAttributes.state?.osuSmallTickHits;
-            calcOptions.largeTickHits =
-                this.performanceAttributes.state?.osuLargeTickHits;
-            calcOptions.misses = 0;
+                calcOptions.sliderEndHits =
+                    this.performanceAttributes.state?.sliderEndHits;
+                calcOptions.smallTickHits =
+                    this.performanceAttributes.state?.osuSmallTickHits;
+                calcOptions.largeTickHits =
+                    this.performanceAttributes.state?.osuLargeTickHits;
+                calcOptions.misses = 0;
+            }
 
             const fcPerformance = new rosu.Performance(calcOptions).calculate(
                 this.performanceAttributes
