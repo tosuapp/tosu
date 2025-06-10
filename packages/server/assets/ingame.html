@@ -172,7 +172,7 @@
           <input
             type="number"
             class="input2"
-            @input="overlays[context_overlay.index].z_index = round_up($event.target.value)"
+            @input="overlays[context_overlay.index].z_index = Math.max(0, round_up($event.target.value))"
             :value="overlays[context_overlay.index].z_index"
           />
           <input
@@ -181,7 +181,7 @@
             :min="0"
             :max="999"
             step="1"
-            @input="overlays[context_overlay.index].z_index = round_up($event.target.value)"
+            @input="overlays[context_overlay.index].z_index = Math.max(0, round_up($event.target.value))"
             :value="overlays[context_overlay.index].z_index"
           />
         </div>
@@ -196,7 +196,7 @@
             width: `${o.width}px`,
             height: `${o.height}px`,
             scale: o.scale,
-            zIndex: o.z_index
+            zIndex: Math.max(0, o.z_index)
           }"
           :data-ind="ind"
           :data-url="o.url"
