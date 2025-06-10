@@ -253,16 +253,6 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         httpServer.restart();
     }
 
-    if (
-        config.pollRate !== pollRate ||
-        config.preciseDataPollRate !== preciseDataPollRate
-    ) {
-        config.pollRate = pollRate >= 100 ? pollRate : 100;
-        config.preciseDataPollRate =
-            preciseDataPollRate >= 0 ? preciseDataPollRate : 10;
-        httpServer.restartWS();
-    }
-
     config.enableIngameOverlay = enableIngameOverlay;
     checkGameOverlayConfig();
 

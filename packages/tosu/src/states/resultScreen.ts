@@ -162,28 +162,49 @@ export class ResultScreen extends AbstractState {
                 return;
             }
 
-            const scoreParams: rosu.PerformanceArgs = {
-                combo: this.maxCombo,
+            const commonParams = {
                 mods: removeDebuffMods(this.mods.array),
-                misses: this.hitMiss,
-                n50: this.hit50,
-                n100: this.hit100,
-                n300: this.hit300,
-                nKatu: this.hitKatu,
-                nGeki: this.hitGeki,
-                sliderEndHits: this.sliderEndHits,
-                smallTickHits: this.smallTickHits,
-                largeTickHits: this.largeTickHits,
                 lazer: this.game.client === ClientType.lazer
             };
 
+            const scoreParams: rosu.PerformanceArgs = {
+                nGeki: this.hitGeki,
+                n300: this.hit300,
+                nKatu: this.hitKatu,
+                n100: this.hit100,
+                n50: this.hit50,
+                misses: this.hitMiss,
+                sliderEndHits: this.sliderEndHits,
+                smallTickHits: this.smallTickHits,
+                largeTickHits: this.largeTickHits,
+                combo: this.maxCombo,
+                ...commonParams
+            };
+
+            const t1 = performance.now();
             const curPerformance = new rosu.Performance(scoreParams).calculate(
                 currentBeatmap
             );
+
+            const t2 = performance.now();
             const fcPerformance = new rosu.Performance({
-                mods: removeDebuffMods(this.mods.array),
+                nGeki: this.hitGeki + this.hitMiss,
+                n300: this.hit300,
+                nKatu: this.hitKatu,
+                n100: this.hit100,
+                n50: this.hit50,
                 misses: 0,
-                accuracy: this.accuracy
+                sliderEndHits:
+                    beatmapPP.performanceAttributes?.state?.sliderEndHits,
+                smallTickHits:
+                    beatmapPP.performanceAttributes?.state?.osuSmallTickHits,
+                largeTickHits:
+                    beatmapPP.performanceAttributes?.state?.osuLargeTickHits,
+                combo:
+                    this.mode === 3
+                        ? undefined
+                        : beatmapPP.calculatedMapAttributes.maxCombo,
+                ...commonParams
             }).calculate(curPerformance);
 
             this.pp = curPerformance.pp;
@@ -191,6 +212,14 @@ export class ResultScreen extends AbstractState {
 
             curPerformance.free();
             fcPerformance.free();
+
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `resultScreen updatePerformance`,
+                `pp:${t2 - t1}`,
+                `fc pp:${performance.now() - t2}`
+            );
 
             this.previousBeatmap = key;
             this.resetReportCount('resultScreen updatePerformance');

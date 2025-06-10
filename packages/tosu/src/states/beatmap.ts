@@ -412,6 +412,11 @@ export class BeatmapPP extends AbstractState {
                 `[${totalTime}ms] Spend on opening beatmap`
             );
 
+            const commonParams = {
+                mods: removeDebuffMods(currentMods.array),
+                lazer: this.game.client === ClientType.lazer
+            };
+
             const attributes = new rosu.BeatmapAttributesBuilder({
                 isConvert:
                     this.beatmap.mode === 0 &&
@@ -421,12 +426,9 @@ export class BeatmapPP extends AbstractState {
                 mode: currentMode
             }).build();
 
-            const fcPerformance = new rosu.Performance({
-                mods: removeDebuffMods(currentMods.array),
-                lazer: this.game.client === ClientType.lazer
-            }).calculate(this.beatmap);
-
-            this.performanceAttributes = fcPerformance;
+            this.performanceAttributes = new rosu.Performance(
+                commonParams
+            ).calculate(this.beatmap);
             this.clockRate = currentMods.rate;
 
             if (config.calculatePP) {
@@ -446,7 +448,7 @@ export class BeatmapPP extends AbstractState {
                         mods: removeDebuffMods(currentMods.array),
                         accuracy: acc,
                         lazer: this.game.client === ClientType.lazer
-                    }).calculate(fcPerformance);
+                    }).calculate(this.performanceAttributes);
                     ppAcc[acc] = fixDecimals(calculate.pp);
 
                     calculate.free();
@@ -579,18 +581,19 @@ export class BeatmapPP extends AbstractState {
                 sliders: this.lazerBeatmap.slidable,
                 spinners: this.lazerBeatmap.spinnable,
                 holds: this.lazerBeatmap.holdable,
-                maxCombo: fcPerformance.difficulty.maxCombo,
-                fullStars: fcPerformance.difficulty.stars,
-                stars: fcPerformance.difficulty.stars,
-                aim: fcPerformance.difficulty.aim,
-                speed: fcPerformance.difficulty.speed,
-                flashlight: fcPerformance.difficulty.flashlight,
-                sliderFactor: fcPerformance.difficulty.sliderFactor,
-                stamina: fcPerformance.difficulty.stamina,
-                rhythm: fcPerformance.difficulty.rhythm,
-                color: fcPerformance.difficulty.color,
-                reading: fcPerformance.difficulty.reading,
-                hitWindow: fcPerformance.difficulty.greatHitWindow
+                maxCombo: this.performanceAttributes.difficulty.maxCombo,
+                fullStars: this.performanceAttributes.difficulty.stars,
+                stars: this.performanceAttributes.difficulty.stars,
+                aim: this.performanceAttributes.difficulty.aim,
+                speed: this.performanceAttributes.difficulty.speed,
+                flashlight: this.performanceAttributes.difficulty.flashlight,
+                sliderFactor:
+                    this.performanceAttributes.difficulty.sliderFactor,
+                stamina: this.performanceAttributes.difficulty.stamina,
+                rhythm: this.performanceAttributes.difficulty.rhythm,
+                color: this.performanceAttributes.difficulty.color,
+                reading: this.performanceAttributes.difficulty.reading,
+                hitWindow: this.performanceAttributes.difficulty.greatHitWindow
             };
 
             attributes.free();
