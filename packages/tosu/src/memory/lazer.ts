@@ -174,6 +174,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(this.gameBase() + 0x600);
     }
 
+    private checkIfSongSelectV2(address: number) {
+        return this.process.readIntPtr(address + 0x3e8) === this.gameBase();
+    }
+
     // checks <game>k__BackingField
     private checkIfPlayer(address: number) {
         return this.process.readIntPtr(address + 0x400) === this.gameBase();
@@ -1980,6 +1984,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const isPlaying = this.player() !== 0;
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
         const isSongSelect = this.checkIfSongSelect(this.currentScreen);
+        const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
         const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
@@ -1992,6 +1997,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (isPlaying || isPlayerLoader) {
             status = GameState.play;
         } else if (isSongSelect) {
+            status = GameState.selectPlay;
+        } else if (isSongSelectV2) {
             status = GameState.selectPlay;
         } else if (isResultScreen) {
             status = GameState.resultScreen;
