@@ -354,6 +354,10 @@ export class BeatmapPP extends AbstractState {
                 return 'not-ready';
             }
 
+            if (!fs.existsSync(mapPath) || !fs.statSync(mapPath).isFile()) {
+                return 'not-ready';
+            }
+
             try {
                 this.beatmapContent = fs.readFileSync(mapPath, 'utf8');
 
