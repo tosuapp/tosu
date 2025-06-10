@@ -105,6 +105,13 @@ export class InstanceManager {
                     continue;
                 }
 
+                const processHandle = Process.openProcess(processId);
+                const isProcessExist = Process.isProcessExist(processHandle);
+                if (!isProcessExist) {
+                    Process.closeHandle(processHandle);
+                    continue;
+                }
+
                 const osuInstance = isLazer
                     ? new LazerInstance(processId)
                     : new OsuInstance(processId);

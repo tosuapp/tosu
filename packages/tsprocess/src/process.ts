@@ -35,8 +35,8 @@ export class Process {
         return ProcessUtils.findProcesses(names);
     }
 
-    static isProcessExist(pid: number): boolean {
-        return ProcessUtils.isProcessExist(pid);
+    static isProcessExist(handle: number): boolean {
+        return ProcessUtils.isProcessExist(handle);
     }
 
     static isProcess64bit(pid: number): boolean {
@@ -51,7 +51,7 @@ export class Process {
         return ProcessUtils.getForegroundWindowProcess();
     }
 
-    static openProcess(id: number) {
+    static openProcess(id: number): number {
         return ProcessUtils.openProcess(id);
     }
 
