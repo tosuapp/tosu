@@ -7,6 +7,7 @@ import {
     LazerSettings,
     Rulesets,
     ScoringMode,
+    platformResolver,
     wLogger
 } from '@tosu/common';
 import path from 'path';
@@ -2283,6 +2284,90 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 'settings skin',
                 exc
             );
+        }
+
+        const platform = platformResolver(process.platform);
+        if (platform.type === 'windows') {
+            try {
+                const host = this.process.readIntPtr(
+                    this.gameBaseAddress + 0x338
+                );
+                const inputConfig = this.process.readIntPtr(host + 0x30);
+                const inputHandlers = this.process.readIntPtr(
+                    inputConfig + 0x20
+                );
+
+                const array = this.process.readIntPtr(inputHandlers + 0x8);
+                const size = this.process.readInt(array + 0x8);
+
+                for (let i = 0; i < size; i++) {
+                    const current = this.process.readIntPtr(
+                        array + 0x10 + 0x8 * i
+                    );
+
+                    const enabled =
+                        this.process.readByte(
+                            this.process.readIntPtr(current + 0x18) + 0x40
+                        ) === 1;
+                    if (i === 1) {
+                        const areaOffset = this.process.readIntPtr(
+                            current + 0x48
+                        );
+                        const areaX = this.process.readFloat(areaOffset + 0x44);
+                        const areaY = this.process.readFloat(areaOffset + 0x48);
+
+                        const areaSize = this.process.readIntPtr(
+                            current + 0x50
+                        );
+                        const areaWidth = this.process.readFloat(
+                            areaSize + 0x44
+                        );
+                        const areaHeight = this.process.readFloat(
+                            areaSize + 0x48
+                        );
+
+                        const areaRotation = this.process.readFloat(
+                            this.process.readIntPtr(current + 0x58) + 0x40
+                        );
+                        const pressureThreshold = this.process.readFloat(
+                            this.process.readIntPtr(current + 0x60) + 0x40
+                        );
+
+                        values['tablet.enabled'] = enabled;
+                        values['tablet.x'] = areaX;
+                        values['tablet.y'] = areaY;
+                        values['tablet.width'] = areaWidth;
+                        values['tablet.height'] = areaHeight;
+                        values['tablet.rotation'] = areaRotation;
+                        values['tablet.pressureThreshold'] = pressureThreshold;
+                    }
+
+                    if (i === 5) {
+                        const userRelativeMode =
+                            this.process.readByte(
+                                this.process.readIntPtr(current + 0x28) + 0x40
+                            ) === 1;
+                        values['mouse.highPrecision'] = userRelativeMode;
+                    }
+                }
+
+                this.game.resetReportCount('settings devices');
+            } catch (exc) {
+                this.game.reportError(
+                    'settings devices',
+                    10,
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    'settings devices',
+                    (exc as Error).message
+                );
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    'settings devices',
+                    exc
+                );
+            }
         }
 
         return values;

@@ -185,6 +185,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             cursor: settings.cursor,
             mouse: settings.mouse,
+            tablet: settings.tablet,
             mania: settings.mania,
 
             sort: {

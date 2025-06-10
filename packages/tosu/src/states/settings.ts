@@ -10,7 +10,8 @@ import {
     Mania,
     Mouse,
     Resolution,
-    ScoreMeter
+    ScoreMeter,
+    Tablet
 } from '@/utils/settings.types';
 
 export class Settings extends AbstractState {
@@ -51,10 +52,21 @@ export class Settings extends AbstractState {
     };
 
     mouse: Mouse = {
+        highPrecision: false,
         rawInput: false,
         disableButtons: false,
         disableWheel: false,
         sensitivity: 0
+    };
+
+    tablet: Tablet = {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        rotation: 0,
+        pressureThreshold: 0
     };
 
     mania: Mania = { speedBPMScale: false, usePerBeatmapSpeedScale: false };

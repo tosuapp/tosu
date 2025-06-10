@@ -7,7 +7,8 @@ import {
     Keybinds,
     Mania,
     Mouse,
-    Resolution
+    Resolution,
+    Tablet
 } from '@/utils/settings.types';
 
 export type ApiAnswer = TosuAPi | { error?: string };
@@ -58,6 +59,7 @@ export interface Settings {
     scoreMeter: ScoreMeter;
     cursor: Cursor;
     mouse: Mouse;
+    tablet: Tablet;
     mania: Mania;
 
     sort: NumberName;

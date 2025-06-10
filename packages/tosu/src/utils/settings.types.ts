@@ -93,10 +93,21 @@ export interface Mouse {
     disableButtons: boolean;
     disableWheel: boolean;
     rawInput: boolean;
+    highPrecision: boolean;
     sensitivity: number;
 }
 
 export interface Mania {
     speedBPMScale: boolean;
     usePerBeatmapSpeedScale: boolean;
+}
+
+export interface Tablet {
+    enabled: boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+    pressureThreshold: number;
 }
