@@ -129,14 +129,10 @@ export class InstanceManager {
 
                 this.osuInstances[processId] = osuInstance;
                 osuInstance.start();
-            }
 
-            if (
-                config.enableIngameOverlay &&
-                !this.overlayProcess &&
-                Object.keys(this.osuInstances).length > 0
-            ) {
-                await this.startOverlay();
+                if (config.enableIngameOverlay) {
+                    await this.startOverlay();
+                }
             }
         } catch (exc) {
             wLogger.error('[manager]', 'handleProcesses', (exc as any).message);
@@ -176,6 +172,11 @@ export class InstanceManager {
     }
 
     async startOverlay() {
+        // ignore if it already started
+        if (this.overlayProcess) {
+            return;
+        }
+
         try {
             const child = await runOverlay();
             child.on('error', (err) => {
@@ -185,7 +186,7 @@ export class InstanceManager {
 
             child.on('exit', (code, signal) => {
                 this.overlayProcess = null;
-                if (code !== 0) {
+                if (code !== 0 && signal !== 'SIGTERM') {
                     wLogger.error(
                         '[ingame-overlay]',
                         `Unknown exit code: ${code} ${signal ? `(${signal})` : ''}`
@@ -201,5 +202,16 @@ export class InstanceManager {
             wLogger.error('[ingame-overlay]', (exc as any).message);
             wLogger.debug('[ingame-overlay]', exc);
         }
+    }
+
+    stopOverlay() {
+        // ignore if it's not started
+        if (!this.overlayProcess) {
+            return;
+        }
+
+        wLogger.warn('[ingame-overlay]', 'Stopping...');
+        this.overlayProcess.kill();
+        this.overlayProcess = null;
     }
 }

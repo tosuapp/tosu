@@ -256,12 +256,12 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.enableIngameOverlay = enableIngameOverlay;
     checkGameOverlayConfig();
 
-    if (
-        enableIngameOverlay &&
-        !httpServer.instanceManager.overlayStarted &&
-        Object.keys(httpServer.instanceManager.osuInstances).length > 0
-    ) {
-        httpServer.instanceManager.startOverlay();
+    if (enableIngameOverlay) {
+        if (Object.keys(httpServer.instanceManager.osuInstances).length > 0) {
+            httpServer.instanceManager.startOverlay();
+        }
+    } else {
+        httpServer.instanceManager.stopOverlay();
     }
 
     if (enableGosuOverlay === true && !enableIngameOverlay) {
