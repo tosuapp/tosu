@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.10.0](https://github.com/tosuapp/tosu/compare/v4.9.0...v4.10.0) (2025-06-11)
+
+
+### Features
+
+* Add source .scss file for dashboard styles ([c436f72](https://github.com/tosuapp/tosu/commit/c436f72cbe57e9054be6feeeb509920784907639))
+* Add support for song select v2 ([d512603](https://github.com/tosuapp/tosu/commit/d51260346fab71db211a5e4c852ebd13add0e6d6))
+* Implement settings for lazer ([5b8e915](https://github.com/tosuapp/tosu/commit/5b8e915f20954567335899807dde91affd5efb96))
+* Lazer tablet settings ([68f918c](https://github.com/tosuapp/tosu/commit/68f918ce89291c6eec8fa4a7107aeaf4d1bbdf0f))
+* Move settings parsing to memory class ([70b9bdd](https://github.com/tosuapp/tosu/commit/70b9bdd0a9ea6fb689ee4642b09c7d394db0184c))
+* terminate overlay process if ingame overlay is disabled ([f82d6c5](https://github.com/tosuapp/tosu/commit/f82d6c5ddb9287f6016ac687511440bf50f98de5))
+* use `difficulty`'s `gradualPerformance` ([a7a15e5](https://github.com/tosuapp/tosu/commit/a7a15e5233d877df009b01cc8acdd87023165164))
+
+
+### Bug Fixes
+
+* Another pp fix ([815b656](https://github.com/tosuapp/tosu/commit/815b656775a05d7a2a207a11f151496a7698f0a9))
+* combo predictions (i hope) ([cd6e1e0](https://github.com/tosuapp/tosu/commit/cd6e1e095de4622587956938abe851cf1649ecb1))
+* Fix mania freezes & Fix PP params ([608971a](https://github.com/tosuapp/tosu/commit/608971aec55263d9f15db8e97debbfe4609490cd))
+* Fix result screen score id ([5abea64](https://github.com/tosuapp/tosu/commit/5abea64cb0a820af61e68d94aaa8ecb65e12c0cf))
+* Prevent overlays to go under black bg ([df6f3b6](https://github.com/tosuapp/tosu/commit/df6f3b65f5640ebc796ddfd0c1c901aece1268be))
+* result screen ([25811ef](https://github.com/tosuapp/tosu/commit/25811efa5cd67da665625d2b357b25153633807c))
+* Skip `Dead` processes ([03d33f8](https://github.com/tosuapp/tosu/commit/03d33f87dafb3e2783e3d10e0e82a0da0a74c6e5))
+* Skip beatmap if it doesnt exists ([0f774ae](https://github.com/tosuapp/tosu/commit/0f774aed8305da5b5acf4d37a282732a49c58d37))
+* Use `while` loop instead of `setTimeout` ([f6cc550](https://github.com/tosuapp/tosu/commit/f6cc550e6a400d3e745fab912609c5fd83a594db))
+* Use while loop instead of setinterval ([a622a83](https://github.com/tosuapp/tosu/commit/a622a83518e03106cffc1e50ed8e7ef29638cc79))
+* wrong `300s` value on the fc pp calc. ([52d38d1](https://github.com/tosuapp/tosu/commit/52d38d1384c1455103df260b6a28f45ff319d76a))
+
 ## [4.9.0](https://github.com/tosuapp/tosu/compare/v4.8.0...v4.9.0) (2025-06-01)
 
 
