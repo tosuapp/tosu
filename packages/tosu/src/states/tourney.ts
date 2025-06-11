@@ -88,9 +88,9 @@ export class TourneyManager extends AbstractState {
 
             this.messages = messages;
 
-            this.resetReportCount('tourney updateState');
+            this.game.resetReportCount('tourney updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'tourney updateState',
                 10,
                 ClientType[this.game.client],
@@ -140,9 +140,9 @@ export class TourneyManager extends AbstractState {
 
             this.isDefaultState = false;
 
-            this.resetReportCount('tourney updateUser');
+            this.game.resetReportCount('tourney updateUser');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'tourney updateUser',
                 10,
                 ClientType[this.game.client],

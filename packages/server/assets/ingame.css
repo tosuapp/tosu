@@ -98,6 +98,7 @@ body.-editing {
 main.main {
     width: 100vw;
     height: 100vh;
+    z-index: 1;
 
     &::before {
         content: '';
@@ -163,7 +164,7 @@ main.main {
     opacity: 0;
     transform: translateX(-50%);
     transition: opacity 0.3s ease, top 0.3s ease;
-    z-index: 1;
+    z-index: 2;
 }
 
 .overlay {

@@ -1,13 +1,16 @@
-export type ConfigList = Record<string, IConfigBindable>;
-export type BindingsList = Record<number, IBindable>;
+export type AllowedTypes =
+    | 'bool'
+    | 'byte'
+    | 'int'
+    | 'double'
+    | 'string'
+    | 'bstring'
+    | 'enum';
 
-export interface IBindable {
-    setValue: (value: any) => void;
-}
+export type ConfigList = Record<string, [AllowedTypes, valuePath: string]>;
+export type BindingsList = Record<number, [AllowedTypes, valuePath: string]>;
 
-export interface IConfigBindable extends IBindable {
-    type: 'bool' | 'byte' | 'int' | 'double' | 'string' | 'bstring' | 'enum';
-}
+export type SettingsObject = Record<string, string | number | boolean>;
 
 export interface Keybinds {
     osu: KeybindsOsu;
@@ -36,6 +39,7 @@ export interface KeybindsTaiko {
 }
 
 export interface Volume {
+    masterInactive: number;
     master: number;
     music: number;
     effect: number;
@@ -51,6 +55,7 @@ export interface Audio {
 export interface Background {
     storyboard: boolean;
     video: boolean;
+    blur: number;
     dim: number;
 }
 
@@ -80,6 +85,7 @@ export interface Offset {
 export interface Cursor {
     useSkinCursor: boolean;
     autoSize: boolean;
+    menuSize: number;
     size: number;
 }
 
@@ -87,10 +93,21 @@ export interface Mouse {
     disableButtons: boolean;
     disableWheel: boolean;
     rawInput: boolean;
+    highPrecision: boolean;
     sensitivity: number;
 }
 
 export interface Mania {
     speedBPMScale: boolean;
     usePerBeatmapSpeedScale: boolean;
+}
+
+export interface Tablet {
+    enabled: boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+    pressureThreshold: number;
 }

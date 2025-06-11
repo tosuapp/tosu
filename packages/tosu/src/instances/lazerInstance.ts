@@ -30,6 +30,7 @@ export class LazerInstance extends AbstractInstance {
             beatmapPP,
             gameplay,
             resultScreen,
+            settings,
             user,
             lazerMultiSpectating
         } = this.getServices([
@@ -74,6 +75,8 @@ export class LazerInstance extends AbstractInstance {
                         continue;
                     }
                 }
+
+                settings.updateState();
 
                 const currentMods =
                     global.status === GameState.play

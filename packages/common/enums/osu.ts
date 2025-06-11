@@ -221,7 +221,7 @@ export enum LazerSettings {
     SaveUsername,
     DisplayStarsMinimum,
     DisplayStarsMaximum,
-    SongSelectGroupingMode,
+    SongSelectGroupMode,
     SongSelectSortingMode,
     RandomSelectAlgorithm,
     ModSelectHotkeyStyle,
@@ -293,5 +293,64 @@ export enum LazerSettings {
     ShowMobileDisclaimer,
     EditorShowStoryboard,
     EditorSubmissionNotifyOnDiscussionReplies,
-    EditorSubmissionLoadInBrowserAfterSubmission
+    EditorSubmissionLoadInBrowserAfterSubmission,
+    WasSupporter
+}
+
+export enum FrameworkSetting {
+    ShowLogOverlay,
+
+    AudioDevice,
+    VolumeUniversal,
+    VolumeEffect,
+    VolumeMusic,
+
+    HardwareVideoDecoder,
+
+    WindowedSize,
+    WindowedPositionX,
+    WindowedPositionY,
+    LastDisplayDevice,
+
+    SizeFullscreen,
+
+    MinimiseOnFocusLossInFullscreen,
+
+    Renderer,
+    WindowMode,
+    ConfineMouseMode,
+    FrameSync,
+    ExecutionMode,
+
+    ShowUnicode,
+    Locale,
+
+    IgnoredInputHandlers,
+
+    CursorSensitivity,
+
+    MapAbsoluteInputToWindow
+}
+
+export enum LazerBeatmapTabType {
+    details,
+    local,
+    country,
+    global,
+    friends,
+    team
+}
+
+export enum LazerSortMode {
+    artist,
+    author,
+    bpm,
+    datesubmitted,
+    dateadded,
+    dateranked,
+    lastplayed,
+    difficulty,
+    length,
+    source,
+    title
 }

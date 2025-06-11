@@ -121,9 +121,9 @@ export class ResultScreen extends AbstractState {
                 hits
             });
 
-            this.resetReportCount('resultScreen updateState');
+            this.game.resetReportCount('resultScreen updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'resultScreen updateState',
                 10,
                 ClientType[this.game.client],
@@ -167,7 +167,7 @@ export class ResultScreen extends AbstractState {
                 lazer: this.game.client === ClientType.lazer
             };
 
-            const scoreParams: rosu.PerformanceArgs = {
+            const calcOptions: rosu.PerformanceArgs = {
                 nGeki: this.hitGeki,
                 n300: this.hit300,
                 nKatu: this.hitKatu,
@@ -182,14 +182,13 @@ export class ResultScreen extends AbstractState {
             };
 
             const t1 = performance.now();
-            const curPerformance = new rosu.Performance(scoreParams).calculate(
+            const curPerformance = new rosu.Performance(calcOptions).calculate(
                 currentBeatmap
             );
 
-            const t2 = performance.now();
-            const fcPerformance = new rosu.Performance({
-                nGeki: this.hitGeki + this.hitMiss,
-                n300: this.hit300,
+            const fcCalcOptions: rosu.PerformanceArgs = {
+                nGeki: this.hitGeki,
+                n300: this.hit300 + this.hitMiss,
                 nKatu: this.hitKatu,
                 n100: this.hit100,
                 n50: this.hit50,
@@ -200,12 +199,28 @@ export class ResultScreen extends AbstractState {
                     beatmapPP.performanceAttributes?.state?.osuSmallTickHits,
                 largeTickHits:
                     beatmapPP.performanceAttributes?.state?.osuLargeTickHits,
-                combo:
-                    this.mode === 3
-                        ? undefined
-                        : beatmapPP.calculatedMapAttributes.maxCombo,
+                combo: beatmapPP.calculatedMapAttributes.maxCombo,
                 ...commonParams
-            }).calculate(curPerformance);
+            };
+            if (this.mode === 3) {
+                fcCalcOptions.nGeki =
+                    this.hitGeki + this.hit100 + this.hit50 + this.hitMiss;
+                fcCalcOptions.n300 = this.hit300;
+                fcCalcOptions.nKatu = this.hitKatu;
+                fcCalcOptions.n100 = 0;
+                fcCalcOptions.n50 = 0;
+                fcCalcOptions.misses = 0;
+                delete fcCalcOptions.sliderEndHits;
+                delete fcCalcOptions.smallTickHits;
+                delete fcCalcOptions.largeTickHits;
+                delete fcCalcOptions.combo;
+                fcCalcOptions.accuracy = this.accuracy;
+            }
+
+            const t2 = performance.now();
+            const fcPerformance = new rosu.Performance(fcCalcOptions).calculate(
+                curPerformance
+            );
 
             this.pp = curPerformance.pp;
             this.fcPP = fcPerformance.pp;
@@ -217,14 +232,14 @@ export class ResultScreen extends AbstractState {
                 ClientType[this.game.client],
                 this.game.pid,
                 `resultScreen updatePerformance`,
-                `pp:${t2 - t1}`,
-                `fc pp:${performance.now() - t2}`
+                `pp:${(t2 - t1).toFixed(2)}`,
+                `fc pp:${(performance.now() - t2).toFixed(2)}`
             );
 
             this.previousBeatmap = key;
-            this.resetReportCount('resultScreen updatePerformance');
+            this.game.resetReportCount('resultScreen updatePerformance');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'resultScreen updatePerformance',
                 10,
                 ClientType[this.game.client],

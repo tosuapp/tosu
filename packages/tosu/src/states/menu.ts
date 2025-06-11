@@ -100,9 +100,9 @@ export class Menu extends AbstractState {
 
             this.previousMD5 = this.checksum;
 
-            this.resetReportCount('menu updateState');
+            this.game.resetReportCount('menu updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'menu updateState',
                 10,
                 ClientType[this.game.client],
@@ -137,9 +137,9 @@ export class Menu extends AbstractState {
             }
 
             this.mp3Length = result;
-            this.resetReportCount('menu updateMP3Length');
+            this.game.resetReportCount('menu updateMP3Length');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'menu updateMP3Length',
                 10,
                 ClientType[this.game.client],

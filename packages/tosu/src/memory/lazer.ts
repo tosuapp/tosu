@@ -1,10 +1,13 @@
 import {
+    ClientType,
     CountryCodes,
+    FrameworkSetting,
     GameState,
     LazerHitResults,
     LazerSettings,
     Rulesets,
     ScoringMode,
+    platformResolver,
     wLogger
 } from '@tosu/common';
 import path from 'path';
@@ -12,8 +15,6 @@ import path from 'path';
 import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
-    IBindingValue,
-    IConfigValue,
     IGameplay,
     IGlobal,
     IGlobalPrecise,
@@ -24,9 +25,8 @@ import type {
     ILeaderboard,
     IMP3Length,
     IMenu,
-    IOffsets,
     IResultScreen,
-    ISettingsPointers,
+    ISettings,
     ITourney,
     ITourneyChat,
     ITourneyUser,
@@ -35,7 +35,11 @@ import type {
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { LeaderboardPlayer, Statistics } from '@/states/types';
-import { netDateBinaryToDate, numberFromDecimal } from '@/utils/converters';
+import {
+    fixDecimals,
+    netDateBinaryToDate,
+    numberFromDecimal
+} from '@/utils/converters';
 import {
     MultiplayerTeamType,
     MultiplayerUserState
@@ -47,7 +51,6 @@ import {
     ModsAcronyms,
     ModsCategories
 } from '@/utils/osuMods.types';
-import type { BindingsList, ConfigList } from '@/utils/settings.types';
 
 type LazerPatternData = {
     sessionIdleTracker: number;
@@ -71,6 +74,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
 
     private currentScreen: number = 0;
+    private scoringDisplayMode: ScoringMode = ScoringMode.standardised;
+    private HUDVisibilityMode: number = 0;
+    private ReplaySettingsOverlay: boolean = true;
 
     private replayMode: boolean = false;
 
@@ -164,16 +170,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.gameBaseAddress;
     }
 
-    private localConfig() {
-        return this.process.readIntPtr(this.gameBase() + 0x3d8);
-    }
-
-    private configStore() {
-        return this.process.readIntPtr(this.localConfig() + 0x20);
-    }
-
     private screenStack() {
         return this.process.readIntPtr(this.gameBase() + 0x600);
+    }
+
+    private checkIfSongSelectV2(address: number) {
+        return this.process.readIntPtr(address + 0x3e8) === this.gameBase();
     }
 
     // checks <game>k__BackingField
@@ -284,11 +286,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private osuConfig() {
-        const configStore = this.configStore();
+        const localConfig = this.process.readIntPtr(this.gameBase() + 0x3d8);
+        const configStore = this.process.readIntPtr(localConfig + 0x20);
         const entries = this.process.readIntPtr(configStore + 0x10);
         const count = this.process.readInt(configStore + 0x38);
 
-        const config: Record<number, any> = {};
+        const config: Record<string, any> = {};
 
         for (let i = 0; i < count; i++) {
             const current = entries + 0x10 + 0x18 * i;
@@ -300,10 +303,189 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             switch (key) {
                 case LazerSettings.ScoreDisplayMode:
-                    config[key] = this.process.readInt(valueAddress);
+                    this.scoringDisplayMode =
+                        this.process.readInt(valueAddress);
                     break;
-                default:
-                    continue;
+
+                case LazerSettings.BeatmapDetailTab:
+                    config.leaderboardType = this.process.readInt(valueAddress);
+                    break;
+
+                case LazerSettings.SongSelectSortingMode:
+                    config.sortType = this.process.readInt(valueAddress);
+                    break;
+
+                case LazerSettings.HUDVisibilityMode:
+                    this.HUDVisibilityMode = this.process.readInt(valueAddress);
+                    break;
+
+                case LazerSettings.ReplaySettingsOverlay:
+                    this.ReplaySettingsOverlay =
+                        this.process.readByte(valueAddress) === 1;
+                    break;
+
+                case LazerSettings.DimLevel:
+                    config['background.dim'] = fixDecimals(
+                        this.process.readDouble(valueAddress)
+                    );
+                    break;
+
+                case LazerSettings.BlurLevel:
+                    config['background.blur'] = fixDecimals(
+                        this.process.readDouble(valueAddress)
+                    );
+                    break;
+
+                case LazerSettings.AudioOffset:
+                    config['audio.offset.universal'] = fixDecimals(
+                        this.process.readDouble(valueAddress)
+                    );
+                    break;
+
+                case LazerSettings.VolumeInactive:
+                    config['audio.volume.musicInactive'] = fixDecimals(
+                        this.process.readDouble(valueAddress)
+                    );
+                    break;
+
+                case LazerSettings.MenuCursorSize:
+                    config['cursor.menuSize'] = fixDecimals(
+                        this.process.readFloat(valueAddress)
+                    );
+                    break;
+
+                case LazerSettings.GameplayCursorSize:
+                    config['cursor.size'] = fixDecimals(
+                        this.process.readFloat(valueAddress)
+                    );
+                    break;
+
+                case LazerSettings.AutoCursorSize:
+                    config['cursor.autoSize'] =
+                        this.process.readByte(valueAddress) === 1;
+                    break;
+
+                case LazerSettings.ShowStoryboard:
+                    config['background.storyboard'] =
+                        this.process.readByte(valueAddress) === 1;
+                    break;
+
+                case LazerSettings.MouseDisableButtons:
+                    config['mouse.disableButtons'] =
+                        this.process.readByte(valueAddress) === 1;
+                    break;
+
+                case LazerSettings.MouseDisableWheel:
+                    config['mouse.disableWheel'] =
+                        this.process.readByte(valueAddress) === 1;
+                    break;
+
+                case LazerSettings.BeatmapHitsounds:
+                    config['audio.ignoreBeatmapSounds'] =
+                        this.process.readByte(valueAddress) === 0;
+                    config['audio.useSkinSamples'] =
+                        this.process.readByte(valueAddress) === 0;
+                    break;
+
+                case LazerSettings.BeatmapSkins:
+                    config['skin.ignoreBeatmapSkins'] =
+                        this.process.readByte(valueAddress) === 0;
+                    break;
+
+                // case LazerSettings.Skin:
+                //     console.log('key', i, key, LazerSettings[key]);
+                //     try { console.log('readIntPtr', this.process.readIntPtr(valueAddress)); } catch (error) { }
+                //     try { console.log('readByte', this.process.readByte(valueAddress)); } catch (error) { }
+                //     try { console.log('readShort', this.process.readShort(valueAddress)); } catch (error) { }
+                //     try { console.log('readInt', this.process.readInt(valueAddress)); } catch (error) { }
+                //     try { console.log('readUInt', this.process.readUInt(valueAddress)); } catch (error) { }
+                //     try { console.log('readPointer', this.process.readPointer(valueAddress)); } catch (error) { }
+                //     try { console.log('readLong', this.process.readLong(valueAddress)); } catch (error) { }
+                //     try { console.log('readFloat', this.process.readFloat(valueAddress)); } catch (error) { }
+                //     try { console.log('readDouble', this.process.readDouble(valueAddress)); } catch (error) { }
+                //     try { console.log('readSharpString', this.process.readSharpString(valueAddress)); } catch (error) { }
+                //     try { console.log('readSharpStringPtr', this.process.readSharpStringPtr(valueAddress)); } catch (error) { }
+                //     // try { console.log('readSharpDictionary', this.process.readSharpDictionary(valueAddress)); } catch (error) { }
+                //     continue;
+            }
+        }
+
+        const frameworkConfig = this.process.readIntPtr(
+            this.gameBase() + 0x5b8
+        );
+        const frameworkConfigStore = this.process.readIntPtr(
+            frameworkConfig + 0x20
+        );
+        const frameworkEntries = this.process.readIntPtr(
+            frameworkConfigStore + 0x10
+        );
+        const frameworkCount = this.process.readInt(
+            frameworkConfigStore + 0x38
+        );
+
+        for (let i = 0; i < frameworkCount; i++) {
+            const current = frameworkEntries + 0x10 + 0x18 * i;
+
+            const key = this.process.readInt(
+                current + 0x10
+            ) as FrameworkSetting;
+            const bindable = this.process.readIntPtr(current);
+
+            const valueAddress = bindable + 0x40;
+
+            switch (key) {
+                case FrameworkSetting.WindowedSize:
+                    config['resolution.width'] = this.process.readInt(
+                        bindable + 0x44
+                    );
+                    config['resolution.height'] = this.process.readInt(
+                        bindable + 0x48
+                    );
+                    break;
+
+                case FrameworkSetting.VolumeUniversal:
+                    config['audio.master'] =
+                        this.process.readDouble(valueAddress);
+                    break;
+
+                case FrameworkSetting.VolumeMusic:
+                    config['audio.music'] =
+                        this.process.readDouble(valueAddress);
+                    break;
+
+                case FrameworkSetting.VolumeEffect:
+                    config['audio.effect'] =
+                        this.process.readDouble(valueAddress);
+                    break;
+
+                case FrameworkSetting.SizeFullscreen:
+                    config['resolution.widthFullscreen'] = this.process.readInt(
+                        bindable + 0x44
+                    );
+                    config['resolution.heightFullscreen'] =
+                        this.process.readInt(bindable + 0x48);
+                    break;
+
+                case FrameworkSetting.CursorSensitivity:
+                    config['mouse.sensitivity'] =
+                        this.process.readDouble(valueAddress);
+                    break;
+
+                // case LazerSettings.Skin:
+                //     console.log('key', i, key, LazerSettings[key]);
+                //     try { console.log('readIntPtr', this.process.readIntPtr(valueAddress)); } catch (error) { }
+                //     try { console.log('readByte', this.process.readByte(valueAddress)); } catch (error) { }
+                //     try { console.log('readShort', this.process.readShort(valueAddress)); } catch (error) { }
+                //     try { console.log('readInt', this.process.readInt(valueAddress)); } catch (error) { }
+                //     try { console.log('readUInt', this.process.readUInt(valueAddress)); } catch (error) { }
+                //     try { console.log('readPointer', this.process.readPointer(valueAddress)); } catch (error) { }
+                //     try { console.log('readLong', this.process.readLong(valueAddress)); } catch (error) { }
+                //     try { console.log('readFloat', this.process.readFloat(valueAddress)); } catch (error) { }
+                //     try { console.log('readDouble', this.process.readDouble(valueAddress)); } catch (error) { }
+                //     try { console.log('readSharpString', this.process.readSharpString(valueAddress)); } catch (error) { }
+                //     try { console.log('readSharpStringPtr', this.process.readSharpStringPtr(valueAddress)); } catch (error) { }
+                //     // try { console.log('readSharpDictionary', this.process.readSharpDictionary(valueAddress)); } catch (error) { }
+                //     continue;
             }
         }
 
@@ -791,9 +973,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         let score = this.process.readLong(scoreInfo + 0x98);
-        const config = this.osuConfig();
-
-        if (config[LazerSettings.ScoreDisplayMode] === ScoringMode.classic) {
+        if (this.scoringDisplayMode === ScoringMode.classic) {
             const objectCount = this.getObjectCountFromMaxStatistics(
                 this.readMaximumStatistics(scoreInfo)
             );
@@ -913,30 +1093,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.readUser(user);
     }
 
-    settingsPointers(): ISettingsPointers {
-        throw new Error('Lazer:settingsPointers not implemented.');
-    }
-
-    configOffsets(_address: number, _list: ConfigList): IOffsets {
-        throw new Error('Lazer:configOffsets not implemented.');
-    }
-
-    bindingsOffsets(_address: number, _list: BindingsList): IOffsets {
-        throw new Error('Lazer:bindingsOffsets not implemented.');
-    }
-
-    configValue(
-        _address: number,
-        _position: number,
-        _list: ConfigList
-    ): IConfigValue {
-        throw new Error('Lazer:configValue not implemented.');
-    }
-
-    bindingValue(_address: number, _position: number): IBindingValue {
-        throw new Error('Lazer:bindingValue not implemented.');
-    }
-
     buildResultScreen(
         scoreInfo: number,
         onlineId: number = -1,
@@ -977,8 +1133,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const scoreInfo = this.process.readIntPtr(selectedScoreBindable + 0x20);
 
         const onlineId = Math.max(
-            this.process.readLong(this.currentScreen + 0xb0),
-            this.process.readLong(this.currentScreen + 0xb8)
+            this.process.readLong(scoreInfo + 0xb0),
+            this.process.readLong(scoreInfo + 0xb8)
         );
 
         const scoreDate = scoreInfo + 0x100;
@@ -1828,6 +1984,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const isPlaying = this.player() !== 0;
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
         const isSongSelect = this.checkIfSongSelect(this.currentScreen);
+        const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
         const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
@@ -1840,6 +1997,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (isPlaying || isPlayerLoader) {
             status = GameState.play;
         } else if (isSongSelect) {
+            status = GameState.selectPlay;
+        } else if (isSongSelectV2) {
             status = GameState.selectPlay;
         } else if (isResultScreen) {
             status = GameState.resultScreen;
@@ -1877,8 +2036,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         return {
             isWatchingReplay: this.replayMode,
-            isReplayUiHidden: false,
-            showInterface: false,
+            isReplayUiHidden: !this.ReplaySettingsOverlay,
+            showInterface: this.HUDVisibilityMode > 0,
             chatStatus: 0,
             isMultiSpectating,
             status,
@@ -2101,5 +2260,123 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         // const channelId = this.process.readInt(room + 0x44);
 
         return { chat: [], spectatingClients };
+    }
+
+    settings(): ISettings {
+        const values = this.osuConfig();
+
+        try {
+            const skinManager = this.process.readIntPtr(
+                this.gameBaseAddress + 0x410
+            );
+            const currentSkin = this.process.readIntPtr(skinManager + 0x50);
+            const value = this.process.readIntPtr(currentSkin + 0x20);
+            const name = this.process.readSharpStringPtr(value + 0x40);
+
+            values['skin.name'] = name;
+
+            this.game.resetReportCount('settings skin');
+        } catch (exc) {
+            this.game.reportError(
+                'settings skin',
+                10,
+                ClientType[this.game.client],
+                this.game.pid,
+                'settings skin',
+                (exc as Error).message
+            );
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                'settings skin',
+                exc
+            );
+        }
+
+        const platform = platformResolver(process.platform);
+        if (platform.type === 'windows') {
+            try {
+                const host = this.process.readIntPtr(
+                    this.gameBaseAddress + 0x338
+                );
+                const inputConfig = this.process.readIntPtr(host + 0x30);
+                const inputHandlers = this.process.readIntPtr(
+                    inputConfig + 0x20
+                );
+
+                const array = this.process.readIntPtr(inputHandlers + 0x8);
+                const size = this.process.readInt(array + 0x8);
+
+                for (let i = 0; i < size; i++) {
+                    const current = this.process.readIntPtr(
+                        array + 0x10 + 0x8 * i
+                    );
+
+                    const enabled =
+                        this.process.readByte(
+                            this.process.readIntPtr(current + 0x18) + 0x40
+                        ) === 1;
+                    if (i === 1) {
+                        const areaOffset = this.process.readIntPtr(
+                            current + 0x48
+                        );
+                        const areaX = this.process.readFloat(areaOffset + 0x44);
+                        const areaY = this.process.readFloat(areaOffset + 0x48);
+
+                        const areaSize = this.process.readIntPtr(
+                            current + 0x50
+                        );
+                        const areaWidth = this.process.readFloat(
+                            areaSize + 0x44
+                        );
+                        const areaHeight = this.process.readFloat(
+                            areaSize + 0x48
+                        );
+
+                        const areaRotation = this.process.readFloat(
+                            this.process.readIntPtr(current + 0x58) + 0x40
+                        );
+                        const pressureThreshold = this.process.readFloat(
+                            this.process.readIntPtr(current + 0x60) + 0x40
+                        );
+
+                        values['tablet.enabled'] = enabled;
+                        values['tablet.x'] = areaX;
+                        values['tablet.y'] = areaY;
+                        values['tablet.width'] = areaWidth;
+                        values['tablet.height'] = areaHeight;
+                        values['tablet.rotation'] = areaRotation;
+                        values['tablet.pressureThreshold'] = pressureThreshold;
+                    }
+
+                    if (i === 5) {
+                        const userRelativeMode =
+                            this.process.readByte(
+                                this.process.readIntPtr(current + 0x28) + 0x40
+                            ) === 1;
+                        values['mouse.highPrecision'] = userRelativeMode;
+                    }
+                }
+
+                this.game.resetReportCount('settings devices');
+            } catch (exc) {
+                this.game.reportError(
+                    'settings devices',
+                    10,
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    'settings devices',
+                    (exc as Error).message
+                );
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    'settings devices',
+                    exc
+                );
+            }
+        }
+
+        return values;
     }
 }

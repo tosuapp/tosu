@@ -38,6 +38,11 @@ export function beatmapFileShortcut(
         });
     }
 
+    if (!folder || !fileName) {
+        res.writeHead(404);
+        return res.end();
+    }
+
     const filePath = path.join(folder, fileName);
     const fileStat = fs.statSync(filePath);
     if (!fileStat.isFile() || !fs.existsSync(filePath)) {

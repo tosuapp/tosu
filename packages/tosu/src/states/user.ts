@@ -36,9 +36,9 @@ export class User extends AbstractState {
             this.backgroundColour = profile.backgroundColour;
             this.rawLoginStatus = profile.rawLoginStatus;
 
-            this.resetReportCount('user updateState');
+            this.game.resetReportCount('user updateState');
         } catch (exc) {
-            this.reportError(
+            this.game.reportError(
                 'user updateState',
                 10,
                 ClientType[this.game.client],
