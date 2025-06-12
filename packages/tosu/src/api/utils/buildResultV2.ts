@@ -173,8 +173,18 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             bassDensity: bassDensity.density,
 
-            resolution: settings.resolution,
-            client: settings.client,
+            resolution: {
+                fullscreen: settings.resolution.fullscreen,
+                width: settings.resolution.width,
+                height: settings.resolution.height,
+                widthFullscreen: settings.resolution.widthFullscreen,
+                heightFullscreen: settings.resolution.heightFullscreen
+            },
+            client: {
+                updateAvailable: settings.client.updateAvailable,
+                branch: settings.client.branch,
+                version: settings.client.version
+            },
 
             scoreMeter: {
                 type: {
@@ -183,10 +193,32 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 },
                 size: settings.scoreMeter.size
             },
-            cursor: settings.cursor,
-            mouse: settings.mouse,
-            tablet: settings.tablet,
-            mania: settings.mania,
+            cursor: {
+                useSkinCursor: settings.cursor.useSkinCursor,
+                autoSize: settings.cursor.autoSize,
+                size: settings.cursor.size,
+                menuSize: settings.cursor.menuSize
+            },
+            mouse: {
+                rawInput: settings.mouse.rawInput,
+                highPrecision: settings.mouse.highPrecision,
+                disableButtons: settings.mouse.disableButtons,
+                disableWheel: settings.mouse.disableWheel,
+                sensitivity: settings.mouse.sensitivity
+            },
+            tablet: {
+                enabled: settings.tablet.enabled,
+                x: settings.tablet.x,
+                y: settings.tablet.y,
+                width: settings.tablet.width,
+                height: settings.tablet.height,
+                rotation: settings.tablet.rotation,
+                pressureThreshold: settings.tablet.pressureThreshold
+            },
+            mania: {
+                speedBPMScale: settings.mania.speedBPMScale,
+                usePerBeatmapSpeedScale: settings.mania.usePerBeatmapSpeedScale
+            },
 
             sort: {
                 number: settings.sortType,
@@ -200,15 +232,54 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 name: GroupType[settings.groupType] || ''
             },
 
-            skin: settings.skin,
+            skin: {
+                useDefaultSkinInEditor: settings.skin.useDefaultSkinInEditor,
+                ignoreBeatmapSkins: settings.skin.ignoreBeatmapSkins,
+                tintSliderBall: settings.skin.tintSliderBall,
+                useTaikoSkin: settings.skin.useTaikoSkin,
+                name: settings.skin.name
+            },
             mode: {
                 number: menu.gamemode,
                 name: Rulesets[menu.gamemode] || ''
             },
-            audio: settings.audio,
-            background: settings.background,
+            audio: {
+                ignoreBeatmapSounds: settings.audio.ignoreBeatmapSounds,
+                useSkinSamples: settings.audio.useSkinSamples,
+                volume: {
+                    masterInactive: settings.audio.volume.masterInactive,
+                    master: settings.audio.volume.master,
+                    music: settings.audio.volume.music,
+                    effect: settings.audio.volume.effect
+                },
+                offset: { universal: settings.audio.offset.universal }
+            },
+            background: {
+                storyboard: settings.background.storyboard,
+                video: settings.background.video,
+                blur: settings.background.blur,
+                dim: settings.background.dim
+            },
 
-            keybinds: settings.keybinds
+            keybinds: {
+                osu: {
+                    k1: settings.keybinds.osu.k1,
+                    k2: settings.keybinds.osu.k2,
+                    smokeKey: settings.keybinds.osu.smokeKey
+                },
+                fruits: {
+                    k1: settings.keybinds.fruits.k1,
+                    k2: settings.keybinds.fruits.k2,
+                    Dash: settings.keybinds.fruits.Dash
+                },
+                taiko: {
+                    innerLeft: settings.keybinds.taiko.innerLeft,
+                    innerRight: settings.keybinds.taiko.innerRight,
+                    outerLeft: settings.keybinds.taiko.outerLeft,
+                    outerRight: settings.keybinds.taiko.outerRight
+                },
+                quickRetry: settings.keybinds.quickRetry
+            }
         },
         profile: {
             userStatus: {
@@ -272,7 +343,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             titleUnicode: menu.titleOriginal,
 
             mapper: menu.creator,
-
             version: menu.difficulty,
 
             stats: buildBeatmapStats(beatmapPP)
