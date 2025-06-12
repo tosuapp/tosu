@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 import { cleanPath } from '@/utils/converters';
@@ -31,6 +31,7 @@ export class Menu extends AbstractState {
     pendingChecksum: string = '';
     mapChangeTime: number = 0;
 
+    @measureTime
     updateState() {
         try {
             const result = this.game.memory.menu(this.previousMD5);
@@ -119,6 +120,7 @@ export class Menu extends AbstractState {
         }
     }
 
+    @measureTime
     updateMP3Length() {
         try {
             const result = this.game.memory.mp3Length();

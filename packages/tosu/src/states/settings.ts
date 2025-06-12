@@ -1,4 +1,4 @@
-import { ClientType, setNestedValue, wLogger } from '@tosu/common';
+import { ClientType, measureTime, setNestedValue, wLogger } from '@tosu/common';
 
 import type {
     Audio,
@@ -119,6 +119,7 @@ export class Settings extends AbstractState {
     leaderboardType: number = 0;
     progressBarType: number = 0;
 
+    @measureTime
     updateState() {
         try {
             const settings = this.game.memory.settings();

@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
@@ -17,6 +17,7 @@ export class User extends AbstractState {
     backgroundColour: number;
     rawLoginStatus: number;
 
+    @measureTime
     updateState() {
         try {
             const profile = this.game.memory.user();
