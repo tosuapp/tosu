@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
@@ -51,6 +51,7 @@ export class TourneyManager extends AbstractState {
         this.userID = 0;
     }
 
+    @measureTime
     updateState() {
         try {
             wLogger.debug(
@@ -107,6 +108,7 @@ export class TourneyManager extends AbstractState {
         }
     }
 
+    @measureTime
     updateUser() {
         try {
             const gameplay = this.game.get('gameplay');
