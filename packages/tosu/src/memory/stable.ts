@@ -73,6 +73,7 @@ const configList: ConfigList = {
     IgnoreBeatmapSamples: ['bool', 'audio.ignoreBeatmapSounds'],
     SkinSamples: ['bool', 'audio.useSkinSamples'],
     LastVersion: ['bstring', 'client.version'],
+    ManiaSpeed: ['int', 'mania.scrollSpeed'],
     ManiaSpeedBPMScale: ['bool', 'mania.speedBPMScale'],
     UsePerBeatmapManiaSpeed: ['bool', 'mania.usePerBeatmapSpeedScale'],
     MouseDisableButtons: ['bool', 'mouse.disableButtons'],

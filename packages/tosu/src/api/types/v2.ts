@@ -114,6 +114,11 @@ export interface Tablet {
 export interface Mania {
     speedBPMScale: boolean;
     usePerBeatmapSpeedScale: boolean;
+    scrollSpeed: number;
+    scrollDirection: {
+        number: number;
+        name: string;
+    };
 }
 
 export interface Skin {
