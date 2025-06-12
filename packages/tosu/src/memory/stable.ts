@@ -50,6 +50,7 @@ export type OsuPatternData = {
     rawLoginStatusPtr: number;
     spectatingUserPtr: number;
     gameTimePtr: number;
+    setSpeedAddr: number;
 };
 
 const configList: ConfigList = {
@@ -167,6 +168,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         gameTimePtr: {
             pattern: 'A1 ?? ?? ?? ?? 89 46 04 8B D6 E8',
             offset: 0x1
+        },
+        setSpeedAddr: {
+            pattern: 'a3 ?? ?? ?? ?? eb ?? dd 45 08 db 5d e8 8b 45 e8 83 f8 28',
+            offset: 0x1
         }
     };
 
@@ -186,7 +191,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         userProfilePtr: 0,
         rawLoginStatusPtr: 0,
         spectatingUserPtr: 0,
-        gameTimePtr: 0
+        gameTimePtr: 0,
+        setSpeedAddr: 0
     };
 
     TOURNAMENT_CHAT_ENGINE = 'A1 ?? ?? ?? ?? 89 45 F0 8B D1 85 C9 75';
@@ -1225,9 +1231,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
     settings(): ISettings {
         try {
-            const { configurationAddr: asd, bindingsAddr } = this.getPatterns([
+            const {
+                configurationAddr: asd,
+                bindingsAddr,
+                setSpeedAddr
+            } = this.getPatterns([
                 'configurationAddr',
-                'bindingsAddr'
+                'bindingsAddr',
+                'setSpeedAddr'
             ]);
 
             const configPointer = this.process.readPointer(asd);
@@ -1313,6 +1324,29 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         exc
                     );
                 }
+            }
+
+            try {
+                const maniaSpeedPtr = this.process.readIntPtr(setSpeedAddr);
+                const maniaSpeed = this.process.readInt(maniaSpeedPtr);
+
+                settings['mania.scrollSpeed'] = maniaSpeed;
+                this.game.resetReportCount(`settings maniaSpeed`);
+            } catch (exc) {
+                this.game.reportError(
+                    `settings maniaSpeed`,
+                    10,
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `settings maniaSpeed`,
+                    (exc as any).message
+                );
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `settings maniaSpeed`,
+                    exc
+                );
             }
 
             return settings;
