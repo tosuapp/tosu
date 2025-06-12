@@ -12,7 +12,7 @@ import type {
     Tablet
 } from '@/api/types/v2';
 import { AbstractState } from '@/states/index';
-import type { SettingsScoreMeter } from '@/utils/settings.types';
+import type { SettingsMania, SettingsScoreMeter } from '@/utils/settings.types';
 
 export class Settings extends AbstractState {
     audio: Audio = {
@@ -78,7 +78,12 @@ export class Settings extends AbstractState {
         pressureThreshold: 0
     };
 
-    mania: Mania = { speedBPMScale: false, usePerBeatmapSpeedScale: false };
+    mania: SettingsMania = {
+        speedBPMScale: false,
+        usePerBeatmapSpeedScale: false,
+        scrollSpeed: 0,
+        scrollDirection: 1
+    };
 
     skin: Skin = {
         useDefaultSkinInEditor: false,

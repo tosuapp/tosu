@@ -8,6 +8,7 @@ import {
     LazerBeatmapTabType,
     LazerSortMode,
     LeaderboardType,
+    ManiaScrollingDirection,
     ProgressBarType,
     Rulesets,
     ScoreMeterType,
@@ -217,7 +218,14 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             mania: {
                 speedBPMScale: settings.mania.speedBPMScale,
-                usePerBeatmapSpeedScale: settings.mania.usePerBeatmapSpeedScale
+                usePerBeatmapSpeedScale: settings.mania.usePerBeatmapSpeedScale,
+                scrollSpeed: settings.mania.scrollSpeed,
+                scrollDirection: {
+                    number: settings.mania.scrollDirection,
+                    name: ManiaScrollingDirection[
+                        settings.mania.scrollDirection
+                    ]
+                }
             },
 
             sort: {
