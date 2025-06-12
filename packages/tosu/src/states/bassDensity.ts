@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 
@@ -7,6 +7,7 @@ export class BassDensity extends AbstractState {
     currentAudioVelocity: number = 0.0;
     density: number = 0.0;
 
+    @measureTime
     updateState() {
         try {
             const audioVelocityBase = this.game.memory.audioVelocityBase();

@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
 import { cleanPath } from '@/utils/converters';
@@ -35,6 +35,7 @@ export class Global extends AbstractState {
         this.songsFolder = value;
     }
 
+    @measureTime
     updateState() {
         try {
             const result = this.game.memory.global();
