@@ -377,13 +377,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
                 case LazerSettings.DimLevel:
                     config['background.dim'] = fixDecimals(
-                        this.process.readDouble(address)
+                        this.process.readDouble(address) * 100
                     );
                     break;
 
                 case LazerSettings.BlurLevel:
                     config['background.blur'] = fixDecimals(
-                        this.process.readDouble(address)
+                        this.process.readDouble(address) * 100
                     );
                     break;
 
@@ -395,7 +395,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
                 case LazerSettings.VolumeInactive:
                     config['audio.volume.musicInactive'] = fixDecimals(
-                        this.process.readDouble(address)
+                        this.process.readDouble(address) * 100
                     );
                     break;
 
@@ -466,15 +466,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     break;
 
                 case FrameworkSetting.VolumeUniversal:
-                    config['audio.master'] = this.process.readDouble(address);
+                    config['audio.volume.master'] = fixDecimals(
+                        this.process.readDouble(address) * 100
+                    );
                     break;
 
                 case FrameworkSetting.VolumeMusic:
-                    config['audio.music'] = this.process.readDouble(address);
+                    config['audio.volume.music'] = fixDecimals(
+                        this.process.readDouble(address) * 100
+                    );
                     break;
 
                 case FrameworkSetting.VolumeEffect:
-                    config['audio.effect'] = this.process.readDouble(address);
+                    config['audio.volume.effect'] = fixDecimals(
+                        this.process.readDouble(address) * 100
+                    );
                     break;
 
                 case FrameworkSetting.SizeFullscreen:
