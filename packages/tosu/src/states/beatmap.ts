@@ -730,7 +730,6 @@ export class BeatmapPP extends AbstractState {
                 oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
             }
 
-
             for (let i = 0; i < LEFT_OFFSET; i++) {
                 resultStrains.xaxis.push(i * sectionOffsetTime);
             }
