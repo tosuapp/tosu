@@ -354,3 +354,34 @@ export enum LazerSortMode {
     source,
     title
 }
+
+export enum LazerManiaSetting {
+    scrollSpeed,
+    scrollDirection,
+    timingBasedNoteColouring,
+    mobileLayout
+}
+
+export enum LazerOsuSetting {
+    snakingInSliders,
+    snakingOutSliders,
+    showCursorTrail,
+    showCursorRipples,
+    playfieldBorderStyle,
+
+    // Replay
+    replayClickMarkersEnabled,
+    replayFrameMarkersEnabled,
+    replayCursorPathEnabled,
+    replayCursorHideEnabled,
+    replayAnalysisDisplayLength
+}
+
+export enum LazerTaikoSetting {
+    touchControlScheme
+}
+
+export enum ManiaScrollingDirection {
+    up = 0,
+    down = 1
+}

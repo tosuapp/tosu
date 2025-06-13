@@ -4,6 +4,7 @@ import {
     FrameworkSetting,
     GameState,
     LazerHitResults,
+    LazerManiaSetting,
     LazerSettings,
     Rulesets,
     ScoringMode,
@@ -60,6 +61,35 @@ interface KeyCounter {
     isPressed: boolean;
     count: number;
 }
+
+const localConfigList = [
+    LazerSettings.ScoreDisplayMode,
+    LazerSettings.BeatmapDetailTab,
+    LazerSettings.SongSelectSortingMode,
+    LazerSettings.HUDVisibilityMode,
+    LazerSettings.ReplaySettingsOverlay,
+    LazerSettings.DimLevel,
+    LazerSettings.BlurLevel,
+    LazerSettings.AudioOffset,
+    LazerSettings.VolumeInactive,
+    LazerSettings.MenuCursorSize,
+    LazerSettings.GameplayCursorSize,
+    LazerSettings.AutoCursorSize,
+    LazerSettings.ShowStoryboard,
+    LazerSettings.MouseDisableButtons,
+    LazerSettings.MouseDisableWheel,
+    LazerSettings.BeatmapHitsounds,
+    LazerSettings.BeatmapSkins
+];
+
+const frameworkConfigList = [
+    FrameworkSetting.WindowedSize,
+    FrameworkSetting.VolumeUniversal,
+    FrameworkSetting.VolumeMusic,
+    FrameworkSetting.VolumeEffect,
+    FrameworkSetting.SizeFullscreen,
+    FrameworkSetting.CursorSensitivity
+];
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private scanPatterns: ScanPatterns = {
@@ -285,209 +315,233 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.process.readIntPtr(items + 0x10 + 0x8 * (count - 1));
     }
 
-    private osuConfig() {
-        const localConfig = this.process.readIntPtr(this.gameBase() + 0x3d8);
-        const configStore = this.process.readIntPtr(localConfig + 0x20);
+    private readConfigstore(configAddress: number, keys: number[]) {
+        const configStore = this.process.readIntPtr(configAddress + 0x20);
         const entries = this.process.readIntPtr(configStore + 0x10);
         const count = this.process.readInt(configStore + 0x38);
 
+        const config: Record<string | number, any> = {};
+
+        if (keys.length > 0)
+            for (let i = 0; i < count; i++) {
+                const current = entries + 0x10 + 0x18 * i;
+
+                const key = this.process.readInt(current + 0x10);
+                if (!keys.includes(key)) continue;
+
+                config[key] = this.process.readIntPtr(current) + 0x40;
+            }
+        else
+            for (let i = 0; i < count; i++) {
+                const current = entries + 0x10 + 0x18 * i;
+
+                const key = this.process.readInt(current + 0x10);
+                config[key] = this.process.readIntPtr(current) + 0x40;
+            }
+
+        return config;
+    }
+
+    private osuConfig() {
         const config: Record<string, any> = {};
+        const gameBase = this.gameBase();
 
-        for (let i = 0; i < count; i++) {
-            const current = entries + 0x10 + 0x18 * i;
+        const localConfig = this.process.readIntPtr(gameBase + 0x3d8);
+        const localValues = this.readConfigstore(localConfig, localConfigList);
 
-            const key = this.process.readInt(current + 0x10) as LazerSettings;
-            const bindable = this.process.readIntPtr(current);
-
-            const valueAddress = bindable + 0x40;
+        for (let i = 0; i < localConfigList.length; i++) {
+            const key = localConfigList[i];
+            const address = localValues[key];
 
             switch (key) {
                 case LazerSettings.ScoreDisplayMode:
-                    this.scoringDisplayMode =
-                        this.process.readInt(valueAddress);
+                    this.scoringDisplayMode = this.process.readInt(address);
                     break;
 
                 case LazerSettings.BeatmapDetailTab:
-                    config.leaderboardType = this.process.readInt(valueAddress);
+                    config.leaderboardType = this.process.readInt(address);
                     break;
 
                 case LazerSettings.SongSelectSortingMode:
-                    config.sortType = this.process.readInt(valueAddress);
+                    config.sortType = this.process.readInt(address);
                     break;
 
                 case LazerSettings.HUDVisibilityMode:
-                    this.HUDVisibilityMode = this.process.readInt(valueAddress);
+                    this.HUDVisibilityMode = this.process.readInt(address);
                     break;
 
                 case LazerSettings.ReplaySettingsOverlay:
                     this.ReplaySettingsOverlay =
-                        this.process.readByte(valueAddress) === 1;
+                        this.process.readByte(address) === 1;
                     break;
 
                 case LazerSettings.DimLevel:
                     config['background.dim'] = fixDecimals(
-                        this.process.readDouble(valueAddress)
+                        this.process.readDouble(address) * 100
                     );
                     break;
 
                 case LazerSettings.BlurLevel:
                     config['background.blur'] = fixDecimals(
-                        this.process.readDouble(valueAddress)
+                        this.process.readDouble(address) * 100
                     );
                     break;
 
                 case LazerSettings.AudioOffset:
                     config['audio.offset.universal'] = fixDecimals(
-                        this.process.readDouble(valueAddress)
+                        this.process.readDouble(address)
                     );
                     break;
 
                 case LazerSettings.VolumeInactive:
                     config['audio.volume.musicInactive'] = fixDecimals(
-                        this.process.readDouble(valueAddress)
+                        this.process.readDouble(address) * 100
                     );
                     break;
 
                 case LazerSettings.MenuCursorSize:
                     config['cursor.menuSize'] = fixDecimals(
-                        this.process.readFloat(valueAddress)
+                        this.process.readFloat(address)
                     );
                     break;
 
                 case LazerSettings.GameplayCursorSize:
                     config['cursor.size'] = fixDecimals(
-                        this.process.readFloat(valueAddress)
+                        this.process.readFloat(address)
                     );
                     break;
 
                 case LazerSettings.AutoCursorSize:
                     config['cursor.autoSize'] =
-                        this.process.readByte(valueAddress) === 1;
+                        this.process.readByte(address) === 1;
                     break;
 
                 case LazerSettings.ShowStoryboard:
                     config['background.storyboard'] =
-                        this.process.readByte(valueAddress) === 1;
+                        this.process.readByte(address) === 1;
                     break;
 
                 case LazerSettings.MouseDisableButtons:
                     config['mouse.disableButtons'] =
-                        this.process.readByte(valueAddress) === 1;
+                        this.process.readByte(address) === 1;
                     break;
 
                 case LazerSettings.MouseDisableWheel:
                     config['mouse.disableWheel'] =
-                        this.process.readByte(valueAddress) === 1;
+                        this.process.readByte(address) === 1;
                     break;
 
                 case LazerSettings.BeatmapHitsounds:
                     config['audio.ignoreBeatmapSounds'] =
-                        this.process.readByte(valueAddress) === 0;
+                        this.process.readByte(address) === 0;
                     config['audio.useSkinSamples'] =
-                        this.process.readByte(valueAddress) === 0;
+                        this.process.readByte(address) === 0;
                     break;
 
                 case LazerSettings.BeatmapSkins:
                     config['skin.ignoreBeatmapSkins'] =
-                        this.process.readByte(valueAddress) === 0;
+                        this.process.readByte(address) === 0;
                     break;
-
-                // case LazerSettings.Skin:
-                //     console.log('key', i, key, LazerSettings[key]);
-                //     try { console.log('readIntPtr', this.process.readIntPtr(valueAddress)); } catch (error) { }
-                //     try { console.log('readByte', this.process.readByte(valueAddress)); } catch (error) { }
-                //     try { console.log('readShort', this.process.readShort(valueAddress)); } catch (error) { }
-                //     try { console.log('readInt', this.process.readInt(valueAddress)); } catch (error) { }
-                //     try { console.log('readUInt', this.process.readUInt(valueAddress)); } catch (error) { }
-                //     try { console.log('readPointer', this.process.readPointer(valueAddress)); } catch (error) { }
-                //     try { console.log('readLong', this.process.readLong(valueAddress)); } catch (error) { }
-                //     try { console.log('readFloat', this.process.readFloat(valueAddress)); } catch (error) { }
-                //     try { console.log('readDouble', this.process.readDouble(valueAddress)); } catch (error) { }
-                //     try { console.log('readSharpString', this.process.readSharpString(valueAddress)); } catch (error) { }
-                //     try { console.log('readSharpStringPtr', this.process.readSharpStringPtr(valueAddress)); } catch (error) { }
-                //     // try { console.log('readSharpDictionary', this.process.readSharpDictionary(valueAddress)); } catch (error) { }
-                //     continue;
             }
         }
 
-        const frameworkConfig = this.process.readIntPtr(
-            this.gameBase() + 0x5b8
-        );
-        const frameworkConfigStore = this.process.readIntPtr(
-            frameworkConfig + 0x20
-        );
-        const frameworkEntries = this.process.readIntPtr(
-            frameworkConfigStore + 0x10
-        );
-        const frameworkCount = this.process.readInt(
-            frameworkConfigStore + 0x38
+        const frameworkConfig = this.process.readIntPtr(gameBase + 0x5b8);
+        const frameworkValues = this.readConfigstore(
+            frameworkConfig,
+            frameworkConfigList
         );
 
-        for (let i = 0; i < frameworkCount; i++) {
-            const current = frameworkEntries + 0x10 + 0x18 * i;
-
-            const key = this.process.readInt(
-                current + 0x10
-            ) as FrameworkSetting;
-            const bindable = this.process.readIntPtr(current);
-
-            const valueAddress = bindable + 0x40;
+        for (let i = 0; i < frameworkConfigList.length; i++) {
+            const key = frameworkConfigList[i];
+            const address = frameworkValues[key];
 
             switch (key) {
                 case FrameworkSetting.WindowedSize:
                     config['resolution.width'] = this.process.readInt(
-                        bindable + 0x44
+                        address + 0x4
                     );
                     config['resolution.height'] = this.process.readInt(
-                        bindable + 0x48
+                        address + 0x8
                     );
                     break;
 
                 case FrameworkSetting.VolumeUniversal:
-                    config['audio.master'] =
-                        this.process.readDouble(valueAddress);
+                    config['audio.volume.master'] = fixDecimals(
+                        this.process.readDouble(address) * 100
+                    );
                     break;
 
                 case FrameworkSetting.VolumeMusic:
-                    config['audio.music'] =
-                        this.process.readDouble(valueAddress);
+                    config['audio.volume.music'] = fixDecimals(
+                        this.process.readDouble(address) * 100
+                    );
                     break;
 
                 case FrameworkSetting.VolumeEffect:
-                    config['audio.effect'] =
-                        this.process.readDouble(valueAddress);
+                    config['audio.volume.effect'] = fixDecimals(
+                        this.process.readDouble(address) * 100
+                    );
                     break;
 
                 case FrameworkSetting.SizeFullscreen:
                     config['resolution.widthFullscreen'] = this.process.readInt(
-                        bindable + 0x44
+                        address + 0x4
                     );
                     config['resolution.heightFullscreen'] =
-                        this.process.readInt(bindable + 0x48);
+                        this.process.readInt(address + 0x8);
                     break;
 
                 case FrameworkSetting.CursorSensitivity:
                     config['mouse.sensitivity'] =
-                        this.process.readDouble(valueAddress);
+                        this.process.readDouble(address);
                     break;
-
-                // case LazerSettings.Skin:
-                //     console.log('key', i, key, LazerSettings[key]);
-                //     try { console.log('readIntPtr', this.process.readIntPtr(valueAddress)); } catch (error) { }
-                //     try { console.log('readByte', this.process.readByte(valueAddress)); } catch (error) { }
-                //     try { console.log('readShort', this.process.readShort(valueAddress)); } catch (error) { }
-                //     try { console.log('readInt', this.process.readInt(valueAddress)); } catch (error) { }
-                //     try { console.log('readUInt', this.process.readUInt(valueAddress)); } catch (error) { }
-                //     try { console.log('readPointer', this.process.readPointer(valueAddress)); } catch (error) { }
-                //     try { console.log('readLong', this.process.readLong(valueAddress)); } catch (error) { }
-                //     try { console.log('readFloat', this.process.readFloat(valueAddress)); } catch (error) { }
-                //     try { console.log('readDouble', this.process.readDouble(valueAddress)); } catch (error) { }
-                //     try { console.log('readSharpString', this.process.readSharpString(valueAddress)); } catch (error) { }
-                //     try { console.log('readSharpStringPtr', this.process.readSharpStringPtr(valueAddress)); } catch (error) { }
-                //     // try { console.log('readSharpDictionary', this.process.readSharpDictionary(valueAddress)); } catch (error) { }
-                //     continue;
             }
         }
+
+        const rulesetConfigCache = this.process.readIntPtr(gameBase + 0x498);
+        const configCache = this.process.readIntPtr(rulesetConfigCache + 0x208);
+        const rulesetEntries = this.process.readIntPtr(configCache + 0x10);
+        const rulesetCount = this.process.readInt(configCache + 0x38);
+
+        for (let i = 0; i < rulesetCount; i++) {
+            const current = rulesetEntries + 0x10 + 0x18 * i;
+
+            const key = this.process.readSharpStringPtr(current);
+            if (key !== 'mania') continue;
+
+            const rulesetConfig = this.process.readIntPtr(current + 0x8);
+            if (rulesetConfig === 0) continue;
+
+            const values = this.readConfigstore(rulesetConfig, []);
+            // console.log(i, key.padEnd(6, ' '), configStore.toString(16), values, '\n\n');
+
+            switch (key) {
+                case 'mania': {
+                    config['mania.scrollSpeed'] = this.process.readDouble(
+                        values[LazerManiaSetting.scrollSpeed]
+                    );
+                    config['mania.scrollDirection'] = this.process.readInt(
+                        values[LazerManiaSetting.scrollDirection]
+                    );
+                    break;
+                }
+            }
+        }
+
+        // const valueAddress = localValues[LazerSettings.AlwaysPlayFirstComboBreak];
+        // console.log('address', 'AlwaysPlayFirstComboBreak', valueAddress);
+        // try { console.log('readIntPtr', this.process.readIntPtr(valueAddress)); } catch (error) { }
+        // try { console.log('readByte', this.process.readByte(valueAddress)); } catch (error) { }
+        // try { console.log('readShort', this.process.readShort(valueAddress)); } catch (error) { }
+        // try { console.log('readInt', this.process.readInt(valueAddress)); } catch (error) { }
+        // try { console.log('readUInt', this.process.readUInt(valueAddress)); } catch (error) { }
+        // try { console.log('readPointer', this.process.readPointer(valueAddress)); } catch (error) { }
+        // try { console.log('readLong', this.process.readLong(valueAddress)); } catch (error) { }
+        // try { console.log('readFloat', this.process.readFloat(valueAddress)); } catch (error) { }
+        // try { console.log('readDouble', this.process.readDouble(valueAddress)); } catch (error) { }
+        // try { console.log('readSharpString', this.process.readSharpString(valueAddress)); } catch (error) { }
+        // try { console.log('readSharpStringPtr', this.process.readSharpStringPtr(valueAddress)); } catch (error) { }
+        // // try { console.log('readSharpDictionary', this.process.readSharpDictionary(valueAddress)); } catch (error) { }
 
         return config;
     }
