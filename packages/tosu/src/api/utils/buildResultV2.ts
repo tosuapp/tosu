@@ -496,6 +496,12 @@ const buildLazerTourneyData = (
                     ipcId: index,
                     team: client.team === 'red' ? 'left' : 'right',
 
+                    settings: {
+                        mania: {
+                            scrollSpeed: 0
+                        }
+                    },
+
                     user: {
                         id: (client.user as IUserProtected).id,
                         name: client.user.name,
@@ -694,13 +700,15 @@ const buildTourneyData = (
                 gameplay,
                 resultScreen,
                 tourneyManager,
-                beatmapPP
+                beatmapPP,
+                settings
             } = instance.getServices([
                 'global',
                 'gameplay',
                 'resultScreen',
                 'tourneyManager',
-                'beatmapPP'
+                'beatmapPP',
+                'settings'
             ]);
 
             const currentMods =
@@ -716,6 +724,11 @@ const buildTourneyData = (
             return {
                 ipcId: instance.ipcId,
                 team: spectatorTeam,
+                settings: {
+                    mania: {
+                        scrollSpeed: settings.mania.scrollSpeed
+                    }
+                },
                 user: {
                     id: tourneyManager.userID,
                     name: tourneyManager.userName,

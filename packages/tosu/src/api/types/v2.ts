@@ -514,6 +514,11 @@ export interface TourneyChatMessages {
 export interface TourneyClients {
     ipcId: number;
     team: 'left' | 'right';
+    settings: {
+        mania: {
+            scrollSpeed: number;
+        };
+    };
     user: {
         id: number;
         name: string;
