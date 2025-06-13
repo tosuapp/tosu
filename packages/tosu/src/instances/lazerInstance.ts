@@ -155,7 +155,6 @@ export class LazerInstance extends AbstractInstance {
                         // reset before first object
                         if (global.playTime <= beatmapPP.timings.firstObj) {
                             gameplay.resetQuick();
-                            break;
                         }
 
                         gameplay.updateState();
