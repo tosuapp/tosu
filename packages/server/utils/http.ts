@@ -185,7 +185,7 @@ export class HttpServer {
                     typeof exc === 'string' ? exc : (exc as Error).message;
 
                 res.statusCode = 500;
-                res.statusMessage = message;
+                res.statusMessage = encodeURI(message);
 
                 wLogger.warn(`[server] ${parsedURL.pathname}`, message);
                 wLogger.debug(`[server] ${parsedURL.pathname}`, exc);
