@@ -10,7 +10,7 @@ export const updateProgressBar = (
     progress: number,
     message: string = ''
 ): void => {
-    const coloredText = colorText('info');
+    const coloredText = colorText('info', 'info');
     if (message) message = ` - ${message}`;
 
     const filledWidth = Math.round(progressBarWidth * progress);
