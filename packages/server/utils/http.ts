@@ -184,7 +184,7 @@ export class HttpServer {
                 const message =
                     typeof exc === 'string' ? exc : (exc as Error).message;
 
-                if ((exc as NodeJS.ErrnoException).code === 'ENOENT')
+                if ((exc as NodeJS.ErrnoException)?.code === 'ENOENT')
                     res.statusMessage = encodeURI(
                         `${parsedURL.pathname} ENOENT: no such file or directory`
                     );
