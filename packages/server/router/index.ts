@@ -429,7 +429,7 @@ export default function buildBaseApi(server: Server) {
                 if (err) {
                     wLogger.debug('/ingame', err);
                     res.writeHead(500);
-                    return res.end(`Server Error: ${err.code}\n${err.message}`);
+                    return res.end(`Server Error: ${err.code}`);
                 }
 
                 const counters = getLocalCounters();

@@ -184,8 +184,13 @@ export class HttpServer {
                 const message =
                     typeof exc === 'string' ? exc : (exc as Error).message;
 
+                if ((exc as NodeJS.ErrnoException).code === 'ENOENT')
+                    res.statusMessage = encodeURI(
+                        `${parsedURL.pathname} ENOENT: no such file or directory`
+                    );
+                else res.statusMessage = encodeURI(message);
+
                 res.statusCode = 500;
-                res.statusMessage = encodeURI(message);
 
                 wLogger.warn(`[server] ${parsedURL.pathname}`, message);
                 wLogger.debug(`[server] ${parsedURL.pathname}`, exc);
