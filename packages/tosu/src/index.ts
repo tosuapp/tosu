@@ -83,7 +83,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
             1024 /
             1024;
 
-        if (size >= 500) {
+        if (size >= 100) {
             logs.forEach((file) => rmSync(join(logsPath, file)));
             wLogger.debug(
                 `The logs folder was cleared due to its size. (${size.toFixed(0)} MB)`
