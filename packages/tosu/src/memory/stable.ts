@@ -192,7 +192,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
     TOURNAMENT_CHAT_ENGINE = 'A1 ?? ?? ?? ?? 89 45 F0 8B D1 85 C9 75';
     ChatAreaAddr: number = 0;
 
-    MANI_SPEED = 'a3 ?? ?? ?? ?? eb ?? dd 45 08 db 5d e8 8b 45 e8 83 f8 28';
+    MANIA_SPEED = 'a3 ?? ?? ?? ?? eb ?? dd 45 08 db 5d e8 8b 45 e8 83 f8 28';
     setSpeedAdr: number = 0;
     gameplayMode: number = 0;
 
@@ -1232,7 +1232,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
     private beatmapScrollSpeed(globalSpeed: number) {
         try {
             if (this.setSpeedAdr === 0 && this.gameplayMode === 3) {
-                this.setSpeedAdr = this.process.scanSync(this.MANI_SPEED);
+                this.setSpeedAdr = this.process.scanSync(this.MANIA_SPEED);
             }
 
             if (this.setSpeedAdr === 0) return globalSpeed;
