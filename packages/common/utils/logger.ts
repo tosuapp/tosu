@@ -72,16 +72,16 @@ export const wLogger = {
 };
 
 function writeLog(type: string, ...args: any[]) {
-    if (config.logsPath === '') {
+    if (config.logFilePath === '') {
         const logsPath = path.join(getProgramPath(), 'logs');
         if (!fs.existsSync(logsPath))
             fs.mkdirSync(logsPath, { recursive: true });
 
-        config.logsPath = path.join(logsPath, `${Date.now()}.txt`);
+        config.logFilePath = path.join(logsPath, `${Date.now()}.txt`);
     }
 
     fsp.appendFile(
-        config.logsPath,
+        config.logFilePath,
         `${new Date().toISOString()} ${type} ${args.join(' ')}\n`,
         'utf8'
     ).catch((reason) => console.log(`writeLog`, reason));
