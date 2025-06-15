@@ -73,6 +73,7 @@ const configList: ConfigList = {
     IgnoreBeatmapSamples: ['bool', 'audio.ignoreBeatmapSounds'],
     SkinSamples: ['bool', 'audio.useSkinSamples'],
     LastVersion: ['bstring', 'client.version'],
+    ManiaSpeed: ['int', 'mania.scrollSpeed'],
     ManiaSpeedBPMScale: ['bool', 'mania.speedBPMScale'],
     UsePerBeatmapManiaSpeed: ['bool', 'mania.usePerBeatmapSpeedScale'],
     MouseDisableButtons: ['bool', 'mouse.disableButtons'],
@@ -190,6 +191,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
     TOURNAMENT_CHAT_ENGINE = 'A1 ?? ?? ?? ?? 89 45 F0 8B D1 85 C9 75';
     ChatAreaAddr: number = 0;
+
+    MANIA_SPEED = 'a3 ?? ?? ?? ?? eb ?? dd 45 08 db 5d e8 8b 45 e8 83 f8 28';
+    setSpeedAdr: number = 0;
+    gameplayMode: number = 0;
 
     previousState: string = '';
     previousMP3Length: number = 0;
@@ -563,6 +568,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             let mods = calculateMods(modsInt, true);
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
+
+            this.gameplayMode = mode;
 
             return {
                 retries,
@@ -1222,6 +1229,41 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         };
     }
 
+    private beatmapScrollSpeed(globalSpeed: number) {
+        try {
+            if (this.setSpeedAdr === 0 && this.gameplayMode === 3) {
+                this.setSpeedAdr = this.process.scanSync(this.MANIA_SPEED);
+            }
+
+            if (this.setSpeedAdr === 0) return globalSpeed;
+
+            const maniaSpeedPtr = this.process.readIntPtr(
+                this.setSpeedAdr + 0x1
+            );
+            const maniaSpeed = this.process.readInt(maniaSpeedPtr);
+
+            this.game.resetReportCount(`beatmapScrollSpeed`);
+            return maniaSpeed;
+        } catch (exc) {
+            this.game.reportError(
+                `beatmapScrollSpeed`,
+                10,
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapScrollSpeed`,
+                (exc as any).message
+            );
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmapScrollSpeed`,
+                exc
+            );
+
+            return globalSpeed;
+        }
+    }
+
     settings(): ISettings {
         try {
             const { configurationAddr: asd, bindingsAddr } = this.getPatterns([
@@ -1313,6 +1355,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     );
                 }
             }
+
+            const beatmapScrollSpeed = this.beatmapScrollSpeed(
+                settings['mania.scrollSpeed'] as number
+            );
+            settings['mania.scrollSpeed'] = beatmapScrollSpeed;
 
             return settings;
         } catch (error) {

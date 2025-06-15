@@ -1,15 +1,4 @@
 import { CalculateMods } from '@/utils/osuMods.types';
-import {
-    Audio,
-    Background,
-    Client,
-    Cursor,
-    Keybinds,
-    Mania,
-    Mouse,
-    Resolution,
-    Tablet
-} from '@/utils/settings.types';
 
 export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
@@ -48,7 +37,7 @@ export interface Settings {
     interfaceVisible: boolean;
     replayUIVisible: boolean;
     chatVisibilityStatus: NumberName;
-    leaderboard: SettingsLeaderboard;
+    leaderboard: LeaderboardSettings;
 
     progressBar: NumberName;
     bassDensity: number;
@@ -73,6 +62,65 @@ export interface Settings {
     keybinds: Keybinds;
 }
 
+export interface LeaderboardSettings {
+    visible: boolean;
+    type: NumberName;
+}
+
+export interface Resolution {
+    fullscreen: boolean;
+    width: number;
+    height: number;
+    widthFullscreen: number;
+    heightFullscreen: number;
+}
+
+export interface Client {
+    updateAvailable: boolean;
+    branch: number;
+    version: string;
+}
+
+export interface ScoreMeter {
+    type: NumberName;
+    size: number;
+}
+
+export interface Cursor {
+    useSkinCursor: boolean;
+    autoSize: boolean;
+    menuSize: number;
+    size: number;
+}
+
+export interface Mouse {
+    disableButtons: boolean;
+    disableWheel: boolean;
+    rawInput: boolean;
+    highPrecision: boolean;
+    sensitivity: number;
+}
+
+export interface Tablet {
+    enabled: boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+    pressureThreshold: number;
+}
+
+export interface Mania {
+    speedBPMScale: boolean;
+    usePerBeatmapSpeedScale: boolean;
+    scrollSpeed: number;
+    scrollDirection: {
+        number: number;
+        name: string;
+    };
+}
+
 export interface Skin {
     useDefaultSkinInEditor: boolean;
     ignoreBeatmapSkins: boolean;
@@ -81,20 +129,55 @@ export interface Skin {
     name: string;
 }
 
-export interface SettingsLeaderboard {
-    visible: boolean;
-    type: NumberName;
-}
-
-export interface ScoreMeter {
-    type: NumberName;
-    size: number;
+export interface Audio {
+    ignoreBeatmapSounds: boolean;
+    useSkinSamples: boolean;
+    volume: Volume;
+    offset: Offset;
 }
 
 export interface Volume {
+    masterInactive: number;
     master: number;
     music: number;
     effect: number;
+}
+
+export interface Offset {
+    universal: number;
+}
+
+export interface Background {
+    storyboard: boolean;
+    video: boolean;
+    blur: number;
+    dim: number;
+}
+
+export interface Keybinds {
+    osu: KeybindsOsu;
+    fruits: KeybindsFruits;
+    taiko: KeybindsTaiko;
+    quickRetry: string;
+}
+
+export interface KeybindsOsu {
+    k1: string;
+    k2: string;
+    smokeKey: string;
+}
+
+export interface KeybindsFruits {
+    k1: string;
+    k2: string;
+    Dash: string;
+}
+
+export interface KeybindsTaiko {
+    innerLeft: string;
+    innerRight: string;
+    outerLeft: string;
+    outerRight: string;
 }
 
 export interface NumberName {
@@ -431,6 +514,11 @@ export interface TourneyChatMessages {
 export interface TourneyClients {
     ipcId: number;
     team: 'left' | 'right';
+    settings: {
+        mania: {
+            scrollSpeed: number;
+        };
+    };
     user: {
         id: number;
         name: string;

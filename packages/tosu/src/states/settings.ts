@@ -1,18 +1,18 @@
 import { ClientType, setNestedValue, wLogger } from '@tosu/common';
 
-import { AbstractState } from '@/states/index';
-import {
+import type {
     Audio,
     Background,
     Client,
     Cursor,
     Keybinds,
-    Mania,
     Mouse,
     Resolution,
-    ScoreMeter,
+    Skin,
     Tablet
-} from '@/utils/settings.types';
+} from '@/api/types/v2';
+import { AbstractState } from '@/states/index';
+import type { SettingsMania, SettingsScoreMeter } from '@/utils/settings.types';
 
 export class Settings extends AbstractState {
     audio: Audio = {
@@ -34,7 +34,12 @@ export class Settings extends AbstractState {
         dim: 0
     };
 
-    client: Client = { updateAvailable: false, branch: 0, version: '' };
+    client: Client = {
+        updateAvailable: false,
+        branch: 0,
+        version: ''
+    };
+
     resolution: Resolution = {
         fullscreen: false,
         width: 0,
@@ -43,7 +48,11 @@ export class Settings extends AbstractState {
         heightFullscreen: 0
     };
 
-    scoreMeter: ScoreMeter = { type: 0, size: 0 };
+    scoreMeter: SettingsScoreMeter = {
+        type: 0,
+        size: 0
+    };
+
     cursor: Cursor = {
         useSkinCursor: false,
         autoSize: false,
@@ -69,9 +78,14 @@ export class Settings extends AbstractState {
         pressureThreshold: 0
     };
 
-    mania: Mania = { speedBPMScale: false, usePerBeatmapSpeedScale: false };
+    mania: SettingsMania = {
+        speedBPMScale: false,
+        usePerBeatmapSpeedScale: false,
+        scrollSpeed: 0,
+        scrollDirection: 1
+    };
 
-    skin = {
+    skin: Skin = {
         useDefaultSkinInEditor: false,
         ignoreBeatmapSkins: false,
         tintSliderBall: false,
@@ -113,7 +127,6 @@ export class Settings extends AbstractState {
             const array = Object.entries(settings);
             for (let i = 0; i < array.length; i++) {
                 const config = array[i];
-
                 setNestedValue(this, config[0], config[1]);
             }
 
