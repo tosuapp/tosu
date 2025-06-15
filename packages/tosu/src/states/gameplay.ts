@@ -349,7 +349,6 @@ export class Gameplay extends AbstractState {
         }
     }
 
-    @measureTime
     updateHitErrors() {
         try {
             const result = this.game.memory.hitErrors();

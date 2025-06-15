@@ -410,7 +410,7 @@ export class BeatmapPP extends AbstractState {
 
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
-            wLogger.timing(
+            wLogger.time(
                 `[${ClientType[this.game.client]}]`,
                 this.game.pid,
                 `beatmapPP.updateMapMetadata`,
@@ -463,7 +463,7 @@ export class BeatmapPP extends AbstractState {
             }
 
             const calculationTime = performance.now();
-            wLogger.timing(
+            wLogger.time(
                 `[${ClientType[this.game.client]}]`,
                 this.game.pid,
                 `beatmapPP.updateMapMetadata`,
@@ -560,7 +560,7 @@ export class BeatmapPP extends AbstractState {
             }
 
             const beatmapParseTime = performance.now();
-            wLogger.timing(
+            wLogger.time(
                 `[${ClientType[this.game.client]}]`,
                 this.game.pid,
                 `beatmapPP.updateMapMetadata`,
@@ -792,7 +792,7 @@ export class BeatmapPP extends AbstractState {
 
             const beatmapParseTime = performance.now();
             const totalTime = (beatmapParseTime - startTime).toFixed(2);
-            wLogger.timing(
+            wLogger.time(
                 `[${ClientType[this.game.client]}]`,
                 this.game.pid,
                 `beatmapPP.updateEditorPP`,

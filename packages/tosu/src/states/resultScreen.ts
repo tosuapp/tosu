@@ -230,7 +230,7 @@ export class ResultScreen extends AbstractState {
             curPerformance.free();
             fcPerformance.free();
 
-            wLogger.timing(
+            wLogger.time(
                 `[${ClientType[this.game.client]}]`,
                 this.game.pid,
                 `resultScreen.updatePerformance`,

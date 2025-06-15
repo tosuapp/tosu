@@ -10,7 +10,7 @@ const colors = {
     info: '\x1b[1m\x1b[40m\x1b[42m',
     error: '\x1b[1m\x1b[37m\x1b[41m',
     debug: '\x1b[1m\x1b[37m\x1b[44m',
-    timing: '\x1b[1m\x1b[37m\x1b[48;5;239m',
+    time: '\x1b[1m\x1b[37m\x1b[48;5;239m',
     debugError: '\x1b[1m\x1b[37m\x1b[45m',
     warn: '\x1b[1m\x1b[40m\x1b[43m',
     reset: '\x1b[0m',
@@ -41,12 +41,12 @@ export const wLogger = {
         const coloredText = colorText('debug', 'debug');
         console.log(coloredText, ...args);
     },
-    timing: (...args: any) => {
-        writeLog('timing', args);
+    time: (...args: any) => {
+        writeLog('time', args);
 
         if (config.debugLogging !== true) return;
 
-        const coloredText = colorText('timing', 'timing');
+        const coloredText = colorText('time', 'time');
         console.log(coloredText, ...args);
     },
     debugError: (...args: any) => {
@@ -109,18 +109,18 @@ export function measureTime(
         const time = performance.now() - t1;
 
         if (time >= 1 && client) {
-            const coloredText = colorText('timing', 'timing');
+            const coloredText = colorText('time', 'time');
             console.log(
                 coloredText,
-                `[${client}]`,
+                client,
                 (this as any).game.pid,
-                `${target.constructor.name}.${propertyKey} [${time.toFixed(2)}ms] Total spent time`
+                `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
             );
         } else if (time >= 1) {
-            const coloredText = colorText('timing', 'timing');
+            const coloredText = colorText('time', 'time');
             console.log(
                 coloredText,
-                `${target.constructor.name}.${propertyKey} [${time.toFixed(2)}ms] Total spent time`
+                `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
             );
         }
 

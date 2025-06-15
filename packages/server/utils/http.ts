@@ -85,7 +85,7 @@ export class HttpServer {
 
         res.on('finish', () => {
             const elapsedTime = (performance.now() - startTime).toFixed(2);
-            wLogger.timing(
+            wLogger.time(
                 `httpServer.request`,
                 `${elapsedTime}ms`,
                 req.method,
