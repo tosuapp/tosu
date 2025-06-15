@@ -1,5 +1,5 @@
 import rosu from '@kotrikd/rosu-pp';
-import { ClientType, config, wLogger } from '@tosu/common';
+import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
@@ -304,6 +304,7 @@ export class BeatmapPP extends AbstractState {
         return this.beatmap;
     }
 
+    @measureTime
     updateMapMetadata(
         currentMods: CalculateMods,
         currentMode: number,
@@ -409,10 +410,10 @@ export class BeatmapPP extends AbstractState {
 
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
-            wLogger.debug(
-                ClientType[this.game.client],
+            wLogger.time(
+                `[${ClientType[this.game.client]}]`,
                 this.game.pid,
-                `beatmapPP updateMapMetadata`,
+                `beatmapPP.updateMapMetadata`,
                 `[${totalTime}ms] Spend on opening beatmap`
             );
 
@@ -462,10 +463,10 @@ export class BeatmapPP extends AbstractState {
             }
 
             const calculationTime = performance.now();
-            wLogger.debug(
-                ClientType[this.game.client],
+            wLogger.time(
+                `[${ClientType[this.game.client]}]`,
                 this.game.pid,
-                `beatmapPP updateMapMetadata`,
+                `beatmapPP.updateMapMetadata`,
                 `[${(calculationTime - beatmapCheckTime).toFixed(2)}ms] Spend on attributes & strains calculation`
             );
 
@@ -559,19 +560,11 @@ export class BeatmapPP extends AbstractState {
             }
 
             const beatmapParseTime = performance.now();
-            wLogger.debug(
-                ClientType[this.game.client],
+            wLogger.time(
+                `[${ClientType[this.game.client]}]`,
                 this.game.pid,
-                `beatmapPP updateMapMetadata`,
+                `beatmapPP.updateMapMetadata`,
                 `[${(beatmapParseTime - calculationTime).toFixed(2)}ms] Spend on parsing beatmap`
-            );
-
-            const endTime = performance.now();
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateMapMetadata`,
-                `[${(endTime - startTime).toFixed(2)}ms] Total spent time`
             );
 
             this.calculatedMapAttributes = {
@@ -623,10 +616,10 @@ export class BeatmapPP extends AbstractState {
         }
     }
 
+    @measureTime
     updateGraph(currentMods: ModsLazer) {
         if (this.beatmap === undefined) return;
         try {
-            const startTime = performance.now();
             const { menu } = this.game.getServices(['menu']);
 
             const resultStrains: BeatmapStrains = {
@@ -737,14 +730,6 @@ export class BeatmapPP extends AbstractState {
                 oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
             }
 
-            const endTIme = performance.now();
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateGraph`,
-                `[${(endTIme - startTime).toFixed(2)}ms] Spend on processing graph strains`
-            );
-
             for (let i = 0; i < LEFT_OFFSET; i++) {
                 resultStrains.xaxis.push(i * sectionOffsetTime);
             }
@@ -789,6 +774,7 @@ export class BeatmapPP extends AbstractState {
         }
     }
 
+    @measureTime
     updateEditorPP() {
         try {
             if (
@@ -806,10 +792,10 @@ export class BeatmapPP extends AbstractState {
 
             const beatmapParseTime = performance.now();
             const totalTime = (beatmapParseTime - startTime).toFixed(2);
-            wLogger.debug(
-                ClientType[this.game.client],
+            wLogger.time(
+                `[${ClientType[this.game.client]}]`,
                 this.game.pid,
-                `beatmapPP updateEditorPP`,
+                `beatmapPP.updateEditorPP`,
                 `${totalTime}ms Spend on beatmap parsing`
             );
 
@@ -822,20 +808,11 @@ export class BeatmapPP extends AbstractState {
                 lazer: this.game.client === ClientType.lazer
             }).calculate(this.performanceAttributes);
 
-            const calculateTime = performance.now();
-
             this.currAttributes.pp = curPerformance.pp;
             this.currAttributes.stars =
                 passedObjects.length === 0
                     ? 0
                     : curPerformance.difficulty.stars;
-
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateEditorPP`,
-                `${(calculateTime - beatmapParseTime).toFixed(2)}ms Spend on calculating performance`
-            );
 
             curPerformance.free();
 

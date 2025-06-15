@@ -1,5 +1,5 @@
 import rosu, { PerformanceArgs } from '@kotrikd/rosu-pp';
-import { ClientType, config, wLogger } from '@tosu/common';
+import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -184,6 +184,7 @@ export class Gameplay extends AbstractState {
         this.isKeyOverlayDefaultState = true;
     }
 
+    @measureTime
     updateState() {
         try {
             const menu = this.game.get('menu');
@@ -281,6 +282,7 @@ export class Gameplay extends AbstractState {
         }
     }
 
+    @measureTime
     updateKeyOverlay() {
         try {
             const result = this.game.memory.keyOverlay(this.mode);
@@ -439,6 +441,7 @@ export class Gameplay extends AbstractState {
         });
     }
 
+    @measureTime
     private updateLeaderboard() {
         try {
             const result = this.game.memory.leaderboard();
@@ -468,9 +471,9 @@ export class Gameplay extends AbstractState {
         }
     }
 
+    @measureTime
     private updateStarsAndPerformance() {
         try {
-            const t1 = performance.now();
             if (!config.calculatePP) {
                 wLogger.debug(
                     ClientType[this.game.client],
@@ -662,12 +665,6 @@ export class Gameplay extends AbstractState {
             }
 
             this.previousPassedObjects = passedObjects;
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `gameplay updateStarsAndPerformance`,
-                `[${(performance.now() - t1).toFixed(2)}ms] elapsed time`
-            );
 
             this.game.resetReportCount('gameplay updateStarsAndPerformance');
         } catch (exc) {

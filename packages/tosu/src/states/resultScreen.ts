@@ -1,5 +1,5 @@
 import rosu from '@kotrikd/rosu-pp';
-import { ClientType, wLogger } from '@tosu/common';
+import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
@@ -68,6 +68,7 @@ export class ResultScreen extends AbstractState {
         this.previousBeatmap = '';
     }
 
+    @measureTime
     updateState() {
         try {
             const result = this.game.memory.resultScreen();
@@ -140,6 +141,7 @@ export class ResultScreen extends AbstractState {
         }
     }
 
+    @measureTime
     updatePerformance() {
         try {
             const { beatmapPP, menu } = this.game.getServices([
@@ -228,10 +230,10 @@ export class ResultScreen extends AbstractState {
             curPerformance.free();
             fcPerformance.free();
 
-            wLogger.debug(
-                ClientType[this.game.client],
+            wLogger.time(
+                `[${ClientType[this.game.client]}]`,
                 this.game.pid,
-                `resultScreen updatePerformance`,
+                `resultScreen.updatePerformance`,
                 `pp:${(t2 - t1).toFixed(2)}`,
                 `fc pp:${(performance.now() - t2).toFixed(2)}`
             );

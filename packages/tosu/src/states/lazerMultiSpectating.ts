@@ -1,4 +1,4 @@
-import { ClientType, wLogger } from '@tosu/common';
+import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { type LazerInstance } from '@/instances/lazerInstance';
 import { ILazerSpectator } from '@/memory/types';
@@ -7,6 +7,7 @@ import { AbstractState } from '@/states';
 export class LazerMultiSpectating extends AbstractState {
     lazerSpectatingData: ILazerSpectator;
 
+    @measureTime
     updateState() {
         try {
             if (this.game.client !== ClientType.lazer) {

@@ -8,6 +8,7 @@ import {
     LazerSettings,
     Rulesets,
     ScoringMode,
+    measureTime,
     platformResolver,
     wLogger
 } from '@tosu/common';
@@ -132,6 +133,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         4: 7
     };
 
+    @measureTime
     private updateGameBaseAddress() {
         const oldAddress = this.gameBaseAddress;
 
