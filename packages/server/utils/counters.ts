@@ -403,7 +403,7 @@ export function buildLocalCounters(
 ) {
     const array = getLocalCounters();
     const build = rebuildJSON({
-        array,
+        array: array.sort((r1, r2) => r1.name.localeCompare(r2.name)),
         address,
         external: false,
         query
@@ -481,7 +481,7 @@ export async function buildExternalCounters(
         });
 
         const build = rebuildJSON({
-            array,
+            array: array.sort((r1, r2) => r1.name.localeCompare(r2.name)),
             address,
             external: true,
             query
