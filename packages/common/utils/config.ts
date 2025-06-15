@@ -87,7 +87,7 @@ export const config = {
     timestamp: 0,
     currentVersion: '',
     updateVersion: '',
-    logsPath: ''
+    logFilePath: ''
 };
 
 export const updateConfigFile = () => {

@@ -7,6 +7,8 @@ import {
 } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
+import { existsSync, readdirSync, rmSync, statSync } from 'fs';
+import { dirname, join } from 'path';
 import { Process } from 'tsprocess';
 
 import { InstanceManager } from '@/instances/manager';
@@ -62,6 +64,30 @@ const currentVersion = require(process.cwd() + '/_version.js');
             );
             wLogger.warn('Please move tosu to different folder');
             return;
+        }
+    }
+
+    const logsPath = dirname(config.logFilePath);
+    if (existsSync(logsPath)) {
+        const logs = readdirSync(logsPath).filter(
+            (file) => file !== config.logFilePath.split('\\').pop()
+        );
+        const size =
+            logs.reduce((total, file) => {
+                const filePath = join(logsPath, file);
+                const fileSize = statSync(filePath).isFile()
+                    ? statSync(filePath).size
+                    : 0;
+                return total + fileSize;
+            }, 0) /
+            1024 /
+            1024;
+
+        if (size >= 100) {
+            logs.forEach((file) => rmSync(join(logsPath, file)));
+            wLogger.debug(
+                `The logs folder was cleared due to its size. (${size.toFixed(0)} MB)`
+            );
         }
     }
 
