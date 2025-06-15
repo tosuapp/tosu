@@ -878,7 +878,7 @@ document.querySelectorAll('.number-input button.incr')
       const newValue = currentValue + incrVal;
 
       const max = Number.isInteger(inputEl.max) ? Number(inputEl.max) : null;
-      inputEl.value = max && newValue > max ? max : newValue;
+      inputEl.value = max !== null && newValue > max ? max : newValue;
 
       checkSettingsChanges();
     })
@@ -895,7 +895,7 @@ document.querySelectorAll('.number-input button.decr')
       const newValue = currentValue - decrVal;
 
       const min = isNumberValid(inputEl.min) ? Number(inputEl.min) : null;
-      inputEl.value = min && newValue < min ? min : newValue;
+      inputEl.value = min !== null && newValue < min ? min : newValue;
 
       checkSettingsChanges();
     })
@@ -912,8 +912,8 @@ document.querySelectorAll('.number-input input').forEach((i) =>
     const min = isNumberValid(e.target.min) ? Number(e.target.min) : null;
     const max = isNumberValid(e.target.max) ? Number(e.target.max) : null;
 
-    if (min && newValue < min) e.target.value = min;
-    if (max && newValue > max) e.target.value = max;
+    if (min !== null && newValue < min) e.target.value = min;
+    if (max !== null && newValue > max) e.target.value = max;
 
     checkSettingsChanges();
   })
