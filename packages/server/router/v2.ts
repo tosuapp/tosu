@@ -1,3 +1,4 @@
+import { ClientType } from '@tosu/common';
 import path from 'path';
 
 import { HttpServer, sendJson } from '../index';
@@ -72,6 +73,14 @@ export default function buildV2Api(app: HttpServer) {
             (global.gameFolder == null && global.skinFolder == null)
         ) {
             throw new Error('osu is not ready/running');
+        }
+
+        // The lazer internal folder structure does not contain a "skins" folder, so we can't parse them.
+        // https://osu.ppy.sh/wiki/en/Client/Release_stream/Lazer/File_storage
+        if (global.game.client === ClientType.lazer) {
+            throw new Error(
+                'This endpoint is unavailable for the lazer client.'
+            );
         }
 
         const folder = path.join(global.gameFolder, 'Skins', global.skinFolder);
