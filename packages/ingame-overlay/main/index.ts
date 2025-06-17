@@ -5,19 +5,10 @@ import path from 'path';
 import packageJSON from '../package.json';
 import { OverlayManager } from './overlay/manager';
 
-(async () => {
-    try {
-        await main();
-    } finally {
-        app.quit();
-    }
-})();
-
+main();
 async function main() {
-    if (!app.requestSingleInstanceLock()) {
-        console.error(
-            'Ingame overlay is already running. Please check tray icon'
-        );
+    // Check single instance and ignore manually launched instance without ipc
+    if (!app.requestSingleInstanceLock() || !process.channel) {
         return;
     }
 
@@ -30,9 +21,10 @@ async function main() {
     // prevent main process from exiting when all windows are closed
     app.on('window-all-closed', () => {});
 
+    const manager = new OverlayManager();
+
     await app.whenReady();
 
-    const manager = new OverlayManager();
     const tray = new Tray(path.join(__dirname, tosuIcon));
     const contextMenu = Menu.buildFromTemplate([
         {
@@ -58,6 +50,4 @@ async function main() {
     ]);
     tray.setToolTip(packageJSON.name);
     tray.setContextMenu(contextMenu);
-
-    await manager.run();
 }
