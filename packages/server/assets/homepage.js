@@ -8,10 +8,12 @@ const BACKUP_SERVER_PORT = document.querySelector('*[data-id="SERVER_PORT"] inpu
 
 
 const downloading = [];
-const tab = +(queryParams.get('tab') || 0);
 
 
 const search_bar = document.querySelector('.search-bar');
+const available_overlays = document.querySelector('a[href="/available-overlays"]');
+const installed_overlays = document.querySelector('a[href="/"]');
+
 let timer;
 
 let isSearching = false;
@@ -857,8 +859,11 @@ const showSettings = {
 };
 
 
-document.querySelectorAll(`a`).forEach(r => {
-  if (!r.href.includes(`?tab=${tab}`)) return;
+document.querySelectorAll(`a.tab-item`).forEach(r => {
+  if (!r.href) return;
+
+  const parse = new URL(r.href);
+  if (parse.pathname != window.location.pathname) return;
 
   r.classList.add('active');
 });
@@ -1298,7 +1303,7 @@ async function startSearch(search) {
   isSearching = true;
 
   try {
-    const request = await fetch(`/api/counters/search/${search_bar.value}?tab=${tab}`);
+    const request = await fetch(`/api/counters/search/${search_bar.value}`);
     const response = await request.text();
 
     document.querySelector('.results').innerHTML = response;
@@ -1643,6 +1648,11 @@ window.onload = async () => {
     const requst = await fetch('https://tosu.app/api.json');
     const json = await requst.json();
 
+
+    if (available_overlays) available_overlays.innerHTML = `Available (${json.length})`;
+    localStorage.setItem('total-available-overlays', json.length.toString());
+
+
     const installed = document.querySelectorAll('.calu');
     for (let i = 0; i < installed.length; i++) {
       const counter = installed[i];
@@ -1663,6 +1673,12 @@ window.onload = async () => {
       button.innerHTML = `<span>Update</span>`;
       counter.prepend(button);
     };
+
+    if (search_bar) {
+      setTimeout(() => {
+        search_bar.focus();
+      }, 100);
+    };
   } catch (error) {
     console.log(error);
   };
@@ -1672,4 +1688,16 @@ if (queryParams.has('ingame')) {
   document.querySelector('.tabs')?.remove();
   document.querySelector('.links')?.remove();
   document.querySelector('.submit-counter')?.remove();
+};
+
+if (available_overlays && localStorage.getItem('total-available-overlays')) {
+  available_overlays.innerHTML = `Available (${localStorage.getItem('total-available-overlays')})`;
+};
+
+if (installed_overlays && localStorage.getItem('total-installed-overlays')) {
+  installed_overlays.innerHTML = `Installed (${localStorage.getItem('total-installed-overlays')})`;
+};
+
+if (installed_overlays && window.location.pathname == '/') {
+  localStorage.setItem('total-installed-overlays', installed_overlays.innerText.toLowerCase().replace('installed (', '').replace(')', '').trim());
 };

@@ -25,14 +25,14 @@ import {
     nameHTML,
     noMoreCounters,
     resultItemHTML,
+    searchBar,
     settingsGroupHTML,
     settingsItemHTMLv2,
     settingsNumberInputHTML,
     settingsSaveButtonHTMLv2,
     settingsSwitchHTML,
     settingsTextInputHTML,
-    settingsTextareaInputHTML,
-    submitCounterHTML
+    settingsTextareaInputHTML
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
 
@@ -433,6 +433,7 @@ export function buildLocalCounters(
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', ` (${array.length})`)
                 .replace('{{AVAILABLE_AMOUNT}}', ``)
+                .replace('{{SEARCH}}', searchBar)
                 .replace('{{LIST}}', build || emptyNotice);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
@@ -524,13 +525,11 @@ export async function buildExternalCounters(
                 return;
             }
 
-            let responseHTML = submitCounterHTML;
-            responseHTML += text || noMoreCounters;
-
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', ` (${totalLocal})`)
                 .replace('{{AVAILABLE_AMOUNT}}', ` (${totalAvailable})`)
-                .replace('{{LIST}}', responseHTML);
+                .replace('{{SEARCH}}', searchBar)
+                .replace('{{LIST}}', text || noMoreCounters);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -805,6 +804,7 @@ export function buildSettings(res: http.ServerResponse) {
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', '')
                 .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{SEARCH}}', '')
                 .replace('{{LIST}}', settingsPage);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
@@ -848,6 +848,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', '')
                 .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{SEARCH}}', '')
                 .replace('{{LIST}}', pageContent);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html

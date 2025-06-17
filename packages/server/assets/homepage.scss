@@ -29,9 +29,11 @@
   --notification-block-red: #d57397;
   --notification-color-red: #191e25;
 
-  --search-color-2: #707f8d;
-  --search-color-1: #cbd8e5;
-  --search-block: #3f4e5d;
+  --search-color-2: #5c6e80;
+  --search-color-1: #a6b8ca;
+
+  --search-block: #283139;
+  --search-block-border: #4c5660;
 
   --header-color: #939393;
   --header-background: #14171c;
@@ -305,7 +307,8 @@ a {
     gap: 0.4em;
 
     img {
-      height: 7.5em;
+      max-width: calc(50% - 0.2em);
+      max-height: 10em;
       border-radius: 0.4em;
     }
   }
@@ -573,7 +576,46 @@ a {
 }
 
 .search-bar {
-  font-size: 0.9em;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 1em;
+  position: sticky;
+  top: 4.2em;
+  color: var(--search-color-1);
+  padding: 0.4em 0.8em;
+  margin-bottom: 0.5em;
+  background: var(--search-block);
+  border-radius: 0.3em;
+  outline: 0;
+  border: 2px solid var(--search-block-border);
+  transition: 0.2s ease;
+  transition-property: filter, opacity, background, border;
+  z-index: 2;
+
+  &::placeholder {
+    color: var(--search-color-2);
+  }
+
+  &.disable {
+    user-select: none;
+    pointer-events: none;
+
+    filter: grayscale(1);
+    opacity: 0.5;
+  }
+
+  &:hover {
+    background: hsl(from var(--search-block) h calc(s - 0) calc(l + 10));
+  }
+
+  &:focus {
+    background: hsl(from var(--search-block) h calc(s - 0) calc(l - 10));
+    border: 2px solid hsl(from var(--search-block-border) h calc(s - 0) calc(l + 20));
+  }
+}
+
+.input {
+  font-size: 1em;
   font-family: inherit;
   color: var(--search-color-1);
   background: var(--search-block);
@@ -665,7 +707,7 @@ a {
         font-size: 1.2rem;
         font-weight: bold;
         opacity: 50%;
-        transition:  opacity 0.2s ease, color 0.2s ease;
+        transition: opacity 0.2s ease, color 0.2s ease;
       }
     }
 
@@ -673,7 +715,7 @@ a {
     &>p:nth-child(2) {
       font-size: 1rem;
       opacity: 50%;
-      transition:  opacity 0.2s ease, color 0.2s ease;
+      transition: opacity 0.2s ease, color 0.2s ease;
     }
 
     &:has(.textarea-input) {
@@ -1423,29 +1465,6 @@ hr.modal-space {
   margin-left: 1.4em;
   background: var(--button-builder);
   border-radius: .2em;
-}
-
-
-.submit-counter {
-  text-decoration: none;
-  font-weight: 700;
-  font-size: .9em;
-  user-select: none;
-  cursor: pointer;
-  color: var(--text-2);
-  gap: 1em;
-  padding: .4em 0.8em;
-  background: var(--block-2);
-  border-radius: 0.3em;
-  transition: padding .4s ease, height .4s ease;
-
-  i {
-    color: var(--color-1);
-  }
-
-  &>* {
-    pointer-events: none;
-  }
 }
 
 .txt-area {
