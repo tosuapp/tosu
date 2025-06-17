@@ -1,13 +1,12 @@
-import tosuIcon from '@asset/tosu.ico?no-inline';
+import tosuIcon from '@assets/tosu.ico?no-inline';
 import { Menu, Tray, app } from 'electron';
 import { on } from 'node:events';
 import path from 'path';
 
 import packageJSON from '../package.json';
-import { OverlayManager } from './overlay/manager';
+import { OverlayManager } from './manager';
 
-main();
-async function main() {
+(async () => {
     // Check single instance and ignore manually launched instance without ipc
     if (!app.requestSingleInstanceLock() || !process.channel) {
         return;
@@ -51,7 +50,7 @@ async function main() {
     ]);
     tray.setToolTip(packageJSON.name);
     tray.setContextMenu(contextMenu);
-}
+})();
 
 async function runIpc(manager: OverlayManager) {
     async function handleEvent(

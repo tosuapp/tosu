@@ -3,8 +3,8 @@ import { BrowserWindow, TextureInfo } from 'electron';
 import EventEmitter from 'node:events';
 import path from 'node:path';
 
-import { Keybind } from '../../keybind';
 import { toCursor, toKeyboardEvent, toMouseEvent } from './input';
+import { Keybind } from './keybind';
 
 export type OverlayEventEmitter = EventEmitter<{
     destroyed: [];
@@ -160,7 +160,7 @@ export class OverlayProcess {
                     useSharedTexture: true
                 },
                 transparent: true,
-                preload: path.join(__dirname, '../preload/index.js')
+                preload: path.join(__dirname, '../preload/preload.js')
             },
             show: false
         });

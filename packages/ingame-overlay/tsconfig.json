@@ -13,7 +13,7 @@
     "strictFunctionTypes": true,
     "baseUrl": ".",
     "paths": {
-      "@asset/*": ["./asset/*"]
+      "@assets/*": ["./assets/*"]
     }
   }
 }

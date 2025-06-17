@@ -1,42 +1,39 @@
-// @ts-check
-
-import { bytecodePlugin } from 'electron-vite';
-import { defineConfig } from 'electron-vite';
+import { bytecodePlugin, defineConfig } from 'electron-vite';
 import path from 'node:path';
 
 export default defineConfig({
-  main: {
-    build: {
-      lib: {
-        entry: './main/index.ts',
-        formats: ['cjs'],
-      },
-      outDir: 'dist/main',
-      minify: true,
-      rollupOptions: {
-        external: [
-          'asdf-overlay-node',
-          '@jellybrick/wql-process-monitor',
-          'tsprocess'
-        ],
-      },
+    main: {
+        build: {
+            lib: {
+                entry: './src/index.ts',
+                formats: ['cjs']
+            },
+            outDir: 'dist/src',
+            minify: true,
+            rollupOptions: {
+                external: [
+                    'asdf-overlay-node',
+                    '@jellybrick/wql-process-monitor',
+                    'tsprocess'
+                ]
+            }
+        },
+        plugins: [bytecodePlugin()],
+        resolve: {
+            alias: {
+                '@assets': path.resolve('./assets')
+            }
+        },
+        assetsInclude: ['./assets/*']
     },
-    plugins: [bytecodePlugin()],
-    resolve: {
-      alias: {
-        '@asset': path.resolve('./asset'),
-      },
-    },
-    assetsInclude: ['./asset/*'],
-  },
-  preload: {
-    build: {
-      lib: {
-        entry: './preload/index.ts',
-        formats: ['cjs'],
-      },
-      outDir: 'dist/preload',
-      minify: true,
-    },
-  },
+    preload: {
+        build: {
+            lib: {
+                entry: './src/preload.ts',
+                formats: ['cjs']
+            },
+            outDir: 'dist/preload',
+            minify: true
+        }
+    }
 });
