@@ -66,15 +66,9 @@ importers:
 
   packages/ingame-overlay:
     dependencies:
-      '@jellybrick/wql-process-monitor':
-        specifier: ^1.4.8
-        version: 1.4.8
       asdf-overlay-node:
-        specifier: ^0.6.5
-        version: 0.6.5
-      tsprocess:
-        specifier: workspace:*
-        version: link:../tsprocess
+        specifier: ^0.6.7
+        version: 0.6.7
     devDependencies:
       '@eslint/js':
         specifier: ^9.26.0
@@ -91,12 +85,6 @@ importers:
       electron-vite:
         specifier: ^3.1.0
         version: 3.1.0(vite@6.3.5(@types/node@22.15.17)(sass@1.89.2)(yaml@2.7.0))
-      emittery:
-        specifier: ^1.1.0
-        version: 1.1.0
-      node-abi:
-        specifier: ^4.8.0
-        version: 4.8.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -611,22 +599,6 @@ packages:
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
-
-  '@jellybrick/ffi-napi@4.0.18':
-    resolution: {integrity: sha512-jtBJPKpnBBRhNT8/uBhAbezBNRB/rCZISipselpBTmmlPL6SIh6UTxtuGyG9R9Y1KMpv7QLHPo1NNCr7DdlIhg==}
-    engines: {node: '>=12.22.12'}
-
-  '@jellybrick/get-uv-event-loop-napi-h@1.0.7':
-    resolution: {integrity: sha512-n2knZ9TQXLbiPdoXA2fgZTe0rwI74qlPs1AFqlzvFQYoOF1zHtguddy+la4NdM2naDnN/f83J2fty+vVTcQZsw==}
-
-  '@jellybrick/ref-napi@4.0.10':
-    resolution: {integrity: sha512-wEuxtLRuAD2Gvp66+u2rrLRsUAPLMGGCcVBdDa3A4C/6V6/Gmi/43XHW1zkmp5OLH201fg0ZZuxM6yadojvEMQ==}
-    engines: {node: '>= 12.22.12'}
-
-  '@jellybrick/wql-process-monitor@1.4.8':
-    resolution: {integrity: sha512-LJcBgWCQFzLtbyrRZLf7QEFL0LTNanpZ3L2emBIB10C03Zfjr4Nzm7ODfCPHrtrFd0qWt9Ajjki4Tceoxwe2xw==}
-    engines: {node: '>=0.12'}
-    os: [win32]
 
   '@jridgewell/gen-mapping@0.3.8':
     resolution: {integrity: sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA==}
@@ -1191,9 +1163,8 @@ packages:
     resolution: {integrity: sha512-3CYzex9M9FGQjCGMGyi6/31c8GJbgb0qGyrx5HWxPd0aCwh4cB2YjMb2Xf9UuoogrMrlO9cTqnB5rI5GHZTcUA==}
     engines: {node: '>=0.10.0'}
 
-  asdf-overlay-node@0.6.5:
-    resolution: {integrity: sha512-YdDl/5WZfENg/2OF/EsLSlO3LyUsj4srh6kBNIFYMIBKtCPhN1JgosS+sdrcMoWF939RxyGvHvGKoqzFlFjbwQ==}
-    cpu: [x64, arm64]
+  asdf-overlay-node@0.6.7:
+    resolution: {integrity: sha512-G3SRLUmQQdPe4vW45Gx1Nnlzclu4HpwTR6QrH7cEflxsogWWTbBmoYX/nEiXTfQ54qX4oSHTWgxNQUGNtlmvZQ==}
     os: [win32]
 
   assert-plus@1.0.0:
@@ -1756,14 +1727,6 @@ packages:
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
-  emittery@0.13.1:
-    resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
-    engines: {node: '>=12'}
-
-  emittery@1.1.0:
-    resolution: {integrity: sha512-rsX7ktqARv/6UQDgMaLfIqUWAEzzbCQiVh7V9rhDXp6c37yoJcks12NVD+XPkgl4AEavmNhVfrhGoqYwIsMYYA==}
-    engines: {node: '>=14.16'}
-
   emoji-regex@10.4.0:
     resolution: {integrity: sha512-EC+0oUMY1Rqm4O6LLrgjtYDvcVYTy7chDnM4Q7030tP4Kwj3u/pR6gP9ygnp2CJMK5Gq+9Q2oqmrFJAz01DXjw==}
 
@@ -2214,9 +2177,6 @@ packages:
   get-symbol-description@1.1.0:
     resolution: {integrity: sha512-w9UMqWwJxHNOvoNzSJ2oPF5wvYcvP7jUvYzhp67yEhTi17ZDBBC1z9pTdGuzjD+EFIqLSYRweZjqfiPzQ06Ebg==}
     engines: {node: '>= 0.4'}
-
-  get-symbol-from-current-process-h@1.0.2:
-    resolution: {integrity: sha512-syloC6fsCt62ELLrr1VKBM1ggOpMdetX9hTrdW77UQdcApPHLmf7CI7OKcN1c9kYuNxKcDe4iJ4FY9sX3aw2xw==}
 
   git-raw-commits@2.0.11:
     resolution: {integrity: sha512-VnctFhw+xfj8Va1xtfEqCUD2XDrbAPSJx+hSrE5K7fGdjZruW7XV+QOrN7LF/RJyvspRiD2I0asWsxFp0ya26A==}
@@ -2997,15 +2957,8 @@ packages:
     resolution: {integrity: sha512-OhYaY5sDsIka7H7AtijtI9jwGYLyl29eQn/W623DiN/MIv5sUqc4g7BIDThX+gb7di9f6xK02nkp8sdfFWZLTg==}
     engines: {node: '>=10'}
 
-  node-abi@4.8.0:
-    resolution: {integrity: sha512-+P1Mf1XNURT+wN9UK8cjtHSwmmG02iAsX0JaYDDdXgMUe5eybde3AKpGGxOrkDmPkuonYJ6WjIRrNVQe0kjmFg==}
-    engines: {node: '>=22.12.0'}
-
   node-addon-api@1.7.2:
     resolution: {integrity: sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==}
-
-  node-addon-api@3.2.1:
-    resolution: {integrity: sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==}
 
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
@@ -3028,10 +2981,6 @@ packages:
     peerDependenciesMeta:
       encoding:
         optional: true
-
-  node-gyp-build@4.8.4:
-    resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
-    hasBin: true
 
   node-gyp@11.1.0:
     resolution: {integrity: sha512-/+7TuHKnBpnMvUQnsYEb0JOozDZqarQbfNuSGLXIjhStMT0fbw7IdSqWgopOP5xhRZE+lsbIvAHcekddruPZgQ==}
@@ -3489,9 +3438,6 @@ packages:
   redent@3.0.0:
     resolution: {integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==}
     engines: {node: '>=8'}
-
-  ref-struct-di@1.1.1:
-    resolution: {integrity: sha512-2Xyn/0Qgz89VT+++WP0sTosdm9oeowLP23wRJYhG4BFdMUrLj3jhwHZNEytYNYgtPKLNTP3KJX4HEgBvM1/Y2g==}
 
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
@@ -4705,37 +4651,6 @@ snapshots:
     dependencies:
       minipass: 7.1.2
 
-  '@jellybrick/ffi-napi@4.0.18':
-    dependencies:
-      '@jellybrick/get-uv-event-loop-napi-h': 1.0.7
-      '@jellybrick/ref-napi': 4.0.10
-      debug: 4.4.0
-      node-addon-api: 8.3.1
-      node-gyp-build: 4.8.4
-      ref-struct-di: 1.1.1
-    transitivePeerDependencies:
-      - supports-color
-
-  '@jellybrick/get-uv-event-loop-napi-h@1.0.7':
-    dependencies:
-      get-symbol-from-current-process-h: 1.0.2
-
-  '@jellybrick/ref-napi@4.0.10':
-    dependencies:
-      debug: 4.4.0
-      get-symbol-from-current-process-h: 1.0.2
-      node-addon-api: 3.2.1
-      node-gyp-build: 4.8.4
-    transitivePeerDependencies:
-      - supports-color
-
-  '@jellybrick/wql-process-monitor@1.4.8':
-    dependencies:
-      '@jellybrick/ffi-napi': 4.0.18
-      emittery: 0.13.1
-    transitivePeerDependencies:
-      - supports-color
-
   '@jridgewell/gen-mapping@0.3.8':
     dependencies:
       '@jridgewell/set-array': 1.2.1
@@ -5343,7 +5258,7 @@ snapshots:
 
   arrify@1.0.1: {}
 
-  asdf-overlay-node@0.6.5: {}
+  asdf-overlay-node@0.6.7: {}
 
   assert-plus@1.0.0:
     optional: true
@@ -6036,10 +5951,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  emittery@0.13.1: {}
-
-  emittery@1.1.0: {}
-
   emoji-regex@10.4.0: {}
 
   emoji-regex@8.0.0: {}
@@ -6642,8 +6553,6 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
-
-  get-symbol-from-current-process-h@1.0.2: {}
 
   git-raw-commits@2.0.11:
     dependencies:
@@ -7453,14 +7362,8 @@ snapshots:
     dependencies:
       semver: 7.7.1
 
-  node-abi@4.8.0:
-    dependencies:
-      semver: 7.7.1
-
   node-addon-api@1.7.2:
     optional: true
-
-  node-addon-api@3.2.1: {}
 
   node-addon-api@7.1.1:
     optional: true
@@ -7478,8 +7381,6 @@ snapshots:
       whatwg-url: 5.0.0
     optionalDependencies:
       encoding: 0.1.13
-
-  node-gyp-build@4.8.4: {}
 
   node-gyp@11.1.0:
     dependencies:
@@ -7941,12 +7842,6 @@ snapshots:
     dependencies:
       indent-string: 4.0.0
       strip-indent: 3.0.0
-
-  ref-struct-di@1.1.1:
-    dependencies:
-      debug: 3.2.7
-    transitivePeerDependencies:
-      - supports-color
 
   reflect.getprototypeof@1.0.10:
     dependencies:

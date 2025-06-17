@@ -6,10 +6,11 @@ import {
     unzip,
     wLogger
 } from '@tosu/common';
-import { ChildProcess, spawn } from 'node:child_process';
+import { ChildProcess, ChildProcessByStdio, spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
+import { Readable } from 'node:stream';
 
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
@@ -90,16 +91,21 @@ export async function runOverlay(): Promise<ChildProcess> {
         [],
         {
             detached: false,
-            stdio: ['ignore', 'overlapped', 'overlapped'],
+            stdio: ['ignore', 'overlapped', 'overlapped', 'ipc'],
             windowsHide: true,
             shell: false,
             env: {
                 // Force nvidia optimus to prefer dedicated gpu
                 SHIM_MCCOMPAT: '0x800000001',
+                // Force ipc fd to 3 just in case
+                NODE_CHANNEL_FD: '3',
                 ...process.env
             }
         }
-    );
+    ) as ChildProcessByStdio<null, Readable, Readable>;
+    if (!child.channel) {
+        throw new Error(`Could not spawn overlay process with Ipc`);
+    }
 
     child.stdout.setEncoding('utf-8').on('data', (data: string) => {
         // overlay logs are a bit verbose, so redirect them to debug log

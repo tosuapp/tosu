@@ -1,23 +1,15 @@
 import tosuIcon from '@asset/tosu.ico?no-inline';
 import { Menu, Tray, app } from 'electron';
+import { on } from 'node:events';
 import path from 'path';
 
 import packageJSON from '../package.json';
 import { OverlayManager } from './overlay/manager';
 
-(async () => {
-    try {
-        await main();
-    } finally {
-        app.quit();
-    }
-})();
-
+main();
 async function main() {
-    if (!app.requestSingleInstanceLock()) {
-        console.error(
-            'Ingame overlay is already running. Please check tray icon'
-        );
+    // Check single instance and ignore manually launched instance without ipc
+    if (!app.requestSingleInstanceLock() || !process.channel) {
         return;
     }
 
@@ -30,9 +22,10 @@ async function main() {
     // prevent main process from exiting when all windows are closed
     app.on('window-all-closed', () => {});
 
+    const manager = new OverlayManager();
+    runIpc(manager);
     await app.whenReady();
 
-    const manager = new OverlayManager();
     const tray = new Tray(path.join(__dirname, tosuIcon));
     const contextMenu = Menu.buildFromTemplate([
         {
@@ -58,6 +51,28 @@ async function main() {
     ]);
     tray.setToolTip(packageJSON.name);
     tray.setContextMenu(contextMenu);
+}
 
-    await manager.run();
+async function runIpc(manager: OverlayManager) {
+    async function handleEvent(
+        message: { cmd: string } & Record<string, unknown>
+    ) {
+        if (message.cmd === 'add') {
+            await manager.runOverlay(message.pid as number);
+        }
+    }
+
+    for await (const events of on(process, 'message')) {
+        for (const msg of events) {
+            if (msg == null) {
+                continue;
+            }
+
+            try {
+                await handleEvent(msg);
+            } catch (e) {
+                console.error(`invalid ipc message. err:`, e);
+            }
+        }
+    }
 }
