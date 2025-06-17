@@ -12,8 +12,7 @@
   "keywords": [],
   "author": "storycraft <storycraft@pancake.sh>",
   "dependencies": {
-    "asdf-overlay-node": "^0.6.7",
-    "tsprocess": "workspace:*"
+    "asdf-overlay-node": "^0.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
@@ -21,8 +20,6 @@
     "electron": "^36.1.0",
     "electron-builder": "^26.0.12",
     "electron-vite": "^3.1.0",
-    "emittery": "^1.1.0",
-    "node-abi": "^4.8.0",
     "typescript": "^5.8.3"
   },
   "build": {

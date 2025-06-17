@@ -69,9 +69,6 @@ importers:
       asdf-overlay-node:
         specifier: ^0.6.7
         version: 0.6.7
-      tsprocess:
-        specifier: workspace:*
-        version: link:../tsprocess
     devDependencies:
       '@eslint/js':
         specifier: ^9.26.0
@@ -88,12 +85,6 @@ importers:
       electron-vite:
         specifier: ^3.1.0
         version: 3.1.0(vite@6.3.5(@types/node@22.15.17)(sass@1.89.2)(yaml@2.7.0))
-      emittery:
-        specifier: ^1.1.0
-        version: 1.1.0
-      node-abi:
-        specifier: ^4.8.0
-        version: 4.8.0
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1736,10 +1727,6 @@ packages:
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
-  emittery@1.1.0:
-    resolution: {integrity: sha512-rsX7ktqARv/6UQDgMaLfIqUWAEzzbCQiVh7V9rhDXp6c37yoJcks12NVD+XPkgl4AEavmNhVfrhGoqYwIsMYYA==}
-    engines: {node: '>=14.16'}
-
   emoji-regex@10.4.0:
     resolution: {integrity: sha512-EC+0oUMY1Rqm4O6LLrgjtYDvcVYTy7chDnM4Q7030tP4Kwj3u/pR6gP9ygnp2CJMK5Gq+9Q2oqmrFJAz01DXjw==}
 
@@ -2969,10 +2956,6 @@ packages:
   node-abi@3.75.0:
     resolution: {integrity: sha512-OhYaY5sDsIka7H7AtijtI9jwGYLyl29eQn/W623DiN/MIv5sUqc4g7BIDThX+gb7di9f6xK02nkp8sdfFWZLTg==}
     engines: {node: '>=10'}
-
-  node-abi@4.8.0:
-    resolution: {integrity: sha512-+P1Mf1XNURT+wN9UK8cjtHSwmmG02iAsX0JaYDDdXgMUe5eybde3AKpGGxOrkDmPkuonYJ6WjIRrNVQe0kjmFg==}
-    engines: {node: '>=22.12.0'}
 
   node-addon-api@1.7.2:
     resolution: {integrity: sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==}
@@ -5968,8 +5951,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  emittery@1.1.0: {}
-
   emoji-regex@10.4.0: {}
 
   emoji-regex@8.0.0: {}
@@ -7378,10 +7359,6 @@ snapshots:
   neo-async@2.6.2: {}
 
   node-abi@3.75.0:
-    dependencies:
-      semver: 7.7.1
-
-  node-abi@4.8.0:
     dependencies:
       semver: 7.7.1
 
