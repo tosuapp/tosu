@@ -2099,7 +2099,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             status,
             gameTime: 0,
             menuMods: this.menuMods,
-            skinFolder: filesFolder,
+            skinFolder: '',
             memorySongsFolder: filesFolder
         };
     }
