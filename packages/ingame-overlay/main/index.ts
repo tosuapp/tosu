@@ -1,5 +1,6 @@
 import tosuIcon from '@asset/tosu.ico?no-inline';
 import { Menu, Tray, app } from 'electron';
+import { on } from 'node:events';
 import path from 'path';
 
 import packageJSON from '../package.json';
@@ -22,7 +23,7 @@ async function main() {
     app.on('window-all-closed', () => {});
 
     const manager = new OverlayManager();
-
+    runIpc(manager);
     await app.whenReady();
 
     const tray = new Tray(path.join(__dirname, tosuIcon));
@@ -50,4 +51,28 @@ async function main() {
     ]);
     tray.setToolTip(packageJSON.name);
     tray.setContextMenu(contextMenu);
+}
+
+async function runIpc(manager: OverlayManager) {
+    async function handleEvent(
+        message: { cmd: string } & Record<string, unknown>
+    ) {
+        if (message.cmd === 'add') {
+            await manager.runOverlay(message.pid as number);
+        }
+    }
+
+    for await (const events of on(process, 'message')) {
+        for (const msg of events) {
+            if (msg == null) {
+                continue;
+            }
+
+            try {
+                await handleEvent(msg);
+            } catch (e) {
+                console.error(`invalid ipc message. err:`, e);
+            }
+        }
+    }
 }

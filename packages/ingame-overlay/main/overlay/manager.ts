@@ -5,24 +5,25 @@ export class OverlayManager {
 
     // Run overlay in provided process
     async runOverlay(pid: number) {
+        if (this.map.has(pid)) {
+            return;
+        }
+
         try {
             console.debug('initializing ingame overlay pid:', pid);
             const overlay = await OverlayProcess.initialize(pid);
+            this.map.set(pid, overlay);
             try {
                 await overlay.window.loadURL(
                     'http://localhost:24050/api/ingame'
                 );
             } catch (e) {
-                console.warn('cannot connect to ingame overlay. err: ', e);
+                console.warn('cannot connect to ingame overlay. err:', e);
             }
 
-            this.map.set(pid, overlay);
-            return new Promise<void>((resolve) =>
-                overlay.event.once('destroyed', () => {
-                    this.map.delete(pid);
-                    resolve();
-                })
-            );
+            overlay.event.once('destroyed', () => {
+                this.map.delete(pid);
+            });
         } catch (e) {
             console.warn('overlay injection failed err:', e);
         }

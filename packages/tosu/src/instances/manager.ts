@@ -139,6 +139,11 @@ export class InstanceManager {
 
                 if (config.enableIngameOverlay) {
                     await this.startOverlay();
+
+                    this.overlayProcess?.send({
+                        cmd: 'add',
+                        pid: processId
+                    });
                 }
             }
         } catch (exc) {
