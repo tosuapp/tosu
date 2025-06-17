@@ -6,7 +6,6 @@ import {
     wLogger
 } from '@tosu/common';
 import fs from 'fs';
-import fsPromise from 'fs/promises';
 import http from 'http';
 import path from 'path';
 import semver from 'semver';
@@ -863,39 +862,4 @@ export function buildInstructionLocal(res: http.ServerResponse) {
             res.end(html);
         }
     );
-}
-
-export async function buildOverlayConfig(res: http.ServerResponse) {
-    try {
-        const pageContent = await fsPromise.readFile(
-            path.join(pkgAssetsPath, 'overlayDisplay.html'),
-            'utf-8'
-        );
-        const homePageContent = await fsPromise.readFile(
-            path.join(pkgAssetsPath, 'homepage.html'),
-            'utf8'
-        );
-
-        let html = homePageContent
-            .replace('{{LOCAL_AMOUNT}}', '')
-            .replace('{{AVAILABLE_AMOUNT}}', '')
-            .replace('{{LIST}}', pageContent);
-
-        if (semver.gt(config.updateVersion, config.currentVersion)) {
-            html = html
-                .replace('{OLD}', config.currentVersion)
-                .replace('{NEW}', config.updateVersion)
-                .replace('update-available hidden', 'update-available');
-        }
-
-        res.writeHead(200, {
-            'Content-Type': getContentType('file.html')
-        });
-        res.end(html);
-    } catch (error) {
-        wLogger.debug('buildOverlayConfig', 'something failed', error);
-        res.writeHead(404, { 'Content-Type': 'text/html' });
-
-        res.end('<html>page not found</html>');
-    }
 }

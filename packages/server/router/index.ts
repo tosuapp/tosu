@@ -20,7 +20,6 @@ import {
     buildExternalCounters,
     buildInstructionLocal,
     buildLocalCounters,
-    buildOverlayConfig,
     buildSettings,
     getLocalCounters,
     saveSettings
@@ -484,10 +483,6 @@ export default function buildBaseApi(server: Server) {
 
                 if (req.query?.tab === '3') {
                     return buildInstructionLocal(res);
-                }
-
-                if (req.query?.tab === '4') {
-                    return await buildOverlayConfig(res);
                 }
 
                 return buildLocalCounters(res, parseAddress.hostname);
