@@ -60,14 +60,20 @@
         ref="overlay_ctx"
       >
         <div class="cm-buttons">
-          <div
+          <a
             v-if="overlays[context_overlay.index]._settings == true"
-            class="ctx-button -settings"
-            :n="overlays[context_overlay.index].folderName"
-            @click.left="context_overlay._ = false; context_overlay.index = -1;"
+            class="ctx-button btn-settings"
+            :href="`http://127.0.0.1:24050/settings?overlay=${overlays[context_overlay.index].folderName}&ingame=true`"
+            target="_blank"
+            @click.left="notification({
+                text: `Settings opened in separate window`,
+                classes: ['green'],
+                delay: 3000,
+            })"
           >
             settings
-          </div>
+            <i class="icon-link"></i>
+          </a>
           <div
             class="ctx-button"
             @click.left="reset_overlay(context_overlay.index)"
@@ -75,7 +81,7 @@
             reset
           </div>
           <div
-            class="ctx-button -delete"
+            class="ctx-button btn-delete"
             @click.left="remove_overlay(context_overlay.index)"
           >
             delete

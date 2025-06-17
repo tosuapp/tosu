@@ -863,3 +863,36 @@ export function buildInstructionLocal(res: http.ServerResponse) {
         }
     );
 }
+
+export function buildEmptyPage(res: http.ServerResponse) {
+    fs.readFile(
+        path.join(pkgAssetsPath, 'homepage.html'),
+        'utf8',
+        (err, content) => {
+            if (err) {
+                wLogger.debug('buildEmptyPage', 'homepage read', err);
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+
+                res.end('<html>page not found</html>');
+                return;
+            }
+
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', '')
+                .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{SEARCH}}', '')
+                .replace('{{LIST}}', '');
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
+
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            res.end(html);
+        }
+    );
+}

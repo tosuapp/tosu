@@ -17,6 +17,7 @@ import path from 'path';
 
 import { Server, sendJson } from '../index';
 import {
+    buildEmptyPage,
     buildExternalCounters,
     buildInstructionLocal,
     buildLocalCounters,
@@ -484,7 +485,10 @@ export default function buildBaseApi(server: Server) {
                 return buildLocalCounters(res, parseAddress.hostname);
             }
 
-            if (url === '/settings') return buildSettings(res);
+            if (url === '/settings') {
+                if (req.query.overlay) return buildEmptyPage(res);
+                return buildSettings(res);
+            }
             if (url === '/local-overlays') return buildInstructionLocal(res);
             if (url === '/available-overlays') {
                 const parseAddress = new URL(

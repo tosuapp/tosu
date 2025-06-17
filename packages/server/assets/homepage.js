@@ -1444,8 +1444,8 @@ function closeModal(event, callback) {
 };
 
 
-async function loadCounterSettings(element) {
-  const folderName = decodeURI(element.attributes.n?.value || '');
+async function loadCounterSettings(overlay_name, to, no_modal) {
+  const folderName = decodeURI(overlay_name || '');
 
   const download = await fetch(`/api/counters/settings/${folderName}`);
   const json = await download.json();
@@ -1467,6 +1467,16 @@ async function loadCounterSettings(element) {
     return;
   };
 
+  if (no_modal == true) {
+    window.counter_settings = createApp(showSettings, {
+      folderName,
+      settings: Array.isArray(json?.settings) ? json.settings : [],
+      values: typeof json?.values == 'object' && !Array.isArray(json?.values) ? json.values : {},
+    });
+
+    window.counter_settings.mount(to);
+    return;
+  };
 
   displayModal(() => {
     window.counter_settings = createApp(showSettings, {
@@ -1475,7 +1485,7 @@ async function loadCounterSettings(element) {
       values: typeof json?.values == 'object' && !Array.isArray(json?.values) ? json.values : {},
     });
 
-    window.counter_settings.mount('#showSettings');
+    window.counter_settings.mount(to);
   }, 'showSettings');
 };
 
@@ -1596,12 +1606,12 @@ window.addEventListener('click', (event) => {
   };
 
   if (t?.classList.value.includes(' settings-button')) {
-    loadCounterSettings(t);
+    loadCounterSettings(t.attributes.n?.value, '#showSettings');
     return;
   };
 
   if (t?.classList.value.includes(' -settings')) {
-    loadCounterSettings(t);
+    loadCounterSettings(t.attributes.n?.value, '#showSettings');
     return;
   };
 
@@ -1698,6 +1708,14 @@ if (installed_overlays && localStorage.getItem('total-installed-overlays')) {
   installed_overlays.innerHTML = `Installed (${localStorage.getItem('total-installed-overlays')})`;
 };
 
-if (installed_overlays && window.location.pathname == '/') {
+if (window.location.pathname == '/' && installed_overlays) {
   localStorage.setItem('total-installed-overlays', installed_overlays.innerText.toLowerCase().replace('installed (', '').replace(')', '').trim());
+};
+
+if (window.location.pathname == '/settings' && queryParams.has('overlay')) {
+  const results = document.querySelector('.results');
+  results.classList.add('--settings');
+  results.innerHTML = `Loading...`;
+
+  loadCounterSettings(queryParams.get('overlay'), '.results', true);
 };
