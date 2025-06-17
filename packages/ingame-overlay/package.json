@@ -12,7 +12,6 @@
   "keywords": [],
   "author": "storycraft <storycraft@pancake.sh>",
   "dependencies": {
-    "@jellybrick/wql-process-monitor": "^1.4.8",
     "asdf-overlay-node": "^0.6.7",
     "tsprocess": "workspace:*"
   },
