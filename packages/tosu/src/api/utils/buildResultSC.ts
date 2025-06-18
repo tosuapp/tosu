@@ -280,7 +280,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         osu_m99_9PP: -1,
         mania_1_000_000PP: -1,
         mania_m1_000_000PP: -1,
-        simulatedPp: beatmapPP.ppAcc[100],
+        simulatedPp: -1,
 
         plays: 0,
         tags: '',
