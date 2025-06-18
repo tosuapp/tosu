@@ -57,12 +57,7 @@ export class Server {
             instanceManager: '',
             pollRateFieldName: '',
             stateFunctionName: '',
-            onMessageCallback: handleSocketCommands,
-            onConnectionCallback: (_, url) => {
-                if (url !== '/websocket/commands?l=__ingame__') return;
-
-                wLogger.warn(`[ingame-overlay] initialized successfully`);
-            }
+            onMessageCallback: handleSocketCommands
         });
 
         buildAssetsApi(this);

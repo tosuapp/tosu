@@ -144,6 +144,11 @@ export class InstanceManager {
                         cmd: 'add',
                         pid: processId
                     });
+
+                    this.overlayProcess?.send({
+                        cmd: 'keybind',
+                        keys: [27]
+                    });
                 }
             }
         } catch (exc) {

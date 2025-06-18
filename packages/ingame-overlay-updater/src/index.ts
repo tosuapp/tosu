@@ -14,7 +14,6 @@ import { Readable } from 'node:stream';
 
 // NOTE: _version.js packs with pkg support in tosu build
 const currentVersion = require(process.cwd() + '/_version.js');
-
 const platform = platformResolver(process.platform);
 
 export async function runOverlay(): Promise<ChildProcess> {
@@ -84,7 +83,7 @@ export async function runOverlay(): Promise<ChildProcess> {
         wLogger.info('[ingame-overlay] Ingame overlay downloaded');
     }
 
-    wLogger.warn(`[ingame-overlay] Starting...`);
+    wLogger.warn(`[ingame-overlay] Launching...`);
 
     const child = spawn(
         path.join(gameOverlayPath, 'tosu-ingame-overlay.exe'),
@@ -109,12 +108,18 @@ export async function runOverlay(): Promise<ChildProcess> {
 
     child.stdout.setEncoding('utf-8').on('data', (data: string) => {
         // overlay logs are a bit verbose, so redirect them to debug log
-        wLogger.debug('[ingame-overlay]', data.trim());
+        data = data.trim();
+
+        if (data.startsWith('info:'))
+            wLogger.info('[ingame-overlay]', data.replace('info:', '').trim());
+        else if (data.startsWith('warn:'))
+            wLogger.warn('[ingame-overlay]', data.replace('warn:', '').trim());
+        else wLogger.debug('[ingame-overlay]', data.trim());
     });
 
     child.stderr.setEncoding('utf-8').on('data', (data: string) => {
         // redirect overlay error backtraces to debug error log
-        wLogger.debugError('[ingame-overlay]', data.trim());
+        wLogger.error('[ingame-overlay]', data.trim());
     });
 
     return child;
