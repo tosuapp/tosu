@@ -8,11 +8,14 @@ const BACKUP_SERVER_PORT = document.querySelector('*[data-id="SERVER_PORT"] inpu
 
 
 const downloading = [];
+let selected_keys = [];
 
 
 const search_bar = document.querySelector('.search-bar');
 const available_overlays = document.querySelector('a[href="/available-overlays"]');
 const installed_overlays = document.querySelector('a[href="/"]');
+
+const keybind_div = document.querySelector('[data-id="INGAME_OVERLAY_KEYBIND"]');
 
 let timer;
 
@@ -1569,6 +1572,17 @@ async function startBuilderModal(element) {
 };
 
 
+function debounce(callback, wait) {
+  let timeoutId = null;
+  return (...args) => {
+    window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => {
+      callback(...args);
+    }, wait);
+  };
+};
+
+
 search_bar?.addEventListener('input', handleInput);
 search_bar?.addEventListener('keydown', handleInput);
 
@@ -1718,4 +1732,49 @@ if (window.location.pathname == '/settings' && queryParams.has('overlay')) {
   results.innerHTML = `Loading...`;
 
   loadCounterSettings(queryParams.get('overlay'), '.results', true);
+};
+
+if (window.location.pathname == '/settings' && !queryParams.has('overlay')) {
+  const keys_debounce = debounce((keys, target) => {
+    selected_keys = keys.slice();
+
+    keys.length = 0;
+    target.value = selected_keys.map(r => r.key).join(' + ');
+
+    checkSettingsChanges();
+  }, 500);
+
+
+  const typed_keys = [];
+  keybind_div.children[0].classList.add('ingame_keybind');
+
+
+  function push_keybind(event) {
+    event.preventDefault();
+    if (typed_keys.length >= 10) return;
+
+    if (!typed_keys.some(r => r.code == event.keyCode)) {
+      selected_keys.length = 0;
+      typed_keys.push({ code: event.keyCode, key: event.key == ' ' ? 'Space' : event.key });
+    };
+
+    event.target.value = typed_keys.map(r => r.key).join(' + ');
+    keys_debounce(typed_keys, event.target);
+  };
+
+
+  keybind_div.children[0].addEventListener('focus', (input) => {
+    input.target.value = '';
+    typed_keys.length = 0;
+
+    window.addEventListener('keydown', push_keybind);
+  });
+
+
+  keybind_div.children[0].addEventListener('blur', input => {
+    window.removeEventListener('keydown', push_keybind);
+
+    const keys = selected_keys.length == 0 ? typed_keys : selected_keys;
+    input.target.value = keys.map(r => r.key).join(' + ');
+  });
 };

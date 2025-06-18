@@ -234,7 +234,7 @@ export function toCursor(cursor: string): Cursor | undefined {
 
 // As per https://www.electronjs.org/docs/latest/api/accelerator
 // and https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-const KEYS: Record<number, string | undefined> = {
+export const KEYS: Record<number, string> = {
     8: 'Backspace',
     9: 'Tab',
     13: 'Enter',

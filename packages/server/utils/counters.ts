@@ -595,6 +595,15 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{checked}',
                                 config.enableIngameOverlay ? 'checked' : ''
                             )
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'In-Game Overlay Keybind')
+                    .replace('{description}', '')
+                    .replace(
+                        '{input-2}',
+                        settingsTextInputHTML
+                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
+                            .replace('{value}', config.ingameOverlayKeybind)
                     )
             ]
                 .map((item) => item.replace(/\{[^}]*}/g, ''))

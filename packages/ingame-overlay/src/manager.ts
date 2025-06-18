@@ -1,5 +1,7 @@
+import { key } from 'asdf-overlay-node';
 import { on } from 'node:events';
 
+import { KEYS, Keybind } from './input';
 import { OverlayProcess } from './process';
 
 export class OverlayManager {
@@ -63,9 +65,34 @@ export class OverlayManager {
         }
     }
 
+    updateKeybind(keybind: string) {
+        const array = Array.from(Object.entries(KEYS));
+        const keys: { code: number; key: string }[] = keybind
+            .split('+')
+            .map((key) => {
+                const find = array.find(
+                    (r) => r[1].toLowerCase() === key.toLowerCase().trim()
+                );
+                return find ? { code: +find[0], key: find[1] } : null;
+            })
+            .filter((r) => r !== null);
+
+        for (const overlay of this.map.values()) {
+            overlay.keybind = new Keybind(keys.map((k) => key(k.code)));
+        }
+
+        console.debug(
+            `Keybind updated to ${keys.map((r) => r.key).join(' + ')}`
+        );
+    }
+
     async handleEvent(message: { cmd: string } & Record<string, unknown>) {
         if (message.cmd === 'add') {
             await this.runOverlay(message.pid as number);
+        }
+
+        if (message.cmd === 'keybind') {
+            this.updateKeybind(message.keybind as string);
         }
     }
 }

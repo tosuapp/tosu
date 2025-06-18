@@ -24,7 +24,7 @@ export class InstanceManager {
         [key: number]: AbstractInstance;
     };
 
-    private overlayProcess: ChildProcess | null = null;
+    overlayProcess: ChildProcess | null = null;
 
     constructor() {
         this.osuInstances = {};
@@ -147,7 +147,7 @@ export class InstanceManager {
 
                     this.overlayProcess?.send({
                         cmd: 'keybind',
-                        keys: [27]
+                        keybind: config.ingameOverlayKeybind
                     });
                 }
             }
@@ -188,9 +188,15 @@ export class InstanceManager {
         }
     }
 
-    async startOverlay() {
+    async startOverlay(keybindUpdated?: boolean) {
         // ignore if it already started
         if (this.overlayProcess) {
+            if (keybindUpdated !== true) return;
+
+            this.overlayProcess?.send({
+                cmd: 'keybind',
+                keybind: config.ingameOverlayKeybind
+            });
             return;
         }
 
