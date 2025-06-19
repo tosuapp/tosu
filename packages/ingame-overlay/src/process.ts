@@ -55,7 +55,6 @@ export class OverlayProcess {
             overlay.setBlockingCursor(hwnd, toCursor(type));
         });
 
-        // TODO:: configurable input key bind
         let configurationEnabled = false;
 
         overlay.event.on('input_blocking_ended', () => {
