@@ -734,14 +734,29 @@ a {
       }
     }
 
+    &:has(.text-input):has(.switch-thumb:not(:checked)) {
+      &>div {
+        cursor: not-allowed;
+      }
+      &>div>.text-input {
+        opacity: 60%;
+        pointer-events: none;
+      }
+    }
+
     &:has(.switch-thumb:checked) {
       &>div>p:nth-child(2) {
-        opacity: 100%;
+        opacity: 1;
         color: #6593c5;
       }
 
       &>p:nth-child(2) {
         opacity: 70%;
+      }
+
+      &>.text-input {
+        opacity: 1;
+        pointer-events: all;
       }
     }
 
@@ -863,15 +878,18 @@ a {
     border-radius: 0.3em;
     width: fit-content;
     height: fit-content;
+    transition: opacity 0.2s ease, color 0.2s ease;
 
     input[type='text'] {
       display: flex;
+      field-sizing: content;
       padding: 0 0.6em;
       border: 0;
       outline: 0;
       font-size: 1rem;
       height: 1.7rem;
-      width: 10rem;
+      min-width: 2rem;
+      width: 100%;
       line-height: 1.7rem;
       font-family: monospace;
       text-align: center;
@@ -885,15 +903,6 @@ a {
       input {
         color: #6593c5;
       }
-    }
-
-    &[data-id='SERVER_PORT'] input {
-      width: 5rem;
-    }
-
-    &[data-id='STATIC_FOLDER_PATH'] input {
-      width: 14rem;
-      text-align: left;
     }
   }
 
@@ -935,15 +944,17 @@ a {
   }
 
   .settings-item-v2:has(div > .text-input) {
-    & div>p {
-      color: #6593c5;
-      font-weight: bold;
-      opacity: 100%;
-      margin-right: 0.4rem;
-    }
+    &:not(:has(div > .switch)) {
+      & div>p {
+        color: #6593c5;
+        font-weight: bold;
+        opacity: 100%;
+        margin-right: 0.4rem;
+      }
 
-    & p {
-      opacity: 60%;
+      & p {
+        opacity: 60%;
+      }
     }
   }
 
