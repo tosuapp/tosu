@@ -1572,17 +1572,6 @@ async function startBuilderModal(element) {
 };
 
 
-function debounce(callback, wait) {
-  let timeoutId = null;
-  return (...args) => {
-    window.clearTimeout(timeoutId);
-    timeoutId = window.setTimeout(() => {
-      callback(...args);
-    }, wait);
-  };
-};
-
-
 search_bar?.addEventListener('input', handleInput);
 search_bar?.addEventListener('keydown', handleInput);
 
@@ -1734,47 +1723,64 @@ if (window.location.pathname == '/settings' && queryParams.has('overlay')) {
   loadCounterSettings(queryParams.get('overlay'), '.results', true);
 };
 
-if (window.location.pathname == '/settings' && !queryParams.has('overlay')) {
-  const keys_debounce = debounce((keys, target) => {
-    selected_keys = keys.slice();
+if (window.location.pathname == '/settings' && !queryParams.has('overlay') && keybind_div) {
+    const keybindInput = keybind_div.children[0];
+    const prevKeybind = keybindInput.value;
 
-    keys.length = 0;
-    target.value = selected_keys.map(r => r.key).join(' + ');
+    keybindInput.addEventListener('focus', () => {
+        keybindInput.value = '...';
+        window.addEventListener('keydown', handleKey);
+        window.addEventListener('keyup', handleKey);
+    });
 
-    checkSettingsChanges();
-  }, 500);
+    keybindInput.addEventListener('blur', () => {
+        if (keybindInput.value === '...') keybindInput.value = prevKeybind;
 
+        window.removeEventListener('keydown', handleKey);
+        window.removeEventListener('keyup', handleKey);
+        checkSettingsChanges();
+    });
 
-  const typed_keys = [];
-  keybind_div.children[0].classList.add('ingame_keybind');
+    const handleKey = (event) => {
+        console.log(event);
+        event.preventDefault();
+        const key = event.key === ' ' ? 'Space' : event.key;
+        const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
 
+        if (event.type === 'keydown') {
+            if (key === 'Escape') {
+                keybindInput.value = prevKeybind;
+                keybindInput.blur();
+                return;
+            }
 
-  function push_keybind(event) {
-    event.preventDefault();
-    if (typed_keys.length >= 10) return;
+            if (selected_keys.length >= 4) {
+                displayNotification({
+                    element: keybindInput,
+                    text: `You can only bind up to 4 keys!`,
+                    classes: ['red'],
+                    delay: 2000,
+                });
 
-    if (!typed_keys.some(r => r.code == event.keyCode)) {
-      selected_keys.length = 0;
-      typed_keys.push({ code: event.keyCode, key: event.key == ' ' ? 'Space' : event.key });
-    };
+                selected_keys = [];
+                keybindInput.blur();
+                return;
+            }
 
-    event.target.value = typed_keys.map(r => r.key).join(' + ');
-    keys_debounce(typed_keys, event.target);
-  };
-
-
-  keybind_div.children[0].addEventListener('focus', (input) => {
-    input.target.value = '';
-    typed_keys.length = 0;
-
-    window.addEventListener('keydown', push_keybind);
-  });
-
-
-  keybind_div.children[0].addEventListener('blur', input => {
-    window.removeEventListener('keydown', push_keybind);
-
-    const keys = selected_keys.length == 0 ? typed_keys : selected_keys;
-    input.target.value = keys.map(r => r.key).join(' + ');
-  });
-};
+            if (!selected_keys.some(k => k.key === formattedKey)) {
+                selected_keys.push({ code: event.keyCode, key: formattedKey });
+                selected_keys.sort((a, b) => {
+                    const modifierOrder = ['Meta', 'Control', 'Shift', 'Alt'];
+                    const isModifierA = modifierOrder.includes(a.key.split('+')[0]);
+                    const isModifierB = modifierOrder.includes(b.key.split('+')[0]);
+                    if (isModifierA !== isModifierB) return isModifierA ? -1 : 1;
+                    return a.key.localeCompare(b.key, undefined, { numeric: true });
+                });
+                keybindInput.value = selected_keys.map(k => k.key).join(' + ');
+            }
+        } else if (event.type === 'keyup') {
+            selected_keys = selected_keys.filter(k => k.code !== event.keyCode);
+            if (selected_keys.length === 0) keybindInput.blur();
+        }
+    }
+}
