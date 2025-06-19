@@ -150,24 +150,24 @@ function rebuildJSON({
 
         try {
             if (query != null) {
-                let isCompatibleFilter = false;
-                if (
-                    query.toLowerCase() === 'sc' &&
-                    item.compatiblewith?.some((r) =>
-                        r.toLowerCase().includes('streamcompanion')
-                    )
-                )
-                    isCompatibleFilter = true;
+                const queryArr = Array.from(
+                    new Set(query.split(' ').map((r) => r.toLowerCase()))
+                );
 
-                if (
-                    !(
-                        item.name.toLowerCase().includes(query) ||
-                        item.name.toLowerCase().includes(query)
-                    ) &&
-                    isCompatibleFilter !== true
-                ) {
-                    continue;
+                if (queryArr.includes('sc')) {
+                    const idx = queryArr.indexOf('sc');
+                    if (idx !== -1) queryArr[idx] = 'streamcompanion';
                 }
+
+                const hasQuery = queryArr.some(
+                    (q) =>
+                        item.name.toLowerCase().includes(q) ||
+                        item.author.toLowerCase().includes(q) ||
+                        (item.compatiblewith ?? []).some((c) =>
+                            c.toLowerCase().includes(q)
+                        )
+                );
+                if (!hasQuery) continue;
             }
 
             if (!Array.isArray(item.settings)) item.settings = [];
