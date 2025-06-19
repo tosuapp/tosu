@@ -1239,6 +1239,10 @@ async function deleteCounter(element) {
   const results = document.querySelector('.results');
   results.removeChild(element.parentElement.parentElement.parentElement);
 
+  const newTotal = document.querySelectorAll('.calu').length ?? 0;
+  installed_overlays.innerHTML = `Installed (${newTotal})`;
+  localStorage.setItem('total-installed-overlays', newTotal);
+
   if (results.innerHTML.trim() != '') return;
 
   results.innerHTML = `<div class="no-results">
@@ -1663,10 +1667,12 @@ window.onload = async () => {
 
 
     if (available_overlays) available_overlays.innerHTML = `Available (${json.length})`;
-    localStorage.setItem('total-available-overlays', json.length.toString());
+    localStorage.setItem('total-available-overlays', json.length);
 
 
     const installed = document.querySelectorAll('.calu');
+    if (installed.length) localStorage.setItem('total-installed-overlays', installed.length);
+
     for (let i = 0; i < installed.length; i++) {
       const counter = installed[i];
 
@@ -1704,16 +1710,22 @@ if (queryParams.has('ingame')) {
 };
 
 if (available_overlays && localStorage.getItem('total-available-overlays')) {
+    const stored = +localStorage.getItem('total-available-overlays');
+    const current = +available_overlays.innerHTML.match(/\d+/);
+    if (current && current !== stored) localStorage.setItem('total-available-overlays', current);
+
   available_overlays.innerHTML = `Available (${localStorage.getItem('total-available-overlays')})`;
 };
 
 if (installed_overlays && localStorage.getItem('total-installed-overlays')) {
+    const stored = +localStorage.getItem('total-installed-overlays');
+    const current = +installed_overlays.innerHTML.match(/\d+/);
+    if (current && current !== stored) localStorage.setItem('total-installed-overlays', current);
+
   installed_overlays.innerHTML = `Installed (${localStorage.getItem('total-installed-overlays')})`;
 };
 
-if (window.location.pathname == '/' && installed_overlays) {
-  localStorage.setItem('total-installed-overlays', installed_overlays.innerText.toLowerCase().replace('installed (', '').replace(')', '').trim());
-};
+
 
 if (window.location.pathname == '/settings' && queryParams.has('overlay')) {
   const results = document.querySelector('.results');
