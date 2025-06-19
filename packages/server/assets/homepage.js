@@ -12,7 +12,7 @@ let selected_keys = [];
 
 
 const search_bar = document.querySelector('.search-bar');
-const available_overlays = document.querySelector('a[href="/available-overlays"]');
+const available_overlays = document.querySelector('a[href="/available"]');
 const installed_overlays = document.querySelector('a[href="/"]');
 
 const keybind_div = document.querySelector('[data-id="INGAME_OVERLAY_KEYBIND"]');

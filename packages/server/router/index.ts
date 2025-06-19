@@ -65,7 +65,7 @@ export default function buildBaseApi(server: Server) {
             const parseReferer = new URL(
                 req.headers.referer || `http://${req.socket.remoteAddress}/`
             );
-            if (parseReferer.pathname === `/available-overlays`) {
+            if (parseReferer.pathname === `/available`) {
                 return buildExternalCounters(res, parseAddress.hostname, query);
             }
 
@@ -490,7 +490,7 @@ export default function buildBaseApi(server: Server) {
                 return buildSettings(res);
             }
             if (url === '/local-overlays') return buildInstructionLocal(res);
-            if (url === '/available-overlays') {
+            if (url === '/available') {
                 const parseAddress = new URL(
                     req.headers.host
                         ? `http://${req.headers.host}/`

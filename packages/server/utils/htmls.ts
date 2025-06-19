@@ -6,7 +6,7 @@ export const iconsImages = {
 };
 
 export const emptyNotice =
-    '<div class="no-results">No counters<br /><a href="/available-overlays">Go here to get one 👉</a></div>';
+    '<div class="no-results">No counters<br /><a href="/available">Go here to get one 👉</a></div>';
 export const emptyCounters =
     '<div class="no-results">No counters<br />Change your search phrase</div>';
 export const noMoreCounters =
