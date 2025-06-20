@@ -98,7 +98,7 @@ export const settingsNumberInputHTML = `
 `;
 
 export const settingsTextInputHTML = `
-<div class="text-input" data-id="{id}">
+<div class="text-input{class}" data-id="{id}">
   <input type="text" value="{value}">
 </div>
 `;

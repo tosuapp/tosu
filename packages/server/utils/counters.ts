@@ -600,6 +600,7 @@ export function buildSettings(res: http.ServerResponse) {
                         '{input-2}',
                         settingsTextInputHTML
                             .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
+                            .replace('{class}', ' -keybind')
                             .replace('{value}', config.ingameOverlayKeybind)
                     )
             ]
@@ -695,6 +696,7 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{input-2}',
                                 settingsTextInputHTML
                                     .replace('{id}', 'SERVER_IP')
+                                    .replace('{class}', '')
                                     .replace(
                                         '{value}',
                                         config.serverIP.toString()
@@ -710,6 +712,7 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{input-2}',
                                 settingsTextInputHTML
                                     .replace('{id}', 'SERVER_PORT')
+                                    .replace('{class}', '')
                                     .replace(
                                         '{value}',
                                         config.serverPort.toString()
@@ -781,6 +784,7 @@ export function buildSettings(res: http.ServerResponse) {
                         '{input-2}',
                         settingsTextInputHTML
                             .replace('{id}', 'STATIC_FOLDER_PATH')
+                            .replace('{class}', '')
                             .replace('{value}', config.staticFolderPath)
                     )
             ]

@@ -1709,18 +1709,18 @@ if (queryParams.has('ingame')) {
   document.querySelector('.submit-counter')?.remove();
 };
 
-if (available_overlays && localStorage.getItem('total-available-overlays')) {
-    const stored = +localStorage.getItem('total-available-overlays');
-    const current = +available_overlays.innerHTML.match(/\d+/);
-    if (current && current !== stored) localStorage.setItem('total-available-overlays', current);
+if (available_overlays && localStorage.getItem('total-available-overlays') != null) {
+  const stored = +localStorage.getItem('total-available-overlays');
+  const current = +available_overlays.innerHTML.match(/\d+/);
+  if (current && current !== stored) localStorage.setItem('total-available-overlays', current);
 
   available_overlays.innerHTML = `Available (${localStorage.getItem('total-available-overlays')})`;
 };
 
-if (installed_overlays && localStorage.getItem('total-installed-overlays')) {
-    const stored = +localStorage.getItem('total-installed-overlays');
-    const current = +installed_overlays.innerHTML.match(/\d+/);
-    if (current && current !== stored) localStorage.setItem('total-installed-overlays', current);
+if (installed_overlays && localStorage.getItem('total-installed-overlays') != null) {
+  const stored = +localStorage.getItem('total-installed-overlays');
+  const current = +installed_overlays.innerHTML.match(/\d+/);
+  if (current && current !== stored) localStorage.setItem('total-installed-overlays', current);
 
   installed_overlays.innerHTML = `Installed (${localStorage.getItem('total-installed-overlays')})`;
 };
@@ -1736,63 +1736,64 @@ if (window.location.pathname == '/settings' && queryParams.has('overlay')) {
 };
 
 if (window.location.pathname == '/settings' && !queryParams.has('overlay') && keybind_div) {
-    const keybindInput = keybind_div.children[0];
-    const prevKeybind = keybindInput.value;
+  const keybindInput = keybind_div.children[0];
+  let previousKeybind = keybindInput.value;
 
-    keybindInput.addEventListener('focus', () => {
-        keybindInput.value = '...';
-        window.addEventListener('keydown', handleKey);
-        window.addEventListener('keyup', handleKey);
-    });
+  keybindInput.addEventListener('focus', () => {
+    keybindInput.value = '...';
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+  });
 
-    keybindInput.addEventListener('blur', () => {
-        if (keybindInput.value === '...') keybindInput.value = prevKeybind;
+  keybindInput.addEventListener('blur', () => {
+    if (keybindInput.value === '...') keybindInput.value = previousKeybind;
 
-        window.removeEventListener('keydown', handleKey);
-        window.removeEventListener('keyup', handleKey);
-        checkSettingsChanges();
-    });
+    window.removeEventListener('keydown', handleKey);
+    window.removeEventListener('keyup', handleKey);
+    checkSettingsChanges();
+  });
 
-    const handleKey = (event) => {
-        console.log(event);
-        event.preventDefault();
-        const key = event.key === ' ' ? 'Space' : event.key;
-        const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+  const handleKey = (event) => {
+    event.preventDefault();
+    const key = event.key === ' ' ? 'Space' : event.key;
+    const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
 
-        if (event.type === 'keydown') {
-            if (key === 'Escape') {
-                keybindInput.value = prevKeybind;
-                keybindInput.blur();
-                return;
-            }
+    if (event.type === 'keydown') {
+      if (key === 'Escape') {
+        keybindInput.value = previousKeybind;
+        keybindInput.blur();
+        return;
+      }
 
-            if (selected_keys.length >= 4) {
-                displayNotification({
-                    element: keybindInput,
-                    text: `You can only bind up to 4 keys!`,
-                    classes: ['red'],
-                    delay: 2000,
-                });
+      if (selected_keys.length >= 4) {
+        displayNotification({
+          element: keybindInput,
+          text: `You can only bind up to 4 keys!`,
+          classes: ['red'],
+          delay: 2000,
+        });
 
-                selected_keys = [];
-                keybindInput.blur();
-                return;
-            }
+        selected_keys = [];
+        keybindInput.blur();
+        return;
+      }
 
-            if (!selected_keys.some(k => k.key === formattedKey)) {
-                selected_keys.push({ code: event.keyCode, key: formattedKey });
-                selected_keys.sort((a, b) => {
-                    const modifierOrder = ['Meta', 'Control', 'Shift', 'Alt'];
-                    const isModifierA = modifierOrder.includes(a.key.split('+')[0]);
-                    const isModifierB = modifierOrder.includes(b.key.split('+')[0]);
-                    if (isModifierA !== isModifierB) return isModifierA ? -1 : 1;
-                    return a.key.localeCompare(b.key, undefined, { numeric: true });
-                });
-                keybindInput.value = selected_keys.map(k => k.key).join(' + ');
-            }
-        } else if (event.type === 'keyup') {
-            selected_keys = selected_keys.filter(k => k.code !== event.keyCode);
-            if (selected_keys.length === 0) keybindInput.blur();
-        }
+      if (!selected_keys.some(k => k.key === formattedKey)) {
+        selected_keys.push({ code: event.keyCode, key: formattedKey });
+        selected_keys.sort((a, b) => {
+          const modifierOrder = ['Meta', 'Control', 'Shift', 'Alt'];
+          const isModifierA = modifierOrder.includes(a.key.split('+')[0]);
+          const isModifierB = modifierOrder.includes(b.key.split('+')[0]);
+          if (isModifierA !== isModifierB) return isModifierA ? -1 : 1;
+          return a.key.localeCompare(b.key, undefined, { numeric: true });
+        });
+        keybindInput.value = selected_keys.map(k => k.key).join(' + ');
+      }
+    } else if (event.type === 'keyup') {
+      selected_keys = selected_keys.filter(k => k.code !== event.keyCode);
+      if (selected_keys.length === 0) keybindInput.blur();
+
+      previousKeybind = keybindInput.value;
     }
+  }
 }

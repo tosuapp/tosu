@@ -738,6 +738,7 @@ a {
       &>div {
         cursor: not-allowed;
       }
+
       &>div>.text-input {
         opacity: 60%;
         pointer-events: none;
@@ -903,6 +904,11 @@ a {
       input {
         color: #6593c5;
       }
+    }
+
+
+    &.-keybind {
+      width: 17em;
     }
   }
 
