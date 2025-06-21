@@ -336,15 +336,9 @@ export default function buildBaseApi(server: Server) {
         }
     );
 
-    server.app.route('/api/runUpdates', 'GET', async (req, res) => {
-        const result = await autoUpdater();
-        if (result instanceof Error) {
-            sendJson(res, { result: result.name });
-            return;
-        }
-
-        return sendJson(res, { result: 'updated' });
-    });
+    server.app.route('/api/runUpdates', 'GET', (req, res) =>
+        autoUpdater('server', res)
+    );
 
     server.app.route('/api/settingsSave', 'POST', (req, res) => {
         const body: object | Error = JsonSafeParse(
