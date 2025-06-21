@@ -1,7 +1,7 @@
 import rosu from '@kotrikd/rosu-pp';
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import fs from 'fs';
-import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
+import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 
 import { BeatmapStrains } from '@/api/types/v1';
@@ -70,6 +70,7 @@ interface BeatmapPPCurrentAttributes {
 
 interface BeatmapPPTimings {
     firstObj: number;
+    firstNonSpinnerObj: number;
     full: number;
 }
 
@@ -130,6 +131,7 @@ export class BeatmapPP extends AbstractState {
 
     timings: BeatmapPPTimings = {
         firstObj: 0,
+        firstNonSpinnerObj: 0,
         full: 0
     };
 
@@ -220,6 +222,7 @@ export class BeatmapPP extends AbstractState {
         };
         this.timings = {
             firstObj: 0,
+            firstNonSpinnerObj: 0,
             full: 0
         };
         this.timingPoints = [];
@@ -512,13 +515,15 @@ export class BeatmapPP extends AbstractState {
                     end: r.endTime
                 }));
 
-                const firstObj = Math.round(
+                this.timings.firstObj = Math.round(
                     this.lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
                 );
-                const full = Math.round(this.lazerBeatmap.totalLength);
-
-                this.timings.firstObj = firstObj;
-                this.timings.full = full;
+                this.timings.firstNonSpinnerObj = Math.round(
+                    this.lazerBeatmap.hitObjects.find(
+                        (r) => !(r.hitType & HitType.Spinner)
+                    )?.startTime ?? 0
+                );
+                this.timings.full = Math.round(this.lazerBeatmap.totalLength);
 
                 this.mode = this.lazerBeatmap.mode;
 
@@ -655,12 +660,14 @@ export class BeatmapPP extends AbstractState {
             }
 
             const sectionOffsetTime = strains.sectionLength;
-            const firstObjectTime = this.timings.firstObj / this.clockRate;
+            const firstObjectTime =
+                this.timings.firstNonSpinnerObj / this.clockRate;
             const lastObjectTime =
                 firstObjectTime + strainsAmount * sectionOffsetTime;
             const mp3LengthTime = menu.mp3Length / this.clockRate;
 
             const LEFT_OFFSET = Math.floor(firstObjectTime / sectionOffsetTime);
+
             const RIGHT_OFFSET =
                 mp3LengthTime >= lastObjectTime
                     ? Math.ceil(
