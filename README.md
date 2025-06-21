@@ -168,6 +168,13 @@ Sponsorship & Thank notice
 * Github: [@xxCherry](https://github.com/xxCherry)
 <br>
 
+🍥 **storycraft**
+* _**baking an ingame-overlay**_
+* Website: https://pancake.sh
+* Twitter: [@storycraft8814](https://twitter.com/storycraft8814)
+* Github: [@storycraft](https://github.com/storycraft)
+<br>
+
 😪 **ck**
 * _**headache provider**_
 * Website: https://osuck.net
