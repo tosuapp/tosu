@@ -44,11 +44,14 @@ export function beatmapFileShortcut(
     }
 
     const filePath = path.join(folder, fileName);
+    if (!fs.existsSync(filePath)) {
+        res.writeHead(404, { 'Content-Type': getContentType(fileName) });
+        return res.end();
+    }
+
     const fileStat = fs.statSync(filePath);
-    if (!fileStat.isFile() || !fs.existsSync(filePath)) {
-        res.writeHead(404, {
-            'Content-Type': getContentType(fileName)
-        });
+    if (!fileStat.isFile()) {
+        res.writeHead(404, { 'Content-Type': getContentType(fileName) });
         return res.end();
     }
 
