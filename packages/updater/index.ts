@@ -9,6 +9,7 @@ import {
 } from '@tosu/common';
 import { spawn } from 'child_process';
 import fs from 'fs';
+import { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
 
 // NOTE: _version.js packs with pkg support in tosu build
@@ -37,10 +38,20 @@ const deleteNotLocked = async (filePath: string) => {
     }
 };
 
-export const checkUpdates = async () => {
+export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
     wLogger.info('[updater]', 'Checking updates');
 
     try {
+        if (from === 'startup') {
+            if (fs.existsSync(fileDestination)) {
+                await deleteNotLocked(fileDestination);
+            }
+
+            if (fs.existsSync(backupExecutablePath)) {
+                await deleteNotLocked(backupExecutablePath);
+            }
+        }
+
         if (platform.type === 'unknown') {
             wLogger.warn(
                 '[updater]',
@@ -76,6 +87,22 @@ export const checkUpdates = async () => {
             return new Error('Version the same');
         }
 
+        if (from === 'startup') {
+            if (
+                versionName.includes(currentVersion) ||
+                currentVersion.includes('-forced')
+            )
+                wLogger.info(
+                    '[updater]',
+                    `You're using latest version v${currentVersion}`
+                );
+            else
+                wLogger.warn(
+                    '[updater]',
+                    `Update available v${currentVersion} => v${config.updateVersion}`
+                );
+        }
+
         return { assets, versionName };
     } catch (exc) {
         wLogger.error('[updater]', `checkUpdates`, (exc as any).message);
@@ -88,9 +115,12 @@ export const checkUpdates = async () => {
     }
 };
 
-export const autoUpdater = async () => {
+export const autoUpdater = async (
+    from: 'server' | 'startup',
+    res?: ServerResponse<IncomingMessage>
+) => {
     try {
-        const check = await checkUpdates();
+        const check = await checkUpdates('autoUpdater');
         if (check instanceof Error) {
             return check;
         }
@@ -137,6 +167,14 @@ export const autoUpdater = async () => {
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
         await unzip(downloadAsset, getProgramPath());
 
+        // close request to allow destroy server
+        if (from === 'server' && res) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end('{"status":"updated"}');
+        }
+
+        await sleep(100);
+
         wLogger.info('[updater]', 'Restarting program');
 
         spawn(`"${process.argv[0]}"`, process.argv.slice(1), {
@@ -153,6 +191,11 @@ export const autoUpdater = async () => {
     } catch (exc) {
         wLogger.error('[updater]', 'autoUpdater', (exc as any).message);
         wLogger.debug('[updater]', 'autoUpdater', exc);
+
+        if (from === 'server' && res) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ status: (exc as any).message }));
+        }
 
         return exc;
     }
