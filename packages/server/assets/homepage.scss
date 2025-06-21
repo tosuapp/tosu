@@ -29,9 +29,15 @@
   --notification-block-red: #d57397;
   --notification-color-red: #191e25;
 
-  --search-color-2: #707f8d;
-  --search-color-1: #cbd8e5;
-  --search-block: #3f4e5d;
+  --search-color-2: #5c6e80;
+  --search-color-1: #a6b8ca;
+
+  --search-block: #283139;
+  --search-block-border: #4c5660;
+
+  --input-color-2: #707f8d;
+  --input-color-1: #cbd8e5;
+  --input-block: #3f4e5d;
 
   --header-color: #939393;
   --header-background: #14171c;
@@ -98,9 +104,9 @@ iframe {
 
 select {
   font-size: 1em;
-  color: var(--search-color-1);
+  color: var(--input-color-1);
   padding: 0.3em 0.4em;
-  background: var(--search-block);
+  background: var(--input-block);
   border-radius: 0.2em;
   outline: 0;
   border: 0;
@@ -305,7 +311,8 @@ a {
     gap: 0.4em;
 
     img {
-      height: 7.5em;
+      max-width: calc(50% - 0.2em);
+      max-height: 10em;
       border-radius: 0.4em;
     }
   }
@@ -573,10 +580,49 @@ a {
 }
 
 .search-bar {
-  font-size: 0.9em;
   font-family: inherit;
+  font-weight: 600;
+  font-size: 1em;
+  position: sticky;
+  top: 4.2em;
   color: var(--search-color-1);
+  padding: 0.4em 0.8em;
+  margin-bottom: 0.5em;
   background: var(--search-block);
+  border-radius: 0.3em;
+  outline: 0;
+  border: 2px solid var(--search-block-border);
+  transition: 0.2s ease;
+  transition-property: filter, opacity, background, border;
+  z-index: 2;
+
+  &::placeholder {
+    color: var(--search-color-2);
+  }
+
+  &.disable {
+    user-select: none;
+    pointer-events: none;
+
+    filter: grayscale(1);
+    opacity: 0.5;
+  }
+
+  &:hover {
+    background: hsl(from var(--search-block) h calc(s - 0) calc(l + 10));
+  }
+
+  &:focus {
+    background: hsl(from var(--search-block) h calc(s - 0) calc(l - 10));
+    border: 2px solid hsl(from var(--search-block-border) h calc(s - 0) calc(l + 20));
+  }
+}
+
+.input {
+  font-size: 1em;
+  font-family: inherit;
+  color: var(--input-color-1);
+  background: var(--input-block);
   padding: 0.2em 0.6em;
   border-radius: 0.2em;
   outline: 0;
@@ -585,7 +631,7 @@ a {
   transition-property: filter, opacity;
 
   &::placeholder {
-    color: var(--search-color-2);
+    color: var(--input-color-2);
   }
 
   &.disable {
@@ -665,7 +711,7 @@ a {
         font-size: 1.2rem;
         font-weight: bold;
         opacity: 50%;
-        transition:  opacity 0.2s ease, color 0.2s ease;
+        transition: opacity 0.2s ease, color 0.2s ease;
       }
     }
 
@@ -673,7 +719,7 @@ a {
     &>p:nth-child(2) {
       font-size: 1rem;
       opacity: 50%;
-      transition:  opacity 0.2s ease, color 0.2s ease;
+      transition: opacity 0.2s ease, color 0.2s ease;
     }
 
     &:has(.textarea-input) {
@@ -688,14 +734,30 @@ a {
       }
     }
 
+    &:has(.text-input):has(.switch-thumb:not(:checked)) {
+      &>div {
+        cursor: not-allowed;
+      }
+
+      &>div>.text-input {
+        opacity: 60%;
+        pointer-events: none;
+      }
+    }
+
     &:has(.switch-thumb:checked) {
       &>div>p:nth-child(2) {
-        opacity: 100%;
+        opacity: 1;
         color: #6593c5;
       }
 
       &>p:nth-child(2) {
         opacity: 70%;
+      }
+
+      &>.text-input {
+        opacity: 1;
+        pointer-events: all;
       }
     }
 
@@ -817,15 +879,18 @@ a {
     border-radius: 0.3em;
     width: fit-content;
     height: fit-content;
+    transition: opacity 0.2s ease, color 0.2s ease;
 
     input[type='text'] {
       display: flex;
+      field-sizing: content;
       padding: 0 0.6em;
       border: 0;
       outline: 0;
       font-size: 1rem;
       height: 1.7rem;
-      width: 10rem;
+      min-width: 2rem;
+      width: 100%;
       line-height: 1.7rem;
       font-family: monospace;
       text-align: center;
@@ -841,13 +906,9 @@ a {
       }
     }
 
-    &[data-id='SERVER_PORT'] input {
-      width: 5rem;
-    }
 
-    &[data-id='STATIC_FOLDER_PATH'] input {
-      width: 14rem;
-      text-align: left;
+    &.-keybind {
+      width: 17em;
     }
   }
 
@@ -889,15 +950,17 @@ a {
   }
 
   .settings-item-v2:has(div > .text-input) {
-    & div>p {
-      color: #6593c5;
-      font-weight: bold;
-      opacity: 100%;
-      margin-right: 0.4rem;
-    }
+    &:not(:has(div > .switch)) {
+      & div>p {
+        color: #6593c5;
+        font-weight: bold;
+        opacity: 100%;
+        margin-right: 0.4rem;
+      }
 
-    & p {
-      opacity: 60%;
+      & p {
+        opacity: 60%;
+      }
     }
   }
 
@@ -958,10 +1021,10 @@ a {
   textarea {
     font-size: 0.9em;
     font-family: inherit;
-    color: var(--search-color-1);
+    color: var(--input-color-1);
     width: 20em;
     padding: 0.2em 0.6em;
-    background: var(--search-block);
+    background: var(--input-block);
     outline: 0;
     border-radius: 0.2em;
     border: 0;
@@ -970,7 +1033,7 @@ a {
     outline: 2px solid transparent;
 
     &::placeholder {
-      color: var(--search-color-2);
+      color: var(--input-color-2);
     }
 
     &:hover {
@@ -979,7 +1042,7 @@ a {
 
     &:focus {
       background: #2b353f;
-      outline: 2px solid var(--search-block);
+      outline: 2px solid var(--input-block);
     }
   }
 
@@ -1015,7 +1078,7 @@ a {
 
   input:checked~.checkmark::before {
     scale: 0.7;
-    background: var(--search-color-1);
+    background: var(--input-color-1);
   }
 
   input:checked~.status::before {
@@ -1328,7 +1391,7 @@ a {
 
   .ni-value input[type="color"] {
     padding: 0em 0.1em !important;
-    background: var(--search-block);
+    background: var(--input-block);
     border: none;
     outline: none;
   }
@@ -1425,29 +1488,6 @@ hr.modal-space {
   border-radius: .2em;
 }
 
-
-.submit-counter {
-  text-decoration: none;
-  font-weight: 700;
-  font-size: .9em;
-  user-select: none;
-  cursor: pointer;
-  color: var(--text-2);
-  gap: 1em;
-  padding: .4em 0.8em;
-  background: var(--block-2);
-  border-radius: 0.3em;
-  transition: padding .4s ease, height .4s ease;
-
-  i {
-    color: var(--color-1);
-  }
-
-  &>* {
-    pointer-events: none;
-  }
-}
-
 .txt-area {
   align-items: flex-start;
   flex-direction: column;
@@ -1535,4 +1575,51 @@ hr.modal-space {
   position: sticky;
   bottom: 1.5em;
   z-index: 1;
+}
+
+
+.results.--settings {
+  .m-content {
+    padding: 1em;
+    background: var(--block-1);
+    border-radius: 0.4em;
+    box-shadow: 0 1em 2em hsl(0deg 0% 0% / 50%), 0 1em 4em hsl(0deg 0% 0% / 50%);
+  }
+
+  .ms-title {
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 1.2em;
+    display: flex;
+    padding-bottom: .1em;
+    margin-bottom: .8em;
+    background: var(--block-1);
+    border-bottom: 1px solid;
+    z-index: 1;
+
+    span:nth-child(2) {
+      font-size: 0.7em;
+    }
+  }
+
+  .ms-btns {
+    font-size: 0.9em;
+    position: sticky;
+    margin-top: 1.5em;
+    bottom: 2rem;
+    z-index: 2;
+  }
+
+  .m-scroll {
+    display: grid;
+    gap: .8em;
+    z-index: 0;
+  }
+}
+
+
+.ingame_keybind {
+  width: 25em !important;
 }

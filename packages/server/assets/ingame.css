@@ -243,6 +243,7 @@ iframe {
 }
 
 .ctx-button {
+    text-decoration: none;
     user-select: none;
     cursor: pointer;
     color: var(--background-1);
@@ -263,11 +264,11 @@ iframe {
     }
 
 
-    &.-delete {
+    &.btn-delete {
         background: var(--button-delete);
     }
 
-    &.-settings {
+    &.btn-settings {
         background: var(--button-builder);
     }
 }

@@ -714,6 +714,36 @@ const app = createApp({
       };
     };
 
+    function notification({ text, classes, delay }) {
+      const div = document.createElement('div');
+      div.classList.add('notification');
+      div.classList.add('hidden');
+      if (Array.isArray(classes)) div.classList.add(...classes);
+
+      div.style.top = `2em`;
+      div.style.right = `2em`;
+
+      div.style.left = `unset`;
+      div.style.bottom = `unset`;
+
+      div.innerHTML = text;
+
+
+      document.querySelector('main').appendChild(div);
+      setTimeout(() => {
+        div.classList.remove('hidden');
+      }, 10);
+
+      setTimeout(() => {
+        div.classList.add('hidden');
+
+        setTimeout(() => {
+          document.querySelector('main').removeChild(div);
+        }, 310);
+      }, delay);
+    };
+
+
     socket.sendCommand('getSettings', encodeURI('__ingame__'));
     socket.sendCommand('getCounters', encodeURI('__ingame__'));
     socket.commands((data) => {
@@ -745,6 +775,7 @@ const app = createApp({
       add_overlay, reset_overlay, remove_overlay,
       reset_hover,
       round_up,
+      notification,
     };
   },
 });

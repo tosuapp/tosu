@@ -17,10 +17,10 @@ import path from 'path';
 
 import { Server, sendJson } from '../index';
 import {
+    buildEmptyPage,
     buildExternalCounters,
     buildInstructionLocal,
     buildLocalCounters,
-    buildOverlayConfig,
     buildSettings,
     getLocalCounters,
     saveSettings
@@ -61,7 +61,11 @@ export default function buildBaseApi(server: Server) {
                     : req.headers.referer ||
                       `http://${req.socket.remoteAddress}/`
             );
-            if (req.query?.tab === '1') {
+
+            const parseReferer = new URL(
+                req.headers.referer || `http://${req.socket.remoteAddress}/`
+            );
+            if (parseReferer.pathname === `/available`) {
                 return buildExternalCounters(res, parseAddress.hostname, query);
             }
 
@@ -464,7 +468,11 @@ export default function buildBaseApi(server: Server) {
     server.app.route(/.*/, 'GET', async (req, res) => {
         const url = req.pathname || '/';
         try {
-            const staticPath = getStaticPath();
+            if (url.startsWith(`/.well-know`)) {
+                res.statusCode = 404;
+                res.statusMessage = 'Not Found';
+                return res.end();
+            }
 
             if (url === '/') {
                 const parseAddress = new URL(
@@ -474,24 +482,25 @@ export default function buildBaseApi(server: Server) {
                           `http://${req.socket.remoteAddress}/`
                 );
 
-                if (req.query?.tab === '1') {
-                    return buildExternalCounters(res, parseAddress.hostname);
-                }
-
-                if (req.query?.tab === '2') {
-                    return buildSettings(res);
-                }
-
-                if (req.query?.tab === '3') {
-                    return buildInstructionLocal(res);
-                }
-
-                if (req.query?.tab === '4') {
-                    return await buildOverlayConfig(res);
-                }
-
                 return buildLocalCounters(res, parseAddress.hostname);
             }
+
+            if (url === '/settings') {
+                if (req.query.overlay) return buildEmptyPage(res);
+                return buildSettings(res);
+            }
+            if (url === '/local-overlays') return buildInstructionLocal(res);
+            if (url === '/available') {
+                const parseAddress = new URL(
+                    req.headers.host
+                        ? `http://${req.headers.host}/`
+                        : req.headers.referer ||
+                          `http://${req.socket.remoteAddress}/`
+                );
+                return buildExternalCounters(res, parseAddress.hostname);
+            }
+
+            const staticPath = getStaticPath();
 
             const extension = path.extname(url);
             if (extension === '' && !url.endsWith('/')) {

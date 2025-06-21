@@ -6,7 +6,6 @@ import {
     wLogger
 } from '@tosu/common';
 import fs from 'fs';
-import fsPromise from 'fs/promises';
 import http from 'http';
 import path from 'path';
 import semver from 'semver';
@@ -25,14 +24,14 @@ import {
     nameHTML,
     noMoreCounters,
     resultItemHTML,
+    searchBar,
     settingsGroupHTML,
     settingsItemHTMLv2,
     settingsNumberInputHTML,
     settingsSaveButtonHTMLv2,
     settingsSwitchHTML,
     settingsTextInputHTML,
-    settingsTextareaInputHTML,
-    submitCounterHTML
+    settingsTextareaInputHTML
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
 
@@ -151,24 +150,24 @@ function rebuildJSON({
 
         try {
             if (query != null) {
-                let isCompatibleFilter = false;
-                if (
-                    query.toLowerCase() === 'sc' &&
-                    item.compatiblewith?.some((r) =>
-                        r.toLowerCase().includes('streamcompanion')
-                    )
-                )
-                    isCompatibleFilter = true;
+                const queryArr = Array.from(
+                    new Set(query.split(' ').map((r) => r.toLowerCase()))
+                );
 
-                if (
-                    !(
-                        item.name.toLowerCase().includes(query) ||
-                        item.name.toLowerCase().includes(query)
-                    ) &&
-                    isCompatibleFilter !== true
-                ) {
-                    continue;
+                if (queryArr.includes('sc')) {
+                    const idx = queryArr.indexOf('sc');
+                    if (idx !== -1) queryArr[idx] = 'streamcompanion';
                 }
+
+                const hasQuery = queryArr.some(
+                    (q) =>
+                        item.name.toLowerCase().includes(q) ||
+                        item.author.toLowerCase().includes(q) ||
+                        (item.compatiblewith ?? []).some((c) =>
+                            c.toLowerCase().includes(q)
+                        )
+                );
+                if (!hasQuery) continue;
             }
 
             if (!Array.isArray(item.settings)) item.settings = [];
@@ -433,6 +432,7 @@ export function buildLocalCounters(
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', ` (${array.length})`)
                 .replace('{{AVAILABLE_AMOUNT}}', ``)
+                .replace('{{SEARCH}}', searchBar)
                 .replace('{{LIST}}', build || emptyNotice);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
@@ -524,13 +524,11 @@ export async function buildExternalCounters(
                 return;
             }
 
-            let responseHTML = submitCounterHTML;
-            responseHTML += text || noMoreCounters;
-
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', ` (${totalLocal})`)
                 .replace('{{AVAILABLE_AMOUNT}}', ` (${totalAvailable})`)
-                .replace('{{LIST}}', responseHTML);
+                .replace('{{SEARCH}}', searchBar)
+                .replace('{{LIST}}', text || noMoreCounters);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
                     .replace('{OLD}', config.currentVersion)
@@ -587,7 +585,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace('{name}', 'In-Game Overlay')
                     .replace(
                         '{description}',
-                        'Show the in-game overlay in the game.'
+                        'Show the in-game overlay in the game, toggleable via a custom keybind.'
                     )
                     .replace(
                         '{input-1}',
@@ -597,6 +595,13 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{checked}',
                                 config.enableIngameOverlay ? 'checked' : ''
                             )
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsTextInputHTML
+                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
+                            .replace('{class}', ' -keybind')
+                            .replace('{value}', config.ingameOverlayKeybind)
                     )
             ]
                 .map((item) => item.replace(/\{[^}]*}/g, ''))
@@ -691,6 +696,7 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{input-2}',
                                 settingsTextInputHTML
                                     .replace('{id}', 'SERVER_IP')
+                                    .replace('{class}', '')
                                     .replace(
                                         '{value}',
                                         config.serverIP.toString()
@@ -706,6 +712,7 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{input-2}',
                                 settingsTextInputHTML
                                     .replace('{id}', 'SERVER_PORT')
+                                    .replace('{class}', '')
                                     .replace(
                                         '{value}',
                                         config.serverPort.toString()
@@ -777,6 +784,7 @@ export function buildSettings(res: http.ServerResponse) {
                         '{input-2}',
                         settingsTextInputHTML
                             .replace('{id}', 'STATIC_FOLDER_PATH')
+                            .replace('{class}', '')
                             .replace('{value}', config.staticFolderPath)
                     )
             ]
@@ -805,6 +813,7 @@ export function buildSettings(res: http.ServerResponse) {
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', '')
                 .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{SEARCH}}', '')
                 .replace('{{LIST}}', settingsPage);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
@@ -848,6 +857,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
             let html = content
                 .replace('{{LOCAL_AMOUNT}}', '')
                 .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{SEARCH}}', '')
                 .replace('{{LIST}}', pageContent);
             if (semver.gt(config.updateVersion, config.currentVersion)) {
                 html = html
@@ -864,37 +874,35 @@ export function buildInstructionLocal(res: http.ServerResponse) {
     );
 }
 
-export async function buildOverlayConfig(res: http.ServerResponse) {
-    try {
-        const pageContent = await fsPromise.readFile(
-            path.join(pkgAssetsPath, 'overlayDisplay.html'),
-            'utf-8'
-        );
-        const homePageContent = await fsPromise.readFile(
-            path.join(pkgAssetsPath, 'homepage.html'),
-            'utf8'
-        );
+export function buildEmptyPage(res: http.ServerResponse) {
+    fs.readFile(
+        path.join(pkgAssetsPath, 'homepage.html'),
+        'utf8',
+        (err, content) => {
+            if (err) {
+                wLogger.debug('buildEmptyPage', 'homepage read', err);
+                res.writeHead(404, { 'Content-Type': 'text/html' });
 
-        let html = homePageContent
-            .replace('{{LOCAL_AMOUNT}}', '')
-            .replace('{{AVAILABLE_AMOUNT}}', '')
-            .replace('{{LIST}}', pageContent);
+                res.end('<html>page not found</html>');
+                return;
+            }
 
-        if (semver.gt(config.updateVersion, config.currentVersion)) {
-            html = html
-                .replace('{OLD}', config.currentVersion)
-                .replace('{NEW}', config.updateVersion)
-                .replace('update-available hidden', 'update-available');
+            let html = content
+                .replace('{{LOCAL_AMOUNT}}', '')
+                .replace('{{AVAILABLE_AMOUNT}}', '')
+                .replace('{{SEARCH}}', '')
+                .replace('{{LIST}}', '');
+            if (semver.gt(config.updateVersion, config.currentVersion)) {
+                html = html
+                    .replace('{OLD}', config.currentVersion)
+                    .replace('{NEW}', config.updateVersion)
+                    .replace('update-available hidden', 'update-available');
+            }
+
+            res.writeHead(200, {
+                'Content-Type': getContentType('file.html')
+            });
+            res.end(html);
         }
-
-        res.writeHead(200, {
-            'Content-Type': getContentType('file.html')
-        });
-        res.end(html);
-    } catch (error) {
-        wLogger.debug('buildOverlayConfig', 'something failed', error);
-        res.writeHead(404, { 'Content-Type': 'text/html' });
-
-        res.end('<html>page not found</html>');
-    }
+    );
 }

@@ -8,10 +8,15 @@ const BACKUP_SERVER_PORT = document.querySelector('*[data-id="SERVER_PORT"] inpu
 
 
 const downloading = [];
-const tab = +(queryParams.get('tab') || 0);
+let selected_keys = [];
 
 
 const search_bar = document.querySelector('.search-bar');
+const available_overlays = document.querySelector('a[href="/available"]');
+const installed_overlays = document.querySelector('a[href="/"]');
+
+const keybind_div = document.querySelector('[data-id="INGAME_OVERLAY_KEYBIND"]');
+
 let timer;
 
 let isSearching = false;
@@ -857,8 +862,11 @@ const showSettings = {
 };
 
 
-document.querySelectorAll(`a`).forEach(r => {
-  if (!r.href.includes(`?tab=${tab}`)) return;
+document.querySelectorAll(`a.tab-item`).forEach(r => {
+  if (!r.href) return;
+
+  const parse = new URL(r.href);
+  if (parse.pathname != window.location.pathname) return;
 
   r.classList.add('active');
 });
@@ -1231,10 +1239,14 @@ async function deleteCounter(element) {
   const results = document.querySelector('.results');
   results.removeChild(element.parentElement.parentElement.parentElement);
 
+  const newTotal = document.querySelectorAll('.calu').length ?? 0;
+  installed_overlays.innerHTML = `Installed (${newTotal})`;
+  localStorage.setItem('total-installed-overlays', newTotal);
+
   if (results.innerHTML.trim() != '') return;
 
   results.innerHTML = `<div class="no-results">
-  No counters<br /><a href="/?tab=1">Go here to get one 👉</a>
+  No counters<br /><a href="/available-overlays">Go here to get one 👉</a>
   </div>`;
 };
 
@@ -1298,7 +1310,7 @@ async function startSearch(search) {
   isSearching = true;
 
   try {
-    const request = await fetch(`/api/counters/search/${search_bar.value}?tab=${tab}`);
+    const request = await fetch(`/api/counters/search/${search_bar.value}`);
     const response = await request.text();
 
     document.querySelector('.results').innerHTML = response;
@@ -1439,8 +1451,8 @@ function closeModal(event, callback) {
 };
 
 
-async function loadCounterSettings(element) {
-  const folderName = decodeURI(element.attributes.n?.value || '');
+async function loadCounterSettings(overlay_name, to, no_modal) {
+  const folderName = decodeURI(overlay_name || '');
 
   const download = await fetch(`/api/counters/settings/${folderName}`);
   const json = await download.json();
@@ -1462,6 +1474,16 @@ async function loadCounterSettings(element) {
     return;
   };
 
+  if (no_modal == true) {
+    window.counter_settings = createApp(showSettings, {
+      folderName,
+      settings: Array.isArray(json?.settings) ? json.settings : [],
+      values: typeof json?.values == 'object' && !Array.isArray(json?.values) ? json.values : {},
+    });
+
+    window.counter_settings.mount(to);
+    return;
+  };
 
   displayModal(() => {
     window.counter_settings = createApp(showSettings, {
@@ -1470,7 +1492,7 @@ async function loadCounterSettings(element) {
       values: typeof json?.values == 'object' && !Array.isArray(json?.values) ? json.values : {},
     });
 
-    window.counter_settings.mount('#showSettings');
+    window.counter_settings.mount(to);
   }, 'showSettings');
 };
 
@@ -1591,12 +1613,12 @@ window.addEventListener('click', (event) => {
   };
 
   if (t?.classList.value.includes(' settings-button')) {
-    loadCounterSettings(t);
+    loadCounterSettings(t.attributes.n?.value, '#showSettings');
     return;
   };
 
   if (t?.classList.value.includes(' -settings')) {
-    loadCounterSettings(t);
+    loadCounterSettings(t.attributes.n?.value, '#showSettings');
     return;
   };
 
@@ -1643,7 +1665,14 @@ window.onload = async () => {
     const requst = await fetch('https://tosu.app/api.json');
     const json = await requst.json();
 
+
+    if (available_overlays) available_overlays.innerHTML = `Available (${json.length})`;
+    localStorage.setItem('total-available-overlays', json.length);
+
+
     const installed = document.querySelectorAll('.calu');
+    if (installed.length) localStorage.setItem('total-installed-overlays', installed.length);
+
     for (let i = 0; i < installed.length; i++) {
       const counter = installed[i];
 
@@ -1663,6 +1692,12 @@ window.onload = async () => {
       button.innerHTML = `<span>Update</span>`;
       counter.prepend(button);
     };
+
+    if (search_bar) {
+      setTimeout(() => {
+        search_bar.focus();
+      }, 100);
+    };
   } catch (error) {
     console.log(error);
   };
@@ -1673,3 +1708,92 @@ if (queryParams.has('ingame')) {
   document.querySelector('.links')?.remove();
   document.querySelector('.submit-counter')?.remove();
 };
+
+if (available_overlays && localStorage.getItem('total-available-overlays') != null) {
+  const stored = +localStorage.getItem('total-available-overlays');
+  const current = +available_overlays.innerHTML.match(/\d+/);
+  if (current && current !== stored) localStorage.setItem('total-available-overlays', current);
+
+  available_overlays.innerHTML = `Available (${localStorage.getItem('total-available-overlays')})`;
+};
+
+if (installed_overlays && localStorage.getItem('total-installed-overlays') != null) {
+  const stored = +localStorage.getItem('total-installed-overlays');
+  const current = +installed_overlays.innerHTML.match(/\d+/);
+  if (current && current !== stored) localStorage.setItem('total-installed-overlays', current);
+
+  installed_overlays.innerHTML = `Installed (${localStorage.getItem('total-installed-overlays')})`;
+};
+
+
+
+if (window.location.pathname == '/settings' && queryParams.has('overlay')) {
+  const results = document.querySelector('.results');
+  results.classList.add('--settings');
+  results.innerHTML = `Loading...`;
+
+  loadCounterSettings(queryParams.get('overlay'), '.results', true);
+};
+
+if (window.location.pathname == '/settings' && !queryParams.has('overlay') && keybind_div) {
+  const keybindInput = keybind_div.children[0];
+  let previousKeybind = keybindInput.value;
+
+  keybindInput.addEventListener('focus', () => {
+    keybindInput.value = '...';
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+  });
+
+  keybindInput.addEventListener('blur', () => {
+    if (keybindInput.value === '...') keybindInput.value = previousKeybind;
+
+    window.removeEventListener('keydown', handleKey);
+    window.removeEventListener('keyup', handleKey);
+    checkSettingsChanges();
+  });
+
+  const handleKey = (event) => {
+    event.preventDefault();
+    const key = event.key === ' ' ? 'Space' : event.key;
+    const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+
+    if (event.type === 'keydown') {
+      if (key === 'Escape') {
+        keybindInput.value = previousKeybind;
+        keybindInput.blur();
+        return;
+      }
+
+      if (selected_keys.length >= 4) {
+        displayNotification({
+          element: keybindInput,
+          text: `You can only bind up to 4 keys!`,
+          classes: ['red'],
+          delay: 2000,
+        });
+
+        selected_keys = [];
+        keybindInput.blur();
+        return;
+      }
+
+      if (!selected_keys.some(k => k.key === formattedKey)) {
+        selected_keys.push({ code: event.keyCode, key: formattedKey });
+        selected_keys.sort((a, b) => {
+          const modifierOrder = ['Meta', 'Control', 'Shift', 'Alt'];
+          const isModifierA = modifierOrder.includes(a.key.split('+')[0]);
+          const isModifierB = modifierOrder.includes(b.key.split('+')[0]);
+          if (isModifierA !== isModifierB) return isModifierA ? -1 : 1;
+          return a.key.localeCompare(b.key, undefined, { numeric: true });
+        });
+        keybindInput.value = selected_keys.map(k => k.key).join(' + ');
+      }
+    } else if (event.type === 'keyup') {
+      selected_keys = selected_keys.filter(k => k.code !== event.keyCode);
+      if (selected_keys.length === 0) keybindInput.blur();
+
+      previousKeybind = keybindInput.value;
+    }
+  }
+}

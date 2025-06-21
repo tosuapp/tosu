@@ -6,7 +6,7 @@ export const iconsImages = {
 };
 
 export const emptyNotice =
-    '<div class="no-results">No counters<br /><a href="/?tab=1">Go here to get one 👉</a></div>';
+    '<div class="no-results">No counters<br /><a href="/available">Go here to get one 👉</a></div>';
 export const emptyCounters =
     '<div class="no-results">No counters<br />Change your search phrase</div>';
 export const noMoreCounters =
@@ -87,7 +87,7 @@ export const settingsSwitchHTML = `
 <label class="switch" data-id="{id}">
   <input type="checkbox" class="switch-thumb" {checked}>
   <span class="switch-track"></span>
-</label>    
+</label>
 `;
 export const settingsNumberInputHTML = `
 <div class="number-input" data-id="{id}">
@@ -98,7 +98,7 @@ export const settingsNumberInputHTML = `
 `;
 
 export const settingsTextInputHTML = `
-<div class="text-input" data-id="{id}">
+<div class="text-input{class}" data-id="{id}">
   <input type="text" value="{value}">
 </div>
 `;
@@ -118,7 +118,4 @@ export const settingsSaveButtonHTMLv2 = `
 export const saveSettingsButtonHTML =
     '<div class="flexer si-btn ssb"><button class="button save-button flexer"><span>Save settings</span></button></div>';
 
-export const submitCounterHTML = `<a class="submit-counter flexer" href="https://osuck.link/tosu-counter-submit" target="_blank">
-  <i class="icon-link"></i>
-  <span>Submit your pp counter here</span>
-</a>`;
+export const searchBar = `<input class="search-bar" type="text" placeholder="Type counter name to search..." />`;

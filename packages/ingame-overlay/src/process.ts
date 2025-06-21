@@ -3,8 +3,7 @@ import { BrowserWindow, TextureInfo } from 'electron';
 import EventEmitter from 'node:events';
 import path from 'node:path';
 
-import { Keybind } from '../../keybind';
-import { toCursor, toKeyboardEvent, toMouseEvent } from './input';
+import { Keybind, toCursor, toKeyboardEvent, toMouseEvent } from './input';
 
 export type OverlayEventEmitter = EventEmitter<{
     destroyed: [];
@@ -12,6 +11,11 @@ export type OverlayEventEmitter = EventEmitter<{
 
 export class OverlayProcess {
     readonly event: OverlayEventEmitter = new EventEmitter();
+    keybind = new Keybind([
+        key(0x11), // Left Control
+        key(0x10), // Left Shift
+        key(0x20) // Space
+    ]);
 
     private constructor(
         readonly pid: number,
@@ -51,13 +55,7 @@ export class OverlayProcess {
             overlay.setBlockingCursor(hwnd, toCursor(type));
         });
 
-        // TODO:: configurable input key bind
         let configurationEnabled = false;
-        const keybind = new Keybind([
-            key(0x11), // Left Control
-            key(0x10), // Left Shift
-            key(0x20) // Space
-        ]);
 
         overlay.event.on('input_blocking_ended', () => {
             this.closeConfiguration();
@@ -67,7 +65,7 @@ export class OverlayProcess {
         overlay.event.on('keyboard_input', (_, input) => {
             if (
                 input.kind === 'Key' &&
-                keybind.update(input.key, input.state)
+                this.keybind.update(input.key, input.state)
             ) {
                 configurationEnabled = !configurationEnabled;
 
@@ -160,7 +158,7 @@ export class OverlayProcess {
                     useSharedTexture: true
                 },
                 transparent: true,
-                preload: path.join(__dirname, '../preload/index.js')
+                preload: path.join(__dirname, '../preload/preload.js')
             },
             show: false
         });

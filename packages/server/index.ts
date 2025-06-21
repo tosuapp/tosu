@@ -57,18 +57,7 @@ export class Server {
             instanceManager: '',
             pollRateFieldName: '',
             stateFunctionName: '',
-            onMessageCallback: handleSocketCommands,
-            onConnectionCallback: (_, url) => {
-                if (url !== '/websocket/commands?l=__ingame__') return;
-
-                const ip =
-                    config.serverIP === '0.0.0.0'
-                        ? 'localhost'
-                        : config.serverIP;
-                wLogger.warn(
-                    `[ingame-overlay] initialized successfully, setup it here: http://${ip}:${config.serverPort}/?tab=4`
-                );
-            }
+            onMessageCallback: handleSocketCommands
         });
 
         buildAssetsApi(this);
