@@ -58,7 +58,7 @@ Features
   - Beatmap data
   - Session _**(Work in progress)**_
   - Multiple graphs for different skill sets _**(aim, speed, etc)**_
-    - Extended starrating stats _**(per mode)**_ 
+    - Extended starrating stats _**(per mode)**_
   - Leaderboards list _**(array)**_
   - Folders paths and Files names
   - Direct paths to files
@@ -168,6 +168,13 @@ Sponsorship & Thank notice
 * Github: [@xxCherry](https://github.com/xxCherry)
 <br>
 
+🍥 **storycraft**
+* _**baking an ingame-overlay**_
+* Website: https://pancake.sh
+* Twitter: [@storycraft8814](https://twitter.com/storycraft8814)
+* Github: [@storycraft](https://github.com/storycraft)
+<br>
+
 😪 **ck**
 * _**headache provider**_
 * Website: https://osuck.net
@@ -179,6 +186,18 @@ Sponsorship & Thank notice
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/tosuapp/tosu/issues). You can also take a look at the [contributing guide](https://github.com/tosuapp/tosu/blob/master/CONTRIBUTING.md).
+
+<br />
+
+## Star History
+
+<a href="https://www.star-history.com/#tosuapp/tosu&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=tosuapp/tosu&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=tosuapp/tosu&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=tosuapp/tosu&type=Date" />
+ </picture>
+</a>
 
 <br />
 
