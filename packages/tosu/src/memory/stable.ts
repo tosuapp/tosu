@@ -24,7 +24,7 @@ import type {
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { LeaderboardPlayer } from '@/states/types';
-import { Bindings } from '@/utils/bindings';
+import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type {
@@ -1333,7 +1333,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     if (!value || !isAllowedValue(value[0], result.value))
                         continue;
 
-                    settings[value[1]] = result.value;
+                    settings[value[1]] = VirtualKeyCode[result.value];
 
                     this.game.resetReportCount(
                         `settings updateBindingState [${position}]`
