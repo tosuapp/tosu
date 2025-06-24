@@ -14,11 +14,17 @@ import { OverlayManager } from './manager';
 
         console.log('warn: Starting...');
 
+        // disable default menu
+        Menu.setApplicationMenu(null);
+
         // prefer discrete gpu on laptop
         app.commandLine.appendSwitch('force_high_performance_gpu');
         // disable view scaling on hidpi
         app.commandLine.appendSwitch('high-dpi-support', '1');
         app.commandLine.appendSwitch('force-device-scale-factor', '1');
+        // run in process gpu, reduce overheads
+        app.commandLine.appendSwitch('in-process-gpu');
+        app.commandLine.appendSwitch('disable-direct-composition');
 
         // prevent main process from exiting when all windows are closed
         app.on('window-all-closed', () => {});
