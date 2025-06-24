@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.11.0](https://github.com/tosuapp/tosu/compare/v4.10.0...v4.11.0) (2025-06-24)
+
+
+### Features
+
+* Add inline overlay keybind input in settings. ([e97db1a](https://github.com/tosuapp/tosu/commit/e97db1a0fdf4fd42801a521cbfc0a5b948b6e15f))
+* Add mania scroll speed & scroll direction (scroll direction lazer only) ([fe81715](https://github.com/tosuapp/tosu/commit/fe81715d2aeccecb7d2bc13552662f7dfbc912e4))
+* Allow changing ingame overlay keybind ([7280791](https://github.com/tosuapp/tosu/commit/728079198a5b300aa5881465584b2b55b8a01f3f))
+* allow searching counters by name, author and compatible software. ([5139d87](https://github.com/tosuapp/tosu/commit/5139d879718fed90cc7dcb59c15c9f8297bfa841))
+* Dedicated page for overlay settings ([fbefb63](https://github.com/tosuapp/tosu/commit/fbefb63f81851c5e28de836f593882602764592a))
+* disable default menu, apply overlay process optimization switches ([9a4f7de](https://github.com/tosuapp/tosu/commit/9a4f7de41a0bae3a87da3f2d6fe3a23b22b20c7a))
+* Implement mania scroll speed  per beatmap ([f1c9774](https://github.com/tosuapp/tosu/commit/f1c977499235a13803b5b2060ffa7817cecb82c5))
+* Improve keybind input listening. ([7e92a22](https://github.com/tosuapp/tosu/commit/7e92a2201e0584ac41aece2305f95e7a4749d562))
+* logs folder self cleanup ([7122931](https://github.com/tosuapp/tosu/commit/712293196c00c03344b0f2e95c5a1637ef995589))
+* Move some logs to timings instead + Use different method of measuring ([8bf865d](https://github.com/tosuapp/tosu/commit/8bf865d80d62c46dd6983e2d417d4f2eb4487a7b))
+* osu pid delivery via ipc ([140225d](https://github.com/tosuapp/tosu/commit/140225d4fd6fcee915ac2112020d499a9cbbb105))
+* Small dashboard update ([073ec41](https://github.com/tosuapp/tosu/commit/073ec4166ac538d0ce482eb10957e7a76d7b09a5))
+
+
+### Bug Fixes
+
+* Do not send entire path to a file on error ([aafa833](https://github.com/tosuapp/tosu/commit/aafa83320a5bd4f4c52d0a9908852323f0fe4722))
+* Fix cleanup after update when updating from dashboard ([a8edfaf](https://github.com/tosuapp/tosu/commit/a8edfaf5f04b28669a9e39ef70d15d8b1c341355))
+* Fix error `Invalid character in statusMessage` ([74b1c09](https://github.com/tosuapp/tosu/commit/74b1c09722fe697ab4d6bf4caf181cb5a6a405a9))
+* FIx incorrect `graph` on maps with `spinner` at beginning ([f999b7c](https://github.com/tosuapp/tosu/commit/f999b7c5a44d18ea63986fc4a1d98421d3f8d75d))
+* Fix settings bindings (was number instead of key name) ([4af5b42](https://github.com/tosuapp/tosu/commit/4af5b42a7651816cc3924303ec1c31afb0b720fb))
+* lazer skins endpoint ([25f84ac](https://github.com/tosuapp/tosu/commit/25f84acdb5e12491fb7996a7d5f224c1bf4ef889))
+* Make dim, blur and volume settings from 0 to 100 for lazer ([b8f7de3](https://github.com/tosuapp/tosu/commit/b8f7de325799047091d10a2e7a29a02af35e3b15))
+* number input not respecting inner limit. ([a17092e](https://github.com/tosuapp/tosu/commit/a17092ede11d2ce61301d2cb180bfe62fd614d06))
+* overlays counter cache not updating correctly. ([58402bf](https://github.com/tosuapp/tosu/commit/58402bf45e11fd9b80b954907d6e80735187ea90))
+* Prevent getting file `stat` when file doesnt exists ([cda4184](https://github.com/tosuapp/tosu/commit/cda4184696019edf3f25a593e650536539672197))
+* Remove `overlay settings` page (since it's now working in ingame overlay ([080b1b0](https://github.com/tosuapp/tosu/commit/080b1b09d13a8c0a363931125d9e8e360f31b0e6))
+* Update gameplay state before first object (lazer) ([680f4af](https://github.com/tosuapp/tosu/commit/680f4af042b0e8eae4cc6ba44e4b5c8558fe4ec2))
+* Update pages url's ([5f3bce7](https://github.com/tosuapp/tosu/commit/5f3bce7a174aef4baf22e8710fc81a58bcb1bd6b))
+
 ## [4.10.0](https://github.com/tosuapp/tosu/compare/v4.9.0...v4.10.0) (2025-06-11)
 
 
