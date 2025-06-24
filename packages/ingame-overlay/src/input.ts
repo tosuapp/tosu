@@ -54,22 +54,28 @@ export function toMouseEvent(
         case 'Enter':
             return {
                 type: 'mouseEnter',
-                x: input.x,
-                y: input.y
+                x: input.clientX,
+                y: input.clientY,
+                globalX: input.windowX,
+                globalY: input.windowY
             };
 
         case 'Leave':
             return {
                 type: 'mouseLeave',
-                x: input.x,
-                y: input.y
+                x: input.clientX,
+                y: input.clientY,
+                globalX: input.windowX,
+                globalY: input.windowY
             };
 
         case 'Move':
             return {
                 type: 'mouseMove',
-                x: input.x,
-                y: input.y
+                x: input.clientX,
+                y: input.clientY,
+                globalX: input.windowX,
+                globalY: input.windowY
             };
 
         case 'Scroll':
@@ -77,15 +83,19 @@ export function toMouseEvent(
                 return {
                     type: 'mouseWheel',
                     deltaY: input.delta,
-                    x: input.x,
-                    y: input.y
+                    x: input.clientX,
+                    y: input.clientY,
+                    globalX: input.windowX,
+                    globalY: input.windowY
                 };
             } else {
                 return {
                     type: 'mouseWheel',
                     deltaX: input.delta,
-                    x: input.x,
-                    y: input.y
+                    x: input.clientX,
+                    y: input.clientY,
+                    globalX: input.windowX,
+                    globalY: input.windowY
                 };
             }
 
@@ -112,8 +122,10 @@ export function toMouseEvent(
                 type: input.state === 'Pressed' ? 'mouseDown' : 'mouseUp',
                 button,
                 clickCount: 1,
-                x: input.x,
-                y: input.y
+                x: input.clientX,
+                y: input.clientY,
+                globalX: input.windowX,
+                globalY: input.windowY
             };
         }
     }

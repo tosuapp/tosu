@@ -115,6 +115,7 @@ export class OverlayProcess {
     private async updateSurface(info: TextureInfo) {
         const rect = info.metadata.captureUpdateRect ?? info.contentRect;
         await this.overlay.updateShtex(
+            this.hwnd,
             info.codedSize.width,
             info.codedSize.height,
             info.sharedTextureHandle,
@@ -132,7 +133,6 @@ export class OverlayProcess {
 
     static async initialize(pid: number): Promise<OverlayProcess> {
         const overlay = await Overlay.attach(
-            'tosu-ingame-overlay',
             defaultDllDir().replaceAll('app.asar', 'app.asar.unpacked'),
             pid,
             5000
@@ -146,9 +146,15 @@ export class OverlayProcess {
         );
         console.debug('found hwnd:', hwnd, 'for pid:', pid);
 
-        await overlay.setPosition(length(0), length(0));
-        await overlay.setAnchor(length(0), length(0));
-        await overlay.setMargin(length(0), length(0), length(0), length(0));
+        await overlay.setPosition(hwnd, length(0), length(0));
+        await overlay.setAnchor(hwnd, length(0), length(0));
+        await overlay.setMargin(
+            hwnd,
+            length(0),
+            length(0),
+            length(0),
+            length(0)
+        );
         // Listen for keyboard events
         await overlay.listenInput(hwnd, false, true);
 

@@ -67,8 +67,8 @@ importers:
   packages/ingame-overlay:
     dependencies:
       asdf-overlay-node:
-        specifier: ^0.6.7
-        version: 0.6.7
+        specifier: ^0.7.3
+        version: 0.7.3
     devDependencies:
       '@eslint/js':
         specifier: ^9.26.0
@@ -1163,8 +1163,9 @@ packages:
     resolution: {integrity: sha512-3CYzex9M9FGQjCGMGyi6/31c8GJbgb0qGyrx5HWxPd0aCwh4cB2YjMb2Xf9UuoogrMrlO9cTqnB5rI5GHZTcUA==}
     engines: {node: '>=0.10.0'}
 
-  asdf-overlay-node@0.6.7:
-    resolution: {integrity: sha512-G3SRLUmQQdPe4vW45Gx1Nnlzclu4HpwTR6QrH7cEflxsogWWTbBmoYX/nEiXTfQ54qX4oSHTWgxNQUGNtlmvZQ==}
+  asdf-overlay-node@0.7.3:
+    resolution: {integrity: sha512-+S21UTNFa80jCQIMWF0kx228bCxo63j5Smi4qtNSdqVJjRE32J1cQ5a8moDsRpFBhh3XC7Td2liE1Wdnfqf3Kg==}
+    cpu: [x64, arm64]
     os: [win32]
 
   assert-plus@1.0.0:
@@ -5258,7 +5259,7 @@ snapshots:
 
   arrify@1.0.1: {}
 
-  asdf-overlay-node@0.6.7: {}
+  asdf-overlay-node@0.7.3: {}
 
   assert-plus@1.0.0:
     optional: true
