@@ -28,6 +28,7 @@ import {
 import { ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
+import { genReport } from '../utils/report';
 
 const pkgAssetsPath =
     'pkg' in process
@@ -417,6 +418,16 @@ export default function buildBaseApi(server: Server) {
         // free beatmap only when map path specified
         if (query.path) beatmap.free();
         calculate.free();
+    });
+
+    server.app.route('/api/generateReport', 'GET', async (req, res) => {
+        try {
+            sendJson(res, await genReport(req.instanceManager));
+        } catch (err) {
+            sendJson(res, {
+                error: (err as Error).message || 'Unknown error'
+            });
+        }
     });
 
     server.app.route(/\/api\/ingame/, 'GET', (req, res) => {
