@@ -15,8 +15,6 @@
     html {
       background-color: rgb(25, 30, 37);
       color: rgb(100, 122, 145);
-      width: fit-content;
-      min-width: 100%;
     }
 
     body {
@@ -58,7 +56,7 @@
       flex-direction: column;
       gap: .5rem;
     }
-    
+
     .group-name {
       margin: 0;
       margin-left: 0.4rem;
@@ -66,11 +64,17 @@
       font-size: 1.4rem;
     }
 
-    .group-inner-box {
+    .summary-table {
       background-color: rgb(25, 30, 37);
       display: block;
       border-radius: .3rem;
       padding: 1rem;
+      overflow: auto;
+    }
+
+    .monaco-editor,
+    .overflow-guard {
+      border-radius: .3rem;
     }
 
     .export-button {
@@ -96,7 +100,75 @@
       anchor.click();
       URL.revokeObjectURL(url);
     }
+
+    window.addEventListener('load', async () => {
+      const logBox = document.getElementById('log-box');
+      const monaco = await monaco_loader.init();
+
+      monaco.languages.register({ id: 'log' });
+      monaco.languages.setMonarchTokensProvider('log', {
+        tokenizer: {
+          // start. iso timestamp
+          root: [
+            [
+              /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
+              'timestamp',
+              '@level'
+            ],
+          ],
+          // log levels
+          level: [
+            [' info', 'info'],
+            [' warn', 'warning'],
+            [' error', 'error'],
+            [' debugError', 'debugError'],
+            [' debug', 'debug'],
+            [' time', 'time'],
+
+            // rest log messages
+            ['.*', 'default', '@pop']
+          ]
+        },
+      });
+      monaco.editor.defineTheme('tosu-report-theme', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: 'timestamp', foreground: '666878' },
+          { token: 'info', foreground: '9cd573', fontStyle: 'bold' },
+          { token: 'warning', foreground: 'd5b873', fontStyle: 'bold' },
+          { token: 'error', foreground: 'd57381', fontStyle: 'bold' },
+          { token: 'debug', foreground: '568cc7', fontStyle: 'bold' },
+          { token: 'time', foreground: '97a7b9', fontStyle: 'bold' },
+          { token: 'debugError', foreground: 'd38ea7', fontStyle: 'bold' }
+        ],
+        colors: {
+          'editor.foreground': '#cdd6f4',
+          'editor.background': '#191e25'
+        }
+      });
+
+      const editor = monaco.editor.create(logBox, {
+        value: reportJson.log,
+        language: 'log',
+        theme: 'tosu-report-theme',
+        fontSize: 16,
+        readOnly: true,
+        automaticLayout: true,
+        scrollBeyondLastLine: false,
+        minimap: { enabled: false },
+        scrollbar: {
+          alwaysConsumeMouseWheel: false,
+          handleMouseWheel: false,
+          vertical: 'hidden'
+        }
+      });
+
+      // fit editor to the content height
+      editor.layout({ height: editor.getContentHeight()});
+    });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@monaco-editor/loader@1.5.0/lib/umd/monaco-loader.min.js"></script>
 </head>
 
 <body>
@@ -112,7 +184,7 @@
   <div class="outer-box">
     <div class="group-box">
       <p class="group-name">Summary</p>
-      <table class="group-inner-box">
+      <table class="summary-table">
         <tr>
           <th>OS</th>
           <td>
@@ -199,7 +271,7 @@
     </div>
     <div class="group-box">
       <p class="group-name">Logs</p>
-      <div id="log-box" class="group-inner-box"></div>
+      <div id="log-box"></div>
     </div>
   </div>
 </body>
