@@ -83,8 +83,8 @@ export type ReportSpec = {
 };
 
 export type ReportInstance = {
-    type: ClientType;
-    bitness: Bitness;
+    type: keyof typeof ClientType;
+    bitness: keyof typeof Bitness;
 };
 
 export type ReportCounter = {
@@ -142,8 +142,8 @@ async function genReportSpec(): Promise<ReportSpec> {
 
 function genReportInstance(instance: any): ReportInstance {
     return {
-        type: instance.client,
-        bitness: instance.bitness
+        type: ClientType[instance.client] as keyof typeof ClientType,
+        bitness: Bitness[instance.bitness] as keyof typeof Bitness
     };
 }
 
