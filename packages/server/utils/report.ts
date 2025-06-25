@@ -1,6 +1,7 @@
 import { Bitness, ClientType, config } from '@tosu/common';
 import { readFile } from 'node:fs/promises';
 import { freemem, machine, release, totalmem, type } from 'node:os';
+import path from 'node:path';
 import { cpu, graphics } from 'systeminformation';
 
 import { getLocalCounters } from './counters';
@@ -112,4 +113,71 @@ function genReportCounters(): ReportCounter[] {
         version: counter.version,
         folderName: counter.folderName
     }));
+}
+
+const pkgAssetsPath =
+    'pkg' in process
+        ? path.join(__dirname, 'assets')
+        : path.join(__filename, '../../../assets');
+
+export async function genReportHTML(report: Report): Promise<string> {
+    const rawHtml = await readFile(
+        path.join(pkgAssetsPath, 'report.html'),
+        'utf8'
+    );
+
+    return rawHtml
+        .replace('{{REPORT_JSON}}', JSON.stringify(report))
+        .replace('{{REPORT_DATE}}', new Date().toLocaleString())
+        .replace('{{OS_NAME}}', report.spec.os.name)
+        .replace('{{OS_RELEASE}}', report.spec.os.release)
+        .replace('{{OS_ARCH}}', report.spec.os.arch)
+        .replace('{{CPU_MANUFACTURER}}', report.spec.cpu.manufacturer)
+        .replace('{{CPU_BRAND}}', report.spec.cpu.brand)
+        .replace(
+            '{{CPU_PHYSICAL_CORES}}',
+            String(report.spec.cpu.physicalCores)
+        )
+        .replace('{{CPU_LOGICAL_CORES}}', String(report.spec.cpu.logicalCores))
+        .replace('{{GPU_ROWS}}', buildRowTable(report.spec.gpus))
+        .replace(
+            '{{TOTAL_MEMORY_GIB}}',
+            (report.spec.totalMemory / (1024 * 1024 * 1024)).toFixed(2)
+        )
+        .replace(
+            '{{FREE_MEMORY_GIB}}',
+            (report.spec.freeMemory / (1024 * 1024 * 1024)).toFixed(2)
+        )
+        .replace('{{CONFIG_ROWS}}', buildRowTable(report.config))
+        .replace(
+            '{{INSTANCE_ROWS}}',
+            buildRowTable(
+                report.instances.map((instance) =>
+                    wrapTable(buildRowTable(instance))
+                )
+            )
+        )
+        .replace(
+            '{{COUNTER_ROWS}}',
+            buildRowTable(
+                report.counters.map((counters) =>
+                    wrapTable(buildRowTable(counters))
+                )
+            )
+        );
+}
+
+function buildRowTable(
+    values: string[] | Record<string, string | number | boolean>
+): string {
+    let tableHtml = '';
+    for (const key in values) {
+        tableHtml += `<tr><th>${key}</th><td>${String(values[key])}</td></tr>`;
+    }
+
+    return tableHtml;
+}
+
+function wrapTable(value: string): string {
+    return `<table>${value}</table>`;
 }

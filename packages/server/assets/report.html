@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Tosu Report</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: rgb(25, 30, 37);
+      color: rgb(100, 122, 145);
+      width: fit-content;
+      min-width: 100%;
+    }
+
+    body {
+      margin: 0 12px;
+    }
+
+    header {
+      display: flex;
+      padding: 0 1rem;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    th {
+      color: rgb(101, 147, 197);
+      font-size: 1.2rem;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 0.5rem;
+    }
+
+    .outer-box {
+      background-color: rgb(36, 45, 55);
+      color: rgb(151, 167, 185);
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      border-radius: .3rem;
+      gap: .8rem;
+    }
+
+    .group-box {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    
+    .group-name {
+      margin: 0;
+      margin-left: 0.4rem;
+      font-weight: bold;
+      font-size: 1.4rem;
+    }
+
+    .group-inner-box {
+      background-color: rgb(25, 30, 37);
+      display: block;
+      border-radius: .3rem;
+      padding: 1rem;
+    }
+
+    .export-button {
+      background-color: rgb(115, 166, 213);
+      color: rgb(25, 30, 37);
+      padding: 0.4rem 1rem;
+      border: none;
+      font-size: 1rem;
+      border-radius: .4rem;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: sans-serif;
+    }
+  </style>
+  <script>
+    const reportJson = {{REPORT_JSON}};
+
+    function exportJson() {
+      const data = new Blob([JSON.stringify(reportJson)], { type: 'application/json' });
+      const anchor = document.createElement('a');
+      const url = URL.createObjectURL(data);
+      anchor.href = url;
+      anchor.download = 'tosu-report.json';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</head>
+
+<body>
+  <header>
+    <div style="flex-grow: 1;">
+      <h1>Tosu Report</h1>
+      <p>Generated on: {{REPORT_DATE}}</p>
+    </div>
+    <div style="align-content: center;">
+      <button class="export-button" onclick="exportJson()">Export Json report</button>
+    </div>
+  </header>
+  <div class="outer-box">
+    <div class="group-box">
+      <p class="group-name">Summary</p>
+      <table class="group-inner-box">
+        <tr>
+          <th>OS</th>
+          <td>
+            <table>
+              <tr>
+                <th>Name</th>
+                <td>{{OS_NAME}}</td>
+              </tr>
+              <tr>
+                <th>Release</th>
+                <td>{{OS_RELEASE}}</td>
+              </tr>
+              <tr>
+                <th>Arch</th>
+                <td>{{OS_ARCH}}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th>CPU</th>
+          <td>
+            <table>
+              <tr>
+                <th>Manufacturer</th>
+                <td>{{CPU_MANUFACTURER}}</td>
+              </tr>
+              <tr>
+                <th>Brand</th>
+                <td>{{CPU_BRAND}}</td>
+              </tr>
+              <tr>
+                <th>Physical Cores</th>
+                <td>{{CPU_PHYSICAL_CORES}}</td>
+              </tr>
+              <tr>
+                <th>Logical Cores</th>
+                <td>{{CPU_LOGICAL_CORES}}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th>GPU</th>
+          <td>
+            <table>
+              {{GPU_ROWS}}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th>Total Memory</th>
+          <td>{{TOTAL_MEMORY_GIB}} GiB</td>
+        </tr>
+        <tr>
+          <th>Free Memory</th>
+          <td>{{FREE_MEMORY_GIB}} GiB</td>
+        </tr>
+        <tr>
+          <th>Configuration</th>
+          <td>
+            <table>
+              {{CONFIG_ROWS}}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th>osu! Instances</th>
+          <td>
+            <table>
+              {{INSTANCE_ROWS}}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th>Counters</th>
+          <td>
+            <table>
+              {{COUNTER_ROWS}}
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="group-box">
+      <p class="group-name">Logs</p>
+      <div id="log-box" class="group-inner-box"></div>
+    </div>
+  </div>
+</body>
+
+</html>

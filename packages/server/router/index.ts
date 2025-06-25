@@ -28,7 +28,7 @@ import {
 import { ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
-import { genReport } from '../utils/report';
+import { genReport, genReportHTML } from '../utils/report';
 
 const pkgAssetsPath =
     'pkg' in process
@@ -422,11 +422,20 @@ export default function buildBaseApi(server: Server) {
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {
         try {
-            sendJson(res, await genReport(req.instanceManager));
-        } catch (err) {
-            sendJson(res, {
-                error: (err as Error).message || 'Unknown error'
+            const html = await genReportHTML(
+                await genReport(req.instanceManager)
+            );
+            res.writeHead(200, {
+                'Content-Type': 'text/html; charset=utf-8'
             });
+            res.end(html, 'utf-8');
+        } catch (err) {
+            res.writeHead(500, {
+                'Content-Type': 'text/plain; charset=utf-8'
+            });
+            res.end(
+                `Server Error: ${(err as Error).message || 'Unknown error'}`
+            );
         }
     });
 
