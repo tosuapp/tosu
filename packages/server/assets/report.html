@@ -87,6 +87,10 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    #log-box {
+      height: 95vh;
+    }
   </style>
   <script>
     const reportJson = {{REPORT_JSON}};
@@ -159,13 +163,8 @@
         minimap: { enabled: false },
         scrollbar: {
           alwaysConsumeMouseWheel: false,
-          handleMouseWheel: false,
-          vertical: 'hidden'
         }
       });
-
-      // fit editor to the content height
-      editor.layout({ height: editor.getContentHeight()});
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@monaco-editor/loader@1.5.0/lib/umd/monaco-loader.min.js"></script>
