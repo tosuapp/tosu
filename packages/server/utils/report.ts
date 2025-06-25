@@ -6,79 +6,45 @@ import * as si from 'systeminformation';
 import { getLocalCounters } from './counters';
 
 export type Report = {
-    /**
-     * System informations
-     */
+    /** System informations */
     spec: ReportSpec;
-    /**
-     * Current tosu configuration
-     */
+    /** Current tosu configuration */
     config: typeof config;
-    /**
-     * Current osu! instances
-     */
+    /** Current osu! instances */
     instances: ReportInstance[];
-    /**
-     * Installed counters
-     */
+    /** Installed counters */
     counters: ReportCounter[];
-    /**
-     * Log file content
-     */
+    /** Log file content */
     log: string;
 };
 
 export type ReportSpec = {
-    /**
-     * Os informations
-     */
+    /** Os informations */
     os: {
-        /**
-         * Operating system name, e.g. "Linux", "Windows_NT", "Darwin"
-         */
+        /** Operating system name, e.g. "Linux", "Windows_NT", "Darwin" */
         name: string;
-        /**
-         * Operating system release version, e.g. "5.4.0-42-generic", "10.0.19041"
-         */
+        /** Operating system release version, e.g. "5.4.0-42-generic", "10.0.19041" */
         release: string;
-        /**
-         * Operating system architecture, e.g. "x64", "arm64"
-         */
+        /** Operating system architecture, e.g. "x64", "arm64" */
         arch: string;
     };
-    /**
-     * CPU informations
-     */
+    /** CPU informations */
     cpu: {
-        /**
-         * CPU manufacturer, e.g. "AMD", "Intel"
-         */
+        /** CPU manufacturer, e.g. "AMD", "Intel" */
         manufacturer: string;
-        /**
-         * CPU brand name, e.g. "Ryzen 9 5900X 12-Core Processor"
-         */
+        /** CPU brand name, e.g. "Ryzen 9 5900X 12-Core Processor" */
         brand: string;
-        /**
-         * Number of physical CPU cores
-         */
+        /** Number of physical CPU cores */
         physicalCores: number;
-        /**
-         * Number of logical CPU cores
-         */
+        /** Number of logical CPU cores */
         logicalCores: number;
     };
-    /**
-     * GPU model names
-     */
+    /** GPU model names */
     gpus: string[];
 
-    /**
-     * Total memory in bytes
-     */
+    /** Total memory in bytes */
     totalMemory: number;
-    /**
-     * Free memory in bytes
-     */
+    /** Free memory in bytes */
     freeMemory: number;
 };
 
@@ -88,21 +54,13 @@ export type ReportInstance = {
 };
 
 export type ReportCounter = {
-    /**
-     * Counter author
-     */
+    /** Counter author */
     author: string;
-    /**
-     * Counter name
-     */
+    /** Counter name */
     name: string;
-    /**
-     * Counter version
-     */
+    /** Counter version */
     version: string;
-    /**
-     * Counter folder name
-     */
+    /** Counter folder name */
     folderName: string;
 };
 
