@@ -1,7 +1,7 @@
 import { Bitness, ClientType, config } from '@tosu/common';
-import * as fs from 'node:fs/promises';
-import * as os from 'node:os';
-import * as si from 'systeminformation';
+import { readFile } from 'node:fs/promises';
+import { freemem, machine, release, totalmem, type } from 'node:os';
+import { cpu, graphics } from 'systeminformation';
 
 import { getLocalCounters } from './counters';
 
@@ -72,29 +72,29 @@ export async function genReport(instanceManager: any): Promise<Report> {
             genReportInstance
         ),
         counters: genReportCounters(),
-        log: await fs.readFile(config.logFilePath, 'utf8')
+        log: await readFile(config.logFilePath, 'utf8')
     };
 }
 
 async function genReportSpec(): Promise<ReportSpec> {
-    const cpu = await si.cpu();
-    const gpu = await si.graphics();
+    const cpuInfo = await cpu();
+    const gpu = await graphics();
 
     return {
         os: {
-            name: os.type(),
-            release: os.release(),
-            arch: os.machine()
+            name: type(),
+            release: release(),
+            arch: machine()
         },
         cpu: {
-            brand: cpu.brand,
-            manufacturer: cpu.manufacturer,
-            physicalCores: cpu.physicalCores,
-            logicalCores: cpu.cores
+            brand: cpuInfo.brand,
+            manufacturer: cpuInfo.manufacturer,
+            physicalCores: cpuInfo.physicalCores,
+            logicalCores: cpuInfo.cores
         },
         gpus: gpu.controllers.map((gpu) => gpu.model),
-        totalMemory: os.totalmem(),
-        freeMemory: os.freemem()
+        totalMemory: totalmem(),
+        freeMemory: freemem()
     };
 }
 
