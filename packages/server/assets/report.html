@@ -7,14 +7,18 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    /* optional Roboto font */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
     * {
       box-sizing: border-box;
-      font-family: sans-serif;
     }
 
     html {
       background-color: rgb(25, 30, 37);
       color: rgb(100, 122, 145);
+      font-family: 'Roboto', sans-serif;
+      font-size: 20px;
     }
 
     body {
@@ -24,15 +28,11 @@
     header {
       display: flex;
       padding: 0 1rem;
-    }
-
-    table {
-      border-collapse: collapse;
+      font-size: 0.9em;
     }
 
     th {
       color: rgb(101, 147, 197);
-      font-size: 1.2rem;
       text-align: left;
     }
 
@@ -70,6 +70,7 @@
       border-radius: .3rem;
       padding: 1rem;
       overflow: auto;
+      font-size: 0.9em;
     }
 
     .monaco-editor,
@@ -82,7 +83,7 @@
       color: rgb(25, 30, 37);
       padding: 0.4rem 1rem;
       border: none;
-      font-size: 1rem;
+      font-size: inherit;
       border-radius: .4rem;
       font-weight: bold;
       cursor: pointer;
