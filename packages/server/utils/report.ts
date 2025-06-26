@@ -7,6 +7,8 @@ import { cpu, graphics } from 'systeminformation';
 import { getLocalCounters } from './counters';
 
 export type Report = {
+    /** Report generation date */
+    date: Date;
     /** System informations */
     spec: ReportSpec;
     /** Current tosu configuration */
@@ -66,14 +68,20 @@ export type ReportCounter = {
 };
 
 export async function genReport(instanceManager: any): Promise<Report> {
+    const spec = await genReportSpec();
+    const instances = Object.values(instanceManager.osuInstances).map(
+        genReportInstance
+    );
+    const counters = genReportCounters();
+    const log = await readFile(config.logFilePath, 'utf8');
+
     return {
-        spec: await genReportSpec(),
+        date: new Date(),
+        spec,
         config,
-        instances: Object.values(instanceManager.osuInstances).map(
-            genReportInstance
-        ),
-        counters: genReportCounters(),
-        log: await readFile(config.logFilePath, 'utf8')
+        instances,
+        counters,
+        log
     };
 }
 
@@ -128,7 +136,7 @@ export async function genReportHTML(report: Report): Promise<string> {
 
     return rawHtml
         .replace('{{REPORT_JSON}}', JSON.stringify(report))
-        .replace('{{REPORT_DATE}}', new Date().toLocaleString())
+        .replace('{{REPORT_DATE}}', report.date.toISOString())
         .replace('{{OS_NAME}}', report.spec.os.name)
         .replace('{{OS_RELEASE}}', report.spec.os.release)
         .replace('{{OS_ARCH}}', report.spec.os.arch)
