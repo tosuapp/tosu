@@ -422,11 +422,11 @@ export default function buildBaseApi(server: Server) {
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {
         try {
-            const html = await genReportHTML(
-                await genReport(req.instanceManager)
-            );
+            const report = await genReport(req.instanceManager);
+            const html = await genReportHTML(report);
             res.writeHead(200, {
-                'Content-Type': 'text/html; charset=utf-8'
+                'Content-Type': 'text/html; charset=utf-8',
+                'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
             });
             res.end(html, 'utf-8');
         } catch (err) {
