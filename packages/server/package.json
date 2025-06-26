@@ -10,10 +10,11 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@kotrikd/rosu-pp": "3.0.1",
     "@tosu/common": "workspace:*",
     "@tosu/updater": "workspace:*",
-    "@kotrikd/rosu-pp": "3.0.1",
     "semver": "^7.7.1",
+    "systeminformation": "^5.27.6",
     "ws": "^8.18.0"
   },
   "devDependencies": {
