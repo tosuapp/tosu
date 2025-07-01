@@ -2,278 +2,512 @@
 <html lang="en">
 
 <head>
-  <title>Tosu report</title>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* optional Roboto font */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+    <title>Tosu Report</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      background-color: rgb(25, 30, 37);
-      color: rgb(100, 122, 145);
-      font-family: 'Roboto', sans-serif;
-      font-size: 20px;
-    }
-
-    body {
-      margin: 0 12px;
-    }
-
-    header {
-      display: flex;
-      padding: 0 1rem;
-      font-size: 0.9em;
-    }
-
-    th {
-      color: rgb(101, 147, 197);
-      text-align: left;
-    }
-
-    th,
-    td {
-      padding: 0.5rem;
-    }
-
-    .outer-box {
-      background-color: rgb(36, 45, 55);
-      color: rgb(151, 167, 185);
-      display: flex;
-      flex-direction: column;
-      padding: 1rem;
-      border-radius: .3rem;
-      gap: .8rem;
-    }
-
-    .group-box {
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
-    }
-
-    .group-name {
-      margin: 0;
-      margin-left: 0.4rem;
-      font-weight: bold;
-      font-size: 1.4rem;
-    }
-
-    .summary-table {
-      background-color: rgb(25, 30, 37);
-      display: block;
-      border-radius: .3rem;
-      padding: 1rem;
-      overflow: auto;
-      font-size: 0.9em;
-    }
-
-    .monaco-editor,
-    .overflow-guard {
-      border-radius: .3rem;
-    }
-
-    .export-button {
-      background-color: rgb(115, 166, 213);
-      color: rgb(25, 30, 37);
-      padding: 0.4rem 1rem;
-      border: none;
-      font-size: inherit;
-      border-radius: .4rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #log-box {
-      height: 95vh;
-    }
-  </style>
-  <script>
-    const reportJson = {{REPORT_JSON}};
-
-    function exportJson() {
-      const data = new Blob([JSON.stringify(reportJson)], { type: 'application/json' });
-      const anchor = document.createElement('a');
-      const url = URL.createObjectURL(data);
-      anchor.href = url;
-      anchor.download = 'tosu-report.json';
-      anchor.click();
-      URL.revokeObjectURL(url);
-    }
-
-    window.addEventListener('load', async () => {
-      const logBox = document.getElementById('log-box');
-      const monaco = await monaco_loader.init();
-
-      monaco.languages.register({ id: 'log' });
-      monaco.languages.setMonarchTokensProvider('log', {
-        tokenizer: {
-          // start. iso timestamp
-          root: [
-            [
-              /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
-              'timestamp',
-              '@level'
-            ],
-          ],
-          // log levels
-          level: [
-            [' info', 'info'],
-            [' warn', 'warning'],
-            [' error', 'error'],
-            [' debugError', 'debugError'],
-            [' debug', 'debug'],
-            [' time', 'time'],
-
-            // rest log messages
-            ['.*', 'default', '@pop']
-          ]
-        },
-      });
-      monaco.editor.defineTheme('tosu-report-theme', {
-        base: 'vs-dark',
-        inherit: true,
-        rules: [
-          { token: 'timestamp', foreground: '666878' },
-          { token: 'info', foreground: '9cd573', fontStyle: 'bold' },
-          { token: 'warning', foreground: 'd5b873', fontStyle: 'bold' },
-          { token: 'error', foreground: 'd57381', fontStyle: 'bold' },
-          { token: 'debug', foreground: '568cc7', fontStyle: 'bold' },
-          { token: 'time', foreground: '97a7b9', fontStyle: 'bold' },
-          { token: 'debugError', foreground: 'd38ea7', fontStyle: 'bold' }
-        ],
-        colors: {
-          'editor.foreground': '#cdd6f4',
-          'editor.background': '#191e25'
+        :root {
+            --surface-0: #191e25;
+            --surface-1: #242d37;
+            --text-0: #647a91;
+            --text-1: #97a7b9;
+            --accent: #6593c5;
         }
-      });
 
-      const editor = monaco.editor.create(logBox, {
-        value: reportJson.log,
-        language: 'log',
-        theme: 'tosu-report-theme',
-        fontSize: 16,
-        readOnly: true,
-        automaticLayout: true,
-        scrollBeyondLastLine: false,
-        minimap: { enabled: false },
-        scrollbar: {
-          alwaysConsumeMouseWheel: false,
+        * {
+            position: relative;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            min-width: 0;
         }
-      });
-    });
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@monaco-editor/loader@1.5.0/lib/umd/monaco-loader.min.js"></script>
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 20px;
+            background-color: var(--surface-0);
+            color: var(--text-0);
+
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin: 0.8rem;
+        }
+
+        ::selection {
+            color: var(--surface-0);
+            background-color: var(--accent);
+        }
+
+        ::-webkit-scrollbar {
+            width: 0.8em;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--accent);
+            border-radius: 0.2em;
+        }
+
+        button {
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: inherit;
+            font-style: inherit;
+            border: 0;
+            outline: 0;
+        }
+
+        table {
+            font-size: 1rem;
+            table-layout: auto;
+            border-spacing: 2rem 0.4rem;
+
+
+            th {
+                color: var(--accent);
+                font-size: 1.2rem;
+                text-align: left;
+            }
+
+            td {
+                font-size: 1.2rem;
+                color: var(--text-1);
+            }
+
+            table {
+                border-left: 2px solid var(--surface-1);
+            }
+        }
+
+        .button {
+            white-space: nowrap;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0.4em 1em;
+            border-radius: 0.4em;
+            height: fit-content;
+
+            transition: 0.1s ease;
+            transition-property: translate, filter;
+
+            & > * {
+                pointer-events: none;
+            }
+
+            span {
+                display: block;
+                pointer-events: none;
+
+                transition: 0.3s ease;
+                transition-property: opacity, width;
+            }
+
+            img {
+                width: 1em;
+                height: 1em;
+
+                object-fit: cover;
+
+                transition: 0.3s ease;
+                transition-property: opacity, width, height;
+
+                animation: spin 1s infinite forwards linear;
+            }
+
+            &:hover {
+                filter: brightness(1.1);
+                translate: 0 -0.05em;
+            }
+
+            &:active {
+                filter: brightness(0.9);
+                translate: 0 0.1em;
+            }
+
+            &.disable {
+                user-select: none;
+                pointer-events: none;
+
+                filter: grayscale(1);
+            }
+
+            &.small {
+                padding: 0.1em 0.5em;
+            }
+        }
+
+        .export-button {
+            background: var(--accent);
+            color: var(--surface-0);
+        }
+
+        #header {
+            display: flex;
+            flex-direction: row;
+
+            div {
+                display: flex;
+                flex-direction: column;
+                gap: 0.4rem;
+                margin-left: 0.4rem;
+            }
+
+            h1 {
+                font-weight: bold;
+                font-size: 2.4rem;
+            }
+
+            p {
+                font-size: 1.2rem;
+            }
+
+            .button {
+                margin-left: auto;
+                margin-top: auto;
+                margin-right: 0.4rem;
+            }
+        }
+
+        #content {
+            display: flex;
+            flex-direction: column;
+            background: var(--surface-1);
+            border-radius: 0.3rem;
+            padding: 0.8rem;
+            gap: 0.8rem;
+
+            .group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.4rem;
+
+                & > p {
+                    font-weight: bold;
+                    color: var(--text-1);
+                    margin-left: 0.4rem;
+                    font-size: 1.3rem;
+                }
+
+                & > div {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+
+                    background-color: var(--surface-0);
+                    border-radius: 0.3rem;
+                    padding: 1rem;
+                    gap: 1rem;
+
+                    .system-table {
+                        border-spacing: 1.2rem 1.4rem;
+                        margin: -0.7rem -0.6rem;
+                    }
+
+                    .tosu-table {
+                        th:first-child {
+                            text-align: right;
+                        }
+
+                        td:nth-child(3) {
+                            font-size: 1rem;
+                            font-family: monospace;
+                        }
+                    }
+
+                    .tosu-table, .instance-table, .counters-table {
+                        margin: -0.2rem -1rem;
+                    }
+                }
+            }
+        }
+
+        #footer {
+            display: flex;
+            justify-content: center;
+
+            a {
+                text-decoration: none;
+                color: var(--accent);
+
+                transition: 0.1s ease;
+                transition-property: color;
+
+                &:hover {
+                    text-decoration: underline;
+                    color: var(--text-1);
+                }
+            }
+        }
+
+        #logs {
+            height: 95vh;
+
+            .monaco-editor,
+            .overflow-guard {
+                border-radius: .3rem;
+            }
+
+            .monaco-editor .monaco-scrollable-element > .scrollbar {
+                width: 0.8em;
+
+                & > .slider, & > .slider:active, & > .slider:hover {
+                    background: var(--accent);
+                    border-radius: 0.2em;
+                }
+            }
+        }
+
+
+    </style>
+    <script>
+        const reportJson = {{REPORT_JSON}}
+
+        function exportJson() {
+            const data = new Blob([JSON.stringify(reportJson)], { type: 'application/json' });
+            const anchor = document.createElement('a');
+            const url = URL.createObjectURL(data);
+            anchor.href = url;
+
+            const pathname = window.location.pathname;
+            const filename = pathname.substring(pathname.lastIndexOf('/') + 1).replace(/\.html$/, '');
+            anchor.download = `${filename}.json`;
+            anchor.click();
+            URL.revokeObjectURL(url);
+        }
+
+        window.addEventListener('load', async () => {
+            const logBox = document.querySelector('#logs');
+            const monaco = await monaco_loader.init();
+
+            monaco.languages.register({ id: 'log' });
+            monaco.languages.setMonarchTokensProvider('log', {
+                tokenizer: {
+                    // start. iso timestamp
+                    root: [
+                        [
+                            /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
+                            'timestamp',
+                            '@level'
+                        ]
+                    ],
+                    // log levels
+                    level: [
+                        [' info', 'info'],
+                        [' warn', 'warning'],
+                        [' error', 'error'],
+                        [' debugError', 'debugError'],
+                        [' debug', 'debug'],
+                        [' time', 'time'],
+
+                        // rest log messages
+                        ['.*', 'default', '@pop']
+                    ]
+                }
+            });
+            monaco.editor.defineTheme('tosu-report-theme', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [
+                    { token: 'timestamp', foreground: '666878' },
+                    { token: 'info', foreground: '9cd573', fontStyle: 'bold' },
+                    { token: 'warning', foreground: 'd5b873', fontStyle: 'bold' },
+                    { token: 'error', foreground: 'd57381', fontStyle: 'bold' },
+                    { token: 'debug', foreground: '568cc7', fontStyle: 'bold' },
+                    { token: 'time', foreground: '97a7b9', fontStyle: 'bold' },
+                    { token: 'debugError', foreground: 'd38ea7', fontStyle: 'bold' }
+                ],
+                colors: {
+                    'editor.foreground': '#cdd6f4',
+                    'editor.background': '#191e25'
+                }
+            });
+
+            const editor = monaco.editor.create(logBox, {
+                value: reportJson.log,
+                language: 'log',
+                theme: 'tosu-report-theme',
+                fontSize: 16,
+                readOnly: true,
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                scrollbar: {
+                    alwaysConsumeMouseWheel: false
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@monaco-editor/loader@1.5.0/lib/umd/monaco-loader.min.js"></script>
 </head>
 
 <body>
-  <header>
-    <div style="flex-grow: 1;">
-      <h1>Tosu report</h1>
-      <p>Generated on: {{REPORT_DATE}}</p>
+<div id="header">
+    <div>
+        <h1>tosu debug report</h1>
+        <p>Generated on {{TIME}} UTC</p>
     </div>
-    <div style="align-content: center;">
-      <button class="export-button" onclick="exportJson()">Export Json report</button>
+
+    <button class="button export-button" onclick="exportJson()">Export to JSON</button>
+</div>
+<div id="content">
+    <div class="group">
+        <p>{{SYSTEM_TYPE}} System Configuration</p>
+        <div>
+            <table class="system-table">
+                <tr>
+                    <th>OS</th>
+                    <td>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Build</th>
+                                <th>Arch</th>
+                            </tr>
+                            <tr>
+                                <th>0</th>
+                                {{SYSTEM_OS}}
+                            </tr>
+                            </thead>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <th>CPU</th>
+                    <td>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Brand</th>
+                                <th>Model</th>
+                                <th>Cores</th>
+                                <th>Threads</th>
+                            </tr>
+                            <tr>
+                                <th>0</th>
+                                {{SYSTEM_CPU}}
+                            </tr>
+                            </thead>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <th>GPU</th>
+                    <td>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Brand</th>
+                                <th>Model</th>
+                            </tr>
+                            {{SYSTEM_GPUS}}
+                            </thead>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <th>RAM</th>
+                    <td>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Total Size</th>
+                                <th>Used</th>
+                                <th>Available</th>
+                            </tr>
+                            <tr>
+                                <th>0</th>
+                                {{SYSTEM_RAM}}
+                            </tr>
+                            </thead>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
-  </header>
-  <div class="outer-box">
-    <div class="group-box">
-      <p class="group-name">Summary</p>
-      <table class="summary-table">
-        <tr>
-          <th>OS</th>
-          <td>
-            <table>
-              <tr>
-                <th>Name</th>
-                <td>{{OS_NAME}}</td>
-              </tr>
-              <tr>
-                <th>Release</th>
-                <td>{{OS_RELEASE}}</td>
-              </tr>
-              <tr>
-                <th>Arch</th>
-                <td>{{OS_ARCH}}</td>
-              </tr>
+    <div class="group">
+        <p>tosu Configuration</p>
+        <div>
+            <table class="tosu-table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                {{TOSU_CONFIG}}
             </table>
-          </td>
-        </tr>
-        <tr>
-          <th>CPU</th>
-          <td>
-            <table>
-              <tr>
-                <th>Manufacturer</th>
-                <td>{{CPU_MANUFACTURER}}</td>
-              </tr>
-              <tr>
-                <th>Brand</th>
-                <td>{{CPU_BRAND}}</td>
-              </tr>
-              <tr>
-                <th>Physical Cores</th>
-                <td>{{CPU_PHYSICAL_CORES}}</td>
-              </tr>
-              <tr>
-                <th>Logical Cores</th>
-                <td>{{CPU_LOGICAL_CORES}}</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th>GPU</th>
-          <td>
-            <table>
-              {{GPU_ROWS}}
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th>Total Memory</th>
-          <td>{{TOTAL_MEMORY_GIB}} GiB</td>
-        </tr>
-        <tr>
-          <th>Free Memory</th>
-          <td>{{FREE_MEMORY_GIB}} GiB</td>
-        </tr>
-        <tr>
-          <th>Configuration</th>
-          <td>
-            <table>
-              {{CONFIG_ROWS}}
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th>osu! Instances</th>
-          <td>
-            <table>
-              {{INSTANCE_ROWS}}
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th>Counters</th>
-          <td>
-            <table>
-              {{COUNTER_ROWS}}
-            </table>
-          </td>
-        </tr>
-      </table>
+        </div>
     </div>
-    <div class="group-box">
-      <p class="group-name">Logs</p>
-      <div id="log-box"></div>
+    <div class="group">
+        <p>osu! Instances</p>
+        <div>
+            <table class="instance-table">
+                <tr>
+                    <th>instance</th>
+                    <td>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>pid</th>
+                                <th>client</th>
+                                <th>bitness</th>
+                                <th>version</th>
+                            </tr>
+                            </thead>
+                            {{INSTANCES}}
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
-  </div>
+    <div class="group">
+        <p>tosu Counters</p>
+        <div>
+            <table class="counters-table">
+                <tr>
+                    <th>counter</th>
+                    <td>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Version</th>
+                                <th>Author</th>
+                                <th>Directory</th>
+                            </tr>
+                            </thead>
+                            {{COUNTERS}}
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="group">
+        <p>Logs</p>
+        <div id="logs"></div>
+    </div>
+</div>
+<div id="footer">
+    <p>This report was generated by <a href="https://github.com/tosuapp/tosu">tosu</a> © 2025</p>
+</div>
 </body>
 
 </html>

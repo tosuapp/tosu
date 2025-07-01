@@ -1,28 +1,31 @@
 import { Bitness, ClientType, config } from '@tosu/common';
 import { readFile } from 'node:fs/promises';
-import { freemem, machine, release, totalmem, type } from 'node:os';
 import path from 'node:path';
-import { cpu, graphics } from 'systeminformation';
+import { battery, cpu, graphics, mem, osInfo } from 'systeminformation';
 
 import { getLocalCounters } from './counters';
 
-export type Report = {
-    /** Report generation date */
-    date: Date;
-    /** System informations */
-    spec: ReportSpec;
-    /** Current tosu configuration */
-    config: typeof config;
-    /** Current osu! instances */
-    instances: ReportInstance[];
-    /** Installed counters */
-    counters: ReportCounter[];
-    /** Log file content */
-    log: string;
+export type ReportInstance = {
+    pid: number;
+    type: keyof typeof ClientType;
+    bitness: keyof typeof Bitness;
+    version: string;
+};
+
+export type ReportCounter = {
+    /** Counter author */
+    author: string;
+    /** Counter name */
+    name: string;
+    /** Counter version */
+    version: string;
+    /** Counter folder name */
+    folderName: string;
 };
 
 export type ReportSpec = {
-    /** Os informations */
+    systemType: 'Desktop' | 'Laptop';
+    /** Os information */
     os: {
         /** Operating system name, e.g. "Linux", "Windows_NT", "Darwin" */
         name: string;
@@ -31,7 +34,7 @@ export type ReportSpec = {
         /** Operating system architecture, e.g. "x64", "arm64" */
         arch: string;
     };
-    /** CPU informations */
+    /** CPU information */
     cpu: {
         /** CPU manufacturer, e.g. "AMD", "Intel" */
         manufacturer: string;
@@ -49,23 +52,72 @@ export type ReportSpec = {
     totalMemory: number;
     /** Free memory in bytes */
     freeMemory: number;
+    /** Potentially available memory in bytes */
+    availableMemory: number;
+    /** Used memory in bytes */
+    usedMemory: number;
 };
 
-export type ReportInstance = {
-    type: keyof typeof ClientType;
-    bitness: keyof typeof Bitness;
+export type Report = {
+    /** Report generation date */
+    date: Date;
+    /** System information */
+    spec: ReportSpec;
+    /** Current tosu configuration */
+    config: typeof config;
+    /** Current osu! instances */
+    instances: ReportInstance[];
+    /** Installed counters */
+    counters: ReportCounter[];
+    /** Log file content */
+    log: string;
 };
 
-export type ReportCounter = {
-    /** Counter author */
-    author: string;
-    /** Counter name */
-    name: string;
-    /** Counter version */
-    version: string;
-    /** Counter folder name */
-    folderName: string;
-};
+async function genReportSpec(): Promise<ReportSpec> {
+    const batt = await battery();
+    const os = await osInfo();
+    const cpuInfo = await cpu();
+    const gpu = await graphics();
+    const memory = await mem();
+
+    return {
+        systemType: batt.hasBattery ? 'Laptop' : 'Desktop',
+        os: {
+            name: os.platform,
+            release: os.release,
+            arch: os.arch
+        },
+        cpu: {
+            brand: cpuInfo.brand,
+            manufacturer: cpuInfo.manufacturer,
+            physicalCores: cpuInfo.physicalCores,
+            logicalCores: cpuInfo.cores
+        },
+        gpus: gpu.controllers.map((gpu) => gpu.model),
+        totalMemory: memory.total,
+        freeMemory: memory.free,
+        usedMemory: memory.used,
+        availableMemory: memory.available
+    };
+}
+
+function genReportInstance(instance: any): ReportInstance {
+    return {
+        pid: instance.pid,
+        type: ClientType[instance.client] as keyof typeof ClientType,
+        bitness: Bitness[instance.bitness] as keyof typeof Bitness,
+        version: instance.getServices(['settings']).settings.client.version
+    };
+}
+
+function genReportCounters(): ReportCounter[] {
+    return getLocalCounters().map((counter) => ({
+        author: counter.author,
+        name: counter.name,
+        version: counter.version,
+        folderName: counter.folderName
+    }));
+}
 
 export async function genReport(instanceManager: any): Promise<Report> {
     const spec = await genReportSpec();
@@ -85,44 +137,6 @@ export async function genReport(instanceManager: any): Promise<Report> {
     };
 }
 
-async function genReportSpec(): Promise<ReportSpec> {
-    const cpuInfo = await cpu();
-    const gpu = await graphics();
-
-    return {
-        os: {
-            name: type(),
-            release: release(),
-            arch: machine()
-        },
-        cpu: {
-            brand: cpuInfo.brand,
-            manufacturer: cpuInfo.manufacturer,
-            physicalCores: cpuInfo.physicalCores,
-            logicalCores: cpuInfo.cores
-        },
-        gpus: gpu.controllers.map((gpu) => gpu.model),
-        totalMemory: totalmem(),
-        freeMemory: freemem()
-    };
-}
-
-function genReportInstance(instance: any): ReportInstance {
-    return {
-        type: ClientType[instance.client] as keyof typeof ClientType,
-        bitness: Bitness[instance.bitness] as keyof typeof Bitness
-    };
-}
-
-function genReportCounters(): ReportCounter[] {
-    return getLocalCounters().map((counter) => ({
-        author: counter.author,
-        name: counter.name,
-        version: counter.version,
-        folderName: counter.folderName
-    }));
-}
-
 const pkgAssetsPath =
     'pkg' in process
         ? path.join(__dirname, 'assets')
@@ -136,56 +150,74 @@ export async function genReportHTML(report: Report): Promise<string> {
 
     return rawHtml
         .replace('{{REPORT_JSON}}', JSON.stringify(report))
-        .replace('{{REPORT_DATE}}', report.date.toISOString())
-        .replace('{{OS_NAME}}', report.spec.os.name)
-        .replace('{{OS_RELEASE}}', report.spec.os.release)
-        .replace('{{OS_ARCH}}', report.spec.os.arch)
-        .replace('{{CPU_MANUFACTURER}}', report.spec.cpu.manufacturer)
-        .replace('{{CPU_BRAND}}', report.spec.cpu.brand)
+        .replace('{{TIME}}', report.date.toISOString())
+        .replace('{{SYSTEM_TYPE}}', report.spec.systemType)
         .replace(
-            '{{CPU_PHYSICAL_CORES}}',
-            String(report.spec.cpu.physicalCores)
-        )
-        .replace('{{CPU_LOGICAL_CORES}}', String(report.spec.cpu.logicalCores))
-        .replace('{{GPU_ROWS}}', buildRowTable(report.spec.gpus))
-        .replace(
-            '{{TOTAL_MEMORY_GIB}}',
-            (report.spec.totalMemory / (1024 * 1024 * 1024)).toFixed(2)
+            '{{SYSTEM_OS}}',
+            [report.spec.os.name, report.spec.os.release, report.spec.os.arch]
+                .map((v) => `<td>${v}</td>`)
+                .join('')
         )
         .replace(
-            '{{FREE_MEMORY_GIB}}',
-            (report.spec.freeMemory / (1024 * 1024 * 1024)).toFixed(2)
+            '{{SYSTEM_CPU}}',
+            [
+                report.spec.cpu.manufacturer,
+                report.spec.cpu.brand,
+                report.spec.cpu.physicalCores,
+                report.spec.cpu.logicalCores
+            ]
+                .map((v) => `<td>${v}</td>`)
+                .join('')
         )
-        .replace('{{CONFIG_ROWS}}', buildRowTable(report.config))
         .replace(
-            '{{INSTANCE_ROWS}}',
-            buildRowTable(
-                report.instances.map((instance) =>
-                    wrapTable(buildRowTable(instance))
+            '{{SYSTEM_GPUS}}',
+            report.spec.gpus
+                .map((gpu) => {
+                    const [brand, ...model] = gpu.split(' ');
+                    return [brand, model.join(' ')];
+                })
+                .map(
+                    (v, i) =>
+                        `<th>${i}</th></th><td>${v[0]}</td><td>${v[1]}</td>`
                 )
-            )
+                .join('')
         )
         .replace(
-            '{{COUNTER_ROWS}}',
-            buildRowTable(
-                report.counters.map((counters) =>
-                    wrapTable(buildRowTable(counters))
+            '{{SYSTEM_RAM}}',
+            [
+                report.spec.totalMemory,
+                report.spec.usedMemory,
+                report.spec.availableMemory
+            ]
+                .map((n) => n / (1024 * 1024 * 1024))
+                .map((v) => `<td>${v.toFixed(2)} GiB</td>`)
+                .join('')
+        )
+        .replace(
+            '{{TOSU_CONFIG}}',
+            Object.entries(report.config)
+                .map(
+                    ([k, v], i) =>
+                        `<tr><th>${i + 1}</th><td>${k}</td><td>${v}</td></tr>`
                 )
-            )
+                .join('')
+        )
+        .replace(
+            '{{INSTANCES}}',
+            report.instances
+                .map(
+                    (v, i) =>
+                        `<tr><th>${i + 1}</th><td>${v.pid}</td><td>${v.type}</td><td>${v.bitness}</td><td>${v.version}</td></tr>`
+                )
+                .join('')
+        )
+        .replace(
+            '{{COUNTERS}}',
+            report.counters
+                .map(
+                    (v, i) =>
+                        `<tr><th>${i + 1}</th><td>${v.name}</td><td>${v.version}</td><td>${v.author}</td><td>${v.folderName}</td></tr>`
+                )
+                .join('')
         );
-}
-
-function buildRowTable(
-    values: string[] | Record<string, string | number | boolean>
-): string {
-    let tableHtml = '';
-    for (const key in values) {
-        tableHtml += `<tr><th>${key}</th><td>${String(values[key])}</td></tr>`;
-    }
-
-    return tableHtml;
-}
-
-function wrapTable(value: string): string {
-    return `<table>${value}</table>`;
 }
