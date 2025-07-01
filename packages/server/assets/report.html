@@ -276,9 +276,7 @@
             const url = URL.createObjectURL(data);
             anchor.href = url;
 
-            const pathname = window.location.pathname;
-            const filename = pathname.substring(pathname.lastIndexOf('/') + 1).replace(/\.html$/, '');
-            anchor.download = `${filename}.json`;
+            anchor.download = `tosu-report-${new Date(reportJson.date).getTime()}.json`;
             anchor.click();
             URL.revokeObjectURL(url);
         }
