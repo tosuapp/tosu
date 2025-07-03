@@ -580,28 +580,6 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{checked}',
                                 config.openDashboardOnStartup ? 'checked' : ''
                             )
-                    ),
-                settingsItemHTMLv2
-                    .replace('{name}', 'In-Game Overlay')
-                    .replace(
-                        '{description}',
-                        'Show the in-game overlay in the game, toggleable via a custom keybind.'
-                    )
-                    .replace(
-                        '{input-1}',
-                        settingsSwitchHTML
-                            .replace('{id}', 'ENABLE_INGAME_OVERLAY')
-                            .replace(
-                                '{checked}',
-                                config.enableIngameOverlay ? 'checked' : ''
-                            )
-                    )
-                    .replace(
-                        '{input-2}',
-                        settingsTextInputHTML
-                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
-                            .replace('{class}', ' -keybind')
-                            .replace('{value}', config.ingameOverlayKeybind)
                     )
             ]
                 .map((item) => item.replace(/\{[^}]*}/g, ''))
@@ -739,6 +717,60 @@ export function buildSettings(res: http.ServerResponse) {
                 .join('\n')
         );
 
+    const ingameOverlayGroup = settingsGroupHTML
+        .replace('{header}', 'In-Game Overlay')
+        .replace(
+            '{items}',
+            [
+                settingsItemHTMLv2
+                    .replace('{name}', 'Enable In-Game Overlay')
+                    .replace(
+                        '{description}',
+                        'Show the in-game overlay in the game.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'ENABLE_INGAME_OVERLAY')
+                            .replace(
+                                '{checked}',
+                                config.enableIngameOverlay ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Config Mode Keybind')
+                    .replace(
+                        '{description}',
+                        'Keybind to toggle config mode for customizing in-game overlay placement.'
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsTextInputHTML
+                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
+                            .replace('{class}', ' -keybind')
+                            .replace('{value}', config.ingameOverlayKeybind)
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Maximum Fps')
+                    .replace(
+                        '{description}',
+                        'Maximum frame rate of in-game overlay. High value may negatively impact performance.'
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsNumberInputHTML
+                            .replace('{id}', 'INGAME_OVERLAY_MAX_FPS')
+                            .replace('{min}', '0')
+                            .replace(
+                                '{value}',
+                                String(config.ingameOverlayMaxFps)
+                            )
+                    )
+            ]
+                .map((item) => item.replace(/\{[^}]*}/g, ''))
+                .join('\n')
+        );
+
     const advancedGroup = settingsGroupHTML
         .replace('{header}', 'Advanced')
         .replace(
@@ -792,7 +824,13 @@ export function buildSettings(res: http.ServerResponse) {
                 .join('\n')
         );
 
-    const groups = [generalGroup, dataGroup, serverGroup, advancedGroup]
+    const groups = [
+        generalGroup,
+        dataGroup,
+        serverGroup,
+        ingameOverlayGroup,
+        advancedGroup
+    ]
         .map((item) => item.replace(/\{[^}]*}/g, ''))
         .join('\n');
 
