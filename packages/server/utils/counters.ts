@@ -760,7 +760,7 @@ export function buildSettings(res: http.ServerResponse) {
                         '{input-2}',
                         settingsNumberInputHTML
                             .replace('{id}', 'INGAME_OVERLAY_MAX_FPS')
-                            .replace('{min}', '0')
+                            .replace('{min}', '1')
                             .replace(
                                 '{value}',
                                 String(config.ingameOverlayMaxFps)
