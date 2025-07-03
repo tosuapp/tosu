@@ -42,6 +42,7 @@ SHOW_MP_COMMANDS=false
 # Enables/disables the in-game overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
 ENABLE_INGAME_OVERLAY=false
 INGAME_OVERLAY_KEYBIND=Control + Shift + Space
+INGAME_OVERLAY_MAX_FPS=60
 
 # WARNING: EVERYTHING BELOW IS NOT TO BE TOUCHED UNNECESSARILY.
 
@@ -86,6 +87,7 @@ export const config = {
     enableIngameOverlay: (process.env.ENABLE_INGAME_OVERLAY || '') === 'true',
     ingameOverlayKeybind:
         process.env.INGAME_OVERLAY_KEYBIND || 'Control + Shift + Space',
+    ingameOverlayMaxFps: Number(process.env.INGAME_OVERLAY_MAX_FPS || 60),
     allowedIPs: process.env.ALLOWED_IPS || '127.0.0.1,localhost,absolute',
     timestamp: 0,
     currentVersion: '',
@@ -153,6 +155,11 @@ export const updateConfigFile = () => {
             '\nINGAME_OVERLAY_KEYBIND=Control + Shift + Space',
             'utf8'
         );
+    }
+
+    if (!process.env.INGAME_OVERLAY_MAX_FPS) {
+        newOptions += 'INGAME_OVERLAY_MAX_FPS, ';
+        fs.appendFileSync(configPath, '\nINGAME_OVERLAY_MAX_FPS=60', 'utf8');
     }
 
     if (!process.env.ENABLE_AUTOUPDATE) {
@@ -242,6 +249,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const enableIngameOverlay = (parsed.ENABLE_INGAME_OVERLAY || '') === 'true';
     const ingameOverlayKeybind =
         parsed.INGAME_OVERLAY_KEYBIND || 'Control + Shift + Space';
+    const ingameOverlayMaxFps = Number(parsed.INGAME_OVERLAY_MAX_FPS || 60);
     const allowedIPs = parsed.ALLOWED_IPS || '127.0.0.1,localhost,absolute';
 
     const isKeybindUpdated =
@@ -272,6 +280,7 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 
     config.enableIngameOverlay = enableIngameOverlay;
     config.ingameOverlayKeybind = ingameOverlayKeybind;
+    config.ingameOverlayMaxFps = ingameOverlayMaxFps;
     checkGameOverlayConfig();
 
     if (enableIngameOverlay) {
@@ -317,6 +326,7 @@ export const writeConfig = (httpServer: any, options: any) => {
     text += `OPEN_DASHBOARD_ON_STARTUP=${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup}\n\n`;
     text += `ENABLE_INGAME_OVERLAY=${options.ENABLE_INGAME_OVERLAY ?? config.enableIngameOverlay}\n`;
     text += `INGAME_OVERLAY_KEYBIND=${options.INGAME_OVERLAY_KEYBIND ?? config.ingameOverlayKeybind}\n`;
+    text += `INGAME_OVERLAY_MAX_FPS=${options.INGAME_OVERLAY_MAX_FPS ?? config.ingameOverlayMaxFps}\n`;
     text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay}\n\n`;
     text += `ALLOWED_IPS=${options.ALLOWED_IPS ?? config.allowedIPs}\n\n`;
     text += `POLL_RATE=${options.POLL_RATE ?? config.pollRate}\n`;

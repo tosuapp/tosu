@@ -86,13 +86,21 @@ export class OverlayManager {
         );
     }
 
+    updateMaxFps(maxFps: number) {
+        for (const overlay of this.map.values()) {
+            overlay.window.webContents.setFrameRate(maxFps);
+        }
+
+        console.debug(`MaxFps updated to ${maxFps}`);
+    }
+
     async handleEvent(message: { cmd: string } & Record<string, unknown>) {
         if (message.cmd === 'add') {
             await this.runOverlay(message.pid as number);
-        }
-
-        if (message.cmd === 'keybind') {
+        } else if (message.cmd === 'keybind') {
             this.updateKeybind(message.keybind as string);
+        } else if (message.cmd === 'maxFps') {
+            this.updateMaxFps(message.maxFps as number);
         }
     }
 }

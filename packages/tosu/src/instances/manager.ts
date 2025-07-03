@@ -149,6 +149,11 @@ export class InstanceManager {
                         cmd: 'keybind',
                         keybind: config.ingameOverlayKeybind
                     });
+
+                    this.overlayProcess?.send({
+                        cmd: 'maxFps',
+                        maxFps: config.ingameOverlayMaxFps
+                    });
                 }
             }
         } catch (exc) {
