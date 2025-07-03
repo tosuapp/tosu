@@ -137,22 +137,10 @@ export class InstanceManager {
                 this.osuInstances[processId] = osuInstance;
                 osuInstance.start();
 
-                if (config.enableIngameOverlay) {
-                    await this.startOverlay();
-
-                    this.overlayProcess?.send({
+                if (this.overlayProcess) {
+                    this.overlayProcess.send({
                         cmd: 'add',
                         pid: processId
-                    });
-
-                    this.overlayProcess?.send({
-                        cmd: 'keybind',
-                        keybind: config.ingameOverlayKeybind
-                    });
-
-                    this.overlayProcess?.send({
-                        cmd: 'maxFps',
-                        maxFps: config.ingameOverlayMaxFps
                     });
                 }
             }
@@ -193,15 +181,9 @@ export class InstanceManager {
         }
     }
 
-    async startOverlay(keybindUpdated?: boolean) {
+    async startOverlay() {
         // ignore if it already started
         if (this.overlayProcess) {
-            if (keybindUpdated !== true) return;
-
-            this.overlayProcess?.send({
-                cmd: 'keybind',
-                keybind: config.ingameOverlayKeybind
-            });
             return;
         }
 
@@ -226,10 +208,31 @@ export class InstanceManager {
             });
 
             this.overlayProcess = child;
+            this.updateOverlayConfig();
+            for (const pid in this.osuInstances) {
+                child.send({
+                    cmd: 'add',
+                    pid: Number(pid)
+                });
+            }
         } catch (exc) {
             wLogger.error('[ingame-overlay]', (exc as any).message);
             wLogger.debug('[ingame-overlay]', exc);
         }
+    }
+
+    updateOverlayConfig() {
+        const proc = this.overlayProcess;
+        if (!proc) return;
+
+        proc.send({
+            cmd: 'keybind',
+            keybind: config.ingameOverlayKeybind
+        });
+        proc.send({
+            cmd: 'maxFps',
+            maxFps: config.ingameOverlayMaxFps
+        });
     }
 
     stopOverlay() {
