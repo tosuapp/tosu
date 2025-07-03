@@ -23,7 +23,7 @@ export async function runOverlay(): Promise<ChildProcess> {
         );
     }
 
-    checkGameOverlayConfig();
+    await checkGameOverlayConfig();
 
     const gameOverlayPath = path.join(getProgramPath(), 'game-overlay');
     if (

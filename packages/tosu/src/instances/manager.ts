@@ -235,14 +235,16 @@ export class InstanceManager {
         });
     }
 
-    stopOverlay() {
+    async stopOverlay() {
         // ignore if it's not started
         if (!this.overlayProcess) {
             return;
         }
 
         wLogger.warn('[ingame-overlay]', 'Stopping...');
-        this.overlayProcess.kill();
+        const overlayProcess = this.overlayProcess;
+        overlayProcess.kill();
+        await new Promise((resolve) => overlayProcess.once('close', resolve));
         this.overlayProcess = null;
     }
 }
