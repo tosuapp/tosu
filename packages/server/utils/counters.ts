@@ -751,10 +751,10 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace('{value}', config.ingameOverlayKeybind)
                     ),
                 settingsItemHTMLv2
-                    .replace('{name}', 'Maximum Fps')
+                    .replace('{name}', 'Frame Rate')
                     .replace(
                         '{description}',
-                        'Maximum frame rate of in-game overlay. High value may negatively impact performance.'
+                        'Maximum frame rate of in-game overlay. High values may negatively impact performance.'
                     )
                     .replace(
                         '{input-2}',
