@@ -1,4 +1,4 @@
-import { key } from 'asdf-overlay-node';
+import { Key, key } from 'asdf-overlay-node';
 import { on } from 'node:events';
 
 import { KEYS, Keybind } from './input';
@@ -6,6 +6,13 @@ import { OverlayProcess } from './process';
 
 export class OverlayManager {
     private readonly map: Map<number, OverlayProcess> = new Map();
+    private keybindKeys: Key[] = [
+        key(0x11), // Left Control
+        key(0x10), // Left Shift
+        key(0x20) // Space
+    ];
+
+    private maxFps: number = 60;
 
     async runIpc() {
         for await (const events of on(process, 'message')) {
@@ -34,6 +41,8 @@ export class OverlayManager {
             console.log('initializing ingame overlay pid:', pid);
 
             const overlay = await OverlayProcess.initialize(pid);
+            overlay.window.webContents.setFrameRate(this.maxFps);
+            overlay.keybind = new Keybind(this.keybindKeys);
             this.map.set(pid, overlay);
             try {
                 await overlay.window.loadURL(
@@ -77,8 +86,9 @@ export class OverlayManager {
             })
             .filter((r) => r !== null);
 
+        this.keybindKeys = keys.map((k) => key(k.code));
         for (const overlay of this.map.values()) {
-            overlay.keybind = new Keybind(keys.map((k) => key(k.code)));
+            overlay.keybind = new Keybind(this.keybindKeys);
         }
 
         console.debug(
@@ -87,6 +97,7 @@ export class OverlayManager {
     }
 
     updateMaxFps(maxFps: number) {
+        this.maxFps = maxFps;
         for (const overlay of this.map.values()) {
             overlay.window.webContents.setFrameRate(maxFps);
         }
