@@ -1,10 +1,12 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 
 import { getSettingsPath } from './directories';
 
-export const checkGameOverlayConfig = () => {
+export const checkGameOverlayConfig = async () => {
     const newestConfigPath = getSettingsPath('__ingame__');
-    if (fs.existsSync(newestConfigPath)) return;
-
-    fs.writeFileSync(newestConfigPath, '{}', 'utf8');
+    try {
+        await fs.access(newestConfigPath, fs.constants.F_OK);
+    } catch {
+        await fs.writeFile(newestConfigPath, '{}', 'utf8');
+    }
 };

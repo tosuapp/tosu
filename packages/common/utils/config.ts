@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
-import fs from 'fs';
+import syncFs from 'fs';
+import fs from 'node:fs/promises';
 import path from 'path';
 
 import { getProgramPath } from './directories';
@@ -9,15 +10,19 @@ import { wLogger } from './logger';
 const oldConfigPath = path.join(getProgramPath(), 'tsosu.env');
 const configPath = path.join(getProgramPath(), 'tosu.env');
 
-if (fs.existsSync(oldConfigPath) && !fs.existsSync(configPath)) {
-    fs.renameSync(oldConfigPath, configPath);
+if (syncFs.existsSync(oldConfigPath) && !syncFs.existsSync(configPath)) {
+    syncFs.renameSync(oldConfigPath, configPath);
 }
 
-const createConfig = () => {
-    if (!fs.existsSync(configPath)) {
-        fs.writeFileSync(
-            configPath,
-            `# The config implies a set of key-values to enable/disable tosu functionality
+const createConfig = async () => {
+    try {
+        await fs.access(configPath, fs.constants.F_OK);
+        return;
+    } catch {}
+
+    await fs.writeFile(
+        configPath,
+        `# The config implies a set of key-values to enable/disable tosu functionality
 # Below you can see that there is EVERY_THE_FUNCTION=true/false,
 # true = on
 # false = off
@@ -42,6 +47,7 @@ SHOW_MP_COMMANDS=false
 # Enables/disables the in-game overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
 ENABLE_INGAME_OVERLAY=false
 INGAME_OVERLAY_KEYBIND=Control + Shift + Space
+INGAME_OVERLAY_MAX_FPS=60
 
 # WARNING: EVERYTHING BELOW IS NOT TO BE TOUCHED UNNECESSARILY.
 
@@ -58,9 +64,8 @@ SERVER_IP=127.0.0.1
 SERVER_PORT=24050
 # The folder from which the overlays will be taken.
 STATIC_FOLDER_PATH=./static`,
-            'utf8'
-        );
-    }
+        'utf8'
+    );
 };
 
 dotenv.config({ path: configPath });
@@ -86,6 +91,7 @@ export const config = {
     enableIngameOverlay: (process.env.ENABLE_INGAME_OVERLAY || '') === 'true',
     ingameOverlayKeybind:
         process.env.INGAME_OVERLAY_KEYBIND || 'Control + Shift + Space',
+    ingameOverlayMaxFps: Number(process.env.INGAME_OVERLAY_MAX_FPS || 60),
     allowedIPs: process.env.ALLOWED_IPS || '127.0.0.1,localhost,absolute',
     timestamp: 0,
     currentVersion: '',
@@ -93,76 +99,93 @@ export const config = {
     logFilePath: ''
 };
 
-export const updateConfigFile = () => {
+export const updateConfigFile = async () => {
     let newOptions = '';
 
     if (!process.env.DEBUG_LOG) {
         newOptions += 'DEBUG_LOG, ';
-        fs.appendFileSync(configPath, '\nDEBUG_LOG=false', 'utf8');
+        await fs.appendFile(configPath, '\nDEBUG_LOG=false', 'utf8');
     }
 
     if (!process.env.CALCULATE_PP) {
         newOptions += 'CALCULATE_PP, ';
-        fs.appendFileSync(configPath, '\nCALCULATE_PP=true', 'utf8');
+        await fs.appendFile(configPath, '\nCALCULATE_PP=true', 'utf8');
     }
 
     if (!process.env.ENABLE_KEY_OVERLAY) {
         newOptions += 'ENABLE_KEY_OVERLAY, ';
-        fs.appendFileSync(configPath, '\nENABLE_KEY_OVERLAY=true', 'utf8');
+        await fs.appendFile(configPath, '\nENABLE_KEY_OVERLAY=true', 'utf8');
     }
 
     if (!process.env.POLL_RATE) {
         newOptions += 'POLL_RATE, ';
-        fs.appendFileSync(configPath, '\nPOLL_RATE=100', 'utf8');
+        await fs.appendFile(configPath, '\nPOLL_RATE=100', 'utf8');
     }
 
     if (!process.env.PRECISE_DATA_POLL_RATE) {
         newOptions += 'PRECISE_DATA_POLL_RATE, ';
-        fs.appendFileSync(configPath, '\n\nPRECISE_DATA_POLL_RATE=10', 'utf8');
+        await fs.appendFile(
+            configPath,
+            '\n\nPRECISE_DATA_POLL_RATE=10',
+            'utf8'
+        );
     }
 
     if (!process.env.SHOW_MP_COMMANDS) {
         newOptions += 'SHOW_MP_COMMANDS, ';
-        fs.appendFileSync(configPath, '\nSHOW_MP_COMMANDS=false', 'utf8');
+        await fs.appendFile(configPath, '\nSHOW_MP_COMMANDS=false', 'utf8');
     }
 
     if (!process.env.SERVER_IP) {
         newOptions += 'SERVER_IP, ';
-        fs.appendFileSync(configPath, '\nSERVER_IP=127.0.0.1', 'utf8');
+        await fs.appendFile(configPath, '\nSERVER_IP=127.0.0.1', 'utf8');
     }
 
     if (!process.env.SERVER_PORT) {
         newOptions += 'SERVER_PORT, ';
-        fs.appendFileSync(configPath, '\nSERVER_PORT=24050', 'utf8');
+        await fs.appendFile(configPath, '\nSERVER_PORT=24050', 'utf8');
     }
 
     if (!process.env.STATIC_FOLDER_PATH) {
         newOptions += 'STATIC_FOLDER_PATH, ';
-        fs.appendFileSync(configPath, '\nSTATIC_FOLDER_PATH=./static', 'utf8');
+        await fs.appendFile(
+            configPath,
+            '\nSTATIC_FOLDER_PATH=./static',
+            'utf8'
+        );
     }
 
     if (!process.env.ENABLE_INGAME_OVERLAY) {
         newOptions += 'ENABLE_INGAME_OVERLAY, ';
-        fs.appendFileSync(configPath, '\nENABLE_INGAME_OVERLAY=false', 'utf8');
+        await fs.appendFile(
+            configPath,
+            '\nENABLE_INGAME_OVERLAY=false',
+            'utf8'
+        );
     }
 
     if (!process.env.INGAME_OVERLAY_KEYBIND) {
         newOptions += 'INGAME_OVERLAY_KEYBIND, ';
-        fs.appendFileSync(
+        await fs.appendFile(
             configPath,
             '\nINGAME_OVERLAY_KEYBIND=Control + Shift + Space',
             'utf8'
         );
     }
 
+    if (!process.env.INGAME_OVERLAY_MAX_FPS) {
+        newOptions += 'INGAME_OVERLAY_MAX_FPS, ';
+        await fs.appendFile(configPath, '\nINGAME_OVERLAY_MAX_FPS=60', 'utf8');
+    }
+
     if (!process.env.ENABLE_AUTOUPDATE) {
         newOptions += 'ENABLE_AUTOUPDATE, ';
-        fs.appendFileSync(configPath, '\nENABLE_AUTOUPDATE=true', 'utf8');
+        await fs.appendFile(configPath, '\nENABLE_AUTOUPDATE=true', 'utf8');
     }
 
     if (!process.env.OPEN_DASHBOARD_ON_STARTUP) {
         newOptions += 'OPEN_DASHBOARD_ON_STARTUP, ';
-        fs.appendFileSync(
+        await fs.appendFile(
             configPath,
             '\nOPEN_DASHBOARD_ON_STARTUP=true',
             'utf8'
@@ -171,7 +194,7 @@ export const updateConfigFile = () => {
 
     if (!process.env.ALLOWED_IPS) {
         newOptions += 'ALLOWED_IPS, ';
-        fs.appendFileSync(
+        await fs.appendFile(
             configPath,
             '\nALLOWED_IPS=127.0.0.1,localhost,absolute',
             'utf8'
@@ -186,26 +209,22 @@ export const updateConfigFile = () => {
     }
 };
 
-export const watchConfigFile = ({
+export const watchConfigFile = async ({
     httpServer,
     initial
 }: {
     httpServer: any;
     initial?: boolean;
 }) => {
+    await createConfig();
     if (initial === true) {
-        createConfig();
-        refreshConfig(httpServer, false);
-        updateConfigFile();
+        await refreshConfig(httpServer, false);
+        await updateConfigFile();
     }
 
-    if (!fs.existsSync(configPath)) {
-        createConfig();
-    }
-
-    const stat = fs.statSync(configPath);
+    const stat = await fs.stat(configPath);
     if (config.timestamp !== stat.mtimeMs) {
-        refreshConfig(httpServer, true);
+        await refreshConfig(httpServer, true);
         config.timestamp = stat.mtimeMs;
     }
 
@@ -214,7 +233,7 @@ export const watchConfigFile = ({
     }, 1000);
 };
 
-export const refreshConfig = (httpServer: any, refresh: boolean) => {
+export const refreshConfig = async (httpServer: any, refresh: boolean) => {
     let updated = false;
     const status = refresh === true ? 'reload' : 'load';
 
@@ -242,10 +261,10 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     const enableIngameOverlay = (parsed.ENABLE_INGAME_OVERLAY || '') === 'true';
     const ingameOverlayKeybind =
         parsed.INGAME_OVERLAY_KEYBIND || 'Control + Shift + Space';
+    const ingameOverlayMaxFps = Number(parsed.INGAME_OVERLAY_MAX_FPS || 60);
     const allowedIPs = parsed.ALLOWED_IPS || '127.0.0.1,localhost,absolute';
 
-    const isKeybindUpdated =
-        config.ingameOverlayKeybind !== ingameOverlayKeybind;
+    const maxFpsUpdated = config.ingameOverlayMaxFps !== ingameOverlayMaxFps;
     // determine whether config actually was updated or not
     updated =
         config.enableAutoUpdate !== enableAutoUpdate ||
@@ -258,7 +277,8 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
         config.showMpCommands !== showMpCommands ||
         config.staticFolderPath !== staticFolderPath ||
         config.enableIngameOverlay !== enableIngameOverlay ||
-        isKeybindUpdated ||
+        config.ingameOverlayKeybind !== ingameOverlayKeybind ||
+        maxFpsUpdated ||
         config.serverIP !== serverIP ||
         config.serverPort !== serverPort ||
         config.allowedIPs !== allowedIPs;
@@ -272,14 +292,24 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
 
     config.enableIngameOverlay = enableIngameOverlay;
     config.ingameOverlayKeybind = ingameOverlayKeybind;
-    checkGameOverlayConfig();
+    config.ingameOverlayMaxFps = ingameOverlayMaxFps;
+    await checkGameOverlayConfig();
 
     if (enableIngameOverlay) {
-        if (Object.keys(httpServer.instanceManager.osuInstances).length > 0) {
-            httpServer.instanceManager.startOverlay(isKeybindUpdated);
+        if (httpServer.instanceManager.overlayProcess) {
+            if (maxFpsUpdated) {
+                // setFrameRate doesn't work after paint event.
+                // overlay must be restarted in this case.
+                await httpServer.instanceManager.stopOverlay();
+                await httpServer.instanceManager.startOverlay();
+            } else {
+                httpServer.instanceManager.updateOverlayConfig();
+            }
+        } else {
+            await httpServer.instanceManager.startOverlay();
         }
     } else {
-        httpServer.instanceManager.stopOverlay();
+        await httpServer.instanceManager.stopOverlay();
     }
 
     if (enableGosuOverlay === true && !enableIngameOverlay) {
@@ -301,14 +331,14 @@ export const refreshConfig = (httpServer: any, refresh: boolean) => {
     config.allowedIPs = allowedIPs;
 
     const staticPath = path.join(getProgramPath(), 'static');
-    if (config.staticFolderPath === './static' && !fs.existsSync(staticPath)) {
-        fs.mkdirSync(staticPath);
+    if (config.staticFolderPath === './static') {
+        await fs.mkdir(staticPath, { recursive: true });
     }
 
     if (updated) wLogger.info('[config]', `Config ${status}ed`);
 };
 
-export const writeConfig = (httpServer: any, options: any) => {
+export const writeConfig = async (httpServer: any, options: any) => {
     let text = '';
 
     text += `DEBUG_LOG=${options.DEBUG_LOG ?? config.debugLogging}\n\n`;
@@ -317,6 +347,7 @@ export const writeConfig = (httpServer: any, options: any) => {
     text += `OPEN_DASHBOARD_ON_STARTUP=${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup}\n\n`;
     text += `ENABLE_INGAME_OVERLAY=${options.ENABLE_INGAME_OVERLAY ?? config.enableIngameOverlay}\n`;
     text += `INGAME_OVERLAY_KEYBIND=${options.INGAME_OVERLAY_KEYBIND ?? config.ingameOverlayKeybind}\n`;
+    text += `INGAME_OVERLAY_MAX_FPS=${options.INGAME_OVERLAY_MAX_FPS ?? config.ingameOverlayMaxFps}\n`;
     text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay}\n\n`;
     text += `ALLOWED_IPS=${options.ALLOWED_IPS ?? config.allowedIPs}\n\n`;
     text += `POLL_RATE=${options.POLL_RATE ?? config.pollRate}\n`;
@@ -326,7 +357,6 @@ export const writeConfig = (httpServer: any, options: any) => {
     text += `SERVER_PORT=${options.SERVER_PORT ?? config.serverPort}\n\n`;
     text += `STATIC_FOLDER_PATH=${options.STATIC_FOLDER_PATH ?? config.staticFolderPath}\n`;
 
-    fs.writeFile(configPath, text, 'utf8', () => {
-        refreshConfig(httpServer, true);
-    });
+    await fs.writeFile(configPath, text, 'utf8');
+    await refreshConfig(httpServer, true);
 };
