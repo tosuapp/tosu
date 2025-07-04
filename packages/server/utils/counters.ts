@@ -718,7 +718,7 @@ export function buildSettings(res: http.ServerResponse) {
         );
 
     const ingameOverlayGroup = settingsGroupHTML
-        .replace('{header}', 'In-Game Overlay')
+        .replace('{header}', 'Overlay')
         .replace(
             '{items}',
             [
@@ -745,10 +745,10 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace('{value}', config.ingameOverlayKeybind)
                     ),
                 settingsItemHTMLv2
-                    .replace('{name}', 'Frame Rate')
+                    .replace('{name}', 'Overlay Frame Rate')
                     .replace(
                         '{description}',
-                        'Maximum frame rate of in-game overlay. High values may negatively impact performance.'
+                        'The maximum frame rate at which the overlay will be rendered.<br>In most cases, this value should not exceed the refresh rate of your monitor.'
                     )
                     .replace(
                         '{input-2}',
