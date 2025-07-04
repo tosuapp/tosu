@@ -762,12 +762,16 @@ a {
     }
 
     &:has(div > .number-input) {
-      & div>p {
+      & div > p {
         color: #6593c5;
         font-weight: bold;
         opacity: 100%;
-        width: 16ch;
       }
+
+      &:has(div > .number-input[data-id='POLL_RATE']) div > p,
+      &:has(div > .number-input[data-id='PRECISE_POLL_RATE']) div > p {
+        width: 16ch;
+    }
 
       & p {
         opacity: 70%;
