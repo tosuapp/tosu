@@ -723,10 +723,10 @@ export function buildSettings(res: http.ServerResponse) {
             '{items}',
             [
                 settingsItemHTMLv2
-                    .replace('{name}', 'Enable In-Game Overlay')
+                    .replace('{name}', 'In-Game Overlay')
                     .replace(
                         '{description}',
-                        'Show the in-game overlay in the game.'
+                        'Show the in-game overlay in the game, toggleable via a custom keybind.'
                     )
                     .replace(
                         '{input-1}',
@@ -736,12 +736,6 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{checked}',
                                 config.enableIngameOverlay ? 'checked' : ''
                             )
-                    ),
-                settingsItemHTMLv2
-                    .replace('{name}', 'Config Mode Keybind')
-                    .replace(
-                        '{description}',
-                        'Keybind to toggle config mode for customizing in-game overlay placement.'
                     )
                     .replace(
                         '{input-2}',
