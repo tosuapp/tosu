@@ -580,28 +580,6 @@ export function buildSettings(res: http.ServerResponse) {
                                 '{checked}',
                                 config.openDashboardOnStartup ? 'checked' : ''
                             )
-                    ),
-                settingsItemHTMLv2
-                    .replace('{name}', 'In-Game Overlay')
-                    .replace(
-                        '{description}',
-                        'Show the in-game overlay in the game, toggleable via a custom keybind.'
-                    )
-                    .replace(
-                        '{input-1}',
-                        settingsSwitchHTML
-                            .replace('{id}', 'ENABLE_INGAME_OVERLAY')
-                            .replace(
-                                '{checked}',
-                                config.enableIngameOverlay ? 'checked' : ''
-                            )
-                    )
-                    .replace(
-                        '{input-2}',
-                        settingsTextInputHTML
-                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
-                            .replace('{class}', ' -keybind')
-                            .replace('{value}', config.ingameOverlayKeybind)
                     )
             ]
                 .map((item) => item.replace(/\{[^}]*}/g, ''))
@@ -739,6 +717,54 @@ export function buildSettings(res: http.ServerResponse) {
                 .join('\n')
         );
 
+    const ingameOverlayGroup = settingsGroupHTML
+        .replace('{header}', 'Overlay')
+        .replace(
+            '{items}',
+            [
+                settingsItemHTMLv2
+                    .replace('{name}', 'In-Game Overlay')
+                    .replace(
+                        '{description}',
+                        'Show the in-game overlay in the game, toggleable via a custom keybind.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'ENABLE_INGAME_OVERLAY')
+                            .replace(
+                                '{checked}',
+                                config.enableIngameOverlay ? 'checked' : ''
+                            )
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsTextInputHTML
+                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
+                            .replace('{class}', ' -keybind')
+                            .replace('{value}', config.ingameOverlayKeybind)
+                    ),
+                settingsItemHTMLv2
+                    .replace('{name}', 'Overlay Frame Rate')
+                    .replace(
+                        '{description}',
+                        'The maximum frame rate at which the overlay will be rendered.<br>In most cases, this value should not exceed the refresh rate of your monitor.'
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsNumberInputHTML
+                            .replace('{id}', 'INGAME_OVERLAY_MAX_FPS')
+                            .replace('{min}', '1')
+                            .replace(
+                                '{value}',
+                                String(config.ingameOverlayMaxFps)
+                            )
+                    )
+            ]
+                .map((item) => item.replace(/\{[^}]*}/g, ''))
+                .join('\n')
+        );
+
     const advancedGroup = settingsGroupHTML
         .replace('{header}', 'Advanced')
         .replace(
@@ -792,7 +818,13 @@ export function buildSettings(res: http.ServerResponse) {
                 .join('\n')
         );
 
-    const groups = [generalGroup, dataGroup, serverGroup, advancedGroup]
+    const groups = [
+        generalGroup,
+        dataGroup,
+        serverGroup,
+        ingameOverlayGroup,
+        advancedGroup
+    ]
         .map((item) => item.replace(/\{[^}]*}/g, ''))
         .join('\n');
 

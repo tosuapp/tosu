@@ -340,14 +340,14 @@ export default function buildBaseApi(server: Server) {
         autoUpdater('server', res)
     );
 
-    server.app.route('/api/settingsSave', 'POST', (req, res) => {
+    server.app.route('/api/settingsSave', 'POST', async (req, res) => {
         const body: object | Error = JsonSafeParse(
             req.body,
             new Error('Failed to parse body')
         );
         if (body instanceof Error) throw body;
 
-        writeConfig(server, body);
+        await writeConfig(server, body);
         return sendJson(res, { status: 'updated' });
     });
 
