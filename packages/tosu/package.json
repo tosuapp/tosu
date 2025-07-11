@@ -24,7 +24,7 @@
         "osu-standard-stable": "^5.0.0",
         "osu-taiko-stable": "^5.0.0",
         "resedit": "^2.0.3",
-        "@kotrikd/rosu-pp": "3.0.1",
+        "@kotrikd/rosu-pp": "3.1.0",
         "semver": "^7.7.1",
         "tsprocess": "workspace:*"
     },
