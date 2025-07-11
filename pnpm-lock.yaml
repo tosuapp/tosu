@@ -112,9 +112,6 @@ importers:
       semver:
         specifier: ^7.7.1
         version: 7.7.1
-      systeminformation:
-        specifier: ^5.27.6
-        version: 5.27.6
       ws:
         specifier: ^8.18.0
         version: 8.18.1
@@ -3830,12 +3827,6 @@ packages:
   synckit@0.9.2:
     resolution: {integrity: sha512-vrozgXDQwYO72vHjUb/HnFbQx1exDjoKzqx23aXEg2a9VIg2TSFZ8FmeZpTjUCFMYw7mpX4BE2SFu8wI7asYsw==}
     engines: {node: ^14.18.0 || >=16.0.0}
-
-  systeminformation@5.27.6:
-    resolution: {integrity: sha512-9gmEXEtFp8vkewF8MLo69OmYBf0UpvGnqfAQs0kO+dgJRyFuCDxBwX53NQj4p/aV4fFmJQry+K1LLxPadAgmFQ==}
-    engines: {node: '>=8.0.0'}
-    os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
-    hasBin: true
 
   tar-fs@2.1.1:
     resolution: {integrity: sha512-V0r2Y9scmbDRLCNex/+hYzvp/zyYjvFbHPNgVTKfQvVrb6guiE/fxP+XblDNR011utopbkex2nM4dHNV6GDsng==}
@@ -8352,8 +8343,6 @@ snapshots:
     dependencies:
       '@pkgr/core': 0.1.1
       tslib: 2.6.2
-
-  systeminformation@5.27.6: {}
 
   tar-fs@2.1.1:
     dependencies:
