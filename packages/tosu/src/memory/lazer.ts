@@ -212,6 +212,16 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
     }
 
+    // checks <api>k__BackingField and <ScoreManager>k__BackingField
+    private checkIfReplay(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x3f0) ===
+                this.process.readIntPtr(this.gameBase() + 0x438) &&
+            this.process.readIntPtr(address + 0x3e8) ===
+                this.process.readIntPtr(this.gameBase() + 0x400)
+        );
+    }
+
     // Checks <api>k__BackingField -> GameBase::<API>k__BackingField and <logo>k__BackingField -> GameBase::osuLogo
     private checkIfResultScreen(address: number) {
         return (
@@ -547,6 +557,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private player() {
         if (this.currentScreen && this.checkIfPlayer(this.currentScreen)) {
+            return this.currentScreen;
+        } else if (
+            this.currentScreen &&
+            this.checkIfReplay(this.currentScreen)
+        ) {
             return this.currentScreen;
         }
 
