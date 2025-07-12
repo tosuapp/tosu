@@ -410,6 +410,8 @@ export default function buildBaseApi(server: Server) {
             params.smallTickHits = +query.smallTickHits;
         if (query.largeTickHits !== undefined)
             params.largeTickHits = +query.largeTickHits;
+        if (query.hitresultPriority !== undefined)
+            params.hitresultPriority = +query.hitresultPriority;
 
         const calculate = new rosu.Performance(params).calculate(beatmap);
         sendJson(res, calculate);

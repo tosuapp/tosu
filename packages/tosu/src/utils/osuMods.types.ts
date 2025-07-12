@@ -449,7 +449,7 @@ export interface ManiaKeys {
 export interface MR {
     acronym: 'MR';
     settings?: {
-        reflection: number;
+        reflection: string;
     };
 }
 

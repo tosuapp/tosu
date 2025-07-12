@@ -1733,7 +1733,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     modObject + 0x10
                 );
                 mod.settings = {
-                    reflection: this.process.readInt(reflectionBindable + 0x40)
+                    reflection: `${this.process.readInt(reflectionBindable + 0x40)}`
                 };
                 break;
             }
