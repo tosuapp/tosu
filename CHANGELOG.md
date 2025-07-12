@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.12.0](https://github.com/tosuapp/tosu/compare/v4.11.0...v4.12.0) (2025-07-12)
+
+
+### Features
+
+* add Content-Disposition ([b0f526a](https://github.com/tosuapp/tosu/commit/b0f526aa70c7cb0fa8c43fb9f8c2a9145684d4fd))
+* asyncifiy potentially racable due to mixed sync/async apis ([1373e76](https://github.com/tosuapp/tosu/commit/1373e7671359166d17a9d8043d7e7056cd7beb0f))
+* dedicated in-game overlay settings group ([78c399c](https://github.com/tosuapp/tosu/commit/78c399c27e198cbdfa6a479fea03525189a328a4))
+* design rework ([446757d](https://github.com/tosuapp/tosu/commit/446757d19398dfda73510acb55037b3c5a7d02f9))
+* generateReport api ([86498ae](https://github.com/tosuapp/tosu/commit/86498ae98baab077dae7bce91ef21ee9b7f716cc))
+* html report generation ([565fb6b](https://github.com/tosuapp/tosu/commit/565fb6b2106532acaa6109ef7fdbd7e4a25cf3e4))
+* include generation date in json report, use iso format in html ([5c609df](https://github.com/tosuapp/tosu/commit/5c609dfd0336427eafcb0a2a70d14677452d55c2))
+* log viewer, syntax highlight ([aa362d5](https://github.com/tosuapp/tosu/commit/aa362d5a3cd0ff0db6f84ea1de83744030fd38c7))
+* Only apply fixed width to the poll rate inputs. ([3e55fa2](https://github.com/tosuapp/tosu/commit/3e55fa22a7d3c78192d2d60882c247c31fb9bab2))
+* overlay maximum fps settings ([d248b9f](https://github.com/tosuapp/tosu/commit/d248b9f1d6982fa01ca5cc7d96efdf77b2241648))
+* use timestamp based json filename ([4fa0539](https://github.com/tosuapp/tosu/commit/4fa0539831fc51fc539e201680acc8800acc8803))
+
+
+### Bug Fixes
+
+* Fix mods issue ([a90b064](https://github.com/tosuapp/tosu/commit/a90b064d2f370e0eb5cdd0b0fe4c9cbfb70b7111))
+* Fix slow acc pp calc for mania ([4af7102](https://github.com/tosuapp/tosu/commit/4af710283b99eb8b8182ba48bdcb12d455fca9d7))
+* font-family ([5d1cced](https://github.com/tosuapp/tosu/commit/5d1cceda5ec5143bb487b4b14dd8a8d67127103c))
+* limit minimum max fps to 1 ([fc2c864](https://github.com/tosuapp/tosu/commit/fc2c864aa3d597a7e685a58a16ae34f23216fd4d))
+* send existing pids when starting overlay ([6731e85](https://github.com/tosuapp/tosu/commit/6731e8557bb3af809cd5cd42dc5f8bed6264468f))
+* store config and apply to new overlay ([34eb000](https://github.com/tosuapp/tosu/commit/34eb00016b49f50060fe87975daf245be8733988))
+* use key name of ClientType, Bitness ([052e8d1](https://github.com/tosuapp/tosu/commit/052e8d1071d898d6644711e33ae8647b294bff0b))
+* use viewer scroll ([1e06101](https://github.com/tosuapp/tosu/commit/1e0610165e813e9998849b3e9492f926971b4317))
+
 ## [4.11.0](https://github.com/tosuapp/tosu/compare/v4.10.0...v4.11.0) (2025-06-24)
 
 
