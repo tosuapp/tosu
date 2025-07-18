@@ -15,7 +15,7 @@ import {
 import { getContentType } from '@tosu/server';
 import path from 'path';
 
-import { AbstractMemory } from '@/memory';
+import { AbstractMemory, expectedVtableValue, offsets } from '@/memory';
 import type {
     IAudioVelocityBase,
     IGameplay,
@@ -167,7 +167,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             // might potentially change
-            return this.process.readLong(vtable) === 7765317648384;
+            return this.process.readLong(vtable) === expectedVtableValue;
         } catch {
             return false;
         }
@@ -196,63 +196,94 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private screenStack() {
-        return this.process.readIntPtr(this.gameBase() + 0x600);
+        return this.process.readIntPtr(
+            this.gameBase() + offsets.gameScreenStack
+        );
     }
 
     private checkIfSongSelectV2(address: number) {
-        return this.process.readIntPtr(address + 0x400) === this.gameBase();
+        return (
+            this.process.readIntPtr(address + offsets.songSelectV2) ===
+            this.gameBase()
+        );
     }
 
     // checks <api>k__BackingField and <spectatorClient>k__BackingField
     private checkIfPlayer(address: number) {
         return (
-            this.process.readIntPtr(address + 0x4e0) ===
-                this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x4e8) ===
-                this.process.readIntPtr(this.gameBase() + 0x4a8)
+            this.process.readIntPtr(address + offsets.playerApiBackingField) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameApiBackingField
+                ) &&
+            this.process.readIntPtr(
+                address + offsets.playerSpectatorBackingField
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameSpectatorBackingField
+                )
         );
     }
 
     // checks <api>k__BackingField and <ScoreManager>k__BackingField
     private checkIfReplay(address: number) {
         return (
-            this.process.readIntPtr(address + 0x3f0) ===
-                this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x3e8) ===
-                this.process.readIntPtr(this.gameBase() + 0x400)
+            this.process.readIntPtr(address + offsets.replayApiBackingField) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameApiBackingField
+                ) &&
+            this.process.readIntPtr(
+                address + offsets.replayScoreManagerBackingField
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameScoreManagerBackingField
+                )
         );
     }
 
     // Checks <api>k__BackingField -> GameBase::<API>k__BackingField and <logo>k__BackingField -> GameBase::osuLogo
     private checkIfResultScreen(address: number) {
         return (
-            this.process.readIntPtr(address + 0x408) ===
-                this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x380) ===
-                this.process.readIntPtr(this.gameBase() + 0x638)
+            this.process.readIntPtr(
+                address + offsets.resultScreenApiBackingField
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameApiBackingField
+                ) &&
+            this.process.readIntPtr(address + offsets.logoBackingField) ===
+                this.process.readIntPtr(this.gameBase() + offsets.gameOsuLogo)
         );
     }
 
     // checks <game>k__BackingField
     private checkIfSongSelect(address: number) {
-        return this.process.readIntPtr(address + 0x3c0) === this.gameBase();
+        return (
+            this.process.readIntPtr(
+                address + offsets.songSelectGameBackingField
+            ) === this.gameBase()
+        );
     }
 
     // checks <logo>k__BackingField and osuLogo
     private checkIfPlayerLoader(address: number) {
         return (
-            this.process.readIntPtr(address + 0x380) ===
-            this.process.readIntPtr(address + 0x490)
+            this.process.readIntPtr(address + offsets.logoBackingField) ===
+            this.process.readIntPtr(address + offsets.playerLoaderOsuLogo)
         );
     }
 
     // Checks <api>k__BackingField and <realm>k__BackingField
     private checkIfEditor(address: number) {
         return (
-            this.process.readIntPtr(address + 0x448) ===
-                this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x3c0) ===
-                this.process.readIntPtr(this.gameBase() + 0x4c0)
+            this.process.readIntPtr(address + offsets.editorApiBackingField) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameApiBackingField
+                ) &&
+            this.process.readIntPtr(
+                address + offsets.editorRealmBackingField
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameRealmBackingField
+                )
         );
     }
 
@@ -260,7 +291,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private checkIfMultiSelect(address: number) {
         const multiplayerClient = this.multiplayerClient();
         const isConnectedBindable = this.process.readIntPtr(
-            multiplayerClient + 0x2d8
+            multiplayerClient + offsets.multiplayerIsConnectedBindable
         );
 
         const isConnected =
@@ -302,33 +333,59 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     // <logo>k__BackingField / <spectatorClient>k__BackingField / <multiplayerClient>k__BackingField
     private checkIfMultiSpectator(address: number) {
         return (
-            this.process.readIntPtr(address + 0x380) ===
-                this.process.readIntPtr(this.gameBase() + 0x638) &&
-            this.process.readIntPtr(address + 0x3b0) ===
-                this.process.readIntPtr(this.gameBase() + 0x4a8) &&
-            this.process.readIntPtr(address + 0x400) ===
-                this.process.readIntPtr(this.gameBase() + 0x4b0)
+            this.process.readIntPtr(address + offsets.logoBackingField) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameOsuLogo
+                ) &&
+            this.process.readIntPtr(
+                address + offsets.multiSpectatorBackingField
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameSpectatorBackingField
+                ) &&
+            this.process.readIntPtr(
+                address + offsets.multiplayerClientBackingField
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() + offsets.gameMultiplayerClientBackingField
+                )
         );
     }
 
     private multiplayerClient() {
-        return this.process.readIntPtr(this.gameBase() + 0x4b0);
+        return this.process.readIntPtr(
+            this.gameBase() + offsets.gameMultiplayerClientBackingField
+        );
     }
 
     private getCurrentScreen() {
         const screenStack = this.screenStack();
 
-        const stack = this.process.readIntPtr(screenStack + 0x320);
-        const count = this.process.readInt(stack + 0x10);
+        const stack = this.process.readIntPtr(
+            screenStack + offsets.currentScreenStack
+        );
+        const count = this.process.readInt(stack + offsets.currentScreenCount);
 
-        const items = this.process.readIntPtr(stack + 0x8);
-        return this.process.readIntPtr(items + 0x10 + 0x8 * (count - 1));
+        const items = this.process.readIntPtr(
+            stack + offsets.currentScreenItems
+        );
+        return this.process.readIntPtr(
+            items +
+                offsets.currentScreenCount +
+                offsets.currentScreenItems * (count - 1)
+        );
     }
 
     private readConfigstore(configAddress: number, keys: number[]) {
-        const configStore = this.process.readIntPtr(configAddress + 0x20);
-        const entries = this.process.readIntPtr(configStore + 0x10);
-        const count = this.process.readInt(configStore + 0x38);
+        const configStore = this.process.readIntPtr(
+            configAddress + offsets.configStore
+        );
+        const entries = this.process.readIntPtr(
+            configStore + offsets.configStoreEntries
+        );
+        const count = this.process.readInt(
+            configStore + offsets.configStoreCount
+        );
 
         const config: Record<string | number, any> = {};
 
@@ -356,7 +413,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const config: Record<string, any> = {};
         const gameBase = this.gameBase();
 
-        const localConfig = this.process.readIntPtr(gameBase + 0x3d8);
+        const localConfig = this.process.readIntPtr(
+            gameBase + offsets.gameOsuLocalConfig
+        );
         const localValues = this.readConfigstore(localConfig, localConfigList);
 
         for (let i = 0; i < localConfigList.length; i++) {
@@ -508,10 +567,18 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
         }
 
-        const rulesetConfigCache = this.process.readIntPtr(gameBase + 0x498);
-        const configCache = this.process.readIntPtr(rulesetConfigCache + 0x208);
-        const rulesetEntries = this.process.readIntPtr(configCache + 0x10);
-        const rulesetCount = this.process.readInt(configCache + 0x38);
+        const rulesetConfigCache = this.process.readIntPtr(
+            gameBase + offsets.gameRulesetConfigCache
+        );
+        const configCache = this.process.readIntPtr(
+            rulesetConfigCache + offsets.configCache
+        );
+        const rulesetEntries = this.process.readIntPtr(
+            configCache + offsets.rulesetEntries
+        );
+        const rulesetCount = this.process.readInt(
+            configCache + offsets.rulesetCount
+        );
 
         for (let i = 0; i < rulesetCount; i++) {
             const current = rulesetEntries + 0x10 + 0x18 * i;
@@ -573,7 +640,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!player) {
             return 0;
         }
-        return this.process.readIntPtr(player + 0x480);
+        return this.process.readIntPtr(player + offsets.currentScore);
     }
 
     private scoreInfo(player: number) {
@@ -740,26 +807,36 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private beatmapClock() {
-        return this.process.readIntPtr(this.gameBase() + 0x4d0);
+        return this.process.readIntPtr(
+            this.gameBase() + offsets.gameBeatmapClock
+        );
     }
 
     private finalClockSource() {
-        return this.process.readIntPtr(this.beatmapClock() + 0x210);
+        return this.process.readIntPtr(
+            this.beatmapClock() + offsets.finalClockSource
+        );
     }
 
     private currentTime() {
-        return this.process.readDouble(this.finalClockSource() + 0x30);
+        return this.process.readDouble(
+            this.finalClockSource() + offsets.currentTime
+        );
     }
 
     private basePath() {
-        const storage = this.process.readIntPtr(this.gameBase() + 0x440);
+        const storage = this.process.readIntPtr(
+            this.gameBase() + offsets.gameStorage
+        );
         const underlyingStorage = this.process.readIntPtr(storage + 0x10);
 
         return this.process.readSharpStringPtr(underlyingStorage + 0x8);
     }
 
     private currentBeatmap() {
-        const bindable = this.process.readIntPtr(this.gameBase() + 0x450);
+        const bindable = this.process.readIntPtr(
+            this.gameBase() + offsets.gameCurrentBeatmap
+        );
         const workingBeatmap = this.process.readIntPtr(bindable + 0x20);
         const beatmapInfo = this.process.readIntPtr(workingBeatmap + 0x8);
         const beatmapSetInfo = this.process.readIntPtr(workingBeatmap + 0x10);
