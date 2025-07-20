@@ -1,48 +1,60 @@
-import { LazerOffsets } from '@/memory/types';
-
 export const expectedVtableValue: number = 7765317648384;
 
-export const offsets: LazerOffsets = {
-    gameOsuLogo: 0x638,
-    songSelectV2: 0x400,
-    playerApiBackingField: 0x4e0,
-    playerSpectatorBackingField: 0x4e8,
-    gameScreenStack: 0x600,
-    gameApiBackingField: 0x438,
-    gameSpectatorBackingField: 0x4a8,
-    gameScoreManagerBackingField: 0x400,
-    replayApiBackingField: 0x3f0,
-    replayScoreManagerBackingField: 0x3e8,
-    resultScreenApiBackingField: 0x4080,
-    songSelectGameBackingField: 0x3c0,
-    editorRealmBackingField: 0x3c0,
-    multiSelectApiBackingField: 0x3c0,
-    logoBackingField: 0x380,
-    playerLoaderOsuLogo: 0x490,
-    editorApiBackingField: 0x448,
-    gameRealmBackingField: 0x4c0,
-    multiplayerIsConnectedBindable: 0x2d8,
-    multiplayerIsConnected: 0x40,
-    multiplayerCurrentRoom: 0x288,
-    multiSelectClientBackingField: 0x3d0,
-    gameMultiplayerClientBackingField: 0x4b0,
-    multiSpectatorBackingField: 0x3b0,
-    multiplayerClientBackingField: 0x400,
-    currentScreenStack: 0x320,
-    currentScreenCount: 0x10,
-    currentScreenItems: 0x8,
-    configStore: 0x20,
-    configStoreEntries: 0x10,
-    configStoreCount: 0x38,
-    gameOsuLocalConfig: 0x3d8,
-    gameRulesetConfigCache: 0x498,
-    configCache: 0x208,
-    rulesetEntries: 0x10,
-    rulesetCount: 0x38,
-    currentScore: 0x480,
-    gameBeatmapClock: 0x4d0,
-    finalClockSource: 0x210,
-    currentTime: 0x30,
-    gameStorage: 0x440,
-    gameCurrentBeatmap: 0x450
-};
+export const lazerOffsets = {
+    'osu.Game.OsuGame': { osuLogo: 1592, ScreenStack: 1536 },
+    'osu.Game.OsuGameBase': {
+        '<API>k__BackingField': 1080,
+        '<SpectatorClient>k__BackingField': 1192,
+        '<ScoreManager>k__BackingField': 1024,
+        '<MultiplayerClient>k__BackingField': 1200,
+        beatmapClock: 1232,
+        '<Storage>k__BackingField': 1088,
+        '<Beatmap>k__BackingField': 1104,
+        '<LocalConfig>k__BackingField': 984,
+        rulesetConfigCache: 1176,
+        realm: 1216
+    },
+    'osu.Game.Screens.SelectV2.SoloSongSelect': {
+        '<game>k__BackingField': 1208
+    },
+    'osu.Game.Screens.Play.SubmittingPlayer': {
+        '<api>k__BackingField': 1248,
+        '<spectatorClient>k__BackingField': 1256
+    },
+    'osu.Game.Screens.Play.PlayerLoader': { osuLogo: 1168 },
+    'osu.Game.Beatmaps.FramedBeatmapClock': { finalClockSource: 528 },
+    'osu.Framework.Timing.FramedClock': {
+        '<CurrentTime>k__BackingField': 48
+    },
+    'osu.Game.Screens.OsuScreen': { '<logo>k__BackingField': 896 },
+    'osu.Game.Screens.Ranking.SoloResultsScreen': {
+        '<api>k__BackingField': 1032
+    },
+    'osu.Game.Screens.Edit.Editor': {
+        '<realm>k__BackingField': 960,
+        '<api>k__BackingField': 1096
+    },
+    'osu.Game.Screens.OnlinePlay.OnlinePlayScreen': {
+        '<API>k__BackingField': 960
+    },
+    'osu.Game.Screens.OnlinePlay.Multiplayer.Multiplayer': {
+        '<client>k__BackingField': 976
+    },
+    'osu.Game.Screens.Spectate.SpectatorScreen': {
+        '<spectatorClient>k__BackingField': 944
+    },
+    'osu.Game.Screens.OnlinePlay.Multiplayer.Spectate.MultiSpectatorScreen': {
+        '<multiplayerClient>k__BackingField': 1032
+    },
+    'osu.Game.Online.Multiplayer.OnlineMultiplayerClient': {
+        '<IsConnected>k__BackingField': 728
+    },
+    'osu.Game.Online.Multiplayer.MultiplayerClient': { room: 648 },
+    'osu.Game.Screens.Play.Player': {
+        '<api>k__BackingField': 1008,
+        '<scoreManager>k__BackingField': 1000,
+        '<Score>k__BackingField': 1152
+    },
+    'osu.Framework.Screens.ScreenStack': { stack: 800 },
+    'osu.Game.Rulesets.RulesetConfigCache': { configCache: 520 }
+} as const;
