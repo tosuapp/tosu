@@ -12,7 +12,7 @@
   "keywords": [],
   "author": "storycraft <storycraft@pancake.sh>",
   "dependencies": {
-    "asdf-overlay-node": "^0.7.6"
+    "asdf-overlay-node": "^0.7.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
