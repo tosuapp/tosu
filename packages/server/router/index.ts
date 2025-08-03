@@ -340,14 +340,14 @@ export default function buildBaseApi(server: Server) {
         autoUpdater('server', res)
     );
 
-    server.app.route('/api/settingsSave', 'POST', (req, res) => {
+    server.app.route('/api/settingsSave', 'POST', async (req, res) => {
         const body: object | Error = JsonSafeParse(
             req.body,
             new Error('Failed to parse body')
         );
         if (body instanceof Error) throw body;
 
-        writeConfig(server, body);
+        await writeConfig(server, body);
         return sendJson(res, { status: 'updated' });
     });
 
@@ -410,6 +410,8 @@ export default function buildBaseApi(server: Server) {
             params.smallTickHits = +query.smallTickHits;
         if (query.largeTickHits !== undefined)
             params.largeTickHits = +query.largeTickHits;
+        if (query.hitresultPriority !== undefined)
+            params.hitresultPriority = +query.hitresultPriority;
 
         const calculate = new rosu.Performance(params).calculate(beatmap);
         sendJson(res, calculate);

@@ -25,7 +25,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
-    watchConfigFile({ httpServer, initial: true });
+    await watchConfigFile({ httpServer, initial: true });
 
     const { update, onedrive: onedriveBypass } = argumentsParser(process.argv);
 

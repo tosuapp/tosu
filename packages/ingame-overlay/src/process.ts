@@ -1,4 +1,4 @@
-import { Overlay, defaultDllDir, key, length } from 'asdf-overlay-node';
+import { Overlay, defaultDllDir, length } from 'asdf-overlay-node';
 import { BrowserWindow, TextureInfo } from 'electron';
 import EventEmitter from 'node:events';
 import path from 'node:path';
@@ -11,11 +11,7 @@ export type OverlayEventEmitter = EventEmitter<{
 
 export class OverlayProcess {
     readonly event: OverlayEventEmitter = new EventEmitter();
-    keybind = new Keybind([
-        key(0x11), // Left Control
-        key(0x10), // Left Shift
-        key(0x20) // Space
-    ]);
+    keybind = new Keybind([]);
 
     private constructor(
         readonly pid: number,

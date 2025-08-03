@@ -280,6 +280,9 @@ export const calculateMods = (
         if (r.settings?.accuracy_judge_mode !== undefined)
             r.settings.accuracy_judge_mode =
                 r.settings.accuracy_judge_mode.toString();
+
+        if (r.settings?.reflection !== undefined)
+            r.settings.reflection = r.settings.reflection.toString();
     });
 
     const settingsSpeedChange = (ModsLazer as any).find(

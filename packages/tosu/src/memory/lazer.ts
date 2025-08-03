@@ -55,7 +55,7 @@ import {
 } from '@/utils/osuMods.types';
 
 type LazerPatternData = {
-    sessionIdleTracker: number;
+    scalingContainerTargetDrawSize: number;
 };
 
 interface KeyCounter {
@@ -94,9 +94,10 @@ const frameworkConfigList = [
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private scanPatterns: ScanPatterns = {
-        sessionIdleTracker: {
-            pattern: '00 00 00 00 80 4F 12 41', // aka 300000 in double
-            offset: -0x208
+        scalingContainerTargetDrawSize: {
+            pattern:
+                '00 00 80 44 00 00 40 44 00 00 00 00 ?? ?? ?? ?? 00 00 00 00',
+            offset: 0
         }
     };
 
@@ -118,7 +119,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private gameBaseAddress: number;
 
     patterns: LazerPatternData = {
-        sessionIdleTracker: 0
+        scalingContainerTargetDrawSize: 0
     };
 
     private lazerToStableStatus = {
@@ -137,26 +138,16 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private updateGameBaseAddress() {
         const oldAddress = this.gameBaseAddress;
 
-        const sessionIdleTracker = this.getPattern('sessionIdleTracker');
-
-        // this is why we like lazer more than stable (we can get everything from one place)
-        this.gameBaseAddress = this.process.readIntPtr(
-            this.process.readIntPtr(
-                this.process.readIntPtr(
-                    this.process.readIntPtr(
-                        this.process.readIntPtr(
-                            this.process.readIntPtr(
-                                this.process.readIntPtr(
-                                    this.process.readIntPtr(
-                                        sessionIdleTracker + 0x90
-                                    ) + 0x90
-                                ) + 0x90
-                            ) + 0x90
-                        ) + 0x90
-                    ) + 0x90
-                ) + 0x90
-            ) + 0x340
+        const scalingContainerTargetDrawSize = this.getPattern(
+            'scalingContainerTargetDrawSize'
         );
+        const externalLinkOpener = this.process.readIntPtr(
+            scalingContainerTargetDrawSize - 0x24
+        );
+
+        const api = this.process.readIntPtr(externalLinkOpener + 0x218);
+
+        this.gameBaseAddress = this.process.readIntPtr(api + 0x1f8);
 
         wLogger.debug(
             'lazer',
@@ -175,7 +166,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             // might potentially change
-            return this.process.readLong(vtable) === 7730957910016;
+            return this.process.readLong(vtable) === 7765317648384;
         } catch {
             return false;
         }
@@ -190,9 +181,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (!this.checkIfGameBase(this.gameBaseAddress)) {
             wLogger.debug('lazer', this.pid, 'GameBase has been reset');
 
-            const scanPattern = this.scanPatterns.sessionIdleTracker;
+            const scanPattern =
+                this.scanPatterns.scalingContainerTargetDrawSize;
             this.setPattern(
-                'sessionIdleTracker',
+                'scalingContainerTargetDrawSize',
                 this.process.scanSync(scanPattern.pattern) + scanPattern.offset!
             );
 
@@ -207,12 +199,27 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private checkIfSongSelectV2(address: number) {
-        return this.process.readIntPtr(address + 0x3e8) === this.gameBase();
+        return this.process.readIntPtr(address + 0x400) === this.gameBase();
     }
 
-    // checks <game>k__BackingField
+    // checks <api>k__BackingField and <spectatorClient>k__BackingField
     private checkIfPlayer(address: number) {
-        return this.process.readIntPtr(address + 0x400) === this.gameBase();
+        return (
+            this.process.readIntPtr(address + 0x4e0) ===
+                this.process.readIntPtr(this.gameBase() + 0x438) &&
+            this.process.readIntPtr(address + 0x4e8) ===
+                this.process.readIntPtr(this.gameBase() + 0x4a8)
+        );
+    }
+
+    // checks <api>k__BackingField and <ScoreManager>k__BackingField
+    private checkIfReplay(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x3f0) ===
+                this.process.readIntPtr(this.gameBase() + 0x438) &&
+            this.process.readIntPtr(address + 0x3e8) ===
+                this.process.readIntPtr(this.gameBase() + 0x400)
+        );
     }
 
     // Checks <api>k__BackingField -> GameBase::<API>k__BackingField and <logo>k__BackingField -> GameBase::osuLogo
@@ -234,7 +241,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private checkIfPlayerLoader(address: number) {
         return (
             this.process.readIntPtr(address + 0x380) ===
-            this.process.readIntPtr(address + 0x478)
+            this.process.readIntPtr(address + 0x490)
         );
     }
 
@@ -244,7 +251,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.process.readIntPtr(address + 0x448) ===
                 this.process.readIntPtr(this.gameBase() + 0x438) &&
             this.process.readIntPtr(address + 0x3c0) ===
-                this.process.readIntPtr(this.gameBase() + 0x4b8)
+                this.process.readIntPtr(this.gameBase() + 0x4c0)
         );
     }
 
@@ -550,6 +557,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private player() {
         if (this.currentScreen && this.checkIfPlayer(this.currentScreen)) {
+            return this.currentScreen;
+        } else if (
+            this.currentScreen &&
+            this.checkIfReplay(this.currentScreen)
+        ) {
             return this.currentScreen;
         }
 
@@ -1721,7 +1733,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     modObject + 0x10
                 );
                 mod.settings = {
-                    reflection: this.process.readInt(reflectionBindable + 0x40)
+                    reflection: `${this.process.readInt(reflectionBindable + 0x40)}`
                 };
                 break;
             }

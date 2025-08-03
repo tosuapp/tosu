@@ -1,4 +1,4 @@
-import rosu from '@kotrikd/rosu-pp';
+import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
@@ -444,18 +444,11 @@ export class BeatmapPP extends AbstractState {
                 for (const acc of [
                     100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
                 ]) {
-                    if (
-                        this.beatmap.mode === 3 &&
-                        this.game.client === ClientType.lazer
-                    ) {
-                        ppAcc[acc] = 0.0;
-                        continue;
-                    }
-
                     const calculate = new rosu.Performance({
                         mods: removeDebuffMods(currentMods.array),
                         accuracy: acc,
-                        lazer: this.game.client === ClientType.lazer
+                        lazer: this.game.client === ClientType.lazer,
+                        hitresultPriority: HitResultPriority.Fastest
                     }).calculate(this.performanceAttributes);
                     ppAcc[acc] = fixDecimals(calculate.pp);
 
