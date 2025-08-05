@@ -137,7 +137,9 @@ export type IMenu =
           hp: number;
           od: number;
           audioFilename: string;
+          audioFileMimetype: string;
           backgroundFilename: string;
+          backgroundFileMimetype: string;
           folder: string;
           creator: string;
           difficulty: string;
