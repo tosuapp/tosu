@@ -3,7 +3,7 @@ import type { ServerResponse } from 'http';
 import path from 'path';
 
 import type { ExtendedIncomingMessage } from '../utils/http';
-import { getContentType, sendJson } from '../utils/index';
+import { sendJson } from '../utils/index';
 
 export function beatmapFileShortcut(
     req: ExtendedIncomingMessage,
@@ -51,13 +51,13 @@ export function beatmapFileShortcut(
 
     const filePath = path.join(folder, fileName);
     if (!fs.existsSync(filePath)) {
-        res.writeHead(404, { 'Content-Type': getContentType(fileMimetype) });
+        res.writeHead(404, { 'Content-Type': fileMimetype });
         return res.end();
     }
 
     const fileStat = fs.statSync(filePath);
     if (!fileStat.isFile()) {
-        res.writeHead(404, { 'Content-Type': getContentType(fileMimetype) });
+        res.writeHead(404, { 'Content-Type': fileMimetype });
         return res.end();
     }
 
@@ -75,7 +75,7 @@ export function beatmapFileShortcut(
 
         res.writeHead(206, {
             'Accept-Ranges': 'bytes',
-            'Content-Type': getContentType(fileMimetype),
+            'Content-Type': fileMimetype,
             'Content-Range': `bytes ${start}-${end}/${fileStat.size}`,
             'Content-Length': end - start + 1
         });
@@ -85,7 +85,7 @@ export function beatmapFileShortcut(
     }
 
     res.writeHead(200, {
-        'Content-Type': getContentType(fileMimetype),
+        'Content-Type': fileMimetype,
         'Content-Length': fileStat.size
     });
 
