@@ -152,6 +152,18 @@ export function toKeyboardEvent(
                 type: 'char',
                 keyCode: input.ch
             };
+
+        case 'Ime': {
+            // TODO:: proper ime handling
+            if (input.ime.kind === 'Commit') {
+                return {
+                    type: 'char',
+                    keyCode: input.ime.text
+                };
+            }
+
+            return null;
+        }
     }
 }
 
