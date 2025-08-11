@@ -12,6 +12,7 @@ import {
     platformResolver,
     wLogger
 } from '@tosu/common';
+import { getContentType } from '@tosu/server';
 import path from 'path';
 
 import { AbstractMemory } from '@/memory';
@@ -2145,9 +2146,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const files = this.getBeatmapFiles(beatmap.setInfo);
 
-        const audioFilename =
+        const audioFilename = this.process.readSharpStringPtr(metadata + 0x50);
+        const backgroundFilename = this.process.readSharpStringPtr(
+            metadata + 0x58
+        );
+        const audioFileHash =
             files[this.process.readSharpStringPtr(metadata + 0x50)];
-        const backgroundFilename =
+        const backgroundFileHash =
             files[this.process.readSharpStringPtr(metadata + 0x58)];
 
         const difficultyName = this.process.readSharpStringPtr(
@@ -2168,8 +2173,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             cs: this.process.readFloat(difficulty + 0x2c),
             hp: this.process.readFloat(difficulty + 0x28),
             od: this.process.readFloat(difficulty + 0x30),
-            audioFilename: this.toLazerPath(audioFilename),
-            backgroundFilename: this.toLazerPath(backgroundFilename),
+            audioFilename: this.toLazerPath(audioFileHash),
+            audioFileMimetype: getContentType(audioFilename),
+            backgroundFilename: this.toLazerPath(backgroundFileHash),
+            backgroundFileMimetype: getContentType(backgroundFilename),
             folder: '',
             creator: this.process.readSharpStringPtr(author + 0x18),
             difficulty: difficultyName,
