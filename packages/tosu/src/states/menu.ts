@@ -15,7 +15,9 @@ export class Menu extends AbstractState {
     hp: number;
     od: number;
     audioFilename: string;
+    audioFileMimetype: string;
     backgroundFilename: string;
+    backgroundFileMimetype: string;
     folder: string;
     creator: string;
     filename: string;
@@ -89,8 +91,13 @@ export class Menu extends AbstractState {
             this.cs = result.cs;
             this.hp = result.hp;
             this.od = result.od;
+
             this.audioFilename = cleanPath(result.audioFilename);
+            this.audioFileMimetype = result.audioFileMimetype;
+
             this.backgroundFilename = cleanPath(result.backgroundFilename);
+            this.backgroundFileMimetype = result.backgroundFileMimetype;
+
             this.folder = cleanPath(result.folder);
             this.creator = result.creator;
             this.difficulty = result.difficulty;

@@ -1,4 +1,5 @@
 import { ClientType, config, isAllowedValue, wLogger } from '@tosu/common';
+import { getContentType } from '@tosu/server';
 
 import { AbstractMemory } from '@/memory';
 import type {
@@ -896,7 +897,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 hp,
                 od,
                 audioFilename,
+                audioFileMimetype: getContentType(audioFilename),
                 backgroundFilename,
+                backgroundFileMimetype: getContentType(backgroundFilename),
                 folder,
                 creator,
                 difficulty,

@@ -3,7 +3,7 @@ import type { ServerResponse } from 'http';
 import path from 'path';
 
 import type { ExtendedIncomingMessage } from '../utils/http';
-import { getContentType, sendJson } from '../utils/index';
+import { sendJson } from '../utils/index';
 
 export function beatmapFileShortcut(
     req: ExtendedIncomingMessage,
@@ -27,12 +27,18 @@ export function beatmapFileShortcut(
 
     const folder = path.join(global.songsFolder, menu.folder || '');
     let fileName = '';
+    let fileMimetype = '';
 
-    if (beatmapFileType === 'audio') fileName = menu.audioFilename;
-    else if (beatmapFileType === 'background')
+    if (beatmapFileType === 'audio') {
+        fileName = menu.audioFilename;
+        fileMimetype = menu.audioFileMimetype;
+    } else if (beatmapFileType === 'background') {
         fileName = menu.backgroundFilename;
-    else if (beatmapFileType === 'file') fileName = menu.filename;
-    else {
+        fileMimetype = menu.backgroundFileMimetype;
+    } else if (beatmapFileType === 'file') {
+        fileName = menu.filename;
+        fileMimetype = 'text/plain';
+    } else {
         return sendJson(res, {
             error: 'Unknown file type'
         });
@@ -45,13 +51,13 @@ export function beatmapFileShortcut(
 
     const filePath = path.join(folder, fileName);
     if (!fs.existsSync(filePath)) {
-        res.writeHead(404, { 'Content-Type': getContentType(fileName) });
+        res.writeHead(404, { 'Content-Type': fileMimetype });
         return res.end();
     }
 
     const fileStat = fs.statSync(filePath);
     if (!fileStat.isFile()) {
-        res.writeHead(404, { 'Content-Type': getContentType(fileName) });
+        res.writeHead(404, { 'Content-Type': fileMimetype });
         return res.end();
     }
 
@@ -69,7 +75,7 @@ export function beatmapFileShortcut(
 
         res.writeHead(206, {
             'Accept-Ranges': 'bytes',
-            'Content-Type': getContentType(fileName),
+            'Content-Type': fileMimetype,
             'Content-Range': `bytes ${start}-${end}/${fileStat.size}`,
             'Content-Length': end - start + 1
         });
@@ -79,7 +85,7 @@ export function beatmapFileShortcut(
     }
 
     res.writeHead(200, {
-        'Content-Type': getContentType(fileName),
+        'Content-Type': fileMimetype,
         'Content-Length': fileStat.size
     });
 
