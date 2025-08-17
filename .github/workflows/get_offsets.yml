@@ -23,7 +23,7 @@ jobs:
         with:
           repository: tosuapp/LazerDumperLib
           path: LazerDumperLib
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DUMPER_LIB_PAT }}
 
       - name: Checkout osu
         uses: actions/checkout@v4
