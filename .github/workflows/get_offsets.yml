@@ -1,0 +1,76 @@
+name: Get Lazer Offsets
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: lint-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-offsets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tosu
+        uses: actions/checkout@v4
+        with:
+          path: tosu
+
+      - name: Checkout LazerDumperLib
+        uses: actions/checkout@v4
+        with:
+          repository: tosuapp/LazerDumperLib
+          path: LazerDumperLib
+
+      - name: Checkout osu
+        uses: actions/checkout@v4
+        with:
+          repository: ppy/osu
+          path: osu
+          fetch-depth: 1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build osu.Desktop
+        working-directory: osu
+        run: |
+          dotnet build osu.Desktop -c Release
+          mkdir -p /tmp/lazer
+          cp -r osu.Desktop/bin/Release/net8.0/* /tmp/lazer/
+
+      - name: Build LazerDumperLib
+        working-directory: LazerDumperLib
+        run: |
+          dotnet build -c Release
+          cp CoreJitterLib/bin/x64/Release/net8.0/osu.Game.Rulesets.CoreJitterLib.dll /tmp/lazer/
+
+      - name: Copy catch.sh
+        run: cp tosu/catch.sh /tmp/lazer/catch.sh
+
+      - name: Install xvfb
+        run: |
+          apt update
+          apt install -y xvfb
+
+      - name: Run catch.sh
+        working-directory: /tmp/lazer
+        run: |
+          chmod +x catch.sh
+          ./catch.sh
+
+      - name: Move offsets.json
+        run: |
+          test -f /tmp/lazer/offsets.json
+          cp /tmp/lazer/offsets.json tosu/packages/tosu/src/assets/offsets.json
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: tosu
+          commit-message: "chore: update offsets.json"
+          branch: update/offsets
+          title: "Update offsets.json"
+          body: "Automated update of offsets.json"
