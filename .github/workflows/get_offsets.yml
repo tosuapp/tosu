@@ -51,7 +51,7 @@ jobs:
           cp CoreJitterLib/bin/x64/Release/net8.0/osu.Game.Rulesets.CoreJitterLib.dll /tmp/lazer/
 
       - name: Copy catch.sh
-        run: cp tosu/catch.sh /tmp/lazer/catch.sh
+        run: cp LazerDumperLib/catch.sh /tmp/lazer/catch.sh
 
       - name: Install xvfb
         run: |
