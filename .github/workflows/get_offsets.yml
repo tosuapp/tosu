@@ -26,10 +26,22 @@ jobs:
           path: LazerDumperLib
           token: ${{ secrets.DUMPER_LIB_PAT }}
 
+      - name: Get latest osu release tag
+        id: get_tag
+        run: |
+          latest_tag=$(git ls-remote --tags https://github.com/ppy/osu.git \
+            | awk '{print $2}' \
+            | grep -E 'refs/tags/[0-9]+\.[0-9]+' \
+            | sed 's|refs/tags/||' \
+            | sort -V \
+            | tail -n1)
+          echo "tag=$latest_tag" >> $GITHUB_OUTPUT
+
       - name: Checkout osu
         uses: actions/checkout@v4
         with:
           repository: ppy/osu
+          ref: ${{ steps.get_tag.outputs.tag }}
           path: osu
           fetch-depth: 1
 
