@@ -10,6 +10,8 @@ concurrency:
 jobs:
   build-offsets:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout tosu
         uses: actions/checkout@v4
@@ -21,6 +23,7 @@ jobs:
         with:
           repository: tosuapp/LazerDumperLib
           path: LazerDumperLib
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout osu
         uses: actions/checkout@v4
