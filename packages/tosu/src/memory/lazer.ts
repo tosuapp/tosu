@@ -117,6 +117,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private isPlayerLoading: boolean = false;
 
+    private apiAddress: number;
     private gameBaseAddress: number;
 
     patterns: LazerPatternData = {
@@ -146,9 +147,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             scalingContainerTargetDrawSize - 0x24
         );
 
-        const api = this.process.readIntPtr(externalLinkOpener + 0x218);
-
-        this.gameBaseAddress = this.process.readIntPtr(api + 0x1f8);
+        this.apiAddress = this.process.readIntPtr(externalLinkOpener + 0x218);
+        this.gameBaseAddress = this.process.readIntPtr(this.apiAddress + 0x1f8);
 
         wLogger.debug(
             'lazer',
@@ -160,14 +160,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private checkIfGameBase(address: number): boolean {
         try {
-            const vtable = this.process.readIntPtr(address);
-
-            if (!vtable) {
+            const baseAddr = this.process.readIntPtr(this.apiAddress + 0x1f8);
+            if (!baseAddr) {
                 return false;
             }
 
-            // might potentially change
-            return this.process.readLong(vtable) === 7765317648384;
+            return baseAddr === address;
         } catch {
             return false;
         }
