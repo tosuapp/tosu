@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      repository-projects: read
       pull-requests: write
     steps:
       - name: Checkout tosu
@@ -25,7 +24,7 @@ jobs:
         with:
           repository: tosuapp/LazerDumperLib
           path: LazerDumperLib
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DUMPER_LIB_PAT }}
 
       - name: Checkout osu
         uses: actions/checkout@v4
