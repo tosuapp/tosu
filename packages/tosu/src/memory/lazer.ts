@@ -146,9 +146,16 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             scalingContainerTargetDrawSize - 0x24
         );
 
-        const api = this.process.readIntPtr(externalLinkOpener + 0x218);
+        const api = this.process.readIntPtr(
+            externalLinkOpener +
+                lazerOffsets['osu.Game.Online.Chat.ExternalLinkOpener'][
+                    '<api>k__BackingField'
+                ]
+        );
 
-        this.gameBaseAddress = this.process.readIntPtr(api + 0x1f8);
+        this.gameBaseAddress = this.process.readIntPtr(
+            api + lazerOffsets['osu.Game.Online.API.APIAccess'].game
+        );
 
         wLogger.debug(
             'lazer',
@@ -289,7 +296,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 ) &&
             this.process.readIntPtr(
                 address +
-                    lazerOffsets['osu.Game.Screens.OsuScreen'][
+                    lazerOffsets['osu.Game.Screens.Ranking.SoloResultsScreen'][
                         '<logo>k__BackingField'
                     ]
             ) ===
@@ -355,14 +362,39 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return false;
         }
 
-        const currentRoom = this.process.readIntPtr(multiplayerClient + 0x288);
+        const currentRoom = this.process.readIntPtr(
+            multiplayerClient +
+                lazerOffsets[
+                    'osu.Game.Online.Multiplayer.OnlineMultiplayerClient'
+                ].room
+        );
 
         return (
             !currentRoom &&
-            this.process.readIntPtr(address + 0x3c0) ===
-                this.process.readIntPtr(this.gameBase() + 0x438) &&
-            this.process.readIntPtr(address + 0x3d0) ===
-                this.process.readIntPtr(this.gameBase() + 0x4b0)
+            this.process.readIntPtr(
+                address +
+                    lazerOffsets[
+                        'osu.Game.Screens.OnlinePlay.Multiplayer.Multiplayer'
+                    ]['<API>k__BackingField']
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() +
+                        lazerOffsets['osu.Desktop.OsuGameDesktop'][
+                            '<API>k__BackingField'
+                        ]
+                ) &&
+            this.process.readIntPtr(
+                address +
+                    lazerOffsets[
+                        'osu.Game.Screens.OnlinePlay.Multiplayer.Multiplayer'
+                    ]['<client>k__BackingField']
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() +
+                        lazerOffsets['osu.Desktop.OsuGameDesktop'][
+                            '<MultiplayerClient>k__BackingField'
+                        ]
+                )
         );
     }
 
@@ -379,7 +411,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return false;
         }
 
-        const currentRoom = this.process.readIntPtr(multiplayerClient + 0x288);
+        const currentRoom = this.process.readIntPtr(
+            multiplayerClient +
+                lazerOffsets[
+                    'osu.Game.Online.Multiplayer.OnlineMultiplayerClient'
+                ].room
+        );
 
         return currentRoom;
     }
@@ -576,7 +613,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
         }
 
-        const frameworkConfig = this.process.readIntPtr(gameBase + 0x5b8);
+        const frameworkConfig = this.process.readIntPtr(
+            gameBase +
+                lazerOffsets['osu.Desktop.OsuGameDesktop'][
+                    '<frameworkConfig>k__BackingField'
+                ]
+        );
         const frameworkValues = this.readConfigStore(
             frameworkConfig,
             frameworkConfigList
@@ -792,7 +834,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private readModMapping() {
         const availableModsDict = this.process.readIntPtr(
-            this.process.readIntPtr(this.gameBase() + 0x468) + 0x20
+            this.process.readIntPtr(
+                this.gameBase() +
+                    lazerOffsets['osu.Desktop.OsuGameDesktop'].AvailableMods
+            ) + 0x20
         );
 
         const entries = this.process.readIntPtr(availableModsDict + 0x10);
@@ -843,7 +888,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return Object.assign({}, defaultCalculatedMods);
         }
 
-        const jsonString = this.process.readSharpStringPtr(scoreInfo + 0x50);
+        const jsonString = this.process.readSharpStringPtr(
+            scoreInfo +
+                lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                    '<ModsJson>k__BackingField'
+                ]
+        );
+
         if (jsonString.length === 0) {
             return Object.assign({}, defaultCalculatedMods);
         }
@@ -885,9 +936,19 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.gameBase() +
                 lazerOffsets['osu.Game.OsuGameBase']['<Storage>k__BackingField']
         );
-        const underlyingStorage = this.process.readIntPtr(storage + 0x10);
+        const underlyingStorage = this.process.readIntPtr(
+            storage +
+                lazerOffsets['osu.Game.IO.OsuStorage'][
+                    '<UnderlyingStorage>k__BackingField'
+                ]
+        );
 
-        return this.process.readSharpStringPtr(underlyingStorage + 0x8);
+        return this.process.readSharpStringPtr(
+            underlyingStorage +
+                lazerOffsets['osu.Game.IO.OsuStorage'][
+                    '<BasePath>k__BackingField'
+                ]
+        );
     }
 
     private currentBeatmap() {
@@ -896,8 +957,19 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 lazerOffsets['osu.Game.OsuGameBase']['<Beatmap>k__BackingField']
         );
         const workingBeatmap = this.process.readIntPtr(bindable + 0x20);
-        const beatmapInfo = this.process.readIntPtr(workingBeatmap + 0x8);
-        const beatmapSetInfo = this.process.readIntPtr(workingBeatmap + 0x10);
+
+        const beatmapInfo = this.process.readIntPtr(
+            workingBeatmap +
+                lazerOffsets[
+                    'osu.Game.Beatmaps.WorkingBeatmapCache+BeatmapManagerWorkingBeatmap'
+                ].BeatmapInfo
+        );
+        const beatmapSetInfo = this.process.readIntPtr(
+            workingBeatmap +
+                lazerOffsets[
+                    'osu.Game.Beatmaps.WorkingBeatmapCache+BeatmapManagerWorkingBeatmap'
+                ].BeatmapSetInfo
+        );
 
         return { info: beatmapInfo, setInfo: beatmapSetInfo };
     }
@@ -988,13 +1060,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private readStatistics(scoreInfo: number): Statistics {
-        const statisticsDict = this.process.readIntPtr(scoreInfo + 0x78);
+        const statisticsDict = this.process.readIntPtr(
+            scoreInfo +
+                lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                    '<HitEvents>k__BackingField'
+                ]
+        );
 
         return this.readStatisticsDict(statisticsDict);
     }
 
     private readMaximumStatistics(scoreInfo: number): Statistics {
-        const statisticsDict = this.process.readIntPtr(scoreInfo + 0x80);
+        const statisticsDict = this.process.readIntPtr(
+            scoreInfo + lazerOffsets['osu.Game.Scoring.ScoreInfo'].statistics
+        );
 
         return this.readStatisticsDict(statisticsDict);
     }
@@ -1005,9 +1084,24 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     ): LeaderboardPlayer {
         const mods = this.mods(scoreInfo);
 
-        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
-        const username = this.process.readSharpStringPtr(realmUser + 0x18);
-        const userId = this.process.readInt(realmUser + 0x28);
+        const realmUser = this.process.readIntPtr(
+            scoreInfo +
+                lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                    '<RealmUser>k__BackingField'
+                ]
+        );
+        const username = this.process.readSharpStringPtr(
+            realmUser +
+                lazerOffsets['osu.Game.Models.RealmUser'][
+                    '<Username>k__BackingField'
+                ]
+        );
+        const userId = this.process.readInt(
+            realmUser +
+                lazerOffsets['osu.Game.Models.RealmUser'][
+                    '<OnlineID>k__BackingField'
+                ]
+        );
 
         const statistics = this.readStatistics(scoreInfo);
 
@@ -1015,15 +1109,36 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             userId,
             name: username,
             mods,
-            score: this.process.readLong(scoreInfo + 0x98),
+            score: this.process.readLong(
+                scoreInfo +
+                    lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                        '<TotalScore>k__BackingField'
+                    ]
+            ),
             h300: statistics.great,
             h100: statistics.ok,
             h50: statistics.meh,
             h0: statistics.miss,
-            combo: this.process.readInt(scoreInfo + 0xcc),
-            maxCombo: this.process.readInt(scoreInfo + 0xc4),
+            combo: this.process.readInt(
+                scoreInfo +
+                    lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                        '<Combo>k__BackingField'
+                    ]
+            ),
+            maxCombo: this.process.readInt(
+                scoreInfo +
+                    lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                        '<MaxCombo>k__BackingField'
+                    ]
+            ),
             team: 0,
-            isPassing: true,
+            isPassing:
+                this.process.readByte(
+                    scoreInfo +
+                        lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                            '<Passed>k__BackingField'
+                        ]
+                ) === 1,
             position: index + 1
         };
     }
@@ -1151,11 +1266,31 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const mods = this.mods(scoreInfo);
 
-        const realmUser = this.process.readIntPtr(scoreInfo + 0x48);
-        const ruleset = this.process.readIntPtr(scoreInfo + 0x30);
-        const mode = this.process.readInt(ruleset + 0x30);
+        const realmUser = this.process.readIntPtr(
+            scoreInfo +
+                lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                    '<RealmUser>k__BackingField'
+                ]
+        );
+        const ruleset = this.process.readIntPtr(
+            scoreInfo +
+                lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                    '<Ruleset>k__BackingField'
+                ]
+        );
+        const mode = this.process.readInt(
+            ruleset +
+                lazerOffsets['osu.Game.Rulesets.RulesetInfo'][
+                    '<OnlineID>k__BackingField'
+                ]
+        );
 
-        let username = this.process.readSharpStringPtr(realmUser + 0x18);
+        let username = this.process.readSharpStringPtr(
+            realmUser +
+                lazerOffsets['osu.Game.Models.RealmUser'][
+                    '<Username>k__BackingField'
+                ]
+        );
 
         if (username === 'Autoplay') username = 'osu!';
         if (username === 'osu!salad') username = 'salad!';
@@ -1163,10 +1298,18 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const player = this.player();
         if (!combo && player) {
-            const scoreProcessor = this.process.readIntPtr(player + 0x448);
+            const scoreProcessor = this.process.readIntPtr(
+                player +
+                    lazerOffsets['osu.Game.Screens.Play.SoloPlayer'][
+                        '<ScoreProcessor>k__BackingField'
+                    ]
+            );
 
             const comboBindable = this.process.readIntPtr(
-                scoreProcessor + 0x250
+                scoreProcessor +
+                    lazerOffsets[
+                        'osu.Game.Rulesets.Osu.Scoring.OsuScoreProcessor'
+                    ].Combo
             );
 
             combo = this.process.readInt(comboBindable + 0x40);
@@ -1176,7 +1319,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             combo = 0;
         }
 
-        let score = this.process.readLong(scoreInfo + 0x98);
+        let score = this.process.readLong(
+            scoreInfo +
+                lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                    '<TotalScore>k__BackingField'
+                ]
+        );
         if (this.scoringDisplayMode === ScoringMode.classic) {
             const objectCount = this.getObjectCountFromMaxStatistics(
                 this.readMaximumStatistics(scoreInfo)
@@ -1193,7 +1341,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             score,
             playerHPSmooth: health,
             playerHP: health,
-            accuracy: this.process.readDouble(scoreInfo + 0xa8) * 100,
+            accuracy:
+                this.process.readDouble(
+                    scoreInfo +
+                        lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                            '<Accuracy>k__BackingField'
+                        ]
+                ) * 100,
             hitGeki: statistics.perfect,
             hit300: statistics.great,
             hitKatu: statistics.good,
@@ -1204,7 +1358,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             smallTickHits: statistics.smallTickHit,
             largeTickHits: statistics.largeTickHit,
             combo,
-            maxCombo: this.process.readInt(scoreInfo + 0xc4)
+            maxCombo: this.process.readInt(
+                scoreInfo +
+                    lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                        '<MaxCombo>k__BackingField'
+                    ]
+            )
         };
     }
 
@@ -1217,7 +1376,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     readUser(user: number) {
-        const userId = this.process.readInt(user + 0xe8);
+        const userId = this.process.readInt(
+            user +
+                lazerOffsets['osu.Game.Online.API.Requests.Responses.APIMe'][
+                    '<Id>k__BackingField'
+                ]
+        );
 
         if (userId === 0) {
             return {
@@ -1237,7 +1401,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             };
         }
 
-        const statistics = this.process.readIntPtr(user + 0xa0);
+        const statistics = this.process.readIntPtr(
+            user +
+                lazerOffsets['osu.Game.Online.API.Requests.Responses.APIMe']
+                    .statistics
+        );
 
         let pp = 0;
         let accuracy = 0;
@@ -1247,7 +1415,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         let rank = 0;
 
         if (statistics) {
-            const ppDecimal = statistics + 0x68 + 0x8;
+            const ppDecimal =
+                statistics +
+                lazerOffsets['osu.Game.Users.UserStatistics'].PP +
+                0x8;
 
             // TODO: read ulong instead long
             pp = numberFromDecimal(
@@ -1256,14 +1427,37 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.process.readInt(ppDecimal)
             );
 
-            accuracy = this.process.readDouble(statistics + 0x28);
-            rankedScore = this.process.readLong(statistics + 0x20);
-            level = this.process.readInt(statistics + 0x4c);
-            playCount = this.process.readInt(statistics + 0x38);
-            rank = this.process.readInt(statistics + 0x54 + 0x4);
+            accuracy = this.process.readDouble(
+                statistics +
+                    lazerOffsets['osu.Game.Users.UserStatistics'].Accuracy
+            );
+            rankedScore = this.process.readLong(
+                statistics +
+                    lazerOffsets['osu.Game.Users.UserStatistics'].RankedScore
+            );
+            level = this.process.readInt(
+                statistics + lazerOffsets['osu.Game.Users.UserStatistics'].Level
+            );
+            playCount = this.process.readInt(
+                statistics +
+                    lazerOffsets['osu.Game.Users.UserStatistics'].PlayCount
+            );
+            rank = this.process.readInt(
+                statistics +
+                    lazerOffsets['osu.Game.Users.UserStatistics'].GlobalRank +
+                    0x4
+            );
         }
 
-        let gamemode = Rulesets[this.process.readSharpStringPtr(user + 0x88)];
+        let gamemode =
+            Rulesets[
+                this.process.readSharpStringPtr(
+                    user +
+                        lazerOffsets[
+                            'osu.Game.Online.API.Requests.Responses.APIMe'
+                        ].PlayMode
+                )
+            ];
 
         if (gamemode === undefined) {
             gamemode = -1;
@@ -1271,7 +1465,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         return {
             id: userId,
-            name: this.process.readSharpStringPtr(user + 0x8),
+            name: this.process.readSharpStringPtr(
+                user +
+                    lazerOffsets[
+                        'osu.Game.Online.API.Requests.Responses.APIMe'
+                    ]['<Username>k__BackingField']
+            ),
             accuracy,
             rankedScore,
             level,
@@ -1280,7 +1479,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             rank,
             countryCode:
                 CountryCodes[
-                    this.process.readSharpStringPtr(user + 0x20).toLowerCase()
+                    this.process
+                        .readSharpStringPtr(
+                            user +
+                                lazerOffsets[
+                                    'osu.Game.Online.API.Requests.Responses.APIMe'
+                                ].countryCodeString
+                        )
+                        .toLowerCase()
                 ],
             performancePoints: pp,
             rawBanchoStatus: 0,
@@ -1290,8 +1496,18 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     user(): IUser {
-        const api = this.process.readIntPtr(this.gameBase() + 0x438);
-        const userBindable = this.process.readIntPtr(api + 0x250);
+        const api = this.process.readIntPtr(
+            this.gameBase() +
+                lazerOffsets['osu.Desktop.OsuGameDesktop'][
+                    '<API>k__BackingField'
+                ]
+        );
+        const userBindable = this.process.readIntPtr(
+            api +
+                lazerOffsets['osu.Game.Online.API.APIAccess'][
+                    '<localUser>k__BackingField'
+                ]
+        );
         const user = this.process.readIntPtr(userBindable + 0x20);
 
         return this.readUser(user);
@@ -1331,17 +1547,31 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     resultScreen(): IResultScreen {
         const selectedScoreBindable = this.process.readIntPtr(
-            this.currentScreen + 0x398
+            this.currentScreen +
+                lazerOffsets['osu.Game.Screens.Ranking.SoloResultsScreen']
+                    .SelectedScore
         );
 
         const scoreInfo = this.process.readIntPtr(selectedScoreBindable + 0x20);
 
         const onlineId = Math.max(
-            this.process.readLong(scoreInfo + 0xb0),
-            this.process.readLong(scoreInfo + 0xb8)
+            this.process.readLong(
+                scoreInfo +
+                    lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                        '<OnlineID>k__BackingField'
+                    ]
+            ),
+            this.process.readLong(
+                scoreInfo +
+                    lazerOffsets['osu.Game.Scoring.ScoreInfo'][
+                        '<LegacyOnlineID>k__BackingField'
+                    ]
+            )
         );
 
-        const scoreDate = scoreInfo + 0x100;
+        const scoreDate =
+            scoreInfo +
+            lazerOffsets['osu.Game.Scoring.ScoreInfo']['<Date>k__BackingField'];
 
         return this.buildResultScreen(
             scoreInfo,
@@ -1361,18 +1591,32 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const player = this.player();
         const scoreInfo = this.scoreInfo(player);
 
-        const healthProcessor = this.process.readIntPtr(player + 0x450);
+        const healthProcessor = this.process.readIntPtr(
+            player +
+                lazerOffsets['osu.Game.Screens.Play.SoloPlayer'][
+                    '<HealthProcessor>k__BackingField'
+                ]
+        );
 
-        const healthBindable = this.process.readIntPtr(healthProcessor + 0x230);
+        const healthBindable = this.process.readIntPtr(
+            healthProcessor +
+                lazerOffsets['osu.Game.Rulesets.Osu.Scoring.OsuHealthProcessor']
+                    .Health
+        );
         const health = this.process.readDouble(healthBindable + 0x40); // 0..1
 
         return this.readScore(
             scoreInfo,
             health * 200,
-            this.process.readInt(player + 0x394)
+            this.process.readInt(
+                player +
+                    lazerOffsets['osu.Game.Screens.Play.SoloPlayer']
+                        .RestartCount
+            )
         );
     }
 
+    // FIXME: not finished
     private readKeyTrigger(trigger: number): KeyCounter {
         const activationCountBindable = this.process.readIntPtr(
             trigger + 0x208
@@ -1407,12 +1651,25 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             const player = this.player();
-            const hudOverlay = this.process.readIntPtr(player + 0x460);
 
-            const inputController = this.process.readIntPtr(hudOverlay + 0x348);
+            const hudOverlay = this.process.readIntPtr(
+                player +
+                    lazerOffsets['osu.Game.Screens.Play.SoloPlayer'][
+                        '<HUDOverlay>k__BackingField'
+                    ]
+            );
+
+            const inputController = this.process.readIntPtr(
+                hudOverlay +
+                    lazerOffsets['osu.Game.Screens.Play.HUDOverlay']
+                        .InputCountController
+            );
 
             const triggersBindable = this.process.readIntPtr(
-                inputController + 0x200
+                inputController +
+                    lazerOffsets[
+                        'osu.Game.Screens.Play.HUD.InputCountController'
+                    ].triggers
             );
 
             const triggerCollection = this.process.readIntPtr(
@@ -1513,8 +1770,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private hitEvents(): number[] {
         const player = this.player();
-        const scoreProcessor = this.process.readIntPtr(player + 0x448);
-        const hitEventsList = this.process.readIntPtr(scoreProcessor + 0x288);
+        const scoreProcessor = this.process.readIntPtr(
+            player +
+                lazerOffsets['osu.Game.Screens.Play.SoloPlayer'][
+                    '<ScoreProcessor>k__BackingField'
+                ]
+        );
+        const hitEventsList = this.process.readIntPtr(
+            scoreProcessor +
+                lazerOffsets['osu.Game.Rulesets.Osu.Scoring.OsuScoreProcessor']
+                    .hitEvents
+        );
         const hitEvents = this.readListItems(hitEventsList, true, 0x40);
 
         const result: number[] = [];
@@ -2117,11 +2383,16 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private readGamemode() {
         const rulesetBindable = this.process.readIntPtr(
-            this.gameBase() + 0x458
+            this.gameBase() + lazerOffsets['osu.Desktop.OsuGameDesktop'].Ruleset
         );
         const rulesetInfo = this.process.readIntPtr(rulesetBindable + 0x20);
 
-        const gamemode = this.process.readInt(rulesetInfo + 0x30);
+        const gamemode = this.process.readInt(
+            rulesetInfo +
+                lazerOffsets['osu.Game.Rulesets.RulesetInfo'][
+                    '<OnlineID>k__BackingField'
+                ]
+        );
         return gamemode;
     }
 
@@ -2150,7 +2421,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.currentScreen = this.getCurrentScreen();
 
         const selectedModsBindable = this.process.readIntPtr(
-            this.gameBase() + 0x460
+            this.gameBase() +
+                lazerOffsets['osu.Desktop.OsuGameDesktop'].SelectedMods
         );
 
         const selectedModsIsDisabled =
@@ -2211,7 +2483,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const multiplayerClient = this.multiplayerClient();
 
             const currentRoom = this.process.readIntPtr(
-                multiplayerClient + 0x288
+                multiplayerClient +
+                    lazerOffsets[
+                        'osu.Game.Online.Multiplayer.OnlineMultiplayerClient'
+                    ].room
             );
 
             if (currentRoom) {
@@ -2226,13 +2501,22 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.isPlayerLoading = isPlayerLoader;
 
         if (isPlaying) {
-            const dependencies = this.process.readIntPtr(this.player() + 0x490);
+            const dependencies = this.process.readIntPtr(
+                this.player() +
+                    lazerOffsets['osu.Game.Screens.Play.SoloPlayer']
+                        .dependencies
+            );
             const cache = this.process.readIntPtr(dependencies + 0x8);
             const entries = this.process.readIntPtr(cache + 0x10);
             const drawableRuleset = this.process.readIntPtr(entries + 0x10);
 
             this.replayMode =
-                this.process.readIntPtr(drawableRuleset + 0x328) !== 0;
+                this.process.readIntPtr(
+                    drawableRuleset +
+                        lazerOffsets[
+                            'osu.Game.Rulesets.Osu.UI.DrawableOsuRuleset'
+                        ]['<ReplayScore>k__BackingField']
+                ) !== 0;
         }
 
         return {
@@ -2257,11 +2541,24 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     menu(previousChecksum: string): IMenu {
         const beatmap = this.currentBeatmap();
-        const checksum = this.process.readSharpStringPtr(beatmap.info + 0x58);
+
+        const checksum = this.process.readSharpStringPtr(
+            beatmap.info +
+                lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                    '<MD5Hash>k__BackingField'
+                ]
+        );
 
         const gamemode = this.readGamemode();
         const rankedStatus = Number(
-            this.lazerToStableStatus[this.process.readInt(beatmap.info + 0x88)]
+            this.lazerToStableStatus[
+                this.process.readInt(
+                    beatmap.info +
+                        lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                            '<StatusInt>k__BackingField'
+                        ]
+                )
+            ]
         );
         if (checksum === previousChecksum) {
             return {
@@ -2271,10 +2568,30 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             };
         }
 
-        const metadata = this.process.readIntPtr(beatmap.info + 0x30);
-        const difficulty = this.process.readIntPtr(beatmap.info + 0x28);
-        const hash = this.process.readSharpStringPtr(beatmap.info + 0x50);
-        const author = this.process.readIntPtr(metadata + 0x38);
+        const metadata = this.process.readIntPtr(
+            beatmap.info +
+                lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                    '<Metadata>k__BackingField'
+                ]
+        );
+        const difficulty = this.process.readIntPtr(
+            beatmap.info +
+                lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                    '<Difficulty>k__BackingField'
+                ]
+        );
+        const hash = this.process.readSharpStringPtr(
+            beatmap.info +
+                lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                    '<Hash>k__BackingField'
+                ]
+        );
+        const author = this.process.readIntPtr(
+            metadata +
+                lazerOffsets['osu.Game.Beatmaps.BeatmapMetadata'][
+                    '<Author>k__BackingField'
+                ]
+        );
 
         const files = this.getBeatmapFiles(beatmap.setInfo);
 
@@ -2283,12 +2600,29 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             metadata + 0x58
         );
         const audioFileHash =
-            files[this.process.readSharpStringPtr(metadata + 0x50)];
+            files[
+                this.process.readSharpStringPtr(
+                    metadata +
+                        lazerOffsets['osu.Game.Beatmaps.BeatmapMetadata'][
+                            '<AudioFile>k__BackingField'
+                        ]
+                )
+            ];
         const backgroundFileHash =
-            files[this.process.readSharpStringPtr(metadata + 0x58)];
+            files[
+                this.process.readSharpStringPtr(
+                    metadata +
+                        lazerOffsets['osu.Game.Beatmaps.BeatmapMetadata'][
+                            '<BackgroundFile>k__BackingField'
+                        ]
+                )
+            ];
 
         const difficultyName = this.process.readSharpStringPtr(
-            beatmap.info + 0x18
+            beatmap.info +
+                lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                    '<DifficultyName>k__BackingField'
+                ]
         );
 
         return {
@@ -2297,34 +2631,108 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             checksum,
             filename: this.toLazerPath(hash),
             plays: 0,
-            title: this.process.readSharpStringPtr(metadata + 0x18),
-            titleOriginal: this.process.readSharpStringPtr(metadata + 0x20),
-            artist: this.process.readSharpStringPtr(metadata + 0x28),
-            artistOriginal: this.process.readSharpStringPtr(metadata + 0x30),
-            ar: this.process.readFloat(difficulty + 0x34),
-            cs: this.process.readFloat(difficulty + 0x2c),
-            hp: this.process.readFloat(difficulty + 0x28),
-            od: this.process.readFloat(difficulty + 0x30),
+            title: this.process.readSharpStringPtr(
+                metadata +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapMetadata'][
+                        '<Title>k__BackingField'
+                    ]
+            ),
+            titleOriginal: this.process.readSharpStringPtr(
+                metadata +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapMetadata'][
+                        '<TitleUnicode>k__BackingField'
+                    ]
+            ),
+            artist: this.process.readSharpStringPtr(
+                metadata +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapMetadata'][
+                        '<Artist>k__BackingField'
+                    ]
+            ),
+            artistOriginal: this.process.readSharpStringPtr(
+                metadata +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapMetadata'][
+                        '<ArtistUnicode>k__BackingField'
+                    ]
+            ),
+            ar: this.process.readFloat(
+                difficulty +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapDifficulty'][
+                        '<ApproachRate>k__BackingField'
+                    ]
+            ),
+            cs: this.process.readFloat(
+                difficulty +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapDifficulty'][
+                        '<CircleSize>k__BackingField'
+                    ]
+            ),
+            hp: this.process.readFloat(
+                difficulty +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapDifficulty'][
+                        '<DrainRate>k__BackingField'
+                    ]
+            ),
+            od: this.process.readFloat(
+                difficulty +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapDifficulty'][
+                        '<OverallDifficulty>k__BackingField'
+                    ]
+            ),
             audioFilename: this.toLazerPath(audioFileHash),
             audioFileMimetype: getContentType(audioFilename),
             backgroundFilename: this.toLazerPath(backgroundFileHash),
             backgroundFileMimetype: getContentType(backgroundFilename),
             folder: '',
-            creator: this.process.readSharpStringPtr(author + 0x18),
+            creator: this.process.readSharpStringPtr(
+                author +
+                    lazerOffsets['osu.Game.Models.RealmUser'][
+                        '<Username>k__BackingField'
+                    ]
+            ),
             difficulty: difficultyName,
-            mapID: this.process.readInt(beatmap.info + 0x8c),
-            setID: this.process.readInt(beatmap.setInfo + 0x30),
+            mapID: this.process.readInt(
+                beatmap.info +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                        '<OnlineID>k__BackingField'
+                    ]
+            ),
+            setID: this.process.readInt(
+                beatmap.setInfo +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapSetInfo'][
+                        '<OnlineID>k__BackingField'
+                    ]
+            ),
             rankedStatus,
-            objectCount: this.process.readInt(beatmap.info + 0x94)
+            objectCount: this.process.readInt(
+                beatmap.info +
+                    lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
+                        '<TotalObjectCount>k__BackingField'
+                    ]
+            )
         };
     }
 
     mp3Length(): IMP3Length {
         const beatmapClock = this.beatmapClock();
-        const decoupledTrack = this.process.readIntPtr(beatmapClock + 0x228);
-        const sourceTrack = this.process.readIntPtr(decoupledTrack + 0x18);
+        const decoupledTrack = this.process.readIntPtr(
+            beatmapClock +
+                lazerOffsets['osu.Game.Beatmaps.FramedBeatmapClock']
+                    .decoupledTrack
+        );
+        const sourceTrack = this.process.readIntPtr(
+            decoupledTrack +
+                lazerOffsets['osu.Framework.Timing.DecouplingFramedClock'][
+                    '<Source>k__BackingField'
+                ]
+        );
 
-        return Math.round(this.process.readDouble(sourceTrack + 0x48));
+        return Math.round(
+            this.process.readDouble(
+                sourceTrack +
+                    lazerOffsets['osu.Framework.Audio.Track.TrackBass'].length
+            )
+        );
     }
 
     tourney(): ITourney {
@@ -2375,7 +2783,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const spectatingClients: ILazerSpectatorEntry[] = [];
 
         const gameplayStates = this.process.readIntPtr(
-            multiSpectatorScreen + 0x3e0
+            multiSpectatorScreen +
+                lazerOffsets[
+                    'osu.Game.Screens.OnlinePlay.Multiplayer.Spectate.MultiSpectatorScreen'
+                ].gameplayStates
         );
         const gameplayStatesEntries = this.process.readIntPtr(
             gameplayStates + 0x10
@@ -2389,7 +2800,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const multiplayerClient = this.multiplayerClient();
 
-        const room = this.process.readIntPtr(multiplayerClient + 0x288);
+        const room = this.process.readIntPtr(
+            multiplayerClient +
+                lazerOffsets['osu.Game.Online.Multiplayer.MultiplayerClient']
+                    .room
+        );
 
         const multiplayerUsers = this.process.readIntPtr(room + 0x10);
         const multiplayerUsersItems = this.process.readIntPtr(
@@ -2404,8 +2819,18 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 multiplayerUsersItems + 0x10 + 0x8 * i
             );
 
-            const userId = this.process.readInt(current + 0x28);
-            const matchState = this.process.readIntPtr(current + 0x18);
+            const userId = this.process.readInt(
+                current +
+                    lazerOffsets[
+                        'osu.Game.Online.Multiplayer.MultiplayerRoomUser'
+                    ].UserID
+            );
+            const matchState = this.process.readIntPtr(
+                current +
+                    lazerOffsets[
+                        'osu.Game.Online.Multiplayer.MultiplayerRoomUser'
+                    ]['<MatchState>k__BackingField']
+            );
 
             let team: MultiplayerTeamType = 'none';
 
@@ -2414,7 +2839,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 team = teamId === 0 ? 'red' : 'blue';
             }
 
-            const state = this.process.readInt(current + 0x2c);
+            const state = this.process.readInt(
+                current +
+                    lazerOffsets[
+                        'osu.Game.Online.Multiplayer.MultiplayerRoomUser'
+                    ]['<State>k__BackingField']
+            );
 
             userStates[userId] = {
                 team,
@@ -2435,7 +2865,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const scoreInfo = this.process.readIntPtr(score + 0x8);
             const gameplayScore = this.readScore(scoreInfo);
 
-            const apiUser = this.process.readIntPtr(scoreInfo + 0x68);
+            const apiUser = this.process.readIntPtr(
+                scoreInfo + lazerOffsets['osu.Game.Scoring.ScoreInfo'].user
+            );
             const user = this.readUser(apiUser);
 
             if (gameplayScore instanceof Error) {
@@ -2474,11 +2906,22 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         try {
             const skinManager = this.process.readIntPtr(
-                this.gameBaseAddress + 0x410
+                this.gameBaseAddress +
+                    lazerOffsets['osu.Desktop.OsuGameDesktop'][
+                        '<SkinManager>k__BackingField'
+                    ]
             );
-            const currentSkin = this.process.readIntPtr(skinManager + 0x50);
+            const currentSkin = this.process.readIntPtr(
+                skinManager +
+                    lazerOffsets['osu.Game.Skinning.SkinManager'].CurrentSkin
+            );
             const value = this.process.readIntPtr(currentSkin + 0x20);
-            const name = this.process.readSharpStringPtr(value + 0x40);
+            const name = this.process.readSharpStringPtr(
+                value +
+                    lazerOffsets['osu.Game.Skinning.LegacySkin'][
+                        '<Name>k__BackingField'
+                    ]
+            );
 
             values['skin.name'] = name;
 
@@ -2504,11 +2947,22 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         if (platform.type === 'windows') {
             try {
                 const host = this.process.readIntPtr(
-                    this.gameBaseAddress + 0x338
+                    this.gameBaseAddress +
+                        lazerOffsets['osu.Desktop.OsuGameDesktop'][
+                            '<Host>k__BackingField'
+                        ]
                 );
-                const inputConfig = this.process.readIntPtr(host + 0x30);
+                const inputConfig = this.process.readIntPtr(
+                    host +
+                        lazerOffsets[
+                            'osu.Framework.Platform.Windows.WindowsGameHost'
+                        ]['<inputConfig>k__BackingField']
+                );
                 const inputHandlers = this.process.readIntPtr(
-                    inputConfig + 0x20
+                    inputConfig +
+                        lazerOffsets[
+                            'osu.Framework.Configuration.InputConfigManager'
+                        ]['<InputHandlers>k__BackingField']
                 );
 
                 const array = this.process.readIntPtr(inputHandlers + 0x8);
@@ -2525,13 +2979,19 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         ) === 1;
                     if (i === 1) {
                         const areaOffset = this.process.readIntPtr(
-                            current + 0x48
+                            current +
+                                lazerOffsets[
+                                    'osu.Framework.Input.Handlers.Tablet.OpenTabletDriverHandler'
+                                ]['<AreaOffset>k__BackingField']
                         );
                         const areaX = this.process.readFloat(areaOffset + 0x44);
                         const areaY = this.process.readFloat(areaOffset + 0x48);
 
                         const areaSize = this.process.readIntPtr(
-                            current + 0x50
+                            current +
+                                lazerOffsets[
+                                    'osu.Framework.Input.Handlers.Tablet.OpenTabletDriverHandler'
+                                ]['<AreaSize>k__BackingField']
                         );
                         const areaWidth = this.process.readFloat(
                             areaSize + 0x44
@@ -2541,10 +3001,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         );
 
                         const areaRotation = this.process.readFloat(
-                            this.process.readIntPtr(current + 0x58) + 0x40
+                            this.process.readIntPtr(
+                                current +
+                                    lazerOffsets[
+                                        'osu.Framework.Input.Handlers.Tablet.OpenTabletDriverHandler'
+                                    ]['<Rotation>k__BackingField']
+                            ) + 0x40
                         );
                         const pressureThreshold = this.process.readFloat(
-                            this.process.readIntPtr(current + 0x60) + 0x40
+                            this.process.readIntPtr(
+                                current +
+                                    lazerOffsets[
+                                        'osu.Framework.Input.Handlers.Tablet.OpenTabletDriverHandler'
+                                    ]['<PressureThreshold>k__BackingField']
+                            ) + 0x40
                         );
 
                         values['tablet.enabled'] = enabled;
@@ -2557,9 +3027,16 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     }
 
                     if (i === 5) {
+                        console.log('handler', current.toString(16));
+
                         const userRelativeMode =
                             this.process.readByte(
-                                this.process.readIntPtr(current + 0x28) + 0x40
+                                this.process.readIntPtr(
+                                    current +
+                                        lazerOffsets[
+                                            'osu.Framework.Platform.Windows.WindowsMouseHandler'
+                                        ]['<UseRelativeMode>k__BackingField']
+                                ) + 0x40
                             ) === 1;
                         values['mouse.highPrecision'] = userRelativeMode;
                     }
