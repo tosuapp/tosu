@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.12.1](https://github.com/tosuapp/tosu/compare/v4.12.0...v4.12.1) (2025-08-17)
+
+
+### Bug Fixes
+
+* Ensure consistent number input appearance across browsers. ([97ba938](https://github.com/tosuapp/tosu/commit/97ba9389cbe23457f61680003ebb3439e23d32fc))
+* Fix mimetype for beatmap file api ([2a07121](https://github.com/tosuapp/tosu/commit/2a071214e9b2f4c1f46fb07cd99362ee75a41c17))
+
 ## [4.12.0](https://github.com/tosuapp/tosu/compare/v4.11.0...v4.12.0) (2025-07-12)
 
 
