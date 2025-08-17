@@ -28,7 +28,7 @@ import {
 import { ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
-import { genReport, genReportHTML } from '../utils/report';
+import { generateReport, generateReportHTML } from '../utils/report';
 
 const pkgAssetsPath =
     'pkg' in process
@@ -426,8 +426,9 @@ export default function buildBaseApi(server: Server) {
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {
         try {
-            const report = await genReport(req.instanceManager);
-            const html = await genReportHTML(report);
+            const report = await generateReport(req.instanceManager);
+            const html = await generateReportHTML(report);
+
             res.writeHead(200, {
                 'Content-Type': 'text/html; charset=utf-8',
                 'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
