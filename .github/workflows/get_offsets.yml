@@ -61,8 +61,7 @@ jobs:
       - name: Run catch.sh
         working-directory: /tmp/lazer
         run: |
-          chmod +x catch.sh
-          ./catch.sh
+          sh catch.sh
 
       - name: Move offsets.json
         run: |
