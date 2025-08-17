@@ -166,10 +166,7 @@ function rebuildJSON({
                 const hasQuery = queryArr.some(
                     (q) =>
                         item.name.toLowerCase().includes(q) ||
-                        item.author.toLowerCase().includes(q) ||
-                        (item.compatiblewith ?? []).some((c) =>
-                            c.toLowerCase().includes(q)
-                        )
+                        item.author.toLowerCase().includes(q)
                 );
                 if (!hasQuery) continue;
             }
