@@ -116,6 +116,7 @@ export const lazerOffsets = {
         '<Accuracy>k__BackingField': 176,
         '<Date>k__BackingField': 256,
         statistics: 128,
+        maximumStatistics: 136,
         user: 112
     },
     'osu.Framework.Platform.Storage': {

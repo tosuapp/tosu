@@ -1052,10 +1052,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private readStatistics(scoreInfo: number): Statistics {
         const statisticsDict = this.process.readIntPtr(
-            scoreInfo +
-                lazerOffsets['osu.Game.Scoring.ScoreInfo'][
-                    '<HitEvents>k__BackingField'
-                ]
+            scoreInfo + lazerOffsets['osu.Game.Scoring.ScoreInfo'].statistics
         );
 
         return this.readStatisticsDict(statisticsDict);
@@ -1063,7 +1060,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private readMaximumStatistics(scoreInfo: number): Statistics {
         const statisticsDict = this.process.readIntPtr(
-            scoreInfo + lazerOffsets['osu.Game.Scoring.ScoreInfo'].statistics
+            scoreInfo +
+                lazerOffsets['osu.Game.Scoring.ScoreInfo'].maximumStatistics
         );
 
         return this.readStatisticsDict(statisticsDict);
