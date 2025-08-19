@@ -837,7 +837,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.readItems(entries, count, false, 0x18);
     }
 
-    private initModMapping(gamemode: number) {
+    private initModMapping(gamemode: Rulesets) {
         if (!ModsCategories[gamemode]) {
             wLogger.warn(
                 'lazer',
@@ -857,15 +857,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             automationCategory: this.readModList(currentModMapping[3]),
             funCategory: this.readModList(currentModMapping[4]),
             systemCategory: this.readModList(currentModMapping[5])
-        };
+        } satisfies Record<keyof (typeof ModsCategories)[0], number[]>;
 
         for (const [category, mods] of Object.entries(
-            ModsCategories[gamemode as 0]
+            ModsCategories[gamemode]
         )) {
+            const categoryName = category as keyof typeof modsList;
+
             for (let i = 0; i < mods.length; i++) {
                 const mod = mods[i];
                 this.modMappings.set(
-                    `${gamemode}-${modsList[category][i]}`,
+                    `${gamemode}-${modsList[categoryName][i]}`,
                     mod
                 );
             }
@@ -966,7 +968,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private getBeatmapFiles(beatmapSetInfo: number): Record<string, string> {
-        const result = {};
+        const result: Record<string, string> = {};
 
         const files = this.process.readIntPtr(beatmapSetInfo + 0x20);
         const size = this.process.readInt(files + 0x10);
@@ -1044,7 +1046,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             const value = this.process.readInt(item + 0xc);
 
-            statistics[LazerHitResults[key]] = value;
+            statistics[LazerHitResults[key] as keyof Statistics] = value;
         }
 
         return statistics;
@@ -1198,7 +1200,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         for (let i = 0; i < entries.length; i++) {
             const kvp = entries[i];
 
-            const key = LazerHitResults[kvp[0]];
+            const key = LazerHitResults[kvp[0] as keyof typeof LazerHitResults];
             const value = kvp[1] as number;
 
             if (this.isBasicHitResult(key)) {
@@ -1445,11 +1447,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         lazerOffsets[
                             'osu.Game.Online.API.Requests.Responses.APIMe'
                         ].PlayMode
-                )
+                ) as keyof typeof Rulesets
             ];
 
         if (gamemode === undefined) {
-            gamemode = -1;
+            gamemode = Rulesets.osu;
         }
 
         return {
@@ -1475,7 +1477,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                                     'osu.Game.Online.API.Requests.Responses.APIUser'
                                 ].countryCodeString
                         )
-                        .toLowerCase()
+                        .toLowerCase() as keyof typeof CountryCodes
                 ],
             performancePoints: pp,
             rawBanchoStatus: 0,
@@ -2543,7 +2545,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         lazerOffsets['osu.Game.Beatmaps.BeatmapInfo'][
                             '<StatusInt>k__BackingField'
                         ]
-                )
+                ) as keyof typeof this.lazerToStableStatus
             ]
         );
         if (checksum === previousChecksum) {

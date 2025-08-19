@@ -239,4 +239,4 @@ export const lazerOffsets = {
     'osu.Framework.Input.Handlers.Mouse.MouseHandler': {
         '<UseRelativeMode>k__BackingField': 40
     }
-};
+} as const;
