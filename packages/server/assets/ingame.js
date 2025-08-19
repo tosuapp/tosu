@@ -760,7 +760,7 @@ const app = createApp({
           available_overlays.value = message;
         };
 
-        if (command == 'getSettings' && command == 'getCounters') {
+        if (command == 'getSettings' || command == 'getCounters') {
           overlays.value.forEach(r => r._enabled = available_overlays.value.some(a => a.folderName == r.folderName));
         }
       } catch (error) {
