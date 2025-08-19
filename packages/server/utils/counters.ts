@@ -8,6 +8,7 @@ import {
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
+// @ts-expect-error
 import semver from 'semver';
 
 import { getContentType } from '../utils';
