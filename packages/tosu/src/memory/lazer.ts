@@ -66,7 +66,7 @@ interface KeyCounter {
 }
 
 export interface offsets {
-    checksum: string;
+    OsuHash: string;
     'osu.Game.OsuGame': {
         osuLogo: number;
         ScreenStack: number;

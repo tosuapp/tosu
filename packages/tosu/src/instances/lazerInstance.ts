@@ -20,7 +20,7 @@ import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
-    checksum: string;
+    OsuHash: string;
     previousCombo: number = 0;
 
     constructor(pid: number) {
@@ -48,22 +48,22 @@ export class LazerInstance extends AbstractInstance {
                     this.pid,
                     'initiate',
                     'osu.Game.dll not a file',
-                    this.checksum
+                    this.OsuHash
                 );
                 return;
             }
 
-            this.checksum = await fileMD5(filepath);
+            this.OsuHash = await fileMD5(filepath);
 
             const controller = new AbortController();
             const links = [
-                `https://tosu.app/offsets/${this.checksum}.json`,
-                `https://osuck.net/offsets/${this.checksum}.json`
+                `https://tosu.app/offsets/${this.OsuHash}.json`,
+                `https://osuck.net/offsets/${this.OsuHash}.json`
             ];
 
-            const jsonCache = path.join(cacheFolder, `${this.checksum}.json`);
+            const jsonCache = path.join(cacheFolder, `${this.OsuHash}.json`);
             if (
-                localOffsets.checksum !== this.checksum &&
+                localOffsets.OsuHash !== this.OsuHash &&
                 fs.existsSync(jsonCache)
             ) {
                 this.memory.offsets = JsonSafeParse(true, jsonCache, null);
@@ -72,13 +72,13 @@ export class LazerInstance extends AbstractInstance {
                     ClientType[this.client],
                     this.pid,
                     'reading offsets from cache',
-                    this.checksum
+                    this.OsuHash
                 );
             }
 
             if (
                 this.memory.offsets === null ||
-                this.memory.offsets.checksum !== this.checksum
+                this.memory.offsets.OsuHash !== this.OsuHash
             ) {
                 for (let i = 0; i < links.length; i++) {
                     const link = links[i];
@@ -113,7 +113,7 @@ export class LazerInstance extends AbstractInstance {
                             this.pid,
                             'searching offsets online',
                             host,
-                            this.checksum
+                            this.OsuHash
                         );
 
                         this.memory.offsets = json;
@@ -142,7 +142,7 @@ export class LazerInstance extends AbstractInstance {
                     ClientType[this.client],
                     this.pid,
                     'offsets not found for this version',
-                    this.checksum
+                    this.OsuHash
                 );
                 return;
             }
