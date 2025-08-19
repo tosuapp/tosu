@@ -94,7 +94,7 @@ export function parseTXT(filePath: string) {
         'settings.json'
     );
     const settings = fs.existsSync(settingsPath)
-        ? JsonSafeParse(fs.readFileSync(settingsPath, 'utf8'), [])
+        ? JsonSafeParse(true, settingsPath, [])
         : [];
 
     if (object.resolution)
@@ -372,7 +372,7 @@ export function getLocalCounters(): ICounter[] {
                     'settings.json'
                 );
                 const settings = fs.existsSync(settingsPath)
-                    ? JsonSafeParse(fs.readFileSync(settingsPath, 'utf8'), [])
+                    ? JsonSafeParse(true, settingsPath, [])
                     : [];
 
                 return {

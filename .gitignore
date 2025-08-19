@@ -11,6 +11,7 @@ tosu.exe
 _version.js
 **/tosu/gameOverlay/
 **/tosu/game-overlay/
+**/tosu/.cache/
 logs/
 settings/
 packages/server/assets/homepage.min.css

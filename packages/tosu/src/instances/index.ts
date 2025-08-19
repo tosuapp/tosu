@@ -190,11 +190,11 @@ export abstract class AbstractInstance {
             }
         }
 
-        this.initiateDataLoops();
+        this.initiate();
         this.watchProcessHealth();
     }
 
-    initiateDataLoops() {
+    initiate() {
         this.regularDataLoop();
         this.preciseDataLoop();
     }

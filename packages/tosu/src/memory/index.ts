@@ -99,5 +99,3 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
 
     abstract settings(): ISettings;
 }
-
-export * from './offsets.lazer';

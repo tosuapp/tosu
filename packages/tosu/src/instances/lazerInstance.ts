@@ -2,23 +2,162 @@ import {
     Bitness,
     ClientType,
     GameState,
+    JsonSafeParse,
     config,
+    fileMD5,
+    getCachePath,
     sleep,
     wLogger
 } from '@tosu/common';
+import fs from 'fs';
+import fsp from 'fs/promises';
+import path from 'path';
 
+import localOffsets from '@/assets/offsets.json';
 import { LazerMemory } from '@/memory/lazer';
 
 import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
+    checksum: string;
     previousCombo: number = 0;
 
     constructor(pid: number) {
         super(pid, Bitness.x64);
-
         this.memory = new LazerMemory(this.process, this);
+    }
+
+    override async initiate() {
+        try {
+            const cacheFolder = getCachePath();
+            const filepath = path.join(this.path, 'osu.Game.dll');
+            if (!fs.existsSync(filepath)) {
+                wLogger.error(
+                    ClientType[this.client],
+                    this.pid,
+                    'osu.Game.dll not found',
+                    { path: filepath }
+                );
+                return;
+            }
+
+            if (!fs.statSync(filepath).isFile()) {
+                wLogger.error(
+                    ClientType[this.client],
+                    this.pid,
+                    'initiate',
+                    'osu.Game.dll not a file',
+                    this.checksum
+                );
+                return;
+            }
+
+            this.checksum = await fileMD5(filepath);
+
+            const controller = new AbortController();
+            const links = [
+                `https://tosu.app/offsets/${this.checksum}.json`,
+                `https://osuck.net/offsets/${this.checksum}.json`
+            ];
+
+            const jsonCache = path.join(cacheFolder, `${this.checksum}.json`);
+            if (
+                localOffsets.checksum !== this.checksum &&
+                fs.existsSync(jsonCache)
+            ) {
+                this.memory.offsets = JsonSafeParse(true, jsonCache, null);
+
+                wLogger.info(
+                    ClientType[this.client],
+                    this.pid,
+                    'reading offsets from cache',
+                    this.checksum
+                );
+            }
+
+            if (
+                this.memory.offsets === null ||
+                this.memory.offsets.checksum !== this.checksum
+            ) {
+                for (let i = 0; i < links.length; i++) {
+                    const link = links[i];
+                    const host = new URL(link).host;
+
+                    const timeout = setTimeout(() => controller.abort, 10_000);
+                    try {
+                        const request = await fetch(link, {
+                            method: 'GET',
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeout);
+                        if (!request.ok) {
+                            wLogger.error(
+                                ClientType[this.client],
+                                this.pid,
+                                'initiate fetch',
+                                host,
+                                request.status,
+                                request.statusText
+                            );
+                            continue;
+                        }
+
+                        const text = await request.text();
+                        const json = JsonSafeParse(false, text, null);
+                        if (json === null) continue;
+
+                        wLogger.info(
+                            ClientType[this.client],
+                            this.pid,
+                            'searching offsets online',
+                            host,
+                            this.checksum
+                        );
+
+                        this.memory.offsets = json;
+                        await fsp.writeFile(jsonCache, text, 'utf8');
+
+                        break;
+                    } catch (exc) {
+                        wLogger.error(
+                            ClientType[this.client],
+                            this.pid,
+                            'initiate fetch',
+                            (exc as any).message
+                        );
+                        wLogger.debug(
+                            ClientType[this.client],
+                            this.pid,
+                            'initiate fetch',
+                            exc
+                        );
+                    }
+                }
+            }
+
+            if (this.memory.offsets === null) {
+                wLogger.error(
+                    ClientType[this.client],
+                    this.pid,
+                    'offsets not found for this version',
+                    this.checksum
+                );
+                return;
+            }
+
+            this.regularDataLoop();
+            this.preciseDataLoop();
+        } catch (exc) {
+            wLogger.error(
+                ClientType[this.client],
+                this.pid,
+                'initiate',
+                (exc as Error).message
+            );
+            wLogger.debug(ClientType[this.client], this.pid, 'initiate', exc);
+        }
     }
 
     async regularDataLoop(): Promise<void> {

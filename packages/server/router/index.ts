@@ -270,6 +270,7 @@ export default function buildBaseApi(server: Server) {
         'POST',
         (req, res) => {
             const body: ISettings[] | Error = JsonSafeParse(
+                false,
                 req.body,
                 new Error('Failed to parse body')
             );
@@ -342,6 +343,7 @@ export default function buildBaseApi(server: Server) {
 
     server.app.route('/api/settingsSave', 'POST', async (req, res) => {
         const body: object | Error = JsonSafeParse(
+            false,
             req.body,
             new Error('Failed to parse body')
         );

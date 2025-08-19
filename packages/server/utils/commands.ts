@@ -69,7 +69,11 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
         }
 
         case 'applyFilters': {
-            const json = JsonSafeParse(payload, new Error('Broken json'));
+            const json = JsonSafeParse(
+                false,
+                payload,
+                new Error('Broken json')
+            );
             if (json instanceof Error) {
                 wLogger.error(
                     '[ws]',
