@@ -8,7 +8,7 @@ import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { cleanPath, fixDecimals } from '@/utils/converters';
-import { removeDebuffMods } from '@/utils/osuMods';
+import { sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
@@ -418,7 +418,7 @@ export class BeatmapPP extends AbstractState {
             );
 
             const commonParams = {
-                mods: removeDebuffMods(currentMods.array),
+                mods: sanitizeMods(currentMods.array),
                 lazer: this.game.client === ClientType.lazer
             };
 
@@ -427,7 +427,7 @@ export class BeatmapPP extends AbstractState {
                     this.beatmap.mode === 0 &&
                     this.beatmap.mode !== currentMode,
                 map: this.beatmap,
-                mods: removeDebuffMods(currentMods.array),
+                mods: sanitizeMods(currentMods.array),
                 mode: currentMode
             }).build();
 
@@ -444,7 +444,7 @@ export class BeatmapPP extends AbstractState {
                     100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
                 ]) {
                     const calculate = new rosu.Performance({
-                        mods: removeDebuffMods(currentMods.array),
+                        mods: sanitizeMods(currentMods.array),
                         accuracy: acc,
                         lazer: this.game.client === ClientType.lazer,
                         hitresultPriority: HitResultPriority.Fastest
@@ -625,7 +625,7 @@ export class BeatmapPP extends AbstractState {
             };
 
             const difficulty = new rosu.Difficulty({
-                mods: removeDebuffMods(currentMods),
+                mods: sanitizeMods(currentMods),
                 lazer: this.game.client === ClientType.lazer
             });
             const strains = difficulty.strains(this.beatmap);

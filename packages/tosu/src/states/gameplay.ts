@@ -5,7 +5,7 @@ import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
 import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
-import { defaultCalculatedMods, removeDebuffMods } from '@/utils/osuMods';
+import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
 const defaultLBPlayer = {
@@ -512,7 +512,7 @@ export class Gameplay extends AbstractState {
             const isUpdate = this.previousState !== currentState;
 
             const commonParams = {
-                mods: removeDebuffMods(this.mods.array),
+                mods: sanitizeMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             };
 
