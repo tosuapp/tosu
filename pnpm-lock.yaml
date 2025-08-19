@@ -116,6 +116,9 @@ importers:
         specifier: ^8.18.0
         version: 8.18.1
     devDependencies:
+      '@types/semver':
+        specifier: ^7.7.0
+        version: 7.7.0
       '@types/ws':
         specifier: ^8.18.0
         version: 8.18.0
@@ -954,6 +957,9 @@ packages:
 
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
+
+  '@types/semver@7.7.0':
+    resolution: {integrity: sha512-k107IF4+Xr7UHjwDc7Cfd6PRQfbdkiRabXGRjo07b4WyPahFBZCZ1sE+BNxYIJPPg73UkfOsVOLwqVc/6ETrIA==}
 
   '@types/verror@1.10.11':
     resolution: {integrity: sha512-RlDm9K7+o5stv0Co8i8ZRGxDbrTxhJtgjqjFyVh/tXQyl/rYtTKlnTvZ88oSTeYREWurwx20Js4kTuKCsFkUtg==}
@@ -4964,6 +4970,8 @@ snapshots:
   '@types/responselike@1.0.3':
     dependencies:
       '@types/node': 22.15.17
+
+  '@types/semver@7.7.0': {}
 
   '@types/verror@1.10.11':
     optional: true
