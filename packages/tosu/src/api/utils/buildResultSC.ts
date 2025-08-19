@@ -118,11 +118,20 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
         mapid: menu.mapID,
         mapsetid: menu.setID,
-        mapStrains: beatmapPP.strainsAll.xaxis.reduce((acc, v, ind) => {
-            const value = beatmapPP.strainsAll.series[0].data[ind];
-            acc[v] = value <= 0 ? 0 : value;
-            return acc;
-        }, {}),
+        mapStrains: beatmapPP.strainsAll.xaxis.reduce(
+            (
+                acc: {
+                    [key: string]: number;
+                },
+                v,
+                ind
+            ) => {
+                const value = beatmapPP.strainsAll.series[0].data[ind];
+                acc[v] = value <= 0 ? 0 : value;
+                return acc;
+            },
+            {}
+        ),
         mapBreaks: beatmapPP.breaks.map((r) => ({
             startTime: r.start,
             endTime: r.end,
@@ -185,8 +194,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         unstableRate: fixDecimals(gameplay.unstableRate * currentMods.rate),
         convertedUnstableRate: fixDecimals(gameplay.unstableRate),
 
-        grade: GradeEnum[gameplay.gradeCurrent],
-        maxGrade: GradeEnum[gameplay.gradeExpected],
+        grade: GradeEnum[gameplay.gradeCurrent as keyof typeof GradeEnum],
+        maxGrade: GradeEnum[gameplay.gradeExpected as keyof typeof GradeEnum],
 
         hitErrors: gameplay.hitErrors,
 

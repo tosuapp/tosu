@@ -627,10 +627,10 @@ export class Gameplay extends AbstractState {
             if (maxAchievablePerformance) {
                 beatmapPP.currAttributes.maxAchievable =
                     maxAchievablePerformance.pp;
-                beatmapPP.updatePPAttributes(
-                    'maxAchievable',
-                    maxAchievablePerformance
-                );
+                // beatmapPP.updatePPAttributes(
+                //     'maxAchievable',
+                //     maxAchievablePerformance
+                // );
             }
 
             if (this.mode === 3) {

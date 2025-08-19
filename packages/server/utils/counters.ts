@@ -46,7 +46,7 @@ const pkgAssetsPath =
         ? path.join(__dirname, 'assets')
         : path.join(__filename, '../../../assets');
 
-function splitTextByIndex(text, letter) {
+function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);
     if (index === -1) {
         return [text];
@@ -98,7 +98,7 @@ export function parseTXT(filePath: string) {
         : [];
 
     if (object.resolution)
-        object.resolution = object.resolution.map((r) => +r.trim()) || [
+        object.resolution = object.resolution.map((r: string) => +r.trim()) || [
             'Any',
             'Any'
         ];
@@ -197,7 +197,10 @@ function rebuildJSON({
                         /:\/\/(?<domain>\S+)\//.exec(r)?.groups?.domain || '';
                     if (!domain) return null;
 
-                    const iconUrl = iconsImages[domain.toLowerCase()];
+                    const iconUrl =
+                        iconsImages[
+                            domain.toLowerCase() as keyof typeof iconsImages
+                        ];
                     if (!iconUrl) return null;
 
                     return authorLinksHTML

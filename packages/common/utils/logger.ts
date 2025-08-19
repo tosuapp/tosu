@@ -17,7 +17,7 @@ const colors = {
     grey: '\x1b[90m'
 };
 
-export function colorText(status: string, color: string) {
+export function colorText(status: string, color: keyof typeof colors) {
     const colorCode = colors[color] || colors.reset;
     const timestamp = new Date().toISOString().split('T')[1].replace('Z', '');
 

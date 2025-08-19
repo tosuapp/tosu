@@ -283,13 +283,4 @@ export abstract class AbstractInstance {
     resetReportCount(id: string | number) {
         this.errorsCount[id] = 0;
     }
-
-    preventThrow(callback) {
-        try {
-            const result = callback();
-            return result;
-        } catch (error) {
-            return error as Error;
-        }
-    }
 }

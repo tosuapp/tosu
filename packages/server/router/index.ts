@@ -98,7 +98,7 @@ export default function buildBaseApi(server: Server) {
 
             if (!fs.existsSync(cacheFolder)) fs.mkdirSync(cacheFolder);
 
-            const startUnzip = (result) => {
+            const startUnzip = (result: string) => {
                 unzip(result, folderPath)
                     .then(() => {
                         wLogger.info(
