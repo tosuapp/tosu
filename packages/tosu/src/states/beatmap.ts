@@ -231,13 +231,10 @@ export class BeatmapPP extends AbstractState {
     }
 
     updatePPAttributes(
-        type: 'curr' | 'fc' | 'maxAchievable',
+        type: 'curr' | 'fc',
         attributes: rosu.PerformanceAttributes
     ) {
         try {
-            if (type !== 'curr' && type !== 'fc' && type !== 'maxAchievable')
-                return;
-
             this[`${type}PPAttributes`] = {
                 ppAccuracy: attributes.ppAccuracy || 0.0,
                 ppAim: attributes.ppAim || 0.0,
@@ -440,7 +437,9 @@ export class BeatmapPP extends AbstractState {
             this.clockRate = currentMods.rate;
 
             if (config.calculatePP) {
-                const ppAcc = {};
+                const ppAcc: {
+                    [key: string]: number;
+                } = {};
                 for (const acc of [
                     100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
                 ]) {
@@ -842,7 +841,8 @@ export class BeatmapPP extends AbstractState {
             this.lazerBeatmap.controlPoints.timingPoints
                 // @ts-expect-error
                 .toReversed()
-                .find((r) => r.startTime <= ms && r.bpm !== 0)?.bpm ||
+                .find((r: TimingPoint) => r.startTime <= ms && r.bpm !== 0)
+                ?.bpm ||
             this.lazerBeatmap.controlPoints.timingPoints[0]?.bpm ||
             0.0;
 

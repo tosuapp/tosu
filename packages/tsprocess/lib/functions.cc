@@ -130,6 +130,7 @@ Napi::Value read_long(const Napi::CallbackInfo &args) {
 
 Napi::Value read_double(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
+
   if (args.Length() < 3) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();

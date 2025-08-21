@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import fsp from 'fs/promises';
 
 export function formatMilliseconds(ms: number) {
     const hours = Math.floor(ms / 3600000);
@@ -15,6 +16,11 @@ export function formatMilliseconds(ms: number) {
 
 export function textMD5(text: string) {
     return crypto.createHash('md5').update(text).digest('hex');
+}
+
+export async function fileMD5(filepath: string) {
+    const content = await fsp.readFile(filepath);
+    return crypto.createHash('md5').update(content).digest('hex');
 }
 
 export function isRealNumber(value: any) {

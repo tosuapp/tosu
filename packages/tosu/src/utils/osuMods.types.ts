@@ -242,7 +242,7 @@ export const ModsCategories = {
         funCategory: ['WU', 'WD', 'MU', 'AS'],
         systemCategory: ['TD', 'SV2']
     }
-};
+} as const;
 
 export enum OsuMods {
     Nomod = 0,

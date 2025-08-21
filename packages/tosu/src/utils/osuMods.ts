@@ -286,7 +286,7 @@ export const calculateMods = (
     });
 
     const settingsSpeedChange = (ModsLazer as any).find(
-        (r) => typeof r.settings?.speed_change === 'number'
+        (r: any) => typeof r.settings?.speed_change === 'number'
     )?.settings?.speed_change;
 
     const DT = ModsLazer.some((r) => r.acronym === 'DT' || r.acronym === 'NC');

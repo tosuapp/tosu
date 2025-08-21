@@ -2,23 +2,189 @@ import {
     Bitness,
     ClientType,
     GameState,
+    JsonSafeParse,
     config,
+    getCachePath,
     sleep,
     wLogger
 } from '@tosu/common';
+import fs from 'fs';
+import fsp from 'fs/promises';
+import path from 'path';
 
+import localOffsets from '@/assets/offsets.json';
 import { LazerMemory } from '@/memory/lazer';
 
 import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
+    osuVersion: string;
     previousCombo: number = 0;
 
     constructor(pid: number) {
         super(pid, Bitness.x64);
-
         this.memory = new LazerMemory(this.process, this);
+    }
+
+    override async initiate() {
+        try {
+            const cacheFolder = getCachePath();
+
+            let attempts = 1;
+            while (attempts < 5 && !this.osuVersion) {
+                if (attempts > 1)
+                    wLogger.warn(
+                        ClientType[this.client],
+                        `Trying to find osu version #${attempts}`
+                    );
+
+                try {
+                    this.osuVersion = this.memory.gameVersion() || '';
+
+                    wLogger.info(
+                        ClientType[this.client],
+                        `Version: ${this.osuVersion}`
+                    );
+
+                    break;
+                } catch (exc) {
+                    wLogger.debug(
+                        ClientType[this.client],
+                        this.pid,
+                        'Unnable to find osu version',
+                        exc
+                    );
+                } finally {
+                    attempts++;
+                    await sleep(1000);
+                }
+            }
+
+            if (!this.osuVersion) {
+                wLogger.error(
+                    ClientType[this.client],
+                    this.pid,
+                    'Unnable to find osu version, report to devs: https://discord.gg/WX7BTs8kwh'
+                );
+
+                this.regularDataLoop();
+                this.preciseDataLoop();
+
+                return;
+            }
+
+            const controller = new AbortController();
+            const links = [
+                `https://tosu.app/offsets/${this.osuVersion}.json`,
+                `https://osuck.net/offsets/${this.osuVersion}.json`
+            ];
+
+            const jsonCache = path.join(cacheFolder, `${this.osuVersion}.json`);
+            if (
+                localOffsets.OsuVersion !== this.osuVersion &&
+                fs.existsSync(jsonCache)
+            ) {
+                this.memory.offsets = JsonSafeParse({
+                    isFile: true,
+                    payload: jsonCache,
+                    defaultValue: null
+                });
+
+                wLogger.info(
+                    ClientType[this.client],
+                    this.pid,
+                    'reading offsets from cache',
+                    this.osuVersion
+                );
+            }
+
+            if (
+                this.memory.offsets === null ||
+                this.memory.offsets.OsuVersion !== this.osuVersion
+            ) {
+                for (let i = 0; i < links.length; i++) {
+                    const link = links[i];
+                    const host = new URL(link).host;
+
+                    const timeout = setTimeout(() => controller.abort, 10_000);
+                    try {
+                        const request = await fetch(link, {
+                            method: 'GET',
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeout);
+                        if (!request.ok) {
+                            wLogger.error(
+                                ClientType[this.client],
+                                this.pid,
+                                'initiate fetch',
+                                host,
+                                request.status,
+                                request.statusText
+                            );
+                            continue;
+                        }
+
+                        const text = await request.text();
+                        const json = JsonSafeParse({
+                            isFile: false,
+                            payload: text,
+                            defaultValue: null
+                        });
+                        if (json === null) continue;
+
+                        wLogger.info(
+                            ClientType[this.client],
+                            this.pid,
+                            'searching offsets online',
+                            host,
+                            this.osuVersion
+                        );
+
+                        this.memory.offsets = json;
+                        await fsp.writeFile(jsonCache, text, 'utf8');
+
+                        break;
+                    } catch (exc) {
+                        wLogger.error(
+                            ClientType[this.client],
+                            this.pid,
+                            'initiate fetch',
+                            (exc as any).message
+                        );
+                        wLogger.debug(
+                            ClientType[this.client],
+                            this.pid,
+                            'initiate fetch',
+                            exc
+                        );
+                    }
+                }
+            }
+
+            if (this.memory.offsets === null) {
+                wLogger.error(
+                    ClientType[this.client],
+                    this.pid,
+                    'offsets not found for this version',
+                    this.osuVersion
+                );
+                return;
+            }
+
+            this.regularDataLoop();
+            this.preciseDataLoop();
+        } catch (exc) {
+            wLogger.error(
+                ClientType[this.client],
+                this.pid,
+                'initiate',
+                (exc as Error).message
+            );
+            wLogger.debug(ClientType[this.client], this.pid, 'initiate', exc);
+        }
     }
 
     async regularDataLoop(): Promise<void> {

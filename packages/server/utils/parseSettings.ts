@@ -44,14 +44,19 @@ export function parseCounterSettings(
         if (fs.existsSync(settingsPath) && !fs.existsSync(settingsValuesPath))
             fs.writeFileSync(settingsValuesPath, JSON.stringify({}), 'utf8');
 
-        const settings: ISettings[] = ingameOverlay
-            ? []
-            : JsonSafeParse(fs.readFileSync(settingsPath, 'utf8'), []);
+        const settings: ISettings[] = !ingameOverlay
+            ? JsonSafeParse({
+                  isFile: true,
+                  payload: settingsPath,
+                  defaultValue: []
+              })
+            : [];
 
-        const values: ISettingsCompact = JsonSafeParse(
-            fs.readFileSync(settingsValuesPath, 'utf8'),
-            {}
-        );
+        const values: ISettingsCompact = JsonSafeParse({
+            isFile: true,
+            payload: settingsValuesPath,
+            defaultValue: {}
+        });
 
         switch (action) {
             case 'parse':

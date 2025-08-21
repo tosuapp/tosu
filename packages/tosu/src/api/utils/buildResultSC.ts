@@ -46,6 +46,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
               ? resultScreen.mode
               : menu.gamemode;
 
+    const firstGraph = beatmapPP.strainsAll.series[0];
     return {
         osuIsRunning: 1,
         chatIsEnabled: global.chatStatus > 0 ? 1 : 0,
@@ -118,11 +119,12 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
         mapid: menu.mapID,
         mapsetid: menu.setID,
-        mapStrains: beatmapPP.strainsAll.xaxis.reduce((acc, v, ind) => {
-            const value = beatmapPP.strainsAll.series[0].data[ind];
-            acc[v] = value <= 0 ? 0 : value;
-            return acc;
-        }, {}),
+        mapStrains: Object.fromEntries(
+            beatmapPP.strainsAll.xaxis.map((time, index) => {
+                const value = firstGraph.data[index];
+                return [time, value <= 0 ? 0 : value];
+            })
+        ),
         mapBreaks: beatmapPP.breaks.map((r) => ({
             startTime: r.start,
             endTime: r.end,
@@ -185,8 +187,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         unstableRate: fixDecimals(gameplay.unstableRate * currentMods.rate),
         convertedUnstableRate: fixDecimals(gameplay.unstableRate),
 
-        grade: GradeEnum[gameplay.gradeCurrent],
-        maxGrade: GradeEnum[gameplay.gradeExpected],
+        grade: GradeEnum[gameplay.gradeCurrent as keyof typeof GradeEnum],
+        maxGrade: GradeEnum[gameplay.gradeExpected as keyof typeof GradeEnum],
 
         hitErrors: gameplay.hitErrors,
 

@@ -190,11 +190,11 @@ export abstract class AbstractInstance {
             }
         }
 
-        this.initiateDataLoops();
+        this.initiate();
         this.watchProcessHealth();
     }
 
-    initiateDataLoops() {
+    initiate() {
         this.regularDataLoop();
         this.preciseDataLoop();
     }
@@ -282,14 +282,5 @@ export abstract class AbstractInstance {
 
     resetReportCount(id: string | number) {
         this.errorsCount[id] = 0;
-    }
-
-    preventThrow(callback) {
-        try {
-            const result = callback();
-            return result;
-        } catch (error) {
-            return error as Error;
-        }
     }
 }

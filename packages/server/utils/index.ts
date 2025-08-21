@@ -72,7 +72,8 @@ const contentTypes = {
 export function getContentType(text: string) {
     const extension = path.extname(text);
 
-    const contentType = contentTypes[extension] || '';
+    const contentType =
+        contentTypes[extension as keyof typeof contentTypes] || '';
     return contentType;
 }
 
