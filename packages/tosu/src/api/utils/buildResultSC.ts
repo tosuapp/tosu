@@ -46,6 +46,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
               ? resultScreen.mode
               : menu.gamemode;
 
+    const firstGraph = beatmapPP.strainsAll.series[0];
     return {
         osuIsRunning: 1,
         chatIsEnabled: global.chatStatus > 0 ? 1 : 0,
@@ -118,19 +119,11 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
         mapid: menu.mapID,
         mapsetid: menu.setID,
-        mapStrains: beatmapPP.strainsAll.xaxis.reduce(
-            (
-                acc: {
-                    [key: string]: number;
-                },
-                v,
-                ind
-            ) => {
-                const value = beatmapPP.strainsAll.series[0].data[ind];
-                acc[v] = value <= 0 ? 0 : value;
-                return acc;
-            },
-            {}
+        mapStrains: Object.fromEntries(
+            beatmapPP.strainsAll.xaxis.map((time, index) => {
+                const value = firstGraph.data[index];
+                return [time, value <= 0 ? 0 : value];
+            })
         ),
         mapBreaks: beatmapPP.breaks.map((r) => ({
             startTime: r.start,

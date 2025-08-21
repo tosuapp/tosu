@@ -235,8 +235,6 @@ export class BeatmapPP extends AbstractState {
         attributes: rosu.PerformanceAttributes
     ) {
         try {
-            if (type !== 'curr' && type !== 'fc') return;
-
             this[`${type}PPAttributes`] = {
                 ppAccuracy: attributes.ppAccuracy || 0.0,
                 ppAim: attributes.ppAim || 0.0,

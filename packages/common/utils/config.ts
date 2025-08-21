@@ -99,6 +99,8 @@ export const config = {
     logFilePath: ''
 };
 
+export type ConfigFields = keyof typeof config | '';
+
 export const updateConfigFile = async () => {
     let newOptions = '';
 

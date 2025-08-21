@@ -1,4 +1,4 @@
-import { config, sleep, wLogger } from '@tosu/common';
+import { ConfigFields, config, sleep, wLogger } from '@tosu/common';
 import WebSocket from 'ws';
 
 import { getUniqueID } from './hashing';
@@ -20,7 +20,7 @@ export interface ModifiedWebsocket extends WebSocket {
 
 export class Websocket {
     private instanceManager: any;
-    private pollRateFieldName: keyof typeof config | '';
+    private pollRateFieldName: ConfigFields;
     private stateFunctionName: string;
     private onMessageCallback: (
         data: string,
@@ -40,7 +40,7 @@ export class Websocket {
         onConnectionCallback
     }: {
         instanceManager: any;
-        pollRateFieldName: keyof typeof config | '';
+        pollRateFieldName: ConfigFields;
         stateFunctionName:
             | 'getState'
             | 'getStateV2'
