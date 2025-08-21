@@ -31,24 +31,43 @@ export class LazerInstance extends AbstractInstance {
         try {
             const cacheFolder = getCachePath();
 
-            try {
-                this.osuVersion = this.memory.gameVersion();
-            } catch (exc) {
-                wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'Unnable to find osu version',
-                    (exc as Error).message
-                );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'Unnable to find osu version',
-                    exc
-                );
+            let attempts = 1;
+            while (attempts < 5 && !this.osuVersion) {
+                if (attempts > 1)
+                    wLogger.warn(
+                        ClientType[this.client],
+                        `Trying to find osu version #${attempts}`
+                    );
+
+                try {
+                    this.osuVersion = this.memory.gameVersion() || '';
+
+                    wLogger.info(
+                        ClientType[this.client],
+                        `Version: ${this.osuVersion}`
+                    );
+
+                    break;
+                } catch (exc) {
+                    wLogger.debug(
+                        ClientType[this.client],
+                        this.pid,
+                        'Unnable to find osu version',
+                        exc
+                    );
+                } finally {
+                    attempts++;
+                    await sleep(1000);
+                }
             }
 
             if (!this.osuVersion) {
+                wLogger.error(
+                    ClientType[this.client],
+                    this.pid,
+                    'Unnable to find osu version, report to devs: https://discord.gg/WX7BTs8kwh'
+                );
+
                 this.regularDataLoop();
                 this.preciseDataLoop();
 
