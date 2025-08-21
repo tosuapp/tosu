@@ -744,11 +744,10 @@ const app = createApp({
     };
 
 
-    socket.sendCommand('getSettings', encodeURI('__ingame__'));
     socket.sendCommand('getCounters', encodeURI('__ingame__'));
+    socket.sendCommand('getSettings', encodeURI('__ingame__'));
     socket.commands((data) => {
       try {
-
         const { command, message } = data;
         if (command == 'getSettings') {
           if (JSON.stringify(message.overlays || []) != JSON.stringify(overlays.value)) {
@@ -759,6 +758,10 @@ const app = createApp({
 
         if (command == 'getCounters' && Array.isArray(message)) {
           available_overlays.value = message;
+        };
+
+        if (command == 'getSettings' || command == 'getCounters') {
+          overlays.value.forEach(r => r._enabled = available_overlays.value.some(a => a.folderName == r.folderName));
         }
       } catch (error) {
         console.log(error);
@@ -785,6 +788,7 @@ app.mount('.main');
 
 /**
  * @typedef {Object} Overlay
+ * @property {boolean} _enabled
  * @property {boolean | undefined} _settings
  * @property {string} id
  * @property {string} folderName

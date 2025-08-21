@@ -163,14 +163,21 @@ function rebuildJSON({
                     if (idx !== -1) queryArr[idx] = 'streamcompanion';
                 }
 
-                const hasQuery = queryArr.some(
-                    (q) =>
+                const hasQuery = queryArr.some((q) => {
+                    if (q === 'tosu')
+                        return (
+                            item.name.toLowerCase().includes(q) ||
+                            item.author.toLowerCase().includes(q)
+                        );
+
+                    return (
                         item.name.toLowerCase().includes(q) ||
                         item.author.toLowerCase().includes(q) ||
                         (item.compatiblewith ?? []).some((c) =>
                             c.toLowerCase().includes(q)
                         )
-                );
+                    );
+                });
                 if (!hasQuery) continue;
             }
 

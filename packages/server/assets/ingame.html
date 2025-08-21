@@ -194,7 +194,7 @@
       </div>
       <transition-group name="scale-up" mode="out-in">
         <div
-          v-for="(o, ind) in overlays"
+          v-for="(o, ind) in overlays.filter(r=> r._enabled == true)"
           class="overlay"
           :style="{
             top: `${o.top}px`,
