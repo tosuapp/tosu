@@ -28,6 +28,7 @@ import {
 import { ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
+import { generateReport, generateReportHTML } from '../utils/report';
 
 const pkgAssetsPath =
     'pkg' in process
@@ -421,6 +422,26 @@ export default function buildBaseApi(server: Server) {
         // free beatmap only when map path specified
         if (query.path) beatmap.free();
         calculate.free();
+    });
+
+    server.app.route('/api/generateReport', 'GET', async (req, res) => {
+        try {
+            const report = await generateReport(req.instanceManager);
+            const html = await generateReportHTML(report);
+
+            res.writeHead(200, {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
+            });
+            res.end(html, 'utf-8');
+        } catch (err) {
+            res.writeHead(500, {
+                'Content-Type': 'text/plain; charset=utf-8'
+            });
+            res.end(
+                `Server Error: ${(err as Error).message || 'Unknown error'}`
+            );
+        }
     });
 
     server.app.route(/\/api\/ingame/, 'GET', (req, res) => {

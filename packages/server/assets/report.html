@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Tosu Report</title>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+    :root {
+      --text-1: #647a91;
+      --text-2: #8ca0b5;
+      --text-links: #6593c5;
+      --background-1: #191e25;
+
+      --block-1: #242d37;
+      --block-2: #333f4c;
+    }
+
+    * {
+      position: relative;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    a {
+      color: var(--text-links);
+    }
+
+    ::selection {
+      color: var(--background-1);
+      background-color: var(--text-links);
+    }
+
+    button {
+      font-size: 1em;
+      font-family: inherit;
+      font-weight: inherit;
+      font-style: inherit;
+      border: 0;
+      outline: 0;
+    }
+
+    .button {
+      white-space: nowrap;
+      text-decoration: none;
+      font-size: 0.9em;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0.4em 1em;
+      border-radius: 0.4em;
+
+      transition: 0.1s ease;
+      transition-property: translate, filter;
+
+      &>* {
+        pointer-events: none;
+      }
+
+      span {
+        display: block;
+        pointer-events: none;
+
+        transition: 0.3s ease;
+        transition-property: opacity, width;
+      }
+
+      img {
+        width: 1em;
+        height: 1em;
+
+        object-fit: cover;
+
+        transition: 0.3s ease;
+        transition-property: opacity, width, height;
+
+        animation: spin 1s infinite forwards linear;
+      }
+
+      &:hover {
+        filter: brightness(1.1);
+        translate: 0 -0.05em;
+      }
+
+      &:active {
+        filter: brightness(0.9);
+        translate: 0 0.1em;
+      }
+    }
+
+    html {
+      scrollbar-color: var(--text-links) var(--block-2);
+    }
+
+    body {
+      font-size: 20px;
+      font-family: "Roboto", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      justify-content: center;
+      flex-direction: column;
+      display: flex;
+      gap: 1.5em;
+
+      color: var(--text-1);
+      width: min(1200px, 100vw - 3em);
+      min-height: 100vh;
+      margin: 0 auto;
+      background-color: var(--background-1);
+
+
+      overflow-x: hidden;
+    }
+
+    header {
+      justify-content: flex-start;
+      align-items: center;
+      display: flex;
+      margin-top: 1em;
+      padding: 0 0.5em;
+
+      .button {
+        margin-left: auto;
+      }
+    }
+
+    main {
+      display: grid;
+      gap: 1.5em;
+    }
+
+    footer {
+      margin-top: auto;
+    }
+
+    .group {
+      h3 {
+        margin-left: 0.6em;
+        margin-bottom: 0.5em;
+      }
+
+      &:not(.instances):not(.counters):not(.logs) {
+        tr:first-child td {
+          padding-top: 0 !important;
+        }
+      }
+    }
+
+    .group-content {
+      color: var(--text-2);
+      background-color: var(--block-1);
+      padding: 0.6em;
+      border-radius: 0.4em;
+
+      table {
+        font-weight: 500;
+        width: 100%;
+
+        border-collapse: collapse;
+
+        td {
+          padding: 0.6em 0em;
+        }
+
+        th {
+          font-weight: 700;
+          color: var(--text-links);
+        }
+
+        tr {
+          text-align: left;
+          border: solid;
+          border-width: 1px 0;
+          border-color: var(--text-1);
+        }
+
+        tr:first-child {
+          border-top: none;
+        }
+
+        tr:last-child {
+          border-bottom: none;
+
+          td {
+            padding-bottom: 0 !important;
+          }
+        }
+      }
+    }
+
+    .scrollable {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 38em;
+      scrollbar-color: var(--text-links) var(--block-2);
+    }
+
+    .highlight {
+      font-weight: 700;
+      color: var(--text-links);
+    }
+
+    .tosu-cfg table {
+      font-size: 0.85em;
+    }
+
+    .logs {
+      font-size: 0.85em;
+
+      table {
+        width: fit-content !important;
+        white-space: nowrap;
+
+        td {
+          padding: 0.6em 0.4em !important;
+        }
+      }
+
+
+      th.type {
+        min-width: 6em;
+      }
+    }
+
+    .status-info {
+      color: #25d491
+    }
+
+    .status-debug {
+      color: #63a8f3
+    }
+
+    .status-time {
+      color: #959595
+    }
+
+    .status-debugError {
+      color: #d87dd8
+    }
+
+    .status-error {
+      color: #e26b6b
+    }
+
+    .status-warn {
+      color: #dfdf53
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>Debug report</h1>
+      <p>Generated on {{TIME}} UTC</p>
+    </div>
+
+    <!-- <button class="button export-button" onclick="exportJson()">Export to JSON</button> -->
+  </header>
+
+  <main>
+    <div class="group os-cfg">
+      <h3>System Configuration</h3>
+      <div class="group-content">
+        <table>
+          <tr>
+            <td class="highlight">OS</td>
+            <td>{{SYSTEM_OS}}</td>
+          </tr>
+          <tr>
+            <td class="highlight">CPU</td>
+            <td>{{SYSTEM_CPU}}</td>
+          </tr>
+          <tr>
+            <td class="highlight">GPU</td>
+            <td>{{SYSTEM_GPUS}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="group tosu-cfg">
+      <h3>Tosu Settings</h3>
+      <div class="group-content">
+        <table>{{TOSU_CONFIG}}</table>
+      </div>
+    </div>
+
+    <div class="group instances">
+      <h3>osu! Instances</h3>
+      <div class="group-content">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>pid</th>
+              <th>client</th>
+              <th>bitness</th>
+              <th>version</th>
+            </tr>
+          </thead>
+          {{INSTANCES}}
+        </table>
+      </div>
+    </div>
+
+    <div class="group counters">
+      <h3>Installed Overlays</h3>
+      <div class="group-content">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Version</th>
+              <th>Author</th>
+              <th>Directory</th>
+            </tr>
+          </thead>
+          {{COUNTERS}}
+        </table>
+      </div>
+    </div>
+
+    <div class="group logs">
+      <h3>Logs</h3>
+      <div class="group-content">
+        <div class="scrollable">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="timestamp">Timestamp</th>
+                <th class="type">Type</th>
+                <th class="message">Message</th>
+              </tr>
+            </thead>
+            {{LOGS}}
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>This report was generated by <a href="https://github.com/tosuapp/tosu">tosu</a> © 2025</p>
+  </footer>
+</body>
+
+</html>
