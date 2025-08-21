@@ -7,22 +7,21 @@ import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods } from '@/utils/osuMods.types';
 
+import { defaultStatistics } from './gameplay';
+import { Statistics } from './types';
+
 export class ResultScreen extends AbstractState {
     onlineId: number;
     playerName: string;
+
     mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
     mode: number;
     maxCombo: number;
+
     score: number;
-    hit100: number;
-    hit300: number;
-    hit50: number;
-    hitGeki: number;
-    hitKatu: number;
-    hitMiss: number;
-    sliderEndHits: number;
-    smallTickHits: number;
-    largeTickHits: number;
+    statistics: Statistics;
+    maximumStatistics: Statistics;
+
     grade: string;
     date: string;
     accuracy: number;
@@ -50,15 +49,8 @@ export class ResultScreen extends AbstractState {
         this.mode = 0;
         this.maxCombo = 0;
         this.score = 0;
-        this.hit100 = 0;
-        this.hit300 = 0;
-        this.hit50 = 0;
-        this.hitGeki = 0;
-        this.hitKatu = 0;
-        this.hitMiss = 0;
-        this.sliderEndHits = 0;
-        this.smallTickHits = 0;
-        this.largeTickHits = 0;
+        this.statistics = Object.assign({}, defaultStatistics);
+        this.maximumStatistics = Object.assign({}, defaultStatistics);
         this.grade = '';
         this.date = '';
         this.accuracy = 0;
@@ -89,37 +81,28 @@ export class ResultScreen extends AbstractState {
             this.mode = result.mode;
             this.maxCombo = result.maxCombo;
             this.score = result.score;
-            this.hit100 = result.hit100;
-            this.hit300 = result.hit300;
-            this.hit50 = result.hit50;
-            this.hitGeki = result.hitGeki;
-            this.hitKatu = result.hitKatu;
-            this.hitMiss = result.hitMiss;
-            this.sliderEndHits = result.sliderEndHits;
-            this.smallTickHits = result.smallTickHits;
-            this.largeTickHits = result.largeTickHits;
+            this.statistics = result.statistics;
+            this.maximumStatistics = result.maximumStatistics;
             this.date = result.date;
-
-            const hits = {
-                300: this.hit300,
-                geki: 0,
-                100: this.hit100,
-                katu: 0,
-                50: this.hit50,
-                0: this.hitMiss
-            };
 
             this.grade = calculateGrade({
                 isLazer: this.game.client === ClientType.lazer,
-                mods: this.mods.number,
+                mods: this.mods.array,
                 mode: this.mode,
-                hits
+
+                statistics: this.statistics,
+                maximumStatistics: this.maximumStatistics
             });
 
             this.accuracy = calculateAccuracy({
+                isLazer: this.game.client === ClientType.lazer,
                 isRound: true,
+
+                mods: this.mods.array,
                 mode: this.mode,
-                hits
+
+                statistics: this.statistics,
+                maximumStatistics: this.maximumStatistics
             });
 
             this.game.resetReportCount('resultScreen updateState');
@@ -170,15 +153,15 @@ export class ResultScreen extends AbstractState {
             };
 
             const calcOptions: rosu.PerformanceArgs = {
-                nGeki: this.hitGeki,
-                n300: this.hit300,
-                nKatu: this.hitKatu,
-                n100: this.hit100,
-                n50: this.hit50,
-                misses: this.hitMiss,
-                sliderEndHits: this.sliderEndHits,
-                smallTickHits: this.smallTickHits,
-                largeTickHits: this.largeTickHits,
+                nGeki: this.statistics.perfect,
+                n300: this.statistics.great,
+                nKatu: this.statistics.good,
+                n100: this.statistics.ok,
+                n50: this.statistics.meh,
+                misses: this.statistics.miss,
+                sliderEndHits: this.statistics.sliderTailHit,
+                smallTickHits: this.statistics.smallTickHit,
+                largeTickHits: this.statistics.largeTickHit,
                 combo: this.maxCombo,
                 ...commonParams
             };
@@ -189,11 +172,11 @@ export class ResultScreen extends AbstractState {
             );
 
             const fcCalcOptions: rosu.PerformanceArgs = {
-                nGeki: this.hitGeki,
-                n300: this.hit300 + this.hitMiss,
-                nKatu: this.hitKatu,
-                n100: this.hit100,
-                n50: this.hit50,
+                nGeki: this.statistics.perfect,
+                n300: this.statistics.great + this.statistics.miss,
+                nKatu: this.statistics.good,
+                n100: this.statistics.ok,
+                n50: this.statistics.meh,
                 misses: 0,
                 sliderEndHits:
                     beatmapPP.performanceAttributes?.state?.sliderEndHits,
@@ -206,9 +189,12 @@ export class ResultScreen extends AbstractState {
             };
             if (this.mode === 3) {
                 fcCalcOptions.nGeki =
-                    this.hitGeki + this.hit100 + this.hit50 + this.hitMiss;
-                fcCalcOptions.n300 = this.hit300;
-                fcCalcOptions.nKatu = this.hitKatu;
+                    this.statistics.perfect +
+                    this.statistics.ok +
+                    this.statistics.meh +
+                    this.statistics.miss;
+                fcCalcOptions.n300 = this.statistics.great;
+                fcCalcOptions.nKatu = this.statistics.good;
                 fcCalcOptions.n100 = 0;
                 fcCalcOptions.n50 = 0;
                 fcCalcOptions.misses = 0;

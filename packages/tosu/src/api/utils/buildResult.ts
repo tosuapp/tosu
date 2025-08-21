@@ -23,10 +23,12 @@ const convertMemoryPlayerToResult = (
     combo: memoryPlayer.combo,
     maxCombo: memoryPlayer.maxCombo,
     mods: memoryPlayer.mods.name,
-    h300: memoryPlayer.h300,
-    h100: memoryPlayer.h100,
-    h50: memoryPlayer.h50,
-    h0: memoryPlayer.h0,
+    h300: memoryPlayer.statistics.great,
+    geki: memoryPlayer.statistics.perfect,
+    h100: memoryPlayer.statistics.ok,
+    katu: memoryPlayer.statistics.good,
+    h50: memoryPlayer.statistics.meh,
+    h0: memoryPlayer.statistics.miss,
     team: memoryPlayer.team,
     position: memoryPlayer.position,
     isPassing: Number(memoryPlayer.isPassing)
@@ -64,15 +66,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             : global.status === GameState.resultScreen
               ? resultScreen.mods
               : global.menuMods;
-
-    const resultScreenHits = {
-        300: resultScreen.hit300,
-        geki: resultScreen.hitGeki,
-        100: resultScreen.hit100,
-        katu: resultScreen.hitKatu,
-        50: resultScreen.hit50,
-        0: resultScreen.hitMiss
-    };
 
     return {
         client: ClientType[osuInstance.client],
@@ -179,12 +172,12 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 smooth: gameplay.playerHPSmooth
             },
             hits: {
-                300: gameplay.hit300,
-                geki: gameplay.hitGeki,
-                100: gameplay.hit100,
-                katu: gameplay.hitKatu,
-                50: gameplay.hit50,
-                0: gameplay.hitMiss,
+                300: gameplay.statistics.great,
+                geki: gameplay.statistics.perfect,
+                100: gameplay.statistics.ok,
+                katu: gameplay.statistics.good,
+                50: gameplay.statistics.meh,
+                0: gameplay.statistics.miss,
                 sliderBreaks: gameplay.hitSB,
                 grade: {
                     current: gameplay.gradeCurrent,
@@ -233,21 +226,26 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             name: resultScreen.playerName,
             score: resultScreen.score,
             accuracy: calculateAccuracy({
+                isLazer: false,
                 isRound: true,
-                hits: resultScreenHits,
-                mode: gameplay.mode
+
+                mods: resultScreen.mods.array,
+                mode: resultScreen.mode,
+
+                statistics: resultScreen.statistics,
+                maximumStatistics: resultScreen.maximumStatistics
             }),
             maxCombo: resultScreen.maxCombo,
             mods: {
                 num: resultScreen.mods.number,
                 str: resultScreen.mods.name
             },
-            300: resultScreen.hit300,
-            geki: resultScreen.hitGeki,
-            100: resultScreen.hit100,
-            katu: resultScreen.hitKatu,
-            50: resultScreen.hit50,
-            0: resultScreen.hitMiss,
+            300: resultScreen.statistics.great,
+            geki: resultScreen.statistics.perfect,
+            100: resultScreen.statistics.ok,
+            katu: resultScreen.statistics.good,
+            50: resultScreen.statistics.meh,
+            0: resultScreen.statistics.miss,
             grade: resultScreen.grade,
             createdAt: resultScreen.date
         },
@@ -324,20 +322,6 @@ const buildLazerTourneyData = (
                                     .mods as CalculateMods)
                               : global.menuMods;
 
-                    const currentGrade = calculateGrade({
-                        isLazer: true,
-                        mods: client.score!.mods.number,
-                        mode: client.score!.mode,
-                        hits: {
-                            300: client.score!.hit300,
-                            geki: 0,
-                            100: client.score!.hit100,
-                            katu: 0,
-                            50: client.score!.hit50,
-                            0: client.score!.hitMiss
-                        }
-                    });
-
                     return {
                         team: client.team === 'red' ? 'left' : 'right',
                         spectating: {
@@ -370,16 +354,23 @@ const buildLazerTourneyData = (
                                 smooth: client.score!.playerHPSmooth
                             },
                             hits: {
-                                300: client.score!.hit300,
-                                geki: client.score!.hitGeki,
-                                100: client.score!.hit100,
-                                katu: client.score!.hitKatu,
-                                50: client.score!.hit50,
-                                0: client.score!.hitMiss,
+                                300: client.score!.statistics.great,
+                                geki: client.score!.statistics.perfect,
+                                100: client.score!.statistics.ok,
+                                katu: client.score!.statistics.good,
+                                50: client.score!.statistics.meh,
+                                0: client.score!.statistics.miss,
                                 // TODO: ADD SLIDERBREAKS
                                 sliderBreaks: 0,
                                 grade: {
-                                    current: currentGrade,
+                                    current: calculateGrade({
+                                        isLazer: true,
+                                        mods: client.score!.mods.array,
+                                        mode: client.score!.mode,
+                                        statistics: client.score!.statistics,
+                                        maximumStatistics:
+                                            client.score!.maximumStatistics
+                                    }),
                                     // not supported
                                     maxThisPlay: ''
                                 },
@@ -485,12 +476,12 @@ const buildTourneyData = (
                         smooth: gameplay.playerHPSmooth
                     },
                     hits: {
-                        300: gameplay.hit300,
-                        geki: gameplay.hitGeki,
-                        100: gameplay.hit100,
-                        katu: gameplay.hitKatu,
-                        50: gameplay.hit50,
-                        0: gameplay.hitMiss,
+                        300: gameplay.statistics.great,
+                        geki: gameplay.statistics.perfect,
+                        100: gameplay.statistics.ok,
+                        katu: gameplay.statistics.good,
+                        50: gameplay.statistics.meh,
+                        0: gameplay.statistics.miss,
                         sliderBreaks: gameplay.hitSB,
                         grade: {
                             current: gameplay.gradeCurrent,

@@ -23,6 +23,7 @@ import type {
     IUser,
     ScanPatterns
 } from '@/memory/types';
+import { defaultStatistics } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { LeaderboardPlayer } from '@/states/types';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
@@ -459,15 +460,15 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 mode,
                 maxCombo,
                 score,
-                hit100,
-                hit300,
-                hit50,
-                hitGeki,
-                hitKatu,
-                hitMiss,
-                sliderEndHits: 0,
-                smallTickHits: 0,
-                largeTickHits: 0,
+                statistics: {
+                    perfect: hitGeki,
+                    great: hit300,
+                    good: hitKatu,
+                    ok: hit100,
+                    meh: hit50,
+                    miss: hitMiss
+                },
+                maximumStatistics: Object.assign({}, defaultStatistics),
                 date
             };
         } catch (error) {
@@ -581,15 +582,15 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 playerHPSmooth,
                 playerHP,
                 accuracy,
-                hit100,
-                hit300,
-                hit50,
-                hitGeki,
-                hitKatu,
-                hitMiss,
-                sliderEndHits: 0,
-                smallTickHits: 0,
-                largeTickHits: 0,
+                statistics: {
+                    perfect: hitGeki,
+                    great: hit300,
+                    good: hitKatu,
+                    ok: hit100,
+                    meh: hit50,
+                    miss: hitMiss
+                },
+                maximumStatistics: Object.assign({}, defaultStatistics),
                 combo,
                 maxCombo
             };
@@ -1222,10 +1223,15 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             combo: this.process.readShort(entry + 0x94),
             maxCombo: this.process.readShort(entry + 0x68),
             mods,
-            h300: this.process.readShort(entry + 0x8a),
-            h100: this.process.readShort(entry + 0x88),
-            h50: this.process.readShort(entry + 0x8c),
-            h0: this.process.readShort(entry + 0x92),
+            statistics: {
+                perfect: 0,
+                great: this.process.readShort(entry + 0x8a),
+                good: 0,
+                ok: this.process.readShort(entry + 0x88),
+                meh: this.process.readShort(entry + 0x8c),
+                miss: this.process.readShort(entry + 0x92)
+            },
+            maximumStatistics: Object.assign({}, defaultStatistics),
             team: this.process.readInt(base + 0x40),
             position: this.process.readInt(base + 0x2c),
             isPassing: Boolean(this.process.readByte(base + 0x4b))

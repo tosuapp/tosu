@@ -1,23 +1,31 @@
 import { CalculateMods } from '@/utils/osuMods.types';
 
 export interface Statistics {
-    miss: number;
-    meh: number;
-    ok: number;
-    good: number;
-    great: number;
+    /** geki */
     perfect: number;
-    smallTickMiss: number;
-    smallTickHit: number;
-    largeTickMiss: number;
-    largeTickHit: number;
-    smallBonus: number;
-    largeBonus: number;
-    ignoreMiss: number;
-    ignoreHit: number;
-    comboBreak: number;
-    sliderTailHit: number;
-    legacyComboIncrease: number;
+    /** h300 */
+    great: number;
+    /** katu */
+    good: number;
+    /** h100 */
+    ok: number;
+    /** h50 */
+    meh: number;
+    /** h0 */
+    miss: number;
+
+    smallTickMiss?: number;
+    smallTickHit?: number;
+    largeTickMiss?: number;
+    largeTickHit?: number;
+    smallBonus?: number;
+    largeBonus?: number;
+    ignoreMiss?: number;
+    ignoreHit?: number;
+    comboBreak?: number;
+    /** sliderEndHits */
+    sliderTailHit?: number;
+    legacyComboIncrease?: number;
 }
 
 export interface KeyOverlay {
@@ -38,10 +46,8 @@ export interface LeaderboardPlayer {
     combo: number;
     maxCombo: number;
     mods: CalculateMods;
-    h300: number;
-    h100: number;
-    h50: number;
-    h0: number;
+    statistics: Statistics;
+    maximumStatistics: Statistics;
     team: number;
     position: number;
     isPassing: boolean;

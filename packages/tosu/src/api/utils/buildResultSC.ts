@@ -175,12 +175,12 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             M2Count: gameplay.keyOverlay.M2Count
         }),
 
-        geki: gameplay.hitGeki,
-        c300: gameplay.hit300,
-        katsu: gameplay.hitKatu,
-        c100: gameplay.hit100,
-        c50: gameplay.hit50,
-        miss: gameplay.hitMiss,
+        geki: gameplay.statistics.perfect,
+        c300: gameplay.statistics.great,
+        katsu: gameplay.statistics.good,
+        c100: gameplay.statistics.ok,
+        c50: gameplay.statistics.meh,
+        miss: gameplay.statistics.miss,
         sliderBreaks: gameplay.hitSB,
 
         acc: fixDecimals(gameplay.accuracy),
@@ -209,10 +209,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 ModsXor2: -1,
                 Value: gameplay.leaderboardPlayer.mods.number
             },
-            Hit300: gameplay.leaderboardPlayer.h300,
-            Hit100: gameplay.leaderboardPlayer.h100,
-            Hit50: gameplay.leaderboardPlayer.h50,
-            HitMiss: gameplay.leaderboardPlayer.h0,
+            Hit300: gameplay.leaderboardPlayer.statistics.great,
+            Hit100: gameplay.leaderboardPlayer.statistics.ok,
+            Hit50: gameplay.leaderboardPlayer.statistics.meh,
+            HitMiss: gameplay.leaderboardPlayer.statistics.miss,
             Team: gameplay.leaderboardPlayer.team,
             Position: gameplay.leaderboardPlayer.position,
             IsPassing: gameplay.leaderboardPlayer.isPassing
@@ -229,10 +229,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                     ModsXor2: -1,
                     Value: score.mods.number
                 },
-                Hit300: score.h300,
-                Hit100: score.h100,
-                Hit50: score.h50,
-                HitMiss: score.h0,
+                Hit300: score.statistics.great,
+                Hit100: score.statistics.ok,
+                Hit50: score.statistics.meh,
+                HitMiss: score.statistics.miss,
                 Team: score.team,
                 Position: score.position,
                 IsPassing: score.isPassing

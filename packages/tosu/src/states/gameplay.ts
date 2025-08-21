@@ -3,10 +3,30 @@ import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
-import { KeyOverlay, LeaderboardPlayer } from '@/states/types';
+import { KeyOverlay, LeaderboardPlayer, Statistics } from '@/states/types';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
+
+export const defaultStatistics = {
+    miss: 0,
+    meh: 0,
+    ok: 0,
+    good: 0,
+    great: 0,
+    perfect: 0,
+    smallTickMiss: 0,
+    smallTickHit: 0,
+    largeTickMiss: 0,
+    largeTickHit: 0,
+    smallBonus: 0,
+    largeBonus: 0,
+    ignoreMiss: 0,
+    ignoreHit: 0,
+    comboBreak: 0,
+    sliderTailHit: 0,
+    legacyComboIncrease: 0
+};
 
 const defaultLBPlayer = {
     name: '',
@@ -14,10 +34,8 @@ const defaultLBPlayer = {
     combo: 0,
     maxCombo: 0,
     mods: Object.assign({}, defaultCalculatedMods),
-    h300: 0,
-    h100: 0,
-    h50: 0,
-    h0: 0,
+    statistics: Object.assign({}, defaultStatistics),
+    maximumStatistics: Object.assign({}, defaultStatistics),
     team: 0,
     position: 0,
     isPassing: false
@@ -37,15 +55,10 @@ export class Gameplay extends AbstractState {
     mode: number;
     maxCombo: number;
     score: number;
-    hit100: number;
-    hit300: number;
-    hit50: number;
-    hitGeki: number;
-    hitKatu: number;
-    hitMiss: number;
-    sliderEndHits: number;
-    smallTickHits: number;
-    largeTickHits: number;
+
+    statistics: Statistics;
+    maximumStatistics: Statistics;
+
     hitMissPrev: number;
     hitUR: number;
     hitSB: number;
@@ -85,15 +98,9 @@ export class Gameplay extends AbstractState {
         this.hitErrors = [];
         this.maxCombo = 0;
         this.score = 0;
-        this.hit100 = 0;
-        this.hit300 = 0;
-        this.hit50 = 0;
-        this.hitGeki = 0;
-        this.hitKatu = 0;
-        this.hitMiss = 0;
-        this.sliderEndHits = 0;
-        this.smallTickHits = 0;
-        this.largeTickHits = 0;
+        this.statistics = Object.assign({}, defaultStatistics);
+        this.maximumStatistics = Object.assign({}, defaultStatistics);
+
         this.hitMissPrev = 0;
         this.hitUR = 0.0;
         this.hitSB = 0;
@@ -105,16 +112,10 @@ export class Gameplay extends AbstractState {
         this.unstableRate = 0;
         this.gradeCurrent = calculateGrade({
             isLazer: this.game.client === ClientType.lazer,
-            mods: this.mods.number,
+            mods: this.mods.array,
             mode: this.mode,
-            hits: {
-                300: this.hit300,
-                geki: 0,
-                100: this.hit100,
-                katu: 0,
-                50: this.hit50,
-                0: this.hitMiss
-            }
+            statistics: this.statistics,
+            maximumStatistics: this.maximumStatistics
         });
 
         this.gradeExpected = this.gradeCurrent;
@@ -217,15 +218,8 @@ export class Gameplay extends AbstractState {
             this.playerHP = result.playerHP;
             this.accuracy = result.accuracy;
 
-            this.hit100 = result.hit100;
-            this.hit300 = result.hit300;
-            this.hit50 = result.hit50;
-            this.hitGeki = result.hitGeki;
-            this.hitKatu = result.hitKatu;
-            this.hitMiss = result.hitMiss;
-            this.sliderEndHits = result.sliderEndHits;
-            this.smallTickHits = result.smallTickHits;
-            this.largeTickHits = result.largeTickHits;
+            this.statistics = result.statistics;
+            this.maximumStatistics = result.maximumStatistics;
 
             this.combo = result.combo;
             this.maxCombo = result.maxCombo;
@@ -252,11 +246,11 @@ export class Gameplay extends AbstractState {
             }
             if (
                 this.combo < this.comboPrev &&
-                this.hitMiss === this.hitMissPrev
+                this.statistics.miss === this.hitMissPrev
             ) {
                 this.hitSB += 1;
             }
-            this.hitMissPrev = this.hitMiss;
+            this.hitMissPrev = this.statistics.miss;
             this.comboPrev = this.combo;
 
             this.updateGrade(menu.objectCount);
@@ -409,35 +403,28 @@ export class Gameplay extends AbstractState {
     }
 
     private updateGrade(objectCount: number) {
-        const remaining =
-            objectCount - this.hit300 - this.hit100 - this.hit50 - this.hitMiss;
-
         this.gradeCurrent = calculateGrade({
             isLazer: this.game.client === ClientType.lazer,
-            mods: this.mods.number,
+            mods: this.mods.array,
             mode: this.mode,
-            hits: {
-                300: this.hit300,
-                geki: 0,
-                100: this.hit100,
-                katu: 0,
-                50: this.hit50,
-                0: this.hitMiss
-            }
+            statistics: this.statistics,
+            maximumStatistics: this.maximumStatistics
         });
 
         this.gradeExpected = calculateGrade({
             isLazer: this.game.client === ClientType.lazer,
-            mods: this.mods.number,
+            mods: this.mods.array,
             mode: this.mode,
-            hits: {
-                300: this.hit300 + remaining,
-                geki: 0,
-                100: this.hit100,
-                katu: 0,
-                50: this.hit50,
-                0: this.hitMiss
-            }
+            statistics: Object.assign({}, this.statistics, {
+                great:
+                    this.statistics.great +
+                    objectCount -
+                    this.statistics.great -
+                    this.statistics.ok -
+                    this.statistics.meh -
+                    this.statistics.miss
+            } as Statistics),
+            maximumStatistics: this.maximumStatistics
         });
     }
 
@@ -548,12 +535,7 @@ export class Gameplay extends AbstractState {
 
             const passedObjects = calculatePassedObjects(
                 this.mode,
-                this.hit300,
-                this.hit100,
-                this.hit50,
-                this.hitMiss,
-                this.hitKatu,
-                this.hitGeki
+                this.statistics
             );
 
             const offset = passedObjects - this.previousPassedObjects;
@@ -561,15 +543,15 @@ export class Gameplay extends AbstractState {
 
             const currPerformance = this.gradualPerformance.nth(
                 {
-                    nGeki: this.hitGeki,
-                    n300: this.hit300,
-                    nKatu: this.hitKatu,
-                    n100: this.hit100,
-                    n50: this.hit50,
-                    misses: this.hitMiss,
-                    sliderEndHits: this.sliderEndHits,
-                    osuSmallTickHits: this.smallTickHits,
-                    osuLargeTickHits: this.largeTickHits,
+                    nGeki: this.statistics.perfect,
+                    n300: this.statistics.great,
+                    nKatu: this.statistics.good,
+                    n100: this.statistics.ok,
+                    n50: this.statistics.meh,
+                    misses: this.statistics.miss,
+                    sliderEndHits: this.statistics.sliderTailHit,
+                    osuSmallTickHits: this.statistics.smallTickHit,
+                    osuLargeTickHits: this.statistics.largeTickHit,
                     maxCombo: this.maxCombo
                 },
                 offset - 1
@@ -591,31 +573,31 @@ export class Gameplay extends AbstractState {
                 beatmapPP.calculatedMapAttributes.holds;
 
             const calcOptions: PerformanceArgs = {
-                nGeki: this.hitGeki,
+                nGeki: this.statistics.perfect,
                 n300:
                     maxJudgementsAmount -
-                    this.hit100 -
-                    this.hit50 -
-                    this.hitMiss,
-                nKatu: this.hitKatu,
-                n100: this.hit100,
-                n50: this.hit50,
-                misses: this.hitMiss,
-                sliderEndHits: this.sliderEndHits,
-                smallTickHits: this.smallTickHits,
-                largeTickHits: this.largeTickHits,
+                    this.statistics.ok -
+                    this.statistics.meh -
+                    this.statistics.miss,
+                nKatu: this.statistics.good,
+                n100: this.statistics.ok,
+                n50: this.statistics.meh,
+                misses: this.statistics.miss,
+                sliderEndHits: this.statistics.sliderTailHit,
+                smallTickHits: this.statistics.smallTickHit,
+                largeTickHits: this.statistics.largeTickHit,
                 combo: this.maxCombo,
                 ...commonParams
             };
             if (this.mode === 3) {
                 calcOptions.nGeki =
                     maxJudgementsAmount -
-                    this.hit300 -
-                    this.hitKatu -
-                    this.hit100 -
-                    this.hit50 -
-                    this.hitMiss;
-                calcOptions.n300 = this.hit300;
+                    this.statistics.great -
+                    this.statistics.good -
+                    this.statistics.ok -
+                    this.statistics.meh -
+                    this.statistics.miss;
+                calcOptions.n300 = this.statistics.great;
                 calcOptions.hitresultPriority = HitResultPriority.Fastest;
                 delete calcOptions.combo;
             }
@@ -633,16 +615,16 @@ export class Gameplay extends AbstractState {
                 delete calcOptions.nGeki;
                 delete calcOptions.n300;
                 delete calcOptions.nKatu;
-                calcOptions.n100 = this.hit100;
-                calcOptions.n50 = this.hit50;
-                calcOptions.misses = this.hitMiss;
+                calcOptions.n100 = this.statistics.ok;
+                calcOptions.n50 = this.statistics.meh;
+                calcOptions.misses = this.statistics.miss;
                 delete calcOptions.sliderEndHits;
                 delete calcOptions.smallTickHits;
                 delete calcOptions.largeTickHits;
                 calcOptions.accuracy = this.accuracy;
                 calcOptions.hitresultPriority = HitResultPriority.Fastest;
             } else {
-                calcOptions.n300 = this.hit300 + this.hitMiss;
+                calcOptions.n300 = this.statistics.great + this.statistics.miss;
                 calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;
                 calcOptions.sliderEndHits =
                     this.performanceAttributes.state?.sliderEndHits;

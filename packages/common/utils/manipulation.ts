@@ -24,7 +24,11 @@ export async function fileMD5(filepath: string) {
 }
 
 export function isRealNumber(value: any) {
-    return typeof value === 'number' && !isNaN(value) && isFinite(value);
+    if (typeof value === 'number') return value - value === 0;
+    if (typeof value === 'string' && value.trim() !== '')
+        return Number.isFinite ? Number.isFinite(+value) : isFinite(+value);
+
+    return false;
 }
 
 export function isAllowedValue(
