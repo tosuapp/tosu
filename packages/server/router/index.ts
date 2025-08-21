@@ -269,11 +269,11 @@ export default function buildBaseApi(server: Server) {
         /^\/api\/counters\/settings\/(?<name>.*)/,
         'POST',
         (req, res) => {
-            const body: ISettings[] | Error = JsonSafeParse(
-                false,
-                req.body,
-                new Error('Failed to parse body')
-            );
+            const body: ISettings[] | Error = JsonSafeParse({
+                isFile: false,
+                payload: req.body,
+                defaultValue: new Error('Failed to parse body')
+            });
             if (body instanceof Error) throw body;
 
             const folderName = req.params.name;
@@ -342,11 +342,11 @@ export default function buildBaseApi(server: Server) {
     );
 
     server.app.route('/api/settingsSave', 'POST', async (req, res) => {
-        const body: object | Error = JsonSafeParse(
-            false,
-            req.body,
-            new Error('Failed to parse body')
-        );
+        const body: object | Error = JsonSafeParse({
+            isFile: false,
+            payload: req.body,
+            defaultValue: new Error('Failed to parse body')
+        });
         if (body instanceof Error) throw body;
 
         await writeConfig(server, body);

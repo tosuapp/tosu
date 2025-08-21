@@ -1,15 +1,19 @@
 import fs from 'fs';
 
-export function JsonSafeParse(isFile: boolean, str: string, errorReturn: any) {
+export function JsonSafeParse(params: {
+    isFile: boolean;
+    payload: string;
+    defaultValue: unknown;
+}) {
     try {
-        if (isFile) {
-            const content = fs.readFileSync(str, 'utf8');
+        if (params.isFile) {
+            const content = fs.readFileSync(params.payload, 'utf8');
             return JSON.parse(content);
         }
 
-        return JSON.parse(str);
+        return JSON.parse(params.payload);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-        return errorReturn;
+        return params.defaultValue;
     }
 }

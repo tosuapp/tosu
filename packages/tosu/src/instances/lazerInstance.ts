@@ -85,7 +85,11 @@ export class LazerInstance extends AbstractInstance {
                 localOffsets.OsuVersion !== this.osuVersion &&
                 fs.existsSync(jsonCache)
             ) {
-                this.memory.offsets = JsonSafeParse(true, jsonCache, null);
+                this.memory.offsets = JsonSafeParse({
+                    isFile: true,
+                    payload: jsonCache,
+                    defaultValue: null
+                });
 
                 wLogger.info(
                     ClientType[this.client],
@@ -124,7 +128,11 @@ export class LazerInstance extends AbstractInstance {
                         }
 
                         const text = await request.text();
-                        const json = JsonSafeParse(false, text, null);
+                        const json = JsonSafeParse({
+                            isFile: false,
+                            payload: text,
+                            defaultValue: null
+                        });
                         if (json === null) continue;
 
                         wLogger.info(

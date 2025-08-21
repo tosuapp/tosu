@@ -46,13 +46,17 @@ export function parseCounterSettings(
 
         const settings: ISettings[] = ingameOverlay
             ? []
-            : JsonSafeParse(true, settingsPath, []);
+            : JsonSafeParse({
+                  isFile: true,
+                  payload: settingsPath,
+                  defaultValue: []
+              });
 
-        const values: ISettingsCompact = JsonSafeParse(
-            true,
-            settingsValuesPath,
-            {}
-        );
+        const values: ISettingsCompact = JsonSafeParse({
+            isFile: true,
+            payload: settingsValuesPath,
+            defaultValue: {}
+        });
 
         switch (action) {
             case 'parse':
