@@ -16,6 +16,7 @@ import { getContentType } from '@tosu/server';
 import path from 'path';
 
 import localOffsets from '@/assets/offsets.json';
+import { LazerInstance } from '@/instances/lazerInstance';
 import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
@@ -3197,6 +3198,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     settings(): ISettings {
         const values = this.osuConfig();
+        values['client.version'] = (this.game as LazerInstance).osuVersion;
 
         try {
             const skinManager = this.process.readIntPtr(
