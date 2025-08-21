@@ -4,7 +4,6 @@ import {
     GameState,
     JsonSafeParse,
     config,
-    fileMD5,
     getCachePath,
     sleep,
     wLogger
@@ -20,7 +19,7 @@ import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
-    OsuHash: string;
+    osuVersion: string;
     previousCombo: number = 0;
 
     constructor(pid: number) {
@@ -31,39 +30,40 @@ export class LazerInstance extends AbstractInstance {
     override async initiate() {
         try {
             const cacheFolder = getCachePath();
-            const filepath = path.join(this.path, 'osu.Game.dll');
-            if (!fs.existsSync(filepath)) {
+
+            try {
+                this.osuVersion = this.memory.gameVersion();
+            } catch (exc) {
                 wLogger.error(
                     ClientType[this.client],
                     this.pid,
-                    'osu.Game.dll not found',
-                    { path: filepath }
+                    'Unnable to find osu version',
+                    (exc as Error).message
                 );
-                return;
-            }
-
-            if (!fs.statSync(filepath).isFile()) {
-                wLogger.error(
+                wLogger.debug(
                     ClientType[this.client],
                     this.pid,
-                    'initiate',
-                    'osu.Game.dll not a file',
-                    this.OsuHash
+                    'Unnable to find osu version',
+                    exc
                 );
-                return;
             }
 
-            this.OsuHash = await fileMD5(filepath);
+            if (!this.osuVersion) {
+                this.regularDataLoop();
+                this.preciseDataLoop();
+
+                return;
+            }
 
             const controller = new AbortController();
             const links = [
-                `https://tosu.app/offsets/${this.OsuHash}.json`,
-                `https://osuck.net/offsets/${this.OsuHash}.json`
+                `https://tosu.app/offsets/${this.osuVersion}.json`,
+                `https://osuck.net/offsets/${this.osuVersion}.json`
             ];
 
-            const jsonCache = path.join(cacheFolder, `${this.OsuHash}.json`);
+            const jsonCache = path.join(cacheFolder, `${this.osuVersion}.json`);
             if (
-                localOffsets.OsuHash !== this.OsuHash &&
+                localOffsets.OsuVersion !== this.osuVersion &&
                 fs.existsSync(jsonCache)
             ) {
                 this.memory.offsets = JsonSafeParse(true, jsonCache, null);
@@ -72,13 +72,13 @@ export class LazerInstance extends AbstractInstance {
                     ClientType[this.client],
                     this.pid,
                     'reading offsets from cache',
-                    this.OsuHash
+                    this.osuVersion
                 );
             }
 
             if (
                 this.memory.offsets === null ||
-                this.memory.offsets.OsuHash !== this.OsuHash
+                this.memory.offsets.OsuVersion !== this.osuVersion
             ) {
                 for (let i = 0; i < links.length; i++) {
                     const link = links[i];
@@ -113,7 +113,7 @@ export class LazerInstance extends AbstractInstance {
                             this.pid,
                             'searching offsets online',
                             host,
-                            this.OsuHash
+                            this.osuVersion
                         );
 
                         this.memory.offsets = json;
@@ -142,7 +142,7 @@ export class LazerInstance extends AbstractInstance {
                     ClientType[this.client],
                     this.pid,
                     'offsets not found for this version',
-                    this.OsuHash
+                    this.osuVersion
                 );
                 return;
             }

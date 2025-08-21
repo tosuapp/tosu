@@ -66,10 +66,11 @@ interface KeyCounter {
 }
 
 export interface offsets {
-    OsuHash: string;
+    OsuVersion: string;
     'osu.Game.OsuGame': {
         osuLogo: number;
         ScreenStack: number;
+        SentryLogger: number;
         '<frameworkConfig>k__BackingField': number;
     };
     'osu.Framework.Game': {
@@ -306,6 +307,18 @@ export interface offsets {
     'osu.Framework.Input.Handlers.Mouse.MouseHandler': {
         '<UseRelativeMode>k__BackingField': number;
     };
+    'osu.Game.Utils.SentryLogger': {
+        sentrySession: number;
+    };
+    'Sentry.SentrySdk+DisposeHandle': {
+        _localHub: number;
+    };
+    'Sentry.Internal.Hub': {
+        _options: number;
+    };
+    'Sentry.SentryOptions': {
+        '<Release>k__BackingField': number;
+    };
 }
 
 const localConfigList = [
@@ -428,7 +441,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
     }
 
-    gameBase() {
+    private gameBase() {
         if (!this.gameBaseAddress) {
             this.updateGameBaseAddress();
         }
@@ -448,6 +461,52 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return this.gameBaseAddress;
+    }
+
+    gameVersion() {
+        const sentryLogger = this.process.readIntPtr(
+            this.gameBase() + this.offsets['osu.Game.OsuGame'].SentryLogger
+        );
+        wLogger.debug(
+            'lazer',
+            'gameVersion',
+            'SentryLogger',
+            sentryLogger.toString(16)
+        );
+
+        const sentrySession = this.process.readIntPtr(
+            sentryLogger +
+                this.offsets['osu.Game.Utils.SentryLogger'].sentrySession
+        );
+        wLogger.debug(
+            'lazer',
+            'gameVersion',
+            'sentrySession',
+            sentrySession.toString(16)
+        );
+
+        const localHub = this.process.readIntPtr(
+            sentrySession +
+                this.offsets['Sentry.SentrySdk+DisposeHandle']._localHub
+        );
+        wLogger.debug(
+            'lazer',
+            'gameVersion',
+            'localHub',
+            localHub.toString(16)
+        );
+
+        const options = this.process.readIntPtr(
+            localHub + this.offsets['Sentry.Internal.Hub']._options
+        );
+        wLogger.debug('lazer', 'gameVersion', 'options', options.toString(16));
+
+        const release = this.process.readSharpStringPtr(
+            options +
+                this.offsets['Sentry.SentryOptions']['<Release>k__BackingField']
+        );
+
+        return release?.split('@')?.[1];
     }
 
     private screenStack() {
