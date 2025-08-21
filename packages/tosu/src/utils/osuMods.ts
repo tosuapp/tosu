@@ -308,14 +308,19 @@ export const calculateMods = (
     };
 };
 
-export function removeDebuffMods(mods: ModsLazer) {
+export function sanitizeMods(arrayMods: ModsLazer) {
     try {
-        const _mods = mods.filter(
+        // remove debuff mods
+        const mods = arrayMods.filter(
             (r) => !(r.acronym === 'RX' || r.acronym === 'AP')
         );
-        return _mods;
+
+        const v2 = mods.findIndex((r) => r.acronym.toLowerCase() === 'v2');
+        if (v2 > -1) mods.splice(v2, 1, { acronym: 'SV2' });
+
+        return mods;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        return mods;
+        return arrayMods;
     }
 }

@@ -4,7 +4,7 @@ import { ClientType, measureTime, wLogger } from '@tosu/common';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
-import { defaultCalculatedMods, removeDebuffMods } from '@/utils/osuMods';
+import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods } from '@/utils/osuMods.types';
 
 export class ResultScreen extends AbstractState {
@@ -165,7 +165,7 @@ export class ResultScreen extends AbstractState {
             }
 
             const commonParams = {
-                mods: removeDebuffMods(this.mods.array),
+                mods: sanitizeMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             };
 
