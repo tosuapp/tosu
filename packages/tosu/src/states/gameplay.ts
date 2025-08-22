@@ -33,9 +33,9 @@ const defaultLBPlayer = {
     score: 0,
     combo: 0,
     maxCombo: 0,
+    accuracy: 100,
     mods: Object.assign({}, defaultCalculatedMods),
     statistics: Object.assign({}, defaultStatistics),
-    maximumStatistics: Object.assign({}, defaultStatistics),
     team: 0,
     position: 0,
     isPassing: false
@@ -112,10 +112,12 @@ export class Gameplay extends AbstractState {
         this.unstableRate = 0;
         this.gradeCurrent = calculateGrade({
             isLazer: this.game.client === ClientType.lazer,
+
             mods: this.mods.array,
             mode: this.mode,
-            statistics: this.statistics,
-            maximumStatistics: this.maximumStatistics
+            accuracy: this.accuracy,
+
+            statistics: this.statistics
         });
 
         this.gradeExpected = this.gradeCurrent;
@@ -405,16 +407,21 @@ export class Gameplay extends AbstractState {
     private updateGrade(objectCount: number) {
         this.gradeCurrent = calculateGrade({
             isLazer: this.game.client === ClientType.lazer,
+
             mods: this.mods.array,
             mode: this.mode,
-            statistics: this.statistics,
-            maximumStatistics: this.maximumStatistics
+            accuracy: this.accuracy,
+
+            statistics: this.statistics
         });
 
         this.gradeExpected = calculateGrade({
             isLazer: this.game.client === ClientType.lazer,
+
             mods: this.mods.array,
             mode: this.mode,
+            accuracy: this.accuracy,
+
             statistics: Object.assign({}, this.statistics, {
                 great:
                     this.statistics.great +
@@ -423,15 +430,14 @@ export class Gameplay extends AbstractState {
                     this.statistics.ok -
                     this.statistics.meh -
                     this.statistics.miss
-            } as Statistics),
-            maximumStatistics: this.maximumStatistics
+            } as Statistics)
         });
     }
 
     @measureTime
     private updateLeaderboard() {
         try {
-            const result = this.game.memory.leaderboard();
+            const result = this.game.memory.leaderboard(this.mode);
             if (result instanceof Error) throw result;
 
             this.isLeaderboardVisible = result[0];

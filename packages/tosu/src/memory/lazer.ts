@@ -1403,7 +1403,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         const statistics = this.readStatistics(scoreInfo);
-        const maximumStatistics = this.readMaximumStatistics(scoreInfo);
 
         return {
             userId,
@@ -1416,7 +1415,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     ]
             ),
             statistics,
-            maximumStatistics,
+            accuracy:
+                this.process.readDouble(
+                    scoreInfo +
+                        this.offsets['osu.Game.Scoring.ScoreInfo'][
+                            '<Accuracy>k__BackingField'
+                        ]
+                ) * 100,
             combo: this.process.readInt(
                 scoreInfo +
                     this.offsets['osu.Game.Scoring.ScoreInfo'][
@@ -1818,6 +1823,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             playerName: score.playerName,
             mods: score.mods,
             mode: score.mode,
+            accuracy: score.accuracy,
             maxCombo: score.maxCombo,
             score: score.score,
             statistics: score.statistics,

@@ -27,6 +27,7 @@ import { defaultStatistics } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import { LeaderboardPlayer } from '@/states/types';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
+import { calculateAccuracy } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type {
@@ -453,6 +454,15 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
+            const hits = {
+                perfect: hitGeki,
+                great: hit300,
+                good: hitKatu,
+                ok: hit100,
+                meh: hit50,
+                miss: hitMiss
+            };
+
             return {
                 onlineId,
                 playerName,
@@ -460,14 +470,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 mode,
                 maxCombo,
                 score,
-                statistics: {
-                    perfect: hitGeki,
-                    great: hit300,
-                    good: hitKatu,
-                    ok: hit100,
-                    meh: hit50,
-                    miss: hitMiss
-                },
+                accuracy: calculateAccuracy({
+                    mode,
+                    mods: mods.array,
+                    statistics: hits
+                }),
+                statistics: hits,
                 maximumStatistics: Object.assign({}, defaultStatistics),
                 date
             };
@@ -1126,7 +1134,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    leaderboard(): ILeaderboard {
+    leaderboard(mode: number): ILeaderboard {
         try {
             const rulesetAddr = this.process.readInt(
                 this.process.readInt(this.getPattern('rulesetsAddr') - 0xb) +
@@ -1149,7 +1157,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 this.process.readInt(playerBase + 0x24) + 0x20
             );
 
-            const currentPlayer = this.leaderboardPlayer(playerBase);
+            const currentPlayer = this.leaderboardPlayer(playerBase, mode);
 
             const playersAddr = this.process.readInt(address + 0x4);
             const slotsAmount = this.process.readInt(playersAddr + 0xc);
@@ -1167,7 +1175,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 const current = itemsBase + leaderStart + 0x4 * i;
 
                 const lbEntry = this.leaderboardPlayer(
-                    this.process.readInt(current)
+                    this.process.readInt(current),
+                    mode
                 );
 
                 if (!lbEntry) {
@@ -1184,7 +1193,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    private leaderboardPlayer(base: number): LeaderboardPlayer | undefined {
+    private leaderboardPlayer(
+        base: number,
+        mode: number
+    ): LeaderboardPlayer | undefined {
         const entry = this.process.readInt(base + 0x20);
         if (entry === 0) {
             return undefined;
@@ -1214,6 +1226,15 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             }
         }
 
+        const hits = {
+            perfect: 0,
+            great: this.process.readShort(entry + 0x8a),
+            good: 0,
+            ok: this.process.readShort(entry + 0x88),
+            meh: this.process.readShort(entry + 0x8c),
+            miss: this.process.readShort(entry + 0x92)
+        };
+
         return {
             userId,
             name: this.process.readSharpString(
@@ -1223,15 +1244,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             combo: this.process.readShort(entry + 0x94),
             maxCombo: this.process.readShort(entry + 0x68),
             mods,
-            statistics: {
-                perfect: 0,
-                great: this.process.readShort(entry + 0x8a),
-                good: 0,
-                ok: this.process.readShort(entry + 0x88),
-                meh: this.process.readShort(entry + 0x8c),
-                miss: this.process.readShort(entry + 0x92)
-            },
-            maximumStatistics: Object.assign({}, defaultStatistics),
+            accuracy: calculateAccuracy({
+                mode,
+                mods: mods.array,
+                statistics: hits
+            }),
+            statistics: hits,
             team: this.process.readInt(base + 0x40),
             position: this.process.readInt(base + 0x2c),
             isPassing: Boolean(this.process.readByte(base + 0x4b))

@@ -6,13 +6,23 @@ import { ModsLazer } from '@/utils/osuMods.types';
  * credits: https://github.com/maxohn/rosu-pp
  */
 export const calculateAccuracy = (params: {
-    isLazer: boolean;
-    isRound: boolean;
     mods: ModsLazer;
     mode: number;
 
-    statistics: Statistics;
-    maximumStatistics: Statistics;
+    statistics: {
+        /** geki */
+        perfect: number;
+        /** h300 */
+        great: number;
+        /** katu */
+        good: number;
+        /** h100 */
+        ok: number;
+        /** h50 */
+        meh: number;
+        /** h0 */
+        miss: number;
+    };
 }) => {
     const hits = params.statistics;
     let numerator = 0;
@@ -22,23 +32,6 @@ export const calculateAccuracy = (params: {
         case 0: {
             numerator = 6 * hits.great + 2 * hits.ok + hits.meh;
             denominator = 6 * (hits.great + hits.ok + hits.meh + hits.miss);
-
-            if (!params.isLazer) break;
-
-            numerator +=
-                3 *
-                    Math.min(
-                        hits.sliderTailHit || 0,
-                        params.maximumStatistics.sliderTailHit || 0
-                    ) +
-                0.6 *
-                    Math.min(
-                        hits.largeTickHit || 0,
-                        params.maximumStatistics.largeTickHit || 0
-                    );
-            denominator +=
-                3 * (params.maximumStatistics.sliderTailHit || 0) +
-                0.6 * (params.maximumStatistics.largeTickHit || 0);
             break;
         }
 
@@ -88,32 +81,24 @@ export const calculateAccuracy = (params: {
     }
 
     if (denominator === 0) return 0;
-    if (params.isRound) return +((numerator / denominator) * 100).toFixed(2);
-    return numerator / denominator;
+    return +((numerator / denominator) * 100).toFixed(2);
 };
 
 export const calculateGrade = (params: {
     isLazer: boolean;
+
     mods: ModsLazer;
     mode: number;
+    accuracy: number;
 
     statistics: Statistics;
-    maximumStatistics: Statistics;
 }): string => {
     const silver = params.mods.some(
         (mod) => mod.acronym === 'FL' || mod.acronym === 'HD'
     );
 
-    const accuracy = calculateAccuracy({
-        isLazer: params.isLazer,
-        isRound: false,
+    const accuracy = params.accuracy / 100;
 
-        mods: params.mods,
-        mode: params.mode,
-
-        statistics: params.statistics,
-        maximumStatistics: params.maximumStatistics
-    });
     let rank = '';
 
     if (params.isLazer === true) {
