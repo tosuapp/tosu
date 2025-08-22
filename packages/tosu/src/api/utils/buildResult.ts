@@ -11,7 +11,7 @@ import { LazerInstance } from '@/instances/lazerInstance';
 import { InstanceManager } from '@/instances/manager';
 import { IUserProtected } from '@/memory/types';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
-import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
+import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { CalculateMods } from '@/utils/osuMods.types';
 
@@ -225,16 +225,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             mode: gameplay.mode,
             name: resultScreen.playerName,
             score: resultScreen.score,
-            accuracy: calculateAccuracy({
-                isLazer: false,
-                isRound: true,
-
-                mods: resultScreen.mods.array,
-                mode: resultScreen.mode,
-
-                statistics: resultScreen.statistics,
-                maximumStatistics: resultScreen.maximumStatistics
-            }),
+            accuracy: resultScreen.accuracy,
             maxCombo: resultScreen.maxCombo,
             mods: {
                 num: resultScreen.mods.number,
@@ -365,11 +356,12 @@ const buildLazerTourneyData = (
                                 grade: {
                                     current: calculateGrade({
                                         isLazer: true,
+
                                         mods: client.score!.mods.array,
                                         mode: client.score!.mode,
-                                        statistics: client.score!.statistics,
-                                        maximumStatistics:
-                                            client.score!.maximumStatistics
+                                        accuracy: client.score!.accuracy,
+
+                                        statistics: client.score!.statistics
                                     }),
                                     // not supported
                                     maxThisPlay: ''

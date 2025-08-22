@@ -44,10 +44,10 @@ export interface LeaderboardPlayer {
     name: string;
     score: number;
     combo: number;
+    accuracy: number;
     maxCombo: number;
     mods: CalculateMods;
     statistics: Statistics;
-    maximumStatistics: Statistics;
     team: number;
     position: number;
     isPassing: boolean;

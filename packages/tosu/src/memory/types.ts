@@ -56,6 +56,7 @@ export type IResultScreen =
           playerName: string;
           mods: CalculateMods;
           mode: number;
+          accuracy: number;
           maxCombo: number;
           score: number;
           statistics: Statistics;

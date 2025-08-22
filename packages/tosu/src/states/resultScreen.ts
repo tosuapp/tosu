@@ -3,7 +3,7 @@ import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
-import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
+import { calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods } from '@/utils/osuMods.types';
 
@@ -81,28 +81,19 @@ export class ResultScreen extends AbstractState {
             this.mode = result.mode;
             this.maxCombo = result.maxCombo;
             this.score = result.score;
+            this.accuracy = result.accuracy;
             this.statistics = result.statistics;
             this.maximumStatistics = result.maximumStatistics;
             this.date = result.date;
 
             this.grade = calculateGrade({
                 isLazer: this.game.client === ClientType.lazer,
-                mods: this.mods.array,
-                mode: this.mode,
-
-                statistics: this.statistics,
-                maximumStatistics: this.maximumStatistics
-            });
-
-            this.accuracy = calculateAccuracy({
-                isLazer: this.game.client === ClientType.lazer,
-                isRound: true,
 
                 mods: this.mods.array,
                 mode: this.mode,
+                accuracy: this.accuracy,
 
-                statistics: this.statistics,
-                maximumStatistics: this.maximumStatistics
+                statistics: this.statistics
             });
 
             this.game.resetReportCount('resultScreen updateState');

@@ -31,7 +31,7 @@ import { IUserProtected } from '@/memory/types';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
-import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
+import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { CalculateMods } from '@/utils/osuMods.types';
 
@@ -49,16 +49,7 @@ const convertMemoryPlayerToResult = (
     name: memoryPlayer.name,
 
     score: memoryPlayer.score,
-    accuracy: calculateAccuracy({
-        isLazer: client === ClientType.lazer,
-        isRound: true,
-
-        mods: memoryPlayer.mods.array,
-        mode: gameMode,
-
-        statistics: memoryPlayer.statistics,
-        maximumStatistics: memoryPlayer.maximumStatistics
-    }),
+    accuracy: memoryPlayer.accuracy,
 
     hits: {
         300: memoryPlayer.statistics.great,
@@ -82,11 +73,12 @@ const convertMemoryPlayerToResult = (
     },
     rank: calculateGrade({
         isLazer: client === ClientType.lazer,
+
         mods: memoryPlayer.mods.array,
         mode: gameMode,
+        accuracy: memoryPlayer.accuracy,
 
-        statistics: memoryPlayer.statistics,
-        maximumStatistics: memoryPlayer.maximumStatistics
+        statistics: memoryPlayer.statistics
     })
 });
 
@@ -480,8 +472,8 @@ const buildLazerTourneyData = (
                     mods: client.score!.mods.array,
                     mode: client.score!.mode,
 
-                    statistics: client.score!.statistics,
-                    maximumStatistics: client.score!.maximumStatistics
+                    accuracy: client.score!.accuracy,
+                    statistics: client.score!.statistics
                 });
 
                 const currentMods =
