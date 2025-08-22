@@ -1,9 +1,13 @@
-import { Overlay, defaultDllDir, length } from 'asdf-overlay-node';
-import { BrowserWindow, TextureInfo } from 'electron';
+import { Overlay, defaultDllDir, length } from '@asdf-overlay/core';
+import {
+    ElectronOverlayInput,
+    ElectronOverlaySurface
+} from '@asdf-overlay/electron';
+import { BrowserWindow } from 'electron';
 import EventEmitter from 'node:events';
 import path from 'node:path';
 
-import { Keybind, toCursor, toKeyboardEvent, toMouseEvent } from './input';
+import { Keybind } from './keybind';
 
 export type OverlayEventEmitter = EventEmitter<{
     destroyed: [];
@@ -13,9 +17,12 @@ export class OverlayProcess {
     readonly event: OverlayEventEmitter = new EventEmitter();
     keybind = new Keybind([]);
 
+    private readonly surface: ElectronOverlaySurface;
+    private input: ElectronOverlayInput | null = null;
+
     private constructor(
         readonly pid: number,
-        private readonly hwnd: number,
+        private readonly windowId: number,
         readonly overlay: Overlay,
         readonly window: BrowserWindow
     ) {
@@ -25,7 +32,7 @@ export class OverlayProcess {
         });
 
         overlay.event.on('resized', (hwnd, width, height) => {
-            if (hwnd !== this.hwnd) {
+            if (hwnd !== this.windowId) {
                 return;
             }
 
@@ -40,21 +47,10 @@ export class OverlayProcess {
             this.window.setSize(width, height);
         });
 
-        overlay.event.on('cursor_input', (_, input) => {
-            const event = toMouseEvent(input);
-            if (event) {
-                window.webContents.sendInputEvent(event);
-            }
-        });
-
-        window.webContents.on('cursor-changed', (_, type) => {
-            overlay.setBlockingCursor(hwnd, toCursor(type));
-        });
-
         let configurationEnabled = false;
-
         overlay.event.on('input_blocking_ended', () => {
             this.closeConfiguration();
+            this.input?.disconnect();
             configurationEnabled = false;
         });
 
@@ -65,37 +61,22 @@ export class OverlayProcess {
             ) {
                 configurationEnabled = !configurationEnabled;
 
-                overlay.blockInput(hwnd, configurationEnabled);
+                overlay.blockInput(windowId, configurationEnabled);
                 if (configurationEnabled) {
+                    this.input = ElectronOverlayInput.connect(
+                        { id: windowId, overlay },
+                        window.webContents
+                    );
+                    this.input.forwardInput = true;
                     this.openConfiguration();
                 }
             }
-
-            if (configurationEnabled) {
-                const event = toKeyboardEvent(input);
-                if (event) {
-                    window.webContents.sendInputEvent(event);
-                }
-            }
         });
 
-        window.webContents.on('paint', async (e) => {
-            if (!e.texture) {
-                return;
-            }
-
-            try {
-                await this.updateSurface(e.texture.textureInfo);
-            } catch (e) {
-                console.error(
-                    `error while updating overlay pid: ${pid.toString()}, err:`,
-                    e
-                );
-                this.destroy();
-            } finally {
-                e.texture.release();
-            }
-        });
+        this.surface = ElectronOverlaySurface.connect(
+            { id: windowId, overlay },
+            window.webContents
+        );
     }
 
     private openConfiguration() {
@@ -108,22 +89,9 @@ export class OverlayProcess {
         this.window.blurWebView();
     }
 
-    private async updateSurface(info: TextureInfo) {
-        const rect = info.metadata.captureUpdateRect ?? info.contentRect;
-        await this.overlay.updateShtex(
-            this.hwnd,
-            info.codedSize.width,
-            info.codedSize.height,
-            info.sharedTextureHandle,
-            {
-                dstX: rect.x,
-                dstY: rect.y,
-                src: rect
-            }
-        );
-    }
-
     destroy() {
+        this.input?.disconnect();
+        this.surface.disconnect();
         this.overlay.destroy();
     }
 

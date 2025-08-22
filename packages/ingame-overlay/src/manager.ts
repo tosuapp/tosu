@@ -1,7 +1,8 @@
-import { Key, key } from 'asdf-overlay-node';
+import { type Key, key } from '@asdf-overlay/core';
 import { on } from 'node:events';
 
-import { KEYS, Keybind } from './input';
+import { KEYS } from './input';
+import { Keybind } from './keybind';
 import { OverlayProcess } from './process';
 
 export class OverlayManager {
