@@ -70,8 +70,8 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0
       '@asdf-overlay/electron':
-        specifier: ^0.9.0
-        version: 0.9.0(@asdf-overlay/core@0.9.0)(electron@37.3.1)
+        specifier: ^0.9.1
+        version: 0.9.1(@asdf-overlay/core@0.9.0)(electron@37.3.1)
     devDependencies:
       '@eslint/js':
         specifier: ^9.26.0
@@ -235,8 +235,8 @@ packages:
     resolution: {integrity: sha512-Z/WDJcDkYfB3qDQo1QSJvGkcVoAqkp0NWuEgIXQKdn9A3Fe+qgQAnyjBW4Aao5Jv42Uh2po+8nESA5aZ0Qjcsw==}
     os: [win32]
 
-  '@asdf-overlay/electron@0.9.0':
-    resolution: {integrity: sha512-pskXYwprlrkftqm3rS2h6ulL4nenU0MzY5Od7/gSBy7T9WXnSICArroA8y33nDNG9PH5RiNJ9sy8NhQVxf/yrw==}
+  '@asdf-overlay/electron@0.9.1':
+    resolution: {integrity: sha512-Rh2tsb0JAJULayBlZXgP/mOgR02yIHfYB6sSukPOCnMRQTKADfxsfLBaLyRR6F2GXiET2D3nr2OeW6hWqvSl9A==}
     peerDependencies:
       '@asdf-overlay/core': 0.9.0
       electron: ^37.3.1
@@ -4276,7 +4276,7 @@ snapshots:
 
   '@asdf-overlay/core@0.9.0': {}
 
-  '@asdf-overlay/electron@0.9.0(@asdf-overlay/core@0.9.0)(electron@37.3.1)':
+  '@asdf-overlay/electron@0.9.1(@asdf-overlay/core@0.9.0)(electron@37.3.1)':
     dependencies:
       '@asdf-overlay/core': 0.9.0
       electron: 37.3.1

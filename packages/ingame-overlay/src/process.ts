@@ -1,8 +1,6 @@
 import { Overlay, defaultDllDir, length } from '@asdf-overlay/core';
-import {
-    ElectronOverlayInput,
-    ElectronOverlaySurface
-} from '@asdf-overlay/electron';
+import { ElectronOverlayInput } from '@asdf-overlay/electron/input';
+import { ElectronOverlaySurface } from '@asdf-overlay/electron/surface';
 import { BrowserWindow } from 'electron';
 import EventEmitter from 'node:events';
 import path from 'node:path';
@@ -67,7 +65,6 @@ export class OverlayProcess {
                         { id: windowId, overlay },
                         window.webContents
                     );
-                    this.input.forwardInput = true;
                     this.openConfiguration();
                 }
             }

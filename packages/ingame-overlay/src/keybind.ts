@@ -1,13 +1,14 @@
 import type { Key } from '@asdf-overlay/core';
 import type { InputState } from '@asdf-overlay/core/input';
+import { mapKeycode } from '@asdf-overlay/electron/input/conv';
 
 export class Keybind {
     private state = 0xffffffff;
 
     /**
-     * @param keys array of keybind key up to 32 keys
+     * @param keys array of dom keys up to 32 keys
      */
-    constructor(private readonly keys: Key[]) {
+    constructor(private readonly keys: string[]) {
         if (keys.length > 32) {
             throw new Error('Keybind keys cannot be more than 32 keys');
         }
@@ -15,10 +16,7 @@ export class Keybind {
 
     update(key: Key, state: InputState): boolean {
         const index = this.keys.findIndex((keybindKey) => {
-            return (
-                key.code === keybindKey.code &&
-                key.extended === keybindKey.extended
-            );
+            return mapKeycode(key.code) === keybindKey;
         });
         if (index === -1) {
             return false;
