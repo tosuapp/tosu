@@ -460,7 +460,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 good: hitKatu,
                 ok: hit100,
                 meh: hit50,
-                miss: hitMiss
+                miss: hitMiss,
+
+                sliderTailHit: 0,
+                smallTickHit: 0,
+                largeTickHit: 0
             };
 
             return {
@@ -596,7 +600,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     good: hitKatu,
                     ok: hit100,
                     meh: hit50,
-                    miss: hitMiss
+                    miss: hitMiss,
+                    sliderTailHit: 0,
+                    smallTickHit: 0,
+                    largeTickHit: 0
                 },
                 maximumStatistics: Object.assign({}, defaultStatistics),
                 combo,
@@ -1232,7 +1239,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             good: 0,
             ok: this.process.readShort(entry + 0x88),
             meh: this.process.readShort(entry + 0x8c),
-            miss: this.process.readShort(entry + 0x92)
+            miss: this.process.readShort(entry + 0x92),
+
+            sliderTailHit: 0,
+            smallTickHit: 0,
+            largeTickHit: 0
         };
 
         return {
