@@ -15,16 +15,16 @@ export interface Statistics {
     miss: number;
 
     smallTickMiss?: number;
-    smallTickHit?: number;
+    smallTickHit: number;
     largeTickMiss?: number;
-    largeTickHit?: number;
+    largeTickHit: number;
     smallBonus?: number;
     largeBonus?: number;
     ignoreMiss?: number;
     ignoreHit?: number;
     comboBreak?: number;
     /** sliderEndHits */
-    sliderTailHit?: number;
+    sliderTailHit: number;
     legacyComboIncrease?: number;
 }
 
