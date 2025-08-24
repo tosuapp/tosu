@@ -1,7 +1,7 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
-import { cleanPath } from '@/utils/converters';
+import { safeJoin } from '@/utils/converters';
 import { defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods } from '@/utils/osuMods.types';
 
@@ -64,8 +64,8 @@ export class Global extends AbstractState {
             this.gameTime = result.gameTime;
             this.menuMods = result.menuMods;
 
-            this.skinFolder = cleanPath(result.skinFolder);
-            this.memorySongsFolder = cleanPath(result.memorySongsFolder);
+            this.skinFolder = safeJoin(result.skinFolder);
+            this.memorySongsFolder = safeJoin(result.memorySongsFolder);
 
             this.game.resetReportCount('global updateState');
         } catch (exc) {
