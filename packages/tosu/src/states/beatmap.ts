@@ -7,7 +7,7 @@ import { BeatmapDecoder } from 'osu-parsers';
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
-import { cleanPath, fixDecimals } from '@/utils/converters';
+import { fixDecimals, safeJoin } from '@/utils/converters';
 import { sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
@@ -345,7 +345,7 @@ export class BeatmapPP extends AbstractState {
                 return;
             }
 
-            const mapPath = cleanPath(
+            const mapPath = safeJoin(
                 global.songsFolder,
                 menu.folder,
                 menu.filename
@@ -486,11 +486,11 @@ export class BeatmapPP extends AbstractState {
                 const { bpm, bpmMin, bpmMax } = this.lazerBeatmap;
 
                 if (
-                    cleanPath(this.lazerBeatmap.events.backgroundPath || '') !==
+                    safeJoin(this.lazerBeatmap.events.backgroundPath || '') !==
                         menu.backgroundFilename &&
                     !lazerBypass
                 ) {
-                    menu.backgroundFilename = cleanPath(
+                    menu.backgroundFilename = safeJoin(
                         this.lazerBeatmap.events.backgroundPath || ''
                     );
                 }

@@ -1,7 +1,7 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractState } from '@/states';
-import { cleanPath } from '@/utils/converters';
+import { safeJoin } from '@/utils/converters';
 
 export class Menu extends AbstractState {
     gamemode: number;
@@ -79,7 +79,7 @@ export class Menu extends AbstractState {
 
             // MD5 hasn't changed in over NEW_MAP_COMMIT_DELAY, commit to new map
             this.checksum = result.checksum;
-            this.filename = cleanPath(result.filename);
+            this.filename = safeJoin(result.filename);
 
             this.plays = result.plays;
             this.artist = result.artist;
@@ -92,13 +92,13 @@ export class Menu extends AbstractState {
             this.hp = result.hp;
             this.od = result.od;
 
-            this.audioFilename = cleanPath(result.audioFilename);
+            this.audioFilename = safeJoin(result.audioFilename);
             this.audioFileMimetype = result.audioFileMimetype;
 
-            this.backgroundFilename = cleanPath(result.backgroundFilename);
+            this.backgroundFilename = safeJoin(result.backgroundFilename);
             this.backgroundFileMimetype = result.backgroundFileMimetype;
 
-            this.folder = cleanPath(result.folder);
+            this.folder = safeJoin(result.folder);
             this.creator = result.creator;
             this.difficulty = result.difficulty;
             this.mapID = result.mapID;
