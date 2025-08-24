@@ -10,7 +10,7 @@ import fs from 'fs';
 
 import { AbstractInstance } from '@/instances/index';
 import { StableMemory } from '@/memory/stable';
-import { cleanPath } from '@/utils/converters';
+import { safeJoin } from '@/utils/converters';
 
 export class OsuInstance extends AbstractInstance {
     memory: StableMemory;
@@ -65,7 +65,7 @@ export class OsuInstance extends AbstractInstance {
                         global.setSongsFolder(global.memorySongsFolder);
                     } else {
                         global.setSongsFolder(
-                            cleanPath(this.path, global.memorySongsFolder)
+                            safeJoin(this.path, global.memorySongsFolder)
                         );
                     }
                 }
