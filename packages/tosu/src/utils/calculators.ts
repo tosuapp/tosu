@@ -98,7 +98,6 @@ export const calculateGrade = (params: {
     );
 
     const accuracy = params.accuracy / 100;
-
     let rank = '';
 
     if (params.isLazer === true) {
@@ -245,19 +244,19 @@ export const calculatePassedObjects = (
         case 2:
             return (
                 statistics.great +
+                statistics.good +
                 statistics.ok +
                 statistics.meh +
-                statistics.miss +
-                statistics.good
+                statistics.miss
             );
         case 3:
             return (
                 statistics.great +
+                statistics.perfect +
                 statistics.ok +
-                statistics.meh +
-                statistics.miss +
                 statistics.good +
-                statistics.great
+                statistics.meh +
+                statistics.miss
             );
         default:
             return 0;

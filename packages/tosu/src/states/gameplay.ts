@@ -598,8 +598,6 @@ export class Gameplay extends AbstractState {
             if (this.mode === 3) {
                 calcOptions.nGeki =
                     maxJudgementsAmount -
-                    this.statistics.great -
-                    this.statistics.good -
                     this.statistics.ok -
                     this.statistics.meh -
                     this.statistics.miss;
