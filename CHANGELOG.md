@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.13.0](https://github.com/tosuapp/tosu/compare/v4.12.1...v4.13.0) (2025-08-24)
+
+
+### Features
+
+* Add lazer version to api v2 ([2af9378](https://github.com/tosuapp/tosu/commit/2af93780b3f101372040f817640ae9847543a2b5))
+* HIde/show overlays after deletion/restore ([935ed9e](https://github.com/tosuapp/tosu/commit/935ed9ea77a91f87f3b2dbefeabfd57169f5e860))
+* Move lazer offsets to separate file (1/?) ([db60ef9](https://github.com/tosuapp/tosu/commit/db60ef9903a6ec5c5e0ffa3b1303e14f9c957df5))
+* Move lazer offsets to separate file (2/?) ([593533a](https://github.com/tosuapp/tosu/commit/593533a1a26f792ac8b50e9da75eb3ad6792f6a9))
+* reorganize lazer offsets structure to fit generator ([548041b](https://github.com/tosuapp/tosu/commit/548041b45ec20c5e0fc6fd04fda6e960c89144c6))
+* Update offsets without new release ([3608640](https://github.com/tosuapp/tosu/commit/3608640f9f1f823e4a756ea336fb746a05317192))
+
+
+### Bug Fixes
+
+* Fix finding wrong memory address in lazer ([46950a1](https://github.com/tosuapp/tosu/commit/46950a11327c73895a80eee9873c6de4e5279a08))
+* Rename `V2` to `SV2` for rosu only ([fe42669](https://github.com/tosuapp/tosu/commit/fe42669b6d972de897962d287f5920196c6d46a6))
+* semver expect error ([d21f029](https://github.com/tosuapp/tosu/commit/d21f0297a0d4a62669288c5a65d04703b48d2344))
+
 ### [4.12.1](https://github.com/tosuapp/tosu/compare/v4.12.0...v4.12.1) (2025-08-17)
 
 
