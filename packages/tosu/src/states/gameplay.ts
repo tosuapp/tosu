@@ -585,10 +585,13 @@ export class Gameplay extends AbstractState {
             }
 
             const maxJudgementsAmount =
-                beatmapPP.calculatedMapAttributes.circles +
-                beatmapPP.calculatedMapAttributes.sliders +
-                beatmapPP.calculatedMapAttributes.spinners +
-                beatmapPP.calculatedMapAttributes.holds;
+                this.mode === 3
+                    ? beatmapPP.calculatedMapAttributes.circles +
+                      2 * beatmapPP.calculatedMapAttributes.sliders
+                    : beatmapPP.calculatedMapAttributes.circles +
+                      beatmapPP.calculatedMapAttributes.sliders +
+                      beatmapPP.calculatedMapAttributes.spinners +
+                      beatmapPP.calculatedMapAttributes.holds;
 
             const calcOptions: PerformanceArgs = {
                 nGeki: this.hitGeki,
