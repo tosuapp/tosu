@@ -31,7 +31,7 @@ import { IUserProtected } from '@/memory/types';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
-import { calculateAccuracy, calculateGrade } from '@/utils/calculators';
+import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { CalculateMods } from '@/utils/osuMods.types';
 
@@ -39,49 +39,48 @@ const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
     gameMode: any,
     client: ClientType
-): Leaderboard => {
-    const hits = {
-        300: memoryPlayer.h300,
-        100: memoryPlayer.h100,
-        50: memoryPlayer.h50,
-        0: memoryPlayer.h0,
-        geki: 0,
-        katu: 0
-    };
+): Leaderboard => ({
+    isFailed: memoryPlayer.isPassing === false,
 
-    return {
-        isFailed: memoryPlayer.isPassing === false,
+    position: memoryPlayer.position,
+    team: memoryPlayer.team,
 
-        position: memoryPlayer.position,
-        team: memoryPlayer.team,
+    id: memoryPlayer.userId,
+    name: memoryPlayer.name,
 
-        id: memoryPlayer.userId,
-        name: memoryPlayer.name,
+    score: memoryPlayer.score,
+    accuracy: memoryPlayer.accuracy,
 
-        score: memoryPlayer.score,
-        accuracy: calculateAccuracy({ isRound: true, hits, mode: gameMode }),
+    hits: {
+        300: memoryPlayer.statistics.great,
+        geki: memoryPlayer.statistics.perfect,
+        100: memoryPlayer.statistics.ok,
+        katu: memoryPlayer.statistics.good,
+        50: memoryPlayer.statistics.meh,
+        0: memoryPlayer.statistics.miss
+    },
 
-        hits,
+    combo: {
+        current: memoryPlayer.combo,
+        max: memoryPlayer.maxCombo
+    },
+    mods: {
+        checksum: memoryPlayer.mods.checksum,
+        number: memoryPlayer.mods.number,
+        name: memoryPlayer.mods.name,
+        array: memoryPlayer.mods.array,
+        rate: memoryPlayer.mods.rate
+    },
+    rank: calculateGrade({
+        isLazer: client === ClientType.lazer,
 
-        combo: {
-            current: memoryPlayer.combo,
-            max: memoryPlayer.maxCombo
-        },
-        mods: {
-            checksum: memoryPlayer.mods.checksum,
-            number: memoryPlayer.mods.number,
-            name: memoryPlayer.mods.name,
-            array: memoryPlayer.mods.array,
-            rate: memoryPlayer.mods.rate
-        },
-        rank: calculateGrade({
-            isLazer: client === ClientType.lazer,
-            mods: memoryPlayer.mods.number,
-            mode: gameMode,
-            hits
-        })
-    };
-};
+        mods: memoryPlayer.mods.array,
+        mode: gameMode,
+        accuracy: memoryPlayer.accuracy,
+
+        statistics: memoryPlayer.statistics
+    })
+});
 
 export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     const osuInstance = instanceManager.getInstance(
@@ -124,18 +123,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             : global.status === 7
               ? resultScreen.mode
               : menu.gamemode;
-
-    const resultScreenHits = {
-        300: resultScreen.hit300,
-        geki: resultScreen.hitGeki,
-        100: resultScreen.hit100,
-        katu: resultScreen.hitKatu,
-        50: resultScreen.hit50,
-        0: resultScreen.hitMiss,
-        sliderEndHits: resultScreen.sliderEndHits,
-        smallTickHits: resultScreen.smallTickHits,
-        largeTickHits: resultScreen.largeTickHits
-    };
 
     return {
         client: ClientType[osuInstance.client],
@@ -381,7 +368,17 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             accuracy: resultScreen.accuracy,
 
             name: resultScreen.playerName, // legacy, remove it later
-            hits: resultScreenHits,
+            hits: {
+                300: resultScreen.statistics.great,
+                geki: resultScreen.statistics.perfect,
+                100: resultScreen.statistics.ok,
+                katu: resultScreen.statistics.good,
+                50: resultScreen.statistics.meh,
+                0: resultScreen.statistics.miss,
+                sliderEndHits: resultScreen.statistics.sliderTailHit || 0,
+                smallTickHits: resultScreen.statistics.smallTickHit || 0,
+                largeTickHits: resultScreen.statistics.largeTickHit || 0
+            },
             mods: {
                 checksum: resultScreen.mods.checksum,
                 number: resultScreen.mods.number,
@@ -472,16 +469,11 @@ const buildLazerTourneyData = (
             (client, index) => {
                 const currentGrade = calculateGrade({
                     isLazer: true,
-                    mods: client.score!.mods.number,
+                    mods: client.score!.mods.array,
                     mode: client.score!.mode,
-                    hits: {
-                        300: client.score!.hit300,
-                        geki: 0,
-                        100: client.score!.hit100,
-                        katu: 0,
-                        50: client.score!.hit50,
-                        0: client.score!.hitMiss
-                    }
+
+                    accuracy: client.score!.accuracy,
+                    statistics: client.score!.statistics
                 });
 
                 const currentMods =
@@ -589,15 +581,18 @@ const buildLazerTourneyData = (
                         },
 
                         hits: {
-                            300: client.score!.hit300,
-                            geki: client.score!.hitGeki,
-                            100: client.score!.hit100,
-                            katu: client.score!.hitKatu,
-                            50: client.score!.hit50,
-                            0: client.score!.hitMiss,
-                            sliderEndHits: client.score!.sliderEndHits,
-                            smallTickHits: client.score!.smallTickHits,
-                            largeTickHits: client.score!.largeTickHits,
+                            300: client.score!.statistics.great,
+                            geki: client.score!.statistics.perfect,
+                            100: client.score!.statistics.ok,
+                            katu: client.score!.statistics.good,
+                            50: client.score!.statistics.meh,
+                            0: client.score!.statistics.miss,
+                            sliderEndHits:
+                                client.score!.statistics.sliderTailHit || 0,
+                            smallTickHits:
+                                client.score!.statistics.smallTickHit || 0,
+                            largeTickHits:
+                                client.score!.statistics.largeTickHit || 0,
                             // TODO: ADD SLIDERBREAKS
                             sliderBreaks: 0
                         },
@@ -899,16 +894,16 @@ function buildPlay(
         },
 
         hits: {
-            300: gameplay.hit300,
-            geki: gameplay.hitGeki,
-            100: gameplay.hit100,
-            katu: gameplay.hitKatu,
-            50: gameplay.hit50,
-            0: gameplay.hitMiss,
+            300: gameplay.statistics.great,
+            geki: gameplay.statistics.perfect,
+            100: gameplay.statistics.ok,
+            katu: gameplay.statistics.good,
+            50: gameplay.statistics.meh,
+            0: gameplay.statistics.miss,
             sliderBreaks: gameplay.hitSB,
-            sliderEndHits: gameplay.sliderEndHits,
-            smallTickHits: gameplay.smallTickHits,
-            largeTickHits: gameplay.largeTickHits
+            sliderEndHits: gameplay.statistics.sliderTailHit || 0,
+            smallTickHits: gameplay.statistics.smallTickHit || 0,
+            largeTickHits: gameplay.statistics.largeTickHit || 0
         },
 
         hitErrorArray: gameplay.hitErrors,

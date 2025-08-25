@@ -1,5 +1,5 @@
 import type { ITourneyManagerChatItem } from '@/states/tourney';
-import type { KeyOverlay, LeaderboardPlayer } from '@/states/types';
+import type { KeyOverlay, LeaderboardPlayer, Statistics } from '@/states/types';
 import type { MultiplayerTeamType } from '@/utils/multiplayer.types';
 import type { CalculateMods } from '@/utils/osuMods.types';
 import type { SettingsObject } from '@/utils/settings.types';
@@ -56,17 +56,11 @@ export type IResultScreen =
           playerName: string;
           mods: CalculateMods;
           mode: number;
+          accuracy: number;
           maxCombo: number;
           score: number;
-          hit100: number;
-          hit300: number;
-          hit50: number;
-          hitGeki: number;
-          hitKatu: number;
-          hitMiss: number;
-          sliderEndHits: number;
-          smallTickHits: number;
-          largeTickHits: number;
+          statistics: Statistics;
+          maximumStatistics: Statistics;
           date: string;
       }
     | string
@@ -81,15 +75,8 @@ export type IScore = {
     playerHPSmooth: number;
     playerHP: number;
     accuracy: number;
-    hit100: number;
-    hit300: number;
-    hit50: number;
-    hitGeki: number;
-    hitKatu: number;
-    hitMiss: number;
-    sliderEndHits: number;
-    smallTickHits: number;
-    largeTickHits: number;
+    statistics: Statistics;
+    maximumStatistics: Statistics;
     combo: number;
     maxCombo: number;
     pp?: number;

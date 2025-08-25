@@ -1414,10 +1414,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         '<TotalScore>k__BackingField'
                     ]
             ),
-            h300: statistics.great,
-            h100: statistics.ok,
-            h50: statistics.meh,
-            h0: statistics.miss,
+            statistics,
+            accuracy:
+                this.process.readDouble(
+                    scoreInfo +
+                        this.offsets['osu.Game.Scoring.ScoreInfo'][
+                            '<Accuracy>k__BackingField'
+                        ]
+                ) * 100,
             combo: this.process.readInt(
                 scoreInfo +
                     this.offsets['osu.Game.Scoring.ScoreInfo'][
@@ -1562,6 +1566,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         combo?: number
     ): IGameplay {
         const statistics = this.readStatistics(scoreInfo);
+        const maximumStatistics = this.readMaximumStatistics(scoreInfo);
 
         const mods = this.mods(scoreInfo);
 
@@ -1625,10 +1630,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 ]
         );
         if (this.scoringDisplayMode === ScoringMode.classic) {
-            const objectCount = this.getObjectCountFromMaxStatistics(
-                this.readMaximumStatistics(scoreInfo)
-            );
-
+            const objectCount =
+                this.getObjectCountFromMaxStatistics(maximumStatistics);
             score = this.getDisplayScore(mode, score, objectCount);
         }
 
@@ -1647,15 +1650,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                             '<Accuracy>k__BackingField'
                         ]
                 ) * 100,
-            hitGeki: statistics.perfect,
-            hit300: statistics.great,
-            hitKatu: statistics.good,
-            hit100: statistics.ok,
-            hit50: statistics.meh,
-            hitMiss: statistics.miss,
-            sliderEndHits: statistics.sliderTailHit,
-            smallTickHits: statistics.smallTickHit,
-            largeTickHits: statistics.largeTickHit,
+            statistics,
+            maximumStatistics,
             combo,
             maxCombo: this.process.readInt(
                 scoreInfo +
@@ -1827,17 +1823,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             playerName: score.playerName,
             mods: score.mods,
             mode: score.mode,
+            accuracy: score.accuracy,
             maxCombo: score.maxCombo,
             score: score.score,
-            hit100: score.hit100,
-            hit300: score.hit300,
-            hit50: score.hit50,
-            hitGeki: score.hitGeki,
-            hitKatu: score.hitKatu,
-            hitMiss: score.hitMiss,
-            sliderEndHits: score.sliderEndHits,
-            smallTickHits: score.smallTickHits,
-            largeTickHits: score.largeTickHits,
+            statistics: score.statistics,
+            maximumStatistics: score.maximumStatistics,
             date
         };
     }
