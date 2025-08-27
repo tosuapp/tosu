@@ -13,7 +13,7 @@ export const noMoreCounters =
     '<div class="no-results">Nice job!<br />You downloaded all available pp counters</div>';
 
 export const iframeHTML =
-    '<iframe src="{URL}" width="{WIDTH}" height="{HEIGHT}" n="{NAME}" scrolling="no" frameborder="0"></iframe>';
+    '<iframe src="{URL}" loading="lazy" width="{WIDTH}" height="{HEIGHT}" n="{NAME}" scrolling="no" frameborder="0"></iframe>';
 
 export const metadataHTML = `
 <div>URL: <span nf nft="url" nfv="{COPY_URL}" class="copyable">{TEXT_URL}</span></div>
