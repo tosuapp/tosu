@@ -79,6 +79,12 @@ export const numberFromDecimal = (
     return value;
 };
 
+/**
+ * Joins given paths safely, removes invalid characters, uses system path separator and normalizes the joined path.
+ *
+ * @param {...string} paths - The paths to join.
+ * @returns {string} The safely joined path.
+ */
 export const safeJoin = (...paths: string[]): string => {
     const invalidChars = process.platform === 'win32' ? /[<>?"*|]/g : /[\\0/]/g;
 
