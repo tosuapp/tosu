@@ -1106,6 +1106,8 @@ async function downloadCounter(element, id, update) {
     return;
   };
 
+  const oldCount = localStorage.getItem('total-installed-overlays');
+  localStorage.setItem('total-installed-overlays', +oldCount + 1);
 
   let text = `PP Counter downloaded: ${name} by ${author}`;
   if (update == true) text = `PP Counter updated: ${name} by ${author}<br>Refresh it in obs (if you have one added)`;
@@ -1239,9 +1241,9 @@ async function deleteCounter(element) {
   const results = document.querySelector('.results');
   results.removeChild(element.parentElement.parentElement.parentElement);
 
-  const newTotal = document.querySelectorAll('.calu').length ?? 0;
-  installed_overlays.innerHTML = `Installed (${newTotal})`;
+  const newTotal = document.querySelectorAll('.calu').length || 0;
   localStorage.setItem('total-installed-overlays', newTotal);
+  installed_overlays.innerHTML = `Installed (${newTotal})`;
 
   if (results.innerHTML.trim() != '') return;
 
@@ -1305,7 +1307,7 @@ function handleInput() {
 };
 
 async function startSearch(search) {
-  if (isSearching == true) return;
+  if (isSearching == true || search_bar.value.trim().length === 0) return;
   search_bar.classList.add('disable');
   isSearching = true;
 
@@ -1659,24 +1661,41 @@ document.addEventListener('keydown', (event) => {
 });
 
 
+// Use cached values if available before updating with real values.
+const cachedAvailable = +localStorage.getItem('total-available-overlays') || 0;
+const cachedInstalled = +localStorage.getItem('total-installed-overlays') || 0;
+
+if (available_overlays) available_overlays.innerHTML = `Available (${cachedAvailable})`;
+if (installed_overlays) installed_overlays.innerHTML = `Installed (${cachedInstalled})`;
+
+
+
 window.onload = async () => {
+  window.closeModal_func = closeModal;
+
   try {
-    window.closeModal_func = closeModal;
-    const requst = await fetch('https://tosu.app/api.json');
-    const json = await requst.json();
+    const request = await fetch('https://tosu.app/api.json');
+    const available = await request.json();
 
-
-    if (available_overlays) available_overlays.innerHTML = `Available (${json.length})`;
-    localStorage.setItem('total-available-overlays', json.length);
-
+    if (Array.isArray(available) && cachedAvailable !== available.length) {
+      available_overlays.innerHTML = `Available (${available.length})`;
+      localStorage.setItem('total-available-overlays', available.length);
+    }
 
     const installed = document.querySelectorAll('.calu');
-    if (installed.length) localStorage.setItem('total-installed-overlays', installed.length);
+    if (installed_overlays) {
+      if (window.location.pathname === '/' && cachedInstalled !== installed.length) {
+        installed_overlays.innerHTML = `Installed (${installed.length})`;
+        localStorage.setItem('total-installed-overlays', installed.length);
+      } else {
+        installed_overlays.innerHTML = `Installed (${cachedInstalled})`;
+      }
+    }
 
     for (let i = 0; i < installed.length; i++) {
       const counter = installed[i];
 
-      const find = json.find(r => r.name.toLowerCase() == counter.attributes.getNamedItem('n')?.value.toLowerCase() && r.author.toLowerCase() == counter.attributes.getNamedItem('a')?.value.toLowerCase());
+      const find = available.find(r => r.name.toLowerCase() == counter.attributes.getNamedItem('n')?.value.toLowerCase() && r.author.toLowerCase() == counter.attributes.getNamedItem('a')?.value.toLowerCase())
       if (!find) continue;
 
       const updatable = counter.attributes.getNamedItem('v')?.value != find.version;
@@ -1691,40 +1710,32 @@ window.onload = async () => {
 
       button.innerHTML = `<span>Update</span>`;
       counter.prepend(button);
-    };
+    }
 
-    if (search_bar) {
-      setTimeout(() => {
-        search_bar.focus();
-      }, 100);
-    };
-
+    if (search_bar) setTimeout(() => search_bar.focus(), 100);
     window.showDonateModal = showDonateModal;
-  } catch (error) {
-    console.log(error);
-  };
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+// dynamically update values on all opened tabs.
+window.onstorage = (e) => {
+  if (e.key === 'total-installed-overlays' && installed_overlays) {
+    installed_overlays.innerHTML = `Installed (${e.newValue})`;
+    if (window.location.pathname === '/') setTimeout(() => window.location.reload(), 250);
+  }
+
+  if (e.key === 'total-available-overlays' && available_overlays) {
+    available_overlays.innerHTML = `Available (${e.newValue})`;
+    if (window.location.pathname === '/available') setTimeout(() => window.location.reload(), 250);
+  }
 };
 
 if (queryParams.has('ingame')) {
   document.querySelector('.tabs')?.remove();
   document.querySelector('.links')?.remove();
   document.querySelector('.submit-counter')?.remove();
-};
-
-if (available_overlays && localStorage.getItem('total-available-overlays') != null) {
-  const stored = +localStorage.getItem('total-available-overlays');
-  const current = +available_overlays.innerHTML.match(/\d+/);
-  if (current && current !== stored) localStorage.setItem('total-available-overlays', current);
-
-  available_overlays.innerHTML = `Available (${localStorage.getItem('total-available-overlays')})`;
-};
-
-if (installed_overlays && localStorage.getItem('total-installed-overlays') != null) {
-  const stored = +localStorage.getItem('total-installed-overlays');
-  const current = +installed_overlays.innerHTML.match(/\d+/);
-  if (current && current !== stored) localStorage.setItem('total-installed-overlays', current);
-
-  installed_overlays.innerHTML = `Installed (${localStorage.getItem('total-installed-overlays')})`;
 };
 
 
