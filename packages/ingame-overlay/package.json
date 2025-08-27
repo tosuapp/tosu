@@ -1,6 +1,6 @@
 {
   "name": "@tosu/ingame-overlay",
-  "version": "4.12.1",
+  "version": "4.13.0",
   "description": "High performance tosu ingame overlay",
   "private": true,
   "main": "./dist/src/index.js",
@@ -12,7 +12,7 @@
   "keywords": [],
   "author": "storycraft <storycraft@pancake.sh>",
   "dependencies": {
-    "asdf-overlay-node": "^0.8.2"
+    "asdf-overlay-node": "^0.7.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
