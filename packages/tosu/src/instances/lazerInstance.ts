@@ -30,6 +30,8 @@ export class LazerInstance extends AbstractInstance {
     override async initiate() {
         try {
             const cacheFolder = getCachePath();
+            if (!fs.existsSync(cacheFolder))
+                await fsp.mkdir(cacheFolder, { recursive: true });
 
             let attempts = 1;
             while (attempts < 5 && !this.osuVersion) {
