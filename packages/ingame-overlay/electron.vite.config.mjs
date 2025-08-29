@@ -12,9 +12,7 @@ export default defineConfig({
             minify: true,
             rollupOptions: {
                 external: [
-                    'asdf-overlay-node',
-                    '@jellybrick/wql-process-monitor',
-                    'tsprocess'
+                    '@asdf-overlay/core',
                 ]
             }
         },

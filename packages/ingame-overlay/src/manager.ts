@@ -1,16 +1,11 @@
-import { Key, key } from 'asdf-overlay-node';
 import { on } from 'node:events';
 
-import { KEYS, Keybind } from './input';
+import { Keybind } from './keybind';
 import { OverlayProcess } from './process';
 
 export class OverlayManager {
     private readonly map: Map<number, OverlayProcess> = new Map();
-    private keybindKeys: Key[] = [
-        key(0x11), // Left Control
-        key(0x10), // Left Shift
-        key(0x20) // Space
-    ];
+    private keybindKeys: string[] = ['Control', 'Shift', 'Space'];
 
     private maxFps: number = 60;
 
@@ -75,25 +70,12 @@ export class OverlayManager {
     }
 
     updateKeybind(keybind: string) {
-        const array = Array.from(Object.entries(KEYS));
-        const keys: { code: number; key: string }[] = keybind
-            .split('+')
-            .map((key) => {
-                const find = array.find(
-                    (r) => r[1].toLowerCase() === key.toLowerCase().trim()
-                );
-                return find ? { code: +find[0], key: find[1] } : null;
-            })
-            .filter((r) => r !== null);
-
-        this.keybindKeys = keys.map((k) => key(k.code));
+        this.keybindKeys = keybind.split(/\s*\+\s*/);
         for (const overlay of this.map.values()) {
             overlay.keybind = new Keybind(this.keybindKeys);
         }
 
-        console.debug(
-            `Keybind updated to ${keys.map((r) => r.key).join(' + ')}`
-        );
+        console.debug(`Keybind updated to ${this.keybindKeys.join(' + ')}`);
     }
 
     updateMaxFps(maxFps: number) {
