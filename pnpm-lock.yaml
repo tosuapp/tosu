@@ -67,11 +67,11 @@ importers:
   packages/ingame-overlay:
     dependencies:
       '@asdf-overlay/core':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: ^0.9.1
+        version: 0.9.1
       '@asdf-overlay/electron':
         specifier: ^0.9.1
-        version: 0.9.1(@asdf-overlay/core@0.9.0)(electron@37.3.1)
+        version: 0.9.1(@asdf-overlay/core@0.9.1)(electron@37.3.1)
     devDependencies:
       '@eslint/js':
         specifier: ^9.26.0
@@ -231,8 +231,9 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@asdf-overlay/core@0.9.0':
-    resolution: {integrity: sha512-Z/WDJcDkYfB3qDQo1QSJvGkcVoAqkp0NWuEgIXQKdn9A3Fe+qgQAnyjBW4Aao5Jv42Uh2po+8nESA5aZ0Qjcsw==}
+  '@asdf-overlay/core@0.9.1':
+    resolution: {integrity: sha512-Sz0+rqJ/yKRRNrRj2lOH43UoETTHUxvxsw5iwAreGZXmgVAYGf7DPP+Fc6rgK8SMnfSeUmJmpCxDzjLwnHx+0Q==}
+    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@0.9.1':
@@ -4274,11 +4275,11 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@asdf-overlay/core@0.9.0': {}
+  '@asdf-overlay/core@0.9.1': {}
 
-  '@asdf-overlay/electron@0.9.1(@asdf-overlay/core@0.9.0)(electron@37.3.1)':
+  '@asdf-overlay/electron@0.9.1(@asdf-overlay/core@0.9.1)(electron@37.3.1)':
     dependencies:
-      '@asdf-overlay/core': 0.9.0
+      '@asdf-overlay/core': 0.9.1
       electron: 37.3.1
 
   '@babel/code-frame@7.26.2':
