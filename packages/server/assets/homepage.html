@@ -24,19 +24,23 @@
       <i class="icon-discord"></i>
       discord
     </a>
-    <label class="flexer devmode si-checkbox indent-left">
+    <a href="#" onclick="showDonateModal()" class="flexer">
+      ‧ <span>❤️</span>
+      <span class="rainbow-donate">Donate</span>
+    </a>
+    <label class="flexer indent-left devmode si-checkbox">
       <input type="checkbox" name="devMode" id="devMode" value="false" />
       <div>DevMode</div>
       <span class="status"></span>
       <span class="checkmark"></span>
     </label>
   </header>
-  <div class="update-available hidden">
+  <div class="hidden update-available">
     <div>New version available. {OLD} => {NEW}</div>
     <div>click here to run update</div>
   </div>
   <main>
-    <div class="links flexer">
+    <div class="flexer links">
       <a href="https://github.com/tosuapp/tosu/wiki" target="_blank" class="flexer button open-button">
         wiki
         <i class="icon-link"></i>
@@ -45,11 +49,11 @@
         <i class="icon-folder"></i>
         open tosu folder
       </a>
-      <a href="/local-overlays" class="flexer button open-button indent-left">
+      <a href="/local-overlays" class="flexer indent-left button open-button">
         How to install local counter
       </a>
     </div>
-    <div class="tabs flexer">
+    <div class="flexer tabs">
       <a href="/settings" class="tab-item">
         <i class="icon-settings"></i>
         Settings

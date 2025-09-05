@@ -19,6 +19,7 @@
   --button-builder: #d5b873;
   --button-add-option: #9cd573;
   --button-update-settings: #73a6d5;
+  --button-boosty: #f15f2c;
 
   --submit-delete: #56c763;
 
@@ -577,6 +578,11 @@ a {
 
 .open-link-button {
   gap: 0.5em;
+}
+
+.boosty-button {
+  color: white;
+  background: var(--button-boosty);
 }
 
 .search-bar {
@@ -1628,4 +1634,44 @@ hr.modal-space {
 
 .ingame_keybind {
   width: 25em !important;
+}
+
+@keyframes rainbow-text-flow {
+  0% { 
+    background-position: 0% 50%; 
+  }
+  100% { 
+    background-position: 200% 50%; 
+  }
+}
+
+.rainbow-donate {
+  background: linear-gradient(
+    90deg,
+    #ff6b6b,
+    #4ecdc4, 
+    #45b7d1,
+    #f9ca24,
+    #f0932b,
+    #eb4d4b,
+    #6c5ce7,
+    #a29bfe,
+    #fd79a8,
+    #ff6b6b,
+    #4ecdc4, 
+    #45b7d1
+  );
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-text-flow 4s linear infinite;
+  font-weight: bold;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+  transition: filter 0.3s ease, transform 0.3s ease;
+  
+  &:hover {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+    transform: scale(1.05);
+  }
 }
