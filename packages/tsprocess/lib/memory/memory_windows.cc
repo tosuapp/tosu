@@ -87,10 +87,17 @@ bool memory::is_process_64bit(uint32_t id) {
 }
 
 std::string memory::get_process_path(void *handle) {
-  char filePath[MAX_PATH];
-  GetModuleFileNameExA(handle, NULL, filePath, MAX_PATH);
+  if (!handle) return {};
 
-  return filePath;
+  wchar_t buffer[MAX_PATH];
+  DWORD len = GetModuleFileNameExW(static_cast<HANDLE>(handle), nullptr, buffer, MAX_PATH);
+  if (len == 0) return {};
+
+  int size_needed = WideCharToMultiByte(CP_UTF8, 0, buffer, len, nullptr, 0, nullptr, nullptr);
+  std::string result(size_needed, 0);
+  WideCharToMultiByte(CP_UTF8, 0, buffer, len, &result[0], size_needed, nullptr, nullptr);
+
+  return result;
 }
 
 std::string memory::get_process_cwd(void *process) {
