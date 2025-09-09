@@ -20,6 +20,7 @@
   --button-add-option: #9cd573;
   --button-update-settings: #73a6d5;
   --button-boosty: #f15f2c;
+  --button-gumroad: black;
 
   --submit-delete: #56c763;
 
@@ -199,6 +200,10 @@ a {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
+}
+
+.clickable {
+  cursor: pointer;
 }
 
 .links {
@@ -585,6 +590,11 @@ a {
   background: var(--button-boosty);
 }
 
+.gumroad-button {
+  color: white;
+  background: var(--button-gumroad);
+}
+
 .search-bar {
   font-family: inherit;
   font-weight: 600;
@@ -768,16 +778,16 @@ a {
     }
 
     &:has(div > .number-input) {
-      & div > p {
+      & div>p {
         color: #6593c5;
         font-weight: bold;
         opacity: 100%;
       }
 
-      &:has(div > .number-input[data-id='POLL_RATE']) div > p,
-      &:has(div > .number-input[data-id='PRECISE_POLL_RATE']) div > p {
+      &:has(div > .number-input[data-id='POLL_RATE']) div>p,
+      &:has(div > .number-input[data-id='PRECISE_POLL_RATE']) div>p {
         width: 16ch;
-    }
+      }
 
       & p {
         opacity: 70%;
@@ -1218,6 +1228,56 @@ a {
   }
 }
 
+#donateModal {
+  .m-content {
+    text-align: center;
+    max-width: min(100vw - 2em, 500px);
+    padding: 1em 1.5em;
+  }
+
+  .ms-title {
+    color: var(--text-2);
+  }
+
+  .donate-buttons {
+    gap: 1em;
+
+    .button {
+      flex-grow: 1;
+    }
+  }
+
+  .donate-qr {
+    flex-direction: column;
+    padding: 1em;
+    background: var(--block-2);
+    border-radius: .5em;
+    box-shadow: 0em 0.7em 2em hsl(0deg 0% 0% / 14%);
+
+    img {
+      margin-bottom: 1em;
+      border-radius: 0.5em;
+    }
+
+    h3 {
+      color: var(--text-2);
+      margin-bottom: 0.2em;
+    }
+
+    code {
+      font-size: 0.8em;
+      color: var(--text-2);
+      padding: 0.3em 0.4em;
+      background: var(--block-1);
+      border-radius: 0.5em;
+    }
+  }
+
+  .donate-description {
+    margin-top: 1em;
+    font-size: 0.8em;
+  }
+}
 
 .update-available {
   font-weight: 700;
@@ -1637,30 +1697,29 @@ hr.modal-space {
 }
 
 @keyframes rainbow-text-flow {
-  0% { 
-    background-position: 0% 50%; 
+  0% {
+    background-position: 0% 50%;
   }
-  100% { 
-    background-position: 200% 50%; 
+
+  100% {
+    background-position: 200% 50%;
   }
 }
 
 .rainbow-donate {
-  background: linear-gradient(
-    90deg,
-    #ff6b6b,
-    #4ecdc4, 
-    #45b7d1,
-    #f9ca24,
-    #f0932b,
-    #eb4d4b,
-    #6c5ce7,
-    #a29bfe,
-    #fd79a8,
-    #ff6b6b,
-    #4ecdc4, 
-    #45b7d1
-  );
+  background: linear-gradient(90deg,
+      #ff6b6b,
+      #4ecdc4,
+      #45b7d1,
+      #f9ca24,
+      #f0932b,
+      #eb4d4b,
+      #6c5ce7,
+      #a29bfe,
+      #fd79a8,
+      #ff6b6b,
+      #4ecdc4,
+      #45b7d1);
   background-size: 200% 200%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -1669,7 +1728,7 @@ hr.modal-space {
   font-weight: bold;
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
   transition: filter 0.3s ease, transform 0.3s ease;
-  
+
   &:hover {
     filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
     transform: scale(1.05);
