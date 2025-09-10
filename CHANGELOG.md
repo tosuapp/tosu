@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.13.1](https://github.com/tosuapp/tosu/compare/v4.13.0...v4.13.1) (2025-09-10)
+
+
+### Features
+
+* donate ([56ee3c1](https://github.com/tosuapp/tosu/commit/56ee3c1ca6bdc69c45b61a3de346049b3c86614b))
+* use @asdf-overlay/electron for input & rendering ([9b6118b](https://github.com/tosuapp/tosu/commit/9b6118bd3e955fafbfc81b328fa60a7a758270e5))
+
+
+### Bug Fixes
+
+* downgrade ingame-overlay version even more ([79f0a5f](https://github.com/tosuapp/tosu/commit/79f0a5f7d72b6b912886501e4f84007a8673238e))
+* Make sure cache folder exists before writing ([8a18ea8](https://github.com/tosuapp/tosu/commit/8a18ea80c1d2942b3330175f4a9cf013bbc6ea96))
+* path names in cyrlic or utf-16 symbols ([f8d9bfc](https://github.com/tosuapp/tosu/commit/f8d9bfc12725eb881fd488005ec3c61bd79eb201))
+
 ## [4.13.0](https://github.com/tosuapp/tosu/compare/v4.12.1...v4.13.0) (2025-08-24)
 
 
