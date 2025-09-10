@@ -23,7 +23,7 @@ Tosu is a memory reader for osu! that sends data to overlays (aka pp counters) v
 
 
 <div  align="center">
-<a href="https://boosty.to/kotrik/donate"><img src=".github/button-boosty.png" /></a><a href="https://boosty.to/kotrik/donate"><img src=".github/button-gumroad.png" /></a><br>
+<a href="https://boosty.to/kotrik/donate"><img src=".github/button-boosty.png" /></a><a href="https://kotrik0.gumroad.com/l/tosuapp"><img src=".github/button-gumroad.png" /></a><br>
 <a href="https://github.com/tosuapp/tosu/releases/latest"><img src=".github/button-download.png" /></a>
 <a href="https://discord.gg/WX7BTs8kwh"><img src=".github/button-discord.png" /></a>
 <a href="https://github.com/tosuapp/counters/tree/master/counters"><img src=".github/button-counters.png" /></a>
