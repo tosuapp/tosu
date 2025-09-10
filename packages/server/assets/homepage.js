@@ -1698,6 +1698,8 @@ window.onload = async () => {
         search_bar.focus();
       }, 100);
     };
+
+    window.showDonateModal = showDonateModal;
   } catch (error) {
     console.log(error);
   };
@@ -1796,4 +1798,31 @@ if (window.location.pathname == '/settings' && !queryParams.has('overlay') && ke
       previousKeybind = keybindInput.value;
     }
   }
+}
+
+function showDonateModal() {
+  displayModal(`
+    <h2 class="ms-title">Support us! ❤️</h2>
+
+    <div class="m-scroll donate-container">
+        <div class="flexer donate-buttons">
+            <a class="button boosty-button" href="https://boosty.to/kotrik/donate" target="_blank">Boosty</a>
+            <a class="button gumroad-button" href="https://kotrik0.gumroad.com/l/tosuapp" target="_blank">Gumroad</a>
+        </div>
+
+        <div class="flexer donate-qr">
+            <img src="/assets/images/usdt-qr-code.png"/>
+
+            <h3>USDT (TRC20)</h3>
+            <code>TCYKLbTiASF1j5hvSoYFXsd56nXFeSqfFn</code>
+        </div>
+
+        <div class="donate-description">
+            <p>Hello! Unfortunately, everything we do here is "free job" and we are glad that you use our software</p></br>
+            <p>We would like to ask you to support us with a coin, even a small one</p></br>
+            <p>Due to the fact that almost all developers are from Russia, we are paralyzed in accepting donations via Patreon or PayPal</p></br>
+            <p>So if it is not difficult and you don't mind a coin with provided options, we will be grateful!</p>
+        </div>
+    </div>
+`, 'donateModal')
 }
