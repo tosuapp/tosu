@@ -226,7 +226,7 @@ export const watchConfigFile = async ({
 
     const stat = await fs.stat(configPath);
     if (config.timestamp !== stat.mtimeMs) {
-        await refreshConfig(httpServer, true);
+        await refreshConfig(httpServer, config.timestamp !== 0);
         config.timestamp = stat.mtimeMs;
     }
 
@@ -297,7 +297,7 @@ export const refreshConfig = async (httpServer: any, refresh: boolean) => {
     config.ingameOverlayMaxFps = ingameOverlayMaxFps;
     await checkGameOverlayConfig();
 
-    if (enableIngameOverlay) {
+    if (enableIngameOverlay && refresh) {
         if (httpServer.instanceManager.overlayProcess) {
             if (maxFpsUpdated) {
                 // setFrameRate doesn't work after paint event.
@@ -310,7 +310,7 @@ export const refreshConfig = async (httpServer: any, refresh: boolean) => {
         } else {
             await httpServer.instanceManager.startOverlay();
         }
-    } else {
+    } else if (refresh) {
         await httpServer.instanceManager.stopOverlay();
     }
 

@@ -177,7 +177,11 @@ export const autoUpdater = async (
 
         wLogger.info('[updater]', 'Restarting program');
 
-        spawn(`"${process.argv[0]}"`, process.argv.slice(1), {
+        const correctExecutablePath = path.join(
+            path.dirname(process.argv[0]),
+            `tosu${platform.fileType}`
+        );
+        spawn(`"${correctExecutablePath}"`, process.argv.slice(1), {
             detached: true,
             shell: true,
             stdio: 'ignore'
