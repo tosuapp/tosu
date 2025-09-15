@@ -96,4 +96,5 @@ const currentVersion = require(process.cwd() + '/_version.js');
     httpServer.start();
     instanceManager.runWatcher();
     instanceManager.runDetemination();
+    if (config.enableIngameOverlay) instanceManager.startOverlay();
 })();

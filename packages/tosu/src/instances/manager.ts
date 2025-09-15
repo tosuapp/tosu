@@ -24,6 +24,7 @@ export class InstanceManager {
         [key: number]: AbstractInstance;
     };
 
+    isOverlayStarted: boolean = false;
     overlayProcess: ChildProcess | null = null;
 
     constructor() {
@@ -183,19 +184,24 @@ export class InstanceManager {
 
     async startOverlay() {
         // ignore if it already started
-        if (this.overlayProcess) {
+        if (this.overlayProcess || this.isOverlayStarted) {
             return;
         }
+        this.isOverlayStarted = true;
 
         try {
             const child = await runOverlay();
             child.on('error', (err) => {
+                this.isOverlayStarted = false;
                 this.overlayProcess = null;
+
                 wLogger.warn('[ingame-overlay]', 'run error', err);
             });
 
             child.on('exit', (code, signal) => {
+                this.isOverlayStarted = false;
                 this.overlayProcess = null;
+
                 if (code !== 0 && signal !== 'SIGTERM') {
                     wLogger.error(
                         '[ingame-overlay]',
@@ -244,7 +250,9 @@ export class InstanceManager {
         wLogger.warn('[ingame-overlay]', 'Stopping...');
         const overlayProcess = this.overlayProcess;
         overlayProcess.kill();
+
         await new Promise((resolve) => overlayProcess.once('close', resolve));
+        this.isOverlayStarted = false;
         this.overlayProcess = null;
     }
 }

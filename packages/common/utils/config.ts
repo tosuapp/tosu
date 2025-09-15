@@ -298,7 +298,7 @@ export const refreshConfig = async (httpServer: any, refresh: boolean) => {
     await checkGameOverlayConfig();
 
     if (enableIngameOverlay && refresh) {
-        if (httpServer.instanceManager.overlayProcess) {
+        if (httpServer.instanceManager.isOverlayStarted) {
             if (maxFpsUpdated) {
                 // setFrameRate doesn't work after paint event.
                 // overlay must be restarted in this case.
