@@ -106,7 +106,9 @@ export interface LeaderboardPlayer {
     maxCombo: number;
     mods: string;
     h300: number;
+    geki: number;
     h100: number;
+    katu: number;
     h50: number;
     h0: number;
     team: number;
