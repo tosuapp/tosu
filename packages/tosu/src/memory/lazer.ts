@@ -2663,6 +2663,55 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 };
                 break;
             }
+            case 'BM': {
+                const maxSizeComboCountBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+                const maxCursorSizeBindable = this.process.readIntPtr(
+                    modObject + 0x28
+                );
+
+                mod.settings = {
+                    max_size_combo_count: this.process.readInt(
+                        maxSizeComboCountBindable + 0x40
+                    ),
+                    max_cursor_size: this.process.readFloat(
+                        maxCursorSizeBindable + 0x40
+                    )
+                };
+
+                break;
+            }
+            case 'SR': {
+                const oneThirdConversionBindable = this.process.readIntPtr(
+                    modObject + 0x10
+                );
+                const oneSixthConversionBindable = this.process.readIntPtr(
+                    modObject + 0x18
+                );
+                const oneEighthConversionBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
+
+                console.log(modObject.toString(16));
+
+                mod.settings = {
+                    one_third_conversion:
+                        this.process.readByte(
+                            oneThirdConversionBindable + 0x40
+                        ) === 1,
+                    one_sixth_conversion:
+                        this.process.readByte(
+                            oneSixthConversionBindable + 0x40
+                        ) === 1,
+                    one_eighth_conversion:
+                        this.process.readByte(
+                            oneEighthConversionBindable + 0x40
+                        ) === 1
+                };
+
+                break;
+            }
         }
 
         return mod;
@@ -2728,7 +2777,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 const type = this.process.readIntPtr(selectedModsItems[i]);
 
                 const acronym = this.modMappings.get(`${gamemode}-${type}`);
-
                 if (acronym) {
                     modList.push(
                         this.readMod(acronym as any, selectedModsItems[i])

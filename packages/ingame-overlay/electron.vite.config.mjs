@@ -11,9 +11,7 @@ export default defineConfig({
             outDir: 'dist/src',
             minify: true,
             rollupOptions: {
-                external: [
-                    '@asdf-overlay/core',
-                ]
+                external: ['@asdf-overlay/core']
             }
         },
         plugins: [bytecodePlugin()],

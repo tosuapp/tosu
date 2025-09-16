@@ -111,7 +111,9 @@ export type ModsAcronyms =
     | 'FI'
     | 'NR'
     | 'FF'
-    | 'SW';
+    | 'SW'
+    | 'SR'
+    | 'MF';
 
 export const ModsOrder: {
     [key: string]: number;
@@ -166,12 +168,13 @@ export const ModsCategories = {
             'FR',
             'BU',
             'SY',
-            'DP'
+            'DP',
+            'BM'
         ],
         systemCategory: ['TD', 'SV2']
     },
     [Rulesets.taiko]: {
-        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC'],
+        diffReductionCategory: ['EZ', 'NF', 'HT', 'DC', 'SR'],
         diffIncreasingCategory: [
             'HR',
             'SD',
@@ -201,7 +204,7 @@ export const ModsCategories = {
         ],
         automationCategory: ['AT', 'CN', 'RX'],
         conversionCategory: ['DA', 'CL', 'MR'],
-        funCategory: ['WU', 'WD', 'FF', 'MU', 'NS'],
+        funCategory: ['WU', 'WD', 'FF', 'MU', 'NS', 'MF'],
         systemCategory: ['TD', 'SV2']
     },
     [Rulesets.mania]: {
@@ -655,6 +658,27 @@ export interface SW {
     acronym: 'SW';
 }
 
+export interface BM {
+    acronym: 'BM';
+    settings?: {
+        max_size_combo_count?: number;
+        max_cursor_size?: number;
+    };
+}
+
+export interface SR {
+    acronym: 'SR';
+    settings?: {
+        one_third_conversion?: boolean;
+        one_sixth_conversion?: boolean;
+        one_eighth_conversion?: boolean;
+    };
+}
+
+export interface MF {
+    acronym: 'MF';
+}
+
 export type Mod =
     | EZ
     | NF
@@ -712,4 +736,7 @@ export type Mod =
     | FI
     | NR
     | FF
-    | SW;
+    | SW
+    | BM
+    | SR
+    | MF;
