@@ -1121,9 +1121,10 @@ async function downloadCounter(element, id, update) {
 
   endDownload(element, id, 'Downloaded');
 
-  setTimeout(() => {
-    window.location.reload(true)
-  }, 1000);
+  const div_element = element.parentElement?.parentElement?.parentElement;
+
+  if (div_element.classList.contains('result-item')) div_element.classList.add('downloaded');
+  if (div_element.classList.contains('result-item')) div_element.classList.remove('updatable');
 };
 
 function displayNotification({ element, text, classes, delay }) {
