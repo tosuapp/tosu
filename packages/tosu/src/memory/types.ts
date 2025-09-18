@@ -67,6 +67,7 @@ export type IResultScreen =
     | Error;
 
 export type IScore = {
+    failed: boolean;
     retries: number;
     playerName: string;
     mods: CalculateMods;

@@ -14,6 +14,7 @@ export class Global extends AbstractState {
     chatStatus: number = 0;
     status: number = 0;
 
+    paused: boolean = false;
     gameTime: number = 0;
     playTime: number = 0;
     menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
@@ -91,6 +92,7 @@ export class Global extends AbstractState {
             const result = this.game.memory.globalPrecise();
             if (result instanceof Error) throw result;
 
+            this.paused = result.time === this.playTime;
             this.playTime = result.time;
 
             this.game.resetReportCount('global updatePreciseState');

@@ -31,6 +31,7 @@ import type {
     IMP3Length,
     IMenu,
     IResultScreen,
+    IScore,
     ISettings,
     ITourney,
     ITourneyChat,
@@ -1645,7 +1646,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         health: number = 0,
         retries: number = 0,
         combo?: number
-    ): IGameplay {
+    ): IScore {
         const statistics = this.readStatistics(scoreInfo);
         const maximumStatistics = this.readMaximumStatistics(scoreInfo);
 
@@ -1717,6 +1718,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return {
+            failed: health <= 0,
             retries,
             playerName: username,
             mods,
@@ -2979,7 +2981,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.isPlayerLoading = isPlayerLoader;
 
         return {
-            isWatchingReplay: this.replayMode,
+            isWatchingReplay: status === GameState.watchingReplay,
             isReplayUiHidden: !this.ReplaySettingsOverlay,
             showInterface: this.HUDVisibilityMode > 0,
             chatStatus: 0,
