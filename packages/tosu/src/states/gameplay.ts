@@ -52,6 +52,8 @@ export class Gameplay extends AbstractState {
     performanceAttributes: rosu.PerformanceAttributes | undefined;
     gradualPerformance: rosu.GradualPerformance | undefined;
 
+    failed: boolean;
+
     retries: number;
     playerName: string;
     mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
@@ -98,6 +100,8 @@ export class Gameplay extends AbstractState {
             this.game.pid,
             `gameplay init (${isRetry} - ${from})`
         );
+
+        this.failed = false;
 
         this.hitErrors = [];
         this.maxCombo = 0;
@@ -200,6 +204,8 @@ export class Gameplay extends AbstractState {
             // Resetting default state value, to define other componenets that we have touched gameplay
             // needed for ex like you done with replay watching/gameplay and return to mainMenu, you need alteast one reset to gameplay/resultScreen
             this.isDefaultState = false;
+
+            this.failed = result.failed;
 
             this.retries = result.retries;
             this.playerName = result.playerName;
