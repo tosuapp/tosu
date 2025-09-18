@@ -2021,7 +2021,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             case LazerHitResults.great:
             case LazerHitResults.ok:
             case LazerHitResults.meh:
-            case LazerHitResults.miss:
+            case LazerHitResults.largeTickHit:
                 break;
 
             default:
@@ -2050,7 +2050,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             case LazerHitResults.good:
             case LazerHitResults.ok:
             case LazerHitResults.meh:
-            case LazerHitResults.miss:
                 break;
 
             default:
