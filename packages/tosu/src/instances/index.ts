@@ -18,7 +18,7 @@ import { ResultScreen } from '@/states/resultScreen';
 import { Settings } from '@/states/settings';
 import { TourneyManager } from '@/states/tourney';
 import { User } from '@/states/user';
-import { cleanPath } from '@/utils/converters';
+import { safeJoin } from '@/utils/converters';
 
 export interface DataRepoList {
     settings: Settings;
@@ -65,7 +65,7 @@ export abstract class AbstractInstance {
         this.pid = pid;
 
         this.process = new Process(this.pid, bitness);
-        this.path = cleanPath(this.process.path);
+        this.path = safeJoin(this.process.path);
         this.bitness = bitness;
 
         this.client =

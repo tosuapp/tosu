@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { join, normalize, sep } from 'path';
 
 const DOUBLE_POWERS_10 = [
     1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13,
@@ -80,28 +80,16 @@ export const numberFromDecimal = (
 };
 
 /**
- * Joins multiple paths, sanitizing each parameter (like invalid windows characters, trailing spaces, etc.) before joining.
+ * Joins given paths safely, uses system path separator and normalizes the joined path.
  *
- * @param {...string[]} paths Paths to sanitize and join.
- * @returns {string} The joined & sanitized path.
+ * @param {...string} paths - The paths to join.
+ * @returns {string} The safely joined path.
  */
-export const cleanPath = (...paths: string[]): string => {
-    paths.map((p) => {
-        // Ensure UTF-8 encoding and trim whitespace
-        let cleaned = Buffer.from(p.trim(), 'utf-8').toString('utf-8');
-
-        // Replace invalid OS-specific characters
-        cleaned = cleaned.replace(
-            process.platform === 'win32' ? /[<>:"/\\|?*]/g : /\//g,
-            ''
-        );
-
-        // On Windows, trim trailing dots and spaces
-        if (process.platform === 'win32')
-            cleaned = cleaned.replace(/[ .]+$/, '');
-
-        return cleaned;
+export const safeJoin = (...paths: string[]): string => {
+    const cleaned = paths.map((path) => {
+        if (!path) return '';
+        return path.trim().replace(/[/\\]+/g, sep);
     });
 
-    return join(...paths);
+    return normalize(join(...cleaned));
 };
