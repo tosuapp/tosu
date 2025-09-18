@@ -314,6 +314,8 @@ export class LazerInstance extends AbstractInstance {
                         break;
 
                     case GameState.play: // is playing (after player is loaded)
+                    case GameState.spectating: // is playing (after player is loaded)
+                    case GameState.watchingReplay: // is playing (after player is loaded)
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
