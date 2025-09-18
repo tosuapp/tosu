@@ -4,7 +4,6 @@ import {
     argumentsParser,
     config,
     platformResolver,
-    sleep,
     wLogger
 } from '@tosu/common';
 import { runOverlay } from '@tosu/ingame-overlay-updater';
@@ -196,13 +195,11 @@ export class InstanceManager {
                 child instanceof Error &&
                 (child as NodeJS.ErrnoException)?.code === 'EPERM'
             ) {
-                while (Object.keys(this.osuInstances).length > 0) {
-                    wLogger.warn(
-                        '[ingame-overlay]',
-                        'Unnable to delete previous version, please close osu clients to rerun'
-                    );
-                    await sleep(1000);
-                }
+                wLogger.warn(
+                    '[ingame-overlay]',
+                    'Unnable to delete previous version, please close osu clients to continue'
+                );
+                await this.checkInstances();
 
                 this.isOverlayStarted = false;
                 this.startOverlay();
@@ -248,6 +245,17 @@ export class InstanceManager {
             wLogger.error('[ingame-overlay]', (exc as any).message);
             wLogger.debug('[ingame-overlay]', exc);
         }
+    }
+
+    async checkInstances() {
+        return new Promise((resolve) => {
+            const intervalId = setInterval(() => {
+                if (Object.keys(this.osuInstances).length > 0) return;
+
+                clearInterval(intervalId);
+                resolve(true);
+            }, 1000);
+        });
     }
 
     updateOverlayConfig() {
