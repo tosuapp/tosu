@@ -80,23 +80,16 @@ export const numberFromDecimal = (
 };
 
 /**
- * Joins given paths safely, removes invalid characters, uses system path separator and normalizes the joined path.
+ * Joins given paths safely, uses system path separator and normalizes the joined path.
  *
  * @param {...string} paths - The paths to join.
  * @returns {string} The safely joined path.
  */
 export const safeJoin = (...paths: string[]): string => {
-    const invalidChars = process.platform === 'win32' ? /[<>?"*|]/g : /[\\0/]/g;
-
     const cleaned = paths.map((path) => {
         if (!path) return '';
-
-        return path
-            .trim()
-            .replace(/[/\\]+/g, sep)
-            .replace(invalidChars, '');
+        return path.trim().replace(/[/\\]+/g, sep);
     });
 
-    const result = join(...cleaned);
-    return normalize(result);
+    return normalize(join(...cleaned));
 };
