@@ -33,13 +33,13 @@ const currentVersion = require(process.cwd() + '/_version.js');
     const isConfigUpdate = config.enableAutoUpdate === true;
     if (update !== null && update !== undefined) {
         if (update === true) {
-            await autoUpdater('startup');
+            await autoUpdater('startup', instanceManager);
         } else {
             await checkUpdates('startup');
         }
     } else {
         if (isDev === false && isConfigUpdate) {
-            await autoUpdater('startup');
+            await autoUpdater('startup', instanceManager);
         } else {
             await checkUpdates('startup');
         }

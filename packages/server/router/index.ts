@@ -339,7 +339,7 @@ export default function buildBaseApi(server: Server) {
     );
 
     server.app.route('/api/runUpdates', 'GET', (req, res) =>
-        autoUpdater('server', res)
+        autoUpdater('server', req.instanceManager, res)
     );
 
     server.app.route('/api/settingsSave', 'POST', async (req, res) => {
