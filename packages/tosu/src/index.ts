@@ -2,6 +2,7 @@ import {
     argumentsParser,
     config,
     getProgramPath,
+    initConfigFile,
     wLogger,
     watchConfigFile
 } from '@tosu/common';
@@ -25,7 +26,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
-    await watchConfigFile({ httpServer, initial: true });
+    await initConfigFile(httpServer);
 
     const { update, onedrive: onedriveBypass } = argumentsParser(process.argv);
 
@@ -97,4 +98,6 @@ const currentVersion = require(process.cwd() + '/_version.js');
     instanceManager.runWatcher();
     instanceManager.runDetemination();
     if (config.enableIngameOverlay) instanceManager.startOverlay();
+
+    await watchConfigFile(httpServer);
 })();
