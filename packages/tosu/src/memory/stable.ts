@@ -1,4 +1,10 @@
-import { ClientType, config, isAllowedValue, wLogger } from '@tosu/common';
+import {
+    ClientType,
+    GameState,
+    config,
+    isAllowedValue,
+    wLogger
+} from '@tosu/common';
 import { getContentType } from '@tosu/server';
 
 import { AbstractMemory } from '@/memory';
@@ -586,6 +592,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             this.gameplayMode = mode;
 
             return {
+                failed: playerHP <= 0,
                 retries,
                 playerName,
                 mods,
@@ -745,7 +752,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 'gameTimePtr'
             ]);
 
-            const status = this.process.readPointer(statusPtr);
+            let status = this.process.readPointer(statusPtr);
             const menuMods = this.process.readPointer(menuModsPtr);
             const chatStatus = this.process.readByte(
                 this.process.readInt(chatCheckerPtr)
@@ -777,11 +784,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 const rulesetAddr = this.process.readInt(
                     this.process.readInt(rulesetsAddr - 0xb) + 0x4
                 );
+
                 if (rulesetAddr !== 0) {
                     isReplayUiHidden = Boolean(
                         this.process.readByte(rulesetAddr + 0x1d8)
                     );
                 }
+
+                status = GameState.watchingReplay;
             }
 
             const skinOsuAddr = this.process.readInt(skinDataAddr + 0x7);
