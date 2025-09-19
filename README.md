@@ -1,19 +1,33 @@
 <p align="center">
+  <a href="https://github.com/tosuapp/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/tosuapp/tosu?style=for-the-badge&color=%23A27456" /></a>
   <img alt="Version" src="https://img.shields.io/github/release/tosuapp/tosu.svg?style=for-the-badge&color=%235686A2" />
   <img src="https://img.shields.io/badge/node-%3E%3D20.11.1-45915E.svg?style=for-the-badge&logo=node.js&logoColor=white" />
-  <a href="https://github.com/tosuapp/tosu/blob/master/LICENSE" target="_blank"><img alt="License: GPL--3.0" src="https://img.shields.io/github/license/tosuapp/tosu?style=for-the-badge&color=%23A27456" /></a>
-  <a href="https://twitter.com/kotrik0" target="_blank"><img alt="Twitter: kotrik0" src="https://img.shields.io/badge/kotrik0-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" /></a>
+  <a href="https://twitter.com/kotrik0" target="_blank"><img alt="Twitter: kotrik0" src="https://img.shields.io/badge/kotrik0-5593ba?style=for-the-badge&logo=x&logoColor=white" /></a>
 </p>
 
 
 <h1 align="center">Welcome to tosu 👋</h1>
 <div align="center">
-<img src=".github/logo.png" />
+  <img src=".github/logo.png" />
 </div>
 
 <br>
 
+<p align="center">
+  <img src="https://img.shields.io/github/issues/tosuapp/tosu?style=for-the-badge&color=%23a35f56" />
+  <img src="https://img.shields.io/github/issues-closed/tosuapp/tosu?style=for-the-badge&color=%237256a3&label=" />
+  <img src="https://img.shields.io/github/issues-pr/tosuapp/tosu?style=for-the-badge&color=%2354935b" />
+  <img src="https://img.shields.io/github/issues-pr-closed/tosuapp/tosu?style=for-the-badge&color=%237256a3&label=" />
+</p>
 
+<div  align="center">
+  <a href="https://boosty.to/kotrik/donate"><img src=".github/button-boosty.png" /></a><a href="https://kotrik0.gumroad.com/l/tosuapp"><img src=".github/button-gumroad.png" /></a><br>
+  <a href="https://github.com/tosuapp/tosu/releases/latest"><img src=".github/button-download.png" /></a>
+  <a href="https://discord.gg/WX7BTs8kwh"><img src=".github/button-discord.png" /></a>
+  <a href="https://github.com/tosuapp/counters/tree/master/counters"><img src=".github/button-counters.png" /></a>
+</div>
+
+<br>
 
 ```text
 Tosu is a memory reader for osu! that sends data to overlays (aka pp counters) via WebSocket API, with extra features.
@@ -21,14 +35,7 @@ Tosu is a memory reader for osu! that sends data to overlays (aka pp counters) v
 > [!NOTE]
 > Supports stable and osu! lazer. <br> Compatible with _**gosumemory**_ and _**streamCompanion**_ overlays.
 
-
-<div  align="center">
-<a href="https://boosty.to/kotrik/donate"><img src=".github/button-boosty.png" /></a><a href="https://kotrik0.gumroad.com/l/tosuapp"><img src=".github/button-gumroad.png" /></a><br>
-<a href="https://github.com/tosuapp/tosu/releases/latest"><img src=".github/button-download.png" /></a>
-<a href="https://discord.gg/WX7BTs8kwh"><img src=".github/button-discord.png" /></a>
-<a href="https://github.com/tosuapp/counters/tree/master/counters"><img src=".github/button-counters.png" /></a>
-</div>
-
+<br>
 
 Installation guide
 ---
