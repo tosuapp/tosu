@@ -384,6 +384,8 @@ export class LazerInstance extends AbstractInstance {
 
                 switch (global.status) {
                     case GameState.play:
+                    case GameState.spectating:
+                    case GameState.watchingReplay:
                         if (global.playTime < 150) {
                             break;
                         }

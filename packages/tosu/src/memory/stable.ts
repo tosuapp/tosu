@@ -1,4 +1,10 @@
-import { ClientType, config, isAllowedValue, wLogger } from '@tosu/common';
+import {
+    ClientType,
+    GameState,
+    config,
+    isAllowedValue,
+    wLogger
+} from '@tosu/common';
 import { getContentType } from '@tosu/server';
 
 import { AbstractMemory } from '@/memory';
@@ -759,7 +765,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 'gameTimePtr'
             ]);
 
-            const status = this.process.readPointer(statusPtr);
+            let status = this.process.readPointer(statusPtr);
             const menuMods = this.process.readPointer(menuModsPtr);
             const chatStatus = this.process.readByte(
                 this.process.readInt(chatCheckerPtr)
@@ -797,6 +803,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         this.process.readByte(rulesetAddr + 0x1d8)
                     );
                 }
+
+                status = GameState.watchingReplay;
             }
 
             const skinOsuAddr = this.process.readInt(skinDataAddr + 0x7);
