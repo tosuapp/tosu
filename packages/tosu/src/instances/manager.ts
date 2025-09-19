@@ -191,6 +191,26 @@ export class InstanceManager {
 
         try {
             const child = await runOverlay();
+            if (
+                child instanceof Error &&
+                (child as NodeJS.ErrnoException)?.code === 'EPERM'
+            ) {
+                wLogger.warn(
+                    '[ingame-overlay]',
+                    'Unnable to delete previous version, please close osu clients to continue'
+                );
+                await this.checkInstances();
+
+                this.isOverlayStarted = false;
+                this.startOverlay();
+                return;
+            } else if (child instanceof Error) {
+                wLogger.error('[ingame-overlay]', (child as any).message);
+                wLogger.debug('[ingame-overlay]', child);
+
+                return;
+            }
+
             child.on('error', (err) => {
                 this.isOverlayStarted = false;
                 this.overlayProcess = null;
@@ -225,6 +245,17 @@ export class InstanceManager {
             wLogger.error('[ingame-overlay]', (exc as any).message);
             wLogger.debug('[ingame-overlay]', exc);
         }
+    }
+
+    async checkInstances() {
+        return new Promise((resolve) => {
+            const intervalId = setInterval(() => {
+                if (Object.keys(this.osuInstances).length > 0) return;
+
+                clearInterval(intervalId);
+                resolve(true);
+            }, 1000);
+        });
     }
 
     updateOverlayConfig() {

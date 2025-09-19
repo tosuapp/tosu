@@ -8,7 +8,7 @@
         "outDir": "dist",
         "rootDir": "src",
         "sourceMap": false,
-        "declaration": false,
+        "declaration": true,
         "strict": true,
         "noImplicitAny": false,
         "target": "ES2020",
