@@ -211,28 +211,23 @@ export const updateConfigFile = async () => {
     }
 };
 
-export const watchConfigFile = async ({
-    httpServer,
-    initial
-}: {
-    httpServer: any;
-    initial?: boolean;
-}) => {
+export const initConfigFile = async (httpServer: any) => {
     await createConfig();
-    if (initial === true) {
-        await refreshConfig(httpServer, false);
-        await updateConfigFile();
-    }
+    await refreshConfig(httpServer, false);
+    await updateConfigFile();
+};
 
-    const stat = await fs.stat(configPath);
-    if (config.timestamp !== stat.mtimeMs) {
-        await refreshConfig(httpServer, config.timestamp !== 0);
+export const watchConfigFile = async (httpServer: any) => {
+    // Initialize watcher.
+    const iter = fs.watch(configPath)[Symbol.asyncIterator]();
+
+    // Run initial check first, run on changes afterward.
+    do {
+        await createConfig();
+        const stat = await fs.stat(configPath);
+        await refreshConfig(httpServer, true);
         config.timestamp = stat.mtimeMs;
-    }
-
-    setTimeout(() => {
-        watchConfigFile({ httpServer });
-    }, 1000);
+    } while (!(await iter.next()).done);
 };
 
 export const refreshConfig = async (httpServer: any, refresh: boolean) => {
