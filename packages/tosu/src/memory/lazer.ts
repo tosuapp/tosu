@@ -2001,24 +2001,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
     }
 
-    private isResultHit(result: number): boolean {
-        switch (result) {
-            case LazerHitResults.none:
-            case LazerHitResults.ignoreMiss:
-            case LazerHitResults.miss:
-            case LazerHitResults.smallTickMiss:
-            case LazerHitResults.largeTickMiss:
-            case LazerHitResults.smallBonus:
-            case LazerHitResults.largeBonus:
-            case LazerHitResults.comboBreak:
-                return false;
-
-            default:
-                return true;
-        }
-    }
-
-    private isHitCircle(object: number): boolean {
+    private readOsuHit(address: number, object: number): number | undefined {
         // These might potentially change
         const sliderHeadCircleBaseSize = 0xe8;
         const hitCircleBaseSize = 0xe0;
@@ -2030,10 +2013,77 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             baseSize !== sliderHeadCircleBaseSize &&
             baseSize !== hitCircleBaseSize
         ) {
-            return false;
+            return;
         }
 
-        return true;
+        const hitResult = this.process.readInt(address + 0x18);
+        switch (hitResult) {
+            case LazerHitResults.great:
+            case LazerHitResults.ok:
+            case LazerHitResults.meh:
+            case LazerHitResults.largeTickHit:
+                break;
+
+            default:
+                return;
+        }
+
+        const timeOffset = this.process.readDouble(address + 0x10);
+        return timeOffset;
+    }
+
+    private readManiaHit(address: number, object: number): number | undefined {
+        const headNote = 0x58;
+        const holdNote = 0x88;
+
+        const type = this.process.readIntPtr(object);
+        const baseSize = this.process.readInt(type + 0x4);
+
+        if (baseSize !== headNote && baseSize !== holdNote) {
+            return;
+        }
+
+        const hitResult = this.process.readInt(address + 0x18);
+        switch (hitResult) {
+            case LazerHitResults.perfect:
+            case LazerHitResults.great:
+            case LazerHitResults.good:
+            case LazerHitResults.ok:
+            case LazerHitResults.meh:
+                break;
+
+            default:
+                return;
+        }
+
+        const timeOffset = this.process.readDouble(address + 0x10);
+        return timeOffset;
+    }
+
+    private readTaikoHit(address: number, object: number): number | undefined {
+        const hit = 0x68;
+        const strongNestedHit = 0x50;
+
+        const type = this.process.readIntPtr(object);
+        const baseSize = this.process.readInt(type + 0x4);
+
+        if (baseSize !== hit && baseSize !== strongNestedHit) {
+            return;
+        }
+
+        const hitResult = this.process.readInt(address + 0x18);
+        switch (hitResult) {
+            case LazerHitResults.great:
+            case LazerHitResults.ok:
+            case LazerHitResults.meh:
+                break;
+
+            default:
+                return;
+        }
+
+        const timeOffset = this.process.readDouble(address + 0x10);
+        return timeOffset;
     }
 
     private readHitEvent(address: number): number | undefined {
@@ -2042,17 +2092,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return undefined;
         }
 
-        if (!this.isHitCircle(hitObject)) {
-            return undefined;
+        if (this.selectedGamemode === Rulesets.osu) {
+            const offset = this.readOsuHit(address, hitObject);
+            return offset;
+        } else if (this.selectedGamemode === Rulesets.fruits) {
+            return undefined; // catch doesnt have hit errors
+        } else if (this.selectedGamemode === Rulesets.mania) {
+            const offset = this.readManiaHit(address, hitObject);
+            return offset;
+        } else if (this.selectedGamemode === Rulesets.taiko) {
+            const offset = this.readTaikoHit(address, hitObject);
+            return offset;
         }
 
-        const hitResult = this.process.readInt(address + 0x18);
-        if (!this.isResultHit(hitResult)) {
-            return undefined;
-        }
-
-        const timeOffset = this.process.readDouble(address + 0x10);
-        return timeOffset;
+        return undefined;
     }
 
     private hitEvents(): number[] {
