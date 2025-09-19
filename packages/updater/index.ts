@@ -117,6 +117,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
 export const autoUpdater = async (
     from: 'server' | 'startup',
+    Instance: any,
     res?: ServerResponse<IncomingMessage>
 ) => {
     try {
@@ -166,6 +167,9 @@ export const autoUpdater = async (
 
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
         await unzip(downloadAsset, getProgramPath());
+
+        if (typeof Instance?.stopOverlay === 'function')
+            await Instance.stopOverlay();
 
         // close request to allow destroy server
         if (from === 'server' && res) {

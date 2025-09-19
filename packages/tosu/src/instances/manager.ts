@@ -197,8 +197,9 @@ export class InstanceManager {
             ) {
                 wLogger.warn(
                     '[ingame-overlay]',
-                    'Unnable to delete previous version, please close osu clients to continue'
+                    'Unable to delete previous version, please close osu clients to continue'
                 );
+                wLogger.debug('[ingame-overlay]', child);
                 await this.checkInstances();
 
                 this.isOverlayStarted = false;
