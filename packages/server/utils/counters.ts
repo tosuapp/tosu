@@ -846,7 +846,7 @@ export function buildSettings(res: http.ServerResponse) {
         .map((item) => item.replace(/\{[^}]*}/g, ''))
         .join('\n');
 
-    const settingsPage = `<div class="settings">${groups} ${settingsSaveButtonHTMLv2}</div>`;
+    const settingsPage = `<div class="settings">${groups}</div>`;
 
     fs.readFile(
         path.join(pkgAssetsPath, 'homepage.html'),

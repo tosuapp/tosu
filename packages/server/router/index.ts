@@ -1,14 +1,14 @@
 import rosu from '@kotrikd/rosu-pp';
 import {
     JsonSafeParse,
+    _updateSettingsFromApi,
     downloadFile,
     getCachePath,
     getProgramPath,
     getStaticPath,
     platformResolver,
     unzip,
-    wLogger,
-    writeConfig
+    wLogger
 } from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
@@ -350,7 +350,7 @@ export default function buildBaseApi(server: Server) {
         });
         if (body instanceof Error) throw body;
 
-        await writeConfig(server, body);
+        await _updateSettingsFromApi(body as object);
         return sendJson(res, { status: 'updated' });
     });
 
