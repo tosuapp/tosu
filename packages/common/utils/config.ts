@@ -102,20 +102,49 @@ export type ConfigKey = EnvSchemaItem['key'];
 export type ConfigBinding = EnvSchemaItem['binding'];
 
 interface Config {
+    // Whether tosu should automatically check for and install updates.
     enableAutoUpdate: boolean;
+
+    // Whether tosu should open the web dashboard on startup.
     openDashboardOnStartup: boolean;
+
+    // Whether to show verbose logging for debugging purposes.
     debugLog: boolean;
+
+    // Whether tosu should calculate performance points from game data.
     calculatePP: boolean;
+
+    // Whether tosu should read osu!'s built-in key overlay data.
     enableKeyOverlay: boolean;
+
+    // General data polling rate in milliseconds.
     pollRate: number;
+
+    // More precise polling rate for critical data, in milliseconds. (e.g. key overlay data)
     preciseDataPollRate: number;
+
+    // Whether to show bancho !mp commands in the tournament manager chat.
     showMpCommands: boolean;
+
+    // The IP address tosu should serve on.
     serverIP: string;
+
+    // The port tosu should serve on.
     serverPort: number;
+
+    // Path to the folder containing pp counters.
     staticFolderPath: string;
+
+    // Whether tosu should launch the in-game overlay.
     enableIngameOverlay: boolean;
+
+    // The keybind to open the in-game overlay.
     ingameOverlayKeybind: string;
+
+    // The maximum frames per second for the in-game overlay.
     ingameOverlayMaxFps: number;
+
+    // Comma-separated list of allowed IPs for remote access.
     allowedIPs: string;
 }
 
