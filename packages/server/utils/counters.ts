@@ -1,6 +1,7 @@
 import {
     JsonSafeParse,
     config,
+    context,
     getStaticPath,
     recursiveFilesSearch,
     wLogger
@@ -28,7 +29,6 @@ import {
     settingsGroupHTML,
     settingsItemHTMLv2,
     settingsNumberInputHTML,
-    settingsSaveButtonHTMLv2,
     settingsSwitchHTML,
     settingsTextInputHTML,
     settingsTextareaInputHTML
@@ -452,10 +452,10 @@ export function buildLocalCounters(
                 .replace('{{AVAILABLE_AMOUNT}}', ``)
                 .replace('{{SEARCH}}', searchBar)
                 .replace('{{LIST}}', build || emptyNotice);
-            if (semver.gt(config.updateVersion, config.currentVersion)) {
+            if (semver.gt(context.updateVersion, context.currentVersion)) {
                 html = html
-                    .replace('{OLD}', config.currentVersion)
-                    .replace('{NEW}', config.updateVersion)
+                    .replace('{OLD}', context.currentVersion)
+                    .replace('{NEW}', context.updateVersion)
                     .replace('update-available hidden', 'update-available');
             }
 
@@ -547,10 +547,10 @@ export async function buildExternalCounters(
                 .replace('{{AVAILABLE_AMOUNT}}', ` (${totalAvailable})`)
                 .replace('{{SEARCH}}', searchBar)
                 .replace('{{LIST}}', text || noMoreCounters);
-            if (semver.gt(config.updateVersion, config.currentVersion)) {
+            if (semver.gt(context.updateVersion, context.currentVersion)) {
                 html = html
-                    .replace('{OLD}', config.currentVersion)
-                    .replace('{NEW}', config.updateVersion)
+                    .replace('{OLD}', context.currentVersion)
+                    .replace('{NEW}', context.updateVersion)
                     .replace('update-available hidden', 'update-available');
             }
 
@@ -800,7 +800,7 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace('{id}', 'DEBUG_LOG')
                             .replace(
                                 '{checked}',
-                                config.debugLogging ? 'checked' : ''
+                                config.debugLog ? 'checked' : ''
                             )
                     ),
                 settingsItemHTMLv2
@@ -865,10 +865,10 @@ export function buildSettings(res: http.ServerResponse) {
                 .replace('{{AVAILABLE_AMOUNT}}', '')
                 .replace('{{SEARCH}}', '')
                 .replace('{{LIST}}', settingsPage);
-            if (semver.gt(config.updateVersion, config.currentVersion)) {
+            if (semver.gt(context.updateVersion, context.currentVersion)) {
                 html = html
-                    .replace('{OLD}', config.currentVersion)
-                    .replace('{NEW}', config.updateVersion)
+                    .replace('{OLD}', context.currentVersion)
+                    .replace('{NEW}', context.updateVersion)
                     .replace('update-available hidden', 'update-available');
             }
 
@@ -909,10 +909,10 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 .replace('{{AVAILABLE_AMOUNT}}', '')
                 .replace('{{SEARCH}}', '')
                 .replace('{{LIST}}', pageContent);
-            if (semver.gt(config.updateVersion, config.currentVersion)) {
+            if (semver.gt(context.updateVersion, context.currentVersion)) {
                 html = html
-                    .replace('{OLD}', config.currentVersion)
-                    .replace('{NEW}', config.updateVersion)
+                    .replace('{OLD}', context.currentVersion)
+                    .replace('{NEW}', context.updateVersion)
                     .replace('update-available hidden', 'update-available');
             }
 
@@ -942,10 +942,10 @@ export function buildEmptyPage(res: http.ServerResponse) {
                 .replace('{{AVAILABLE_AMOUNT}}', '')
                 .replace('{{SEARCH}}', '')
                 .replace('{{LIST}}', '');
-            if (semver.gt(config.updateVersion, config.currentVersion)) {
+            if (semver.gt(context.updateVersion, context.currentVersion)) {
                 html = html
-                    .replace('{OLD}', config.currentVersion)
-                    .replace('{NEW}', config.updateVersion)
+                    .replace('{OLD}', context.currentVersion)
+                    .replace('{NEW}', context.updateVersion)
                     .replace('update-available hidden', 'update-available');
             }
 
