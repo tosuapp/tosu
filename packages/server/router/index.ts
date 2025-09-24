@@ -343,14 +343,14 @@ export default function buildBaseApi(server: Server) {
     );
 
     server.app.route('/api/settingsSave', 'POST', async (req, res) => {
-        const body: object | Error = JsonSafeParse({
+        const body: Record<string, string> | Error = JsonSafeParse({
             isFile: false,
             payload: req.body,
             defaultValue: new Error('Failed to parse body')
         });
         if (body instanceof Error) throw body;
 
-        await _updateSettingsFromApi(body as object);
+        await _updateSettingsFromApi(body);
         return sendJson(res, { status: 'updated' });
     });
 

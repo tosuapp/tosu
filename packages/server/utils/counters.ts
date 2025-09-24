@@ -577,7 +577,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'ENABLE_AUTOUPDATE')
+                            .replace('{id}', 'enableAutoUpdate')
                             .replace(
                                 '{checked}',
                                 config.enableAutoUpdate ? 'checked' : ''
@@ -593,7 +593,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'OPEN_DASHBOARD_ON_STARTUP')
+                            .replace('{id}', 'openDashboardOnStartup')
                             .replace(
                                 '{checked}',
                                 config.openDashboardOnStartup ? 'checked' : ''
@@ -618,7 +618,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'CALCULATE_PP')
+                            .replace('{id}', 'calculatePP')
                             .replace(
                                 '{checked}',
                                 config.calculatePP ? 'checked' : ''
@@ -634,10 +634,10 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'ENABLE_KEY_OVERLAY')
+                            .replace('{id}', 'enableKeyOverlay')
                             .replace(
                                 '{checked}',
-                                config.calculatePP ? 'checked' : ''
+                                config.enableKeyOverlay ? 'checked' : ''
                             )
                     ),
                 settingsItemHTMLv2
@@ -649,7 +649,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsNumberInputHTML
-                            .replace('{id}', 'POLL_RATE')
+                            .replace('{id}', 'pollRate')
                             .replace('{value}', config.pollRate.toString())
                             .replace('{min}', '100')
                     ),
@@ -662,7 +662,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsNumberInputHTML
-                            .replace('{id}', 'PRECISE_POLL_RATE')
+                            .replace('{id}', 'preciseDataPollRate')
                             .replace(
                                 '{value}',
                                 config.preciseDataPollRate.toString()
@@ -691,7 +691,7 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace(
                                 '{input-2}',
                                 settingsTextInputHTML
-                                    .replace('{id}', 'SERVER_IP')
+                                    .replace('{id}', 'serverIP')
                                     .replace('{class}', '')
                                     .replace(
                                         '{value}',
@@ -707,7 +707,7 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace(
                                 '{input-2}',
                                 settingsTextInputHTML
-                                    .replace('{id}', 'SERVER_PORT')
+                                    .replace('{id}', 'serverPort')
                                     .replace('{class}', '')
                                     .replace(
                                         '{value}',
@@ -727,7 +727,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-3}',
                         settingsTextareaInputHTML
-                            .replace('{id}', 'ALLOWED_IPS')
+                            .replace('{id}', 'allowedIPs')
                             .replace('{value}', config.allowedIPs)
                     )
             ]
@@ -749,7 +749,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'ENABLE_INGAME_OVERLAY')
+                            .replace('{id}', 'enableIngameOverlay')
                             .replace(
                                 '{checked}',
                                 config.enableIngameOverlay ? 'checked' : ''
@@ -758,7 +758,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsTextInputHTML
-                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
+                            .replace('{id}', 'ingameOverlayKeybind')
                             .replace('{class}', ' -keybind')
                             .replace('{value}', config.ingameOverlayKeybind)
                     ),
@@ -771,7 +771,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsNumberInputHTML
-                            .replace('{id}', 'INGAME_OVERLAY_MAX_FPS')
+                            .replace('{id}', 'ingameOverlayMaxFps')
                             .replace('{min}', '1')
                             .replace(
                                 '{value}',
@@ -797,7 +797,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'DEBUG_LOG')
+                            .replace('{id}', 'debugLog')
                             .replace(
                                 '{checked}',
                                 config.debugLog ? 'checked' : ''
@@ -812,7 +812,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'SHOW_MP_COMMANDS')
+                            .replace('{id}', 'showMpCommands')
                             .replace(
                                 '{checked}',
                                 config.showMpCommands ? 'checked' : ''
@@ -827,7 +827,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsTextInputHTML
-                            .replace('{id}', 'STATIC_FOLDER_PATH')
+                            .replace('{id}', 'staticFolderPath')
                             .replace('{class}', '')
                             .replace('{value}', config.staticFolderPath)
                     )
