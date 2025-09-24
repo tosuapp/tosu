@@ -3,7 +3,7 @@
       "files": true
     },
     "compilerOptions": {
-      "lib": ["ES2020"],
+      "lib": ["ES2023"],
       "module": "commonjs",
       "moduleResolution": "Node",
       "allowJs": true,

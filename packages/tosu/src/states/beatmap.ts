@@ -839,7 +839,6 @@ export class BeatmapPP extends AbstractState {
 
         const bpm =
             this.lazerBeatmap.controlPoints.timingPoints
-                // @ts-expect-error
                 .toReversed()
                 .find((r: TimingPoint) => r.startTime <= ms && r.bpm !== 0)
                 ?.bpm ||

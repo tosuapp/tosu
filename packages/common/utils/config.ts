@@ -248,8 +248,7 @@ export class ConfigManager {
 
             const migratedEnv: Record<string, string> = {};
             for (const key in configSchema) {
-                if (!Object.prototype.hasOwnProperty.call(configSchema, key))
-                    continue;
+                if (!Object.hasOwn(configSchema, key)) continue;
 
                 const item = configSchema[key as ConfigKeys];
 
@@ -266,8 +265,7 @@ export class ConfigManager {
             wLogger.warn(`[config] Your config file has been migrated.`);
 
             const deprecated = Object.keys(oldEnv).filter(
-                (binding) =>
-                    !Object.prototype.hasOwnProperty.call(migratedEnv, binding)
+                (binding) => !Object.hasOwn(migratedEnv, binding)
             );
             if (deprecated.length > 0) {
                 wLogger.warn(
@@ -276,8 +274,7 @@ export class ConfigManager {
             }
 
             const newProps = Object.keys(migratedEnv).filter(
-                (binding) =>
-                    !Object.prototype.hasOwnProperty.call(newEnv, binding)
+                (binding) => !Object.hasOwn(newEnv, binding)
             );
             if (newProps.length > 0) {
                 wLogger.warn(
@@ -463,8 +460,7 @@ export class ConfigManager {
      */
     public refreshConfig(env: Record<string, string>): void {
         for (const key in configSchema) {
-            if (!Object.prototype.hasOwnProperty.call(configSchema, key))
-                continue;
+            if (!Object.hasOwn(configSchema, key)) continue;
 
             const item = configSchema[key as ConfigKeys];
             if (item === undefined || item === null) continue;
@@ -594,7 +590,7 @@ export const _updateSettingsFromApi = async (
 
     const oldConfig = { ...managerInstance.config };
     for (const key in settings) {
-        if (!Object.prototype.hasOwnProperty.call(configSchema, key)) continue;
+        if (!Object.hasOwn(configSchema, key)) continue;
 
         const item = configSchema[key as ConfigKeys];
         if (item === undefined || item === null) continue;
