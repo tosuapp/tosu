@@ -971,7 +971,7 @@ const checkSettingsChanges = () => {
   });
 
   if (hasChanges) {
-    debouncedSave();
+    saveSettings();
   }
 };
 
@@ -1385,17 +1385,6 @@ async function saveSettings() {
         });
     }
 }
-
-function debounce(func, delay) {
-    let timeoutId;
-    return function(...args) {
-        const context = this;
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func.apply(context, args), delay);
-    };
-}
-
-const debouncedSave = debounce(saveSettings, 400);
 
 function displayModal(callback, id, classes) {
   const div = document.createElement('div');
