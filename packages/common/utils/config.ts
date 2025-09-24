@@ -287,10 +287,13 @@ export class ConfigManager {
         await this.migrate(oldConfigPath);
         await this.writeEnv(filePath);
 
-        const env: Record<ConfigBinding, string> = await fs
+        const env = await fs
             .readFile(filePath, 'utf-8')
-            .then(dotenv.parse as any)
-            .catch(() => ({}) as any);
+            .then(
+                (content) =>
+                    dotenv.parse(content) as Record<ConfigBinding, string>
+            )
+            .catch(() => ({}) as Record<ConfigBinding, string>);
 
         this.httpServer = httpServer;
         this.refreshConfig(env);
@@ -402,7 +405,7 @@ export class ConfigManager {
         let value = item.default;
         switch (typeof item.default) {
             case 'boolean': {
-                value = (raw as any) === true || raw === 'true';
+                value = raw === 'true';
                 break;
             }
 
@@ -590,7 +593,7 @@ export async function updateSettingsFromApi(
         let value = item.default;
         switch (typeof item.default) {
             case 'boolean': {
-                value = (raw as any) === true || raw === 'true';
+                value = (raw as any) === true;
                 break;
             }
 
