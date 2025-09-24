@@ -1,4 +1,4 @@
-import { ConfigBinding, config, sleep, wLogger } from '@tosu/common';
+import { ConfigKeys, config, sleep, wLogger } from '@tosu/common';
 import WebSocket from 'ws';
 
 import { getUniqueID } from './hashing';
@@ -20,7 +20,7 @@ export interface ModifiedWebsocket extends WebSocket {
 
 export class Websocket {
     private instanceManager: any;
-    private pollRateFieldName: ConfigBinding | '';
+    private pollRateFieldName: ConfigKeys | '';
     private stateFunctionName: string;
     private onMessageCallback: (
         data: string,
@@ -40,7 +40,7 @@ export class Websocket {
         onConnectionCallback
     }: {
         instanceManager: any;
-        pollRateFieldName: ConfigBinding | '';
+        pollRateFieldName: ConfigKeys | '';
         stateFunctionName:
             | 'getState'
             | 'getStateV2'
@@ -121,7 +121,7 @@ export class Websocket {
             });
         });
 
-        if (this.pollRateFieldName !== '') {
+        if (this.pollRateFieldName) {
             this.start();
         }
     }
@@ -162,9 +162,8 @@ export class Websocket {
                 wLogger.debug('[ws]', 'loop', error);
             }
 
-            await sleep(
-                config[this.pollRateFieldName as keyof typeof config] as number
-            );
+            if (this.pollRateFieldName)
+                await sleep(config[this.pollRateFieldName] as number);
         }
     }
 
