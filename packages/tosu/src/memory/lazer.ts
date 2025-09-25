@@ -702,7 +702,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private checkIfMulti() {
         const multiplayerClient = this.multiplayerClient();
         const isConnectedBindable = this.process.readIntPtr(
-            multiplayerClient + 0x2d8
+            multiplayerClient +
+                this.offsets[
+                    'osu.Game.Online.Multiplayer.OnlineMultiplayerClient'
+                ]['<IsConnected>k__BackingField']
         );
 
         const isConnected =
