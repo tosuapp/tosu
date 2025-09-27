@@ -283,6 +283,12 @@ export const calculateMods = (
 
         if (r.settings?.reflection !== undefined)
             r.settings.reflection = r.settings.reflection.toString();
+
+        if (r.settings?.direction !== undefined)
+            r.settings.direction = r.settings.direction.toString();
+
+        if (r.settings?.style !== undefined)
+            r.settings.style = r.settings.style.toString();
     });
 
     const settingsSpeedChange = (ModsLazer as any).find(

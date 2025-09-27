@@ -337,6 +337,7 @@ export interface HR {
 export interface SD {
     acronym: 'SD';
     settings?: {
+        fail_on_slider_tail?: boolean;
         restart: boolean;
     };
 }
@@ -344,6 +345,7 @@ export interface SD {
 export interface PF {
     acronym: 'PF';
     settings?: {
+        require_perfect_hits?: boolean;
         restart: boolean;
     };
 }
@@ -539,7 +541,7 @@ export interface BR {
     acronym: 'BR';
     settings?: {
         spin_speed?: number;
-        direction?: number;
+        direction?: string;
     };
 }
 
@@ -547,7 +549,7 @@ export interface AD {
     acronym: 'AD';
     settings?: {
         scale?: number;
-        style?: number;
+        style?: string;
     };
 }
 
@@ -638,7 +640,7 @@ export interface CO {
     acronym: 'CO';
     settings?: {
         coverage?: number;
-        direction?: number;
+        direction?: string;
     };
 }
 
