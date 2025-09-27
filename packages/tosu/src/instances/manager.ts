@@ -76,6 +76,11 @@ export class InstanceManager {
 
             let lazerOnLinux = false;
 
+            if (osuProcesses.length > 0 && process.platform === 'linux') {
+                /* Fix for osu tournament, like osu! -spectateclient 2, wtf btw? */
+                osuProcesses.push(...Process.findProcesses(['osu!']));
+            }
+
             if (osuProcesses.length === 0 && process.platform === 'linux') {
                 osuProcesses = Process.findProcesses(['osu!']);
 
