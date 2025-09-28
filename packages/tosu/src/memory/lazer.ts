@@ -2415,7 +2415,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'CL': {
-                if (this.selectedGamemode === 1) break;
+                if (this.selectedGamemode !== 0) break;
                 const noSliderHeadAccuracyBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
