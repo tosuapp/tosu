@@ -1,6 +1,7 @@
 import {
     argumentsParser,
     config,
+    configEvents,
     configInitialization,
     context,
     getProgramPath,
@@ -26,7 +27,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
-    await configInitialization(httpServer);
+    await configInitialization();
 
     const { update, onedrive: onedriveBypass } = argumentsParser(process.argv);
 
@@ -97,5 +98,9 @@ const currentVersion = require(process.cwd() + '/_version.js');
     httpServer.start();
     instanceManager.runWatcher();
     instanceManager.runDetemination();
+
+    configEvents.addListener('change', httpServer.handleConfigUpdate);
+    configEvents.addListener('change', instanceManager.handleConfigUpdate);
+
     if (config.enableIngameOverlay) instanceManager.startOverlay();
 })();

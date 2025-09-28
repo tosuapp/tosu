@@ -1,10 +1,10 @@
 import { createHash } from 'crypto';
 import * as dotenv from 'dotenv';
+import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
 import path from 'path';
 
 import { getProgramPath } from './directories';
-import { checkGameOverlayConfig } from './ingame';
 import { wLogger } from './logger';
 import { isRealNumber } from './manipulation';
 
@@ -119,8 +119,12 @@ type ConfigSchema = {
     };
 };
 
-type GlobalConfig = {
+export type GlobalConfig = {
     [K in ConfigKey]: Config[K]['type'];
+};
+
+type ConfigEvents = {
+    change: [GlobalConfig];
 };
 
 const configSchema: ConfigSchema = {
@@ -186,6 +190,8 @@ const configSchema: ConfigSchema = {
     }
 };
 
+export const configEvents = new EventEmitter<ConfigEvents>();
+
 export const config: GlobalConfig = new Proxy(
     Object.entries(configSchema).reduce((value, item) => {
         const key = item[0] as ConfigKey;
@@ -204,9 +210,7 @@ const configPath = path.join(getProgramPath(), 'tosu.env');
 
 export class ConfigManager {
     private static previousFileHash: string = '';
-
     private static saveTimeout: NodeJS.Timeout | null = null;
-    private static httpServer: any;
 
     /**
      * Migrates the old config to the new config. (`tsosu.env` -> `tosu.env`)
@@ -280,10 +284,7 @@ export class ConfigManager {
     /**
      * Initializes the ConfigManager, migrates old settings, and starts the file watcher.
      */
-    public static async initialize(
-        filePath: string,
-        httpServer: any
-    ): Promise<void> {
+    public static async initialize(filePath: string): Promise<void> {
         await this.migrate(oldConfigPath);
         await this.writeEnv(filePath);
 
@@ -295,7 +296,6 @@ export class ConfigManager {
             )
             .catch(() => ({}) as Record<ConfigBinding, string>);
 
-        this.httpServer = httpServer;
         this.refreshConfig(env);
         this.startConfigWatcher();
     }
@@ -310,6 +310,8 @@ export class ConfigManager {
         receiver: any
     ): boolean {
         if (config[key] !== value) {
+            // make sure to emit changes before updating value
+            configEvents.emit('change', { ...config });
             this.save();
         }
 
@@ -324,7 +326,7 @@ export class ConfigManager {
 
         this.saveTimeout = setTimeout(async () => {
             await this.updateEnv();
-        }, 500);
+        }, 100);
     }
 
     /**
@@ -435,9 +437,7 @@ export class ConfigManager {
     /**
      * Refreshes the config object with the passed .env object.
      */
-    public static async refreshConfig(
-        env: Record<ConfigBinding, string>
-    ): Promise<void> {
+    public static refreshConfig(env: Record<ConfigBinding, string>): void {
         const oldConfig = { ...config };
         for (const key in configSchema) {
             if (!Object.hasOwn(configSchema, key)) continue;
@@ -448,66 +448,7 @@ export class ConfigManager {
             this.processItem(key as ConfigKey, item, env);
         }
 
-        await checkGameOverlayConfig();
-        this.handleServerRestart(oldConfig);
-        this.handleOverlayUpdate(oldConfig);
-    }
-
-    /**
-     * Restarts the HTTP server if the server IP or port has changed.
-     */
-    private static handleServerRestart(oldConfig: GlobalConfig): void {
-        const ipChanged = oldConfig.serverIP !== config.serverIP;
-        const portChanged = oldConfig.serverPort !== config.serverPort;
-
-        if (ipChanged || portChanged) {
-            this.httpServer.restart();
-        }
-    }
-
-    /**
-     * Manages the game overlay's lifecycle based on config changes.
-     */
-    private static async handleOverlayUpdate(
-        oldConfig: GlobalConfig
-    ): Promise<void> {
-        const oldEnableOverlay = oldConfig.enableIngameOverlay;
-        const newEnableOverlay = config.enableIngameOverlay;
-
-        const instanceManager = this.httpServer.instanceManager;
-
-        if (!oldEnableOverlay && !newEnableOverlay) {
-            return;
-        }
-
-        if (oldEnableOverlay && !newEnableOverlay) {
-            if (instanceManager.isOverlayStarted) {
-                await instanceManager.stopOverlay();
-            }
-            return;
-        }
-
-        if (!oldEnableOverlay && newEnableOverlay) {
-            await instanceManager.updateOverlayConfig();
-            await instanceManager.startOverlay();
-            return;
-        }
-
-        const keybindChanged =
-            oldConfig.ingameOverlayKeybind !== config.ingameOverlayKeybind;
-        const maxFpsChanged =
-            oldConfig.ingameOverlayMaxFps !== config.ingameOverlayMaxFps;
-
-        if (oldEnableOverlay && newEnableOverlay) {
-            if (keybindChanged || maxFpsChanged)
-                await instanceManager.updateOverlayConfig();
-
-            if (maxFpsChanged && instanceManager.isOverlayStarted) {
-                // setFrameRate doesn't work after paint event. Overlay must be restarted.
-                await instanceManager.stopOverlay();
-                await instanceManager.startOverlay();
-            }
-        }
+        configEvents.emit('change', oldConfig);
     }
 
     /**
@@ -548,7 +489,7 @@ export class ConfigManager {
                         const newEnv: Record<ConfigBinding, string> =
                             dotenv.parse(content);
 
-                        await this.refreshConfig(newEnv);
+                        this.refreshConfig(newEnv);
                     } catch (exc) {
                         const msg =
                             exc instanceof Error ? exc.message : String(exc);
@@ -573,8 +514,8 @@ export class ConfigManager {
     }
 }
 
-export async function configInitialization(httpServer: any) {
-    await ConfigManager.initialize(configPath, httpServer);
+export async function configInitialization() {
+    await ConfigManager.initialize(configPath);
 
     // Create user-specified static folder
     await fs.mkdir(config.staticFolderPath, { recursive: true }).catch(null);

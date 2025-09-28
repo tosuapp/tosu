@@ -1,7 +1,9 @@
 import {
     ClientType,
+    GlobalConfig,
     Platform,
     argumentsParser,
+    checkGameOverlayConfig,
     config,
     platformResolver,
     wLogger
@@ -195,6 +197,8 @@ export class InstanceManager {
         this.isOverlayStarted = true;
 
         try {
+            await checkGameOverlayConfig();
+
             const child = await runOverlay();
             if (
                 child instanceof Error &&
@@ -249,6 +253,47 @@ export class InstanceManager {
         } catch (exc) {
             wLogger.error('[ingame-overlay]', (exc as any).message);
             wLogger.debug('[ingame-overlay]', exc);
+        }
+    }
+
+    async handleConfigUpdate(oldConfig: GlobalConfig) {
+        try {
+            const oldEnableOverlay = oldConfig.enableIngameOverlay;
+            const newEnableOverlay = config.enableIngameOverlay;
+
+            if (!oldEnableOverlay && !newEnableOverlay) {
+                return;
+            }
+
+            if (oldEnableOverlay && !newEnableOverlay) {
+                if (this.isOverlayStarted) {
+                    await this.stopOverlay();
+                }
+                return;
+            }
+
+            if (!oldEnableOverlay && newEnableOverlay) {
+                this.updateOverlayConfig();
+                await this.startOverlay();
+                return;
+            }
+
+            const keybindChanged =
+                oldConfig.ingameOverlayKeybind !== config.ingameOverlayKeybind;
+            const maxFpsChanged =
+                oldConfig.ingameOverlayMaxFps !== config.ingameOverlayMaxFps;
+
+            if (oldEnableOverlay && newEnableOverlay) {
+                if (keybindChanged || maxFpsChanged) this.updateOverlayConfig();
+
+                if (maxFpsChanged && this.isOverlayStarted) {
+                    await this.stopOverlay();
+                    await this.startOverlay();
+                }
+            }
+        } catch (exc) {
+            wLogger.error('[ingame-config-update]', (exc as any).message);
+            wLogger.debug('[ingame-config-update]', exc);
         }
     }
 
