@@ -3,8 +3,8 @@ const { createApp, ref } = Vue;
 
 const queryParams = new URLSearchParams(window.location.search);
 
-const BACKUP_SERVER_IP = document.querySelector('*[data-id="serverIP"] input')?.value;
-const BACKUP_SERVER_PORT = document.querySelector('*[data-id="serverPort"] input')?.value;
+const BACKUP_SERVER_IP = document.querySelector('*[data-id="SERVER_IP"] input')?.value;
+const BACKUP_SERVER_PORT = document.querySelector('*[data-id="SERVER_PORT"] input')?.value;
 
 
 const downloading = [];
@@ -15,7 +15,7 @@ const search_bar = document.querySelector('.search-bar');
 const available_overlays = document.querySelector('a[href="/available"]');
 const installed_overlays = document.querySelector('a[href="/"]');
 
-const keybind_div = document.querySelector('[data-id="ingameOverlayKeybind"]');
+const keybind_div = document.querySelector('[data-id="INGAME_OVERLAY_KEYBIND"]');
 
 let timer;
 
@@ -931,14 +931,14 @@ document.querySelectorAll('.text-input input').forEach((i) =>
   i.addEventListener('change', (e) => {
     const settingId = e.target.parentElement.getAttribute('data-id');
 
-    if (settingId === 'serverIP') {
+    if (settingId === 'SERVER_IP') {
       const IPv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/g;
 
       const newIp = e.target.value;
       const isValidIp = IPv4Regex.test(newIp);
 
       if (isValidIp === false) e.target.value = e.target.defaultValue;
-    } else if (settingId === 'serverPort') {
+    } else if (settingId === 'SERVER_PORT') {
       const newPort = Number(e.target.value);
       const isInRange = newPort >= 1024 && newPort <= 65536;
 
@@ -1342,7 +1342,7 @@ async function saveSettings() {
           settings[settingId] = value;
     });
 
-     if (BACKUP_SERVER_IP != settings['serverIP'] || BACKUP_SERVER_PORT != settings['serverPort']) redirect = true;
+     if (BACKUP_SERVER_IP != settings['SERVER_IP'] || BACKUP_SERVER_PORT != settings['SERVER_PORT']) redirect = true;
 
      const download = await fetch(`/api/settingsSave`, {
          method: 'POST',
@@ -1370,10 +1370,10 @@ async function saveSettings() {
      });
 
      if (redirect === true) {
-         const ip = settings['serverIP'] === '0.0.0.0' ? 'localhost' : settings['serverPort'];
+         const ip = settings['SERVER_IP'] === '0.0.0.0' ? 'localhost' : settings['SERVER_IP'];
 
         setTimeout(() => {
-            window.location.href = `http://${ip}:${settings['serverPort']}${window.location.pathname}${window.location.search}`;
+            window.location.href = `http://${ip}:${settings['SERVER_PORT']}${window.location.pathname}${window.location.search}`;
         }, 300);
      }
     } catch (error) {

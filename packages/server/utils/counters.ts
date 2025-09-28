@@ -577,7 +577,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'enableAutoUpdate')
+                            .replace('{id}', 'ENABLE_AUTOUPDATE')
                             .replace(
                                 '{checked}',
                                 config.enableAutoUpdate ? 'checked' : ''
@@ -593,7 +593,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'openDashboardOnStartup')
+                            .replace('{id}', 'OPEN_DASHBOARD_ON_STARTUP')
                             .replace(
                                 '{checked}',
                                 config.openDashboardOnStartup ? 'checked' : ''
@@ -618,7 +618,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'calculatePP')
+                            .replace('{id}', 'CALCULATE_PP')
                             .replace(
                                 '{checked}',
                                 config.calculatePP ? 'checked' : ''
@@ -634,7 +634,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'enableKeyOverlay')
+                            .replace('{id}', 'ENABLE_KEY_OVERLAY')
                             .replace(
                                 '{checked}',
                                 config.enableKeyOverlay ? 'checked' : ''
@@ -649,7 +649,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsNumberInputHTML
-                            .replace('{id}', 'pollRate')
+                            .replace('{id}', 'POLL_RATE')
                             .replace('{value}', config.pollRate.toString())
                             .replace('{min}', '100')
                     ),
@@ -662,7 +662,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsNumberInputHTML
-                            .replace('{id}', 'preciseDataPollRate')
+                            .replace('{id}', 'PRECISE_POLL_RATE')
                             .replace(
                                 '{value}',
                                 config.preciseDataPollRate.toString()
@@ -691,7 +691,7 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace(
                                 '{input-2}',
                                 settingsTextInputHTML
-                                    .replace('{id}', 'serverIP')
+                                    .replace('{id}', 'SERVER_IP')
                                     .replace('{class}', '')
                                     .replace(
                                         '{value}',
@@ -707,7 +707,7 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace(
                                 '{input-2}',
                                 settingsTextInputHTML
-                                    .replace('{id}', 'serverPort')
+                                    .replace('{id}', 'SERVER_PORT')
                                     .replace('{class}', '')
                                     .replace(
                                         '{value}',
@@ -727,7 +727,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-3}',
                         settingsTextareaInputHTML
-                            .replace('{id}', 'allowedIPs')
+                            .replace('{id}', 'ALLOWED_IPS')
                             .replace('{value}', config.allowedIPs)
                     )
             ]
@@ -749,7 +749,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'enableIngameOverlay')
+                            .replace('{id}', 'ENABLE_INGAME_OVERLAY')
                             .replace(
                                 '{checked}',
                                 config.enableIngameOverlay ? 'checked' : ''
@@ -758,7 +758,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsTextInputHTML
-                            .replace('{id}', 'ingameOverlayKeybind')
+                            .replace('{id}', 'INGAME_OVERLAY_KEYBIND')
                             .replace('{class}', ' -keybind')
                             .replace('{value}', config.ingameOverlayKeybind)
                     ),
@@ -771,7 +771,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsNumberInputHTML
-                            .replace('{id}', 'ingameOverlayMaxFps')
+                            .replace('{id}', 'INGAME_OVERLAY_MAX_FPS')
                             .replace('{min}', '1')
                             .replace(
                                 '{value}',
@@ -797,7 +797,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'debugLog')
+                            .replace('{id}', 'DEBUG_LOG')
                             .replace(
                                 '{checked}',
                                 config.debugLog ? 'checked' : ''
@@ -812,7 +812,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-1}',
                         settingsSwitchHTML
-                            .replace('{id}', 'showMpCommands')
+                            .replace('{id}', 'SHOW_MP_COMMANDS')
                             .replace(
                                 '{checked}',
                                 config.showMpCommands ? 'checked' : ''
@@ -827,7 +827,7 @@ export function buildSettings(res: http.ServerResponse) {
                     .replace(
                         '{input-2}',
                         settingsTextInputHTML
-                            .replace('{id}', 'staticFolderPath')
+                            .replace('{id}', 'STATIC_FOLDER_PATH')
                             .replace('{class}', '')
                             .replace('{value}', config.staticFolderPath)
                     )

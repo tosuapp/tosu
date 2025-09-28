@@ -301,7 +301,7 @@ export class ConfigManager {
     }
 
     /**
-     * Schedules a debounced save to the .env file.
+     * Set property to a config file
      */
     public static set<B extends ConfigKey>(
         target: GlobalConfig,
@@ -316,6 +316,9 @@ export class ConfigManager {
         return Reflect.set(target, key, value, receiver);
     }
 
+    /**
+     * Schedules a debounced save to the .env file.
+     */
     public static save() {
         if (this.saveTimeout) clearTimeout(this.saveTimeout);
 
@@ -432,7 +435,10 @@ export class ConfigManager {
     /**
      * Refreshes the config object with the passed .env object.
      */
-    public static refreshConfig(env: Record<ConfigBinding, string>): void {
+    public static async refreshConfig(
+        env: Record<ConfigBinding, string>
+    ): Promise<void> {
+        const oldConfig = { ...config };
         for (const key in configSchema) {
             if (!Object.hasOwn(configSchema, key)) continue;
 
@@ -441,6 +447,10 @@ export class ConfigManager {
 
             this.processItem(key as ConfigKey, item, env);
         }
+
+        await checkGameOverlayConfig();
+        this.handleServerRestart(oldConfig);
+        this.handleOverlayUpdate(oldConfig);
     }
 
     /**
@@ -501,17 +511,6 @@ export class ConfigManager {
     }
 
     /**
-     * Runs all handlers that respond to config changes.
-     */
-    public static async runChangeHandlers(
-        oldConfig: GlobalConfig
-    ): Promise<void> {
-        await checkGameOverlayConfig();
-        this.handleServerRestart(oldConfig);
-        await this.handleOverlayUpdate(oldConfig);
-    }
-
-    /**
      * Watches the .env file for external changes and reloads the config if any are detected.
      */
     private static async startConfigWatcher(): Promise<void> {
@@ -546,12 +545,10 @@ export class ConfigManager {
                         wLogger.debug(
                             '[config] File changed. Refreshing config...'
                         );
-                        const oldConfig = { ...config };
                         const newEnv: Record<ConfigBinding, string> =
                             dotenv.parse(content);
-                        this.refreshConfig(newEnv);
 
-                        await this.runChangeHandlers(oldConfig);
+                        await this.refreshConfig(newEnv);
                     } catch (exc) {
                         const msg =
                             exc instanceof Error ? exc.message : String(exc);
@@ -574,50 +571,6 @@ export class ConfigManager {
             }
         }
     }
-}
-
-export async function updateSettingsFromApi(
-    settings: Record<ConfigKey, string>
-) {
-    const oldConfig = { ...config };
-    for (const key in settings) {
-        if (!Object.hasOwn(configSchema, key)) continue;
-
-        const item = configSchema[key as ConfigKey];
-        if (item === undefined || item === null) continue;
-
-        const raw = settings[key as ConfigKey];
-        if (raw === undefined || raw === null) return;
-
-        let value = item.default;
-        switch (typeof item.default) {
-            case 'boolean': {
-                value = (raw as any) === true;
-                break;
-            }
-
-            case 'number': {
-                if (isRealNumber(raw)) value = +raw;
-                break;
-            }
-
-            case 'string': {
-                value = raw;
-                break;
-            }
-
-            default: {
-                wLogger.warn(
-                    `[config] Value of '${item.binding}' is not of type '${typeof item.default}'. Using default value.`
-                );
-                break;
-            }
-        }
-
-        config[key as ConfigKey] = value as never;
-    }
-
-    await ConfigManager.runChangeHandlers(oldConfig);
 }
 
 export async function configInitialization(httpServer: any) {
