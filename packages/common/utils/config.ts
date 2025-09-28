@@ -329,19 +329,16 @@ export class ConfigManager {
      * Is only called once, on initialization.
      */
     public static async writeEnv(filePath: string): Promise<void> {
-        const fileExists = await fs
-            .stat(filePath)
-            .then(() => true)
-            .catch(() => false);
-
-        if (fileExists) return;
+        const file = await fs.open(filePath, 'wx').catch(() => null);
+        if (!file) {
+            return;
+        }
 
         try {
             const defaults = Object.values(configSchema)
                 .map((value) => `${value.binding}=${value.default}`)
                 .join('\n');
-
-            await fs.writeFile(filePath, defaults, 'utf-8');
+            await file.writeFile(defaults, 'utf-8');
             wLogger.debug(`[config] Config file created at '${filePath}'.`);
         } catch (e) {
             if (!(e instanceof Error) || !('code' in e)) return;
@@ -352,6 +349,8 @@ export class ConfigManager {
 
             wLogger.error(`[config] Failed to write config file: ${cause}`);
             wLogger.debug(`[config] Failed to write config file: ${e}`);
+        } finally {
+            await file.close();
         }
     }
 
