@@ -58,7 +58,7 @@ export class Process {
     static getProcessCommandLine(id: number) {
         const handle = this.openProcess(id);
 
-        const commandLine = ProcessUtils.getProcessCommandLine(handle);
+        const commandLine = ProcessUtils.getProcessCommandLine(handle).trim();
 
         this.closeHandle(handle);
 
@@ -75,26 +75,7 @@ export class Process {
         }
 
         // If using wine (not symlinked into image)
-        if (
-            process.platform === 'linux' &&
-            this.getProcessPath().match('wine-preloader')
-        ) {
-            // bicycle for osu-winnello
-            // I swear a god, I will create a delete osu-winnello repo PR
-            // if you guys will break this
-            const homeEnv = process.env.HOME || '';
-            const xdgDataHome = process.env.XDG_DATA_HOME || '';
-            const shareFolder =
-                xdgDataHome !== ''
-                    ? xdgDataHome
-                    : pathJoin(homeEnv, '.local/share');
-            const osuWinelloPath = pathJoin(shareFolder, 'osuconfig/osupath');
-
-            if (existsSync(osuWinelloPath)) {
-                // osu-sinello script installation found
-                return readFileSync(osuWinelloPath, 'utf-8').trim();
-            }
-
+        if (process.platform === 'linux') {
             const overridenOsuPath = process.env.TOSU_OSU_PATH || '';
             if (overridenOsuPath !== '') {
                 // for other genius, who have their custom wine prefixes
@@ -103,10 +84,31 @@ export class Process {
                 return overridenOsuPath;
             }
 
-            return this.getProcessCommandLine()
-                .slice(2)
-                .replace(/\\/g, '/')
-                .replace(/\/osu!.exe$/, ''); // Format windows dir to linux style.
+            if (this.getProcessPath().match('wine-preloader')) {
+                // bicycle for osu-winnello
+                // I swear a god, I will create a delete osu-winnello repo PR
+                // if you guys will break this
+                const homeEnv = process.env.HOME || '';
+                const xdgDataHome = process.env.XDG_DATA_HOME || '';
+                const shareFolder =
+                    xdgDataHome !== ''
+                        ? xdgDataHome
+                        : pathJoin(homeEnv, '.local/share');
+                const osuWinelloPath = pathJoin(
+                    shareFolder,
+                    'osuconfig/osupath'
+                );
+
+                if (existsSync(osuWinelloPath)) {
+                    // osu-sinello script installation found
+                    return readFileSync(osuWinelloPath, 'utf-8').trim();
+                }
+
+                return this.getProcessCommandLine()
+                    .slice(2)
+                    .replace(/\\/g, '/')
+                    .replace(/\/osu!.exe$/, ''); // Format windows dir to linux style.
+            }
         }
 
         return this.getProcessCwd();

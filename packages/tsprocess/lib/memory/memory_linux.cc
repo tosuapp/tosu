@@ -103,7 +103,15 @@ std::string memory::get_process_path(void *process) {
 
 std::string memory::get_process_command_line(void *process) {
   const auto pid = reinterpret_cast<uintptr_t>(process);
-  return read_file("/proc/" + std::to_string(pid) + "/cmdline");
+  auto cmdline = read_file("/proc/" + std::to_string(pid) + "/cmdline");
+  
+  std::replace(cmdline.begin(), cmdline.end(), '\0', ' ');
+
+  if (!cmdline.empty() && cmdline.back() == ' ') {
+    cmdline.pop_back();
+  }
+  
+  return cmdline;
 }
 
 std::string memory::get_process_cwd(void *process) {

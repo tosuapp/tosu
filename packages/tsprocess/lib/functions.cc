@@ -386,7 +386,7 @@ Napi::Value get_process_command_line(const Napi::CallbackInfo &args) {
 
   auto command_line = memory::get_process_command_line(handle);
 
-  return Napi::String::New(env, command_line.c_str());
+  return Napi::String::New(env, command_line);
 }
 Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
