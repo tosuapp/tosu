@@ -2194,25 +2194,49 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 break;
             }
             case 'SD': {
+                const settings: any = {};
                 const restartBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
 
-                mod.settings = {
-                    restart: this.process.readByte(restartBindable + 0x40) === 1
-                };
+                const failOnSliderTailBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
 
+                if (this.selectedGamemode === 0) {
+                    settings.fail_on_slider_tail =
+                        this.process.readByte(
+                            failOnSliderTailBindable + 0x40
+                        ) === 1;
+                }
+
+                settings.restart =
+                    this.process.readByte(restartBindable + 0x40) === 1;
+
+                mod.settings = settings;
                 break;
             }
             case 'PF': {
+                const settings: any = {};
                 const restartBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
 
-                mod.settings = {
-                    restart: this.process.readByte(restartBindable + 0x40) === 1
-                };
+                const requirePerfectHitsBindable = this.process.readIntPtr(
+                    modObject + 0x20
+                );
 
+                if (this.selectedGamemode === 3) {
+                    settings.require_perfect_hits =
+                        this.process.readByte(
+                            requirePerfectHitsBindable + 0x40
+                        ) === 1;
+                }
+
+                settings.restart =
+                    this.process.readByte(restartBindable + 0x40) === 1;
+
+                mod.settings = settings;
                 break;
             }
             case 'DT': {
@@ -2580,7 +2604,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     spin_speed: this.process.readDouble(
                         spinSpeedBindable + 0x40
                     ),
-                    direction: this.process.readInt(directionBindable + 0x40)
+                    direction: `${this.process.readInt(directionBindable + 0x40)}`
                 };
                 break;
             }
@@ -2590,7 +2614,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
                 mod.settings = {
                     scale: this.process.readFloat(scaleBindable + 0x40),
-                    style: this.process.readInt(styleBindable + 0x40)
+                    style: `${this.process.readInt(styleBindable + 0x40)}`
                 };
                 break;
             }
@@ -2715,7 +2739,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
                 mod.settings = {
                     coverage: this.process.readFloat(coverageBindable + 0x40),
-                    direction: this.process.readInt(directionBindable + 0x40)
+                    direction: `${this.process.readInt(directionBindable + 0x40)}`
                 };
                 break;
             }
