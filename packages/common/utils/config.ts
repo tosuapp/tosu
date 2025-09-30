@@ -296,7 +296,7 @@ export class ConfigManager {
             )
             .catch(() => ({}) as Record<ConfigBinding, string>);
 
-        this.refreshConfig(env);
+        this.refreshConfig(env, false);
         this.startConfigWatcher();
     }
 
@@ -310,8 +310,6 @@ export class ConfigManager {
         receiver: any
     ): boolean {
         if (config[key] !== value) {
-            // make sure to emit changes before updating value
-            configEvents.emit('change', { ...config });
             this.save();
         }
 
@@ -437,7 +435,10 @@ export class ConfigManager {
     /**
      * Refreshes the config object with the passed .env object.
      */
-    public static refreshConfig(env: Record<ConfigBinding, string>): void {
+    public static refreshConfig(
+        env: Record<ConfigBinding, string>,
+        emit: boolean
+    ): void {
         const oldConfig = { ...config };
         for (const key in configSchema) {
             if (!Object.hasOwn(configSchema, key)) continue;
@@ -448,7 +449,7 @@ export class ConfigManager {
             this.processItem(key as ConfigKey, item, env);
         }
 
-        configEvents.emit('change', oldConfig);
+        if (emit === true) configEvents.emit('change', oldConfig);
     }
 
     /**
@@ -489,7 +490,7 @@ export class ConfigManager {
                         const newEnv: Record<ConfigBinding, string> =
                             dotenv.parse(content);
 
-                        this.refreshConfig(newEnv);
+                        this.refreshConfig(newEnv, true);
                     } catch (exc) {
                         const msg =
                             exc instanceof Error ? exc.message : String(exc);

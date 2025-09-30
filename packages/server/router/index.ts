@@ -351,7 +351,7 @@ export default function buildBaseApi(server: Server) {
         });
         if (body instanceof Error) throw body;
 
-        await ConfigManager.refreshConfig(body);
+        ConfigManager.refreshConfig(body, true);
         return sendJson(res, { status: 'updated' });
     });
 
