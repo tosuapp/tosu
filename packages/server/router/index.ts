@@ -522,7 +522,9 @@ export default function buildBaseApi(server: Server) {
             const staticPath = getStaticPath();
 
             const extension = path.extname(url);
-            if (extension === '' && !url.endsWith('/')) {
+
+            // ignore empty and one letter extension (extension returned with .)
+            if (extension.length < 3 && !url.endsWith('/')) {
                 res.writeHead(301, { Location: url + '/' });
                 return res.end();
             }
