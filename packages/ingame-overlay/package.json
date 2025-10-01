@@ -1,6 +1,6 @@
 {
   "name": "@tosu/ingame-overlay",
-  "version": "4.13.1",
+  "version": "4.14.0",
   "description": "High performance tosu ingame overlay",
   "private": true,
   "main": "./dist/src/index.js",

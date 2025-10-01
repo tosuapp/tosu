@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.14.0](https://github.com/tosuapp/tosu/compare/v4.13.1...v4.14.0) (2025-10-01)
+
+
+### Features
+
+* add jsdoc to `safeJoin` func. ([2c965ef](https://github.com/tosuapp/tosu/commit/2c965ef66f8c4eab181812dab8f0e64a9bfeeb0e))
+* Add lazer mods, `BM` (osu), `SR` (taiko) and `MF` (fruits) ([4ebbade](https://github.com/tosuapp/tosu/commit/4ebbade498a6ef519cc6b4819c733f25f22086ce))
+* switch to flat eslint config. ([f8af276](https://github.com/tosuapp/tosu/commit/f8af27605f64792375d83047da52158b7987adcf))
+* switch to flat eslint config. ([5d4158b](https://github.com/tosuapp/tosu/commit/5d4158b6eb18f0ff12c14169f7b18318f8119006))
+
+
+### Bug Fixes
+
+* Ask user to close osu before updating ingame-overlay (if it unnable to delete old version) ([8762b88](https://github.com/tosuapp/tosu/commit/8762b884de202b06bfe38aac7a5b2d83b121aaf0))
+* Calculate accuracy for stable only ([3e10e29](https://github.com/tosuapp/tosu/commit/3e10e29a962b32e6aa1c402b5a82f9e3252761be))
+* Do not start ingame overlay on startup ([c78bb7d](https://github.com/tosuapp/tosu/commit/c78bb7d45e7fa0d07f12e1cb03628d9492d9140e))
+* ensure paths are sanitized correctly. ([b2e0bc6](https://github.com/tosuapp/tosu/commit/b2e0bc615f4ad59cb086a82a1334e56c72688459))
+* Fix empty hitErrors and 0 UR for taiko, mania (ctb doesnt have it) ([21f89f9](https://github.com/tosuapp/tosu/commit/21f89f9beab9e38105b6cef2843f29259f576701))
+* FIx infinity update loop when executable is not tosu.exe ([1ab419e](https://github.com/tosuapp/tosu/commit/1ab419e2b33c9460289cf8fe2426ce43f4700b9a))
+* Fix lazer grades ([6821adc](https://github.com/tosuapp/tosu/commit/6821adc4270fa6139dc40c783d5b9e0da6de1a29))
+* Fix overlays which displays directory files ([7d42d7d](https://github.com/tosuapp/tosu/commit/7d42d7d1d0d1bcf4f44ee61273692284789c063e))
+* Fix trying to read nonexistent "Classic" mod's settings in osu!mania ([138c38a](https://github.com/tosuapp/tosu/commit/138c38a2ad9454f43bef28a26791c15aa44821ba))
+* iframe elements degrading website performance. ([50d421a](https://github.com/tosuapp/tosu/commit/50d421a13ec54b3747328ec79cd8d78dc1908372))
+* Improve error message when tosu linux cannot read memory ([34799f4](https://github.com/tosuapp/tosu/commit/34799f4553663d21d650331903a6e3b5da565811))
+* lazer multi detection ([d973d22](https://github.com/tosuapp/tosu/commit/d973d222dbbc5a5e1cb02af1009f57a34354757c))
+* maxJudgementsAmount for mania score v2 and lazer client ([9067b0f](https://github.com/tosuapp/tosu/commit/9067b0fe6f8039280e168c1190ef222a0c206eb6))
+* Prevent starting overlay when it's already started ([b2cacf7](https://github.com/tosuapp/tosu/commit/b2cacf75d26601434441aa733e830f3037693227))
+* Remove reload after each overlay download ([74f76f9](https://github.com/tosuapp/tosu/commit/74f76f92b7e89d1af9b9dec301fca2623521c077))
+* setcap command need sudo ([3dd0f24](https://github.com/tosuapp/tosu/commit/3dd0f24c59e7c2d6b4d14a21b3ba164d98cf4794))
+* tournament on linux ([d10daad](https://github.com/tosuapp/tosu/commit/d10daad36b98ace40e745c2cc07831ab3f47ed45))
+* wrong eslint config. ([054a91a](https://github.com/tosuapp/tosu/commit/054a91aeaea7293e2a687f6f2769461e3b58de28))
+
 ### [4.13.1](https://github.com/tosuapp/tosu/compare/v4.13.0...v4.13.1) (2025-09-10)
 
 
