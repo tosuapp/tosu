@@ -38,27 +38,21 @@ export interface Settings {
     // replayUIVisible: boolean;
     // chatVisibilityStatus: NumberName;
     // leaderboard: LeaderboardSettings;
-
     // progressBar: NumberName;
     // bassDensity: number;
-
     // resolution: Resolution;
     // client: Client;
-
     // scoreMeter: ScoreMeter;
     // cursor: Cursor;
     // mouse: Mouse;
     // tablet: Tablet;
     // mania: Mania;
-
     // sort: NumberName;
     // group: NumberName;
-
     // skin: Skin;
     // mode: NumberName;
     // audio: Audio;
     // background: Background;
-
     // keybinds: Keybinds;
 }
 
@@ -190,7 +184,7 @@ export interface Profile {
     // banchoStatus: NumberName;
     // id: number;
     // name: string;
-    // mode: NumberName;
+    // mode: NumberName; // removed
     // rankedScore: number;
     // level: number;
     // accuracy: number;
