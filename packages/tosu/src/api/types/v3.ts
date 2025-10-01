@@ -39,11 +39,8 @@ export interface schema {
         leaderboard: boolean; // settings.leaderboard.visible
         interface: boolean; // settings.interfaceVisible
         replay_ui: boolean; // settings.replayUIVisible
-        chat: keyof typeof ChatStatus; // settings.chatVisibilityStatus.name
-
         paused: boolean;
-        break: boolean; // beatmap.isBreak
-        kiai: boolean; // beatmap.kiai
+        chat: keyof typeof ChatStatus; // settings.chatVisibilityStatus.name
 
         client: 'lazer' | 'stable' | 'macos'; // client
         branch: number; // settings.client.branch
@@ -60,9 +57,9 @@ export interface schema {
 
         skin: string; // settings.skin.name  FIXME: naming
 
-        time: number; // beatmap.time.live
-        speed: number; // play.mods.rate FIXME: better naming
         bass_density: number; // settings.bassDensity
+        rate: number; // play.mods.rate FIXME: better naming
+        time: number; // beatmap.time.live
 
         play_time: number; // *new
         running_time: number; // session.playTime
@@ -74,10 +71,6 @@ export interface schema {
 
         id: number;
         name: string;
-        mode: {
-            id: number; // profile.mode.number
-            name: keyof typeof Rulesets; // profile.mode.name
-        };
 
         global_rank: number; // globalRank
         ranked_score: number; // rankedScore
@@ -93,11 +86,13 @@ export interface schema {
         };
 
         country_code: keyof typeof CountryCodes; // profile.countryCode.name
-        background_color: string; // backgroundColour
+        background_color: string; // backgroundColour - stable only
     };
 
     beatmap: {
         convert: boolean;
+        break: boolean; // beatmap.isBreak
+        kiai: boolean;
 
         status: {
             id: number; // beatmap.status.number
@@ -132,7 +127,7 @@ export interface schema {
 
         stats: {
             stars: {
-                realtime: number; // beatmap.stats.stars.live
+                realtime: number; // beatmap.stats.stars.
 
                 /**   osu!   */
                 aim: number | undefined;
@@ -213,7 +208,7 @@ export interface schema {
     play: {
         failed: boolean;
 
-        username: string; // play.playerName
+        name: string; // play.playerName
         score: number;
 
         // play.healthBar
@@ -262,9 +257,9 @@ export interface schema {
             legacy_combo_increase?: number;
         };
 
-        rank: {
-            current: number;
-            max: number;
+        grade: {
+            current: string;
+            max: string;
         };
 
         mods: {
@@ -309,7 +304,7 @@ export interface schema {
     result: {
         online_id: number; // resultsScreen.scoreId
 
-        username: string; // resultsScreen.playerName
+        name: string; // resultsScreen.playerName
         score: number;
 
         mode: {
@@ -354,7 +349,7 @@ export interface schema {
             legacy_combo_increase?: number;
         };
 
-        rank: string;
+        grade: string;
 
         mods: {
             checksum: string; // play.mods.checksum  -  unique md5
@@ -392,8 +387,56 @@ export interface schema {
         created_at: string; // createdAt
     };
 
+    lobby: {
+        freestyle: boolean;
+        type:
+            | 'multiplayer'
+            | 'playlist'
+            | 'daily-challenge'
+            | 'quick-play'
+            | 'tournament';
+
+        id: number;
+        name: string;
+
+        // FIXME: naming
+        hosted_by: {
+            id: number;
+            name: string;
+        };
+
+        mods: {
+            freemods: boolean;
+            checksum: string; // play.mods.checksum  -  unique md5
+
+            id: number;
+            name: string;
+
+            array: ModsLazer;
+        };
+
+        queue: {
+            id: number;
+        }[];
+
+        users: {
+            host: boolean;
+            team: string;
+
+            id: number;
+            name: string;
+        }[];
+
+        messages: {
+            team: string;
+            name: string;
+            message: string;
+            timestamp: string;
+        }[];
+    };
+
     // performance.graph
-    graph: {
+    graphs: {
         labels: number[]; // performance.graph.xaxis
         series: {
             name:
@@ -410,6 +453,7 @@ export interface schema {
         }[];
     };
 
+    // for beatmap and lobbies
     leaderboard: {
         failed: boolean; // leaderboard.isFailed
 
@@ -418,7 +462,6 @@ export interface schema {
 
         id: number;
         name: string;
-
         score: number;
 
         combo: {
@@ -461,7 +504,7 @@ export interface schema {
             legacy_combo_increase?: number;
         };
 
-        rank: string;
+        grade: string;
 
         mods: {
             checksum: string; // play.mods.checksum  -  unique md5
@@ -470,6 +513,27 @@ export interface schema {
             name: string;
 
             array: ModsLazer;
+        };
+
+        pp: {
+            current: number;
+
+            aim: number;
+            speed: number;
+            accuracy: number;
+
+            /**   taiko   */
+            difficulty: number;
+        };
+
+        fc: {
+            current: number;
+            aim: number;
+            speed: number;
+            accuracy: number;
+
+            /**   taiko   */
+            difficulty: number;
         };
 
         accuracy: number;
