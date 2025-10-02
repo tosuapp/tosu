@@ -4,6 +4,7 @@ export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
 
 export interface TosuAPi {
+    game: Game;
     client: string;
     server: string;
     state: NumberName;
@@ -19,6 +20,11 @@ export interface TosuAPi {
     files: Files;
     directPath: DirectPath;
     tourney: Tourney | undefined;
+}
+
+export interface Game {
+    focused: boolean;
+    paused: boolean;
 }
 
 export interface BeatmapTime {
@@ -281,6 +287,8 @@ export interface Objects {
 }
 
 export interface Play {
+    failed: boolean;
+
     playerName: string;
     mode: NumberName;
     score: number;

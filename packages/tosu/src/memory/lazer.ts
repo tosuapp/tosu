@@ -31,6 +31,7 @@ import type {
     IMP3Length,
     IMenu,
     IResultScreen,
+    IScore,
     ISettings,
     ITourney,
     ITourneyChat,
@@ -82,6 +83,8 @@ export interface offsets {
         '<SpectatorClient>k__BackingField': number;
         '<ScoreManager>k__BackingField': number;
         '<MultiplayerClient>k__BackingField': number;
+        '<LeaderboardManager>k__BackingField': number;
+        '<SessionStatics>k__BackingField': number;
         beatmapClock: number;
         '<Storage>k__BackingField': number;
         '<Beatmap>k__BackingField': number;
@@ -100,6 +103,11 @@ export interface offsets {
     };
     'osu.Game.Screens.Play.PlayerLoader': {
         osuLogo: number;
+        '<leaderboardManager>k__BackingField': number;
+    };
+    'osu.Game.Screens.Play.SpectatorPlayer': {
+        score: number;
+        '<SpectatorClient>k__BackingField': number;
     };
     'osu.Game.Beatmaps.FramedBeatmapClock': {
         finalClockSource: number;
@@ -151,6 +159,7 @@ export interface offsets {
         '<ScoreProcessor>k__BackingField': number;
         '<HealthProcessor>k__BackingField': number;
         '<HUDOverlay>k__BackingField': number;
+        '<DrawableRuleset>k__BackingField': number;
         dependencies: number;
     };
     'osu.Framework.Screens.ScreenStack': {
@@ -372,8 +381,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private scoringDisplayMode: ScoringMode = ScoringMode.standardised;
     private HUDVisibilityMode: number = 0;
     private ReplaySettingsOverlay: boolean = true;
-
-    private replayMode: boolean = false;
 
     private modMappings: Map<string, string> = new Map();
 
@@ -619,9 +626,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         '<logo>k__BackingField'
                     ]
             ) ===
+                this.process.readIntPtr(
+                    this.gameBase() + this.offsets['osu.Game.OsuGame'].osuLogo
+                ) &&
             this.process.readIntPtr(
-                address + this.offsets['osu.Game.OsuGame'].osuLogo
-            )
+                address +
+                    this.offsets['osu.Game.Screens.Play.PlayerLoader'][
+                        '<leaderboardManager>k__BackingField'
+                    ]
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() +
+                        this.offsets['osu.Game.OsuGameBase'][
+                            '<LeaderboardManager>k__BackingField'
+                        ]
+                )
         );
     }
 
@@ -644,6 +663,69 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             ) ===
                 this.process.readIntPtr(
                     this.gameBase() + this.offsets['osu.Game.OsuGameBase'].realm
+                )
+        );
+    }
+
+    private checkIfSpectator(address: number) {
+        return (
+            this.process.readIntPtr(address + 0x3f0) ===
+                this.process.readIntPtr(
+                    this.gameBase() +
+                        this.offsets['osu.Game.OsuGameBase'][
+                            '<API>k__BackingField'
+                        ]
+                ) &&
+            this.process.readIntPtr(
+                address +
+                    this.offsets['osu.Game.Screens.Play.SpectatorPlayer'][
+                        '<SpectatorClient>k__BackingField'
+                    ]
+            ) ===
+                this.process.readIntPtr(
+                    this.gameBase() +
+                        this.offsets['osu.Game.OsuGameBase'][
+                            '<SpectatorClient>k__BackingField'
+                        ]
+                ) &&
+            this.process.readIntPtr(
+                address +
+                    this.offsets['osu.Game.Screens.Play.SpectatorPlayer'].score
+            ) !==
+                this.process.readIntPtr(
+                    this.gameBase() +
+                        this.offsets['osu.Game.OsuGameBase'][
+                            '<SessionStatics>k__BackingField'
+                        ]
+                )
+        );
+    }
+
+    private checkIfWatchingReplay(address: number) {
+        const drawableRuleset = this.process.readIntPtr(
+            this.player() +
+                this.offsets['osu.Game.Screens.Play.Player'][
+                    '<DrawableRuleset>k__BackingField'
+                ]
+        );
+        return (
+            this.process.readIntPtr(
+                drawableRuleset +
+                    this.offsets['osu.Game.Rulesets.UI.DrawableRuleset'][
+                        '<ReplayScore>k__BackingField'
+                    ]
+            ) !== 0 &&
+            this.process.readIntPtr(
+                address +
+                    this.offsets['osu.Game.Screens.Play.SpectatorPlayer'][
+                        '<SpectatorClient>k__BackingField'
+                    ]
+            ) !==
+                this.process.readIntPtr(
+                    this.gameBase() +
+                        this.offsets['osu.Game.OsuGameBase'][
+                            '<SpectatorClient>k__BackingField'
+                        ]
                 )
         );
     }
@@ -1567,7 +1649,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         health: number = 0,
         retries: number = 0,
         combo?: number
-    ): IGameplay {
+    ): IScore {
         const statistics = this.readStatistics(scoreInfo);
         const maximumStatistics = this.readMaximumStatistics(scoreInfo);
 
@@ -1639,6 +1721,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return {
+            failed: health <= 0,
             retries,
             playerName: username,
             mods,
@@ -2873,18 +2956,27 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const filesFolder = path.join(this.basePath(), 'files');
         const isPlaying = this.player() !== 0;
+
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
         const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
+        const isSpectator = this.checkIfSpectator(this.currentScreen);
         const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
         const isMulti = this.checkIfMulti();
+        const isReplay = isPlaying
+            ? this.checkIfWatchingReplay(this.currentScreen)
+            : false;
 
         let isMultiSpectating = false;
 
         let status = 0;
 
-        if (isPlaying || isPlayerLoader) {
+        if (isReplay && (isPlaying || isPlayerLoader)) {
+            status = GameState.watchingReplay;
+        } else if (isSpectator && (isPlaying || isPlayerLoader)) {
+            status = GameState.spectating;
+        } else if (isPlaying || isPlayerLoader) {
             status = GameState.play;
         } else if (isSongSelectV2) {
             status = GameState.selectPlay;
@@ -2915,26 +3007,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         this.isPlayerLoading = isPlayerLoader;
 
-        if (isPlaying) {
-            const dependencies = this.process.readIntPtr(
-                this.player() +
-                    this.offsets['osu.Game.Screens.Play.Player'].dependencies
-            );
-            const cache = this.process.readIntPtr(dependencies + 0x8);
-            const entries = this.process.readIntPtr(cache + 0x10);
-            const drawableRuleset = this.process.readIntPtr(entries + 0x10);
-
-            this.replayMode =
-                this.process.readIntPtr(
-                    drawableRuleset +
-                        this.offsets['osu.Game.Rulesets.UI.DrawableRuleset'][
-                            '<ReplayScore>k__BackingField'
-                        ]
-                ) !== 0;
-        }
-
         return {
-            isWatchingReplay: this.replayMode,
+            isWatchingReplay: status === GameState.watchingReplay,
             isReplayUiHidden: !this.ReplaySettingsOverlay,
             showInterface: this.HUDVisibilityMode > 0,
             chatStatus: 0,

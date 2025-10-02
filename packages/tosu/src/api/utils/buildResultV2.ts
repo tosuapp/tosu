@@ -21,6 +21,7 @@ import path from 'path';
 import {
     ApiAnswer,
     Leaderboard,
+    Play,
     Tourney,
     TourneyChatMessages,
     TourneyClients
@@ -125,6 +126,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
               : menu.gamemode;
 
     return {
+        game: {
+            focused: instanceManager.gameFocused,
+            paused: global.paused
+        },
         client: ClientType[osuInstance.client],
         server: osuInstance.customServerEndpoint ?? 'ppy.sh',
         state: {
@@ -565,6 +570,7 @@ const buildLazerTourneyData = (
                     },
 
                     play: {
+                        failed: false,
                         playerName: client.score!.playerName,
 
                         mode: {
@@ -876,8 +882,9 @@ function buildPlay(
     gameplay: Gameplay,
     beatmapPP: BeatmapPP,
     currentMods: CalculateMods
-) {
+): Play {
     return {
+        failed: gameplay.failed,
         playerName: gameplay.playerName,
 
         mode: {
