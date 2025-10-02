@@ -4,130 +4,19 @@ import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
 import path from 'path';
 
+import {
+    ConfigBinding,
+    ConfigEvents,
+    ConfigItem,
+    ConfigKey,
+    ConfigSchema,
+    GlobalConfig
+} from './config.types';
 import { getProgramPath } from './directories';
 import { wLogger } from './logger';
 import { isRealNumber } from './manipulation';
 
-interface Config {
-    // Whether tosu should automatically check for and install updates.
-    enableAutoUpdate: {
-        type: boolean;
-        binding: 'ENABLE_AUTOUPDATE';
-    };
-
-    // Whether tosu should open the web dashboard on startup.
-    openDashboardOnStartup: {
-        type: boolean;
-        binding: 'OPEN_DASHBOARD_ON_STARTUP';
-    };
-
-    // Whether to show verbose logging for debugging purposes.
-    debugLog: {
-        type: boolean;
-        binding: 'DEBUG_LOG';
-    };
-
-    // Whether tosu should calculate performance points from game data.
-    calculatePP: {
-        type: boolean;
-        binding: 'CALCULATE_PP';
-    };
-
-    // Whether tosu should read osu!'s built-in key overlay data.
-    enableKeyOverlay: {
-        type: boolean;
-        binding: 'ENABLE_KEY_OVERLAY';
-    };
-
-    // General data polling rate in milliseconds.
-    pollRate: {
-        type: number;
-        binding: 'POLL_RATE';
-    };
-
-    // More precise polling rate for critical data, in milliseconds. (e.g. key overlay data)
-    preciseDataPollRate: {
-        type: number;
-        binding: 'PRECISE_DATA_POLL_RATE';
-    };
-
-    // Whether to show bancho !mp commands in the tournament manager chat.
-    showMpCommands: {
-        type: boolean;
-        binding: 'SHOW_MP_COMMANDS';
-    };
-
-    // The IP address tosu should serve on.
-    serverIP: {
-        type: string;
-        binding: 'SERVER_IP';
-    };
-
-    // The port tosu should serve on.
-    serverPort: {
-        type: number;
-        binding: 'SERVER_PORT';
-    };
-
-    // Path to the folder containing pp counters.
-    staticFolderPath: {
-        type: string;
-        binding: 'STATIC_FOLDER_PATH';
-    };
-
-    // Whether tosu should launch the in-game overlay.
-    enableIngameOverlay: {
-        type: boolean;
-        binding: 'ENABLE_INGAME_OVERLAY';
-    };
-
-    // The keybind to open the in-game overlay.
-    ingameOverlayKeybind: {
-        type: string;
-        binding: 'INGAME_OVERLAY_KEYBIND';
-    };
-
-    // The maximum frames per second for the in-game overlay.
-    ingameOverlayMaxFps: {
-        type: number;
-        binding: 'INGAME_OVERLAY_MAX_FPS';
-    };
-
-    // Comma-separated list of allowed IPs for remote access.
-    allowedIPs: {
-        type: string;
-        binding: 'ALLOWED_IPS';
-    };
-}
-
-export type ConfigKey = keyof Config;
-export type ConfigBinding = {
-    [K in keyof Config]: Config[K] extends { binding: infer binding }
-        ? binding
-        : never;
-}[keyof Config];
-
-interface ConfigItem<K extends ConfigKey> {
-    binding: Config[K]['binding'];
-    default: Config[K]['type'];
-}
-
-type ConfigSchema = {
-    [K in ConfigKey]: {
-        binding: Config[K]['binding'];
-        default: Config[K]['type'];
-    };
-};
-
-export type GlobalConfig = {
-    [K in ConfigKey]: Config[K]['type'];
-};
-
-type ConfigEvents = {
-    change: [GlobalConfig];
-};
-
-const configSchema: ConfigSchema = {
+const defaultSchema: ConfigSchema = {
     enableAutoUpdate: {
         binding: 'ENABLE_AUTOUPDATE',
         default: true
@@ -193,7 +82,7 @@ const configSchema: ConfigSchema = {
 export const configEvents = new EventEmitter<ConfigEvents>();
 
 export const config: GlobalConfig = new Proxy(
-    Object.entries(configSchema).reduce((value, item) => {
+    Object.entries(defaultSchema).reduce((value, item) => {
         const key = item[0] as ConfigKey;
         value[key] = item[1].default as never;
 
@@ -238,10 +127,10 @@ export class ConfigManager {
                     .catch(() => null)) || {};
 
             const migratedEnv: Record<string, string> = {};
-            for (const key in configSchema) {
-                if (!Object.hasOwn(configSchema, key)) continue;
+            for (const key in defaultSchema) {
+                if (!Object.hasOwn(defaultSchema, key)) continue;
 
-                const item = configSchema[key as ConfigKey];
+                const item = defaultSchema[key as ConfigKey];
 
                 migratedEnv[item.binding] = newEnv[item.binding];
                 migratedEnv[item.binding] ??= oldEnv[item.binding];
@@ -303,10 +192,10 @@ export class ConfigManager {
     /**
      * Set property to a config file
      */
-    public static set<B extends ConfigKey>(
+    public static set<T extends ConfigKey>(
         target: GlobalConfig,
-        key: B,
-        value: GlobalConfig[B],
+        key: T,
+        value: GlobalConfig[T],
         receiver: any
     ): boolean {
         if (config[key] !== value) {
@@ -338,7 +227,7 @@ export class ConfigManager {
         }
 
         try {
-            const defaults = Object.values(configSchema)
+            const defaults = Object.values(defaultSchema)
                 .map((value) => `${value.binding}=${value.default}`)
                 .join('\n');
             await file.writeFile(defaults, 'utf-8');
@@ -367,7 +256,7 @@ export class ConfigManager {
             const content = Object.entries(config)
                 .map(
                     (value) =>
-                        `${configSchema[value[0] as ConfigKey].binding}=${value[1]}`
+                        `${defaultSchema[value[0] as ConfigKey].binding}=${value[1]}`
                 )
                 .join('\n');
             const newHash = createHash('sha256').update(content).digest('hex');
@@ -440,10 +329,10 @@ export class ConfigManager {
         emit: boolean
     ): void {
         const oldConfig = { ...config };
-        for (const key in configSchema) {
-            if (!Object.hasOwn(configSchema, key)) continue;
+        for (const key in defaultSchema) {
+            if (!Object.hasOwn(defaultSchema, key)) continue;
 
-            const item = configSchema[key as ConfigKey];
+            const item = defaultSchema[key as ConfigKey];
             if (item === undefined || item === null) continue;
 
             this.processItem(key as ConfigKey, item, env);

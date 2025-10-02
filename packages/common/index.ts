@@ -14,3 +14,5 @@ export * from './utils/context';
 export * from './enums/osu';
 export * from './enums/tosu';
 export * from './enums/country';
+
+export * from './utils/config.types';
