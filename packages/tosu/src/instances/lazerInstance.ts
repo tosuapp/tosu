@@ -54,7 +54,7 @@ export class LazerInstance extends AbstractInstance {
                     wLogger.debug(
                         ClientType[this.client],
                         this.pid,
-                        'Unnable to find osu version',
+                        'Unable to find osu version',
                         exc
                     );
                 } finally {
@@ -67,7 +67,7 @@ export class LazerInstance extends AbstractInstance {
                 wLogger.error(
                     ClientType[this.client],
                     this.pid,
-                    'Unnable to find osu version, report to devs: https://discord.gg/WX7BTs8kwh'
+                    'Unable to find osu version, report to devs: https://discord.gg/WX7BTs8kwh'
                 );
 
                 this.regularDataLoop();
@@ -340,11 +340,8 @@ export class LazerInstance extends AbstractInstance {
                         resultScreen.updatePerformance();
                         break;
 
-                    case GameState.selectMulti:
                     case GameState.lobby:
-                        if (global.isMultiSpectating) {
-                            lazerMultiSpectating.updateState();
-                        }
+                        lazerMultiSpectating.updateState();
 
                         break;
 

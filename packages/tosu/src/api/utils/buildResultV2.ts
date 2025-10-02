@@ -420,7 +420,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         },
 
         tourney:
-            osuInstance instanceof LazerInstance && global.isMultiSpectating
+            osuInstance instanceof LazerInstance &&
+            global.status === GameState.lobby
                 ? buildLazerTourneyData(osuInstance)
                 : buildTourneyData(instanceManager)
     };
@@ -454,7 +455,14 @@ const buildLazerTourneyData = (
             right: 0
         },
 
-        chat: [],
+        chat: lazerMultiSpectating.lazerSpectatingData.chat.map((x) => {
+            return {
+                team: 'none',
+                timestamp: x.time,
+                name: x.name,
+                message: x.content
+            };
+        }),
 
         totalScore: {
             left: lazerMultiSpectating.lazerSpectatingData.spectatingClients

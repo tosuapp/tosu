@@ -404,6 +404,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const scalingContainerTargetDrawSize = this.getPattern(
             'scalingContainerTargetDrawSize'
         );
+
         const externalLinkOpener = this.process.readIntPtr(
             scalingContainerTargetDrawSize - 0x24
         );
@@ -1089,7 +1090,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         let isArray = false;
 
         // another hacky check :D
-        // 0x10 is _items in List and length in array
         if (this.process.readInt(list + 0x10) > 10000000) {
             isArray = true;
         }
@@ -3304,14 +3304,57 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             });
         }
 
-        // const multiplayerClient = this.multiplayerClient();
+        const channelId = this.process.readInt(room + 0x44); // osu.Game.Online.Multiplayer.MultiplayerRoom::<ChannelID>k__BackingField
+        const channelManager = this.process.readIntPtr(this.gameBase() + 0x520); // osu.Desktop.OsuGameDesktop::channelManager
 
-        // const room = this.process.readIntPtr(multiplayerClient + 0x288);
+        const joinedChannels = this.process.readIntPtr(channelManager + 0x320); // osu.Game.Online.Chat.ChannelManager::joinedChannels
+        const collection = this.process.readIntPtr(joinedChannels + 0x18);
+        const channelList = this.readListItems(collection);
 
-        // const roomId = this.process.readInt(room + 0x38);
-        // const channelId = this.process.readInt(room + 0x44);
+        let multiChannel = 0;
 
-        return { chat: [], spectatingClients };
+        for (const channel of channelList) {
+            const iterChannelId = this.process.readLong(channel + 0x60); // osu.Game.Online.Chat.Channel::Id
+
+            if (iterChannelId === channelId) {
+                multiChannel = channel;
+                break;
+            }
+        }
+
+        if (multiChannel === 0) {
+            return { chat: [], spectatingClients };
+        }
+
+        const chatItems: ITourneyManagerChatItem[] = [];
+
+        const messagesSortedList = this.process.readIntPtr(multiChannel + 0x10); // osu.Game.Online.Chat.Channel::Messages
+        const messageList = this.readListItems(
+            this.process.readIntPtr(messagesSortedList + 0x8)
+        );
+
+        for (const message of messageList) {
+            const dateTime = message + 0x58 + 0x8; // osu.Game.Online.Chat.Message::Timestamp
+
+            const date = netDateBinaryToDate(
+                this.process.readInt(dateTime + 0x4),
+                this.process.readInt(dateTime)
+            );
+
+            const content = this.process.readSharpStringPtr(message + 0x8); // osu.Game.Online.Chat.Message::Content
+
+            const apiUser = this.readUser(
+                this.process.readIntPtr(message + 0x10) // osu.Game.Online.Chat.Message::Sender
+            );
+
+            chatItems.push({
+                time: date.toISOString(),
+                name: apiUser.name,
+                content
+            });
+        }
+
+        return { chat: chatItems, spectatingClients };
     }
 
     settings(): ISettings {
