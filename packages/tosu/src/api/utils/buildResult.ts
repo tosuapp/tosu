@@ -277,42 +277,8 @@ const buildLazerTourneyData = (
 
     const lazerSpectatingData = lazerMultiSpectating.lazerSpectatingData;
 
-    return {
-        manager: {
-            ipcState: global.status,
-            bestOF: 0,
-            teamName: {
-                left: '',
-                right: ''
-            },
-            stars: {
-                left: 0,
-                right: 0
-            },
-            bools: {
-                scoreVisible: global.status === GameState.lobby,
-                starsVisible: false
-            },
-            chat: lazerSpectatingData.chat.map((x) => {
-                return {
-                    team: 'none',
-                    time: x.time,
-                    name: x.name,
-                    messageBody: x.content
-                };
-            }),
-            gameplay: {
-                score: {
-                    left: lazerSpectatingData.spectatingClients
-                        .filter((client) => client.team === 'red')
-                        .reduce((pv, cv) => (pv += cv.score?.score || 0), 0),
-                    right: lazerSpectatingData.spectatingClients
-                        .filter((client) => client.team === 'blue')
-                        .reduce((pv, cv) => (pv += cv.score?.score || 0), 0)
-                }
-            }
-        },
-        ipcClients: lazerSpectatingData.spectatingClients.map((client) => {
+    const mappedOsuTourneyClients = lazerSpectatingData.spectatingClients.map(
+        (client) => {
             const currentMods =
                 global.status === GameState.play
                     ? client.score!.mods
@@ -381,7 +347,55 @@ const buildLazerTourneyData = (
                     }
                 }
             };
-        })
+        }
+    );
+
+    const mappedChat = lazerSpectatingData.chat.map((message) => {
+        const ipcClient = mappedOsuTourneyClients.find(
+            (client) => client.spectating.name === message.name
+        );
+
+        return {
+            team: ipcClient
+                ? ipcClient.team
+                : message.name === 'BanchoBot'
+                  ? 'bot'
+                  : 'unknown',
+            time: message.time,
+            name: message.name,
+            messageBody: message.content
+        };
+    });
+
+    return {
+        manager: {
+            ipcState: global.status,
+            bestOF: 0,
+            teamName: {
+                left: '',
+                right: ''
+            },
+            stars: {
+                left: 0,
+                right: 0
+            },
+            bools: {
+                scoreVisible: global.status === GameState.lobby,
+                starsVisible: false
+            },
+            chat: mappedChat,
+            gameplay: {
+                score: {
+                    left: lazerSpectatingData.spectatingClients
+                        .filter((client) => client.team === 'red')
+                        .reduce((pv, cv) => (pv += cv.score?.score || 0), 0),
+                    right: lazerSpectatingData.spectatingClients
+                        .filter((client) => client.team === 'blue')
+                        .reduce((pv, cv) => (pv += cv.score?.score || 0), 0)
+                }
+            }
+        },
+        ipcClients: mappedOsuTourneyClients
     };
 };
 

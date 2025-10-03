@@ -8,6 +8,7 @@ import {
     LazerSettings,
     Rulesets,
     ScoringMode,
+    config,
     measureTime,
     platformResolver,
     wLogger
@@ -2773,8 +2774,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     modObject + 0x20
                 );
 
-                console.log(modObject.toString(16));
-
                 mod.settings = {
                     one_third_conversion:
                         this.process.readByte(
@@ -3346,6 +3345,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const apiUser = this.readUser(
                 this.process.readIntPtr(message + 0x10) // osu.Game.Online.Chat.Message::Sender
             );
+
+            if (!config.showMpCommands && content.startsWith('!mp')) {
+                continue;
+            }
 
             chatItems.push({
                 time: date.toISOString(),
