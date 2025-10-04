@@ -55,8 +55,9 @@ inline bool scan(std::vector<uint8_t> buffer, std::span<uint8_t> signature, std:
   for (size_t i = 0; i + signature.size() <= buffer.size(); ++i) {
     bool found = true;
     for (size_t j = 0; j < signature.size(); ++j) {
-      if (buffer[i + j] == signature[j] || mask[j] == 0)
+      if ((buffer[i + j] == signature[j] && mask[j] == 1) || (mask[j] == 0 && buffer[i + j] != 0)) {
         continue;
+      }
 
       found = false;
       break;
@@ -77,10 +78,11 @@ inline bool scan(std::vector<uint8_t> buffer, std::vector<uint8_t> signature, st
   offset = 0;
 
   for (size_t i = 0; i + signature.size() <= buffer.size(); ++i) {
-    bool found = true;
+    auto found = true;
     for (size_t j = 0; j < signature.size(); ++j) {
-      if (buffer[i + j] == signature[j] || mask[j] == 0)
+      if ((buffer[i + j] == signature[j] && mask[j] == 1) || (mask[j] == 0 && buffer[i + j] != 0)) {
         continue;
+      }
 
       found = false;
       break;
