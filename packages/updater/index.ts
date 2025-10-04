@@ -1,5 +1,5 @@
 import {
-    config,
+    context,
     downloadFile,
     getProgramPath,
     platformResolver,
@@ -75,8 +75,8 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
             assets: { name: string; browser_download_url: string }[];
         } = json;
 
-        config.currentVersion = currentVersion;
-        config.updateVersion = versionName || currentVersion;
+        context.currentVersion = currentVersion;
+        context.updateVersion = versionName || currentVersion;
 
         if (versionName === null || versionName === undefined) {
             wLogger.info(
@@ -99,7 +99,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
             else
                 wLogger.warn(
                     '[updater]',
-                    `Update available v${currentVersion} => v${config.updateVersion}`
+                    `Update available v${currentVersion} => v${context.updateVersion}`
                 );
         }
 
@@ -108,8 +108,8 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
         wLogger.error('[updater]', `checkUpdates`, (exc as any).message);
         wLogger.debug('[updater]', `checkUpdates`, exc);
 
-        config.currentVersion = currentVersion;
-        config.updateVersion = currentVersion;
+        context.currentVersion = currentVersion;
+        context.updateVersion = currentVersion;
 
         return exc as Error;
     }

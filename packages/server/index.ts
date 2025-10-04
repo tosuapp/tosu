@@ -1,4 +1,4 @@
-import { config, wLogger } from '@tosu/common';
+import { GlobalConfig, config, wLogger } from '@tosu/common';
 
 import buildAssetsApi from './router/assets';
 import buildBaseApi from './router/index';
@@ -84,6 +84,20 @@ export class Server {
     restart() {
         this.app.server.close();
         this.app.listen(config.serverPort, config.serverIP);
+    }
+
+    handleConfigUpdate(oldConfig: GlobalConfig) {
+        try {
+            const ipChanged = oldConfig.serverIP !== config.serverIP;
+            const portChanged = oldConfig.serverPort !== config.serverPort;
+
+            if (ipChanged || portChanged) {
+                this.restart();
+            }
+        } catch (exc) {
+            wLogger.error('[server-config-update]', (exc as any).message);
+            wLogger.debug('[server-config-update]', exc);
+        }
     }
 
     middlewares() {

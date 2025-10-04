@@ -953,8 +953,7 @@ document.querySelectorAll('.text-input input').forEach((i) =>
 document.querySelectorAll('.textarea-input textarea')
   .forEach((i) => i.addEventListener('change', () => checkSettingsChanges()));
 
-document.querySelector('.settings-save-button button')
-  ?.addEventListener('click', () => saveSettings());
+
 
 const isNumberValid = (num) => {
   if (typeof num === 'number') return num - num === 0;
@@ -964,7 +963,6 @@ const isNumberValid = (num) => {
 };
 
 const checkSettingsChanges = () => {
-  const saveButton = document.querySelector('.settings-save-button');
   const settings = document.querySelectorAll('.settings input, .settings textarea');
 
   const hasChanges = Array.from(settings).some((s) => {
@@ -973,9 +971,7 @@ const checkSettingsChanges = () => {
   });
 
   if (hasChanges) {
-    saveButton.style.opacity = 1;
-    saveButton.classList.add('shake');
-    saveButton.querySelector('button').disabled = false;
+    saveSettings();
   }
 };
 
@@ -1332,66 +1328,62 @@ async function startSearch(search) {
 };
 
 async function saveSettings() {
-  if (downloading.includes('settings-save-button')) return;
-  downloading.push('settings-save-button');
+  try {
+    let redirect = false;
+    let settings = {};
 
-  let redirect = false;
-  let settings = {};
+    document.querySelectorAll('.settings *[data-id]').forEach((s) => {
+        const input = s.querySelector('input, textarea');
+        if (!input) return;
 
-  document.querySelectorAll('.settings *[data-id]').forEach((s) => {
-    const input = s.querySelector('input, textarea');
-    if (!input) return;
+          const value = input.type == 'checkbox' ? input.checked : input.value;
+         const settingId = s.getAttribute('data-id');
 
-    const value = input.type == 'checkbox' ? input.checked : input.value;
-    const settingId = s.getAttribute('data-id');
-
-    settings[settingId] = value;
-  });
-
-  if (BACKUP_SERVER_IP != settings['SERVER_IP'] || BACKUP_SERVER_PORT != settings['SERVER_PORT']) redirect = true;
-
-  const download = await fetch(`/api/settingsSave`, {
-    method: 'POST',
-    body: JSON.stringify(settings)
-  });
-  const json = await download.json();
-
-  if (json.error != null) {
-    if (typeof json.error == 'object') try { json.error = JSON.stringify(json.error) } catch (error) { }
-
-    displayNotification({
-      element: document.querySelector('main'),
-      text: `Error while opening: ${json.error}`,
-      classes: ['red'],
-      delay: 3000
+          settings[settingId] = value;
     });
-  }
 
-  displayNotification({
-    element: document.querySelector('.settings-save-button'),
-    text: `Config has been saved`,
-    classes: ['green'],
-    delay: 3000
-  });
+     if (BACKUP_SERVER_IP != settings['SERVER_IP'] || BACKUP_SERVER_PORT != settings['SERVER_PORT']) redirect = true;
 
-  if (redirect === true) {
-    const ip = settings['SERVER_IP'] === '0.0.0.0' ? 'localhost' : settings['SERVER_IP'];
+     const download = await fetch(`/api/settingsSave`, {
+         method: 'POST',
+         body: JSON.stringify(settings)
+     });
+     const json = await download.json();
 
-    setTimeout(() => {
-      window.location.href = `http://${ip}:${settings['SERVER_PORT']}${window.location.pathname}${window.location.search}`;
-    }, 300);
-  }
+     if (json.error != null) {
+         if (typeof json.error == 'object') try { json.error = JSON.stringify(json.error) } catch (error) { }
 
-  const settingsButton = document.querySelector('.settings-save-button');
+         displayNotification({
+             element: document.querySelector('header'),
+            text: `Error while saving settings: ${json.error}`,
+           classes: ['red'],
+           delay: 3000
+         });
+         return;
+     }
 
-  const index = downloading.indexOf('settings-save-button');
-  if (index == -1) return;
+     displayNotification({
+         element: document.querySelector('header'),
+         text: `Settings saved`,
+         classes: ['green'],
+         delay: 1500
+     });
 
-  downloading.splice(index, 1);
+     if (redirect === true) {
+         const ip = settings['SERVER_IP'] === '0.0.0.0' ? 'localhost' : settings['SERVER_IP'];
 
-  settingsButton.style.opacity = '25%';
-  settingsButton.querySelector('button').disabled = true;
-  settingsButton.classList.remove('shake');
+        setTimeout(() => {
+            window.location.href = `http://${ip}:${settings['SERVER_PORT']}${window.location.pathname}${window.location.search}`;
+        }, 300);
+     }
+    } catch (error) {
+        displayNotification({
+            element: document.querySelector('main'),
+            text: `Error while saving settings: ${error.message}`,
+            classes: ['red'],
+            delay: 3000
+        });
+    }
 }
 
 function displayModal(callback, id, classes) {
@@ -1609,11 +1601,7 @@ window.addEventListener('click', (event) => {
   if (t?.classList.value.includes(' open-button')) return openCounter(t);
   if (t?.classList.value.includes(' open-folder-button')) return openCounter(t);
 
-  // save tosu settings
-  if (t?.classList.value.includes(' save-button')) {
-    startDownload(t);
-    return saveSettings(t);
-  };
+
 
   if (t?.classList.value.includes(' settings-button')) {
     loadCounterSettings(t.attributes.n?.value, '#showSettings');

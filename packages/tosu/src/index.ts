@@ -1,9 +1,11 @@
 import {
     argumentsParser,
     config,
+    configEvents,
+    configInitialization,
+    context,
     getProgramPath,
-    wLogger,
-    watchConfigFile
+    wLogger
 } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
@@ -17,7 +19,7 @@ import { InstanceManager } from '@/instances/manager';
 const currentVersion = require(process.cwd() + '/_version.js');
 
 (async () => {
-    config.currentVersion = currentVersion;
+    context.currentVersion = currentVersion;
     wLogger.info(`Starting tosu`);
 
     Process.disablePowerThrottling();
@@ -25,7 +27,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
     const instanceManager = new InstanceManager();
     const httpServer = new Server({ instanceManager });
 
-    await watchConfigFile({ httpServer, initial: true });
+    await configInitialization();
 
     const { update, onedrive: onedriveBypass } = argumentsParser(process.argv);
 
@@ -67,10 +69,10 @@ const currentVersion = require(process.cwd() + '/_version.js');
         }
     }
 
-    const logsPath = dirname(config.logFilePath);
+    const logsPath = dirname(context.logFilePath);
     if (existsSync(logsPath)) {
         const logs = readdirSync(logsPath).filter(
-            (file) => file !== config.logFilePath.split('\\').pop()
+            (file) => file !== context.logFilePath.split('\\').pop()
         );
         const size =
             logs.reduce((total, file) => {
@@ -96,5 +98,9 @@ const currentVersion = require(process.cwd() + '/_version.js');
     httpServer.start();
     instanceManager.runWatcher();
     instanceManager.runDetemination();
+
+    configEvents.addListener('change', httpServer.handleConfigUpdate);
+    configEvents.addListener('change', instanceManager.handleConfigUpdate);
+
     if (config.enableIngameOverlay) instanceManager.startOverlay();
 })();

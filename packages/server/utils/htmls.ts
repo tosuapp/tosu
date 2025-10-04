@@ -109,13 +109,4 @@ export const settingsTextareaInputHTML = `
 </div>
 `;
 
-export const settingsSaveButtonHTMLv2 = `
-<div class="settings-save-button">
-    <button class="button" disabled>Save Settings</button>
-</div>
-`;
-
-export const saveSettingsButtonHTML =
-    '<div class="flexer si-btn ssb"><button class="button save-button flexer"><span>Save settings</span></button></div>';
-
 export const searchBar = `<input class="search-bar" type="text" placeholder="Type counter name to search..." />`;

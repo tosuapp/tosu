@@ -1,364 +1,448 @@
+import { createHash } from 'crypto';
 import * as dotenv from 'dotenv';
-import syncFs from 'fs';
+import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
 import path from 'path';
 
+import {
+    ConfigBinding,
+    ConfigEvents,
+    ConfigItem,
+    ConfigKey,
+    ConfigSchema,
+    GlobalConfig
+} from './config.types';
 import { getProgramPath } from './directories';
-import { checkGameOverlayConfig } from './ingame';
 import { wLogger } from './logger';
+import { isRealNumber } from './manipulation';
+
+const defaultSchema: ConfigSchema = {
+    enableAutoUpdate: {
+        binding: 'ENABLE_AUTOUPDATE',
+        default: true,
+        order: 1
+    },
+    openDashboardOnStartup: {
+        binding: 'OPEN_DASHBOARD_ON_STARTUP',
+        default: true,
+        order: 2
+    },
+    debugLog: {
+        binding: 'DEBUG_LOG',
+        default: false,
+        order: 0
+    },
+    calculatePP: {
+        binding: 'CALCULATE_PP',
+        default: true,
+        order: 4
+    },
+    enableKeyOverlay: {
+        binding: 'ENABLE_KEY_OVERLAY',
+        default: true,
+        order: 5
+    },
+    pollRate: {
+        binding: 'POLL_RATE',
+        default: 100,
+        order: 6
+    },
+    preciseDataPollRate: {
+        binding: 'PRECISE_DATA_POLL_RATE',
+        default: 10,
+        order: 7
+    },
+    showMpCommands: {
+        binding: 'SHOW_MP_COMMANDS',
+        default: false,
+        order: 3
+    },
+    serverIP: {
+        binding: 'SERVER_IP',
+        default: '127.0.0.1',
+        order: 11
+    },
+    serverPort: {
+        binding: 'SERVER_PORT',
+        default: 24050,
+        order: 12
+    },
+    staticFolderPath: {
+        binding: 'STATIC_FOLDER_PATH',
+        default: './static',
+        order: 14
+    },
+    enableIngameOverlay: {
+        binding: 'ENABLE_INGAME_OVERLAY',
+        default: false,
+        order: 5
+    },
+    ingameOverlayKeybind: {
+        binding: 'INGAME_OVERLAY_KEYBIND',
+        default: 'Control + Shift + Space',
+        order: 9
+    },
+    ingameOverlayMaxFps: {
+        binding: 'INGAME_OVERLAY_MAX_FPS',
+        default: 60,
+        order: 10
+    },
+    allowedIPs: {
+        binding: 'ALLOWED_IPS',
+        default: '127.0.0.1,localhost,absolute',
+        order: 13
+    }
+};
+
+const newlineInsertions: ConfigBinding[] = [
+    'OPEN_DASHBOARD_ON_STARTUP',
+    'CALCULATE_PP',
+    'ENABLE_INGAME_OVERLAY',
+    'PRECISE_DATA_POLL_RATE',
+    'INGAME_OVERLAY_MAX_FPS',
+    'ALLOWED_IPS'
+];
+
+export const configEvents = new EventEmitter<ConfigEvents>();
+
+export const config: GlobalConfig = new Proxy(
+    Object.entries(defaultSchema).reduce((value, item) => {
+        const key = item[0] as ConfigKey;
+        value[key] = item[1].default as never;
+
+        return value;
+    }, {} as GlobalConfig),
+    {
+        set: (target, key: ConfigKey, value, receiver) =>
+            ConfigManager.set(target, key, value, receiver)
+    }
+);
 
 const oldConfigPath = path.join(getProgramPath(), 'tsosu.env');
 const configPath = path.join(getProgramPath(), 'tosu.env');
 
-if (syncFs.existsSync(oldConfigPath) && !syncFs.existsSync(configPath)) {
-    syncFs.renameSync(oldConfigPath, configPath);
+export class ConfigManager {
+    private static initialized: boolean = false;
+
+    private static previousFileHash: string = '';
+    private static saveTimeout: NodeJS.Timeout | null = null;
+
+    /**
+     * Migrates the old config to the new config. (`tsosu.env` -> `tosu.env`)
+     * Prioritizes the existing config (if any) and removes deprecated properties.
+     */
+    public static async migrate(filePath: string): Promise<void> {
+        try {
+            const oldEnv = await fs
+                .readFile(filePath, 'utf-8')
+                .then(dotenv.parse)
+                .catch(() => null);
+
+            if (oldEnv === null) {
+                wLogger.debug(
+                    '[config] No old config found. Skipping migration..'
+                );
+
+                return;
+            }
+
+            const newEnv =
+                (await fs
+                    .readFile(configPath, 'utf8')
+                    .then(dotenv.parse)
+                    .catch(() => null)) || {};
+
+            const migratedEnv: Record<string, string> = {};
+            for (const key in defaultSchema) {
+                if (!Object.hasOwn(defaultSchema, key)) continue;
+
+                const item = defaultSchema[key as ConfigKey];
+
+                migratedEnv[item.binding] = newEnv[item.binding];
+                migratedEnv[item.binding] ??= oldEnv[item.binding];
+                migratedEnv[item.binding] ??= `${item.default}`;
+            }
+
+            const output = Object.entries(migratedEnv)
+                .map((value) => `${value[0]}=${value[1]}`)
+                .join('\n');
+
+            await fs.writeFile(configPath, output, 'utf-8');
+            wLogger.warn(`[config] Your config file has been migrated.`);
+
+            const deprecated = Object.keys(oldEnv).filter(
+                (binding) => !Object.hasOwn(migratedEnv, binding)
+            );
+            if (deprecated.length > 0) {
+                wLogger.warn(
+                    `[config] Deprecated properties: ${deprecated.join(', ')}.`
+                );
+            }
+
+            const newProps = Object.keys(migratedEnv).filter(
+                (binding) => !Object.hasOwn(newEnv, binding)
+            );
+            if (newProps.length > 0) {
+                wLogger.warn(
+                    `[config] New properties: ${newProps.join(', ')}.`
+                );
+            }
+
+            await fs.unlink(filePath).catch(null);
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            wLogger.error(`[config] Failed to migrate config: ${msg}`);
+            wLogger.debug(`[config] Migration error: ${e}`);
+        }
+    }
+
+    /**
+     * Initializes the ConfigManager, migrates old settings, and starts the file watcher.
+     */
+    public static async initialize(filePath: string): Promise<void> {
+        await this.migrate(oldConfigPath);
+        await this.writeEnv(filePath);
+
+        const env = await fs
+            .readFile(filePath, 'utf-8')
+            .then(
+                (content) =>
+                    dotenv.parse(content) as Record<ConfigBinding, string>
+            )
+            .catch(() => ({}) as Record<ConfigBinding, string>);
+
+        this.refreshConfig(env, false);
+        this.startConfigWatcher();
+
+        this.initialized = true;
+    }
+
+    /**
+     * Set property to a config file
+     */
+    public static set<T extends ConfigKey>(
+        target: GlobalConfig,
+        key: T,
+        value: GlobalConfig[T],
+        receiver: any
+    ): boolean {
+        if (this.initialized === true && config[key] !== value) {
+            this.save();
+        }
+
+        return Reflect.set(target, key, value, receiver);
+    }
+
+    /**
+     * Schedules a debounced save to the .env file.
+     */
+    public static save() {
+        if (this.saveTimeout) clearTimeout(this.saveTimeout);
+
+        this.saveTimeout = setTimeout(async () => {
+            await this.updateEnv();
+        }, 100);
+    }
+
+    /**
+     * Writes the default config to the specified path if it doesn't exist.
+     * Is only called once, on initialization.
+     */
+    public static async writeEnv(filePath: string): Promise<void> {
+        const file = await fs.open(filePath, 'wx').catch(() => null);
+        if (!file) {
+            return;
+        }
+
+        try {
+            const defaults = Object.values(defaultSchema)
+                .toSorted((a, b) => a.order - b.order)
+                .map((value) => {
+                    if (newlineInsertions.includes(value.binding))
+                        return `${value.binding}=${value.default}\n`;
+                    return `${value.binding}=${value.default}`;
+                })
+                .join('\n');
+
+            await file.writeFile(defaults, 'utf-8');
+            wLogger.debug(`[config] Config file created at '${filePath}'.`);
+        } catch (e) {
+            if (!(e instanceof Error) || !('code' in e)) return;
+            let cause: string = 'unknown';
+
+            if (e.code === 'EPERM') cause = 'missing write permissions.';
+            else if (e.code === 'ENOSPC') cause = 'disk full.';
+
+            wLogger.error(`[config] Failed to write config file: ${cause}`);
+            wLogger.debug(`[config] Failed to write config file: ${e}`);
+        } finally {
+            await file.close();
+        }
+    }
+
+    /**
+     * Writes the current config object to the .env file.
+     */
+    public static async updateEnv() {
+        const oldHash = this.previousFileHash;
+
+        try {
+            const content = Object.entries(defaultSchema)
+                .toSorted((a, b) => a[1].order - b[1].order)
+                .map((item) => {
+                    if (newlineInsertions.includes(item[1].binding))
+                        return `${item[1].binding}=${config[item[0] as ConfigKey]}\n`;
+                    return `${item[1].binding}=${config[item[0] as ConfigKey]}`;
+                })
+                .join('\n');
+            const newHash = createHash('sha256').update(content).digest('hex');
+
+            if (newHash === oldHash) return;
+            this.previousFileHash = newHash;
+
+            await fs.writeFile(configPath, content, 'utf-8');
+            wLogger.debug('[config] Config file saved successfully.');
+
+            dotenv.config({ path: configPath, override: true });
+        } catch (e) {
+            this.previousFileHash = oldHash;
+
+            if (!(e instanceof Error) || !('code' in e)) return;
+            let cause: string = 'unknown cause';
+
+            if (e.code === 'EPERM') cause = 'missing write permissions.';
+            else if (e.code === 'ENOSPC') cause = 'disk full.';
+
+            wLogger.error(`[config] Failed to update config file: ${cause}`);
+            wLogger.debug(`[config] Failed to update config file: ${e}`);
+        }
+    }
+
+    /**
+     * Update's the config object with a typed .env object value.
+     */
+    public static processItem<B extends ConfigKey>(
+        key: B,
+        item: ConfigItem<ConfigKey>,
+        env: Record<ConfigBinding, string>
+    ): void {
+        const raw: any = env[item.binding];
+        if (raw === undefined || raw === null) return;
+
+        let value = item.default;
+        switch (typeof item.default) {
+            case 'boolean': {
+                value = raw === 'true' || raw === true;
+                break;
+            }
+
+            case 'number': {
+                if (isRealNumber(raw)) value = +raw;
+                break;
+            }
+
+            case 'string': {
+                value = raw;
+                break;
+            }
+
+            default: {
+                wLogger.warn(
+                    `[config] Value of '${item.binding}' is not of type '${typeof item.default}'. Using default value.`
+                );
+                break;
+            }
+        }
+
+        config[key] = value as GlobalConfig[B];
+    }
+
+    /**
+     * Refreshes the config object with the passed .env object.
+     */
+    public static refreshConfig(
+        env: Record<ConfigBinding, string>,
+        emit: boolean
+    ): void {
+        const oldConfig = { ...config };
+        for (const key in defaultSchema) {
+            if (!Object.hasOwn(defaultSchema, key)) continue;
+
+            const item = defaultSchema[key as ConfigKey];
+            if (item === undefined || item === null) continue;
+
+            this.processItem(key as ConfigKey, item, env);
+        }
+
+        if (emit === true) configEvents.emit('change', oldConfig);
+    }
+
+    /**
+     * Watches the .env file for external changes and reloads the config if any are detected.
+     */
+    private static async startConfigWatcher(): Promise<void> {
+        const watcher = fs.watch(configPath);
+        wLogger.debug('[config] Started config watcher..');
+
+        // initial file hash calculation
+        this.previousFileHash = await fs
+            .readFile(configPath, 'utf8')
+            .then((c) => createHash('sha256').update(c).digest('hex'))
+            .catch(() => '');
+
+        for await (const event of watcher) {
+            /*
+             * There's a Node.js flaw where sometimes eventType is 'rename' instead of 'change'.
+             * If the watcher ever fails to reload the config without an error, it's because of this.
+             *
+             * See https://nodejs.org/docs/latest/api/fsp.html#caveats
+             */
+
+            switch (event.eventType) {
+                case 'change': {
+                    try {
+                        const content = await fs.readFile(configPath, 'utf8');
+                        const currentHash = createHash('sha256')
+                            .update(content)
+                            .digest('hex');
+
+                        if (currentHash === this.previousFileHash) continue;
+                        this.previousFileHash = currentHash;
+
+                        wLogger.debug(
+                            '[config] File changed. Refreshing config...'
+                        );
+                        const newEnv: Record<ConfigBinding, string> =
+                            dotenv.parse(content);
+
+                        this.refreshConfig(newEnv, true);
+                    } catch (exc) {
+                        const msg =
+                            exc instanceof Error ? exc.message : String(exc);
+                        wLogger.error(
+                            `[config] Failed to reload config: ${msg}`
+                        );
+                        wLogger.debug(
+                            `[config] Failed to reload config: ${exc}`
+                        );
+                    }
+
+                    break;
+                }
+
+                case 'rename': {
+                    // no need to check if it exists because writeEnv already checks that
+                    await ConfigManager.writeEnv(configPath);
+                    break;
+                }
+            }
+        }
+    }
 }
 
-const createConfig = async () => {
-    try {
-        await fs.access(configPath, fs.constants.F_OK);
-        return;
-    } catch {}
+export async function configInitialization() {
+    await ConfigManager.initialize(configPath);
 
-    await fs.writeFile(
-        configPath,
-        `# The config implies a set of key-values to enable/disable tosu functionality
-# Below you can see that there is EVERY_THE_FUNCTION=true/false,
-# true = on
-# false = off
-
-# Turns PP counting on/off. Very useful for tournament client, when you only care about scoring and map stats for example
-CALCULATE_PP=true
-# Enables/disables reading K1/K2/M1/M2 keys on the keyboard
-ENABLE_KEY_OVERLAY=true
-ENABLE_AUTOUPDATE=true
-
-ALLOWED_IPS=127.0.0.1,localhost,absolute
-
-# Reference: 1 second = 1000 milliseconds
-# Once in what value, the programme should read the game values (in milliseconds)
-POLL_RATE=100
-# Once per value, the programme should read the values of keys K1/K2/M1/M2 (in milliseconds)
-PRECISE_DATA_POLL_RATE=10
-
-# Shows !mp commands (messages starting with '!mp') in tournament manager chat (hidden by default)
-SHOW_MP_COMMANDS=false
-
-# Enables/disables the in-game overlay (!!!I AM NOT RESPONSIBLE FOR USING IT!!!).
-ENABLE_INGAME_OVERLAY=false
-INGAME_OVERLAY_KEYBIND=Control + Shift + Space
-INGAME_OVERLAY_MAX_FPS=60
-
-# WARNING: EVERYTHING BELOW IS NOT TO BE TOUCHED UNNECESSARILY.
-
-# Enables logs for tosu developers, not very intuitive for you, the end user.
-# best not to include without developer's request.
-DEBUG_LOG=false
-OPEN_DASHBOARD_ON_STARTUP=true
-
-# IP address where the websocket api server will be registered
-# 127.0.0.1 = localhost
-# 0.0.0.0.0 = all addresses
-SERVER_IP=127.0.0.1
-# The port on which the websocket api server will run
-SERVER_PORT=24050
-# The folder from which the overlays will be taken.
-STATIC_FOLDER_PATH=./static`,
-        'utf8'
-    );
-};
-
-dotenv.config({ path: configPath });
-
-export const config = {
-    enableAutoUpdate: (process.env.ENABLE_AUTOUPDATE || 'true') === 'true',
-    openDashboardOnStartup:
-        (process.env.OPEN_DASHBOARD_ON_STARTUP || 'true') === 'true',
-    debugLogging: (process.env.DEBUG_LOG || '') === 'true',
-    calculatePP: (process.env.CALCULATE_PP || '') === 'true',
-    enableKeyOverlay: (process.env.ENABLE_KEY_OVERLAY || '') === 'true',
-    pollRate: Number(process.env.POLL_RATE || '100'),
-    preciseDataPollRate: Number(
-        process.env.PRECISE_DATA_POLL_RATE ||
-            process.env.KEYOVERLAY_POLL_RATE ||
-            '10'
-    ),
-    showMpCommands: (process.env.SHOW_MP_COMMANDS || '') === 'true',
-    serverIP: process.env.SERVER_IP || '127.0.0.1',
-    serverPort: Number(process.env.SERVER_PORT || '24050'),
-    staticFolderPath: process.env.STATIC_FOLDER_PATH || './static',
-    enableGosuOverlay: (process.env.ENABLE_GOSU_OVERLAY || '') === 'true',
-    enableIngameOverlay: (process.env.ENABLE_INGAME_OVERLAY || '') === 'true',
-    ingameOverlayKeybind:
-        process.env.INGAME_OVERLAY_KEYBIND || 'Control + Shift + Space',
-    ingameOverlayMaxFps: Number(process.env.INGAME_OVERLAY_MAX_FPS || 60),
-    allowedIPs: process.env.ALLOWED_IPS || '127.0.0.1,localhost,absolute',
-    timestamp: 0,
-    currentVersion: '',
-    updateVersion: '',
-    logFilePath: ''
-};
-
-export type ConfigFields = keyof typeof config | '';
-
-export const updateConfigFile = async () => {
-    let newOptions = '';
-
-    if (!process.env.DEBUG_LOG) {
-        newOptions += 'DEBUG_LOG, ';
-        await fs.appendFile(configPath, '\nDEBUG_LOG=false', 'utf8');
-    }
-
-    if (!process.env.CALCULATE_PP) {
-        newOptions += 'CALCULATE_PP, ';
-        await fs.appendFile(configPath, '\nCALCULATE_PP=true', 'utf8');
-    }
-
-    if (!process.env.ENABLE_KEY_OVERLAY) {
-        newOptions += 'ENABLE_KEY_OVERLAY, ';
-        await fs.appendFile(configPath, '\nENABLE_KEY_OVERLAY=true', 'utf8');
-    }
-
-    if (!process.env.POLL_RATE) {
-        newOptions += 'POLL_RATE, ';
-        await fs.appendFile(configPath, '\nPOLL_RATE=100', 'utf8');
-    }
-
-    if (!process.env.PRECISE_DATA_POLL_RATE) {
-        newOptions += 'PRECISE_DATA_POLL_RATE, ';
-        await fs.appendFile(
-            configPath,
-            '\n\nPRECISE_DATA_POLL_RATE=10',
-            'utf8'
-        );
-    }
-
-    if (!process.env.SHOW_MP_COMMANDS) {
-        newOptions += 'SHOW_MP_COMMANDS, ';
-        await fs.appendFile(configPath, '\nSHOW_MP_COMMANDS=false', 'utf8');
-    }
-
-    if (!process.env.SERVER_IP) {
-        newOptions += 'SERVER_IP, ';
-        await fs.appendFile(configPath, '\nSERVER_IP=127.0.0.1', 'utf8');
-    }
-
-    if (!process.env.SERVER_PORT) {
-        newOptions += 'SERVER_PORT, ';
-        await fs.appendFile(configPath, '\nSERVER_PORT=24050', 'utf8');
-    }
-
-    if (!process.env.STATIC_FOLDER_PATH) {
-        newOptions += 'STATIC_FOLDER_PATH, ';
-        await fs.appendFile(
-            configPath,
-            '\nSTATIC_FOLDER_PATH=./static',
-            'utf8'
-        );
-    }
-
-    if (!process.env.ENABLE_INGAME_OVERLAY) {
-        newOptions += 'ENABLE_INGAME_OVERLAY, ';
-        await fs.appendFile(
-            configPath,
-            '\nENABLE_INGAME_OVERLAY=false',
-            'utf8'
-        );
-    }
-
-    if (!process.env.INGAME_OVERLAY_KEYBIND) {
-        newOptions += 'INGAME_OVERLAY_KEYBIND, ';
-        await fs.appendFile(
-            configPath,
-            '\nINGAME_OVERLAY_KEYBIND=Control + Shift + Space',
-            'utf8'
-        );
-    }
-
-    if (!process.env.INGAME_OVERLAY_MAX_FPS) {
-        newOptions += 'INGAME_OVERLAY_MAX_FPS, ';
-        await fs.appendFile(configPath, '\nINGAME_OVERLAY_MAX_FPS=60', 'utf8');
-    }
-
-    if (!process.env.ENABLE_AUTOUPDATE) {
-        newOptions += 'ENABLE_AUTOUPDATE, ';
-        await fs.appendFile(configPath, '\nENABLE_AUTOUPDATE=true', 'utf8');
-    }
-
-    if (!process.env.OPEN_DASHBOARD_ON_STARTUP) {
-        newOptions += 'OPEN_DASHBOARD_ON_STARTUP, ';
-        await fs.appendFile(
-            configPath,
-            '\nOPEN_DASHBOARD_ON_STARTUP=true',
-            'utf8'
-        );
-    }
-
-    if (!process.env.ALLOWED_IPS) {
-        newOptions += 'ALLOWED_IPS, ';
-        await fs.appendFile(
-            configPath,
-            '\nALLOWED_IPS=127.0.0.1,localhost,absolute',
-            'utf8'
-        );
-    }
-
-    if (newOptions !== '') {
-        wLogger.warn(
-            '[config]',
-            `New options available in config: ${newOptions}\n`
-        );
-    }
-};
-
-export const watchConfigFile = async ({
-    httpServer,
-    initial
-}: {
-    httpServer: any;
-    initial?: boolean;
-}) => {
-    await createConfig();
-    if (initial === true) {
-        await refreshConfig(httpServer, false);
-        await updateConfigFile();
-    }
-
-    const stat = await fs.stat(configPath);
-    if (config.timestamp !== stat.mtimeMs) {
-        await refreshConfig(httpServer, config.timestamp !== 0);
-        config.timestamp = stat.mtimeMs;
-    }
-
-    setTimeout(() => {
-        watchConfigFile({ httpServer });
-    }, 1000);
-};
-
-export const refreshConfig = async (httpServer: any, refresh: boolean) => {
-    let updated = false;
-    const status = refresh === true ? 'reload' : 'load';
-
-    const { parsed, error } = dotenv.config({ path: configPath });
-    if (error != null || parsed == null) {
-        wLogger.error('[config]', `Config ${status} failed`);
-        return;
-    }
-
-    const enableAutoUpdate = (parsed.ENABLE_AUTOUPDATE || '') === 'true';
-    const openDashboardOnStartup =
-        (parsed.OPEN_DASHBOARD_ON_STARTUP || '') === 'true';
-    const debugLogging = (parsed.DEBUG_LOG || '') === 'true';
-    const serverIP = parsed.SERVER_IP || '127.0.0.1';
-    const serverPort = Number(parsed.SERVER_PORT || '24050');
-    const calculatePP = (parsed.CALCULATE_PP || '') === 'true';
-    const enableKeyOverlay = (parsed.ENABLE_KEY_OVERLAY || '') === 'true';
-    const pollRate = Number(parsed.POLL_RATE || '100');
-    const preciseDataPollRate = Number(
-        parsed.PRECISE_DATA_POLL_RATE || parsed.KEYOVERLAY_POLL_RATE || '10'
-    );
-    const showMpCommands = (parsed.SHOW_MP_COMMANDS || '') === 'true';
-    const staticFolderPath = parsed.STATIC_FOLDER_PATH || './static';
-    const enableGosuOverlay = (parsed.ENABLE_GOSU_OVERLAY || '') === 'true';
-    const enableIngameOverlay = (parsed.ENABLE_INGAME_OVERLAY || '') === 'true';
-    const ingameOverlayKeybind =
-        parsed.INGAME_OVERLAY_KEYBIND || 'Control + Shift + Space';
-    const ingameOverlayMaxFps = Number(parsed.INGAME_OVERLAY_MAX_FPS || 60);
-    const allowedIPs = parsed.ALLOWED_IPS || '127.0.0.1,localhost,absolute';
-
-    const maxFpsUpdated = config.ingameOverlayMaxFps !== ingameOverlayMaxFps;
-    // determine whether config actually was updated or not
-    updated =
-        config.enableAutoUpdate !== enableAutoUpdate ||
-        config.openDashboardOnStartup !== openDashboardOnStartup ||
-        config.debugLogging !== debugLogging ||
-        config.calculatePP !== calculatePP ||
-        config.enableKeyOverlay !== enableKeyOverlay ||
-        config.pollRate !== pollRate ||
-        config.preciseDataPollRate !== preciseDataPollRate ||
-        config.showMpCommands !== showMpCommands ||
-        config.staticFolderPath !== staticFolderPath ||
-        config.enableIngameOverlay !== enableIngameOverlay ||
-        config.ingameOverlayKeybind !== ingameOverlayKeybind ||
-        maxFpsUpdated ||
-        config.serverIP !== serverIP ||
-        config.serverPort !== serverPort ||
-        config.allowedIPs !== allowedIPs;
-
-    if (config.serverIP !== serverIP || config.serverPort !== serverPort) {
-        config.serverIP = serverIP;
-        config.serverPort = serverPort;
-
-        httpServer.restart();
-    }
-
-    config.enableIngameOverlay = enableIngameOverlay;
-    config.ingameOverlayKeybind = ingameOverlayKeybind;
-    config.ingameOverlayMaxFps = ingameOverlayMaxFps;
-    await checkGameOverlayConfig();
-
-    if (enableIngameOverlay && refresh) {
-        if (httpServer.instanceManager.isOverlayStarted) {
-            if (maxFpsUpdated) {
-                // setFrameRate doesn't work after paint event.
-                // overlay must be restarted in this case.
-                await httpServer.instanceManager.stopOverlay();
-                await httpServer.instanceManager.startOverlay();
-            } else {
-                httpServer.instanceManager.updateOverlayConfig();
-            }
-        } else {
-            await httpServer.instanceManager.startOverlay();
-        }
-    } else if (refresh) {
-        await httpServer.instanceManager.stopOverlay();
-    }
-
-    if (enableGosuOverlay === true && !enableIngameOverlay) {
-        wLogger.warn(
-            '\n\n\n',
-            'Gosu Ingame-overlay removed, please use new one, you can https://osuck.link/tosu-ingame',
-            '\n\n\n'
-        );
-    }
-
-    config.enableAutoUpdate = enableAutoUpdate;
-    config.openDashboardOnStartup = openDashboardOnStartup;
-
-    config.debugLogging = debugLogging;
-    config.calculatePP = calculatePP;
-    config.enableKeyOverlay = enableKeyOverlay;
-    config.showMpCommands = showMpCommands;
-    config.staticFolderPath = staticFolderPath;
-    config.allowedIPs = allowedIPs;
-
-    const staticPath = path.join(getProgramPath(), 'static');
-    if (config.staticFolderPath === './static') {
-        await fs.mkdir(staticPath, { recursive: true });
-    }
-
-    if (updated) wLogger.info('[config]', `Config ${status}ed`);
-};
-
-export const writeConfig = async (httpServer: any, options: any) => {
-    let text = '';
-
-    text += `DEBUG_LOG=${options.DEBUG_LOG ?? config.debugLogging}\n\n`;
-    text += `CALCULATE_PP=${options.CALCULATE_PP ?? config.calculatePP}\n\n`;
-    text += `ENABLE_AUTOUPDATE=${options.ENABLE_AUTOUPDATE ?? config.enableAutoUpdate}\n`;
-    text += `OPEN_DASHBOARD_ON_STARTUP=${options.OPEN_DASHBOARD_ON_STARTUP ?? config.openDashboardOnStartup}\n\n`;
-    text += `ENABLE_INGAME_OVERLAY=${options.ENABLE_INGAME_OVERLAY ?? config.enableIngameOverlay}\n`;
-    text += `INGAME_OVERLAY_KEYBIND=${options.INGAME_OVERLAY_KEYBIND ?? config.ingameOverlayKeybind}\n`;
-    text += `INGAME_OVERLAY_MAX_FPS=${options.INGAME_OVERLAY_MAX_FPS ?? config.ingameOverlayMaxFps}\n`;
-    text += `ENABLE_KEY_OVERLAY=${options.ENABLE_KEY_OVERLAY ?? config.enableKeyOverlay}\n\n`;
-    text += `ALLOWED_IPS=${options.ALLOWED_IPS ?? config.allowedIPs}\n\n`;
-    text += `POLL_RATE=${options.POLL_RATE ?? config.pollRate}\n`;
-    text += `PRECISE_DATA_POLL_RATE=${options.PRECISE_DATA_POLL_RATE ?? config.preciseDataPollRate}\n\n`;
-    text += `SHOW_MP_COMMANDS=${options.SHOW_MP_COMMANDS ?? config.showMpCommands}\n\n`;
-    text += `SERVER_IP=${options.SERVER_IP ?? config.serverIP}\n`;
-    text += `SERVER_PORT=${options.SERVER_PORT ?? config.serverPort}\n\n`;
-    text += `STATIC_FOLDER_PATH=${options.STATIC_FOLDER_PATH ?? config.staticFolderPath}\n`;
-
-    await fs.writeFile(configPath, text, 'utf8');
-    await refreshConfig(httpServer, true);
-};
+    // Create user-specified static folder
+    await fs.mkdir(config.staticFolderPath, { recursive: true }).catch(null);
+}
