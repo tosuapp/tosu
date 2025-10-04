@@ -475,6 +475,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 maxCombo,
                 score,
                 accuracy: calculateAccuracy({
+                    isLazer: false,
                     mode,
                     mods: mods.array,
                     statistics: hits
@@ -1256,6 +1257,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             maxCombo: this.process.readShort(entry + 0x68),
             mods,
             accuracy: calculateAccuracy({
+                isLazer: false,
                 mode,
                 mods: mods.array,
                 statistics: hits
