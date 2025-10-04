@@ -19,65 +19,89 @@ import { isRealNumber } from './manipulation';
 const defaultSchema: ConfigSchema = {
     enableAutoUpdate: {
         binding: 'ENABLE_AUTOUPDATE',
-        default: true
+        default: true,
+        order: 1
     },
     openDashboardOnStartup: {
         binding: 'OPEN_DASHBOARD_ON_STARTUP',
-        default: true
+        default: true,
+        order: 2
     },
     debugLog: {
         binding: 'DEBUG_LOG',
-        default: false
+        default: false,
+        order: 0
     },
     calculatePP: {
         binding: 'CALCULATE_PP',
-        default: true
+        default: true,
+        order: 4
     },
     enableKeyOverlay: {
         binding: 'ENABLE_KEY_OVERLAY',
-        default: true
+        default: true,
+        order: 5
     },
     pollRate: {
         binding: 'POLL_RATE',
-        default: 100
+        default: 100,
+        order: 6
     },
     preciseDataPollRate: {
         binding: 'PRECISE_DATA_POLL_RATE',
-        default: 10
+        default: 10,
+        order: 7
     },
     showMpCommands: {
         binding: 'SHOW_MP_COMMANDS',
-        default: false
+        default: false,
+        order: 3
     },
     serverIP: {
         binding: 'SERVER_IP',
-        default: '127.0.0.1'
+        default: '127.0.0.1',
+        order: 11
     },
     serverPort: {
         binding: 'SERVER_PORT',
-        default: 24050
+        default: 24050,
+        order: 12
     },
     staticFolderPath: {
         binding: 'STATIC_FOLDER_PATH',
-        default: './static'
+        default: './static',
+        order: 14
     },
     enableIngameOverlay: {
         binding: 'ENABLE_INGAME_OVERLAY',
-        default: false
+        default: false,
+        order: 5
     },
     ingameOverlayKeybind: {
         binding: 'INGAME_OVERLAY_KEYBIND',
-        default: 'Control + Shift + Space'
+        default: 'Control + Shift + Space',
+        order: 9
     },
     ingameOverlayMaxFps: {
         binding: 'INGAME_OVERLAY_MAX_FPS',
-        default: 60
+        default: 60,
+        order: 10
     },
     allowedIPs: {
         binding: 'ALLOWED_IPS',
-        default: '127.0.0.1,localhost,absolute'
+        default: '127.0.0.1,localhost,absolute',
+        order: 13
     }
 };
+
+const newlineInsertions: ConfigBinding[] = [
+    'OPEN_DASHBOARD_ON_STARTUP',
+    'CALCULATE_PP',
+    'ENABLE_INGAME_OVERLAY',
+    'PRECISE_DATA_POLL_RATE',
+    'INGAME_OVERLAY_MAX_FPS',
+    'ALLOWED_IPS'
+];
 
 export const configEvents = new EventEmitter<ConfigEvents>();
 
@@ -98,6 +122,8 @@ const oldConfigPath = path.join(getProgramPath(), 'tsosu.env');
 const configPath = path.join(getProgramPath(), 'tosu.env');
 
 export class ConfigManager {
+    private static initialized: boolean = false;
+
     private static previousFileHash: string = '';
     private static saveTimeout: NodeJS.Timeout | null = null;
 
@@ -187,6 +213,8 @@ export class ConfigManager {
 
         this.refreshConfig(env, false);
         this.startConfigWatcher();
+
+        this.initialized = true;
     }
 
     /**
@@ -198,7 +226,7 @@ export class ConfigManager {
         value: GlobalConfig[T],
         receiver: any
     ): boolean {
-        if (config[key] !== value) {
+        if (this.initialized === true && config[key] !== value) {
             this.save();
         }
 
@@ -228,8 +256,14 @@ export class ConfigManager {
 
         try {
             const defaults = Object.values(defaultSchema)
-                .map((value) => `${value.binding}=${value.default}`)
+                .toSorted((a, b) => a.order - b.order)
+                .map((value) => {
+                    if (newlineInsertions.includes(value.binding))
+                        return `${value.binding}=${value.default}\n`;
+                    return `${value.binding}=${value.default}`;
+                })
                 .join('\n');
+
             await file.writeFile(defaults, 'utf-8');
             wLogger.debug(`[config] Config file created at '${filePath}'.`);
         } catch (e) {
@@ -253,11 +287,13 @@ export class ConfigManager {
         const oldHash = this.previousFileHash;
 
         try {
-            const content = Object.entries(config)
-                .map(
-                    (value) =>
-                        `${defaultSchema[value[0] as ConfigKey].binding}=${value[1]}`
-                )
+            const content = Object.entries(defaultSchema)
+                .toSorted((a, b) => a[1].order - b[1].order)
+                .map((item) => {
+                    if (newlineInsertions.includes(item[1].binding))
+                        return `${item[1].binding}=${config[item[0] as ConfigKey]}\n`;
+                    return `${item[1].binding}=${config[item[0] as ConfigKey]}`;
+                })
                 .join('\n');
             const newHash = createHash('sha256').update(content).digest('hex');
 
@@ -290,13 +326,13 @@ export class ConfigManager {
         item: ConfigItem<ConfigKey>,
         env: Record<ConfigBinding, string>
     ): void {
-        const raw = env[item.binding];
+        const raw: any = env[item.binding];
         if (raw === undefined || raw === null) return;
 
         let value = item.default;
         switch (typeof item.default) {
             case 'boolean': {
-                value = raw === 'true';
+                value = raw === 'true' || raw === true;
                 break;
             }
 

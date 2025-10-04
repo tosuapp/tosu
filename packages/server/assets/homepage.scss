@@ -785,7 +785,7 @@ a {
       }
 
       &:has(div > .number-input[data-id='POLL_RATE']) div>p,
-      &:has(div > .number-input[data-id='PRECISE_POLL_RATE']) div>p {
+      &:has(div > .number-input[data-id='PRECISE_DATA_POLL_RATE']) div>p {
         width: 16ch;
       }
 
