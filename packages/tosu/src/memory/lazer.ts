@@ -73,6 +73,7 @@ export interface offsets {
         osuLogo: number;
         ScreenStack: number;
         SentryLogger: number;
+        channelManager: number;
         '<frameworkConfig>k__BackingField': number;
     };
     'osu.Framework.Game': {
@@ -131,6 +132,9 @@ export interface offsets {
     };
     'osu.Game.Screens.OnlinePlay.Multiplayer.Multiplayer': {
         '<client>k__BackingField': number;
+    };
+    'osu.Game.Online.Multiplayer.MultiplayerRoom': {
+        '<ChannelID>k__BackingField': number;
     };
     'osu.Game.Screens.Spectate.SpectatorScreen': {
         '<spectatorClient>k__BackingField': number;
@@ -223,6 +227,18 @@ export interface offsets {
         '<Username>k__BackingField': number;
         countryCodeString: number;
         statistics: number;
+    };
+    'osu.Game.Online.Chat.ChannelManager': {
+        joinedChannels: number;
+    };
+    'osu.Game.Online.Chat.Channel': {
+        Id: number;
+        Messages: number;
+    };
+    'osu.Game.Online.Chat.Message': {
+        Timestamp: number;
+        Content: number;
+        Sender: number;
     };
     'osu.Game.Users.UserStatistics': {
         RankedScore: number;
@@ -3303,17 +3319,30 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             });
         }
 
-        const channelId = this.process.readInt(room + 0x44); // osu.Game.Online.Multiplayer.MultiplayerRoom::<ChannelID>k__BackingField
-        const channelManager = this.process.readIntPtr(this.gameBase() + 0x520); // osu.Desktop.OsuGameDesktop::channelManager
+        const channelId = this.process.readInt(
+            room +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerRoom'][
+                    '<ChannelID>k__BackingField'
+                ]
+        );
+        const channelManager = this.process.readIntPtr(
+            this.gameBase() + this.offsets['osu.Game.OsuGame'].channelManager
+        );
 
-        const joinedChannels = this.process.readIntPtr(channelManager + 0x320); // osu.Game.Online.Chat.ChannelManager::joinedChannels
+        const joinedChannels = this.process.readIntPtr(
+            channelManager +
+                this.offsets['osu.Game.Online.Chat.ChannelManager']
+                    .joinedChannels
+        );
         const collection = this.process.readIntPtr(joinedChannels + 0x18);
         const channelList = this.readListItems(collection);
 
         let multiChannel = 0;
 
         for (const channel of channelList) {
-            const iterChannelId = this.process.readLong(channel + 0x60); // osu.Game.Online.Chat.Channel::Id
+            const iterChannelId = this.process.readLong(
+                channel + this.offsets['osu.Game.Online.Chat.Channel'].Id
+            );
 
             if (iterChannelId === channelId) {
                 multiChannel = channel;
@@ -3327,23 +3356,33 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const chatItems: ITourneyManagerChatItem[] = [];
 
-        const messagesSortedList = this.process.readIntPtr(multiChannel + 0x10); // osu.Game.Online.Chat.Channel::Messages
+        const messagesSortedList = this.process.readIntPtr(
+            multiChannel + this.offsets['osu.Game.Online.Chat.Channel'].Messages
+        );
         const messageList = this.readListItems(
             this.process.readIntPtr(messagesSortedList + 0x8)
         );
 
         for (const message of messageList) {
-            const dateTime = message + 0x58 + 0x8; // osu.Game.Online.Chat.Message::Timestamp
+            const dateTime =
+                message +
+                this.offsets['osu.Game.Online.Chat.Message'].Timestamp +
+                0x8; // dateTime offset
 
             const date = netDateBinaryToDate(
                 this.process.readInt(dateTime + 0x4),
                 this.process.readInt(dateTime)
             );
 
-            const content = this.process.readSharpStringPtr(message + 0x8); // osu.Game.Online.Chat.Message::Content
+            const content = this.process.readSharpStringPtr(
+                message + this.offsets['osu.Game.Online.Chat.Message'].Content
+            );
 
             const apiUser = this.readUser(
-                this.process.readIntPtr(message + 0x10) // osu.Game.Online.Chat.Message::Sender
+                this.process.readIntPtr(
+                    message +
+                        this.offsets['osu.Game.Online.Chat.Message'].Sender
+                )
             );
 
             if (!config.showMpCommands && content.startsWith('!mp')) {
