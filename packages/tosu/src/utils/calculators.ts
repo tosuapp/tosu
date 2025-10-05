@@ -6,6 +6,8 @@ import { ModsLazer } from '@/utils/osuMods.types';
  * credits: https://github.com/maxohn/rosu-pp
  */
 export const calculateAccuracy = (params: {
+    isLazer: boolean;
+
     mods: ModsLazer;
     mode: number;
 
@@ -64,18 +66,18 @@ export const calculateAccuracy = (params: {
                 hits.miss;
             if (totalHits === 0) break;
 
-            const perfectWeight = params.mods.find(
-                (mod) => mod.acronym === 'CL'
-            )
-                ? 60
-                : 61;
+            const perfectWeight =
+                params.isLazer ||
+                params.mods.some((mod) => mod.acronym === 'V2')
+                    ? 61
+                    : 60;
             numerator =
                 perfectWeight * hits.perfect +
                 60 * hits.great +
                 40 * hits.good +
                 20 * hits.ok +
                 10 * hits.meh;
-            denominator = totalHits;
+            denominator = totalHits * perfectWeight;
             break;
         }
     }
