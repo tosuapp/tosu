@@ -1,5 +1,7 @@
 import rosu from '@kotrikd/rosu-pp';
 import {
+    ConfigBinding,
+    ConfigManager,
     JsonSafeParse,
     downloadFile,
     getCachePath,
@@ -7,8 +9,7 @@ import {
     getStaticPath,
     platformResolver,
     unzip,
-    wLogger,
-    writeConfig
+    wLogger
 } from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
@@ -343,14 +344,14 @@ export default function buildBaseApi(server: Server) {
     );
 
     server.app.route('/api/settingsSave', 'POST', async (req, res) => {
-        const body: object | Error = JsonSafeParse({
+        const body: Record<ConfigBinding, string> | Error = JsonSafeParse({
             isFile: false,
             payload: req.body,
             defaultValue: new Error('Failed to parse body')
         });
         if (body instanceof Error) throw body;
 
-        await writeConfig(server, body);
+        ConfigManager.refreshConfig(body, true);
         return sendJson(res, { status: 'updated' });
     });
 

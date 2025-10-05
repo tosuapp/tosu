@@ -4,6 +4,7 @@ import path from 'path';
 
 import { ClientType } from '../enums/tosu';
 import { config } from './config';
+import { context } from './context';
 import { getProgramPath } from './directories';
 
 const colors = {
@@ -22,7 +23,7 @@ export function colorText(status: string, color: keyof typeof colors) {
     const timestamp = new Date().toISOString().split('T')[1].replace('Z', '');
 
     const time = `${colors.grey}${timestamp}${colors.reset}`;
-    const version = `${colors.grey}v${config.currentVersion}${colors.reset}`;
+    const version = `${colors.grey}v${context.currentVersion}${colors.reset}`;
     return `${time} ${version} ${colorCode} ${status.toUpperCase()} ${colors.reset}`;
 }
 
@@ -36,7 +37,7 @@ export const wLogger = {
     debug: (...args: any) => {
         writeLog('debug', args);
 
-        if (config.debugLogging !== true) return;
+        if (config.debugLog !== true) return;
 
         const coloredText = colorText('debug', 'debug');
         console.log(coloredText, ...args);
@@ -44,13 +45,13 @@ export const wLogger = {
     time: (...args: any) => {
         writeLog('time', args);
 
-        if (config.debugLogging !== true) return;
+        if (config.debugLog !== true) return;
 
         const coloredText = colorText('time', 'time');
         console.log(coloredText, ...args);
     },
     debugError: (...args: any) => {
-        if (config.debugLogging !== true) return;
+        if (config.debugLog !== true) return;
 
         const coloredText = colorText('debugError', 'debugError');
         console.log(coloredText, ...args);
@@ -72,16 +73,16 @@ export const wLogger = {
 };
 
 function writeLog(type: string, ...args: any[]) {
-    if (config.logFilePath === '') {
+    if (context.logFilePath === '') {
         const logsPath = path.join(getProgramPath(), 'logs');
         if (!fs.existsSync(logsPath))
             fs.mkdirSync(logsPath, { recursive: true });
 
-        config.logFilePath = path.join(logsPath, `${Date.now()}.txt`);
+        context.logFilePath = path.join(logsPath, `${Date.now()}.txt`);
     }
 
     fsp.appendFile(
-        config.logFilePath,
+        context.logFilePath,
         `${new Date().toISOString()} ${type} ${args.join(' ')}\n`,
         'utf8'
     ).catch((reason) => console.log(`writeLog`, reason));
@@ -95,7 +96,7 @@ export function measureTime(
     const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: any[]) {
-        if (config.debugLogging !== true) {
+        if (config.debugLog !== true) {
             return originalMethod.apply(this, args);
         }
 

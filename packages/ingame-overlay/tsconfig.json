@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "lib": [
+      "ES2023"
+    ],
     "target": "ESNext",
     "module": "Preserve",
     "allowSyntheticDefaultImports": true,

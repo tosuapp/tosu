@@ -8,6 +8,7 @@ import {
     LazerSettings,
     Rulesets,
     ScoringMode,
+    config,
     measureTime,
     platformResolver,
     wLogger
@@ -72,6 +73,7 @@ export interface offsets {
         osuLogo: number;
         ScreenStack: number;
         SentryLogger: number;
+        channelManager: number;
         '<frameworkConfig>k__BackingField': number;
     };
     'osu.Framework.Game': {
@@ -130,6 +132,9 @@ export interface offsets {
     };
     'osu.Game.Screens.OnlinePlay.Multiplayer.Multiplayer': {
         '<client>k__BackingField': number;
+    };
+    'osu.Game.Online.Multiplayer.MultiplayerRoom': {
+        '<ChannelID>k__BackingField': number;
     };
     'osu.Game.Screens.Spectate.SpectatorScreen': {
         '<spectatorClient>k__BackingField': number;
@@ -222,6 +227,18 @@ export interface offsets {
         '<Username>k__BackingField': number;
         countryCodeString: number;
         statistics: number;
+    };
+    'osu.Game.Online.Chat.ChannelManager': {
+        joinedChannels: number;
+    };
+    'osu.Game.Online.Chat.Channel': {
+        Id: number;
+        Messages: number;
+    };
+    'osu.Game.Online.Chat.Message': {
+        Timestamp: number;
+        Content: number;
+        Sender: number;
     };
     'osu.Game.Users.UserStatistics': {
         RankedScore: number;
@@ -404,6 +421,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const scalingContainerTargetDrawSize = this.getPattern(
             'scalingContainerTargetDrawSize'
         );
+
         const externalLinkOpener = this.process.readIntPtr(
             scalingContainerTargetDrawSize - 0x24
         );
@@ -1089,7 +1107,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         let isArray = false;
 
         // another hacky check :D
-        // 0x10 is _items in List and length in array
         if (this.process.readInt(list + 0x10) > 10000000) {
             isArray = true;
         }
@@ -2773,8 +2790,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     modObject + 0x20
                 );
 
-                console.log(modObject.toString(16));
-
                 mod.settings = {
                     one_third_conversion:
                         this.process.readByte(
@@ -3304,14 +3319,84 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             });
         }
 
-        // const multiplayerClient = this.multiplayerClient();
+        const channelId = this.process.readInt(
+            room +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerRoom'][
+                    '<ChannelID>k__BackingField'
+                ]
+        );
+        const channelManager = this.process.readIntPtr(
+            this.gameBase() + this.offsets['osu.Game.OsuGame'].channelManager
+        );
 
-        // const room = this.process.readIntPtr(multiplayerClient + 0x288);
+        const joinedChannels = this.process.readIntPtr(
+            channelManager +
+                this.offsets['osu.Game.Online.Chat.ChannelManager']
+                    .joinedChannels
+        );
+        const collection = this.process.readIntPtr(joinedChannels + 0x18);
+        const channelList = this.readListItems(collection);
 
-        // const roomId = this.process.readInt(room + 0x38);
-        // const channelId = this.process.readInt(room + 0x44);
+        let multiChannel = 0;
 
-        return { chat: [], spectatingClients };
+        for (const channel of channelList) {
+            const iterChannelId = this.process.readLong(
+                channel + this.offsets['osu.Game.Online.Chat.Channel'].Id
+            );
+
+            if (iterChannelId === channelId) {
+                multiChannel = channel;
+                break;
+            }
+        }
+
+        if (multiChannel === 0) {
+            return { chat: [], spectatingClients };
+        }
+
+        const chatItems: ITourneyManagerChatItem[] = [];
+
+        const messagesSortedList = this.process.readIntPtr(
+            multiChannel + this.offsets['osu.Game.Online.Chat.Channel'].Messages
+        );
+        const messageList = this.readListItems(
+            this.process.readIntPtr(messagesSortedList + 0x8)
+        );
+
+        for (const message of messageList) {
+            const dateTime =
+                message +
+                this.offsets['osu.Game.Online.Chat.Message'].Timestamp +
+                0x8; // dateTime offset
+
+            const date = netDateBinaryToDate(
+                this.process.readInt(dateTime + 0x4),
+                this.process.readInt(dateTime)
+            );
+
+            const content = this.process.readSharpStringPtr(
+                message + this.offsets['osu.Game.Online.Chat.Message'].Content
+            );
+
+            const apiUser = this.readUser(
+                this.process.readIntPtr(
+                    message +
+                        this.offsets['osu.Game.Online.Chat.Message'].Sender
+                )
+            );
+
+            if (!config.showMpCommands && content.startsWith('!mp')) {
+                continue;
+            }
+
+            chatItems.push({
+                time: date.toISOString(),
+                name: apiUser.name,
+                content
+            });
+        }
+
+        return { chat: chatItems, spectatingClients };
     }
 
     settings(): ISettings {

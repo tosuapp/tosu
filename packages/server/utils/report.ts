@@ -1,4 +1,4 @@
-import { Bitness, ClientType, config } from '@tosu/common';
+import { Bitness, ClientType, config, context } from '@tosu/common';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { battery, cpu, graphics, osInfo } from 'systeminformation';
@@ -72,7 +72,7 @@ export async function generateReport(instanceManager: any): Promise<Report> {
     }));
 
     const specs = await specsDetails();
-    const log = await readFile(config.logFilePath, 'utf8');
+    const log = await readFile(context.logFilePath, 'utf8');
 
     return {
         date: new Date(),
