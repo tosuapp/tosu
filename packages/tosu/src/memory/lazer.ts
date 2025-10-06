@@ -40,7 +40,11 @@ import type {
     ScanPatterns
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
-import { LeaderboardPlayer, Statistics } from '@/states/types';
+import {
+    KeyOverlayButton,
+    LeaderboardPlayer,
+    Statistics
+} from '@/states/types';
 import {
     fixDecimals,
     netDateBinaryToDate,
@@ -1940,21 +1944,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         };
     }
 
-    keyOverlay(mode: number): IKeyOverlay {
+    keyOverlay(): IKeyOverlay {
         try {
-            const emptyKeyOverlay: IKeyOverlay = {
-                K1Pressed: false,
-                K1Count: 0,
-                K2Pressed: false,
-                K2Count: 0,
-                M1Pressed: false,
-                M1Count: 0,
-                M2Pressed: false,
-                M2Count: 0
-            };
-
-            if (mode !== 0 || this.isPlayerLoading) {
-                return emptyKeyOverlay;
+            if (this.isPlayerLoading) {
+                return [];
             }
 
             const player = this.player();
@@ -1985,37 +1978,19 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
             const triggers = this.readListItems(triggerCollection);
 
-            if (triggers.length === 0) {
-                return {
-                    K1Pressed: false,
-                    K1Count: 0,
-                    K2Pressed: false,
-                    K2Count: 0,
-                    M1Pressed: false,
-                    M1Count: 0,
-                    M2Pressed: false,
-                    M2Count: 0
-                };
-            }
-
-            // available keys:
-            // 0 - k1/m1, 1 - k2/m2, 2 - smoke
-            const keyCounters: KeyCounter[] = [];
+            const keyCounters: KeyOverlayButton[] = [];
 
             for (let i = 0; i < triggers.length; i++) {
-                keyCounters.push(this.readKeyTrigger(triggers[i]));
+                const keyTrigger: KeyCounter = this.readKeyTrigger(triggers[i]);
+
+                keyCounters.push({
+                    name: `B${i + 1}`,
+                    isPressed: keyTrigger.isPressed,
+                    count: keyTrigger.count
+                });
             }
 
-            return {
-                K1Pressed: keyCounters[0].isPressed,
-                K1Count: keyCounters[0].count,
-                K2Pressed: keyCounters[1].isPressed,
-                K2Count: keyCounters[1].count,
-                M1Pressed: keyCounters[2].isPressed,
-                M1Count: keyCounters[2].count,
-                M2Pressed: false,
-                M2Count: 0
-            };
+            return keyCounters;
         } catch (error) {
             return error as Error;
         }

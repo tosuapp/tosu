@@ -1,5 +1,9 @@
 import type { ITourneyManagerChatItem } from '@/states/tourney';
-import type { KeyOverlay, LeaderboardPlayer, Statistics } from '@/states/types';
+import type {
+    KeyOverlayButton,
+    LeaderboardPlayer,
+    Statistics
+} from '@/states/types';
 import type { MultiplayerTeamType } from '@/utils/multiplayer.types';
 import type { CalculateMods } from '@/utils/osuMods.types';
 import type { SettingsObject } from '@/utils/settings.types';
@@ -84,7 +88,7 @@ export type IScore = {
 
 export type IGameplay = IScore | string | Error;
 
-export type IKeyOverlay = KeyOverlay | string | Error;
+export type IKeyOverlay = KeyOverlayButton[] | string | Error;
 export type IHitErrors = number[] | string | Error;
 
 export type IGlobal =
