@@ -3,7 +3,11 @@ import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
-import { KeyOverlay, LeaderboardPlayer, Statistics } from '@/states/types';
+import {
+    KeyOverlayButton,
+    LeaderboardPlayer,
+    Statistics
+} from '@/states/types';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
 import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
@@ -70,7 +74,7 @@ export class Gameplay extends AbstractState {
     unstableRate: number;
     gradeCurrent: string;
     gradeExpected: string;
-    keyOverlay: KeyOverlay;
+    keyOverlay: KeyOverlayButton[];
     isReplayUiHidden: boolean;
 
     isLeaderboardVisible: boolean = false;
@@ -121,16 +125,7 @@ export class Gameplay extends AbstractState {
         });
 
         this.gradeExpected = this.gradeCurrent;
-        this.keyOverlay = {
-            K1Pressed: false,
-            K1Count: 0,
-            K2Pressed: false,
-            K2Count: 0,
-            M1Pressed: false,
-            M1Count: 0,
-            M2Pressed: false,
-            M2Count: 0
-        };
+        this.keyOverlay = [];
         this.isReplayUiHidden = false;
 
         this.previousPassedObjects = 0;
@@ -174,15 +169,10 @@ export class Gameplay extends AbstractState {
             `gameplay resetKeyOverlay`
         );
 
-        this.keyOverlay.K1Pressed = false;
-        this.keyOverlay.K2Pressed = false;
-        this.keyOverlay.M1Pressed = false;
-        this.keyOverlay.M2Pressed = false;
-
-        this.keyOverlay.K1Count = 0;
-        this.keyOverlay.K2Count = 0;
-        this.keyOverlay.M1Count = 0;
-        this.keyOverlay.M2Count = 0;
+        this.keyOverlay.forEach((key) => {
+            key.isPressed = false;
+            key.count = 0;
+        });
 
         this.isKeyOverlayDefaultState = true;
     }
@@ -295,27 +285,17 @@ export class Gameplay extends AbstractState {
                 return 'not-ready';
             }
 
-            if (result.K1Count < 0 || result.K1Count > 1_000_000) {
-                result.K1Pressed = false;
-                result.K1Count = 0;
-            }
-            if (result.K2Count < 0 || result.K2Count > 1_000_000) {
-                result.K2Pressed = false;
-                result.K2Count = 0;
-            }
-            if (result.M1Count < 0 || result.M1Count > 1_000_000) {
-                result.M1Pressed = false;
-                result.M1Count = 0;
-            }
-            if (result.M2Count < 0 || result.M2Count > 1_000_000) {
-                result.M2Pressed = false;
-                result.M2Count = 0;
-            }
+            result.forEach((key) => {
+                if (key.count < 0 || key.count > 1_000_000) {
+                    key.isPressed = false;
+                    key.count = 0;
+                }
+            });
 
             this.keyOverlay = result;
             this.isKeyOverlayDefaultState = false;
 
-            const keysLine = `${this.keyOverlay.K1Count}:${this.keyOverlay.K2Count}:${this.keyOverlay.M1Count}:${this.keyOverlay.M2Count}`;
+            const keysLine = result.map((key) => key.count).join(':');
             if (this.cachedkeys !== keysLine) {
                 wLogger.debug(
                     ClientType[this.game.client],

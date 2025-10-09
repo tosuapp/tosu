@@ -193,20 +193,20 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             keyOverlay: {
                 k1: {
-                    isPressed: gameplay.keyOverlay.K1Pressed,
-                    count: gameplay.keyOverlay.K1Count
+                    isPressed: gameplay.keyOverlay.at(0)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(0)?.count ?? 0
                 },
                 k2: {
-                    isPressed: gameplay.keyOverlay.K2Pressed,
-                    count: gameplay.keyOverlay.K2Count
+                    isPressed: gameplay.keyOverlay.at(1)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(1)?.count ?? 0
                 },
                 m1: {
-                    isPressed: gameplay.keyOverlay.M1Pressed,
-                    count: gameplay.keyOverlay.M1Count
+                    isPressed: gameplay.keyOverlay.at(2)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(2)?.count ?? 0
                 },
                 m2: {
-                    isPressed: gameplay.keyOverlay.M2Pressed,
-                    count: gameplay.keyOverlay.M2Count
+                    isPressed: gameplay.keyOverlay.at(3)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(3)?.count ?? 0
                 }
             },
             leaderboard: {

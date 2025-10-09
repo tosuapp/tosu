@@ -638,52 +638,64 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
             const itemsSize = this.process.readInt(keyOverlayArrayAddr + 0x4);
             if (itemsSize < 4) {
-                return {
-                    K1Pressed: false,
-                    K1Count: 0,
-                    K2Pressed: false,
-                    K2Count: 0,
-                    M1Pressed: false,
-                    M1Count: 0,
-                    M2Pressed: false,
-                    M2Count: 0
-                };
+                return [];
             }
 
-            return {
-                K1Pressed: Boolean(
-                    this.process.readByte(
-                        this.process.readInt(keyOverlayArrayAddr + 0x8) + 0x1c
+            const keyOverlay = [
+                {
+                    name: mode === 2 ? 'L' : 'K1',
+                    isPressed: Boolean(
+                        this.process.readByte(
+                            this.process.readInt(keyOverlayArrayAddr + 0x8) +
+                                0x1c
+                        )
+                    ),
+                    count: this.process.readInt(
+                        this.process.readInt(keyOverlayArrayAddr + 0x8) + 0x14
                     )
-                ),
-                K1Count: this.process.readInt(
-                    this.process.readInt(keyOverlayArrayAddr + 0x8) + 0x14
-                ),
-                K2Pressed: Boolean(
-                    this.process.readByte(
-                        this.process.readInt(keyOverlayArrayAddr + 0xc) + 0x1c
+                },
+                {
+                    name: mode === 2 ? 'R' : 'K2',
+                    isPressed: Boolean(
+                        this.process.readByte(
+                            this.process.readInt(keyOverlayArrayAddr + 0xc) +
+                                0x1c
+                        )
+                    ),
+                    count: this.process.readInt(
+                        this.process.readInt(keyOverlayArrayAddr + 0xc) + 0x14
                     )
-                ),
-                K2Count: this.process.readInt(
-                    this.process.readInt(keyOverlayArrayAddr + 0xc) + 0x14
-                ),
-                M1Pressed: Boolean(
-                    this.process.readByte(
-                        this.process.readInt(keyOverlayArrayAddr + 0x10) + 0x1c
+                },
+                {
+                    name: mode === 2 ? 'D' : 'M1',
+                    isPressed: Boolean(
+                        this.process.readByte(
+                            this.process.readInt(keyOverlayArrayAddr + 0x10) +
+                                0x1c
+                        )
+                    ),
+                    count: this.process.readInt(
+                        this.process.readInt(keyOverlayArrayAddr + 0x10) + 0x14
                     )
-                ),
-                M1Count: this.process.readInt(
-                    this.process.readInt(keyOverlayArrayAddr + 0x10) + 0x14
-                ),
-                M2Pressed: Boolean(
-                    this.process.readByte(
-                        this.process.readInt(keyOverlayArrayAddr + 0x14) + 0x1c
+                }
+            ];
+
+            if (mode === 0) {
+                keyOverlay.push({
+                    name: 'M2',
+                    isPressed: Boolean(
+                        this.process.readByte(
+                            this.process.readInt(keyOverlayArrayAddr + 0x14) +
+                                0x1c
+                        )
+                    ),
+                    count: this.process.readInt(
+                        this.process.readInt(keyOverlayArrayAddr + 0x14) + 0x14
                     )
-                ),
-                M2Count: this.process.readInt(
-                    this.process.readInt(keyOverlayArrayAddr + 0x14) + 0x14
-                )
-            };
+                });
+            }
+
+            return keyOverlay;
         } catch (error) {
             return error as Error;
         }

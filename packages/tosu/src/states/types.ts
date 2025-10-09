@@ -28,15 +28,10 @@ export interface Statistics {
     legacyComboIncrease?: number;
 }
 
-export interface KeyOverlay {
-    K1Pressed: boolean;
-    K1Count: number;
-    K2Pressed: boolean;
-    K2Count: number;
-    M1Pressed: boolean;
-    M1Count: number;
-    M2Pressed: boolean;
-    M2Count: number;
+export interface KeyOverlayButton {
+    name: string;
+    isPressed: boolean;
+    count: number;
 }
 
 export interface LeaderboardPlayer {
