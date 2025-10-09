@@ -165,38 +165,14 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
         keyOverlay: JSON.stringify({
             Enabled: config.enableKeyOverlay,
-            K1Pressed:
-                gameplay.keyOverlay.length > 0
-                    ? gameplay.keyOverlay[0].isPressed
-                    : false,
-            K1Count:
-                gameplay.keyOverlay.length > 0
-                    ? gameplay.keyOverlay[0].count
-                    : 0,
-            K2Pressed:
-                gameplay.keyOverlay.length > 1
-                    ? gameplay.keyOverlay[1].isPressed
-                    : false,
-            K2Count:
-                gameplay.keyOverlay.length > 1
-                    ? gameplay.keyOverlay[1].count
-                    : 0,
-            M1Pressed:
-                gameplay.keyOverlay.length > 2
-                    ? gameplay.keyOverlay[2].isPressed
-                    : false,
-            M1Count:
-                gameplay.keyOverlay.length > 2
-                    ? gameplay.keyOverlay[2].count
-                    : 0,
-            M2Pressed:
-                gameplay.keyOverlay.length > 3
-                    ? gameplay.keyOverlay[3].isPressed
-                    : false,
-            M2Count:
-                gameplay.keyOverlay.length > 3
-                    ? gameplay.keyOverlay[3].count
-                    : 0
+            K1Pressed: gameplay.keyOverlay.at(0)?.isPressed ?? false,
+            K1Count: gameplay.keyOverlay.at(0)?.count ?? 0,
+            K2Pressed: gameplay.keyOverlay.at(1)?.isPressed ?? false,
+            K2Count: gameplay.keyOverlay.at(1)?.count ?? 0,
+            M1Pressed: gameplay.keyOverlay.at(2)?.isPressed ?? false,
+            M1Count: gameplay.keyOverlay.at(2)?.count ?? 0,
+            M2Pressed: gameplay.keyOverlay.at(3)?.isPressed ?? false,
+            M2Count: gameplay.keyOverlay.at(3)?.count ?? 0
         }),
 
         geki: gameplay.statistics.perfect,

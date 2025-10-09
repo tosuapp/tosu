@@ -193,44 +193,20 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             keyOverlay: {
                 k1: {
-                    isPressed:
-                        gameplay.keyOverlay.length > 0
-                            ? gameplay.keyOverlay[0].isPressed
-                            : false,
-                    count:
-                        gameplay.keyOverlay.length > 0
-                            ? gameplay.keyOverlay[0].count
-                            : 0
+                    isPressed: gameplay.keyOverlay.at(0)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(0)?.count ?? 0
                 },
                 k2: {
-                    isPressed:
-                        gameplay.keyOverlay.length > 1
-                            ? gameplay.keyOverlay[1].isPressed
-                            : false,
-                    count:
-                        gameplay.keyOverlay.length > 1
-                            ? gameplay.keyOverlay[1].count
-                            : 0
+                    isPressed: gameplay.keyOverlay.at(1)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(1)?.count ?? 0
                 },
                 m1: {
-                    isPressed:
-                        gameplay.keyOverlay.length > 2
-                            ? gameplay.keyOverlay[2].isPressed
-                            : false,
-                    count:
-                        gameplay.keyOverlay.length > 2
-                            ? gameplay.keyOverlay[2].count
-                            : 0
+                    isPressed: gameplay.keyOverlay.at(2)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(2)?.count ?? 0
                 },
                 m2: {
-                    isPressed:
-                        gameplay.keyOverlay.length > 3
-                            ? gameplay.keyOverlay[3].isPressed
-                            : false,
-                    count:
-                        gameplay.keyOverlay.length > 3
-                            ? gameplay.keyOverlay[3].count
-                            : 0
+                    isPressed: gameplay.keyOverlay.at(3)?.isPressed ?? false,
+                    count: gameplay.keyOverlay.at(3)?.count ?? 0
                 }
             },
             leaderboard: {
