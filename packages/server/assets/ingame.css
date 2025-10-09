@@ -295,13 +295,13 @@ iframe {
 }
 
 
-.context-menu,
 .overlay {
     transition: 0.2s ease;
     transition-property: translate;
 
     &::after {
         content: '';
+        pointer-events: none;
         justify-content: center;
         align-items: center;
         position: absolute;
