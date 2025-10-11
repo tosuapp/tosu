@@ -6,6 +6,7 @@ import {
     GameState,
     GroupType,
     LazerBeatmapTabType,
+    LazerGroupMode,
     LazerSortMode,
     LeaderboardType,
     ManiaScrollingDirection,
@@ -224,7 +225,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             group: {
                 number: settings.groupType,
-                name: GroupType[settings.groupType] || ''
+                name:
+                    osuInstance.client === ClientType.lazer
+                        ? LazerGroupMode[settings.groupType] || ''
+                        : GroupType[settings.groupType] || ''
             },
 
             skin: {
