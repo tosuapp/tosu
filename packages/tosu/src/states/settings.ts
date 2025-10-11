@@ -61,7 +61,6 @@ export class Settings extends AbstractState {
     };
 
     mouse: Mouse = {
-        highPrecision: false,
         rawInput: false,
         disableButtons: false,
         disableWheel: false,

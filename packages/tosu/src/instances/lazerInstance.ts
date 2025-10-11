@@ -195,6 +195,7 @@ export class LazerInstance extends AbstractInstance {
         const {
             global,
             menu,
+            bassDensity,
             beatmapPP,
             gameplay,
             resultScreen,
@@ -288,8 +289,7 @@ export class LazerInstance extends AbstractInstance {
 
                 switch (global.status) {
                     case GameState.menu:
-                        // FIXME: TODO
-                        // bassDensity.updateState();
+                        bassDensity.updateState();
                         break;
 
                     case GameState.edit:
