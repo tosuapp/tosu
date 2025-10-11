@@ -216,6 +216,7 @@ export enum LazerSettings {
     MenuParallax,
     Prefer24HourTime,
     BeatmapDetailTab,
+    BeatmapLeaderboardSortMode,
     BeatmapDetailModsFilter,
     Username,
     ReleaseStream,
@@ -296,7 +297,9 @@ export enum LazerSettings {
     EditorShowStoryboard,
     EditorSubmissionNotifyOnDiscussionReplies,
     EditorSubmissionLoadInBrowserAfterSubmission,
-    WasSupporter
+    WasSupporter,
+    LastOnlineTagsPopulation,
+    AutomaticallyAdjustBeatmapOffset
 }
 
 export enum FrameworkSetting {
@@ -341,6 +344,25 @@ export enum LazerBeatmapTabType {
     global,
     friends,
     team
+}
+
+export enum LazerGroupMode {
+    none,
+    artist,
+    author,
+    bpm,
+    collections,
+    dateAdded,
+    dateRanked,
+    difficulty,
+    // favourites, // Not implemented in lazer yet
+    lastPlayed,
+    length,
+    myMaps,
+    rankAchieved,
+    rankedStatus,
+    source,
+    title
 }
 
 export enum LazerSortMode {
