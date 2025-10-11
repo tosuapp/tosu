@@ -195,7 +195,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             mouse: {
                 rawInput: settings.mouse.rawInput,
-                highPrecision: settings.mouse.highPrecision,
                 disableButtons: settings.mouse.disableButtons,
                 disableWheel: settings.mouse.disableWheel,
                 sensitivity: settings.mouse.sensitivity

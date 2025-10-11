@@ -103,7 +103,6 @@ export interface Mouse {
     disableButtons: boolean;
     disableWheel: boolean;
     rawInput: boolean;
-    highPrecision: boolean;
     sensitivity: number;
 }
 

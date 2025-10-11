@@ -3691,7 +3691,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                                         ]['<UseRelativeMode>k__BackingField']
                                 ) + 0x40
                             ) === 1;
-                        values['mouse.highPrecision'] = userRelativeMode;
+                        values['mouse.rawInput'] = userRelativeMode;
                     }
                 }
 
