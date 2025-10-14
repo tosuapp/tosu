@@ -17,6 +17,7 @@ struct Pattern {
   int index;
   std::span<uint8_t> signature;
   std::span<uint8_t> mask;
+  bool non_zero_mask;
   bool found;
 };
 
@@ -49,14 +50,26 @@ std::tuple<T, bool> read(void *process, uintptr_t address) {
   return std::make_tuple(data, success);
 }
 
-inline bool scan(std::vector<uint8_t> buffer, std::span<uint8_t> signature, std::span<uint8_t> mask, size_t &offset) {
+inline bool scan(
+  std::vector<uint8_t> buffer,
+  std::span<uint8_t> signature,
+  std::span<uint8_t> mask,
+  size_t &offset,
+  bool non_zero_mask
+) {
   offset = 0;
 
   for (size_t i = 0; i + signature.size() <= buffer.size(); ++i) {
     bool found = true;
     for (size_t j = 0; j < signature.size(); ++j) {
-      if ((buffer[i + j] == signature[j] && mask[j] == 1) || (mask[j] == 0 && buffer[i + j] != 0)) {
-        continue;
+      if (non_zero_mask) {
+        if ((buffer[i + j] == signature[j] && mask[j] == 1) || (mask[j] == 0 && buffer[i + j] != 0)) {
+          continue;
+        }
+      } else {
+        if (buffer[i + j] == signature[j] || mask[j] == 0) {
+          continue;
+        }
       }
 
       found = false;
@@ -74,14 +87,26 @@ inline bool scan(std::vector<uint8_t> buffer, std::span<uint8_t> signature, std:
   return false;
 }
 
-inline bool scan(std::vector<uint8_t> buffer, std::vector<uint8_t> signature, std::vector<uint8_t> mask, size_t &offset) {
+inline bool scan(
+  std::vector<uint8_t> buffer,
+  std::vector<uint8_t> signature,
+  std::vector<uint8_t> mask,
+  size_t &offset,
+  bool non_zero_mask
+) {
   offset = 0;
 
   for (size_t i = 0; i + signature.size() <= buffer.size(); ++i) {
     auto found = true;
     for (size_t j = 0; j < signature.size(); ++j) {
-      if ((buffer[i + j] == signature[j] && mask[j] == 1) || (mask[j] == 0 && buffer[i + j] != 0)) {
-        continue;
+      if (non_zero_mask) {
+        if ((buffer[i + j] == signature[j] && mask[j] == 1) || (mask[j] == 0 && buffer[i + j] != 0)) {
+          continue;
+        }
+      } else {
+        if (buffer[i + j] == signature[j] || mask[j] == 0) {
+          continue;
+        }
       }
 
       found = false;
@@ -99,7 +124,8 @@ inline bool scan(std::vector<uint8_t> buffer, std::vector<uint8_t> signature, st
   return false;
 }
 
-inline uintptr_t find_pattern(void *process, const std::vector<uint8_t> signature, const std::vector<uint8_t> mask) {
+inline uintptr_t
+find_pattern(void *process, const std::vector<uint8_t> signature, const std::vector<uint8_t> mask, bool non_zero_mask) {
   const auto regions = query_regions(process);
 
   for (auto &region : regions) {
@@ -109,7 +135,7 @@ inline uintptr_t find_pattern(void *process, const std::vector<uint8_t> signatur
     }
 
     size_t offset;
-    if (!scan(buffer, signature, mask, offset)) {
+    if (!scan(buffer, signature, mask, offset, non_zero_mask)) {
       continue;
     }
 
@@ -136,7 +162,7 @@ inline std::vector<PatternResult> batch_find_pattern(void *process, std::vector<
       }
 
       size_t offset;
-      if (!scan(buffer, pattern.signature, pattern.mask, offset)) {
+      if (!scan(buffer, pattern.signature, pattern.mask, offset, pattern.non_zero_mask)) {
         continue;
       }
 

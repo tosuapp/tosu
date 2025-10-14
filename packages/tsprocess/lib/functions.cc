@@ -149,7 +149,7 @@ Napi::Value read_double(const Napi::CallbackInfo &args) {
 
 Napi::Value scan_sync(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 3) {
+  if (args.Length() < 4) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -157,6 +157,7 @@ Napi::Value scan_sync(const Napi::CallbackInfo &args) {
   auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
   auto signature_buffer = args[1].As<Napi::Uint8Array>();
   auto mask_buffer = args[2].As<Napi::Uint8Array>();
+  auto non_zero_mask = args[3].As<Napi::Boolean>().Value();
 
   auto signature = std::vector<uint8_t>(signature_buffer.ByteLength());
   memcpy(signature.data(), signature_buffer.Data(), signature_buffer.ByteLength());
@@ -164,7 +165,7 @@ Napi::Value scan_sync(const Napi::CallbackInfo &args) {
   auto mask = std::vector<uint8_t>(mask_buffer.ByteLength());
   memcpy(mask.data(), mask_buffer.Data(), mask_buffer.ByteLength());
 
-  auto result = memory::find_pattern(handle, signature, mask);
+  auto result = memory::find_pattern(handle, signature, mask, non_zero_mask);
 
   if (!result) {
     Napi::TypeError::New(env, "Couldn't find signature").ThrowAsJavaScriptException();
@@ -193,10 +194,12 @@ Napi::Value batch_scan(const Napi::CallbackInfo &args) {
     auto iter_obj = pattern_array.Get(i).As<Napi::Object>();
     auto signature = iter_obj.Get("signature").As<Napi::Uint8Array>();
     auto mask = iter_obj.Get("mask").As<Napi::Uint8Array>();
+    auto non_zero_mask = iter_obj.Get("nonZeroMask").As<Napi::Boolean>().Value();
 
     pattern.index = i;
     pattern.signature = std::span<uint8_t>(reinterpret_cast<uint8_t *>(signature.Data()), signature.ByteLength());
     pattern.mask = std::span<uint8_t>(reinterpret_cast<uint8_t *>(mask.Data()), mask.ByteLength());
+    pattern.non_zero_mask = non_zero_mask;
     pattern.found = false;
 
     patterns.push_back(pattern);
@@ -249,7 +252,7 @@ static bool scanning = false;
 
 Napi::Value scan(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
-  if (args.Length() < 4) {
+  if (args.Length() < 5) {
     Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -258,6 +261,8 @@ Napi::Value scan(const Napi::CallbackInfo &args) {
   auto signature = args[1].As<Napi::Uint8Array>();
   auto mask = args[2].As<Napi::Uint8Array>();
   auto callback = Napi::ThreadSafeFunction::New(args.Env(), args[3].As<Napi::Function>(), "tsfn", 0, 1);
+  auto non_zero_mask = args[4].As<Napi::Boolean>().Value();
+
   auto signature_data = signature.Data();
   auto signature_length = signature.ByteLength();
   auto mask_data = mask.Data();
@@ -267,14 +272,14 @@ Napi::Value scan(const Napi::CallbackInfo &args) {
     scanning = true;
 
     std::thread(
-      [handle, signature_data, signature_length, mask_data, mask_length](Napi::ThreadSafeFunction tsfn) {
+      [handle, signature_data, signature_length, mask_data, mask_length, non_zero_mask](Napi::ThreadSafeFunction tsfn) {
         auto signature = std::vector<uint8_t>(signature_length);
         memcpy(signature.data(), signature_data, signature_length);
 
         auto mask = std::vector<uint8_t>(mask_length);
         memcpy(mask.data(), mask_data, mask_length);
 
-        const auto result = memory::find_pattern(handle, signature, mask);
+        const auto result = memory::find_pattern(handle, signature, mask, non_zero_mask);
         scanning = false;
         tsfn.BlockingCall([result, tsfn](Napi::Env env, Napi::Function jsCallback) {
           jsCallback.Call({Napi::Number::From(env, result)});

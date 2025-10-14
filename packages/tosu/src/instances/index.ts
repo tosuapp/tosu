@@ -115,7 +115,13 @@ export abstract class AbstractInstance {
             const scanPatterns = this.memory.getScanPatterns();
 
             const results = this.process.scanBatch(
-                Object.values(scanPatterns).map((x) => x.pattern)
+                Object.values(scanPatterns).map((x) => {
+                    return {
+                        value: x.pattern,
+                        nonZeroMask:
+                            x.nonZeroMask === undefined ? false : x.nonZeroMask
+                    };
+                })
             );
 
             const patternsEntries = Object.entries(scanPatterns);

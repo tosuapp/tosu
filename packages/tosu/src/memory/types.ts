@@ -12,6 +12,7 @@ export type ScanPatterns = {
     [k in keyof any]: {
         pattern: string;
         offset?: number;
+        nonZeroMask?: boolean;
         isTourneyOnly?: boolean;
     };
 };
