@@ -381,7 +381,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         scalingContainerTargetDrawSize: {
             pattern:
                 '00 00 80 44 00 00 40 44 00 00 00 00 ?? ?? ?? ?? 00 00 00 00',
-            offset: 0
+            offset: 0,
+            nonZeroMask: true
         }
     };
 

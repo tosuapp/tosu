@@ -13,6 +13,12 @@ export interface ProcessInfo {
 export interface Pattern {
     signature: Buffer;
     mask: Buffer;
+    nonZeroMask: boolean;
+}
+
+export interface Signature {
+    value: string;
+    nonZeroMask: boolean;
 }
 
 export interface PatternResult {
@@ -212,7 +218,7 @@ export class Process {
             'hex'
         );
 
-        return { signature, mask };
+        return { signature, mask, nonZeroMask: false };
     }
 
     readBuffer(address: number, size: number): Buffer {
@@ -224,23 +230,34 @@ export class Process {
         );
     }
 
-    scanSync(pattern: string): number {
+    scanSync(pattern: string, nonZeroMask: boolean = false): number {
         const result = Process.buildPattern(pattern);
 
         return ProcessUtils.scanSync(
             this.handle,
             result.signature,
-            result.mask
+            result.mask,
+            nonZeroMask
         );
     }
 
-    scan(pattern: string, callback: (address: number) => void): void {
+    scan(
+        pattern: string,
+        callback: (address: number) => void,
+        nonZeroMask: boolean = false
+    ): void {
         const result = Process.buildPattern(pattern);
 
-        ProcessUtils.scan(this.handle, result.signature, result.mask, callback);
+        ProcessUtils.scan(
+            this.handle,
+            result.signature,
+            result.mask,
+            callback,
+            nonZeroMask
+        );
     }
 
-    scanAsync(pattern: string): Promise<number> {
+    scanAsync(pattern: string, nonZeroMask: boolean = false): Promise<number> {
         const result = Process.buildPattern(pattern);
 
         return new Promise((resolve, reject) => {
@@ -249,7 +266,8 @@ export class Process {
                     this.handle,
                     result.signature,
                     result.mask,
-                    resolve
+                    resolve,
+                    nonZeroMask
                 );
             } catch (e) {
                 reject(e);
@@ -257,15 +275,16 @@ export class Process {
         });
     }
 
-    scanBatch(signatures: string[]): PatternResult[] {
+    scanBatch(signatures: Signature[]): PatternResult[] {
         const patterns: Pattern[] = [];
 
         for (const signature of signatures) {
-            const result = Process.buildPattern(signature);
+            const result = Process.buildPattern(signature.value);
 
             patterns.push({
                 signature: result.signature,
-                mask: result.mask
+                mask: result.mask,
+                nonZeroMask: signature.nonZeroMask
             });
         }
 
