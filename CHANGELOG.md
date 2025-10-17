@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.15.0](https://github.com/tosuapp/tosu/compare/v4.14.0...v4.15.0) (2025-10-17)
+
+
+### Features
+
+* add comments on config properties. ([71d763a](https://github.com/tosuapp/tosu/commit/71d763a27f30626b2f3240f47c188ccdd9147765))
+* debounced settings auto-save in dashboard. ([cfaa7de](https://github.com/tosuapp/tosu/commit/cfaa7de417f8bdf67958023ec539635b309ac009))
+* lazer multi chat & signature mask fix ([4376c01](https://github.com/tosuapp/tosu/commit/4376c013b3afb61385bf72d7e07fdbd8ff445ae0))
+* rewrite config handling. ([b767208](https://github.com/tosuapp/tosu/commit/b767208d2b45f0dda85abd0869f4e402ebf9f055))
+
+
+### Bug Fixes
+
+* add mp ignoring and fix team detection naming ([a02fa56](https://github.com/tosuapp/tosu/commit/a02fa56203e0a56d66100319ce1c3eff37ad68ce))
+* Mania accuracy calculation ([2da03ec](https://github.com/tosuapp/tosu/commit/2da03ec4ff0243cd2a09e894cfefc364750f42cc))
+* optional non-zero mask check ([36a0522](https://github.com/tosuapp/tosu/commit/36a05226f8338a0e68fa06b5fa9c24375261fedb))
+* overlay blackscreen ([#485](https://github.com/tosuapp/tosu/issues/485)) ([a043160](https://github.com/tosuapp/tosu/commit/a0431602c26b610b6ac114f18098e4d82baba6b2))
+* Use config keys instead of bindings ([ddeeabe](https://github.com/tosuapp/tosu/commit/ddeeabe22184aaeba1b46fb26abbca7c73ef3228))
+* webkit based browser cannot open edit menu ([b11fe89](https://github.com/tosuapp/tosu/commit/b11fe89defcf4eb71d506b97bbcd375e7ee66c69))
+
 ## [4.14.0](https://github.com/tosuapp/tosu/compare/v4.13.1...v4.14.0) (2025-10-01)
 
 
