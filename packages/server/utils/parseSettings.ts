@@ -2,6 +2,7 @@ import {
     JsonSafeParse,
     getSettingsPath,
     getStaticPath,
+    isRealNumber,
     wLogger
 } from '@tosu/common';
 import fs from 'fs';
@@ -90,9 +91,11 @@ export function parseCounterSettings(
 
                     switch (settings[find].type) {
                         case 'number': {
-                            values[setting.uniqueID] = isNaN(setting.value)
-                                ? 0
-                                : +setting.value;
+                            values[setting.uniqueID] = isRealNumber(
+                                setting.value
+                            )
+                                ? +setting.value
+                                : 0;
                             break;
                         }
 
@@ -186,7 +189,7 @@ export function parseCounterSettings(
                     const value = setting.value;
                     switch (setting.type) {
                         case 'number': {
-                            setting.value = isNaN(value) ? 0 : +value;
+                            setting.value = isRealNumber(value) ? +value : 0;
                             break;
                         }
 

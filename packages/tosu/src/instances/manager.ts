@@ -5,6 +5,7 @@ import {
     argumentsParser,
     checkGameOverlayConfig,
     config,
+    isRealNumber,
     platformResolver,
     wLogger
 } from '@tosu/common';
@@ -124,7 +125,7 @@ export class InstanceManager {
                     ? new LazerInstance(processId)
                     : new OsuInstance(processId);
 
-                if (!isNaN(parseFloat(args.spectateclient))) {
+                if (isRealNumber(args.spectateclient)) {
                     osuInstance.setTourneyIpcId(args.spectateclient);
                     osuInstance.setIsTourneySpectator(true);
                 }

@@ -1,3 +1,5 @@
+import { isRealNumber } from './manipulation';
+
 export const argumentsParser = (argumentsString: string[] | string) => {
     const args: { [key: string]: any } = {};
 
@@ -8,7 +10,7 @@ export const argumentsParser = (argumentsString: string[] | string) => {
             const name = match?.groups?.name || '';
             const value: any = match?.groups?.value || '';
 
-            if (!isNaN(parseFloat(value))) args[name] = parseFloat(value);
+            if (isRealNumber(value)) args[name] = parseFloat(value);
             else if (value === 'true') args[name] = true;
             else if (value === 'false') args[name] = false;
             else args[name] = value;
@@ -27,7 +29,7 @@ export const argumentsParser = (argumentsString: string[] | string) => {
         const name = groups?.name || '';
         const value: any = groups?.value || '';
 
-        if (!isNaN(parseFloat(value))) args[name] = parseFloat(value);
+        if (isRealNumber(value)) args[name] = parseFloat(value);
         else if (value === 'true') args[name] = true;
         else if (value === 'false') args[name] = false;
         else args[name] = value;
