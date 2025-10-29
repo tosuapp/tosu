@@ -1,4 +1,9 @@
-import { Overlay, defaultDllDir, length } from '@asdf-overlay/core';
+import {
+    type GpuLuid,
+    Overlay,
+    defaultDllDir,
+    length
+} from '@asdf-overlay/core';
 import { ElectronOverlayInput } from '@asdf-overlay/electron/input';
 import { ElectronOverlaySurface } from '@asdf-overlay/electron/surface';
 import { BrowserWindow } from 'electron';
@@ -22,7 +27,8 @@ export class OverlayProcess {
         readonly pid: number,
         private readonly windowId: number,
         readonly overlay: Overlay,
-        readonly window: BrowserWindow
+        readonly window: BrowserWindow,
+        private readonly luid: GpuLuid
     ) {
         overlay.event.once('disconnected', () => {
             this.window.destroy();
@@ -72,6 +78,7 @@ export class OverlayProcess {
 
         this.surface = ElectronOverlaySurface.connect(
             { id: windowId, overlay },
+            luid,
             window.webContents
         );
     }
@@ -98,11 +105,11 @@ export class OverlayProcess {
             pid,
             5000
         );
-        const [hwnd, width, height] = await new Promise<
-            [number, number, number]
+        const [hwnd, width, height, luid] = await new Promise<
+            [number, number, number, GpuLuid]
         >((resolve) =>
-            overlay.event.once('added', (hwnd, width, height) =>
-                resolve([hwnd, width, height])
+            overlay.event.once('added', (hwnd, width, height, luid) =>
+                resolve([hwnd, width, height, luid])
             )
         );
         console.debug('found hwnd:', hwnd, 'for pid:', pid);
@@ -131,6 +138,6 @@ export class OverlayProcess {
         });
         window.setSize(width, height, false);
 
-        return new OverlayProcess(pid, hwnd, overlay, window);
+        return new OverlayProcess(pid, hwnd, overlay, window, luid);
     }
 }
