@@ -369,11 +369,11 @@ export enum LazerSortMode {
     artist,
     author,
     bpm,
-    datesubmitted,
     dateadded,
     dateranked,
-    lastplayed,
+    datesubmitted,
     difficulty,
+    lastplayed,
     length,
     source,
     title

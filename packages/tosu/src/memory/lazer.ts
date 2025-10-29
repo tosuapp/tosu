@@ -80,6 +80,7 @@ export interface Offsets {
         SentryLogger: number;
         channelManager: number;
         '<frameworkConfig>k__BackingField': number;
+        chatOverlay: number;
     };
     'osu.Framework.Game': {
         '<Host>k__BackingField': number;
@@ -99,7 +100,6 @@ export interface Offsets {
         '<LocalConfig>k__BackingField': number;
         rulesetConfigCache: number;
         realm: number;
-        chatOverlay: number;
     };
     'osu.Game.Screens.SelectV2.SoloSongSelect': {
         '<game>k__BackingField': number;
@@ -168,7 +168,7 @@ export interface Offsets {
     'osu.Game.Screens.Menu.OsuLogo': {
         visualizer: number;
     };
-    'osu.Game.Screens.Menu.MenuLogoVisualisation': {
+    'osu.Game.Screens.Menu.LogoVisualisation': {
         frequencyAmplitudes: number;
     };
     'osu.Game.Screens.Play.Player': {
@@ -1820,7 +1820,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const frequencyAmplitudes = this.process.readIntPtr(
             visualizer +
-                this.offsets['osu.Game.Screens.Menu.MenuLogoVisualisation']
+                this.offsets['osu.Game.Screens.Menu.LogoVisualisation']
                     .frequencyAmplitudes
         );
 
@@ -3095,7 +3095,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         const chatOverlay = this.process.readIntPtr(
-            this.gameBase() + this.offsets['osu.Game.OsuGameBase'].chatOverlay
+            this.gameBase() + this.offsets['osu.Game.OsuGame'].chatOverlay
         );
 
         const stateBindable = this.process.readIntPtr(
