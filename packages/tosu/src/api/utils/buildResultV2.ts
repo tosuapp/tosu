@@ -6,6 +6,7 @@ import {
     GameState,
     GroupType,
     LazerBeatmapTabType,
+    LazerGroupMode,
     LazerSortMode,
     LeaderboardType,
     ManiaScrollingDirection,
@@ -189,7 +190,6 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             mouse: {
                 rawInput: settings.mouse.rawInput,
-                highPrecision: settings.mouse.highPrecision,
                 disableButtons: settings.mouse.disableButtons,
                 disableWheel: settings.mouse.disableWheel,
                 sensitivity: settings.mouse.sensitivity
@@ -224,7 +224,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             },
             group: {
                 number: settings.groupType,
-                name: GroupType[settings.groupType] || ''
+                name:
+                    osuInstance.client === ClientType.lazer
+                        ? LazerGroupMode[settings.groupType] || ''
+                        : GroupType[settings.groupType] || ''
             },
 
             skin: {
