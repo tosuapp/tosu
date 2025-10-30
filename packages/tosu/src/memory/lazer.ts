@@ -71,7 +71,7 @@ interface KeyCounter {
     count: number;
 }
 
-export interface offsets {
+export interface Offsets {
     OsuVersion: string;
     'osu.Game.OsuGame': {
         osuLogo: number;
@@ -172,8 +172,11 @@ export interface offsets {
         '<api>k__BackingField': number;
     };
     'osu.Game.Online.API.APIAccess': {
-        '<localUser>k__BackingField': number;
+        localUserState: number;
         game: number;
+    };
+    'osu.Game.Online.API.LocalUserState': {
+        localUser: number;
     };
     'osu.Desktop.OsuGameDesktop': {
         AvailableMods: number;
@@ -372,10 +375,10 @@ const frameworkConfigList = [
     FrameworkSetting.CursorSensitivity
 ];
 
-const expectedVtableValue: number = 7765317648384;
+const expectedVtableValue: number = 7696598171648;
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
-    offsets: offsets = localOffsets;
+    offsets: Offsets = localOffsets;
 
     private scanPatterns: ScanPatterns = {
         scalingContainerTargetDrawSize: {
@@ -1820,14 +1823,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.gameBase() +
                 this.offsets['osu.Game.OsuGameBase']['<API>k__BackingField']
         );
-        const userBindable = this.process.readIntPtr(
-            api +
-                this.offsets['osu.Game.Online.API.APIAccess'][
-                    '<localUser>k__BackingField'
-                ]
-        );
-        const user = this.process.readIntPtr(userBindable + 0x20);
 
+        const localUserState = this.process.readIntPtr(
+            api + this.offsets['osu.Game.Online.API.APIAccess'].localUserState
+        );
+
+        const userBindable = this.process.readIntPtr(
+            localUserState +
+                this.offsets['osu.Game.Online.API.LocalUserState'].localUser
+        );
+
+        const user = this.process.readIntPtr(userBindable + 0x20);
         return this.readUser(user);
     }
 
