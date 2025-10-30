@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "lib": [
-      "ES2023"
+      "ES2023",
+      "DOM"
     ],
     "target": "ESNext",
     "module": "Preserve",
