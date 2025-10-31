@@ -99,8 +99,14 @@ const currentVersion = require(process.cwd() + '/_version.js');
     instanceManager.runWatcher();
     instanceManager.runDetemination();
 
-    configEvents.addListener('change', httpServer.handleConfigUpdate);
-    configEvents.addListener('change', instanceManager.handleConfigUpdate);
+    configEvents.addListener(
+        'change',
+        httpServer.handleConfigUpdate.bind(httpServer)
+    );
+    configEvents.addListener(
+        'change',
+        instanceManager.handleConfigUpdate.bind(instanceManager)
+    );
 
     if (config.enableIngameOverlay) instanceManager.startOverlay();
 })();
