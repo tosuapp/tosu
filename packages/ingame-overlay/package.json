@@ -16,12 +16,12 @@
     "@asdf-overlay/electron": "^1.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^9.38.0",
     "@types/node": "^24.9.2",
     "electron": "^39.0.0",
     "electron-builder": "^26.0.12",
-    "electron-vite": "^4.0.0",
-    "typescript": "^5.8.3"
+    "electron-vite": "^4.0.1",
+    "typescript": "^5.9.3"
   },
   "build": {
     "productName": "tosu-ingame-overlay",
