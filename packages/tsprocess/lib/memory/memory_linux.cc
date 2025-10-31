@@ -16,9 +16,11 @@ namespace {
 
 std::string read_file(const std::string &path) {
   std::ifstream file(path, std::ios::binary);
-  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-  return content;
+  if (file.good()) {
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    return content;
+  }
+  return "";
 }
 
 }  // namespace
@@ -35,7 +37,9 @@ std::vector<uint32_t> memory::find_processes(const std::vector<std::string> &pro
           const auto pid = std::stoi(pid_str);
           const auto cmdline_path = "/proc/" + pid_str + "/comm";
           const auto cmdline = read_file(cmdline_path);
-
+          if (cmdline.empty()) {
+            continue;
+          }
           // Check if the process name matches any in the provided list
           for (const auto &process_name : process_names) {
             if (cmdline.find(process_name) != std::string::npos) {
@@ -104,13 +108,17 @@ std::string memory::get_process_path(void *process) {
 std::string memory::get_process_command_line(void *process) {
   const auto pid = reinterpret_cast<uintptr_t>(process);
   auto cmdline = read_file("/proc/" + std::to_string(pid) + "/cmdline");
-  
+
+  if (cmdline.empty()) {
+    return "";
+  }
+
   std::replace(cmdline.begin(), cmdline.end(), '\0', ' ');
 
   if (!cmdline.empty() && cmdline.back() == ' ') {
     cmdline.pop_back();
   }
-  
+
   return cmdline;
 }
 
