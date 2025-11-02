@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.15.1](https://github.com/tosuapp/tosu/compare/v4.15.0...v4.15.1) (2025-11-02)
+
+
+### Bug Fixes
+
+* include dom lib ([cefb35b](https://github.com/tosuapp/tosu/commit/cefb35b8ff1d6b83fa0926a3f8aaa4f1cd55e2ac))
+* **memory:** handle exited /proc reads ([2c34ddc](https://github.com/tosuapp/tosu/commit/2c34ddcc8d95cc2c66cf1a9d7c134e3c15d18cb8)), closes [#346](https://github.com/tosuapp/tosu/issues/346)
+* Undefined is not a function ([e8eaed5](https://github.com/tosuapp/tosu/commit/e8eaed51c2628d2a61aaa66f513c6be3fc949cf9))
+
 ## [4.15.0](https://github.com/tosuapp/tosu/compare/v4.14.0...v4.15.0) (2025-10-17)
 
 
