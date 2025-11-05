@@ -17,6 +17,8 @@ export class Global extends AbstractState {
     paused: boolean = false;
     gameTime: number = 0;
     playTime: number = 0;
+    previousPlayTime: number = 0;
+
     menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
 
     gameFolder: string = '';
@@ -65,6 +67,9 @@ export class Global extends AbstractState {
             this.gameTime = result.gameTime;
             this.menuMods = result.menuMods;
 
+            this.paused = this.previousPlayTime === this.playTime;
+            this.previousPlayTime = this.playTime;
+
             this.skinFolder = safeJoin(result.skinFolder);
             this.memorySongsFolder = safeJoin(result.memorySongsFolder);
 
@@ -92,7 +97,6 @@ export class Global extends AbstractState {
             const result = this.game.memory.globalPrecise();
             if (result instanceof Error) throw result;
 
-            this.paused = result.time === this.playTime;
             this.playTime = result.time;
 
             this.game.resetReportCount('global updatePreciseState');
