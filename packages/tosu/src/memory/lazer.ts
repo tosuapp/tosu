@@ -1895,8 +1895,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             scoreInfo,
             onlineId,
             netDateBinaryToDate(
-                this.process.readInt(scoreDate + 0x4),
-                this.process.readInt(scoreDate)
+                this.process.readInt(scoreDate + 0x8 + 0x4),
+                this.process.readInt(scoreDate + 0x8)
             ).toISOString()
         );
     }
