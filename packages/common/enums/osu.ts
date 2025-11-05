@@ -34,9 +34,9 @@ export enum GameState {
     packageUpdater,
     benchmark,
     tourney,
-    charts,
-    spectating,
-    watchingReplay
+    charts
+    // spectating,
+    // watchingReplay
 }
 
 export enum LobbyStatus {

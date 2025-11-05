@@ -150,8 +150,6 @@ export class OsuInstance extends AbstractInstance {
                         break;
 
                     case GameState.play:
-                    case GameState.spectating:
-                    case GameState.watchingReplay:
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
@@ -226,8 +224,6 @@ export class OsuInstance extends AbstractInstance {
 
                 switch (global.status) {
                     case GameState.play:
-                    case GameState.spectating:
-                    case GameState.watchingReplay:
                         if (global.playTime < 150) {
                             break;
                         }

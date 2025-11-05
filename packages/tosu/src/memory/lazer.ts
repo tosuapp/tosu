@@ -2966,13 +2966,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             : false;
 
         let isMultiSpectating = false;
+        let watchingReplay = false;
 
         let status = 0;
 
         if (isReplay && (isPlaying || isPlayerLoader)) {
-            status = GameState.watchingReplay;
+            watchingReplay = true;
+            status = GameState.play;
         } else if (isSpectator && (isPlaying || isPlayerLoader)) {
-            status = GameState.spectating;
+            status = GameState.play;
         } else if (isPlaying || isPlayerLoader) {
             status = GameState.play;
         } else if (isSongSelectV2) {
@@ -3005,7 +3007,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.isPlayerLoading = isPlayerLoader;
 
         return {
-            isWatchingReplay: status === GameState.watchingReplay,
+            isWatchingReplay: watchingReplay,
             isReplayUiHidden: !this.ReplaySettingsOverlay,
             showInterface: this.HUDVisibilityMode > 0,
             chatStatus: 0,
