@@ -3059,25 +3059,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.isPlayerLoading = isPlayerLoader;
 
         if (isPlaying) {
-            const player = this.player();
-            const dependencies = this.process.readIntPtr(
-                player +
-                    this.offsets['osu.Game.Screens.Play.Player'].dependencies
-            );
-            const cache = this.process.readIntPtr(dependencies + 0x8);
-            const entries = this.process.readIntPtr(cache + 0x10);
-            const drawableRuleset = this.process.readIntPtr(entries + 0x10);
-
-            this.replayMode =
-                this.process.readIntPtr(
-                    drawableRuleset +
-                        this.offsets['osu.Game.Rulesets.UI.DrawableRuleset'][
-                            '<ReplayScore>k__BackingField'
-                        ]
-                ) !== 0;
-
             const hudOverlay = this.process.readIntPtr(
-                player +
+                this.player() +
                     this.offsets['osu.Game.Screens.Play.Player'][
                         '<HUDOverlay>k__BackingField'
                     ]
