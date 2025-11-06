@@ -306,6 +306,7 @@ export enum FrameworkSetting {
     ShowLogOverlay,
 
     AudioDevice,
+    AudioUseExperimentalWasapi,
     VolumeUniversal,
     VolumeEffect,
     VolumeMusic,
