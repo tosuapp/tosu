@@ -35,6 +35,8 @@ export enum GameState {
     benchmark,
     tourney,
     charts
+    // spectating,
+    // watchingReplay
 }
 
 export enum LobbyStatus {

@@ -14,8 +14,11 @@ export class Global extends AbstractState {
     chatStatus: number = 0;
     status: number = 0;
 
+    paused: boolean = false;
     gameTime: number = 0;
     playTime: number = 0;
+    previousPlayTime: number = 0;
+
     menuMods: CalculateMods = Object.assign({}, defaultCalculatedMods);
 
     gameFolder: string = '';
@@ -63,6 +66,9 @@ export class Global extends AbstractState {
 
             this.gameTime = result.gameTime;
             this.menuMods = result.menuMods;
+
+            this.paused = this.previousPlayTime === this.playTime;
+            this.previousPlayTime = this.playTime;
 
             this.skinFolder = safeJoin(result.skinFolder);
             this.memorySongsFolder = safeJoin(result.memorySongsFolder);
