@@ -355,7 +355,7 @@ export enum LazerGroupMode {
     dateAdded,
     dateRanked,
     difficulty,
-    // favourites, // Not implemented in lazer yet
+    favourites,
     lastPlayed,
     length,
     myMaps,
