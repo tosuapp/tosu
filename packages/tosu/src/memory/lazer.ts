@@ -80,6 +80,7 @@ export interface Offsets {
         SentryLogger: number;
         channelManager: number;
         '<frameworkConfig>k__BackingField': number;
+        chatOverlay: number;
     };
     'osu.Framework.Game': {
         '<Host>k__BackingField': number;
@@ -160,6 +161,15 @@ export interface Offsets {
     };
     'osu.Game.Online.Multiplayer.MultiplayerClient': {
         room: number;
+    };
+    'osu.Game.Overlays.ChatOverlay': {
+        State: number;
+    };
+    'osu.Game.Screens.Menu.OsuLogo': {
+        visualizer: number;
+    };
+    'osu.Game.Screens.Menu.LogoVisualisation': {
+        frequencyAmplitudes: number;
     };
     'osu.Game.Screens.Play.Player': {
         '<api>k__BackingField': number;
@@ -269,6 +279,7 @@ export interface Offsets {
     };
     'osu.Game.Screens.Play.HUDOverlay': {
         InputCountController: number;
+        '<ShowHud>k__BackingField': number;
     };
     'osu.Game.Screens.Play.HUD.InputCountController': {
         triggers: number;
@@ -356,10 +367,12 @@ export interface Offsets {
 }
 
 const localConfigList = [
+    LazerSettings.ReleaseStream,
     LazerSettings.ScoreDisplayMode,
     LazerSettings.BeatmapDetailTab,
     LazerSettings.SongSelectSortingMode,
-    LazerSettings.HUDVisibilityMode,
+    LazerSettings.SongSelectGroupMode,
+    LazerSettings.GameplayLeaderboard,
     LazerSettings.ReplaySettingsOverlay,
     LazerSettings.DimLevel,
     LazerSettings.BlurLevel,
@@ -376,6 +389,7 @@ const localConfigList = [
 ];
 
 const frameworkConfigList = [
+    FrameworkSetting.WindowMode,
     FrameworkSetting.WindowedSize,
     FrameworkSetting.VolumeUniversal,
     FrameworkSetting.VolumeMusic,
@@ -404,7 +418,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private currentScreen: number = 0;
     private scoringDisplayMode: ScoringMode = ScoringMode.standardised;
-    private HUDVisibilityMode: number = 0;
+    private showInterface: boolean = true;
     private ReplaySettingsOverlay: boolean = true;
 
     private modMappings: Map<string, string> = new Map();
@@ -412,6 +426,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private isPlayerLoading: boolean = false;
 
     private gameBaseAddress: number;
+
+    private isLeaderboardVisible: boolean = false;
 
     patterns: LazerPatternData = {
         scalingContainerTargetDrawSize: 0
@@ -932,6 +948,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const address = localValues[key];
 
             switch (key) {
+                case LazerSettings.ReleaseStream:
+                    config['client.branch'] = this.process.readInt(address);
+                    break;
+
                 case LazerSettings.ScoreDisplayMode:
                     this.scoringDisplayMode = this.process.readInt(address);
                     break;
@@ -944,8 +964,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     config.sortType = this.process.readInt(address);
                     break;
 
-                case LazerSettings.HUDVisibilityMode:
-                    this.HUDVisibilityMode = this.process.readInt(address);
+                case LazerSettings.SongSelectGroupMode:
+                    config.groupType = this.process.readInt(address);
+                    break;
+
+                case LazerSettings.GameplayLeaderboard:
+                    this.isLeaderboardVisible =
+                        this.process.readByte(address) === 1;
                     break;
 
                 case LazerSettings.ReplaySettingsOverlay:
@@ -972,7 +997,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     break;
 
                 case LazerSettings.VolumeInactive:
-                    config['audio.volume.musicInactive'] = fixDecimals(
+                    config['audio.volume.masterInactive'] = fixDecimals(
                         this.process.readDouble(address) * 100
                     );
                     break;
@@ -996,6 +1021,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
                 case LazerSettings.ShowStoryboard:
                     config['background.storyboard'] =
+                        this.process.readByte(address) === 1;
+                    config['background.video'] =
                         this.process.readByte(address) === 1;
                     break;
 
@@ -1039,6 +1066,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const address = frameworkValues[key];
 
             switch (key) {
+                case FrameworkSetting.WindowMode:
+                    config['resolution.fullscreen'] =
+                        this.process.readInt(address) === 2;
+                    break;
+
                 case FrameworkSetting.WindowedSize:
                     config['resolution.width'] = this.process.readInt(
                         address + 0x4
@@ -1778,7 +1810,27 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     audioVelocityBase(): IAudioVelocityBase {
-        return [];
+        const osuLogo = this.process.readIntPtr(
+            this.gameBase() + this.offsets['osu.Game.OsuGame'].osuLogo
+        );
+
+        const visualizer = this.process.readIntPtr(
+            osuLogo + this.offsets['osu.Game.Screens.Menu.OsuLogo'].visualizer
+        );
+
+        const frequencyAmplitudes = this.process.readIntPtr(
+            visualizer +
+                this.offsets['osu.Game.Screens.Menu.LogoVisualisation']
+                    .frequencyAmplitudes
+        );
+
+        const result: number[] = [];
+        for (let i = 0; i < 40; i++) {
+            result.push(
+                this.process.readFloat(frequencyAmplitudes + 0x10 + 0x4 * i)
+            );
+        }
+        return result;
     }
 
     readUser(user: number) {
@@ -3006,11 +3058,40 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         this.isPlayerLoading = isPlayerLoader;
 
+        if (isPlaying) {
+            const hudOverlay = this.process.readIntPtr(
+                this.player() +
+                    this.offsets['osu.Game.Screens.Play.Player'][
+                        '<HUDOverlay>k__BackingField'
+                    ]
+            );
+
+            const showHudBindable = this.process.readIntPtr(
+                hudOverlay +
+                    this.offsets['osu.Game.Screens.Play.HUDOverlay'][
+                        '<ShowHud>k__BackingField'
+                    ]
+            );
+
+            this.showInterface =
+                this.process.readByte(showHudBindable + 0x40) === 1;
+        }
+
+        const chatOverlay = this.process.readIntPtr(
+            this.gameBase() + this.offsets['osu.Game.OsuGame'].chatOverlay
+        );
+
+        const stateBindable = this.process.readIntPtr(
+            chatOverlay + this.offsets['osu.Game.Overlays.ChatOverlay'].State
+        );
+
+        const chatStatus = this.process.readInt(stateBindable + 0x40);
+
         return {
             isWatchingReplay: watchingReplay,
             isReplayUiHidden: !this.ReplaySettingsOverlay,
-            showInterface: this.HUDVisibilityMode > 0,
-            chatStatus: 0,
+            showInterface: this.showInterface,
+            chatStatus,
             isMultiSpectating,
             status,
             gameTime: 0,
@@ -3261,7 +3342,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         //     scores.push(this.readLeaderboardScore(items[i], i));
         // }
 
-        return [true, personalScore, []];
+        return [this.isLeaderboardVisible, personalScore, []];
     }
 
     readSpectatingData(): ILazerSpectator {
@@ -3593,7 +3674,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                                         ]['<UseRelativeMode>k__BackingField']
                                 ) + 0x40
                             ) === 1;
-                        values['mouse.highPrecision'] = userRelativeMode;
+                        values['mouse.rawInput'] = userRelativeMode;
                     }
                 }
 
