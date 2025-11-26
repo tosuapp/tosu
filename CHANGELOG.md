@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.15.2](https://github.com/tosuapp/tosu/compare/v4.15.1...v4.15.2) (2025-11-26)
+
+
+### Features
+
+* Implement the rest of lazer's settings (except for keybinds) ([5f8949e](https://github.com/tosuapp/tosu/commit/5f8949eb77feecbda5efb38cb058ccec37186e6e))
+* New fields `Focused`, `Paused` and `Failed` ([05161c1](https://github.com/tosuapp/tosu/commit/05161c1b5958841dfd85aa3a8647a78412dde844))
+
+
+### Bug Fixes
+
+* Fix loading state between play and song select + add spectating and watching replay state ([e43fcd6](https://github.com/tosuapp/tosu/commit/e43fcd6eb2f4c40bd89c337b6c6e0298a789232b))
+* Result screen date ([c49671a](https://github.com/tosuapp/tosu/commit/c49671a5cf291ddf09b48f75579ed97f64db8a2b))
+
 ### [4.15.1](https://github.com/tosuapp/tosu/compare/v4.15.0...v4.15.1) (2025-11-02)
 
 
