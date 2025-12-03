@@ -45,6 +45,14 @@ export function directoryWalker({
     const isHTML = filePath.endsWith('.html');
 
     if (isDirectory) {
+        if (!baseUrl.endsWith('/')) {
+            res.writeHead(301, {
+                Location: baseUrl + '/'
+            });
+            res.end();
+            return;
+        }
+
         return readDirectory(filePath, baseUrl, (html: Error | string) => {
             if (html instanceof Error) {
                 res.writeHead(404, { 'Content-Type': 'text/html' });
