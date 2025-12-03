@@ -37,7 +37,7 @@ export function beatmapFileShortcut(
         fileMimetype = menu.backgroundFileMimetype;
     } else if (beatmapFileType === 'file') {
         fileName = menu.filename;
-        fileMimetype = 'text/plain';
+        fileMimetype = 'text/plain; charset=utf-8';
     } else {
         return sendJson(res, {
             error: 'Unknown file type'
