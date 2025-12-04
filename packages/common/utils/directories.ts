@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { homedir } from 'os';
 import path from 'path';
 
 import { config } from './config';
@@ -64,8 +65,7 @@ export function getStaticPath() {
 export function getCachePath() {
     if (process.platform === 'linux') {
         const xdgCacheHome =
-            process.env.XDG_CACHE_HOME ||
-            path.join(process.env.HOME || getProgramPath(), '.cache');
+            process.env.XDG_CACHE_HOME || path.join(homedir(), '.cache');
         const cachePath = path.join(xdgCacheHome, 'tosu');
         ensureDirectoryExists(cachePath);
         return cachePath;
@@ -96,7 +96,7 @@ export function getDataPath() {
     if (process.platform === 'linux') {
         const xdgDataHome =
             process.env.XDG_DATA_HOME ||
-            path.join(process.env.HOME || getProgramPath(), '.local', 'share');
+            path.join(homedir(), '.local', 'share');
         const dataPath = path.join(xdgDataHome, 'tosu');
         ensureDirectoryExists(dataPath);
         return dataPath;
@@ -108,8 +108,7 @@ export function getDataPath() {
 export function getConfigPath() {
     if (process.platform === 'linux') {
         const xdgConfigHome =
-            process.env.XDG_CONFIG_HOME ||
-            path.join(process.env.HOME || getProgramPath(), '.config');
+            process.env.XDG_CONFIG_HOME || path.join(homedir(), '.config');
         const configPath = path.join(xdgConfigHome, 'tosu');
         ensureDirectoryExists(configPath);
         return configPath;
