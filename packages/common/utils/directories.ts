@@ -3,6 +3,12 @@ import path from 'path';
 
 import { config } from './config';
 
+export function ensureDirectoryExists(dir: string) {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+}
+
 export function recursiveFilesSearch({
     _ignoreFileName,
     dir,
@@ -43,20 +49,29 @@ export function recursiveFilesSearch({
 
 export function getStaticPath() {
     let staticPath =
-        config.staticFolderPath || path.join(getProgramPath(), 'static');
+        config.staticFolderPath || path.join(getDataPath(), 'static');
 
     // replace ./static with normal path to the static with program path
     if (
         staticPath.toLowerCase() === './static' ||
         staticPath.toLowerCase() === '.\\static'
     )
-        staticPath = path.join(getProgramPath(), 'static');
-
+        staticPath = path.join(getDataPath(), 'static');
+    ensureDirectoryExists(staticPath);
     return path.resolve(staticPath);
 }
 
 export function getCachePath() {
-    return path.join(getProgramPath(), '.cache');
+    if (process.platform === 'linux') {
+        const xdgCacheHome =
+            process.env.XDG_CACHE_HOME ||
+            path.join(process.env.HOME || getProgramPath(), '.cache');
+        const cachePath = path.join(xdgCacheHome, 'tosu');
+        ensureDirectoryExists(cachePath);
+        return cachePath;
+    } else {
+        return path.join(getProgramPath(), '.cache');
+    }
 }
 
 export function getProgramPath() {
@@ -67,13 +82,38 @@ export function getProgramPath() {
 export function getSettingsPath(folderName: string) {
     if (!folderName) return '';
 
-    const settingsFolderPath = path.join(getProgramPath(), 'settings');
-    if (!fs.existsSync(settingsFolderPath))
-        fs.mkdirSync(settingsFolderPath, { recursive: true });
+    const settingsFolderPath = path.join(getConfigPath(), 'settings');
+    ensureDirectoryExists(settingsFolderPath);
 
     const folderPath = path.join(
         settingsFolderPath,
         `${folderName}.values.json`
     );
     return folderPath;
+}
+
+export function getDataPath() {
+    if (process.platform === 'linux') {
+        const xdgDataHome =
+            process.env.XDG_DATA_HOME ||
+            path.join(process.env.HOME || getProgramPath(), '.local', 'share');
+        const dataPath = path.join(xdgDataHome, 'tosu');
+        ensureDirectoryExists(dataPath);
+        return dataPath;
+    } else {
+        return getProgramPath();
+    }
+}
+
+export function getConfigPath() {
+    if (process.platform === 'linux') {
+        const xdgConfigHome =
+            process.env.XDG_CONFIG_HOME ||
+            path.join(process.env.HOME || getProgramPath(), '.config');
+        const configPath = path.join(xdgConfigHome, 'tosu');
+        ensureDirectoryExists(configPath);
+        return configPath;
+    } else {
+        return getProgramPath();
+    }
 }

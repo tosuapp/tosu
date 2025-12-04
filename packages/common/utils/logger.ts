@@ -1,11 +1,10 @@
-import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 
 import { ClientType } from '../enums/tosu';
 import { config } from './config';
 import { context } from './context';
-import { getProgramPath } from './directories';
+import { ensureDirectoryExists, getDataPath } from './directories';
 
 const colors = {
     info: '\x1b[1m\x1b[40m\x1b[42m',
@@ -74,9 +73,8 @@ export const wLogger = {
 
 function writeLog(type: string, ...args: any[]) {
     if (context.logFilePath === '') {
-        const logsPath = path.join(getProgramPath(), 'logs');
-        if (!fs.existsSync(logsPath))
-            fs.mkdirSync(logsPath, { recursive: true });
+        const logsPath = path.join(getDataPath(), 'logs');
+        ensureDirectoryExists(logsPath);
 
         context.logFilePath = path.join(logsPath, `${Date.now()}.txt`);
     }
