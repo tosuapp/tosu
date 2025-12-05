@@ -12,7 +12,7 @@ import {
     ConfigSchema,
     GlobalConfig
 } from './config.types';
-import { getProgramPath } from './directories';
+import { getConfigPath } from './directories';
 import { wLogger } from './logger';
 import { isRealNumber } from './manipulation';
 
@@ -118,8 +118,8 @@ export const config: GlobalConfig = new Proxy(
     }
 );
 
-const oldConfigPath = path.join(getProgramPath(), 'tsosu.env');
-const configPath = path.join(getProgramPath(), 'tosu.env');
+const oldConfigPath = path.join(getConfigPath(), 'tsosu.env');
+const configPath = path.join(getConfigPath(), 'tosu.env');
 
 export class ConfigManager {
     private static initialized: boolean = false;
