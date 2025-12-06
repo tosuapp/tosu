@@ -387,14 +387,14 @@ export interface Combo2 {
 
 export interface TosuPreciseAnswer {
     currentTime: number;
-    keys: KeyOverlay;
+    keys: KeyOverlay | KeyOverlayButton[];
     hitErrors: number[];
     tourney: PreciseTourney[];
 }
 
 export interface PreciseTourney {
     ipcId: number;
-    keys: KeyOverlay;
+    keys: KeyOverlay | KeyOverlayButton[];
     hitErrors: number[];
 }
 
@@ -406,6 +406,7 @@ interface KeyOverlay {
 }
 
 interface KeyOverlayButton {
+    name?: string;
     isPressed: boolean;
     count: number;
 }
