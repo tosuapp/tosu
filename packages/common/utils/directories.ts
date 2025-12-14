@@ -69,9 +69,8 @@ export function getCachePath() {
         const cachePath = path.join(xdgCacheHome, 'tosu');
         ensureDirectoryExists(cachePath);
         return cachePath;
-    } else {
-        return path.join(getProgramPath(), '.cache');
     }
+    return path.join(getProgramPath(), '.cache');
 }
 
 export function getProgramPath() {
@@ -100,9 +99,8 @@ export function getDataPath() {
         const dataPath = path.join(xdgDataHome, 'tosu');
         ensureDirectoryExists(dataPath);
         return dataPath;
-    } else {
-        return getProgramPath();
     }
+    return getProgramPath();
 }
 
 export function getConfigPath() {
@@ -112,7 +110,6 @@ export function getConfigPath() {
         const configPath = path.join(xdgConfigHome, 'tosu');
         ensureDirectoryExists(configPath);
         return configPath;
-    } else {
-        return getProgramPath();
     }
+    return getProgramPath();
 }
