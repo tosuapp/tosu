@@ -61,7 +61,7 @@ export default function buildBaseApi(server: Server) {
                 req.headers.host
                     ? `http://${req.headers.host}/`
                     : req.headers.referer ||
-                      `http://${req.socket.remoteAddress}/`
+                          `http://${req.socket.remoteAddress}/`
             );
 
             const parseReferer = new URL(
@@ -499,7 +499,7 @@ export default function buildBaseApi(server: Server) {
                     req.headers.host
                         ? `http://${req.headers.host}/`
                         : req.headers.referer ||
-                          `http://${req.socket.remoteAddress}/`
+                              `http://${req.socket.remoteAddress}/`
                 );
 
                 return buildLocalCounters(res, parseAddress.hostname);
@@ -515,7 +515,7 @@ export default function buildBaseApi(server: Server) {
                     req.headers.host
                         ? `http://${req.headers.host}/`
                         : req.headers.referer ||
-                          `http://${req.socket.remoteAddress}/`
+                              `http://${req.socket.remoteAddress}/`
                 );
                 return buildExternalCounters(res, parseAddress.hostname);
             }
