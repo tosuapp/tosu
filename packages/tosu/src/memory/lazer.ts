@@ -2245,7 +2245,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return undefined;
     }
 
-    private hitEvents(): number[] {
+    private hitEvents(last: number): number[] {
         const player = this.player();
         const scoreProcessor = this.process.readIntPtr(
             player +
@@ -2261,7 +2261,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const hitEvents = this.readListItems(hitEventsList, true, 0x40);
 
         const result: number[] = [];
-        for (let i = 0; i < hitEvents.length; i++) {
+        for (let i = last; i < hitEvents.length; i++) {
             const hitEvent = this.readHitEvent(hitEvents[i]);
             if (hitEvent === undefined) {
                 continue;
@@ -2273,12 +2273,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return result;
     }
 
-    hitErrors(): IHitErrors {
+    hitErrors(last: number): IHitErrors {
         if (this.isPlayerLoading) {
             return [];
         }
 
-        return this.hitEvents();
+        return this.hitEvents(last);
     }
 
     private readMod(acronym: ModsAcronyms, modObject: number): Mod {

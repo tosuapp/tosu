@@ -50,7 +50,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract resultScreen(): IResultScreen;
     abstract gameplay(): IGameplay;
     abstract keyOverlay(mode: number): IKeyOverlay;
-    abstract hitErrors(): IHitErrors;
+    abstract hitErrors(last: number): IHitErrors;
     abstract global(): IGlobal;
     abstract globalPrecise(): IGlobalPrecise;
     abstract menu(previousChecksum: string): IMenu;

@@ -57,13 +57,16 @@ export class Gameplay extends AbstractState {
     retries: number;
     playerName: string;
     mods: CalculateMods = Object.assign({}, defaultCalculatedMods);
-    hitErrors: number[];
+    hitErrors: number[] = [];
     mode: number;
     maxCombo: number;
     score: number;
 
     statistics: Statistics;
     maximumStatistics: Statistics;
+
+    unstableRate: number;
+    totalHitErrors: number = 0;
 
     hitMissPrev: number;
     hitUR: number;
@@ -73,7 +76,6 @@ export class Gameplay extends AbstractState {
     playerHPSmooth: number;
     playerHP: number;
     accuracy: number;
-    unstableRate: number;
     gradeCurrent: string;
     gradeExpected: string;
     keyOverlay: KeyOverlayButton[];
@@ -104,6 +106,7 @@ export class Gameplay extends AbstractState {
         this.failed = false;
 
         this.hitErrors = [];
+        this.totalHitErrors = 0;
         this.maxCombo = 0;
         this.score = 0;
         this.statistics = Object.assign({}, defaultStatistics);
@@ -157,6 +160,8 @@ export class Gameplay extends AbstractState {
             `gameplay resetQuick`
         );
 
+        this.hitErrors = [];
+        this.totalHitErrors = 0;
         this.previousPassedObjects = 0;
         this.gradualPerformance = undefined;
         this.performanceAttributes = undefined;
@@ -333,7 +338,7 @@ export class Gameplay extends AbstractState {
 
     updateHitErrors() {
         try {
-            const result = this.game.memory.hitErrors();
+            const result = this.game.memory.hitErrors(this.hitErrors.length);
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 if (result === '') return;
@@ -348,7 +353,10 @@ export class Gameplay extends AbstractState {
                 return 'not-ready';
             }
 
-            this.hitErrors = result;
+            for (const hit of result) {
+                this.hitErrors.push(hit);
+                this.totalHitErrors += hit;
+            }
 
             this.game.resetReportCount('gameplay updateHitErrors');
         } catch (exc) {
@@ -369,18 +377,12 @@ export class Gameplay extends AbstractState {
         }
     }
 
-    // IMPROVE, WE DONT NEED TO SUM EVERY HITERROR EACH TIME (for future)
     private calculateUR(): number {
         if (this.hitErrors.length < 1) {
             return 0;
         }
 
-        let totalAll = 0.0;
-        for (const hit of this.hitErrors) {
-            totalAll += hit;
-        }
-
-        const average = totalAll / this.hitErrors.length;
+        const average = this.totalHitErrors / this.hitErrors.length;
         let variance = 0;
         for (const hit of this.hitErrors) {
             variance += Math.pow(hit - average, 2);
