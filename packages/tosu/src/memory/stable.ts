@@ -702,7 +702,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    hitErrors(): IHitErrors {
+    hitErrors(last: number): IHitErrors {
         try {
             const rulesetsAddr = this.getPattern('rulesetsAddr');
 
@@ -724,7 +724,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const size = this.process.readInt(base + 0xc);
 
             const errors: Array<number> = [];
-            for (let i = 0; i < size; i++) {
+            for (let i = last; i < size; i++) {
                 const current = items + leaderStart + 0x4 * i;
                 const error = this.process.readInt(current);
 
