@@ -181,19 +181,18 @@ interface GameplayHits {
     hitErrorArray: number[];
 }
 
-interface TourneyHits
-    extends Pick<
-        GameplayHits,
-        | '300'
-        | 'geki'
-        | '100'
-        | 'katu'
-        | '50'
-        | '0'
-        | 'sliderBreaks'
-        | 'unstableRate'
-        | 'hitErrorArray'
-    > {}
+interface TourneyHits extends Pick<
+    GameplayHits,
+    | '300'
+    | 'geki'
+    | '100'
+    | 'katu'
+    | '50'
+    | '0'
+    | 'sliderBreaks'
+    | 'unstableRate'
+    | 'hitErrorArray'
+> {}
 
 export interface GameplayValues {
     gameMode: number;
