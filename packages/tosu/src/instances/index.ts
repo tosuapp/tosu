@@ -241,16 +241,16 @@ export abstract class AbstractInstance {
         return buildResult(instanceManager);
     }
 
-    getStateV2(instanceManager: InstanceManager) {
-        return buildResultV2(instanceManager);
+    getStateV2(instanceManager: InstanceManager, apiVersion: number) {
+        return buildResultV2(instanceManager, apiVersion);
     }
 
     getStateSC(instanceManager: InstanceManager) {
         return buildResultSC(instanceManager);
     }
 
-    getPreciseData(instanceManager: InstanceManager) {
-        return buildResultV2Precise(instanceManager);
+    getPreciseData(instanceManager: InstanceManager, apiVersion: number) {
+        return buildResultV2Precise(instanceManager, apiVersion);
     }
 
     /**
