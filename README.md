@@ -210,5 +210,5 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 ## 📝 License
 
-Copyright © 2023-2025 [Mikhail Babynichev](https://github.com/KotRikD).<br />
+Copyright © 2023-2026 [Mikhail Babynichev](https://github.com/KotRikD).<br />
 This project is [LGPL-3.0](https://github.com/tosuapp/tosu/blob/master/LICENSE) licensed.
