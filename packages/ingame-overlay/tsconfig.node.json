@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.common.json",
+  "compilerOptions": {
+    "lib": [
+      "ES2023",
+    ],
+    "types": [
+      "./types/files.d.ts",
+      "electron-vite/node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@assets/*": [
+        "./assets/*"
+      ]
+    }
+  },
+  "include": [
+    "./src"
+  ]
+}

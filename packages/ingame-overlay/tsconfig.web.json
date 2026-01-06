@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.common.json",
+  "compilerOptions": {
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "./renderer",
+    "./preload"
+  ]
+}

@@ -8,9 +8,9 @@ import { ElectronOverlayInput } from '@asdf-overlay/electron/input';
 import { ElectronOverlaySurface } from '@asdf-overlay/electron/surface';
 import { BrowserWindow } from 'electron';
 import EventEmitter from 'node:events';
-import path from 'node:path';
 
 import { Keybind } from './keybind';
+import { preloadPath } from './page';
 
 export type OverlayEventEmitter = EventEmitter<{
     destroyed: [];
@@ -132,7 +132,7 @@ export class OverlayProcess {
                     useSharedTexture: true
                 },
                 transparent: true,
-                preload: path.join(__dirname, '../preload/preload.js')
+                preload: preloadPath
             },
             show: false
         });

@@ -1,6 +1,7 @@
 import { on } from 'node:events';
 
 import { Keybind } from './keybind';
+import { loadMainPage } from './page';
 import { OverlayProcess } from './process';
 
 export class OverlayManager {
@@ -40,10 +41,7 @@ export class OverlayManager {
             overlay.keybind = new Keybind(this.keybindKeys);
             this.map.set(pid, overlay);
             try {
-                await overlay.window.loadURL(
-                    'http://localhost:24050/api/ingame'
-                );
-
+                await loadMainPage(overlay.window.webContents);
                 console.log(`warn: Initialized successfully`);
             } catch (exc) {
                 console.error('Unnable connect to ingame overlay:', exc);
