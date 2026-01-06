@@ -22,7 +22,7 @@ export default [
             '**/static/**/*',
             'packages/server/assets/homepage.js',
             'packages/server/assets/vue.js',
-            'packages/ingame-overlay/renderer/ingame.js',
+            'packages/ingame-overlay/renderer/ingame.js'
         ]
     },
 
