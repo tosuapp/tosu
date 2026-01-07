@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>tosu ingame</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="/assets/ingame.css" />
+    <link rel="stylesheet" href="/assets/homepage.min.css" />
+    <link rel="stylesheet" href="/assets/icons/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/style.css" />
+
+    <link rel="preload" as="image" href="/assets/images/39979.png" />
+  </head>
+
+  <body class="ingame">
+    <main class="main">
+      <div
+        v-if="context_empty._"
+        class="context-menu ao"
+        :class="{
+          '-visible': context_empty._ == true,
+          '-showed': context_empty.showed == true
+        }"
+        :style="{
+          top: `${context_empty.y}px`,
+          left: `${context_empty.x}px`,
+        }"
+        ref="empty_ctx"
+      >
+      <div class="scroll">
+        <div v-if="available_overlays.length == 0" class="no-available">
+          <span>You have 0 overlays</span><br />
+          <a href="http://127.0.0.1:24050/available?ingame=true" target="_blank">
+            Download more
+            <i class="icon-link"></i>
+          </a>
+        </div>
+        <div
+          v-for="a in available_overlays"
+          class="available-overlay"
+          @click="add_overlay(a)"
+        >
+          <span v-text="`${a.name} by ${a.author}`"></span>
+        </div>
+      </div>
+      </div>
+      <div
+        v-if="context_overlay._"
+        class="context-menu os"
+        :class="{
+          '-visible': context_overlay._ == true,
+          '-showed': context_overlay.showed == true
+        }"
+        :style="{
+          top: `${context_overlay.y}px`,
+          left: `${context_overlay.x}px`,
+        }"
+        ref="overlay_ctx"
+      >
+        <div class="cm-buttons">
+          <a
+            v-if="overlays[context_overlay.index]._settings == true"
+            class="ctx-button btn-settings"
+            :href="`http://127.0.0.1:24050/settings?overlay=${overlays[context_overlay.index].folderName}&ingame=true`"
+            target="_blank"
+            @click.left="notification({
+                text: `Settings opened in separate window`,
+                classes: ['green'],
+                delay: 3000,
+            })"
+          >
+            settings
+            <i class="icon-link"></i>
+          </a>
+          <div
+            class="ctx-button"
+            @click.left="reset_overlay(context_overlay.index)"
+          >
+            reset
+          </div>
+          <div
+            class="ctx-button btn-delete"
+            @click.left="remove_overlay(context_overlay.index)"
+          >
+            delete
+          </div>
+        </div>
+        <div class="cm-label">
+          <span>width</span>
+          <input
+            type="number"
+            class="input2"
+            @input="overlays[context_overlay.index].width = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].width"
+          />
+          <input
+            type="range"
+            class="input2"
+            :min="10"
+            :max="max_width - overlays[context_overlay.index].left"
+            @input="overlays[context_overlay.index].width = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].width"
+          />
+        </div>
+        <div class="cm-label">
+          <span>height</span>
+          <input
+            type="number"
+            class="input2"
+            @input="overlays[context_overlay.index].height = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].height"
+          />
+          <input
+            type="range"
+            class="input2"
+            :min="10"
+            :max="max_height - overlays[context_overlay.index].top"
+            @input="overlays[context_overlay.index].height = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].height"
+          />
+        </div>
+        <div class="cm-label">
+          <span>top</span>
+          <input
+            type="number"
+            class="input2"
+            @input="overlays[context_overlay.index].top = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].top"
+          />
+          <input
+            type="range"
+            class="input2"
+            :min="0"
+            :max="max_height - overlays[context_overlay.index].height"
+            @input="overlays[context_overlay.index].top = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].top"
+          />
+        </div>
+        <div class="cm-label">
+          <span>left</span>
+          <input
+            type="number"
+            class="input2"
+            @input="overlays[context_overlay.index].left = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].left"
+          />
+          <input
+            type="range"
+            class="input2"
+            :min="0"
+            :max="max_width - overlays[context_overlay.index].width"
+            @input="overlays[context_overlay.index].left = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].left"
+          />
+        </div>
+        <div class="cm-label">
+          <span>scale</span>
+          <input
+            type="number"
+            class="input2"
+            @input="overlays[context_overlay.index].scale = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].scale"
+          />
+          <input
+            type="range"
+            class="input2"
+            :min="0.1"
+            :max="Math.ceil((max_width / overlays[context_overlay.index].width * 100)) / 100"
+            step="0.1"
+            @input="overlays[context_overlay.index].scale = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].scale"
+          />
+        </div>
+        <div class="cm-label">
+          <span>z-index</span>
+          <input
+            type="number"
+            class="input2"
+            @input="overlays[context_overlay.index].z_index = Math.max(0, round_up($event.target.value))"
+            :value="overlays[context_overlay.index].z_index"
+          />
+          <input
+            type="range"
+            class="input2"
+            :min="0"
+            :max="999"
+            step="1"
+            @input="overlays[context_overlay.index].z_index = Math.max(0, round_up($event.target.value))"
+            :value="overlays[context_overlay.index].z_index"
+          />
+        </div>
+      </div>
+      <transition-group name="scale-up" mode="out-in">
+        <div
+          v-for="(o, ind) in overlays.filter(r=> r._enabled == true)"
+          class="overlay"
+          :style="{
+            top: `${o.top}px`,
+            left: `${o.left}px`,
+            width: `${o.width}px`,
+            height: `${o.height}px`,
+            scale: o.scale,
+            zIndex: Math.max(0, o.z_index)
+          }"
+          :data-ind="ind"
+          :data-url="o.url"
+          @mousemove="side_decide"
+          @mousedown="enable_drag"
+          @mouseout="reset_hover"
+          @mouseleave="reset_hover"
+          :key="`${o.url}-${o.id}`"
+        >
+          <iframe :src="o.url"></iframe>
+        </div>
+      </transition-group>
+
+      <a href="http://127.0.0.1:24050/available?ingame=true" target="_blank" class="ctx-button download-more">
+        <i class="icon-link"></i>
+        Download more overlays
+      </a>
+    </main>
+    <div class="background-notice">
+      <div>
+        <b>right</b> click - on empty space to add new overlay
+      </div>
+      <div>
+        use mouse <b>wheel</b> - to increse or descrese overlay index
+      </div>
+      <br />
+      <div>
+        Hold <B>SHIFT</b> - to force moving overlay over resizing it
+      </div>
+      <div>
+        Hold <B>CTRL</b> - to scale down overlay, instead of resize
+      </div>
+      <div>
+        right <B>click</b> - on overlay to manually specify postion and scale
+      </div>
+      <div>
+        press <B>DELETE</b> - to remove hovered overlay
+      </div>
+    </div>
+
+    <div class="copyright">Tosu.app</div>
+
+    <script src="/assets/vue.js"></script>
+    <script type="module" src="/assets/ingame.js"></script>
+    <script type="module" src="/assets/homepage.js"></script>
+  </body>
+</html>

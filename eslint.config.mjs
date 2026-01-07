@@ -20,6 +20,7 @@ export default [
             '**/dist/**',
             '**/build/**',
             '**/static/**/*',
+            'packages/server/assets/ingame.js',
             'packages/server/assets/homepage.js',
             'packages/server/assets/vue.js',
             'packages/ingame-overlay/renderer/ingame.js'
