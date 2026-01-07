@@ -1,4 +1,4 @@
-import { net, protocol, session } from 'electron';
+import { protocol, session } from 'electron';
 
 // Declare internal protocol for requesting to tosu endpoint
 protocol.registerSchemesAsPrivileged([
@@ -15,10 +15,10 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 export function registerTosuProtocol() {
-    // Fix ws tosu referer filtering
+    // Fix tosu referer filtering
     session.defaultSession.webRequest.onBeforeSendHeaders(
         {
-            urls: ['ws://localhost:24050/*']
+            urls: ['ws://localhost:24050/*', 'http://localhost:24050/*']
         },
         (details, callback) => {
             details.requestHeaders.Referer = 'http://localhost:24050';
@@ -28,19 +28,11 @@ export function registerTosuProtocol() {
 
     // Register tosu protocol handler
     protocol.handle('tosu', (req) => {
-        return net.fetch(
-            req.url.replace('tosu://', 'http://localhost:24050/'),
-            {
-                method: req.method,
-                headers: {
-                    ...req.headers,
-                    // Fix tosu referer filtering
-                    Referer: 'http://localhost:24050'
-                },
-                body: req.body,
-                duplex: 'half',
-                bypassCustomProtocolHandlers: true
+        return new Response('', {
+            status: 308,
+            headers: {
+                Location: req.url.replace('tosu://', 'http://localhost:24050/')
             }
-        );
+        });
     });
 }
