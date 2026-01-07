@@ -132,9 +132,9 @@ export class OverlayProcess {
                     useSharedTexture: true
                 },
                 transparent: true,
+                backgroundThrottling: false,
                 preload: preloadPath
-            },
-            show: false
+            }
         });
         window.setSize(width, height, false);
 
