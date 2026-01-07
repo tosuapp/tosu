@@ -134,7 +134,8 @@ export class OverlayProcess {
                 transparent: true,
                 backgroundThrottling: false,
                 preload: preloadPath
-            }
+            },
+            show: false
         });
         window.setSize(width, height, false);
 
