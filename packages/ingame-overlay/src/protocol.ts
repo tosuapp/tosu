@@ -28,10 +28,19 @@ export function registerTosuProtocol() {
 
     // Register tosu protocol handler
     protocol.handle('tosu', (req) => {
+        if (!req.url.startsWith('tosu://server')) {
+            return new Response('Bad request', {
+                status: 400
+            });
+        }
+
         return new Response('', {
             status: 308,
             headers: {
-                Location: req.url.replace('tosu://', 'http://localhost:24050/')
+                Location: req.url.replace(
+                    'tosu://server',
+                    'http://localhost:24050'
+                )
             }
         });
     });
