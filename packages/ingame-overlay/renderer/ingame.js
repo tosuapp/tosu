@@ -659,7 +659,7 @@ const app = createApp({
                 id: _id,
                 folderName: overlay.folderName,
 
-                url: `tosu://${overlay.folderName}`,
+                url: `tosu://server/${overlay.folderName}`,
                 width: Math.min(
                     max_width.value - context_empty.value.x1,
                     overlay.resolution[0]
@@ -713,7 +713,7 @@ const app = createApp({
 
         async function save_settings() {
             try {
-                await fetch('tosu://api/counters/settings/__ingame__', {
+                await fetch('tosu://server/api/counters/settings/__ingame__', {
                     method: 'POST',
                     body: JSON.stringify({ overlays: overlays.value })
                 });

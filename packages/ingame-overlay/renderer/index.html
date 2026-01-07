@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="stylesheet" href="./ingame.css" />
-    <link rel="stylesheet" href="tosu://assets/homepage.min.css" />
-    <link rel="stylesheet" href="tosu://assets/icons/style.css" />
-    <link rel="stylesheet" href="tosu://assets/fonts/style.css" />
+    <link rel="stylesheet" href="tosu://server/assets/homepage.min.css" />
+    <link rel="stylesheet" href="tosu://server/assets/icons/style.css" />
+    <link rel="stylesheet" href="tosu://server/assets/fonts/style.css" />
 
-    <link rel="preload" as="image" href="tosu://assets/images/39979.png" />
+    <link rel="preload" as="image" href="tosu://server/assets/images/39979.png" />
   </head>
 
   <body class="ingame">
@@ -32,7 +32,7 @@
       <div class="scroll">
         <div v-if="available_overlays.length == 0" class="no-available">
           <span>You have 0 overlays</span><br />
-          <a href="tosu://available?ingame=true" target="_blank">
+          <a href="tosu://server/available?ingame=true" target="_blank">
             Download more
             <i class="icon-link"></i>
           </a>
@@ -63,7 +63,7 @@
           <a
             v-if="overlays[context_overlay.index]._settings == true"
             class="ctx-button btn-settings"
-            :href="`tosu://settings?overlay=${overlays[context_overlay.index].folderName}&ingame=true`"
+            :href="`tosu://server/settings?overlay=${overlays[context_overlay.index].folderName}&ingame=true`"
             target="_blank"
             @click.left="notification({
                 text: `Settings opened in separate window`,
@@ -216,7 +216,7 @@
         </div>
       </transition-group>
 
-      <a href="tosu://available?ingame=true" target="_blank" class="ctx-button download-more">
+      <a href="tosu://server/available?ingame=true" target="_blank" class="ctx-button download-more">
         <i class="icon-link"></i>
         Download more overlays
       </a>
@@ -245,8 +245,8 @@
 
     <div class="copyright">Tosu.app</div>
 
-    <script src="tosu://assets/vue.js"></script>
+    <script src="tosu://server/assets/vue.js"></script>
     <script type="module" src="./ingame.js"></script>
-    <script type="module" src="tosu://assets/homepage.js"></script>
+    <script type="module" src="tosu://server/assets/homepage.js"></script>
   </body>
 </html>
