@@ -2,6 +2,7 @@ import { ConfigKey, config, sleep, wLogger } from '@tosu/common';
 import WebSocket from 'ws';
 
 import { getUniqueID } from './hashing';
+import { parseQueryInt } from './query';
 
 type Filter = string | { field: string; keys: Filter[] };
 
@@ -31,6 +32,8 @@ export class Websocket {
 
     socket: WebSocket.Server;
     clients = new Map<string, ModifiedWebsocket>();
+
+    private v2APIVersion: number;
 
     constructor({
         instanceManager,
@@ -75,13 +78,21 @@ export class Websocket {
             ws.pathname = request.url as any;
 
             ws.query = (request as any).query;
+            this.v2APIVersion = parseQueryInt((request as any).query.v, 1, 1);
 
             ws.hostAddress = request.headers.host || '';
             ws.localAddress = `${request.socket.localAddress}:${request.socket.localPort}`;
             ws.originAddress = request.headers.origin || '';
             ws.remoteAddress = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
 
-            wLogger.debug('[ws]', 'connected', ws.id);
+            wLogger.debug(
+                '[ws]',
+                'connected',
+                ws.id,
+                this.v2APIVersion > 1
+                    ? `using version ${this.v2APIVersion} of the v2 API`
+                    : ''
+            );
 
             ws.on('close', (reason, description) => {
                 this.clients.delete(ws.id);
@@ -137,9 +148,21 @@ export class Websocket {
                     continue; // Exit the loop if conditions are not met
                 }
 
-                const buildedData = osuInstance[this.stateFunctionName](
-                    this.instanceManager
-                );
+                let buildedData: any;
+                if (
+                    this.stateFunctionName === 'getStateV2' ||
+                    this.stateFunctionName === 'getPreciseData'
+                ) {
+                    buildedData = osuInstance[this.stateFunctionName](
+                        this.instanceManager,
+                        this.v2APIVersion
+                    );
+                } else {
+                    buildedData = osuInstance[this.stateFunctionName](
+                        this.instanceManager
+                    );
+                }
+
                 let message = '';
 
                 this.clients.forEach((client) => {

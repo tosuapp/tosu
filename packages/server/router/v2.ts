@@ -4,6 +4,7 @@ import path from 'path';
 import { HttpServer, sendJson } from '../index';
 import { beatmapFileShortcut } from '../scripts/beatmapFile';
 import { directoryWalker } from '../utils/directories';
+import { parseQueryInt } from '../utils/query';
 
 export default function buildV2Api(app: HttpServer) {
     app.route('/json/v2', 'GET', (req, res) => {
@@ -14,7 +15,10 @@ export default function buildV2Api(app: HttpServer) {
             throw new Error('osu is not ready/running');
         }
 
-        const json = osuInstance.getStateV2(req.instanceManager);
+        const json = osuInstance.getStateV2(
+            req.instanceManager,
+            parseQueryInt(req.query.v, 1, Number.MAX_SAFE_INTEGER)
+        );
         return sendJson(res, json);
     });
 
@@ -26,7 +30,10 @@ export default function buildV2Api(app: HttpServer) {
             throw new Error('osu is not ready/running');
         }
 
-        const json = osuInstance.getPreciseData(req.instanceManager);
+        const json = osuInstance.getPreciseData(
+            req.instanceManager,
+            parseQueryInt(req.query.v, 1, Number.MAX_SAFE_INTEGER)
+        );
         return sendJson(res, json);
     });
 

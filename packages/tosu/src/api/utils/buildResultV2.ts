@@ -84,7 +84,11 @@ const convertMemoryPlayerToResult = (
     })
 });
 
-export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
+export const buildResult = (
+    instanceManager: InstanceManager,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    apiVersion: number
+): ApiAnswer => {
     const osuInstance = instanceManager.getInstance(
         instanceManager.focusedClient
     );
