@@ -1807,7 +1807,6 @@ function showDonateModal() {
     <div class="m-scroll donate-container">
         <div class="flexer donate-buttons">
             <a class="button boosty-button" href="https://boosty.to/kotrik/donate" target="_blank">Boosty</a>
-            <a class="button gumroad-button" href="https://kotrik0.gumroad.com/l/tosuapp" target="_blank">Gumroad</a>
         </div>
 
         <div class="flexer donate-qr">

@@ -20,7 +20,6 @@
   --button-add-option: #9cd573;
   --button-update-settings: #73a6d5;
   --button-boosty: #f15f2c;
-  --button-gumroad: black;
 
   --submit-delete: #56c763;
 
@@ -588,11 +587,6 @@ a {
 .boosty-button {
   color: white;
   background: var(--button-boosty);
-}
-
-.gumroad-button {
-  color: white;
-  background: var(--button-gumroad);
 }
 
 .search-bar {
