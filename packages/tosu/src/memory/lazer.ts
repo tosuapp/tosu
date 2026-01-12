@@ -1,4 +1,5 @@
 import {
+    CalculateMods,
     ClientType,
     CountryCodes,
     FrameworkSetting,
@@ -6,9 +7,14 @@ import {
     LazerHitResults,
     LazerManiaSetting,
     LazerSettings,
+    Mod,
+    ModsAcronyms,
+    ModsCategories,
     Rulesets,
     ScoringMode,
+    calculateMods,
     config,
+    defaultCalculatedMods,
     isRealNumber,
     measureTime,
     platformResolver,
@@ -56,13 +62,6 @@ import {
     MultiplayerTeamType,
     MultiplayerUserState
 } from '@/utils/multiplayer.types';
-import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
-import {
-    CalculateMods,
-    Mod,
-    ModsAcronyms,
-    ModsCategories
-} from '@/utils/osuMods.types';
 
 type LazerPatternData = {
     scalingContainerTargetDrawSize: number;
