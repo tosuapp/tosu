@@ -1,6 +1,7 @@
 import type rosu from '@kotrikd/rosu-pp';
+import fsp from 'fs/promises';
 
-import { ModsLazer } from '../utils/osuMods.types';
+import { ModsLazer, wLogger } from '../index';
 
 export {
     HitResultPriority,
@@ -38,14 +39,36 @@ export abstract class ICalculator {
     abstract calculator: any;
 
     constructor(path: string) {
-        this.isLocal = path === 'local';
         this.path = path;
+        this.load();
     }
 
     /**
      * Async load pp calculator module
      */
-    abstract load(): Promise<void>;
+    async load(): Promise<void> {
+        this.isLocal = this.path === 'local';
+        if (this.isLocal) return;
+
+        try {
+            const stats = await fsp.stat(this.path);
+            if (stats.isDirectory()) {
+                this.isLocal = false;
+
+                wLogger.info('[calculator]', 'Successfully loaded external');
+                return;
+            }
+
+            this.isLocal = true;
+        } catch (error) {
+            wLogger.error(
+                '[calculator] Unable to find external one, make sure you specified path to a folder'
+            );
+            wLogger.debug('[calculator] Unable to find external one:', error);
+
+            this.isLocal = true;
+        }
+    }
 
     /**
      * Returns parsed and converted beatmap object
