@@ -1,4 +1,11 @@
-import { ClientType, config, isAllowedValue, wLogger } from '@tosu/common';
+import {
+    ClientType,
+    calculateMods,
+    config,
+    defaultCalculatedMods,
+    isAllowedValue,
+    wLogger
+} from '@tosu/common';
 import { getContentType } from '@tosu/server';
 
 import { AbstractMemory } from '@/memory';
@@ -29,7 +36,6 @@ import { LeaderboardPlayer } from '@/states/types';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import { calculateAccuracy } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
-import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type {
     BindingsList,
     ConfigList,

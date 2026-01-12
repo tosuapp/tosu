@@ -68,6 +68,9 @@ importers:
 
   packages/common:
     dependencies:
+      '@kotrikd/rosu-pp':
+        specifier: 3.1.0
+        version: 3.1.0
       adm-zip:
         specifier: ^0.5.16
         version: 0.5.16
@@ -118,9 +121,6 @@ importers:
 
   packages/server:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: 3.1.0
-        version: 3.1.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -155,9 +155,6 @@ importers:
 
   packages/tosu:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: 3.1.0
-        version: 3.1.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -240,6 +237,7 @@ packages:
 
   '@asdf-overlay/core@1.0.3':
     resolution: {integrity: sha512-u+QZyfyEl+Iel8qjgco0pM6WBJnenZDPC9LcaemL9IUE0V+2oenGuVo00AlOiQal+muYL6MeycHa88xe+BKI3Q==}
+    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.0.3':

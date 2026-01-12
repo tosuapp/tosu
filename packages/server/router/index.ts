@@ -1,8 +1,9 @@
-import rosu from '@kotrikd/rosu-pp';
 import {
+    Beatmap,
     ConfigBinding,
     ConfigManager,
     JsonSafeParse,
+    PerformanceArgs,
     downloadFile,
     getCachePath,
     getProgramPath,
@@ -371,7 +372,7 @@ export default function buildBaseApi(server: Server) {
             'beatmapPP'
         ]);
 
-        let beatmap: rosu.Beatmap;
+        let beatmap: Beatmap;
         const exists = fs.existsSync(query.path);
         if (exists) {
             const beatmapFilePath = path.join(
@@ -381,14 +382,15 @@ export default function buildBaseApi(server: Server) {
             );
 
             const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
-            beatmap = new rosu.Beatmap(beatmapContent);
+            beatmap = osuInstance.calculator.beatmap(
+                beatmapContent,
+                query.mode
+            );
         } else {
             beatmap = beatmapPP.getCurrentBeatmap();
         }
 
-        if (query.mode !== undefined) beatmap.convert(query.mode);
-
-        const params: rosu.PerformanceArgs = {};
+        const params: PerformanceArgs = {};
 
         if (query.ar !== undefined) params.ar = +query.ar;
         if (query.cs !== undefined) params.cs = +query.cs;
@@ -417,7 +419,7 @@ export default function buildBaseApi(server: Server) {
         if (query.hitresultPriority !== undefined)
             params.hitresultPriority = +query.hitresultPriority;
 
-        const calculate = new rosu.Performance(params).calculate(beatmap);
+        const calculate = osuInstance.calculator.performance(params, beatmap);
         sendJson(res, calculate);
 
         // free beatmap only when map path specified
