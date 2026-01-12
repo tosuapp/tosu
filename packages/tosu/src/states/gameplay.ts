@@ -1,5 +1,17 @@
-import rosu, { HitResultPriority, PerformanceArgs } from '@kotrikd/rosu-pp';
-import { ClientType, config, measureTime, wLogger } from '@tosu/common';
+import {
+    CalculateMods,
+    ClientType,
+    GradualPerformance,
+    HitResultPriority,
+    OsuMods,
+    PerformanceArgs,
+    PerformanceAttributes,
+    config,
+    defaultCalculatedMods,
+    measureTime,
+    sanitizeMods,
+    wLogger
+} from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -9,8 +21,6 @@ import {
     Statistics
 } from '@/states/types';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
-import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
-import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
 export const defaultStatistics = {
     miss: 0,
@@ -49,8 +59,8 @@ export class Gameplay extends AbstractState {
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
 
-    performanceAttributes: rosu.PerformanceAttributes | undefined;
-    gradualPerformance: rosu.GradualPerformance | undefined;
+    performanceAttributes: PerformanceAttributes | undefined;
+    gradualPerformance: GradualPerformance | undefined;
 
     failed: boolean;
 
@@ -502,13 +512,15 @@ export class Gameplay extends AbstractState {
                 this.gradualPerformance?.free();
                 this.performanceAttributes?.free();
 
-                const difficulty = new rosu.Difficulty(commonParams);
+                const difficulty =
+                    this.game.calculator.difficulty(commonParams);
 
                 this.gradualPerformance =
                     difficulty.gradualPerformance(currentBeatmap);
-                this.performanceAttributes = new rosu.Performance(
-                    commonParams
-                ).calculate(currentBeatmap);
+                this.performanceAttributes = this.game.calculator.performance(
+                    commonParams,
+                    currentBeatmap
+                );
 
                 this.previousState = currentState;
             }
@@ -594,9 +606,10 @@ export class Gameplay extends AbstractState {
                 delete calcOptions.combo;
             }
 
-            const maxAchievablePerformance = new rosu.Performance(
-                calcOptions
-            ).calculate(this.performanceAttributes);
+            const maxAchievablePerformance = this.game.calculator.performance(
+                calcOptions,
+                this.performanceAttributes
+            );
 
             if (maxAchievablePerformance) {
                 beatmapPP.currAttributes.maxAchievable =
@@ -627,7 +640,8 @@ export class Gameplay extends AbstractState {
                 calcOptions.misses = 0;
             }
 
-            const fcPerformance = new rosu.Performance(calcOptions).calculate(
+            const fcPerformance = this.game.calculator.performance(
+                calcOptions,
                 this.performanceAttributes
             );
 

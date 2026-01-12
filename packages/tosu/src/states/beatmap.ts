@@ -1,5 +1,15 @@
-import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
-import { ClientType, config, measureTime, wLogger } from '@tosu/common';
+import {
+    Beatmap,
+    CalculateMods,
+    ClientType,
+    HitResultPriority,
+    ModsLazer,
+    PerformanceAttributes,
+    config,
+    measureTime,
+    sanitizeMods,
+    wLogger
+} from '@tosu/common';
 import fs from 'fs';
 import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
@@ -8,8 +18,6 @@ import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals, safeJoin } from '@/utils/converters';
-import { sanitizeMods } from '@/utils/osuMods';
-import { CalculateMods, ModsLazer } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -89,9 +97,9 @@ export class BeatmapPP extends AbstractState {
     isKiai: boolean;
     isBreak: boolean;
 
-    beatmap?: rosu.Beatmap;
+    beatmap?: Beatmap;
     lazerBeatmap?: ParsedBeatmap;
-    performanceAttributes?: rosu.PerformanceAttributes;
+    performanceAttributes?: PerformanceAttributes;
 
     mode: number;
     clockRate: number = 1;
@@ -230,10 +238,7 @@ export class BeatmapPP extends AbstractState {
         this.kiais = [];
     }
 
-    updatePPAttributes(
-        type: 'curr' | 'fc',
-        attributes: rosu.PerformanceAttributes
-    ) {
+    updatePPAttributes(type: 'curr' | 'fc', attributes: PerformanceAttributes) {
         try {
             this[`${type}PPAttributes`] = {
                 ppAccuracy: attributes.ppAccuracy || 0.0,
@@ -386,9 +391,27 @@ export class BeatmapPP extends AbstractState {
                 return 'not-ready';
             }
 
-            this.beatmap = new rosu.Beatmap(this.beatmapContent);
-            if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode)
-                this.beatmap.convert(currentMode);
+            const beatmap = this.game.calculator.beatmap(
+                this.beatmapContent,
+                currentMode
+            );
+            if (beatmap instanceof Error) {
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmapPP updateMapMetadata`,
+                    `Can't process map`,
+                    {
+                        mapPath,
+                        currentMods: currentMods.array,
+                        currentMode
+                    },
+                    (beatmap as Error).stack
+                );
+                return 'not-ready';
+            }
+
+            this.beatmap = beatmap;
 
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
@@ -402,18 +425,17 @@ export class BeatmapPP extends AbstractState {
                 lazer: this.game.client === ClientType.lazer
             };
 
-            const attributes = new rosu.BeatmapAttributesBuilder({
-                isConvert:
-                    this.beatmap.mode === 0 &&
-                    this.beatmap.mode !== currentMode,
-                map: this.beatmap,
+            const attributes = this.game.calculator.attributes({
+                isConvert: beatmap.mode === 0 && beatmap.mode !== currentMode,
+                map: beatmap,
                 mods: sanitizeMods(currentMods.array),
                 mode: currentMode
-            }).build();
+            });
 
-            this.performanceAttributes = new rosu.Performance(
-                commonParams
-            ).calculate(this.beatmap);
+            const performanceAttributes = this.game.calculator.performance(
+                commonParams,
+                beatmap
+            );
             this.clockRate = currentMods.rate;
 
             if (config.calculatePP) {
@@ -423,12 +445,15 @@ export class BeatmapPP extends AbstractState {
                 for (const acc of [
                     100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
                 ]) {
-                    const calculate = new rosu.Performance({
-                        mods: sanitizeMods(currentMods.array),
-                        accuracy: acc,
-                        lazer: this.game.client === ClientType.lazer,
-                        hitresultPriority: HitResultPriority.Fastest
-                    }).calculate(this.performanceAttributes);
+                    const calculate = this.game.calculator.performance(
+                        {
+                            mods: sanitizeMods(currentMods.array),
+                            accuracy: acc,
+                            lazer: this.game.client === ClientType.lazer,
+                            hitresultPriority: HitResultPriority.Fastest
+                        },
+                        performanceAttributes
+                    );
                     ppAcc[acc] = fixDecimals(calculate.pp);
 
                     calculate.free();
@@ -542,31 +567,30 @@ export class BeatmapPP extends AbstractState {
             );
 
             this.calculatedMapAttributes = {
-                ar: this.beatmap.ar,
+                ar: beatmap.ar,
                 arConverted: attributes.ar,
-                cs: this.beatmap.cs,
+                cs: beatmap.cs,
                 csConverted: attributes.cs,
-                od: this.beatmap.od,
+                od: beatmap.od,
                 odConverted: attributes.od,
-                hp: this.beatmap.hp,
+                hp: beatmap.hp,
                 hpConverted: attributes.hp,
                 circles: this.lazerBeatmap.hittable,
                 sliders: this.lazerBeatmap.slidable,
                 spinners: this.lazerBeatmap.spinnable,
                 holds: this.lazerBeatmap.holdable,
-                maxCombo: this.performanceAttributes.difficulty.maxCombo,
-                fullStars: this.performanceAttributes.difficulty.stars,
-                stars: this.performanceAttributes.difficulty.stars,
-                aim: this.performanceAttributes.difficulty.aim,
-                speed: this.performanceAttributes.difficulty.speed,
-                flashlight: this.performanceAttributes.difficulty.flashlight,
-                sliderFactor:
-                    this.performanceAttributes.difficulty.sliderFactor,
-                stamina: this.performanceAttributes.difficulty.stamina,
-                rhythm: this.performanceAttributes.difficulty.rhythm,
-                color: this.performanceAttributes.difficulty.color,
-                reading: this.performanceAttributes.difficulty.reading,
-                hitWindow: this.performanceAttributes.difficulty.greatHitWindow
+                maxCombo: performanceAttributes.difficulty.maxCombo,
+                fullStars: performanceAttributes.difficulty.stars,
+                stars: performanceAttributes.difficulty.stars,
+                aim: performanceAttributes.difficulty.aim,
+                speed: performanceAttributes.difficulty.speed,
+                flashlight: performanceAttributes.difficulty.flashlight,
+                sliderFactor: performanceAttributes.difficulty.sliderFactor,
+                stamina: performanceAttributes.difficulty.stamina,
+                rhythm: performanceAttributes.difficulty.rhythm,
+                color: performanceAttributes.difficulty.color,
+                reading: performanceAttributes.difficulty.reading,
+                hitWindow: performanceAttributes.difficulty.greatHitWindow
             };
 
             attributes.free();
@@ -600,11 +624,13 @@ export class BeatmapPP extends AbstractState {
                 xaxis: []
             };
 
-            const difficulty = new rosu.Difficulty({
-                mods: sanitizeMods(currentMods),
-                lazer: this.game.client === ClientType.lazer
-            });
-            const strains = difficulty.strains(this.beatmap);
+            const strains = this.game.calculator.strains(
+                {
+                    mods: sanitizeMods(currentMods),
+                    lazer: this.game.client === ClientType.lazer
+                },
+                this.beatmap
+            );
 
             let oldStrains: number[] = [];
 
@@ -775,10 +801,13 @@ export class BeatmapPP extends AbstractState {
                 (r) => r.startTime <= global.playTime
             );
 
-            const curPerformance = new rosu.Performance({
-                passedObjects: passedObjects.length,
-                lazer: this.game.client === ClientType.lazer
-            }).calculate(this.performanceAttributes);
+            const curPerformance = this.game.calculator.performance(
+                {
+                    passedObjects: passedObjects.length,
+                    lazer: this.game.client === ClientType.lazer
+                },
+                this.performanceAttributes
+            );
 
             this.currAttributes.pp = curPerformance.pp;
             this.currAttributes.stars =

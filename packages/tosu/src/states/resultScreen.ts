@@ -1,11 +1,17 @@
-import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
-import { ClientType, measureTime, wLogger } from '@tosu/common';
+import {
+    CalculateMods,
+    ClientType,
+    HitResultPriority,
+    PerformanceArgs,
+    defaultCalculatedMods,
+    measureTime,
+    sanitizeMods,
+    wLogger
+} from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { calculateGrade } from '@/utils/calculators';
-import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
-import { CalculateMods } from '@/utils/osuMods.types';
 
 import { defaultStatistics } from './gameplay';
 import { Statistics } from './types';
@@ -139,7 +145,7 @@ export class ResultScreen extends AbstractState {
                 lazer: this.game.client === ClientType.lazer
             };
 
-            const calcOptions: rosu.PerformanceArgs = {
+            const calcOptions: PerformanceArgs = {
                 nGeki: this.statistics.perfect,
                 n300: this.statistics.great,
                 nKatu: this.statistics.good,
@@ -154,11 +160,12 @@ export class ResultScreen extends AbstractState {
             };
 
             const t1 = performance.now();
-            const curPerformance = new rosu.Performance(calcOptions).calculate(
+            const curPerformance = this.game.calculator.performance(
+                calcOptions,
                 currentBeatmap
             );
 
-            const fcCalcOptions: rosu.PerformanceArgs = {
+            const fcCalcOptions: PerformanceArgs = {
                 nGeki: this.statistics.perfect,
                 n300: this.statistics.great + this.statistics.miss,
                 nKatu: this.statistics.good,
@@ -194,7 +201,8 @@ export class ResultScreen extends AbstractState {
             }
 
             const t2 = performance.now();
-            const fcPerformance = new rosu.Performance(fcCalcOptions).calculate(
+            const fcPerformance = this.game.calculator.performance(
+                fcCalcOptions,
                 curPerformance
             );
 

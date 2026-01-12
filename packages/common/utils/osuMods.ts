@@ -1,12 +1,11 @@
-import { textMD5 } from '@tosu/common';
-
 import {
     CalculateMods,
     IMods,
     ModsLazer,
     ModsOrder,
-    bitValues
-} from '@/utils/osuMods.types';
+    bitValues,
+    textMD5
+} from '../index';
 
 export const defaultCalculatedMods = {
     checksum: '',
