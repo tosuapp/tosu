@@ -7,6 +7,7 @@
   "scripts": {},
   "dependencies": {
     "adm-zip": "^0.5.16",
+    "@kotrikd/rosu-pp": "3.1.0",
     "dotenv": "^16.6.1"
   },
   "devDependencies": {
