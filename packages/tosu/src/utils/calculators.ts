@@ -1,5 +1,6 @@
+import { ModsLazer } from '@tosu/common';
+
 import { Statistics } from '@/states/types';
-import { ModsLazer } from '@/utils/osuMods.types';
 
 /**
  * Used to calculate accuracy out of hits

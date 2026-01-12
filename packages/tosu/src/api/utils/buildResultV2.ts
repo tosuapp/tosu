@@ -1,5 +1,6 @@
 import {
     BanchoStatus,
+    CalculateMods,
     ChatStatus,
     ClientType,
     CountryCodes,
@@ -35,7 +36,6 @@ import { Gameplay } from '@/states/gameplay';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,

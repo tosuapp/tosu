@@ -1,5 +1,6 @@
 import {
     Bitness,
+    Calculator,
     ClientType,
     GameState,
     config,
@@ -15,8 +16,8 @@ import { safeJoin } from '@/utils/converters';
 export class OsuInstance extends AbstractInstance {
     memory: StableMemory;
 
-    constructor(pid: number) {
-        super(pid, Bitness.x86);
+    constructor(pid: number, calculator: Calculator) {
+        super(pid, Bitness.x86, calculator);
 
         this.memory = new StableMemory(this.process, this);
     }
