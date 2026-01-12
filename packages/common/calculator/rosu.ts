@@ -4,22 +4,37 @@ import type { GameMode } from '@kotrikd/rosu-pp';
 import {
     ICalculator,
     ICalculatorAttributesParams,
-    ICalculatorDifficultyParams
+    ICalculatorDifficultyParams,
+    wLogger
 } from '../index';
 
 export class RosuCalculator extends ICalculator {
-    calculator: any;
+    calculator: typeof rosu;
 
-    async load() {
+    override async load() {
+        super.load();
+
+        if (this.isLocal) {
+            this.calculator = await import('@kotrikd/rosu-pp');
+            return;
+        }
+
         // FIXME: didnt test it
-        this.calculator = this.isLocal
-            ? await import('@kotrikd/rosu-pp')
-            : await import(this.path);
+        try {
+            this.calculator = await import(this.path);
+        } catch (error) {
+            wLogger.error(
+                '[calculator] Failed to load external, fallbacking to internal'
+            );
+            wLogger.debug('[calculator] Failed to load external:', error);
+
+            this.calculator = await import('@kotrikd/rosu-pp');
+        }
     }
 
     beatmap(content: string, mode: GameMode): rosu.Beatmap | Error {
         try {
-            const beatmap = new rosu.Beatmap(content);
+            const beatmap = new this.calculator.Beatmap(content);
             if (beatmap.mode === 0 && beatmap.mode !== mode)
                 beatmap.convert(mode);
 
@@ -30,7 +45,7 @@ export class RosuCalculator extends ICalculator {
     }
 
     attributes(params: ICalculatorAttributesParams): rosu.BeatmapAttributes {
-        const attributes = new rosu.BeatmapAttributesBuilder({
+        const attributes = new this.calculator.BeatmapAttributesBuilder({
             isConvert: params.isConvert,
             map: params.map,
             mods: params.mods,
@@ -44,12 +59,14 @@ export class RosuCalculator extends ICalculator {
         params: rosu.PerformanceArgs,
         beatmap: rosu.MapOrAttributes
     ): rosu.PerformanceAttributes {
-        const calculate = new rosu.Performance(params).calculate(beatmap);
+        const calculate = new this.calculator.Performance(params).calculate(
+            beatmap
+        );
         return calculate;
     }
 
     difficulty(params: ICalculatorDifficultyParams): rosu.Difficulty {
-        const strains = new rosu.Difficulty(params);
+        const strains = new this.calculator.Difficulty(params);
         return strains;
     }
 
@@ -57,7 +74,7 @@ export class RosuCalculator extends ICalculator {
         params: ICalculatorDifficultyParams,
         beatmap: rosu.Beatmap
     ): rosu.Strains {
-        const strains = new rosu.Difficulty(params).strains(beatmap);
+        const strains = new this.calculator.Difficulty(params).strains(beatmap);
         return strains;
     }
 }
