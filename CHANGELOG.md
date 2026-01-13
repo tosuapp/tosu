@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.16.0](https://github.com/tosuapp/tosu/compare/v4.15.3...v4.16.0) (2026-01-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **linux:** The storage paths for data, cache, and configuration files on Linux have been updated to follow the XDG Base Directory Specification.
+
+- Data files are now stored in `$XDG_DATA_HOME/tosu` (default: `~/.local/share/tosu`).
+- Cache files are now stored in `$XDG_CACHE_HOME/tosu` (default: `~/.cache/tosu`).
+- Configuration files are now stored in `$XDG_CONFIG_HOME/tosu` (default: `~/.config/tosu`).
+
+This change improves compliance with Linux standards but may require users to migrate their existing files from the previous storage paths to the new XDG-compliant paths
+
+### Features
+
+* **linux:** use XDG data/cache/config paths ([c0a2818](https://github.com/tosuapp/tosu/commit/c0a281819293172077ac48594c8525e4e82029c2))
+
+
+### Bug Fixes
+
+* beatmap file charset ([c366df4](https://github.com/tosuapp/tosu/commit/c366df4d74580726815df23ca80458b5e3c39a9b))
+* **directories:** utilize os.homedir() to ensure home directory retrieval ([31505da](https://github.com/tosuapp/tosu/commit/31505da8d08dea8a82fcdf7f4f1ce283208af583))
+* ensure directory url end with trailing slash ([68a78c2](https://github.com/tosuapp/tosu/commit/68a78c277df94cea70442dea125cae2483e8cf4b))
+* Improve `HitErrors` performance & Improve `UR` calculation ([9b29f43](https://github.com/tosuapp/tosu/commit/9b29f43034f0e92100bf47b65d34ea6700846483))
+
 ### [4.15.3](https://github.com/tosuapp/tosu/compare/v4.15.2...v4.15.3) (2025-11-26)
 
 ### [4.15.2](https://github.com/tosuapp/tosu/compare/v4.15.1...v4.15.2) (2025-11-26)
