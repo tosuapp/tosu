@@ -1,23 +1,11 @@
 {
-  "compilerOptions": {
-    "lib": [
-      "ES2023",
-      "DOM"
-    ],
-    "target": "ESNext",
-    "module": "Preserve",
-    "allowSyntheticDefaultImports": true,
-    "outDir": "./dist",
-    "esModuleInterop": true,
-    "moduleResolution": "bundler",
-    "allowArbitraryExtensions": true,
-    "resolveJsonModule": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictFunctionTypes": true,
-    "baseUrl": ".",
-    "paths": {
-      "@assets/*": ["./assets/*"]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.web.json"
     }
-  }
+  ]
 }

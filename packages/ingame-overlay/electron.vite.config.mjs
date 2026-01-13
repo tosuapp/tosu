@@ -1,4 +1,4 @@
-import { bytecodePlugin, defineConfig } from 'electron-vite';
+import { defineConfig } from 'electron-vite';
 import path from 'node:path';
 
 export default defineConfig({
@@ -10,11 +10,11 @@ export default defineConfig({
             },
             outDir: 'dist/src',
             minify: true,
+            bytecode: true,
             rollupOptions: {
                 external: ['@asdf-overlay/core']
             }
         },
-        plugins: [bytecodePlugin()],
         resolve: {
             alias: {
                 '@assets': path.resolve('./assets')
@@ -25,11 +25,23 @@ export default defineConfig({
     preload: {
         build: {
             lib: {
-                entry: './src/preload.ts',
+                entry: './preload/index.ts',
                 formats: ['cjs']
             },
             outDir: 'dist/preload',
             minify: true
+        }
+    },
+    renderer: {
+        root: './renderer',
+        build: {
+            minify: true,
+            rollupOptions: {
+                input: {
+                    index: './renderer/index.html'
+                }
+            },
+            outDir: 'dist/renderer'
         }
     }
 });
