@@ -1,3 +1,4 @@
+import { wLogger } from '@tosu/common';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname as pathDirname, join as pathJoin } from 'path';
 
@@ -77,17 +78,20 @@ export class Process {
 
     get path(): string {
         if (process.platform === 'win32') {
+            wLogger.error(`process: using win32 path`);
             return pathDirname(ProcessUtils.getProcessPath(this.handle));
         }
 
         // If using wine (not symlinked into image)
         if (process.platform === 'linux') {
-            const overridenOsuPath = process.env.TOSU_OSU_PATH || '';
-            if (overridenOsuPath !== '') {
+            const overriddenOsuPath = process.env.TOSU_OSU_PATH || '';
+            if (overriddenOsuPath !== '') {
+                wLogger.error(`process: using TOSU_OSU_PATH path`);
+
                 // for other genius, who have their custom wine prefixes
                 // with symlinking or other breaking default cwd????
                 // tldr should be like: /home/kotrik/.local/share/osu-wine/osu!
-                return overridenOsuPath;
+                return overriddenOsuPath;
             }
 
             if (this.getProcessPath().match('wine-preloader')) {
@@ -106,9 +110,12 @@ export class Process {
                 );
 
                 if (existsSync(osuWinelloPath)) {
+                    wLogger.error(`process: using wine preloader path`);
                     // osu-sinello script installation found
                     return readFileSync(osuWinelloPath, 'utf-8').trim();
                 }
+
+                wLogger.error(`process: using getProcessCommandLine path`);
 
                 return this.getProcessCommandLine()
                     .slice(2)
@@ -116,6 +123,8 @@ export class Process {
                     .replace(/\/osu!.exe$/, ''); // Format windows dir to linux style.
             }
         }
+
+        wLogger.error(`process: using getProcessCwd path`);
 
         return this.getProcessCwd();
     }
