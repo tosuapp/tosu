@@ -78,7 +78,7 @@ export class Process {
 
     get path(): string {
         if (process.platform === 'win32') {
-            wLogger.error(`process: using win32 path`);
+            wLogger.info(`process: using win32 path`);
             return pathDirname(ProcessUtils.getProcessPath(this.handle));
         }
 
@@ -86,7 +86,7 @@ export class Process {
         if (process.platform === 'linux') {
             const overriddenOsuPath = process.env.TOSU_OSU_PATH || '';
             if (overriddenOsuPath !== '') {
-                wLogger.error(`process: using TOSU_OSU_PATH path`);
+                wLogger.info(`process: using TOSU_OSU_PATH path`);
 
                 // for other genius, who have their custom wine prefixes
                 // with symlinking or other breaking default cwd????
@@ -110,12 +110,12 @@ export class Process {
                 );
 
                 if (existsSync(osuWinelloPath)) {
-                    wLogger.error(`process: using wine preloader path`);
+                    wLogger.info(`process: using wine preloader path`);
                     // osu-sinello script installation found
                     return readFileSync(osuWinelloPath, 'utf-8').trim();
                 }
 
-                wLogger.error(`process: using getProcessCommandLine path`);
+                wLogger.info(`process: using getProcessCommandLine path`);
 
                 return this.getProcessCommandLine()
                     .slice(2)
@@ -125,7 +125,7 @@ export class Process {
             }
         }
 
-        wLogger.error(`process: using getProcessCwd path`);
+        wLogger.info(`process: using getProcessCwd path`);
 
         return this.getProcessCwd();
     }
