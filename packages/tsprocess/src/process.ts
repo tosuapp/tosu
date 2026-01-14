@@ -120,7 +120,8 @@ export class Process {
                 return this.getProcessCommandLine()
                     .slice(2)
                     .replace(/\\/g, '/')
-                    .replace(/\/osu!.exe$/, ''); // Format windows dir to linux style.
+                    .trim()
+                    .replace(/\/osu!\.exe$/, ''); // Format windows dir to linux style.
             }
         }
 
