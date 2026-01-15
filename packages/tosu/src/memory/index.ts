@@ -1,5 +1,4 @@
 import { ClientType, wLogger } from '@tosu/common';
-import { platform } from 'process';
 import { Process } from 'tsprocess';
 
 import type { AbstractInstance } from '@/instances';
@@ -32,7 +31,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
 
     game: AbstractInstance;
 
-    private leaderStart: number = platform !== 'win32' ? 0xc : 0x8;
+    private leaderStart: number = 0x8;
 
     constructor(process: Process, instance: AbstractInstance) {
         this.process = process;
