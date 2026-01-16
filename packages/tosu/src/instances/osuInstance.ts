@@ -49,6 +49,8 @@ export class OsuInstance extends AbstractInstance {
         while (!this.isDestroyed) {
             try {
                 global.updateState();
+                if (global.status === GameState.exit) break;
+
                 const menuUpdate = menu.updateState();
                 if (menuUpdate === 'not-ready') continue;
 
@@ -221,6 +223,7 @@ export class OsuInstance extends AbstractInstance {
         while (!this.isDestroyed) {
             try {
                 global.updatePreciseState();
+                if (global.status === GameState.exit) break;
 
                 switch (global.status) {
                     case GameState.play:
