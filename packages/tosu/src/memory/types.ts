@@ -101,7 +101,6 @@ export type IGlobal =
 
           showInterface: boolean;
           chatStatus: number;
-          status: number;
 
           gameTime: number;
           menuMods: CalculateMods;
@@ -112,7 +111,7 @@ export type IGlobal =
     | string
     | Error;
 
-export type IGlobalPrecise = { time: number } | Error;
+export type IGlobalPrecise = { status: number; time: number } | Error;
 
 export type IMenu =
     | {

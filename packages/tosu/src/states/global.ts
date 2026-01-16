@@ -62,7 +62,6 @@ export class Global extends AbstractState {
 
             this.showInterface = result.showInterface;
             this.chatStatus = result.chatStatus;
-            this.status = result.status;
 
             this.gameTime = result.gameTime;
             this.menuMods = result.menuMods;
@@ -98,6 +97,7 @@ export class Global extends AbstractState {
             if (result instanceof Error) throw result;
 
             this.playTime = result.time;
+            this.status = result.status;
 
             this.game.resetReportCount('global updatePreciseState');
         } catch (exc) {
