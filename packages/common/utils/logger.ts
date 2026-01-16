@@ -77,6 +77,7 @@ function writeLog(type: string, ...args: any[]) {
         ensureDirectoryExists(logsPath);
 
         context.logFilePath = path.join(logsPath, `${Date.now()}.txt`);
+        wLogger.debug(`logs path: ${logsPath}`);
     }
 
     fsp.appendFile(

@@ -740,7 +740,6 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
     global(): IGlobal {
         try {
             const {
-                statusPtr,
                 menuModsPtr,
                 chatCheckerPtr,
                 skinDataAddr,
@@ -759,7 +758,6 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 'gameTimePtr'
             ]);
 
-            const status = this.process.readPointer(statusPtr);
             const menuMods = this.process.readPointer(menuModsPtr);
             const chatStatus = this.process.readByte(
                 this.process.readInt(chatCheckerPtr)
@@ -826,7 +824,6 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
                 showInterface,
                 chatStatus,
-                status,
 
                 gameTime,
                 menuMods: mods,
@@ -841,12 +838,20 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
     globalPrecise(): IGlobalPrecise {
         try {
-            const playTimeAddr = this.getPattern('playTimeAddr');
+            const { statusPtr, playTimeAddr } = this.getPatterns([
+                'playTimeAddr',
+                'statusPtr'
+            ]);
+
+            const status = this.process.readPointer(statusPtr);
             const playTime = this.process.readInt(
                 this.process.readInt(playTimeAddr + 0x5)
             );
 
-            return { time: playTime };
+            return {
+                status,
+                time: playTime
+            };
         } catch (error) {
             return error as Error;
         }
