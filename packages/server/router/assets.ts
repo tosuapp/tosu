@@ -7,7 +7,7 @@ import { Server, getContentType } from '../index';
 const pkgAssetsPath =
     'pkg' in process
         ? path.join(__dirname, 'assets')
-        : path.join(__filename, '../../../assets');
+        : path.join(__dirname, '../assets');
 
 export default function buildAssetsApi(server: Server) {
     server.app.route(/^\/assets\/(?<filePath>.*)/, 'GET', (req, res) => {

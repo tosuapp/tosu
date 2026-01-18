@@ -44,7 +44,7 @@ import { parseCounterSettings } from './parseSettings';
 const pkgAssetsPath =
     'pkg' in process
         ? path.join(__dirname, 'assets')
-        : path.join(__filename, '../../../assets');
+        : path.join(__dirname, '../assets');
 
 function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);
