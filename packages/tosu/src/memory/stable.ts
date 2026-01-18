@@ -541,8 +541,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 );
             // [[Ruleset + 0x68] + 0x38] + 0x64
             const mode = this.process.readInt(scoreBase + 0x64);
-            // [[Ruleset + 0x68] + 0x38] + 0x78
-            const score = this.process.readInt(rulesetAddr + 0x100);
+            const score = this.process.readInt(rulesetAddr + 0xfc);
             // [[Ruleset + 0x68] + 0x40] + 0x14
             const playerHPSmooth =
                 this.process.readDouble(hpBarBase + 0x14) || 0;

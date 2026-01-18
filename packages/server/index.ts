@@ -113,6 +113,7 @@ export class Server {
                 'Access-Control-Allow-Methods',
                 'POST, GET, PUT, DELETE, OPTIONS'
             );
+            res.setHeader('Access-Control-Allow-Private-Network', 'true');
             next();
         });
 
