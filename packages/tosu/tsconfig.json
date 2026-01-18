@@ -4,8 +4,8 @@
     },
     "compilerOptions": {
       "lib": ["ES2023"],
-      "module": "nodenext",
-      "moduleResolution": "nodenext",
+      "module": "commonjs",
+      "moduleResolution": "node",
       "allowJs": true,
       "esModuleInterop": true,
       "outDir": "dist",
