@@ -1,4 +1,10 @@
-import { ClientType, config, isAllowedValue, wLogger } from '@tosu/common';
+import {
+    ClientType,
+    GameState,
+    config,
+    isAllowedValue,
+    wLogger
+} from '@tosu/common';
 import { getContentType } from '@tosu/server';
 
 import { AbstractMemory } from '@/memory';
@@ -843,6 +849,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             ]);
 
             const status = this.process.readPointer(statusPtr);
+            if (status === GameState.exit) return { status, time: 0 };
+
             const playTime = this.process.readInt(
                 this.process.readInt(playTimeAddr + 0x5)
             );
