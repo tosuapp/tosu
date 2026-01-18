@@ -34,7 +34,7 @@ import { generateReport, generateReportHTML } from '../utils/report';
 const pkgAssetsPath =
     'pkg' in process
         ? path.join(__dirname, 'assets')
-        : path.join(__filename, '../../../assets');
+        : path.join(__dirname, '../assets');
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {

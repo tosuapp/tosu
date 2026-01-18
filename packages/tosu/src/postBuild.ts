@@ -3,7 +3,7 @@ import path from 'path';
 import { load } from 'resedit/cjs';
 import semverParse from 'semver/functions/parse';
 
-async function windowsPostBuild(output) {
+async function windowsPostBuild(output: string) {
     const packageVersion = require(path.join(process.cwd(), '_version.js'));
 
     const ResEdit = await load();

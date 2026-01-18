@@ -198,6 +198,9 @@ importers:
         specifier: workspace:*
         version: link:../tsprocess
     devDependencies:
+      '@types/semver':
+        specifier: ^7.7.1
+        version: 7.7.1
       '@vercel/ncc':
         specifier: ^0.38.4
         version: 0.38.4

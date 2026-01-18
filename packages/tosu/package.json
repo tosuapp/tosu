@@ -29,6 +29,7 @@
         "tsprocess": "workspace:*"
     },
     "devDependencies": {
+        "@types/semver": "^7.7.1",
         "@vercel/ncc": "^0.38.4",
         "@yao-pkg/pkg": "^6.11.0",
         "cross-env": "^7.0.3",

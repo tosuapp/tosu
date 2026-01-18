@@ -5,11 +5,10 @@
     "compilerOptions": {
       "lib": ["ES2023"],
       "module": "commonjs",
-      "moduleResolution": "Node",
+      "moduleResolution": "node",
       "allowJs": true,
       "esModuleInterop": true,
       "outDir": "dist",
-      "rootDir": "src",
       "sourceMap": false,
       "declaration": false,
       "strict": true,
@@ -27,6 +26,6 @@
         "./src/@types"
       ]
     },
-    "exclude": ["node_modules", "src/postBuild.ts"],
+    "exclude": ["node_modules"],
     "include": ["src"]
   }
