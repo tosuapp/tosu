@@ -161,6 +161,7 @@ export class OsuInstance extends AbstractInstance {
                         // reset before first object
                         if (global.playTime < beatmapPP.timings.firstObj) {
                             gameplay.resetQuick();
+                            gameplay.resetHitErrors();
                         }
 
                         this.previousTime = global.playTime;
