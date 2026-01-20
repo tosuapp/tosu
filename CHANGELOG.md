@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.17.0](https://github.com/tosuapp/tosu/compare/v4.16.0...v4.17.0) (2026-01-20)
+
+
+### Features
+
+* add tld to tosu schema as domain is always have slash added. ([7dc4333](https://github.com/tosuapp/tosu/commit/7dc4333b1f777730dd136f7c787309e4df2cc44b))
+* change custom schema response for compat. ([44d7bcf](https://github.com/tosuapp/tosu/commit/44d7bcfd0e1db407f739e0aa534a20647f32a472))
+* leave old ingame.html for compat ([d8e2990](https://github.com/tosuapp/tosu/commit/d8e2990b8b8fa56539e242973130903eba9c9b16))
+* move ingame overlay configuration page to ingame-overlay ([592f6eb](https://github.com/tosuapp/tosu/commit/592f6eb8d4ef57c13bafe3ea8b2e9a1483008336))
+* remove build steps for internal packages ([58f5aaf](https://github.com/tosuapp/tosu/commit/58f5aaf99f97f121a90799941789e16ebcc9d122))
+
+
+### Bug Fixes
+
+* allow private network access for chrome more than 142 and fix score on gameplay ([e39352c](https://github.com/tosuapp/tosu/commit/e39352c94696fe471a0e9d5f770802d7d47ce6f5))
+* disable offscreen placeholder window ([b06fba1](https://github.com/tosuapp/tosu/commit/b06fba1e2d2442e876bdff6e93ed28cdf668a1a1))
+* resedit import ([744b100](https://github.com/tosuapp/tosu/commit/744b1009b7a7c1b5a0226c4c46545d5f9a2fa725))
+
 ## [4.16.0](https://github.com/tosuapp/tosu/compare/v4.15.3...v4.16.0) (2026-01-13)
 
 
