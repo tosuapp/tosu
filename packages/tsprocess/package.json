@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "node-addon-api": "^8.5.0",
+    "@tosu/common": "workspace:*",
     "node-gyp": "^11.5.0"
   },
   "files": [

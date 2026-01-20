@@ -219,6 +219,9 @@ importers:
 
   packages/tsprocess:
     dependencies:
+      '@tosu/common':
+        specifier: workspace:*
+        version: link:../common
       node-addon-api:
         specifier: ^8.5.0
         version: 8.5.0

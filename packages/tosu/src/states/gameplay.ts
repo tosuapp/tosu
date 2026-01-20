@@ -321,7 +321,7 @@ export class Gameplay extends AbstractState {
         } catch (exc) {
             this.game.reportError(
                 'gameplay updateKeyOverlay',
-                10,
+                20,
                 ClientType[this.game.client],
                 this.game.pid,
                 `gameplay updateKeyOverlay`,

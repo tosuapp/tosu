@@ -421,6 +421,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private showInterface: boolean = true;
     private ReplaySettingsOverlay: boolean = true;
 
+    private watchingReplay: boolean = false;
+    private status: number = 0;
+
     private modMappings: Map<string, string> = new Map();
 
     private isPlayerLoading: boolean = false;
@@ -3006,57 +3009,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const filesFolder = path.join(this.basePath(), 'files');
         const isPlaying = this.player() !== 0;
 
-        const isResultScreen = this.checkIfResultScreen(this.currentScreen);
-        const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
-        const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
-        const isEditor = this.checkIfEditor(this.currentScreen);
-        const isSpectator = this.checkIfSpectator(this.currentScreen);
-        const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
-        const isMulti = this.checkIfMulti();
-        const isReplay = isPlaying
-            ? this.checkIfWatchingReplay(this.currentScreen)
-            : false;
-
         let isMultiSpectating = false;
-        let watchingReplay = false;
-
-        let status = 0;
-
-        if (isReplay && (isPlaying || isPlayerLoader)) {
-            watchingReplay = true;
-            status = GameState.play;
-        } else if (isSpectator && (isPlaying || isPlayerLoader)) {
-            status = GameState.play;
-        } else if (isPlaying || isPlayerLoader) {
-            status = GameState.play;
-        } else if (isSongSelectV2) {
-            status = GameState.selectPlay;
-        } else if (isResultScreen) {
-            status = GameState.resultScreen;
-        } else if (isEditor) {
-            status = GameState.edit;
-        } else if (isMultiSelect) {
-            status = GameState.selectMulti;
-        } else if (isMulti) {
-            const multiplayerClient = this.multiplayerClient();
-
-            const currentRoom = this.process.readIntPtr(
-                multiplayerClient +
-                    this.offsets[
-                        'osu.Game.Online.Multiplayer.MultiplayerClient'
-                    ].room
-            );
-
-            if (currentRoom) {
-                status = GameState.lobby;
-
-                isMultiSpectating = this.checkIfMultiSpectator(
-                    this.currentScreen
-                );
-            }
+        if (this.status === GameState.lobby) {
+            isMultiSpectating = this.checkIfMultiSpectator(this.currentScreen);
         }
-
-        this.isPlayerLoading = isPlayerLoader;
 
         if (isPlaying) {
             const hudOverlay = this.process.readIntPtr(
@@ -3088,12 +3044,11 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const chatStatus = this.process.readInt(stateBindable + 0x40);
 
         return {
-            isWatchingReplay: watchingReplay,
+            isWatchingReplay: this.watchingReplay,
             isReplayUiHidden: !this.ReplaySettingsOverlay,
             showInterface: this.showInterface,
             chatStatus,
             isMultiSpectating,
-            status,
             gameTime: 0,
             menuMods: this.menuMods,
             skinFolder: '',
@@ -3102,7 +3057,56 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     globalPrecise(): IGlobalPrecise {
+        let status = 0;
+
+        const isPlaying = this.player() !== 0;
+
+        const isResultScreen = this.checkIfResultScreen(this.currentScreen);
+        const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
+        const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
+        const isEditor = this.checkIfEditor(this.currentScreen);
+        const isSpectator = this.checkIfSpectator(this.currentScreen);
+        const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
+        const isMulti = this.checkIfMulti();
+        const isReplay = isPlaying
+            ? this.checkIfWatchingReplay(this.currentScreen)
+            : false;
+
+        if (isReplay && (isPlaying || isPlayerLoader)) {
+            this.watchingReplay = true;
+            status = GameState.play;
+        } else if (isSpectator && (isPlaying || isPlayerLoader)) {
+            status = GameState.play;
+        } else if (isPlaying || isPlayerLoader) {
+            status = GameState.play;
+        } else if (isSongSelectV2) {
+            status = GameState.selectPlay;
+        } else if (isResultScreen) {
+            status = GameState.resultScreen;
+        } else if (isEditor) {
+            status = GameState.edit;
+        } else if (isMultiSelect) {
+            status = GameState.selectMulti;
+        } else if (isMulti) {
+            const multiplayerClient = this.multiplayerClient();
+
+            const currentRoom = this.process.readIntPtr(
+                multiplayerClient +
+                    this.offsets[
+                        'osu.Game.Online.Multiplayer.MultiplayerClient'
+                    ].room
+            );
+
+            if (currentRoom) {
+                status = GameState.lobby;
+            }
+        }
+
+        this.status = status;
+        this.isPlayerLoading = isPlayerLoader;
+
         return {
+            status,
             time: Math.round(this.currentTime())
         };
     }
