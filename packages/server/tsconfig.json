@@ -1,27 +1,3 @@
 {
-  "compilerOptions": {
-    "lib": [
-      "ES2023"
-    ],
-    "module": "commonjs",
-    "moduleResolution": "Node",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "outDir": "dist",
-    "rootDir": "./",
-    "sourceMap": false,
-    "declaration": false,
-    "strict": true,
-    "noImplicitAny": true,
-    "target": "ES2020",
-    "strictPropertyInitialization": false,
-    "baseUrl": ".",
-  },
-  "exclude": [
-    "node_modules",
-    "dist",
-  ],
-  "include": [
-    "**/*"
-  ],
+  "extends": "../tsconfig.tosu.json"
 }

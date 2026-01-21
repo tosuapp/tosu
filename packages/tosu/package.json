@@ -5,12 +5,12 @@
     "bin": "dist/index.js",
     "scripts": {
         "genver": "npx genversion _version.js",
-        "ts:run": "cross-env NODE_ENV=development ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
-        "ts:compile": "ncc build src/index.ts -o dist -m -d",
+        "ts:run": "cross-env NODE_ENV=development tsx",
+        "ts:compile": "vite build",
         "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
-        "compile:prepare-htmls": "cp -rf node_modules/@tosu/server/assets ./dist",
-        "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts",
-        "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
+        "compile:prepare-assets": "cp -rf node_modules/@kotrikd/rosu-pp/rosu_pp_js_bg.wasm ./dist && cp -rf node_modules/@tosu/server/assets ./dist",
+        "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-assets && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts",
+        "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-assets && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
         "@kotrikd/rosu-pp": "3.1.0",
@@ -34,6 +34,8 @@
         "@yao-pkg/pkg": "^6.11.0",
         "cross-env": "^7.0.3",
         "genversion": "^3.2.0",
-        "ts-node": "^10.9.2"
+        "tsx": "^4.21.0",
+        "vite": "^7.3.0",
+        "vite-tsconfig-paths": "^6.0.4"
     }
 }

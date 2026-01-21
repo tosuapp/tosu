@@ -4,6 +4,7 @@
   "description": "",
   "author": "cyperdark",
   "main": "index.ts",
+  "type": "module",
   "scripts": {
     "prepare": "sass --style compressed --no-source-map ./assets/homepage.scss ./assets/homepage.min.css && postcss ./assets/homepage.min.css -o ./assets/homepage.min.css --use autoprefixer --no-map"
   },

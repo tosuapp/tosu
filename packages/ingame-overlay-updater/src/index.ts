@@ -12,8 +12,7 @@ import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 
-// NOTE: _version.js packs with pkg support in tosu build
-const currentVersion = require(process.cwd() + '/_version.js');
+const currentVersion = import.meta.env.TOSU_VERSION;
 const platform = platformResolver(process.platform);
 
 export async function runOverlay(): Promise<ChildProcess | Error> {

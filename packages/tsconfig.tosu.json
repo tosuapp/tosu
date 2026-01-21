@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "lib": ["ES2023"],
+      "module": "preserve",
+      "moduleResolution": "bundler",
+      "noEmit": true,
+      "allowJs": true,
+      "esModuleInterop": true,
+      "strict": true,
+      "noImplicitAny": true,
+      "resolveJsonModule": true,
+      "target": "ES2020",
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "strictPropertyInitialization": false
+    }
+  }

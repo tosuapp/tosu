@@ -3,6 +3,7 @@
   "private": "true",
   "version": "0.0.1",
   "description": "",
+  "type": "module",
   "main": "index.ts",
   "scripts": {},
   "dependencies": {
@@ -10,6 +11,7 @@
     "dotenv": "^16.6.1"
   },
   "devDependencies": {
-    "@types/adm-zip": "^0.5.7"
+    "@types/adm-zip": "^0.5.7",
+    "vite": "^7.3.0"
   }
 }

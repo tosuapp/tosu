@@ -1,31 +1,12 @@
 {
-    "ts-node": {
-      "files": true
-    },
-    "compilerOptions": {
-      "lib": ["ES2023"],
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "allowJs": true,
-      "esModuleInterop": true,
-      "outDir": "dist",
-      "sourceMap": false,
-      "declaration": false,
-      "strict": true,
-      "noImplicitAny": true,
-      "resolveJsonModule": true,
-      "target": "ES2020",
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "strictPropertyInitialization": false,
-      "baseUrl": ".",
-      "paths": {
-        "@/*": ["src/*"]
-      },
-      "typeRoots": [
-        "./src/@types"
+  "extends": "../tsconfig.tosu.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
       ]
-    },
-    "exclude": ["node_modules"],
-    "include": ["src"]
-  }
+    }
+  },
+  "exclude": ["dist"]
+}

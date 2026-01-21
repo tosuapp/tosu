@@ -15,11 +15,8 @@ import { Process } from 'tsprocess';
 
 import { InstanceManager } from '@/instances/manager';
 
-// NOTE: _version.js packs with pkg support in tosu build
-const currentVersion = require(process.cwd() + '/_version.js');
-
 (async () => {
-    context.currentVersion = currentVersion;
+    context.currentVersion = import.meta.env.TOSU_VERSION;
     wLogger.info(`Starting tosu`);
 
     Process.disablePowerThrottling();
