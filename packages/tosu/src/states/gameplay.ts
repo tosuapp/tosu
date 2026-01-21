@@ -160,11 +160,14 @@ export class Gameplay extends AbstractState {
             `gameplay resetQuick`
         );
 
-        this.hitErrors = [];
-        this.totalHitErrors = 0;
         this.previousPassedObjects = 0;
         this.gradualPerformance = undefined;
         this.performanceAttributes = undefined;
+    }
+
+    resetHitErrors() {
+        this.hitErrors = [];
+        this.totalHitErrors = 0;
     }
 
     resetKeyOverlay() {
