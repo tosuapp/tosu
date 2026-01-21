@@ -1,9 +1,8 @@
-import { getStaticPath, wLogger } from '@tosu/common';
+import { getContentType, getStaticPath, wLogger } from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
 
-import { getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
 
 function isPathDirectory(path: string) {

@@ -2,10 +2,10 @@ import {
     ClientType,
     GameState,
     config,
+    getContentType,
     isAllowedValue,
     wLogger
 } from '@tosu/common';
-import { getContentType } from '@tosu/server';
 
 import { AbstractMemory } from '@/memory';
 import type {

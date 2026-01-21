@@ -1,8 +1,8 @@
-import { wLogger } from '@tosu/common';
+import { getContentType, wLogger } from '@tosu/common';
 import fs from 'fs';
 import path from 'path';
 
-import { Server, getContentType } from '../index';
+import { Server } from '../index';
 
 const pkgAssetsPath =
     'pkg' in process

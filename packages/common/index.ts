@@ -10,6 +10,7 @@ export * from './utils/json';
 export * from './utils/ingame';
 export * from './utils/manipulation';
 export * from './utils/context';
+export * from './utils/contentTypes';
 
 export * from './enums/osu';
 export * from './enums/tosu';

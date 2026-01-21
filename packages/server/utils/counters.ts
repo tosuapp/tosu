@@ -2,6 +2,7 @@ import {
     JsonSafeParse,
     config,
     context,
+    getContentType,
     getStaticPath,
     recursiveFilesSearch,
     wLogger
@@ -11,7 +12,6 @@ import http from 'http';
 import path from 'path';
 import semver from 'semver';
 
-import { getContentType } from '../utils';
 import { ICounter, bodyPayload } from './counters.types';
 import {
     authorHTML,

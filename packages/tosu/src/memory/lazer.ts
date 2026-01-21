@@ -9,11 +9,11 @@ import {
     Rulesets,
     ScoringMode,
     config,
+    getContentType,
     measureTime,
     platformResolver,
     wLogger
 } from '@tosu/common';
-import { getContentType } from '@tosu/server';
 import path from 'path';
 
 import localOffsets from '@/assets/offsets.json';
