@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <title>tosu ingame</title>
     <meta charset="UTF-8" />
@@ -15,203 +16,142 @@
   </head>
 
   <body class="ingame">
+    <div class="copyright">Tosu.app</div>
+
     <main class="main">
-      <div
-        v-if="context_empty._"
-        class="context-menu ao"
-        :class="{
-          '-visible': context_empty._ == true,
-          '-showed': context_empty.showed == true
-        }"
-        :style="{
-          top: `${context_empty.y}px`,
-          left: `${context_empty.x}px`,
-        }"
-        ref="empty_ctx"
-      >
-      <div class="scroll">
-        <div v-if="available_overlays.length == 0" class="no-available">
-          <span>You have 0 overlays</span><br />
-          <a href="tosu://server/available?ingame=true" target="_blank">
-            Download more
-            <i class="icon-link"></i>
-          </a>
+      <button class="button profile-selector" v-text="`${settings.profiles[settings.profile]?.name} profile`"
+        @click="editing_profiles = !editing_profiles"></button>
+      <div v-if="editing_profiles == true" class="context-menu profiles" ref="profiles_ctx">
+        <div v-if="settings.profiles.length == 0" class="no-available">
+          No profiles
         </div>
-        <div
-          v-for="a in available_overlays"
-          class="available-overlay"
-          @click="add_overlay(a)"
-        >
-          <span v-text="`${a.name} by ${a.author}`"></span>
+
+        <div v-if="settings.profiles.length > 0" class="scroll">
+          <div v-for="(value, index) in settings.profiles" class="flexer profile-item">
+            <button class="button flexer" :class="{'selected-button': settings.profile == index}"
+              @click="switch_profile(index)"> </button>
+            <input type="text" class="input" placeholder="profile name" v-model="value.name">
+            <span v-text="value.overlays.length"></span>
+            <button class="button remove-button flexer" @click="delete_profile(index)"><span>Delete</span></button>
+          </div>
+        </div>
+
+        <div class="flexer profile-item">
+          <input type="text" class="input" placeholder="profile name" v-model="new_profile">
+          <button class="button flexer" @click="add_profile"><span>Add</span></button>
         </div>
       </div>
+
+      <div v-if="context_empty._" class="context-menu ao" :class="{
+            '-visible': context_empty._ == true,
+            '-showed': context_empty.showed == true
+          }" :style="{
+            top: `${context_empty.y}px`,
+            left: `${context_empty.x}px`,
+          }" ref="empty_ctx">
+        <div class="scroll">
+          <div v-if="available_overlays.length == 0" class="no-available">
+            <span>You have 0 overlays</span><br />
+            <a href="tosu://server/available?ingame=true" target="_blank">
+              Download more
+              <i class="icon-link"></i>
+            </a>
+          </div>
+          <div v-for="a in available_overlays" class="available-overlay" @click="add_overlay(a)">
+            <span v-text="`${a.name} by ${a.author}`"></span>
+          </div>
+        </div>
       </div>
-      <div
-        v-if="context_overlay._"
-        class="context-menu os"
-        :class="{
-          '-visible': context_overlay._ == true,
-          '-showed': context_overlay.showed == true
-        }"
-        :style="{
-          top: `${context_overlay.y}px`,
-          left: `${context_overlay.x}px`,
-        }"
-        ref="overlay_ctx"
-      >
+      <div v-if="context_overlay._" class="context-menu os" :class="{
+            '-visible': context_overlay._ == true,
+            '-showed': context_overlay.showed == true
+          }" :style="{
+            top: `${context_overlay.y}px`,
+            left: `${context_overlay.x}px`,
+          }" ref="overlay_ctx">
         <div class="cm-buttons">
-          <a
-            v-if="overlays[context_overlay.index]._settings == true"
-            class="ctx-button btn-settings"
+          <a v-if="overlays[context_overlay.index]._settings == true" class="ctx-button btn-settings"
             :href="`tosu://server/settings?overlay=${overlays[context_overlay.index].folderName}&ingame=true`"
-            target="_blank"
-            @click.left="notification({
-                text: `Settings opened in separate window`,
-                classes: ['green'],
-                delay: 3000,
-            })"
-          >
+            target="_blank" @click.left="notification({
+                  text: `Settings opened in separate window`,
+                  classes: ['green'],
+                  delay: 3000,
+              })">
             settings
             <i class="icon-link"></i>
           </a>
-          <div
-            class="ctx-button"
-            @click.left="reset_overlay(context_overlay.index)"
-          >
+          <div class="ctx-button" @click.left="reset_overlay(context_overlay.index)">
             reset
           </div>
-          <div
-            class="ctx-button btn-delete"
-            @click.left="remove_overlay(context_overlay.index)"
-          >
+          <div class="ctx-button btn-delete" @click.left="remove_overlay(context_overlay.index)">
             delete
           </div>
         </div>
         <div class="cm-label">
           <span>width</span>
-          <input
-            type="number"
-            class="input2"
+          <input type="number" class="input2"
             @input="overlays[context_overlay.index].width = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].width"
-          />
-          <input
-            type="range"
-            class="input2"
-            :min="10"
-            :max="max_width - overlays[context_overlay.index].left"
+            :value="overlays[context_overlay.index].width" />
+          <input type="range" class="input2" :min="10" :max="max_width - overlays[context_overlay.index].left"
             @input="overlays[context_overlay.index].width = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].width"
-          />
+            :value="overlays[context_overlay.index].width" />
         </div>
         <div class="cm-label">
           <span>height</span>
-          <input
-            type="number"
-            class="input2"
+          <input type="number" class="input2"
             @input="overlays[context_overlay.index].height = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].height"
-          />
-          <input
-            type="range"
-            class="input2"
-            :min="10"
-            :max="max_height - overlays[context_overlay.index].top"
+            :value="overlays[context_overlay.index].height" />
+          <input type="range" class="input2" :min="10" :max="max_height - overlays[context_overlay.index].top"
             @input="overlays[context_overlay.index].height = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].height"
-          />
+            :value="overlays[context_overlay.index].height" />
         </div>
         <div class="cm-label">
           <span>top</span>
-          <input
-            type="number"
-            class="input2"
+          <input type="number" class="input2" @input="overlays[context_overlay.index].top = round_up($event.target.value)"
+            :value="overlays[context_overlay.index].top" />
+          <input type="range" class="input2" :min="0" :max="max_height - overlays[context_overlay.index].height"
             @input="overlays[context_overlay.index].top = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].top"
-          />
-          <input
-            type="range"
-            class="input2"
-            :min="0"
-            :max="max_height - overlays[context_overlay.index].height"
-            @input="overlays[context_overlay.index].top = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].top"
-          />
+            :value="overlays[context_overlay.index].top" />
         </div>
         <div class="cm-label">
           <span>left</span>
-          <input
-            type="number"
-            class="input2"
+          <input type="number" class="input2"
             @input="overlays[context_overlay.index].left = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].left"
-          />
-          <input
-            type="range"
-            class="input2"
-            :min="0"
-            :max="max_width - overlays[context_overlay.index].width"
+            :value="overlays[context_overlay.index].left" />
+          <input type="range" class="input2" :min="0" :max="max_width - overlays[context_overlay.index].width"
             @input="overlays[context_overlay.index].left = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].left"
-          />
+            :value="overlays[context_overlay.index].left" />
         </div>
         <div class="cm-label">
           <span>scale</span>
-          <input
-            type="number"
-            class="input2"
+          <input type="number" class="input2"
             @input="overlays[context_overlay.index].scale = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].scale"
-          />
-          <input
-            type="range"
-            class="input2"
-            :min="0.1"
-            :max="Math.ceil((max_width / overlays[context_overlay.index].width * 100)) / 100"
-            step="0.1"
+            :value="overlays[context_overlay.index].scale" />
+          <input type="range" class="input2" :min="0.1"
+            :max="Math.ceil((max_width / overlays[context_overlay.index].width * 100)) / 100" step="0.1"
             @input="overlays[context_overlay.index].scale = round_up($event.target.value)"
-            :value="overlays[context_overlay.index].scale"
-          />
+            :value="overlays[context_overlay.index].scale" />
         </div>
         <div class="cm-label">
           <span>z-index</span>
-          <input
-            type="number"
-            class="input2"
+          <input type="number" class="input2"
             @input="overlays[context_overlay.index].z_index = Math.max(0, round_up($event.target.value))"
-            :value="overlays[context_overlay.index].z_index"
-          />
-          <input
-            type="range"
-            class="input2"
-            :min="0"
-            :max="999"
-            step="1"
+            :value="overlays[context_overlay.index].z_index" />
+          <input type="range" class="input2" :min="0" :max="999" step="1"
             @input="overlays[context_overlay.index].z_index = Math.max(0, round_up($event.target.value))"
-            :value="overlays[context_overlay.index].z_index"
-          />
+            :value="overlays[context_overlay.index].z_index" />
         </div>
       </div>
       <transition-group name="scale-up" mode="out-in">
-        <div
-          v-for="(o, ind) in overlays.filter(r=> r._enabled == true)"
-          class="overlay"
-          :style="{
-            top: `${o.top}px`,
-            left: `${o.left}px`,
-            width: `${o.width}px`,
-            height: `${o.height}px`,
-            scale: o.scale,
-            zIndex: Math.max(0, o.z_index)
-          }"
-          :data-ind="ind"
-          :data-url="o.url"
-          @mousemove="side_decide"
-          @mousedown="enable_drag"
-          @mouseout="reset_hover"
-          @mouseleave="reset_hover"
-          :key="`${o.url}-${o.id}`"
-        >
+        <div v-for="(o, ind) in overlays.filter(r=> r._enabled == true)" class="overlay" :style="{
+              top: `${o.top}px`,
+              left: `${o.left}px`,
+              width: `${o.width}px`,
+              height: `${o.height}px`,
+              scale: o.scale,
+              zIndex: Math.max(0, o.z_index)
+            }" :data-ind="ind" :data-url="o.url" @mousemove="side_decide" @mousedown="enable_drag"
+          @mouseout="reset_hover" @mouseleave="reset_hover" :key="`${o.url}-${o.id}`">
           <iframe :src="o.url"></iframe>
         </div>
       </transition-group>
@@ -243,7 +183,6 @@
       </div>
     </div>
 
-    <div class="copyright">Tosu.app</div>
 
     <script src="tosu://server/assets/vue.js"></script>
     <script type="module" src="./ingame.js"></script>
