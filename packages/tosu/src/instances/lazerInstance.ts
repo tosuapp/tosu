@@ -380,6 +380,7 @@ export class LazerInstance extends AbstractInstance {
         while (!this.isDestroyed) {
             try {
                 global.updatePreciseState();
+                if (global.status === GameState.exit) break;
 
                 switch (global.status) {
                     case GameState.play:

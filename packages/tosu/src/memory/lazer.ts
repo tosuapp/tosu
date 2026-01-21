@@ -3105,6 +3105,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         this.status = status;
         this.isPlayerLoading = isPlayerLoader;
 
+        if (status === GameState.exit) return { status, time: 0 };
+
         return {
             status,
             time: Math.round(this.currentTime())
