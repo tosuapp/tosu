@@ -15,3 +15,4 @@ _version.js
 logs/
 settings/
 packages/server/assets/homepage.min.css
+.DS_Store

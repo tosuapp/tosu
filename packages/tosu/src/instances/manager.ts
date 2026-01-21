@@ -90,6 +90,12 @@ export class InstanceManager {
                 lazerOnLinux = true;
             }
 
+            if (osuProcesses.length === 0 && process.platform === 'darwin') {
+                osuProcesses = Process.findProcesses(['osu!']);
+
+                lazerOnLinux = true;
+            }
+
             for (const processId of osuProcesses || []) {
                 if (processId in this.osuInstances) {
                     // dont deploy not needed instances

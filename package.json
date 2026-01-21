@@ -8,6 +8,7 @@
     "start": "pnpm run -C packages/tosu run:dev",
     "build:win": "pnpm run -C packages/tosu compile:win",
     "build:linux": "pnpm run -C packages/tosu compile:linux",
+    "build:mac": "pnpm run -C packages/tosu compile:mac",
     "build:overlay": "pnpm run -C \"packages/ingame-overlay\" dist",
     "release": "standard-version",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,css}\"",

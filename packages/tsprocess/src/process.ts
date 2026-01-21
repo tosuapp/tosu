@@ -125,6 +125,31 @@ export class Process {
             }
         }
 
+        if (process.platform === 'darwin') {
+            const overriddenOsuPath = process.env.TOSU_OSU_PATH || '';
+            if (overriddenOsuPath !== '') {
+                wLogger.info(`process: using TOSU_OSU_PATH path`);
+
+                return overriddenOsuPath;
+            }
+
+            const processPath = this.getProcessPath();
+            if (processPath.match(/wine/i)) {
+                wLogger.info(`process: using getProcessCommandLine path`);
+
+                return this.getProcessCommandLine()
+                    .slice(2)
+                    .replace(/\\/g, '/')
+                    .trim()
+                    .replace(/\/osu!\.exe$/, '');
+            }
+
+            if (processPath !== '') {
+                wLogger.info(`process: using darwin process path`);
+                return pathDirname(processPath);
+            }
+        }
+
         wLogger.info(`process: using getProcessCwd path`);
 
         return this.getProcessCwd();
