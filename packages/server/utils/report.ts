@@ -97,11 +97,12 @@ export async function generateReport(instanceManager: any): Promise<Report> {
     };
 }
 
-const pkgAssetsPath = path.join(__dirname, 'assets');
+const pkgHtmlPath =
+    'pkg' in process ? __dirname : path.resolve(__dirname, '../../pages/dist');
 
 export async function generateReportHTML(report: Report): Promise<string> {
     const rawHtml = await readFile(
-        path.join(pkgAssetsPath, 'report.html'),
+        path.join(pkgHtmlPath, 'report.html'),
         'utf8'
     );
 

@@ -6,7 +6,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default {
     build: {
         outDir: 'dist',
-        assetsDir: '.',
+        assetsDir: 'assets',
         rollupOptions: {
             input: ['homepage.html', 'ingame.html', 'report.html']
         }
