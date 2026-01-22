@@ -35,16 +35,7 @@ import {
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
 
-/**
- * ТАК КАК БЛЯТЬ У НАС В ЖЫЭСЕ
- * НЕ ПРИДУМАЛИ НОРМАЛЬНО ПАКЕТИРОВАТЬ ГОВНО БЕЗ ВЕБПАКА
- * ИДЕМ И ПИЛИМ КОСТЫЛИ
- * kys js!
- */
-const pkgAssetsPath =
-    'pkg' in process
-        ? path.join(__dirname, 'assets')
-        : path.join(__dirname, '../assets');
+const pkgAssetsPath = path.join(__dirname, 'assets');
 
 function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);
