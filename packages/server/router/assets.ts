@@ -6,7 +6,7 @@ import { Server, getContentType } from '../index';
 
 const pkgAssetsPath =
     'pkg' in process
-        ? path.resolve(__dirname, 'assets')
+        ? path.resolve(__dirname, 'assets/assets')
         : path.resolve(__dirname, '../../pages/dist/assets');
 
 export default function buildAssetsApi(server: Server) {

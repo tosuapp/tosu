@@ -32,7 +32,9 @@ import { parseCounterSettings } from '../utils/parseSettings';
 import { generateReport, generateReportHTML } from '../utils/report';
 
 const pkgHtmlPath =
-    'pkg' in process ? __dirname : path.resolve(__dirname, '../../pages/dist');
+    'pkg' in process
+        ? path.resolve(__dirname, 'assets')
+        : path.resolve(__dirname, '../../pages/dist');
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {

@@ -42,7 +42,9 @@ import { parseCounterSettings } from './parseSettings';
  * kys js!
  */
 const pkgHtmlPath =
-    'pkg' in process ? __dirname : path.resolve(__dirname, '../../pages/dist');
+    'pkg' in process
+        ? path.resolve(__dirname, 'assets')
+        : path.resolve(__dirname, '../../pages/dist');
 
 function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);

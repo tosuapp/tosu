@@ -98,7 +98,9 @@ export async function generateReport(instanceManager: any): Promise<Report> {
 }
 
 const pkgHtmlPath =
-    'pkg' in process ? __dirname : path.resolve(__dirname, '../../pages/dist');
+    'pkg' in process
+        ? path.resolve(__dirname, 'assets')
+        : path.resolve(__dirname, '../../pages/dist');
 
 export async function generateReportHTML(report: Report): Promise<string> {
     const rawHtml = await readFile(
