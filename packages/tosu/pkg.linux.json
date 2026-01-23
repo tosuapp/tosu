@@ -1,5 +1,5 @@
 {
-    "scripts": "dist/**/*.js",
+    "scripts": "dist/index.js",
     "assets": [
       "dist/**/*.node",
       "dist/**/*.wasm",

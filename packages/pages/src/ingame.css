@@ -7,7 +7,7 @@
     box-shadow: none !important;
 }
 
-input[type="number"].input2 {
+input[type='number'].input2 {
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
@@ -22,7 +22,7 @@ input[type="number"].input2 {
     border: none;
 }
 
-input[type="range"].input2 {
+input[type='range'].input2 {
     user-select: none;
     appearance: none;
     cursor: pointer;
@@ -32,14 +32,14 @@ input[type="range"].input2 {
     border-radius: 16px;
 }
 
-input[type="range"].input2::-webkit-slider-runnable-track,
-input[type="range"].input2::-moz-range-track {
+input[type='range'].input2::-webkit-slider-runnable-track,
+input[type='range'].input2::-moz-range-track {
     height: 20px;
     background: #ccc;
     border-radius: 16px;
 }
 
-input[type="range"].input2::-webkit-slider-thumb {
+input[type='range'].input2::-webkit-slider-thumb {
     appearance: none;
     width: 20px;
     height: 20px;
@@ -49,8 +49,7 @@ input[type="range"].input2::-webkit-slider-thumb {
     box-shadow: -407px 0 0 400px var(--button-open);
 }
 
-
-input[type="range"].input2::-moz-range-thumb {
+input[type='range'].input2::-moz-range-thumb {
     width: 20px;
     height: 20px;
     background-color: #fff;
@@ -155,7 +154,9 @@ main.main {
 
 .copyright {
     pointer-events: none;
-    text-shadow: 0em 0em 0.2em black, 0em 0em 2em #417bc5;
+    text-shadow:
+        0em 0em 0.2em black,
+        0em 0em 2em #417bc5;
     font-size: 1.4em;
     position: fixed;
     color: #417bc5;
@@ -163,7 +164,9 @@ main.main {
     left: 50%;
     opacity: 0;
     transform: translateX(-50%);
-    transition: opacity 0.3s ease, top 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        top 0.3s ease;
     z-index: 2;
 }
 
@@ -236,7 +239,7 @@ iframe {
     display: flex;
     gap: 0.5em;
 
-    &>* {
+    & > * {
         text-align: center;
         flex-grow: 1;
     }
@@ -262,7 +265,6 @@ iframe {
         filter: brightness(0.9);
         translate: 0 1px;
     }
-
 
     &.btn-delete {
         background: var(--button-delete);
@@ -293,7 +295,6 @@ iframe {
         translate: 0 1px;
     }
 }
-
 
 .overlay {
     transition: 0.2s ease;
@@ -358,8 +359,6 @@ iframe {
         --opacity: 0.2;
     }
 }
-
-
 
 .scale-up-enter-active,
 .scale-up-leave-active {

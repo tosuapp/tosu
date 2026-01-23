@@ -31,10 +31,10 @@ import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
 import { generateReport, generateReportHTML } from '../utils/report';
 
-const pkgAssetsPath =
+const pkgHtmlPath =
     'pkg' in process
-        ? path.join(__dirname, 'assets')
-        : path.join(__dirname, '../assets');
+        ? path.resolve(__dirname, 'assets')
+        : path.resolve(__dirname, '../../pages/dist');
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
@@ -447,7 +447,7 @@ export default function buildBaseApi(server: Server) {
 
     server.app.route(/\/api\/ingame/, 'GET', (req, res) => {
         fs.readFile(
-            path.join(pkgAssetsPath, 'ingame.html'),
+            path.join(pkgHtmlPath, 'ingame.html'),
             'utf8',
             (err, content) => {
                 if (err) {
@@ -468,7 +468,7 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route('/favicon.ico', 'GET', (req, res) => {
-        fs.readFile(path.join(pkgAssetsPath, 'favicon.ico'), (err, content) => {
+        fs.readFile(path.join(pkgHtmlPath, 'favicon.ico'), (err, content) => {
             if (err) {
                 wLogger.debug(`/${'favicon.ico'}`, err);
                 res.writeHead(404, { 'Content-Type': 'text/html' });

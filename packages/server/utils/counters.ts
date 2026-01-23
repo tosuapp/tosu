@@ -41,10 +41,10 @@ import { parseCounterSettings } from './parseSettings';
  * ИДЕМ И ПИЛИМ КОСТЫЛИ
  * kys js!
  */
-const pkgAssetsPath =
+const pkgHtmlPath =
     'pkg' in process
-        ? path.join(__dirname, 'assets')
-        : path.join(__dirname, '../assets');
+        ? path.resolve(__dirname, 'assets')
+        : path.resolve(__dirname, '../../pages/dist');
 
 function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);
@@ -80,7 +80,7 @@ export function parseTXT(filePath: string) {
         } else object[key.toLowerCase()] = value.trim();
     }
 
-    filePath = path.resolve(filePath);
+    filePath = path.join(filePath);
 
     const staticPath = getStaticPath();
     object.folderName = path
@@ -434,7 +434,7 @@ export function buildLocalCounters(
     }
 
     fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
+        path.join(pkgHtmlPath, 'homepage.html'),
         'utf8',
         (err, content) => {
             if (err) {
@@ -531,7 +531,7 @@ export async function buildExternalCounters(
     }
 
     fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
+        path.join(pkgHtmlPath, 'homepage.html'),
         'utf8',
         (err, content) => {
             if (err) {
@@ -849,7 +849,7 @@ export function buildSettings(res: http.ServerResponse) {
     const settingsPage = `<div class="settings">${groups}</div>`;
 
     fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
+        path.join(pkgHtmlPath, 'homepage.html'),
         'utf8',
         (err, content) => {
             if (err) {
@@ -893,7 +893,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
         </p>
       </div>`;
     fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
+        path.join(pkgHtmlPath, 'homepage.html'),
         'utf8',
         (err, content) => {
             if (err) {
@@ -926,7 +926,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
 
 export function buildEmptyPage(res: http.ServerResponse) {
     fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
+        path.join(pkgHtmlPath, 'homepage.html'),
         'utf8',
         (err, content) => {
             if (err) {
