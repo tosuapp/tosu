@@ -22,6 +22,9 @@
       ],
       "@assets/": [
         "assets/*"
+      ],
+      "@public/": [
+        "public/*"
       ]
     }
   }

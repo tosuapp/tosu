@@ -1,5 +1,7 @@
 import { createApp, ref } from 'vue';
 
+import loadingImg from '../public/assets/images/39979.png';
+
 const queryParams = new URLSearchParams(window.location.search);
 
 const BACKUP_SERVER_IP = document.querySelector(
@@ -1030,7 +1032,7 @@ function startDownload(element) {
         children.style.width = childrenSize.width;
 
         const loadingDiv = previousImage || document.createElement('img');
-        if (!previousImage) loadingDiv.src = '/assets/images/39979.png';
+        if (!previousImage) loadingDiv.src = loadingImg;
         loadingDiv.style.width = 0;
         loadingDiv.style.opacity = 0;
 
