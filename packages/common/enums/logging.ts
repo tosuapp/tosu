@@ -12,7 +12,7 @@ export const LogColor = {
 
 export const LogSymbol = {
     Info: '»',
-    Error: '✖',
+    Error: '✕',
     Warn: '!',
     Debug: '❖',
     Time: '⧗',
