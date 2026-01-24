@@ -154,8 +154,11 @@ export function addCounterMetadata(html: string, filePath: string) {
 
         return html;
     } catch (error) {
-        wLogger.error('addCounterMetadata', (error as any).message);
-        wLogger.debug('addCounterMetadata', error);
+        wLogger.error(
+            'Failed to add counter metadata:',
+            (error as any).message
+        );
+        wLogger.debug('Counter metadata error details:', error);
 
         return '';
     }

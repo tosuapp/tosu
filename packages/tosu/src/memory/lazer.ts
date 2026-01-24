@@ -472,10 +472,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         wLogger.debug(
-            'lazer',
-            this.pid,
-            'updateGameBaseAddress',
-            `${oldAddress?.toString(16)} => ${this.gameBaseAddress.toString(16)}`
+            `GameBase address updated for client %${this.pid}%: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
         );
     }
 
@@ -501,7 +498,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         // Check if gamebase instance is valid
         if (!this.checkIfGameBase(this.gameBaseAddress)) {
-            wLogger.debug('lazer', this.pid, 'GameBase has been reset');
+            wLogger.debug(
+                `GameBase validation failed for client %${this.pid}%, resetting...`
+            );
 
             const scanPattern =
                 this.scanPatterns.scalingContainerTargetDrawSize;
@@ -521,10 +520,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.gameBase() + this.offsets['osu.Game.OsuGame'].SentryLogger
         );
         wLogger.debug(
-            'lazer',
-            'gameVersion',
-            'SentryLogger',
-            sentryLogger.toString(16)
+            `Game version check (SentryLogger): %${sentryLogger.toString(16)}%`
         );
 
         const sentrySession = this.process.readIntPtr(
@@ -532,10 +528,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.offsets['osu.Game.Utils.SentryLogger'].sentrySession
         );
         wLogger.debug(
-            'lazer',
-            'gameVersion',
-            'sentrySession',
-            sentrySession.toString(16)
+            `Game version check (SentrySession): %${sentrySession.toString(16)}%`
         );
 
         const localHub = this.process.readIntPtr(
@@ -543,16 +536,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.offsets['Sentry.SentrySdk+DisposeHandle']._localHub
         );
         wLogger.debug(
-            'lazer',
-            'gameVersion',
-            'localHub',
-            localHub.toString(16)
+            `Game version check (LocalHub): %${localHub.toString(16)}%`
         );
 
         const options = this.process.readIntPtr(
             localHub + this.offsets['Sentry.Internal.Hub']._options
         );
-        wLogger.debug('lazer', 'gameVersion', 'options', options.toString(16));
+        wLogger.debug(
+            `Game version check (Options): %${options.toString(16)}%`
+        );
 
         const release = this.process.readSharpStringPtr(
             options +
@@ -2959,13 +2951,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.initModMapping(gamemode);
             } catch (exc) {
                 wLogger.error(
-                    'lazer',
-                    this.pid,
-                    'global',
-                    'mods',
+                    `Error initializing mod mapping for client %${this.pid}%:`,
                     (exc as Error).message
                 );
-                wLogger.debug('lazer', this.pid, 'global', 'mods', exc);
+                wLogger.debug(
+                    `Error reading global mods for client %${this.pid}%:`,
+                    exc
+                );
             }
         }
 

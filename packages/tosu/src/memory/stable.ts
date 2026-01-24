@@ -313,7 +313,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
                     result.push(i);
                 } catch (exc) {
-                    wLogger.debug('stable', this.pid, 'configOffsets', exc);
+                    wLogger.debug(
+                        `Failed to read config offset for client %${this.pid}%:`,
+                        exc
+                    );
                 }
             }
 
@@ -339,7 +342,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
                     result.push(i);
                 } catch (exc) {
-                    wLogger.debug('stable', this.pid, 'bindingsOffsets', exc);
+                    wLogger.debug(
+                        `Failed to read bindings offset for client %${this.pid}%:`,
+                        exc
+                    );
                 }
             }
 
@@ -1108,10 +1114,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                             });
                         } catch (exc) {
                             wLogger.debug(
-                                'stable',
-                                this.pid,
-                                'tourneyChat',
-                                `message loop ${m}`,
+                                `Error processing chat message %${m}% for client %${this.pid}%:`,
                                 exc
                             );
                         }
@@ -1120,10 +1123,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     return result;
                 } catch (exc) {
                     wLogger.debug(
-                        'stable',
-                        this.pid,
-                        'tourneyChat',
-                        `chat loop ${i}`,
+                        `Error processing chat channel %${i}% for client %${this.pid}%:`,
                         exc
                     );
                 }
@@ -1322,9 +1322,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapScrollSpeed`,
+                `Failed to read beatmap scroll speed for client %${this.pid}%:`,
                 exc
             );
 
@@ -1383,9 +1381,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         (exc as any).message
                     );
                     wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateConfigState [${position}]`,
+                        `Failed to update config state at position %${position}% for client %${this.pid}%:`,
                         exc
                     );
                 }
@@ -1416,9 +1412,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         (exc as any).message
                     );
                     wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateBindingState [${position}]`,
+                        `Failed to update binding state at position %${position}% for client %${this.pid}%:`,
                         exc
                     );
                 }

@@ -5,7 +5,7 @@ import { parseCounterSettings } from './parseSettings';
 import { ModifiedWebsocket } from './socket';
 
 export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
-    wLogger.debug('[ws]', `commands`, data);
+    wLogger.debug(`Received WebSocket command: %${data}%`);
     if (!data.includes(':')) {
         return;
     }
@@ -57,12 +57,10 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
                 message = result.values;
             } catch (exc) {
                 wLogger.error(
-                    '[ws]',
-                    `commands`,
-                    command,
+                    `Failed to get data for command %${command}%:`,
                     (exc as Error).message
                 );
-                wLogger.debug('[ws]', `commands`, command, exc);
+                wLogger.debug(`Settings retrieval error details:`, exc);
             }
 
             break;
@@ -76,20 +74,18 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    '[ws]',
-                    `commands`,
-                    command,
+                    `Failed to parse JSON for command %${command}%:`,
                     (json as Error).message
                 );
-                wLogger.debug('[ws]', `commands`, command, json);
+                wLogger.debug(`JSON parsing error details:`, json);
                 return;
             }
 
             try {
                 if (!Array.isArray(json)) {
                     wLogger.error(
-                        `applyFilter(${socket.id})[${socket.pathname}] >>>`,
-                        `Filters should be array of strings (${json})`
+                        `Invalid filter format for socket %${socket.id}% [${socket.pathname}]:`,
+                        `Filters should be an array of strings (received: ${json})`
                     );
                     return;
                 }
@@ -98,12 +94,10 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
                 return;
             } catch (exc) {
                 wLogger.error(
-                    '[ws]',
-                    `commands`,
-                    command,
+                    `Failed to apply filters for command %${command}%:`,
                     (exc as Error).message
                 );
-                wLogger.debug('[ws]', `commands`, command, exc);
+                wLogger.debug(`Filter application error details:`, exc);
             }
         }
     }
@@ -116,7 +110,10 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             })
         );
     } catch (exc) {
-        wLogger.error('[ws]', `commands-send`, (exc as Error).message);
-        wLogger.debug('[ws]', `commands-send`, exc);
+        wLogger.error(
+            `Failed to send response for command %${command}%:`,
+            (exc as Error).message
+        );
+        wLogger.debug(`Command response error details:`, exc);
     }
 }

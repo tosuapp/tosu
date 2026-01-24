@@ -140,7 +140,7 @@ export class ConfigManager {
 
             if (oldEnv === null) {
                 wLogger.debug(
-                    '[config] No old config found. Skipping migration..'
+                    'No legacy configuration found. Skipping migration.'
                 );
 
                 return;
@@ -168,14 +168,14 @@ export class ConfigManager {
                 .join('\n');
 
             await fs.writeFile(configPath, output, 'utf-8');
-            wLogger.warn(`[config] Your config file has been migrated.`);
+            wLogger.warn(`Configuration file successfully migrated.`);
 
             const deprecated = Object.keys(oldEnv).filter(
                 (binding) => !Object.hasOwn(migratedEnv, binding)
             );
             if (deprecated.length > 0) {
                 wLogger.warn(
-                    `[config] Deprecated properties: ${deprecated.join(', ')}.`
+                    `Removed deprecated configuration properties: %${deprecated.join(', ')}%`
                 );
             }
 
@@ -184,15 +184,15 @@ export class ConfigManager {
             );
             if (newProps.length > 0) {
                 wLogger.warn(
-                    `[config] New properties: ${newProps.join(', ')}.`
+                    `Added new configuration properties: %${newProps.join(', ')}%`
                 );
             }
 
             await fs.unlink(filePath).catch(null);
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
-            wLogger.error(`[config] Failed to migrate config: ${msg}`);
-            wLogger.debug(`[config] Migration error: ${e}`);
+            wLogger.error(`Configuration migration failed:`, msg);
+            wLogger.debug(`Migration error details:`, e);
         }
     }
 
@@ -265,7 +265,7 @@ export class ConfigManager {
                 .join('\n');
 
             await file.writeFile(defaults, 'utf-8');
-            wLogger.debug(`[config] Config file created at '${filePath}'.`);
+            wLogger.debug(`Default configuration created at %${filePath}%`);
         } catch (e) {
             if (!(e instanceof Error) || !('code' in e)) return;
             let cause: string = 'unknown';
@@ -273,8 +273,8 @@ export class ConfigManager {
             if (e.code === 'EPERM') cause = 'missing write permissions.';
             else if (e.code === 'ENOSPC') cause = 'disk full.';
 
-            wLogger.error(`[config] Failed to write config file: ${cause}`);
-            wLogger.debug(`[config] Failed to write config file: ${e}`);
+            wLogger.error(`Failed to create configuration file:`, cause);
+            wLogger.debug(`Configuration write error details:`, e);
         } finally {
             await file.close();
         }
@@ -301,7 +301,7 @@ export class ConfigManager {
             this.previousFileHash = newHash;
 
             await fs.writeFile(configPath, content, 'utf-8');
-            wLogger.debug('[config] Config file saved successfully.');
+            wLogger.debug('Configuration saved successfully.');
 
             dotenv.config({ path: configPath, override: true });
         } catch (e) {
@@ -313,8 +313,8 @@ export class ConfigManager {
             if (e.code === 'EPERM') cause = 'missing write permissions.';
             else if (e.code === 'ENOSPC') cause = 'disk full.';
 
-            wLogger.error(`[config] Failed to update config file: ${cause}`);
-            wLogger.debug(`[config] Failed to update config file: ${e}`);
+            wLogger.error(`Failed to save configuration:`, cause);
+            wLogger.debug(`Configuration save error details:`, e);
         }
     }
 
@@ -348,7 +348,7 @@ export class ConfigManager {
 
             default: {
                 wLogger.warn(
-                    `[config] Value of '${item.binding}' is not of type '${typeof item.default}'. Using default value.`
+                    `Invalid type for config key %${item.binding}%. Expected %${typeof item.default}%, using default value.`
                 );
                 break;
             }
@@ -382,7 +382,7 @@ export class ConfigManager {
      */
     private static async startConfigWatcher(): Promise<void> {
         const watcher = fs.watch(configPath);
-        wLogger.debug('[config] Started config watcher..');
+        wLogger.debug('Started configuration file watcher.');
 
         // initial file hash calculation
         this.previousFileHash = await fs
@@ -410,7 +410,7 @@ export class ConfigManager {
                         this.previousFileHash = currentHash;
 
                         wLogger.debug(
-                            '[config] File changed. Refreshing config...'
+                            'Configuration file changed. Reloading...'
                         );
                         const newEnv: Record<ConfigBinding, string> =
                             dotenv.parse(content);
@@ -419,11 +419,10 @@ export class ConfigManager {
                     } catch (exc) {
                         const msg =
                             exc instanceof Error ? exc.message : String(exc);
-                        wLogger.error(
-                            `[config] Failed to reload config: ${msg}`
-                        );
+                        wLogger.error(`Failed to reload configuration:`, msg);
                         wLogger.debug(
-                            `[config] Failed to reload config: ${exc}`
+                            `Configuration reload error details:`,
+                            exc
                         );
                     }
 

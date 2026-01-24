@@ -33,13 +33,13 @@ const deleteNotLocked = async (filePath: string) => {
             return;
         }
 
-        wLogger.error('[updater]', 'deleteNotLocked', (err as any).message);
-        wLogger.debug('[updater]', 'deleteNotLocked', err);
+        wLogger.error('Failed to delete unlocked file', (err as any).message);
+        wLogger.debug('Delete failure details', err);
     }
 };
 
 export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
-    wLogger.info('[updater]', 'Checking updates');
+    wLogger.info('Checking for updates...');
 
     try {
         if (from === 'startup') {
@@ -54,8 +54,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
         if (platform.type === 'unknown') {
             wLogger.warn(
-                '[updater]',
-                `Unsupported platform (${process.platform}). Unable to run updater`
+                `Unsupported platform (%${process.platform}%). Unable to run updater`
             );
 
             return new Error(
@@ -80,8 +79,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
         if (versionName === null || versionName === undefined) {
             wLogger.info(
-                '[updater]',
-                `Failed to check updates v${currentVersion}`
+                `Failed to check updates for version %v${currentVersion}%`
             );
 
             return new Error('Version the same');
@@ -93,20 +91,18 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
                 currentVersion.includes('-forced')
             )
                 wLogger.info(
-                    '[updater]',
-                    `You're using latest version v${currentVersion}`
+                    `You're using the latest version (%v${currentVersion}%)`
                 );
             else
                 wLogger.warn(
-                    '[updater]',
-                    `Update available v${currentVersion} => v${context.updateVersion}`
+                    `Update available: %v${currentVersion}% => %v${context.updateVersion}%`
                 );
         }
 
         return { assets, versionName };
     } catch (exc) {
-        wLogger.error('[updater]', `checkUpdates`, (exc as any).message);
-        wLogger.debug('[updater]', `checkUpdates`, exc);
+        wLogger.error(`Update check failed:`, (exc as any).message);
+        wLogger.debug(`Update check error details:`, exc);
 
         context.currentVersion = currentVersion;
         context.updateVersion = currentVersion;
@@ -131,8 +127,7 @@ export const autoUpdater = async (
             currentVersion.includes('-forced')
         ) {
             wLogger.info(
-                '[updater]',
-                `You're using latest version v${currentVersion}`
+                `You're using the latest version (%v${currentVersion}%)`
             );
 
             if (fs.existsSync(fileDestination)) {
@@ -151,8 +146,7 @@ export const autoUpdater = async (
         );
         if (!findAsset) {
             wLogger.info(
-                '[updater]',
-                `Files to update not found (${platform.type})`
+                `Update files not found for platform (%${platform.type}%)`
             );
             return 'noFiles';
         }
@@ -175,7 +169,7 @@ export const autoUpdater = async (
 
         await sleep(100);
 
-        wLogger.info('[updater]', 'Restarting program');
+        wLogger.info('Restarting program to apply updates...');
 
         const correctExecutablePath = path.join(
             path.dirname(process.argv[0]),
@@ -187,14 +181,14 @@ export const autoUpdater = async (
             stdio: 'ignore'
         }).unref();
 
-        wLogger.info('[updater]', 'Closing program');
+        wLogger.info('Closing program...');
 
         await sleep(1000);
 
         process.exit();
     } catch (exc) {
-        wLogger.error('[updater]', 'autoUpdater', (exc as any).message);
-        wLogger.debug('[updater]', 'autoUpdater', exc);
+        wLogger.error('Auto-update failed:', (exc as any).message);
+        wLogger.debug('Auto-update error details:', exc);
 
         if (from === 'server' && res) {
             res.setHeader('Content-Type', 'application/json');

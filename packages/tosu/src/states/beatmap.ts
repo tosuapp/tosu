@@ -244,17 +244,10 @@ export class BeatmapPP extends AbstractState {
             };
         } catch (exc) {
             wLogger.error(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updatePPAttributes(${type})`,
+                `Error updating PP attributes (%${type}%) for client %${this.game.pid}%:`,
                 (exc as Error).message
             );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updatePPAttributes(${type})`,
-                exc
-            );
+            wLogger.debug(`PP attributes update error details:`, exc);
         }
     }
 
@@ -263,10 +256,7 @@ export class BeatmapPP extends AbstractState {
 
         if (this.currAttributes.pp.toFixed(2) !== pp.toFixed(2)) {
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateCurrentAttributes`,
-                `maxAchieved -> ${this.currAttributes.maxAchieved.toFixed(2)} | currentPP -> ${pp.toFixed(2)} | stars -> ${stars.toFixed(2)}`
+                `Current attributes updated for client %${this.game.pid}% to %${stars.toFixed(2)}★% | %${pp.toFixed(2)}pp% (max achieved: %${maxAchieved.toFixed(2)}pp%)`
             );
         }
 
@@ -317,10 +307,7 @@ export class BeatmapPP extends AbstractState {
 
             if (menu.folder === '.' && !lazerBypass) {
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `beatmapPP updateMapMetadata`,
-                    `Skip osu! music theme file`,
+                    `Skipping osu! theme song metadata update for client %${this.game.pid}%`,
                     {
                         SongsFolder: global.songsFolder,
                         Folder: menu.folder,
@@ -332,10 +319,7 @@ export class BeatmapPP extends AbstractState {
 
             if (!menu.filename) {
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `beatmapPP updateMapMetadata`,
-                    `Skip new map creation`,
+                    `Skipping beatmap with no file name for client %${this.game.pid}%`,
                     {
                         SongsFolder: global.songsFolder,
                         Folder: menu.folder,
@@ -367,10 +351,7 @@ export class BeatmapPP extends AbstractState {
                 } catch (exc) {
                     this.beatmap = undefined;
                     wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `beatmapPP updateMapMetadata`,
-                        `unable to free beatmap`,
+                        `Failed to free previous beatmap instance for client %${this.game.pid}%:`,
                         exc
                     );
                 }
@@ -381,19 +362,13 @@ export class BeatmapPP extends AbstractState {
                 } catch (exc) {
                     this.performanceAttributes = undefined;
                     wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `beatmapPP updateMapMetadata`,
-                        `unable to free PerformanceAttributes`,
+                        `Failed to free previous PerformanceAttributes for client %${this.game.pid}%:`,
                         exc
                     );
                 }
             } catch (error) {
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `beatmapPP updateMapMetadata`,
-                    `Can't get map`,
+                    `Error reading beatmap file for client %${this.game.pid}%:`,
                     {
                         mapPath,
                         currentMods: currentMods.array,
@@ -411,10 +386,7 @@ export class BeatmapPP extends AbstractState {
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
             wLogger.time(
-                `[${ClientType[this.game.client]}]`,
-                this.game.pid,
-                `beatmapPP.updateMapMetadata`,
-                `[${totalTime}ms] Spend on opening beatmap`
+                `Beatmap took %${totalTime}ms% for client %${this.game.pid}%`
             );
 
             const commonParams = {
@@ -459,10 +431,7 @@ export class BeatmapPP extends AbstractState {
 
             const calculationTime = performance.now();
             wLogger.time(
-                `[${ClientType[this.game.client]}]`,
-                this.game.pid,
-                `beatmapPP.updateMapMetadata`,
-                `[${(calculationTime - beatmapCheckTime).toFixed(2)}ms] Spend on attributes & strains calculation`
+                `Attributes & strains calculation took %${(calculationTime - beatmapCheckTime).toFixed(2)}ms% for client %${this.game.pid}%`
             );
 
             try {
@@ -548,9 +517,7 @@ export class BeatmapPP extends AbstractState {
                     (exc as any).message
                 );
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `beatmapPP updateMapMetadata`,
+                    `Error in metadata timings update for client %${this.game.pid}%:`,
                     exc
                 );
                 return;
@@ -558,10 +525,7 @@ export class BeatmapPP extends AbstractState {
 
             const beatmapParseTime = performance.now();
             wLogger.time(
-                `[${ClientType[this.game.client]}]`,
-                this.game.pid,
-                `beatmapPP.updateMapMetadata`,
-                `[${(beatmapParseTime - calculationTime).toFixed(2)}ms] Spend on parsing beatmap`
+                `Beatmap parsing took %${(beatmapParseTime - calculationTime).toFixed(2)}ms% for client %${this.game.pid}%`
             );
 
             this.calculatedMapAttributes = {
@@ -605,9 +569,7 @@ export class BeatmapPP extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateMapMetadata`,
+                `Error updating map metadata for client %${this.game.pid}%:`,
                 exc
             );
         }
@@ -765,9 +727,7 @@ export class BeatmapPP extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateGraph`,
+                `Error updating graph for client %${this.game.pid}%:`,
                 exc
             );
         }
@@ -792,10 +752,7 @@ export class BeatmapPP extends AbstractState {
             const beatmapParseTime = performance.now();
             const totalTime = (beatmapParseTime - startTime).toFixed(2);
             wLogger.time(
-                `[${ClientType[this.game.client]}]`,
-                this.game.pid,
-                `beatmapPP.updateEditorPP`,
-                `${totalTime}ms Spend on beatmap parsing`
+                `Beatmap parsing for editor PP took %${totalTime}ms% for client %${this.game.pid}%`
             );
 
             const passedObjects = this.lazerBeatmap.hitObjects.filter(
@@ -826,9 +783,7 @@ export class BeatmapPP extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateEditorPP`,
+                `Error updating editor PP for client %${this.game.pid}%:`,
                 exc
             );
         }

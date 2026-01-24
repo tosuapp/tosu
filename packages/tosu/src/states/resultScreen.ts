@@ -38,9 +38,7 @@ export class ResultScreen extends AbstractState {
 
     init() {
         wLogger.debug(
-            ClientType[this.game.client],
-            this.game.pid,
-            `resultScreen init`
+            `Initializing result screen for client %${this.game.pid}%`
         );
 
         this.onlineId = 0;
@@ -67,9 +65,7 @@ export class ResultScreen extends AbstractState {
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `resultScreen updateState`,
+                    `Result screen state update not ready for client %${this.game.pid}%:`,
                     result
                 );
                 return 'not-ready';
@@ -107,9 +103,7 @@ export class ResultScreen extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `resultScreen updateState`,
+                `Error updating result screen state for client %${this.game.pid}%:`,
                 exc
             );
         }
@@ -131,9 +125,7 @@ export class ResultScreen extends AbstractState {
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
             if (!currentBeatmap) {
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `resultScreen updatePerformance can't get current map`
+                    `Result screen PP calc skipped for client %${this.game.pid}%: Can't get current map`
                 );
                 return;
             }
@@ -209,11 +201,7 @@ export class ResultScreen extends AbstractState {
             fcPerformance.free();
 
             wLogger.time(
-                `[${ClientType[this.game.client]}]`,
-                this.game.pid,
-                `resultScreen.updatePerformance`,
-                `pp:${(t2 - t1).toFixed(2)}`,
-                `fc pp:${(performance.now() - t2).toFixed(2)}`
+                `Result screen PP calc for client %${this.game.pid}%: PP: %${(t2 - t1).toFixed(2)}ms%, FC PP: %${(performance.now() - t2).toFixed(2)}ms%`
             );
 
             this.previousBeatmap = key;
@@ -228,9 +216,7 @@ export class ResultScreen extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `resultScreen updatePerformance`,
+                `Error updating result screen performance for client %${this.game.pid}%:`,
                 exc
             );
         }

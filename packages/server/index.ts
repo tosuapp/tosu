@@ -95,8 +95,11 @@ export class Server {
                 this.restart();
             }
         } catch (exc) {
-            wLogger.error('[server-config-update]', (exc as any).message);
-            wLogger.debug('[server-config-update]', exc);
+            wLogger.error(
+                'Failed to handle server config update:',
+                (exc as any).message
+            );
+            wLogger.debug('Server config update error details:', exc);
         }
     }
 
@@ -123,7 +126,7 @@ export class Server {
                 return next();
             }
 
-            wLogger.warn('[request]', 'Unallowed request', req.url, {
+            wLogger.warn('Blocked unauthorized request to %' + req.url + '%', {
                 origin: req.headers.origin,
                 referer: req.headers.referer
             });

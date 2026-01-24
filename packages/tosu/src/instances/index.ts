@@ -142,24 +142,17 @@ export abstract class AbstractInstance {
             return true;
         } catch (exc) {
             wLogger.error(
-                ClientType[this.client],
-                this.pid,
-                'resolvePatterns',
+                `Memory pattern resolution failed for client %${this.pid}%:`,
                 (exc as Error).message
             );
-            wLogger.debug(
-                ClientType[this.client],
-                this.pid,
-                'resolvePatterns',
-                exc
-            );
+            wLogger.debug(`Pattern resolution error details:`, exc);
 
             return false;
         }
     }
 
     start(): void {
-        wLogger.info(`[${this.pid} ${this.client}] Running memory chimera...`);
+        wLogger.info(`Scanning memory for client %${this.pid}%...`);
 
         while (!this.isReady) {
             try {
@@ -171,25 +164,16 @@ export abstract class AbstractInstance {
 
                 const elapsedTime = `${(performance.now() - s1).toFixed(2)}ms`;
                 wLogger.info(
-                    ClientType[this.client],
-                    this.pid,
-                    `All patterns resolved within ${elapsedTime}`
+                    `Memory patterns resolved for client %${this.pid}% in %${elapsedTime}%`
                 );
 
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'Pattern scanning failed, Trying one more time...',
+                    `Pattern scanning failed for client %${this.pid}%, retrying...`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'Pattern scanning failed, Trying one more time...',
-                    exc
-                );
+                wLogger.debug(`Pattern scan retry details:`, exc);
 
                 this.emitter.emit('onResolveFailed', this.pid);
                 return;
@@ -211,11 +195,7 @@ export abstract class AbstractInstance {
     async watchProcessHealth() {
         while (!this.isDestroyed) {
             if (!Process.isProcessExist(this.process.handle)) {
-                wLogger.warn(
-                    ClientType[this.client],
-                    this.pid,
-                    'osu!.exe got destroyed'
-                );
+                wLogger.warn(`Client process %${this.pid}% has terminated`);
 
                 this.emitter.emit('onDestroy', this.pid);
                 this.isDestroyed = true;
