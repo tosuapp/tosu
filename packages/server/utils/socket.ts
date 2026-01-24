@@ -81,18 +81,26 @@ export class Websocket {
             ws.originAddress = request.headers.origin || '';
             ws.remoteAddress = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
 
-            wLogger.debug('[ws]', 'connected', ws.id);
+            wLogger.debug(`WebSocket client connected: %${ws.id}%`);
 
             ws.on('close', (reason, description) => {
                 this.clients.delete(ws.id);
 
-                wLogger.debug('[ws]', 'closed', ws.id, reason, description);
+                wLogger.debug(
+                    `WebSocket client disconnected: %${ws.id}%`,
+                    reason,
+                    description
+                );
             });
 
             ws.on('error', (reason: any, description: any) => {
                 this.clients.delete(ws.id);
 
-                wLogger.debug('[ws]', 'error', ws.id, reason, description);
+                wLogger.debug(
+                    `WebSocket client error: %${ws.id}%`,
+                    reason,
+                    description
+                );
             });
 
             if (typeof this.onMessageCallback === 'function') {
@@ -158,8 +166,11 @@ export class Websocket {
                     client.send(message);
                 });
             } catch (error) {
-                wLogger.error('[ws]', 'loop', (error as any).message);
-                wLogger.debug('[ws]', 'loop', error);
+                wLogger.error(
+                    'WebSocket data loop failed:',
+                    (error as any).message
+                );
+                wLogger.debug('WebSocket loop error details:', error);
             }
 
             if (this.pollRateFieldName)

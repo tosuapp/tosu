@@ -215,8 +215,15 @@ export function parseCounterSettings(
 
         return new Error('Undefined action to parse counter settings');
     } catch (exc) {
-        wLogger.error('parseCounterSettings', (exc as any).message);
-        wLogger.debug('parseCounterSettings', { staticPath, folderName }, exc);
+        wLogger.error(
+            'Failed to parse counter settings:',
+            (exc as any).message
+        );
+        wLogger.debug(
+            'Parse settings error details:',
+            { staticPath, folderName },
+            exc
+        );
 
         return new Error(`parseCounterSettings Error: ${(exc as any).message}`);
     }

@@ -43,12 +43,14 @@ export class HttpServer {
 
         this.server.on('error', (err) => {
             if (err.message.includes('getaddrinfo')) {
-                wLogger.warn('server', 'Incorrect server ip or url');
+                wLogger.warn(
+                    'Server failed to start: Incorrect IP address or URL'
+                );
                 return;
             }
 
-            wLogger.error('[server]', err.message);
-            wLogger.debug('[server]', err);
+            wLogger.error('Server experienced an error:', err.message);
+            wLogger.debug('Server error details:', err);
         });
     }
 
@@ -86,8 +88,7 @@ export class HttpServer {
         res.on('finish', () => {
             const elapsedTime = (performance.now() - startTime).toFixed(2);
             wLogger.time(
-                `httpServer.request`,
-                `${elapsedTime}ms`,
+                `Request processed in %${elapsedTime}ms%`,
                 req.method,
                 res.statusCode,
                 res.getHeader('content-type'),
@@ -106,11 +107,10 @@ export class HttpServer {
                     });
                 } catch (exc) {
                     wLogger.error(
-                        '[server]',
-                        'middleware',
+                        'Middleware execution failed:',
                         (exc as Error).message
                     );
-                    wLogger.debug('[server]', 'middleware', exc);
+                    wLogger.debug('Middleware error details:', exc);
                 }
                 return;
             }
@@ -192,8 +192,14 @@ export class HttpServer {
 
                 res.statusCode = 500;
 
-                wLogger.warn(`[server] ${parsedURL.pathname}`, message);
-                wLogger.debug(`[server] ${parsedURL.pathname}`, exc);
+                wLogger.warn(
+                    `Request to %${parsedURL.pathname}% failed:`,
+                    message
+                );
+                wLogger.debug(
+                    `Route handling error for %${parsedURL.pathname}%:`,
+                    exc
+                );
 
                 return sendJson(res, { error: message });
             }
@@ -206,10 +212,7 @@ export class HttpServer {
     listen(port: number, hostname: string) {
         this.server.listen(port, hostname, () => {
             const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
-            wLogger.info(
-                '[server]',
-                `Dashboard started on http://${ip}:${port}`
-            );
+            wLogger.info(`Dashboard server started on %http://${ip}:${port}%`);
 
             if (config.openDashboardOnStartup === true) {
                 const command =
@@ -226,7 +229,7 @@ export class HttpServer {
                             return;
                         }
 
-                        wLogger.info(`Web dashboard opened`);
+                        wLogger.info(`Web dashboard opened successfully`);
                     }
                 );
             }

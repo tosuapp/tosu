@@ -48,9 +48,7 @@ export class User extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `user updateState`,
+                `Error updating user state for client %${this.game.pid}%:`,
                 exc
             );
         }
