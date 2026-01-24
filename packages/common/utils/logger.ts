@@ -1,10 +1,13 @@
-import fsp from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
+import util from 'util';
 
+import { LogColor, LogSymbol } from '../enums/logging';
 import { ClientType } from '../enums/tosu';
 import { config } from './config';
 import { context } from './context';
 import { ensureDirectoryExists, getDataPath } from './directories';
+import { progressManager } from './progress';
 
 export function getLocalTime() {
     const now = new Date();
@@ -20,86 +23,159 @@ export function getLocalTime() {
     );
 }
 
-const colors = {
-    info: '\x1b[1m\x1b[40m\x1b[42m',
-    error: '\x1b[1m\x1b[37m\x1b[41m',
-    debug: '\x1b[1m\x1b[37m\x1b[44m',
-    time: '\x1b[1m\x1b[37m\x1b[48;5;239m',
-    debugError: '\x1b[1m\x1b[37m\x1b[45m',
-    warn: '\x1b[1m\x1b[40m\x1b[43m',
-    reset: '\x1b[0m',
-    grey: '\x1b[90m'
-};
+export function colorText(status: string, color: keyof typeof LogColor) {
+    const colorCode = LogColor[color] || LogColor.Reset;
+    const time = `${LogColor.Grey}${getLocalTime()}${LogColor.Reset}`;
 
-export function colorText(status: string, color: keyof typeof colors) {
-    const colorCode = colors[color] || colors.reset;
-    const timestamp = new Date().toISOString().split('T')[1].replace('Z', '');
+    let levelChar = status[0].toUpperCase();
+    if (status === 'info') levelChar = LogSymbol.Info;
+    else if (status === 'error' || status === 'debugerror')
+        levelChar = LogSymbol.Error;
+    else if (status === 'warn') levelChar = LogSymbol.Warn;
+    else if (status === 'debug') levelChar = LogSymbol.Debug;
+    else if (status === 'time') levelChar = LogSymbol.Time;
 
-    const time = `${colors.grey}${timestamp}${colors.reset}`;
-    const version = `${colors.grey}v${context.currentVersion}${colors.reset}`;
-    return `${time} ${version} ${colorCode} ${status.toUpperCase()} ${colors.reset}`;
+    return `${time} ${colorCode} ${levelChar} ${LogColor.Reset}`;
 }
 
-export const wLogger = {
-    info: (...args: any) => {
-        const coloredText = colorText('info', 'info');
-        console.log(coloredText, ...args);
+const HighlightColor = '\x1b[1m\x1b[37m';
 
-        writeLog('info', args);
-    },
-    debug: (...args: any) => {
-        writeLog('debug', args);
+function stripHighlights(text: string): string {
+    return text.replace(/%([^%]+)%/g, '$1');
+}
 
-        if (config.debugLog !== true) return;
+function applyHighlightStyles(text: string): string {
+    return text.replace(/%([^%]+)%/g, `${HighlightColor}$1\x1b[0m`);
+}
 
-        const coloredText = colorText('debug', 'debug');
-        console.log(coloredText, ...args);
-    },
-    time: (...args: any) => {
-        writeLog('time', args);
+function formatConsoleArgs(args: any[]): any[] {
+    return args.map((arg) => {
+        if (typeof arg === 'string') {
+            return applyHighlightStyles(arg);
+        }
+        if (typeof arg === 'object' && arg !== null) {
+            return (
+                '\n' +
+                util.inspect(arg, { depth: 2, colors: true, compact: false })
+            );
+        }
+        return arg;
+    });
+}
 
-        if (config.debugLog !== true) return;
+function formatFileArgs(args: any[]): string {
+    return args
+        .map((arg) => {
+            if (typeof arg === 'string') {
+                return stripHighlights(arg);
+            }
+            if (typeof arg === 'object') {
+                return (
+                    '\n' +
+                    util.inspect(arg, {
+                        depth: 2,
+                        colors: false,
+                        compact: false
+                    })
+                );
+            }
+            return String(arg);
+        })
+        .join(' ');
+}
 
-        const coloredText = colorText('time', 'time');
-        console.log(coloredText, ...args);
-    },
-    debugError: (...args: any) => {
-        if (config.debugLog !== true) return;
+function logConsole(type: keyof typeof LogColor, ...args: any[]) {
+    progressManager.clear();
 
-        const coloredText = colorText('debugError', 'debugError');
-        console.log(coloredText, ...args);
+    const coloredText = colorText(type.toLowerCase(), type);
+    console.log(coloredText, ...formatConsoleArgs(args));
 
-        writeLog('debugError', args);
-    },
-    error: (...args: any) => {
-        const coloredText = colorText('error', 'error');
-        console.log(coloredText, ...args);
-
-        writeLog('error', args);
-    },
-    warn: (...args: any) => {
-        const coloredText = colorText('warn', 'warn');
-        console.log(coloredText, ...args);
-
-        writeLog('warn', args);
+    if (progressManager.isActive && process.stdout.isTTY) {
+        console.log('');
     }
-};
 
-function writeLog(type: string, ...args: any[]) {
+    progressManager.render();
+}
+
+function getFilenameFriendlyTime(date: Date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}`;
+}
+
+let logStream: fs.WriteStream | null = null;
+
+function logFile(type: string, ...args: any[]) {
     if (context.logFilePath === '') {
         const logsPath = path.join(getDataPath(), 'logs');
         ensureDirectoryExists(logsPath);
 
-        context.logFilePath = path.join(logsPath, `${Date.now()}.txt`);
-        wLogger.debug(`logs path: ${logsPath}`);
+        const latestLog = path.join(logsPath, 'latest.log');
+
+        if (fs.existsSync(latestLog)) {
+            const stat = fs.statSync(latestLog);
+            const birthtime = stat.birthtime.getTime();
+            const date =
+                isNaN(birthtime) || birthtime === 0
+                    ? new Date()
+                    : new Date(birthtime);
+            const newPath = path.join(
+                logsPath,
+                `${getFilenameFriendlyTime(date)}.log`
+            );
+
+            try {
+                fs.renameSync(latestLog, newPath);
+            } catch (e) {
+                console.error(`Failed to rename latest.log:`, e);
+            }
+        }
+
+        context.logFilePath = latestLog;
+        wLogger.debug(`Logs path initialized at: %${logsPath}%`);
     }
 
-    fsp.appendFile(
-        context.logFilePath,
-        `${new Date().toISOString()} ${type} ${args.join(' ')}\n`,
-        'utf8'
-    ).catch((reason) => console.log(`writeLog`, reason));
+    if (!logStream) {
+        logStream = fs.createWriteStream(context.logFilePath, { flags: 'a' });
+        logStream.on('error', (err) => {
+            console.error('Log stream error:', err);
+        });
+    }
+
+    let levelName = type.toLowerCase();
+    if (levelName === 'debugerror') levelName = 'derror';
+    const levelLabel = `[${levelName}]`.padEnd(8, ' ');
+
+    const time = getLocalTime();
+    const message = formatFileArgs(args);
+
+    logStream.write(`${time} ${levelLabel} ${message}\n`);
 }
+function dispatchLog(level: keyof typeof LogColor, ...args: any[]) {
+    logFile(level.toLowerCase(), ...args);
+
+    if (
+        (level === 'Debug' || level === 'Time' || level === 'DebugError') &&
+        config.debugLog === false
+    ) {
+        return;
+    }
+
+    logConsole(level, ...args);
+}
+
+export const wLogger = {
+    info: (...args: any) => dispatchLog('Info', ...args),
+    debug: (...args: any) => dispatchLog('Debug', ...args),
+    time: (...args: any) => dispatchLog('Time', ...args),
+    debugError: (...args: any) => dispatchLog('DebugError', ...args),
+    error: (...args: any) => dispatchLog('Error', ...args),
+    warn: (...args: any) => dispatchLog('Warn', ...args)
+};
 
 export function measureTime(
     target: any,
@@ -122,20 +198,12 @@ export function measureTime(
         const result = originalMethod.apply(this, args);
         const time = performance.now() - t1;
 
-        if (time >= 1 && client) {
-            const coloredText = colorText('time', 'time');
-            console.log(
-                coloredText,
-                client,
-                (this as any).game.pid,
-                `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
-            );
-        } else if (time >= 1) {
-            const coloredText = colorText('time', 'time');
-            console.log(
-                coloredText,
-                `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
-            );
+        if (time >= 1) {
+            const msg = client
+                ? `${client} ${(this as any).game.pid} ${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
+                : `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`;
+
+            logConsole('Time', msg);
         }
 
         return result;

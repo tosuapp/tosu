@@ -1,38 +1,7 @@
 import fs from 'fs';
 import https from 'https';
 
-import { colorText } from './logger';
-
-const progressBarWidth = 40;
-
-export const updateProgressBar = (
-    title: string,
-    progress: number,
-    message: string = ''
-): void => {
-    const coloredText = colorText('info', 'info');
-    if (message) message = ` - ${message}`;
-
-    const filledWidth = Math.round(progressBarWidth * progress);
-    const emptyWidth = progressBarWidth - filledWidth;
-    const progressBar = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
-
-    process.stdout.write(
-        `${coloredText} ${title}: [${progressBar}] ${(progress * 100).toFixed(2)}%${message}\r`
-    );
-
-    if (progress === 1) {
-        if (
-            typeof process.stdout.clearLine === 'function' &&
-            typeof process.stdout.cursorTo === 'function'
-        ) {
-            process.stdout.clearLine(0);
-            process.stdout.cursorTo(0);
-        } else {
-            process.stdout.write('\n');
-        }
-    }
-};
+import { progressManager } from './progress';
 
 /**
  * A cyperdark's downloadFile implmentation based on pure node api
@@ -67,13 +36,15 @@ export const downloadFile = (
 
                 const file = fs.createWriteStream(destination);
 
-                file.on('error', (err) => {
+                file.on('error', async (err) => {
                     fs.unlinkSync(destination);
+                    await progressManager.end('Download failed');
                     reject(err);
                 });
 
-                file.on('finish', () => {
+                file.on('finish', async () => {
                     file.close();
+                    await progressManager.end('Download completed');
                     resolve(destination);
                 });
 
@@ -83,13 +54,27 @@ export const downloadFile = (
                 );
                 let downloadedSize = 0;
 
+                progressManager.start('Downloading File');
+
                 response.on('data', (data) => {
                     downloadedSize += data.length;
                     const progress = downloadedSize / totalSize;
-                    updateProgressBar('Downloading', progress);
+
+                    const downloadedMB = (downloadedSize / 1024 / 1024).toFixed(
+                        2
+                    );
+                    const totalMB = (totalSize / 1024 / 1024).toFixed(2);
+
+                    progressManager.update(
+                        progress,
+                        `| ${downloadedMB} / ${totalMB} MB`
+                    );
                 });
 
                 response.pipe(file);
             })
-            .on('error', reject);
+            .on('error', async (err) => {
+                await progressManager.end();
+                reject(err);
+            });
     });
