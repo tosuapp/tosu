@@ -103,7 +103,7 @@ class WebSocketManager {
 
     try {
       const value = typeof payload == 'object' ? JSON.stringify(payload) : payload;
-      this.sockets['/websocket/commands'].send(`${command}:${overlay_name}:${value}`);
+      this.sockets['/websocket/commands'].send(`${command}:${overlay_name}:${value || ''}`);
     } catch (error) {
       if (amountOfRetries <= 3) {
         console.log(`[COMMAND_ERROR] Attempt ${amountOfRetries}`, error);
@@ -154,11 +154,15 @@ const app = createApp({
     const overlay_ctx = ref(null);
     const profiles_ctx = ref(null);
 
+    const profile_name = window.obsstudio ? 'obs' : 'ingame';
 
-    /** @type { { value: { profile: number, profiles: { name: string, overlays: Overlay[] }[] } } } */
+
+    /** @type { { value: { obs_profile: string, ingame_profile: string, profiles: Profile[] } } } */
     const settings = ref({
-      profile: 0,
+      obs_profile: 'default',
+      ingame_profile: 'default',
       profiles: [{
+        id: 'default',
         name: 'default',
         overlays: [],
       }]
@@ -167,7 +171,8 @@ const app = createApp({
 
     /** @type { { value: ICounter[] } } */
     const available_overlays = ref(window.COUNTERS || []);
-    const overlays = computed(() => settings.value.profiles[settings.value.profile]?.overlays || []);
+    /** @type { { value: Profile } } */
+    const profile = computed(() => settings.value.profiles.find(r => r.id == settings.value[`${profile_name}_profile`]) || settings.value.profiles.at(0));
 
     const context_empty = ref({
       _: false,
@@ -299,7 +304,7 @@ const app = createApp({
         return;
       };
 
-      const find = overlays.value[index];
+      const find = profile.value.overlays[index];
       if (!find) {
         // console.log(`[resizing-${event.ctrlKey ? 'scale' : ''}]`, `cant find overlay`, event);
 
@@ -435,7 +440,7 @@ const app = createApp({
         return;
       };
 
-      const find = overlays.value[index];
+      const find = profile.value.overlays[index];
       if (!find) {
         // console.log('[mousemove]', `cant find overlay`, event);
 
@@ -592,12 +597,12 @@ const app = createApp({
           element = document.querySelector(`[data-ind="${copy_index}"]`);
         };
 
-        overlays.value[copy_index].width = overlays.value[hovered_index].width;
-        overlays.value[copy_index].height = overlays.value[hovered_index].height;
-        overlays.value[copy_index].top = overlays.value[hovered_index].top;
-        overlays.value[copy_index].left = overlays.value[hovered_index].left;
-        overlays.value[copy_index].scale = overlays.value[hovered_index].scale;
-        overlays.value[copy_index].z_index = overlays.value[hovered_index].z_index + 1;
+        profile.value.overlays[copy_index].width = profile.value.overlays[hovered_index].width;
+        profile.value.overlays[copy_index].height = profile.value.overlays[hovered_index].height;
+        profile.value.overlays[copy_index].top = profile.value.overlays[hovered_index].top;
+        profile.value.overlays[copy_index].left = profile.value.overlays[hovered_index].left;
+        profile.value.overlays[copy_index].scale = profile.value.overlays[hovered_index].scale;
+        profile.value.overlays[copy_index].z_index = profile.value.overlays[hovered_index].z_index + 1;
 
 
         copy_index = -1;
@@ -617,7 +622,7 @@ const app = createApp({
       const index = event.target.attributes.getNamedItem('data-ind')?.value;
       if (!index) return;
 
-      const overlay = overlays.value[index];
+      const overlay = profile.value.overlays[index];
       let class_name = '';
 
 
@@ -671,7 +676,7 @@ const app = createApp({
      */
     function add_overlay(overlay) {
       _id++;
-      settings.value.profiles[settings.value.profile].overlays.push({
+      profile.value.overlays.push({
         _enabled: true,
         _settings: Array.isArray(overlay.settings) ? overlay.settings.length > 0 : false,
         id: _id,
@@ -694,7 +699,7 @@ const app = createApp({
 
 
     function reset_overlay(index) {
-      const item = overlays.value[index];
+      const item = profile.value.overlays[index];
       if (!item) return;
 
 
@@ -714,7 +719,7 @@ const app = createApp({
 
 
     function remove_overlay(index) {
-      settings.value.profiles[settings.value.profile].overlays.splice(index, 1);
+      profile.value.overlays.splice(index, 1);
       context_overlay.value._ = false;
 
       save_settings();
@@ -730,34 +735,41 @@ const app = createApp({
     function add_profile() {
       if (new_profile.value == '') return;
 
-      const index = settings.value.profiles.push({
+      const id = crypto.randomUUID();
+      settings.value.profiles.push({
+        id: id,
         name: new_profile.value,
         overlays: [],
       });
 
-      settings.value.profile = index - 1;
+      settings.value[`${profile_name}_profile`] = id;
       new_profile.value = '';
 
       save_settings();
     };
 
 
-    function switch_profile(index) {
-      settings.value.profile = index;
+    function switch_profile(id, type) {
+      settings.value[`${type}_profile`] = id;
       save_settings();
     };
 
+
     function delete_profile(index) {
+      const id = settings.value.profiles[index].id;
       settings.value.profiles.splice(index, 1);
+
 
       if (settings.value.profiles.length == 0) {
         settings.value.profiles.push({
+          id: 'default',
           name: 'default',
           overlays: [],
         });
       };
 
-      settings.value.profile = 0;
+      if (settings.value.obs_profile == id) settings.value.obs_profile = 'default';
+      if (settings.value.ingame_profile == id) settings.value.ingame_profile = 'default';
 
       save_settings();
     };
@@ -794,18 +806,34 @@ const app = createApp({
     };
 
 
+    function is_number(value) {
+      if (typeof value === 'number') return value - value === 0;
+      if (typeof value === 'string' && value.trim() !== '')
+        return Number.isFinite ? Number.isFinite(+value) : isFinite(+value);
+
+      return false;
+    };
+
+
     socket.sendCommand('getOverlays', encodeURI('__ingame__'));
     socket.sendCommand('getSettings', encodeURI('__ingame__'));
     socket.commands((data) => {
       try {
         let { command, message } = data;
         if (command == 'getSettings') {
-          // FIXME: Remove legacy after 12 months
-          if (Object.keys(message).length == 1 && message.overlays)
-            message = { profile: 0, profiles: [{ name: 'default', overlays: message.overlays }] };
+          if (
+            Object.keys(message).length == 0 ||
+            (Object.keys(message).length == 1 && message.overlays)
+          )
+            message = { obs_profile: 'default', ingame_profile: 'default', profiles: [{ id: 'default', name: 'default', overlays: message.overlays || [] }] };
 
           if (JSON.stringify(message) != JSON.stringify(settings.value)) {
             settings.value = message;
+
+            if (!is_number(settings.value.obs_profile))
+              settings.value.obs_profile = 'default';
+            if (!is_number(settings.value.ingame_profile))
+              settings.value.ingame_profile = 'default';
           };
         };
 
@@ -833,11 +861,11 @@ const app = createApp({
 
     return {
       settings,
-      editing_profiles, new_profile,
+      editing_profiles, new_profile, profile,
       add_profile, switch_profile, delete_profile,
       max_width, max_height, cursor,
       empty_ctx, overlay_ctx, profiles_ctx,
-      available_overlays, overlays,
+      available_overlays,
       context_empty, context_overlay,
       side_decide, enable_drag, stop_drag,
       add_overlay, reset_overlay, remove_overlay,
@@ -902,4 +930,9 @@ app.mount('.main');
 
 /**
  * @typedef {string | { field: string; keys: Filters[] }} Filters
+ */
+
+
+/**
+ * @typedef { { id: string, name: string, overlays: Overlay[] } } Profile
  */
