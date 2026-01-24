@@ -6,6 +6,20 @@ import { config } from './config';
 import { context } from './context';
 import { ensureDirectoryExists, getDataPath } from './directories';
 
+export function getLocalTime() {
+    const now = new Date();
+    return (
+        now.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        }) +
+        '.' +
+        String(now.getMilliseconds()).padStart(3, '0')
+    );
+}
+
 const colors = {
     info: '\x1b[1m\x1b[40m\x1b[42m',
     error: '\x1b[1m\x1b[37m\x1b[41m',
