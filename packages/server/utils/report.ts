@@ -84,15 +84,18 @@ export async function generateReport(instanceManager: any): Promise<Report> {
             .split('\n')
             .slice(0, -1)
             .map((r) => {
-                const parse = r.split(
-                    /info|debugError|debug|time|error|warn/gm
+                const match = r.match(
+                    /^(\d{2}:\d{2}:\d{2}\.\d{3})\s+\[(\w+)\]\s+(.*)$/
                 );
-                return [
-                    parse[0] || '',
-                    r.match(/info|debugError|debug|time|error|warn/gm)?.[0] ||
-                        '',
-                    parse[1] || ''
-                ];
+
+                if (match) {
+                    let level = match[2];
+                    if (level === 'derror') level = 'debugError';
+
+                    return [match[1], level, match[3]];
+                }
+
+                return ['', '', r];
             })
     };
 }
