@@ -1,0 +1,111 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Nullable>enable</Nullable>
+    <PublishDir>dist</PublishDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.JavaScript.NodeApi" Version="0.9.19" />
+    <PackageReference Include="Microsoft.JavaScript.NodeApi.Generator" Version="0.9.19" />
+    <PackageReference Include="ppy.osu.Game" Version="2026.119.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2026.119.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2026.119.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2026.119.0" />
+    <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2026.119.0" />
+
+    <!-- Idk if there are better way to exclude bloated dependencies without specifying them all -->
+    <PackageReference Include="ppy.Veldrid" Version="4.9.69-ga405fe8484" PrivateAssets="All" />
+    <PackageReference Include="ppy.Veldrid.SPIRV" Version="1.0.15-g5911265ec3" PrivateAssets="All" />
+    <PackageReference Include="ppy.Veldrid.OpenGLBindings" Version="4.9.69-ga405fe8484" PrivateAssets="All" />
+    <PackageReference Include="ppy.Veldrid.MetalBindings" Version="4.9.69-ga405fe8484" PrivateAssets="All" />
+    <PackageReference Include="ppy.osu.Framework.NativeLibs" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.osu.Game.Resources" Version="*" PrivateAssets="All" />
+    <PackageReference Include="MessagePack" Version="*" PrivateAssets="All" />
+    <PackageReference Include="MessagePack.Annotations" Version="*" PrivateAssets="All" />
+    <PackageReference Include="JetBrains.Annotations" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.af" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ar" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.az" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.bg" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.bn" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ca" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.cs" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.da" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.de" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.el" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.es" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.fa" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.fi" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.fil" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.fr" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.he" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.hr" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.hu" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.hy" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.id" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.is" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.it" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ja" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ko" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ku" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.lb" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.lt" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.lv" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ms" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.mt" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.nb" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.nl" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.pl" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.pt" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.pt-BR" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ro" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.ru" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.sk" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.sl" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.sr" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.sr-Latn" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.sv" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.th" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.tr" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.uk" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.uz-Cyrl-UZ" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.uz-Latn-UZ" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.vi" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.zh-CN" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.zh-Hans" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer.Core.zh-Hant" version="*" PrivateAssets="All" />
+    <PackageReference Include="Humanizer" Version="*" PrivateAssets="All" />
+    <PackageReference Include="AutoMapper" Version="*" PrivateAssets="All" />
+    <PackageReference Include="DiffPlex" Version="*" PrivateAssets="All" />
+    <PackageReference Include="HtmlAgilityPack" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.LocalisationAnalyser" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Sentry" Version="*" PrivateAssets="All" />
+    <PackageReference Include="TagLibSharp" Version="*" PrivateAssets="All" />
+    <PackageReference Include="OpenTabletDriver" Version="*" PrivateAssets="All" />
+    <PackageReference Include="OpenTabletDriver.Native" Version="*" PrivateAssets="All" />
+    <PackageReference Include="OpenTabletDriver.Plugin" Version="*" PrivateAssets="All" />
+    <PackageReference Include="OpenTabletDriver.Configurations" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.ManagedBass" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.ManagedBass.Fx" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.ManagedBass.Mix" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.ManagedBass.Wasapi" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.SDL2-CS" Version="*" PrivateAssets="All" />
+    <PackageReference Include="ppy.SDL3-CS" Version="*" PrivateAssets="All" />
+    <PackageReference Include="SQLitePCLRaw.core" Version="*" PrivateAssets="All" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="*" PrivateAssets="All" />
+    <PackageReference Include="SQLitePCLRaw.config.e_sqlite3" Version="*" PrivateAssets="All" />
+    <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3" Version="*" PrivateAssets="All" />
+    <PackageReference Include="SourceGear.sqlite3" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Realm" Version="20.1.0" ExcludeAssets="native" />
+    <PackageReference Include="StbiSharp" Version="1.1.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="*" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

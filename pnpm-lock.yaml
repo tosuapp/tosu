@@ -116,6 +116,12 @@ importers:
         specifier: workspace:*
         version: link:../tsprocess
 
+  packages/pp:
+    devDependencies:
+      node-api-dotnet:
+        specifier: ^0.9.19
+        version: 0.9.19
+
   packages/server:
     dependencies:
       '@kotrikd/rosu-pp':
@@ -246,7 +252,6 @@ packages:
 
   '@asdf-overlay/core@1.0.4':
     resolution: {integrity: sha512-XzhnD7M+MXCMWx32763mmvzxJCJqGWb2qzlaNNhLVrUAXfy5S4uZGuw4GoLqT2oVfxwG+sFknYFiw+2hdfzFiQ==}
-    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.0.4':
@@ -3139,6 +3144,9 @@ packages:
     resolution: {integrity: sha512-/bRZty2mXUIFY/xU5HLvveNHlswNJej+RnxBjOMkidWfwZzgTbPG1E3K5TOxRLOR+5hX7bSofy8yf1hZevMS8A==}
     engines: {node: ^18 || ^20 || >= 21}
 
+  node-api-dotnet@0.9.19:
+    resolution: {integrity: sha512-7y+mPsIfebm8ftc+ZdQtC/05KT5IRK4N4Kdkb+VPpW7fLJsGupIiTOCCDZ3H4tKNPVvifNzFCbv0lak/JCKh+w==}
+
   node-api-headers@1.7.0:
     resolution: {integrity: sha512-uJMGdkhVwu9+I3UsVvI3KW6ICAy/yDfsu5Br9rSnTtY3WpoaComXvKloiV5wtx0Md2rn0B9n29Ys2WMNwWxj9A==}
 
@@ -3959,10 +3967,12 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   temp-file@3.4.0:
     resolution: {integrity: sha512-C5tjlC/HCtVUOi3KWVokd4vHVViOmGjtLwIh4MuzPo/nMYTV/p1urt3RnMz2IWXDdKEGJH3k5+KPxtqRsUYGtg==}
@@ -7596,6 +7606,8 @@ snapshots:
     optional: true
 
   node-addon-api@8.5.0: {}
+
+  node-api-dotnet@0.9.19: {}
 
   node-api-headers@1.7.0: {}
 

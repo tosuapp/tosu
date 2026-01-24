@@ -1,0 +1,13 @@
+{
+  "name": "@tosu/pp",
+  "version": "0.1.0",
+  "description": "PP calculator for tosu",
+  "author": "storycraft <storycraft@pancake.sh>",
+  "main": "src/index.ts",
+  "scripts": {
+    "postinstall": "dotnet publish native"
+  },
+  "devDependencies": {
+    "node-api-dotnet": "^0.9.19"
+  }
+}
