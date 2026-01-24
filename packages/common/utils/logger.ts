@@ -41,11 +41,16 @@ export function colorText(status: string, color: keyof typeof LogColor) {
 const HighlightColor = '\x1b[1m\x1b[37m';
 
 function stripHighlights(text: string): string {
-    return text.replace(/%([^%]+)%/g, '$1');
+    // Removes %text% markers used for highlighting. Ignores links.
+    return text.replace(/(^|[\s([])%([^%]+)%(?=[.,:;!?\s)\]]|$)/g, '$1$2');
 }
 
 function applyHighlightStyles(text: string): string {
-    return text.replace(/%([^%]+)%/g, `${HighlightColor}$1\x1b[0m`);
+    // Matches %text% and applies highlight styles. Ignores links.
+    return text.replace(
+        /(^|[\s([])%([^%]+)%(?=[.,:;!?\s)\]]|$)/g,
+        `$1${HighlightColor}$2\x1b[0m`
+    );
 }
 
 function formatConsoleArgs(args: any[]): any[] {
@@ -89,10 +94,6 @@ function logConsole(type: keyof typeof LogColor, ...args: any[]) {
 
     const coloredText = colorText(type.toLowerCase(), type);
     console.log(coloredText, ...formatConsoleArgs(args));
-
-    if (progressManager.isActive && process.stdout.isTTY) {
-        console.log('');
-    }
 
     progressManager.render();
 }
