@@ -35,16 +35,17 @@ export const downloadFile = (
                 }
 
                 const file = fs.createWriteStream(destination);
+                const token = progressManager.start('Downloading File');
 
                 file.on('error', async (err) => {
                     fs.unlinkSync(destination);
-                    await progressManager.end('Download failed');
+                    await progressManager.end(token, 'Download failed');
                     reject(err);
                 });
 
                 file.on('finish', async () => {
                     file.close();
-                    await progressManager.end('Download completed');
+                    await progressManager.end(token, 'Download completed');
                     resolve(destination);
                 });
 
@@ -53,8 +54,6 @@ export const downloadFile = (
                     10
                 );
                 let downloadedSize = 0;
-
-                progressManager.start('Downloading File');
 
                 response.on('data', (data) => {
                     downloadedSize += data.length;
@@ -66,6 +65,7 @@ export const downloadFile = (
                     const totalMB = (totalSize / 1024 / 1024).toFixed(2);
 
                     progressManager.update(
+                        token,
                         progress,
                         `| ${downloadedMB} / ${totalMB} MB`
                     );
@@ -74,7 +74,6 @@ export const downloadFile = (
                 response.pipe(file);
             })
             .on('error', async (err) => {
-                await progressManager.end();
                 reject(err);
             });
     });
