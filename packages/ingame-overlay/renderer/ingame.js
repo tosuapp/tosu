@@ -158,9 +158,11 @@ const socket = new WebSocketManager('localhost:24050');
 
 const app = createApp({
     setup() {
+        const params = new URL(location.href).searchParams;
         const is_edit_available_by_default =
-            import.meta.env.DEV ||
-            new URL(location.href).searchParams.get('edit') === 'true';
+            import.meta.env.DEV || params.get('edit') === 'true';
+
+        const url_profile_name = params.get('profile');
 
         const is_edit = ref(is_edit_available_by_default);
         const editing_profiles = ref(false);
@@ -197,8 +199,12 @@ const app = createApp({
         const profile = computed(
             () =>
                 settings.value.profiles.find(
+                    (r) => r.name == url_profile_name
+                ) ||
+                settings.value.profiles.find(
                     (r) => r.id == settings.value[`${profile_name}_profile`]
-                ) || settings.value.profiles.at(0)
+                ) ||
+                settings.value.profiles.at(0)
         );
 
         const context_empty = ref({

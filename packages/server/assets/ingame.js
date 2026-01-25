@@ -139,7 +139,9 @@ const socket = new WebSocketManager(window.location.host);
 
 const app = createApp({
   setup() {
-    const is_edit_available_by_default = new URL(location.href).searchParams.get('edit') === 'true';
+    const params = new URL(location.href).searchParams;
+    const is_edit_available_by_default = params.get('edit') === 'true';
+    const url_profile_name = params.get('profile');
 
     const is_edit = ref(is_edit_available_by_default);
     const editing_profiles = ref(false);
@@ -172,7 +174,7 @@ const app = createApp({
     /** @type { { value: ICounter[] } } */
     const available_overlays = ref(window.COUNTERS || []);
     /** @type { { value: Profile } } */
-    const profile = computed(() => settings.value.profiles.find(r => r.id == settings.value[`${profile_name}_profile`]) || settings.value.profiles.at(0));
+    const profile = computed(() => settings.value.profiles.find(r => r.name == url_profile_name) || settings.value.profiles.find(r => r.id == settings.value[`${profile_name}_profile`]) || settings.value.profiles.at(0));
 
     const context_empty = ref({
       _: false,
