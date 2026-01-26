@@ -808,15 +808,6 @@ const app = createApp({
     };
 
 
-    function is_number(value) {
-      if (typeof value === 'number') return value - value === 0;
-      if (typeof value === 'string' && value.trim() !== '')
-        return Number.isFinite ? Number.isFinite(+value) : isFinite(+value);
-
-      return false;
-    };
-
-
     socket.sendCommand('getOverlays', encodeURI('__ingame__'));
     socket.sendCommand('getSettings', encodeURI('__ingame__'));
     socket.commands((data) => {
@@ -832,9 +823,9 @@ const app = createApp({
           if (JSON.stringify(message) != JSON.stringify(settings.value)) {
             settings.value = message;
 
-            if (!is_number(settings.value.obs_profile))
+            if (!settings.value.obs_profile)
               settings.value.obs_profile = 'default';
-            if (!is_number(settings.value.ingame_profile))
+            if (!settings.value.ingame_profile)
               settings.value.ingame_profile = 'default';
           };
         };

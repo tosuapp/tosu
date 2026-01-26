@@ -34,7 +34,7 @@
         <span>obs</span>
       </div>
       <div v-if="settings.profiles.length > 0" class="scroll">
-        <div v-for="value in settings.profiles" class="flexer profile-item">
+        <div v-for="(value, index) in settings.profiles" class="flexer profile-item">
           <span v-text="value.overlays.length"></span>
           <input type="text" class="input" placeholder="profile name" v-model="value.name">
 
