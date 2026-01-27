@@ -27,7 +27,7 @@ class WebSocketManager {
 
       if (INTERVAL) clearInterval(INTERVAL);
       if (Array.isArray(filters)) {
-        this.sockets[url].send(`applyFilters:${JSON.stringify(filters)}`);
+        this.sockets[url].send(`applyFilters:__ingame__:${JSON.stringify(filters)}`);
       }
     };
 
@@ -43,7 +43,6 @@ class WebSocketManager {
     this.sockets[url].onerror = (event) => {
       console.log(`[ERROR] ${url}: ${event.reason}`);
     };
-
 
     this.sockets[url].onmessage = (event) => {
       try {
@@ -86,16 +85,16 @@ class WebSocketManager {
 
   /**
    *
-   * @param {string} name
-   * @param {string|Object} payload
+   * @param {string} command
+   * @param {string} overlay_name
+   * @param {string} payload
    */
-  sendCommand(name, command, amountOfRetries = 1) {
+  sendCommand(command, overlay_name, payload, amountOfRetries = 1) {
     const that = this;
-
 
     if (!this.sockets['/websocket/commands']) {
       setTimeout(() => {
-        that.sendCommand(name, command, amountOfRetries + 1);
+        that.sendCommand(command, overlay_name, payload, amountOfRetries + 1);
       }, 100);
 
       return;
@@ -103,13 +102,13 @@ class WebSocketManager {
 
 
     try {
-      const payload = typeof command == 'object' ? JSON.stringify(command) : command;
-      this.sockets['/websocket/commands'].send(`${name}:${payload}`);
+      const value = typeof payload == 'object' ? JSON.stringify(payload) : payload;
+      this.sockets['/websocket/commands'].send(`${command}:${overlay_name}:${value || ''}`);
     } catch (error) {
       if (amountOfRetries <= 3) {
         console.log(`[COMMAND_ERROR] Attempt ${amountOfRetries}`, error);
         setTimeout(() => {
-          that.sendCommand(name, command, amountOfRetries + 1);
+          that.sendCommand(command, overlay_name, payload, amountOfRetries + 1);
         }, 1000);
         return;
       };
@@ -140,12 +139,12 @@ const socket = new WebSocketManager(window.location.host);
 
 const app = createApp({
   setup() {
-    const settings_debounce = debounce((v, old) => {
-      save_settings();
-    }, 400);
+    const params = new URL(location.href).searchParams;
+    const is_edit_available_by_default = params.get('edit') === 'true';
+    const url_profile_name = params.get('profile');
 
-    const is_edit_available_by_default = new URL(location.href).searchParams.get('edit') === 'true';
     const is_edit = ref(is_edit_available_by_default);
+    const editing_profiles = ref(false);
 
     const max_width = ref(window.innerWidth);
     const max_height = ref(window.innerHeight);
@@ -155,15 +154,27 @@ const app = createApp({
 
     const empty_ctx = ref(null);
     const overlay_ctx = ref(null);
+    const profiles_ctx = ref(null);
+
+    const profile_name = window.obsstudio ? 'obs' : 'ingame';
 
 
+    /** @type { { value: { obs_profile: string, ingame_profile: string, profiles: Profile[] } } } */
+    const settings = ref({
+      obs_profile: 'default',
+      ingame_profile: 'default',
+      profiles: [{
+        id: 'default',
+        name: 'default',
+        overlays: [],
+      }]
+    });
+    const new_profile = ref('');
 
     /** @type { { value: ICounter[] } } */
     const available_overlays = ref(window.COUNTERS || []);
-    /** @type { { value: Overlay[] } } */
-    const overlays = ref([]);
-
-
+    /** @type { { value: Profile } } */
+    const profile = computed(() => settings.value.profiles.find(r => r.name == url_profile_name) || settings.value.profiles.find(r => r.id == settings.value[`${profile_name}_profile`]) || settings.value.profiles.at(0));
 
     const context_empty = ref({
       _: false,
@@ -185,13 +196,6 @@ const app = createApp({
     });
 
 
-    const settings = computed(() => {
-      const array = JSON.stringify(overlays.value);
-      return { overlays: array };
-    });
-
-
-    watch(settings, settings_debounce);
     watchEffect(() => {
       document.body.style.cursor = cursor.value.type;
     });
@@ -302,7 +306,7 @@ const app = createApp({
         return;
       };
 
-      const find = overlays.value[index];
+      const find = profile.value.overlays[index];
       if (!find) {
         // console.log(`[resizing-${event.ctrlKey ? 'scale' : ''}]`, `cant find overlay`, event);
 
@@ -318,6 +322,8 @@ const app = createApp({
         if (scale < 0.1) return;
 
         find.scale = round_up(scale);
+
+        save_settings();
         return;
       };
 
@@ -374,6 +380,7 @@ const app = createApp({
         }
       };
 
+      save_settings();
     };
 
 
@@ -435,7 +442,7 @@ const app = createApp({
         return;
       };
 
-      const find = overlays.value[index];
+      const find = profile.value.overlays[index];
       if (!find) {
         // console.log('[mousemove]', `cant find overlay`, event);
 
@@ -446,6 +453,8 @@ const app = createApp({
       find.left = round_up(Math.max(0, Math.min(max_width.value - element_width, initial_left + offset_x)));
 
       // console.log('move', { offset_x, offset_y, element_width, element_height });
+
+      save_settings();
     });
 
     window.addEventListener('mouseup', stop_drag);
@@ -535,11 +544,17 @@ const app = createApp({
         context_overlay.value.index = -1;
       };
 
+      if (profiles_ctx.value) {
+        if (profiles_ctx.value.contains(event.target)) return;
+
+        editing_profiles.value = false;
+      };
+
       // console.log('lost', event);
     });
 
 
-    window.addEventListener('resize', (event) => {
+    window.addEventListener('resize', () => {
       max_width.value = window.innerWidth;
       max_height.value = window.innerHeight;
     });
@@ -584,12 +599,12 @@ const app = createApp({
           element = document.querySelector(`[data-ind="${copy_index}"]`);
         };
 
-        overlays.value[copy_index].width = overlays.value[hovered_index].width;
-        overlays.value[copy_index].height = overlays.value[hovered_index].height;
-        overlays.value[copy_index].top = overlays.value[hovered_index].top;
-        overlays.value[copy_index].left = overlays.value[hovered_index].left;
-        overlays.value[copy_index].scale = overlays.value[hovered_index].scale;
-        overlays.value[copy_index].z_index = overlays.value[hovered_index].z_index + 1;
+        profile.value.overlays[copy_index].width = profile.value.overlays[hovered_index].width;
+        profile.value.overlays[copy_index].height = profile.value.overlays[hovered_index].height;
+        profile.value.overlays[copy_index].top = profile.value.overlays[hovered_index].top;
+        profile.value.overlays[copy_index].left = profile.value.overlays[hovered_index].left;
+        profile.value.overlays[copy_index].scale = profile.value.overlays[hovered_index].scale;
+        profile.value.overlays[copy_index].z_index = profile.value.overlays[hovered_index].z_index + 1;
 
 
         copy_index = -1;
@@ -599,6 +614,8 @@ const app = createApp({
         setTimeout(() => {
           element.classList.remove('hlh-paste');
         }, 200);
+
+        save_settings();
       };
     });
 
@@ -607,7 +624,7 @@ const app = createApp({
       const index = event.target.attributes.getNamedItem('data-ind')?.value;
       if (!index) return;
 
-      const overlay = overlays.value[index];
+      const overlay = profile.value.overlays[index];
       let class_name = '';
 
 
@@ -629,6 +646,8 @@ const app = createApp({
       setTimeout(() => {
         event.target.classList.remove(`hlh-index-${class_name}`);
       }, 100);
+
+      save_settings();
     });
 
     window.addEventListener('message', data => {
@@ -640,10 +659,17 @@ const app = createApp({
 
         context_empty.value._ = false;
         context_overlay.value._ = false;
+        editing_profiles.value = false;
+
         closeModal_func(null);
       };
     });
 
+
+
+    function save_settings() {
+      socket.sendCommand('saveSettings', encodeURI('__ingame__'), JSON.stringify(settings.value));
+    };
 
 
     /**
@@ -652,7 +678,8 @@ const app = createApp({
      */
     function add_overlay(overlay) {
       _id++;
-      overlays.value.push({
+      profile.value.overlays.push({
+        _enabled: true,
         _settings: Array.isArray(overlay.settings) ? overlay.settings.length > 0 : false,
         id: _id,
         folderName: overlay.folderName,
@@ -669,11 +696,12 @@ const app = createApp({
 
 
       context_empty.value._ = false;
+      save_settings();
     };
 
 
     function reset_overlay(index) {
-      const item = overlays.value[index];
+      const item = profile.value.overlays[index];
       if (!item) return;
 
 
@@ -687,12 +715,16 @@ const app = createApp({
       item.scale = 1;
       item.z_index = 1;
       // context_overlay.value._ = false;
+
+      save_settings();
     };
 
 
     function remove_overlay(index) {
-      overlays.value.splice(index, 1);
+      profile.value.overlays.splice(index, 1);
       context_overlay.value._ = false;
+
+      save_settings();
     };
 
 
@@ -702,17 +734,49 @@ const app = createApp({
     };
 
 
+    function add_profile() {
+      if (new_profile.value == '') return;
 
-    async function save_settings() {
-      try {
-        await fetch('/api/counters/settings/__ingame__', {
-          method: 'POST',
-          body: JSON.stringify({ overlays: overlays.value })
-        });
-      } catch (error) {
-        console.log(error);
-      };
+      const id = crypto.randomUUID();
+      settings.value.profiles.push({
+        id: id,
+        name: new_profile.value,
+        overlays: [],
+      });
+
+      settings.value[`${profile_name}_profile`] = id;
+      new_profile.value = '';
+
+      save_settings();
     };
+
+
+    function switch_profile(id, type) {
+      settings.value[`${type}_profile`] = id;
+      save_settings();
+    };
+
+
+    function delete_profile(index) {
+      const id = settings.value.profiles[index].id;
+      settings.value.profiles.splice(index, 1);
+
+
+      if (settings.value.profiles.length == 0) {
+        settings.value.profiles.push({
+          id: 'default',
+          name: 'default',
+          overlays: [],
+        });
+      };
+
+      if (settings.value.obs_profile == id) settings.value.obs_profile = 'default';
+      if (settings.value.ingame_profile == id) settings.value.ingame_profile = 'default';
+
+      save_settings();
+    };
+
+
 
     function notification({ text, classes, delay }) {
       const div = document.createElement('div');
@@ -744,25 +808,44 @@ const app = createApp({
     };
 
 
-    socket.sendCommand('getCounters', encodeURI('__ingame__'));
+    socket.sendCommand('getOverlays', encodeURI('__ingame__'));
     socket.sendCommand('getSettings', encodeURI('__ingame__'));
     socket.commands((data) => {
       try {
-        const { command, message } = data;
+        let { command, message } = data;
         if (command == 'getSettings') {
-          if (JSON.stringify(message.overlays || []) != JSON.stringify(overlays.value)) {
-            overlays.value = message.overlays;
+          if (
+            Object.keys(message).length == 0 ||
+            (Object.keys(message).length == 1 && message.overlays)
+          )
+            message = { obs_profile: 'default', ingame_profile: 'default', profiles: [{ id: 'default', name: 'default', overlays: message.overlays || [] }] };
+
+          if (JSON.stringify(message) != JSON.stringify(settings.value)) {
+            settings.value = message;
+
+            if (!settings.value.obs_profile)
+              settings.value.obs_profile = 'default';
+            if (!settings.value.ingame_profile)
+              settings.value.ingame_profile = 'default';
           };
         };
 
 
-        if (command == 'getCounters' && Array.isArray(message)) {
+        if (command == 'getOverlays' && Array.isArray(message)) {
           available_overlays.value = message;
         };
 
-        if (command == 'getSettings' || command == 'getCounters') {
-          overlays.value.forEach(r => r._enabled = available_overlays.value.some(a => a.folderName == r.folderName));
-        }
+        if ((command == 'getSettings' || command == 'getOverlays') && Array.isArray(settings.value.profiles)) {
+          for (let i = 0; i < settings.value.profiles.length; i++) {
+            const profile = settings.value.profiles[i];
+            profile.overlays.forEach(r => r._enabled = available_overlays.value.some(a => a.folderName == r.folderName));
+          };
+        };
+
+
+        if (command == 'updateSettings') {
+          settings.value = message;
+        };
       } catch (error) {
         console.log(error);
       };
@@ -770,9 +853,12 @@ const app = createApp({
 
 
     return {
+      settings,
+      editing_profiles, new_profile, profile,
+      add_profile, switch_profile, delete_profile,
       max_width, max_height, cursor,
-      empty_ctx, overlay_ctx,
-      available_overlays, overlays,
+      empty_ctx, overlay_ctx, profiles_ctx,
+      available_overlays,
       context_empty, context_overlay,
       side_decide, enable_drag, stop_drag,
       add_overlay, reset_overlay, remove_overlay,
@@ -840,12 +926,6 @@ app.mount('.main');
  */
 
 
-function debounce(callback, wait) {
-  let timeoutId = null;
-  return (...args) => {
-    window.clearTimeout(timeoutId);
-    timeoutId = window.setTimeout(() => {
-      callback(...args);
-    }, wait);
-  };
-};
+/**
+ * @typedef { { id: string, name: string, overlays: Overlay[] } } Profile
+ */

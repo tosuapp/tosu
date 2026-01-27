@@ -523,7 +523,8 @@ a {
   box-shadow: 0em 0.4em 3em hsl(from var(--button-update) h s l / 50%);
 }
 
-.delete-button {
+.delete-button,
+.remove-button {
   color: var(--background-1);
   background: var(--button-delete);
 }
