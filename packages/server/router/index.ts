@@ -110,7 +110,9 @@ export default function buildBaseApi(server: Server) {
 
                         server.WS_COMMANDS.socket.emit(
                             'message',
-                            `getCounters:__ingame__`
+                            'unzip',
+                            'getOverlays',
+                            `__ingame__`
                         );
 
                         sendJson(res, {
@@ -222,7 +224,12 @@ export default function buildBaseApi(server: Server) {
 
             fs.rmSync(folderPath, { recursive: true, force: true });
 
-            server.WS_COMMANDS.socket.emit('message', `getCounters:__ingame__`);
+            server.WS_COMMANDS.socket.emit(
+                'message',
+                'remove',
+                'getOverlays',
+                `__ingame__`
+            );
 
             return sendJson(res, {
                 status: 'deleted'
@@ -327,7 +334,9 @@ export default function buildBaseApi(server: Server) {
 
             server.WS_COMMANDS.socket.emit(
                 'message',
-                `getSettings:${folderName}`
+                'save settings',
+                'getSettings',
+                folderName
             );
 
             return sendJson(res, { result: 'success' });

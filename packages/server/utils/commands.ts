@@ -1,29 +1,49 @@
-import { JsonSafeParse, wLogger } from '@tosu/common';
+import { JsonSafeParse, debounce, wLogger } from '@tosu/common';
 
-import { getLocalCounters } from './counters';
+import { getLocalCounters, saveSettings } from './counters';
 import { parseCounterSettings } from './parseSettings';
-import { ModifiedWebsocket } from './socket';
+import { ModifiedWebsocket, Websocket } from './socket';
 
-export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
+const saveDelay = debounce((overlayFrom: string, json: any) => {
+    const html = saveSettings(overlayFrom, json);
+    if (html instanceof Error) {
+        wLogger.error(`Failed to save settings for %${overlayFrom}%: ${html.message}`);
+        wLogger.debug(`Detailed error object for failed save:`, html);
+        return;
+    }
+  
+    wLogger.debug(`Successfully saved settings for %${overlayFrom}%`);
+}, 500);
+
+export function handleSocketCommands(
+    data: string,
+    socket: ModifiedWebsocket,
+    ws: Websocket
+) {
     wLogger.debug(`Received WebSocket command: %${data}%`);
     if (!data.includes(':')) {
         return;
     }
 
-    const index = data.indexOf(':');
-    const command = data.substring(0, index);
-    const payload = data.substring(index + 1);
+    const firstIndex = data.indexOf(':');
+    const SecondIndex = data.indexOf(':', firstIndex + 1);
+
+    const command = data.substring(0, firstIndex);
+    const overlayName =
+        SecondIndex === -1
+            ? decodeURIComponent(data.substring(firstIndex + 1))
+            : decodeURIComponent(data.substring(firstIndex + 1, SecondIndex));
+
+    const legacyPayload = data.substring(firstIndex + 1);
+    const payload = data.substring(SecondIndex + 1);
 
     let message: any;
 
-    const requestedFrom = decodeURI(socket.query?.l || '');
-    const requestedName = decodeURI(payload || '');
+    const overlayFrom = decodeURI(socket.query?.l || '');
     switch (command) {
+        case 'getOverlays':
         case 'getCounters': {
-            if (
-                requestedFrom !== '__ingame__' ||
-                requestedName !== requestedFrom
-            ) {
+            if (overlayFrom !== '__ingame__' || overlayName !== overlayFrom) {
                 message = {
                     error: 'Wrong overlay'
                 };
@@ -35,7 +55,7 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
         }
 
         case 'getSettings': {
-            if (requestedName !== requestedFrom) {
+            if (overlayName !== overlayFrom) {
                 message = {
                     error: 'Wrong overlay'
                 };
@@ -43,10 +63,7 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             }
 
             try {
-                const result = parseCounterSettings(
-                    requestedName,
-                    'counter/get'
-                );
+                const result = parseCounterSettings(overlayName, 'counter/get');
                 if (result instanceof Error) {
                     message = {
                         error: result.message
@@ -66,7 +83,28 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
             break;
         }
 
-        case 'applyFilters': {
+        case 'updateSettings': {
+            const json = JsonSafeParse({
+                isFile: false,
+                payload,
+                defaultValue: new Error('Broken json')
+            });
+            if (json instanceof Error) {
+                wLogger.error(
+                    '[ws]',
+                    `commands`,
+                    command,
+                    (json as Error).message
+                );
+                wLogger.debug('[ws]', `commands`, command, json);
+                return;
+            }
+
+            message = json;
+            break;
+        }
+
+        case 'saveSettings': {
             const json = JsonSafeParse({
                 isFile: false,
                 payload,
@@ -78,6 +116,35 @@ export function handleSocketCommands(data: string, socket: ModifiedWebsocket) {
                     (json as Error).message
                 );
                 wLogger.debug(`JSON parsing error details:`, json);
+                return;
+            }
+
+            saveDelay(overlayFrom, json);
+
+            ws.socket.emit(
+                'message',
+                socket.id,
+                'updateSettings',
+                overlayName,
+                payload
+            );
+            return;
+        }
+
+        case 'applyFilters': {
+            const json = JsonSafeParse({
+                isFile: false,
+                payload: payload.startsWith('[') ? payload : legacyPayload, // FIXME:
+                defaultValue: new Error('Broken json')
+            });
+            if (json instanceof Error) {
+                wLogger.error(
+                    '[ws]',
+                    `commands`,
+                    command,
+                    (json as Error).message
+                );
+                wLogger.debug('[ws]', `commands`, command, json);
                 return;
             }
 

@@ -76,12 +76,17 @@ body.-editing {
     background-color: rgba(0, 0, 0, 0.5);
 
     .background-notice,
-    .copyright {
+    .copyright,
+    .profile-selector {
         opacity: 1;
     }
 
     .copyright {
         top: 0.5em;
+    }
+
+    .profile-selector {
+        top: 3.4em;
     }
 
     .download-more {
@@ -375,6 +380,7 @@ iframe {
 
 .no-available {
     margin: 1em;
+    text-align: center;
 }
 
 .download-more {
@@ -386,4 +392,94 @@ iframe {
     transition: 0.3s ease;
     transition-property: filter, translate, opacity, bottom;
     z-index: 1;
+}
+
+.profile-selector {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    gap: 0.5em;
+
+    color: var(--background-1);
+    opacity: 0;
+    background: var(--button-open);
+
+    transition: all 0.3s ease;
+
+    transform: translateX(-50%);
+
+    &.active {
+        i {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+.profiles {
+    grid-auto-rows: minmax(min-content, max-content);
+    display: grid;
+    gap: 1em;
+
+    width: max-content;
+    top: 50%;
+    left: 50%;
+
+    padding: 0.8em;
+    opacity: 1;
+
+    transform: translate(-50%, -50%);
+}
+
+.profiles .scroll {
+    grid-auto-rows: minmax(min-content, max-content);
+    display: grid;
+    gap: 0.5em;
+    padding-bottom: 2px;
+}
+
+.profile-item {
+    gap: 0.5em;
+
+    .input {
+        flex-grow: 1;
+        background-color: #495b6d;
+
+        &::placeholder {
+            color: #9ba7b3;
+        }
+
+        &:hover {
+            background: #4e5e6f;
+        }
+
+        &:focus {
+            background: #2b353f;
+            outline: 2px solid var(--input-block);
+        }
+    }
+
+    .buttons {
+        width: 9.2em;
+        gap: 0.5em;
+    }
+
+    .selected-button {
+        background-color: #8e97a3;
+
+        &.active {
+            background-color: #e9e9ed;
+        }
+    }
+}
+
+.profiles-header {
+    justify-content: flex-end;
+    display: flex;
+    gap: 0.5em;
+
+    span {
+        justify-content: center;
+        display: flex;
+        width: 2.9em;
+    }
 }
