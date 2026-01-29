@@ -11,11 +11,7 @@ export const LogColor = {
 };
 
 export const LogSymbol = {
-    Info: '»',
-    Error: '✕',
-    Warn: '!',
-    Debug: '❖',
-    Time: '⧗',
+    Separator: '▍',
     ProgressBarFilled: '━',
     ProgressBarEmpty: '─'
 };

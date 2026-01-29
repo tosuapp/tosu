@@ -61,7 +61,7 @@ class ProgressManager {
 
             if (process.stdout.isTTY) {
                 const time = `${LogColor.Grey}${getLocalTime()}${LogColor.Reset}`;
-                const prefix = `${time} ${LogColor.Info} ${LogSymbol.Info} ${LogColor.Reset}`;
+                const prefix = `${LogColor.Info}${LogSymbol.Separator} ${time}${LogColor.Reset} `;
                 console.log(`${prefix} ${bar.title}: ${message}`);
             }
 
@@ -91,7 +91,7 @@ class ProgressManager {
 
         for (const [, bar] of this.bars) {
             const time = `${LogColor.Grey}${getLocalTime()}${LogColor.Reset}`;
-            const prefix = `${time} ${LogColor.Info} ${LogSymbol.Info} ${LogColor.Reset}`;
+            const prefix = `${LogColor.Info}${LogSymbol.Separator} ${time}${LogColor.Reset} `;
 
             const filledWidth = Math.round(this.barWidth * bar.progress);
             const emptyWidth = this.barWidth - filledWidth;

@@ -27,15 +27,7 @@ export function colorText(status: string, color: keyof typeof LogColor) {
     const colorCode = LogColor[color] || LogColor.Reset;
     const time = `${LogColor.Grey}${getLocalTime()}${LogColor.Reset}`;
 
-    let levelChar = status[0].toUpperCase();
-    if (status === 'info') levelChar = LogSymbol.Info;
-    else if (status === 'error' || status === 'debugerror')
-        levelChar = LogSymbol.Error;
-    else if (status === 'warn') levelChar = LogSymbol.Warn;
-    else if (status === 'debug') levelChar = LogSymbol.Debug;
-    else if (status === 'time') levelChar = LogSymbol.Time;
-
-    return `${time} ${colorCode} ${levelChar} ${LogColor.Reset}`;
+    return `${colorCode}${LogSymbol.Separator} ${time} ${LogColor.Reset}`;
 }
 
 const HighlightColor = '\x1b[1m\x1b[37m';
