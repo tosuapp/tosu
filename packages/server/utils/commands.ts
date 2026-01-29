@@ -7,11 +7,13 @@ import { ModifiedWebsocket, Websocket } from './socket';
 const saveDelay = debounce((overlayFrom: string, json: any) => {
     const html = saveSettings(overlayFrom, json);
     if (html instanceof Error) {
-        wLogger.error(`Failed to save settings for %${overlayFrom}%: ${html.message}`);
+        wLogger.error(
+            `Failed to save settings for %${overlayFrom}%: ${html.message}`
+        );
         wLogger.debug(`Detailed error object for failed save:`, html);
         return;
     }
-  
+
     wLogger.debug(`Successfully saved settings for %${overlayFrom}%`);
 }, 500);
 
