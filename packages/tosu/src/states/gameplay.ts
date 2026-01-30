@@ -704,6 +704,11 @@ export class Gameplay extends AbstractState {
                 difficultyNow
             );
 
+            beatmapPP.updateCurrentAttributes(
+                difficultyNow?.starRating || 0,
+                currPerformance.total
+            );
+
             beatmapPP.updatePPAttributes('curr', currPerformance);
             // todo: maxAchievable pp
             beatmapPP.currAttributes.maxAchievable = 0;
