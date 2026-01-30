@@ -83,7 +83,7 @@ export const calculateAccuracy = (params: {
     }
 
     if (denominator === 0) return 0;
-    return +((numerator / denominator) * 100).toFixed(2);
+    return (numerator / denominator) * 100;
 };
 
 export const calculateGrade = (params: {

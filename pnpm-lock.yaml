@@ -168,11 +168,11 @@ importers:
         specifier: workspace:*
         version: link:../updater
       '@tosuapp/osu-native-napi':
-        specifier: 1.0.1
-        version: 1.0.1
+        specifier: 1.0.2
+        version: 1.0.2
       '@tosuapp/osu-native-wrapper':
-        specifier: 1.0.4
-        version: 1.0.4
+        specifier: 1.0.6
+        version: 1.0.6
       osu-catch-stable:
         specifier: ^4.0.1
         version: 4.0.1(osu-classes@3.1.0)
@@ -1055,8 +1055,16 @@ packages:
     resolution: {integrity: sha512-gT+bQjWSOrna7zLbNbDuZB3yhYMJtkyRKnpOgcDdtzRkdyuytre0T9xEAugkA2CMO2vxqu/I6y2Y0CUXLkCSTg==}
     os: [win32]
 
+  '@tosuapp/osu-native-napi@1.0.2':
+    resolution: {integrity: sha512-H7sONpXPqIEuBgOnZAANddZZG4PJNm/ZOOc5GEJInyx3/dzEWJZmb7zWNGDjD1n4oJUWftbceHnj+To8hHzKHw==}
+    cpu: [x64]
+    os: [win32]
+
   '@tosuapp/osu-native-wrapper@1.0.4':
     resolution: {integrity: sha512-GlWLgPC49hvaqaRQbMRViR+l4r6PmUwEONUW/GkqaUHOcA8lRJOIl4CSx37xShVrwssPBi0kqgeMptuNvpnxeQ==}
+
+  '@tosuapp/osu-native-wrapper@1.0.6':
+    resolution: {integrity: sha512-LLo5cdzHEQTKlvI1Te3/DCZ/auiBOsjW1xqzN50nlDY6fCRkPq0bzZwvRl5h+eHMnUrRs77qCOVgLB/Y1uPlUg==}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
     resolution: {integrity: sha512-fYDQA9e6yTNmA13TLVSA+WMQRc5Bn/c0EUBditUHNfMMxN7M82c38b1kEggVE3pLpZ0FwkwJkUEKMiOi52JXFA==}
@@ -5055,9 +5063,15 @@ snapshots:
 
   '@tosuapp/osu-native-napi@1.0.1': {}
 
+  '@tosuapp/osu-native-napi@1.0.2': {}
+
   '@tosuapp/osu-native-wrapper@1.0.4':
     dependencies:
       '@tosuapp/osu-native-napi': 1.0.1
+
+  '@tosuapp/osu-native-wrapper@1.0.6':
+    dependencies:
+      '@tosuapp/osu-native-napi': 1.0.2
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:

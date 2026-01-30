@@ -9,7 +9,8 @@ import {
     ModsCollection,
     OsuPerformanceCalculator,
     PerformanceCalculatorFactory,
-    Ruleset
+    Ruleset,
+    ScoreInfoInput
 } from '@tosuapp/osu-native-wrapper';
 
 import { AbstractInstance } from '@/instances';
@@ -19,7 +20,11 @@ import {
     LeaderboardPlayer,
     Statistics
 } from '@/states/types';
-import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
+import {
+    calculateAccuracy,
+    calculateGrade,
+    calculatePassedObjects
+} from '@/utils/calculators';
 import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
@@ -236,9 +241,16 @@ export class Gameplay extends AbstractState {
             this.score = result.score;
             this.playerHPSmooth = result.playerHPSmooth;
             this.playerHP = result.playerHP;
-            this.accuracy = result.accuracy;
 
             this.statistics = result.statistics;
+
+            this.accuracy = calculateAccuracy({
+                isLazer: this.game.client === ClientType.lazer,
+                mode: this.mode,
+                mods: this.mods.array,
+                statistics: this.statistics
+            });
+
             this.maximumStatistics = result.maximumStatistics;
 
             this.combo = result.combo;
@@ -667,33 +679,31 @@ export class Gameplay extends AbstractState {
                 this.nativeTimedDifficulty[0]?.attributes ||
                 difficulty;
 
+            const scoreInput: ScoreInfoInput = {
+                ruleset,
+                legacyScore:
+                    this.game.client !== ClientType.lazer
+                        ? this.score
+                        : undefined,
+                beatmap: currentBeatmap,
+                mods: this.nativeMods,
+                maxCombo: this.maxCombo,
+                accuracy: this.accuracy / 100,
+                countMiss: this.statistics.miss,
+                countMeh: this.statistics.meh,
+                countOk: this.statistics.ok,
+                countGood: this.statistics.good,
+                countGreat: this.statistics.great,
+                countPerfect: this.statistics.perfect,
+                countSliderTailHit: this.statistics.sliderTailHit,
+                countLargeTickMiss: this.statistics.largeTickMiss
+            };
+
             const currPerformance = performanceCalc.calculate(
-                {
-                    ruleset,
-                    legacyScore:
-                        this.game.client !== ClientType.lazer
-                            ? this.score
-                            : undefined,
-                    beatmap: currentBeatmap,
-                    mods: this.nativeMods,
-                    maxCombo: this.maxCombo,
-                    accuracy: this.accuracy / 100,
-                    countMiss: this.statistics.miss,
-                    countMeh: this.statistics.meh,
-                    countOk: this.statistics.ok,
-                    countGood: this.statistics.good,
-                    countGreat: this.statistics.great,
-                    countPerfect: this.statistics.perfect,
-                    countSliderTailHit: this.statistics.sliderTailHit,
-                    countLargeTickMiss: this.statistics.largeTickMiss
-                },
+                scoreInput,
                 difficultyNow
             );
 
-            beatmapPP.updateCurrentAttributes(
-                difficultyNow?.starRating || 0,
-                currPerformance.total
-            );
             beatmapPP.updatePPAttributes('curr', currPerformance);
             // todo: maxAchievable pp
             beatmapPP.currAttributes.maxAchievable = 0;

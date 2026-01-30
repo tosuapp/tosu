@@ -1,5 +1,8 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
-import { NativeOsuDifficultyAttributes } from '@tosuapp/osu-native-napi';
+import {
+    NativeOsuDifficultyAttributes,
+    NativeOsuPerformanceAttributes
+} from '@tosuapp/osu-native-napi';
 import {
     DifficultyCalculatorFactory,
     Mod,
@@ -239,17 +242,17 @@ export class BeatmapPP extends AbstractState {
         this.kiais = [];
     }
 
-    updatePPAttributes(type: 'curr' | 'fc', attributes: any) {
+    updatePPAttributes(
+        type: 'curr' | 'fc',
+        attributes: NativeOsuPerformanceAttributes
+    ) {
         try {
             this[`${type}PPAttributes`] = {
-                ppAccuracy:
-                    attributes?.ppAccuracy ?? attributes?.accuracy ?? 0.0,
-                ppAim: attributes?.ppAim ?? attributes?.aim ?? 0.0,
-                ppDifficulty:
-                    attributes?.ppDifficulty ?? attributes?.difficulty ?? 0.0,
-                ppFlashlight:
-                    attributes?.ppFlashlight ?? attributes?.flashlight ?? 0.0,
-                ppSpeed: attributes?.ppSpeed ?? attributes?.speed ?? 0.0
+                ppAccuracy: attributes.accuracy,
+                ppAim: attributes.aim,
+                ppDifficulty: 0, // todo
+                ppFlashlight: attributes.flashlight,
+                ppSpeed: attributes.speed
             };
         } catch (exc) {
             wLogger.error(
