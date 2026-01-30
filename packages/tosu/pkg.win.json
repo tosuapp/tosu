@@ -2,13 +2,14 @@
     "scripts": "dist/**/*.js",
     "assets": [
       "dist/**/*.node",
+      "dist/**/*.dll",
       "dist/**/*.wasm",
       "dist/target/**/*",
       "dist/_version.js",
       "dist/assets/**/*"
     ],
     "targets": [
-	"node20-win-x64"
+	    "node20-win-x64"
     ],
     "outputPath": "dist"
 }   
