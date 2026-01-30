@@ -1,5 +1,15 @@
-import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
+import { NativeOsuDifficultyAttributes } from '@tosuapp/osu-native-napi';
+import {
+    DifficultyCalculatorFactory,
+    Mod,
+    ModsCollection,
+    Beatmap as NativeBeatmap,
+    OsuDifficultyCalculator,
+    OsuPerformanceCalculator,
+    PerformanceCalculatorFactory,
+    Ruleset
+} from '@tosuapp/osu-native-wrapper';
 import fs from 'fs';
 import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
@@ -89,9 +99,8 @@ export class BeatmapPP extends AbstractState {
     isKiai: boolean;
     isBreak: boolean;
 
-    beatmap?: rosu.Beatmap;
+    beatmap?: NativeBeatmap;
     lazerBeatmap?: ParsedBeatmap;
-    performanceAttributes?: rosu.PerformanceAttributes;
 
     mode: number;
     clockRate: number = 1;
@@ -151,7 +160,7 @@ export class BeatmapPP extends AbstractState {
 
         this.strains = [];
         this.strainsAll = {
-            series: [],
+            series: [{ name: 'stars', data: [] }],
             xaxis: []
         };
         this.mode = 0;
@@ -230,17 +239,17 @@ export class BeatmapPP extends AbstractState {
         this.kiais = [];
     }
 
-    updatePPAttributes(
-        type: 'curr' | 'fc',
-        attributes: rosu.PerformanceAttributes
-    ) {
+    updatePPAttributes(type: 'curr' | 'fc', attributes: any) {
         try {
             this[`${type}PPAttributes`] = {
-                ppAccuracy: attributes.ppAccuracy || 0.0,
-                ppAim: attributes.ppAim || 0.0,
-                ppDifficulty: attributes.ppDifficulty || 0.0,
-                ppFlashlight: attributes.ppFlashlight || 0.0,
-                ppSpeed: attributes.ppSpeed || 0.0
+                ppAccuracy:
+                    attributes?.ppAccuracy ?? attributes?.accuracy ?? 0.0,
+                ppAim: attributes?.ppAim ?? attributes?.aim ?? 0.0,
+                ppDifficulty:
+                    attributes?.ppDifficulty ?? attributes?.difficulty ?? 0.0,
+                ppFlashlight:
+                    attributes?.ppFlashlight ?? attributes?.flashlight ?? 0.0,
+                ppSpeed: attributes?.ppSpeed ?? attributes?.speed ?? 0.0
             };
         } catch (exc) {
             wLogger.error(
@@ -363,28 +372,14 @@ export class BeatmapPP extends AbstractState {
                 this.beatmapContent = fs.readFileSync(mapPath, 'utf8');
 
                 try {
-                    if (this.beatmap) this.beatmap.free();
+                    this.beatmap?.destroy();
                 } catch (exc) {
                     this.beatmap = undefined;
                     wLogger.debug(
                         ClientType[this.game.client],
                         this.game.pid,
                         `beatmapPP updateMapMetadata`,
-                        `unable to free beatmap`,
-                        exc
-                    );
-                }
-
-                try {
-                    if (this.performanceAttributes)
-                        this.performanceAttributes.free();
-                } catch (exc) {
-                    this.performanceAttributes = undefined;
-                    wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `beatmapPP updateMapMetadata`,
-                        `unable to free PerformanceAttributes`,
+                        `unable to destroy beatmap`,
                         exc
                     );
                 }
@@ -404,9 +399,8 @@ export class BeatmapPP extends AbstractState {
                 return 'not-ready';
             }
 
-            this.beatmap = new rosu.Beatmap(this.beatmapContent);
-            if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode)
-                this.beatmap.convert(currentMode);
+            this.beatmap = NativeBeatmap.fromText(this.beatmapContent);
+            // todo: beatmap conversion
 
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
@@ -417,44 +411,134 @@ export class BeatmapPP extends AbstractState {
                 `[${totalTime}ms] Spend on opening beatmap`
             );
 
-            const commonParams = {
-                mods: sanitizeMods(currentMods.array),
-                lazer: this.game.client === ClientType.lazer
-            };
-
-            const attributes = new rosu.BeatmapAttributesBuilder({
-                isConvert:
-                    this.beatmap.mode === 0 &&
-                    this.beatmap.mode !== currentMode,
-                map: this.beatmap,
-                mods: sanitizeMods(currentMods.array),
-                mode: currentMode
-            }).build();
-
-            this.performanceAttributes = new rosu.Performance(
-                commonParams
-            ).calculate(this.beatmap);
             this.clockRate = currentMods.rate;
 
-            if (config.calculatePP) {
+            let calculatedDifficulty: NativeOsuDifficultyAttributes | undefined;
+
+            const calculateDifficultyAndPPAcc = (rulesetId: number) => {
+                if (!this.beatmap || !this.beatmapContent) return;
+
                 const ppAcc: {
                     [key: string]: number;
                 } = {};
-                for (const acc of [
-                    100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
-                ]) {
-                    const calculate = new rosu.Performance({
-                        mods: sanitizeMods(currentMods.array),
-                        accuracy: acc,
-                        lazer: this.game.client === ClientType.lazer,
-                        hitresultPriority: HitResultPriority.Fastest
-                    }).calculate(this.performanceAttributes);
-                    ppAcc[acc] = fixDecimals(calculate.pp);
 
-                    calculate.free();
+                const mods = sanitizeMods(currentMods.array);
+                let nativeMods: ModsCollection | null = null;
+                const nativeModsOwned: Mod[] = [];
+
+                const ruleset = Ruleset.fromId(rulesetId);
+                try {
+                    if (
+                        this.game.client !== ClientType.lazer &&
+                        !mods.some((m) => m.acronym === 'CL')
+                    ) {
+                        mods.unshift({ acronym: 'CL' });
+                    }
+
+                    if (mods.length > 0) {
+                        nativeMods = ModsCollection.create();
+
+                        for (const m of mods) {
+                            let mod: Mod;
+                            try {
+                                mod = Mod.create(m.acronym);
+                            } catch {
+                                continue;
+                            }
+
+                            nativeModsOwned.push(mod);
+                            nativeMods.add(mod);
+                        }
+                    }
+
+                    const difficultyCalc =
+                        DifficultyCalculatorFactory.create<OsuDifficultyCalculator>(
+                            ruleset,
+                            this.beatmap
+                        );
+                    const performanceCalc = config.calculatePP
+                        ? PerformanceCalculatorFactory.create<OsuPerformanceCalculator>(
+                              ruleset
+                          )
+                        : null;
+
+                    try {
+                        const difficulty = nativeMods
+                            ? difficultyCalc.calculateWithMods(nativeMods)
+                            : difficultyCalc.calculate();
+
+                        calculatedDifficulty = difficulty;
+
+                        if (config.calculatePP && performanceCalc) {
+                            for (const acc of [
+                                100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
+                            ]) {
+                                const perf = performanceCalc.calculate(
+                                    {
+                                        ruleset,
+                                        beatmap: this.beatmap,
+                                        mods: nativeMods,
+                                        maxCombo: difficulty.maxCombo,
+                                        countGreat:
+                                            difficulty.hitCircleCount +
+                                            difficulty.sliderCount +
+                                            difficulty.spinnerCount,
+                                        countSliderTailHit:
+                                            difficulty.sliderCount,
+                                        accuracy: acc / 100
+                                    },
+                                    difficulty
+                                );
+
+                                ppAcc[acc] = fixDecimals(perf.total);
+                            }
+                        }
+                    } finally {
+                        performanceCalc?.destroy();
+                        difficultyCalc.destroy();
+                    }
+                } finally {
+                    nativeMods?.destroy();
+                    for (const mod of nativeModsOwned) {
+                        mod.destroy();
+                    }
+
+                    ruleset.destroy();
                 }
 
-                this.ppAcc = ppAcc as any;
+                if (config.calculatePP) {
+                    this.ppAcc = ppAcc as any;
+                }
+            };
+
+            try {
+                calculateDifficultyAndPPAcc(currentMode);
+            } catch (exc) {
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmapPP updateMapMetadata calc`,
+                    exc
+                );
+
+                if (
+                    this.beatmap.native.rulesetId !== currentMode &&
+                    Number.isFinite(this.beatmap.native.rulesetId)
+                ) {
+                    // todo: ruleset conversion
+                    try {
+                        calculateDifficultyAndPPAcc(
+                            this.beatmap.native.rulesetId
+                        );
+                    } catch (exc2) {
+                        wLogger.debug(
+                            ClientType[this.game.client],
+                            this.game.pid,
+                            `beatmapPP updateMapMetadata calc fallback`,
+                            exc2
+                        );
+                    }
+                }
             }
 
             const calculationTime = performance.now();
@@ -565,34 +649,32 @@ export class BeatmapPP extends AbstractState {
             );
 
             this.calculatedMapAttributes = {
-                ar: this.beatmap.ar,
-                arConverted: attributes.ar,
-                cs: this.beatmap.cs,
-                csConverted: attributes.cs,
-                od: this.beatmap.od,
-                odConverted: attributes.od,
-                hp: this.beatmap.hp,
-                hpConverted: attributes.hp,
+                ar: this.beatmap.native.approachRate,
+                arConverted: this.beatmap.native.approachRate, // todo
+                cs: this.beatmap.native.circleSize,
+                csConverted: this.beatmap.native.circleSize, // todo
+                hp: this.beatmap.native.drainRate,
+                hpConverted: this.beatmap.native.drainRate, // todo
+                od: this.beatmap.native.overallDifficulty,
+                odConverted: this.beatmap.native.overallDifficulty, // todo
                 circles: this.lazerBeatmap.hittable,
                 sliders: this.lazerBeatmap.slidable,
                 spinners: this.lazerBeatmap.spinnable,
                 holds: this.lazerBeatmap.holdable,
-                maxCombo: this.performanceAttributes.difficulty.maxCombo,
-                fullStars: this.performanceAttributes.difficulty.stars,
-                stars: this.performanceAttributes.difficulty.stars,
-                aim: this.performanceAttributes.difficulty.aim,
-                speed: this.performanceAttributes.difficulty.speed,
-                flashlight: this.performanceAttributes.difficulty.flashlight,
-                sliderFactor:
-                    this.performanceAttributes.difficulty.sliderFactor,
-                stamina: this.performanceAttributes.difficulty.stamina,
-                rhythm: this.performanceAttributes.difficulty.rhythm,
-                color: this.performanceAttributes.difficulty.color,
-                reading: this.performanceAttributes.difficulty.reading,
-                hitWindow: this.performanceAttributes.difficulty.greatHitWindow
+                maxCombo: calculatedDifficulty?.maxCombo || 0,
+                fullStars: calculatedDifficulty?.starRating || 0,
+                stars: calculatedDifficulty?.starRating || 0,
+                aim: calculatedDifficulty?.aimDifficulty || 0,
+                speed: calculatedDifficulty?.speedDifficulty || 0,
+                flashlight: calculatedDifficulty?.flashlightDifficulty || 0,
+                sliderFactor: calculatedDifficulty?.sliderFactor || 0,
+                // todo
+                // stamina: calculatedDifficulty?.staminaDifficulty || 0,
+                // rhythm: calculatedDifficulty?.rhythmDifficulty || 0,
+                // color: calculatedDifficulty?.colourDifficulty || 0,
+                // reading: calculatedDifficulty?.readingDifficulty || 0,
+                hitWindow: 0 // todo
             };
-
-            attributes.free();
 
             this.game.resetReportCount('beatmapPP updateMapMetadata');
         } catch (exc) {
@@ -614,224 +696,13 @@ export class BeatmapPP extends AbstractState {
     }
 
     @measureTime
-    updateGraph(currentMods: ModsLazer) {
-        if (this.beatmap === undefined) return;
-        try {
-            const { menu } = this.game.getServices(['menu']);
-
-            const resultStrains: BeatmapStrains = {
-                series: [],
-                xaxis: []
-            };
-
-            const difficulty = new rosu.Difficulty({
-                mods: sanitizeMods(currentMods),
-                lazer: this.game.client === ClientType.lazer
-            });
-            const strains = difficulty.strains(this.beatmap);
-
-            let oldStrains: number[] = [];
-
-            let strainsAmount = 0;
-            switch (strains.mode) {
-                case 0:
-                    strainsAmount = strains.aim?.length || 0;
-                    break;
-
-                case 1:
-                    strainsAmount = strains.color?.length || 0;
-                    break;
-
-                case 2:
-                    strainsAmount = strains.movement?.length || 0;
-                    break;
-
-                case 3:
-                    strainsAmount = strains.strains?.length || 0;
-                    break;
-            }
-
-            const sectionOffsetTime = strains.sectionLength;
-            const firstObjectTime =
-                this.timings.firstNonSpinnerObj / this.clockRate;
-            const lastObjectTime =
-                firstObjectTime + strainsAmount * sectionOffsetTime;
-            const mp3LengthTime = menu.mp3Length / this.clockRate;
-
-            const LEFT_OFFSET = Math.floor(firstObjectTime / sectionOffsetTime);
-
-            const RIGHT_OFFSET =
-                mp3LengthTime >= lastObjectTime
-                    ? Math.ceil(
-                          (mp3LengthTime - lastObjectTime) / sectionOffsetTime
-                      )
-                    : 0;
-
-            const updateWithOffset = (
-                name: string,
-                values: Float64Array | undefined
-            ) => {
-                if (values instanceof Float64Array !== true) return;
-                let data: number[] = [];
-
-                if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
-                    data = Array(LEFT_OFFSET).fill(-100);
-                }
-
-                data = data.concat(Array.from(values));
-
-                if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
-                    data = data.concat(Array(RIGHT_OFFSET).fill(-100));
-                }
-
-                resultStrains.series.push({ name, data });
-            };
-
-            switch (strains.mode) {
-                case 0:
-                    updateWithOffset('aim', strains.aim);
-                    updateWithOffset('aimNoSliders', strains.aimNoSliders);
-                    updateWithOffset('flashlight', strains.flashlight);
-                    updateWithOffset('speed', strains.speed);
-
-                    if (strains.aim instanceof Float64Array)
-                        oldStrains = Array.from(strains.aim);
-                    break;
-                case 1:
-                    updateWithOffset('color', strains.color);
-                    updateWithOffset('rhythm', strains.rhythm);
-                    updateWithOffset('stamina', strains.stamina);
-
-                    if (strains.color instanceof Float64Array)
-                        oldStrains = Array.from(strains.color);
-                    break;
-                case 2:
-                    updateWithOffset('movement', strains.movement);
-
-                    if (strains.movement instanceof Float64Array)
-                        oldStrains = Array.from(strains.movement);
-                    break;
-                case 3:
-                    updateWithOffset('strains', strains.strains);
-
-                    if (strains.strains instanceof Float64Array)
-                        oldStrains = Array.from(strains.strains);
-                    break;
-                default:
-                // no-default
-            }
-
-            if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
-                oldStrains = Array(LEFT_OFFSET).fill(0).concat(oldStrains);
-            }
-
-            if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
-                oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
-            }
-
-            for (let i = 0; i < LEFT_OFFSET; i++) {
-                resultStrains.xaxis.push(i * sectionOffsetTime);
-            }
-
-            const total =
-                resultStrains.series[0].data.length -
-                LEFT_OFFSET -
-                RIGHT_OFFSET;
-            for (let i = 0; i < total; i++) {
-                resultStrains.xaxis.push(
-                    firstObjectTime + i * sectionOffsetTime
-                );
-            }
-
-            for (let i = 0; i < RIGHT_OFFSET; i++) {
-                resultStrains.xaxis.push(
-                    lastObjectTime + i * sectionOffsetTime
-                );
-            }
-
-            this.strains = oldStrains;
-            this.strainsAll = resultStrains;
-
-            strains.free();
-
-            this.game.resetReportCount('beatmapPP updateGraph');
-        } catch (exc) {
-            this.game.reportError(
-                'beatmapPP updateGraph',
-                10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateGraph`,
-                (exc as any).message
-            );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateGraph`,
-                exc
-            );
-        }
+    updateGraph(_currentMods: ModsLazer) {
+        // todo
     }
 
     @measureTime
     updateEditorPP() {
-        try {
-            if (
-                !this.beatmap ||
-                !this.beatmapContent ||
-                !this.performanceAttributes ||
-                !this.lazerBeatmap
-            ) {
-                return;
-            }
-
-            const startTime = performance.now();
-
-            const { global } = this.game.getServices(['global']);
-
-            const beatmapParseTime = performance.now();
-            const totalTime = (beatmapParseTime - startTime).toFixed(2);
-            wLogger.time(
-                `[${ClientType[this.game.client]}]`,
-                this.game.pid,
-                `beatmapPP.updateEditorPP`,
-                `${totalTime}ms Spend on beatmap parsing`
-            );
-
-            const passedObjects = this.lazerBeatmap.hitObjects.filter(
-                (r) => r.startTime <= global.playTime
-            );
-
-            const curPerformance = new rosu.Performance({
-                passedObjects: passedObjects.length,
-                lazer: this.game.client === ClientType.lazer
-            }).calculate(this.performanceAttributes);
-
-            this.currAttributes.pp = curPerformance.pp;
-            this.currAttributes.stars =
-                passedObjects.length === 0
-                    ? 0
-                    : curPerformance.difficulty.stars;
-
-            curPerformance.free();
-
-            this.game.resetReportCount('beatmapPP updateEditorPP');
-        } catch (exc) {
-            this.game.reportError(
-                'beatmapPP updateEditorPP',
-                10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateEditorPP`,
-                (exc as any).message
-            );
-            wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapPP updateEditorPP`,
-                exc
-            );
-        }
+        // todo
     }
 
     updateEventsStatus(ms: number, multiply: number) {

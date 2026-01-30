@@ -118,15 +118,15 @@ importers:
 
   packages/server:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: 3.1.0
-        version: 3.1.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
+      '@tosuapp/osu-native-wrapper':
+        specifier: 1.0.4
+        version: 1.0.4
       semver:
         specifier: ^7.7.3
         version: 7.7.3
@@ -155,9 +155,6 @@ importers:
 
   packages/tosu:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: 3.1.0
-        version: 3.1.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -170,6 +167,12 @@ importers:
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
+      '@tosuapp/osu-native-napi':
+        specifier: 1.0.1
+        version: 1.0.1
+      '@tosuapp/osu-native-wrapper':
+        specifier: 1.0.4
+        version: 1.0.4
       osu-catch-stable:
         specifier: ^4.0.1
         version: 4.0.1(osu-classes@3.1.0)
@@ -246,7 +249,6 @@ packages:
 
   '@asdf-overlay/core@1.0.4':
     resolution: {integrity: sha512-XzhnD7M+MXCMWx32763mmvzxJCJqGWb2qzlaNNhLVrUAXfy5S4uZGuw4GoLqT2oVfxwG+sFknYFiw+2hdfzFiQ==}
-    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.0.4':
@@ -809,9 +811,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@kotrikd/rosu-pp@3.1.0':
-    resolution: {integrity: sha512-QECWxB8jG3wBnt5HD37gQNfFLr46/+WQSr68DHAuPXBoteOwf6zrVoxGiV0smZE+GXeMUhRDjGrfnnROGgNm3w==}
-
   '@malept/cross-spawn-promise@2.0.0':
     resolution: {integrity: sha512-1DpKU0Z5ThltBwjNySMC14g0CkbyhCaz9FkhxqNsZI6uAPJXFS8cMXlBKo26FJ8ZuW6S9GCMcR9IO5k2X5/9Fg==}
     engines: {node: '>= 12.13.0'}
@@ -1051,6 +1050,13 @@ packages:
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
+
+  '@tosuapp/osu-native-napi@1.0.1':
+    resolution: {integrity: sha512-gT+bQjWSOrna7zLbNbDuZB3yhYMJtkyRKnpOgcDdtzRkdyuytre0T9xEAugkA2CMO2vxqu/I6y2Y0CUXLkCSTg==}
+    os: [win32]
+
+  '@tosuapp/osu-native-wrapper@1.0.4':
+    resolution: {integrity: sha512-GlWLgPC49hvaqaRQbMRViR+l4r6PmUwEONUW/GkqaUHOcA8lRJOIl4CSx37xShVrwssPBi0kqgeMptuNvpnxeQ==}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
     resolution: {integrity: sha512-fYDQA9e6yTNmA13TLVSA+WMQRc5Bn/c0EUBditUHNfMMxN7M82c38b1kEggVE3pLpZ0FwkwJkUEKMiOi52JXFA==}
@@ -3959,10 +3965,12 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   temp-file@3.4.0:
     resolution: {integrity: sha512-C5tjlC/HCtVUOi3KWVokd4vHVViOmGjtLwIh4MuzPo/nMYTV/p1urt3RnMz2IWXDdKEGJH3k5+KPxtqRsUYGtg==}
@@ -4866,8 +4874,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kotrikd/rosu-pp@3.1.0': {}
-
   '@malept/cross-spawn-promise@2.0.0':
     dependencies:
       cross-spawn: 7.0.6
@@ -5046,6 +5052,12 @@ snapshots:
       defer-to-connect: 2.0.1
 
   '@tootallnate/once@2.0.0': {}
+
+  '@tosuapp/osu-native-napi@1.0.1': {}
+
+  '@tosuapp/osu-native-wrapper@1.0.4':
+    dependencies:
+      '@tosuapp/osu-native-napi': 1.0.1
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:

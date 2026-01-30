@@ -13,11 +13,12 @@
         "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
-        "@kotrikd/rosu-pp": "3.1.0",
         "@tosu/common": "workspace:*",
         "@tosu/ingame-overlay-updater": "workspace:*",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
+        "@tosuapp/osu-native-napi": "1.0.1",
+        "@tosuapp/osu-native-wrapper": "1.0.4",
         "osu-catch-stable": "^4.0.1",
         "osu-classes": "^3.1.0",
         "osu-mania-stable": "^5.0.1",

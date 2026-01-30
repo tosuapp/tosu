@@ -1,4 +1,3 @@
-import rosu from '@kotrikd/rosu-pp';
 import {
     ConfigBinding,
     ConfigManager,
@@ -12,6 +11,16 @@ import {
     wLogger
 } from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
+import {
+    DifficultyCalculatorFactory,
+    Mod,
+    ModsCollection,
+    Beatmap as NativeBeatmap,
+    OsuDifficultyCalculator,
+    OsuPerformanceCalculator,
+    PerformanceCalculatorFactory,
+    Ruleset
+} from '@tosuapp/osu-native-wrapper';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -380,9 +389,11 @@ export default function buildBaseApi(server: Server) {
             'beatmapPP'
         ]);
 
-        let beatmap: rosu.Beatmap;
-        const exists = fs.existsSync(query.path);
-        if (exists) {
+        let beatmap: NativeBeatmap | undefined;
+        let destroyBeatmap = false;
+
+        const exists = query.path ? fs.existsSync(query.path) : false;
+        if (exists === true) {
             const beatmapFilePath = path.join(
                 global.songsFolder,
                 menu.folder,
@@ -390,48 +401,120 @@ export default function buildBaseApi(server: Server) {
             );
 
             const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
-            beatmap = new rosu.Beatmap(beatmapContent);
+            beatmap = NativeBeatmap.fromText(beatmapContent);
+            destroyBeatmap = true;
         } else {
             beatmap = beatmapPP.getCurrentBeatmap();
         }
 
-        if (query.mode !== undefined) beatmap.convert(query.mode);
+        if (!beatmap) {
+            return sendJson(res, { error: 'beatmap_not_ready' });
+        }
 
-        const params: rosu.PerformanceArgs = {};
+        // todo: beatmap conversion
 
-        if (query.ar !== undefined) params.ar = +query.ar;
-        if (query.cs !== undefined) params.cs = +query.cs;
-        if (query.hp !== undefined) params.hp = +query.hp;
-        if (query.od !== undefined) params.od = +query.od;
+        let nativeMods: ModsCollection | null = null;
+        const nativeModsOwned: Mod[] = [];
 
-        if (query.clockRate !== undefined) params.clockRate = +query.clockRate;
-        if (query.passedObjects !== undefined)
-            params.passedObjects = +query.passedObjects;
-        if (query.combo !== undefined) params.combo = +query.combo;
-        if (query.nMisses !== undefined) params.misses = +query.nMisses;
-        if (query.n100 !== undefined) params.n100 = +query.n100;
-        if (query.n300 !== undefined) params.n300 = +query.n300;
-        if (query.n50 !== undefined) params.n50 = +query.n50;
-        if (query.nGeki !== undefined) params.nGeki = +query.nGeki;
-        if (query.nKatu !== undefined) params.nKatu = +query.nKatu;
-        if (query.mods !== undefined)
-            params.mods = Array.isArray(query.mods) ? query.mods : +query.mods;
-        if (query.acc !== undefined) params.accuracy = +query.acc;
-        if (query.sliderEndHits !== undefined)
-            params.sliderEndHits = +query.sliderEndHits;
-        if (query.smallTickHits !== undefined)
-            params.smallTickHits = +query.smallTickHits;
-        if (query.largeTickHits !== undefined)
-            params.largeTickHits = +query.largeTickHits;
-        if (query.hitresultPriority !== undefined)
-            params.hitresultPriority = +query.hitresultPriority;
+        const rulesetId =
+            query.mode !== undefined ? +query.mode : beatmap.native.rulesetId;
+        const ruleset = Ruleset.fromId(rulesetId);
+        try {
+            const modsInput: string[] = [];
+            if (query.mods !== undefined) {
+                if (Array.isArray(query.mods)) {
+                    modsInput.push(...query.mods.map((m: any) => String(m)));
+                } else if (typeof query.mods === 'string') {
+                    const parsed = Number(query.mods);
+                    if (Number.isFinite(parsed)) {
+                        // todo: numeric mod bitmasks not supported here
+                    } else if (query.mods.includes(',')) {
+                        modsInput.push(
+                            ...query.mods
+                                .split(',')
+                                .map((m: string) => m.trim())
+                                .filter(Boolean)
+                        );
+                    } else {
+                        modsInput.push(...(query.mods.match(/.{1,2}/g) || []));
+                    }
+                }
+            }
 
-        const calculate = new rosu.Performance(params).calculate(beatmap);
-        sendJson(res, calculate);
+            if (modsInput.length > 0) {
+                nativeMods = ModsCollection.create();
 
-        // free beatmap only when map path specified
-        if (query.path) beatmap.free();
-        calculate.free();
+                for (const acronym of modsInput) {
+                    let mod: Mod;
+                    try {
+                        mod = Mod.create(acronym.toUpperCase());
+                    } catch {
+                        continue;
+                    }
+
+                    nativeModsOwned.push(mod);
+                    nativeMods.add(mod);
+                }
+            }
+
+            const difficultyCalc =
+                DifficultyCalculatorFactory.create<OsuDifficultyCalculator>(
+                    ruleset,
+                    beatmap
+                );
+            const performanceCalc =
+                PerformanceCalculatorFactory.create<OsuPerformanceCalculator>(
+                    ruleset
+                );
+
+            try {
+                const difficulty = nativeMods
+                    ? difficultyCalc.calculateWithMods(nativeMods)
+                    : difficultyCalc.calculate();
+
+                // todo: ar/cs/hp/od/clockRate/passedObjects
+
+                const perf = performanceCalc.calculate(
+                    {
+                        ruleset,
+                        beatmap,
+                        mods: nativeMods,
+                        maxCombo: query.combo !== undefined ? +query.combo : 0,
+                        accuracy:
+                            query.acc !== undefined ? +query.acc / 100 : 0,
+                        countMiss:
+                            query.nMisses !== undefined ? +query.nMisses : 0,
+                        countOk: query.n100 !== undefined ? +query.n100 : 0,
+                        countGreat: query.n300 !== undefined ? +query.n300 : 0,
+                        countMeh: query.n50 !== undefined ? +query.n50 : 0,
+                        countPerfect:
+                            query.nGeki !== undefined ? +query.nGeki : 0,
+                        countGood: query.nKatu !== undefined ? +query.nKatu : 0
+                    },
+                    difficulty
+                );
+
+                sendJson(res, {
+                    pp: perf.total,
+                    ...perf,
+                    difficulty: {
+                        starRating: difficulty.starRating,
+                        maxCombo: difficulty.maxCombo
+                    }
+                });
+            } finally {
+                performanceCalc.destroy();
+                difficultyCalc.destroy();
+            }
+        } finally {
+            nativeMods?.destroy();
+            for (const mod of nativeModsOwned) {
+                mod.destroy();
+            }
+
+            ruleset.destroy();
+            if (destroyBeatmap) beatmap.destroy();
+        }
     });
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {

@@ -1,5 +1,13 @@
-import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
 import { ClientType, measureTime, wLogger } from '@tosu/common';
+import {
+    DifficultyCalculatorFactory,
+    Mod,
+    ModsCollection,
+    OsuDifficultyCalculator,
+    OsuPerformanceCalculator,
+    PerformanceCalculatorFactory,
+    Ruleset
+} from '@tosuapp/osu-native-wrapper';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
@@ -142,71 +150,131 @@ export class ResultScreen extends AbstractState {
                 mods: sanitizeMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             };
-
-            const calcOptions: rosu.PerformanceArgs = {
-                nGeki: this.statistics.perfect,
-                n300: this.statistics.great,
-                nKatu: this.statistics.good,
-                n100: this.statistics.ok,
-                n50: this.statistics.meh,
-                misses: this.statistics.miss,
-                sliderEndHits: this.statistics.sliderTailHit,
-                smallTickHits: this.statistics.smallTickHit,
-                largeTickHits: this.statistics.largeTickHit,
-                combo: this.maxCombo,
-                ...commonParams
-            };
-
             const t1 = performance.now();
-            const curPerformance = new rosu.Performance(calcOptions).calculate(
-                currentBeatmap
-            );
 
-            const fcCalcOptions: rosu.PerformanceArgs = {
-                nGeki: this.statistics.perfect,
-                n300: this.statistics.great + this.statistics.miss,
-                nKatu: this.statistics.good,
-                n100: this.statistics.ok,
-                n50: this.statistics.meh,
-                misses: 0,
-                sliderEndHits:
-                    beatmapPP.performanceAttributes?.state?.sliderEndHits,
-                smallTickHits:
-                    beatmapPP.performanceAttributes?.state?.osuSmallTickHits,
-                largeTickHits:
-                    beatmapPP.performanceAttributes?.state?.osuLargeTickHits,
-                combo: beatmapPP.calculatedMapAttributes.maxCombo,
-                ...commonParams
-            };
-            if (this.mode === 3) {
-                fcCalcOptions.nGeki =
-                    this.statistics.perfect +
-                    this.statistics.ok +
-                    this.statistics.meh +
-                    this.statistics.miss;
-                fcCalcOptions.n300 = this.statistics.great;
-                fcCalcOptions.nKatu = this.statistics.good;
-                fcCalcOptions.n100 = 0;
-                fcCalcOptions.n50 = 0;
-                fcCalcOptions.misses = 0;
-                delete fcCalcOptions.sliderEndHits;
-                delete fcCalcOptions.smallTickHits;
-                delete fcCalcOptions.largeTickHits;
-                delete fcCalcOptions.combo;
-                fcCalcOptions.accuracy = this.accuracy;
-                fcCalcOptions.hitresultPriority = HitResultPriority.Fastest;
+            const mods = commonParams.mods;
+            if (
+                this.game.client !== ClientType.lazer &&
+                !mods.some((m) => m.acronym === 'CL')
+            ) {
+                mods.unshift({ acronym: 'CL' });
+            }
+
+            let nativeMods: ModsCollection | null = null;
+            const nativeModsOwned: Mod[] = [];
+
+            try {
+                if (mods.length > 0) {
+                    nativeMods = ModsCollection.create();
+
+                    for (const m of mods) {
+                        let mod: Mod;
+                        try {
+                            mod = Mod.create(m.acronym);
+                        } catch {
+                            continue;
+                        }
+
+                        nativeModsOwned.push(mod);
+                        nativeMods.add(mod);
+                    }
+                }
+
+                const ruleset = Ruleset.fromId(this.mode);
+                try {
+                    const difficultyCalc =
+                        DifficultyCalculatorFactory.create<OsuDifficultyCalculator>(
+                            ruleset,
+                            currentBeatmap
+                        );
+                    const performanceCalc =
+                        PerformanceCalculatorFactory.create<OsuPerformanceCalculator>(
+                            ruleset
+                        );
+
+                    try {
+                        const difficulty = nativeMods
+                            ? difficultyCalc.calculateWithMods(nativeMods)
+                            : difficultyCalc.calculate();
+
+                        const curPerformance = performanceCalc.calculate(
+                            {
+                                ruleset,
+                                beatmap: currentBeatmap,
+                                mods: nativeMods,
+                                maxCombo: this.maxCombo,
+                                accuracy: this.accuracy / 100,
+                                countMiss: this.statistics.miss,
+                                countMeh: this.statistics.meh,
+                                countOk: this.statistics.ok,
+                                countGood: this.statistics.good,
+                                countGreat: this.statistics.great,
+                                countPerfect: this.statistics.perfect,
+                                countSliderTailHit:
+                                    this.statistics.sliderTailHit,
+                                countLargeTickMiss:
+                                    this.statistics.largeTickMiss
+                            },
+                            difficulty
+                        );
+
+                        const totalHits =
+                            this.statistics.great +
+                            this.statistics.ok +
+                            this.statistics.meh +
+                            this.statistics.miss;
+
+                        const fcAccuracy =
+                            this.mode === 0 && totalHits > 0
+                                ? ((this.statistics.great +
+                                      this.statistics.miss) *
+                                      300 +
+                                      this.statistics.ok * 100 +
+                                      this.statistics.meh * 50) /
+                                  (totalHits * 300)
+                                : this.accuracy / 100;
+
+                        const fcPerformance = performanceCalc.calculate(
+                            {
+                                ruleset,
+                                beatmap: currentBeatmap,
+                                mods: nativeMods,
+                                maxCombo:
+                                    beatmapPP.calculatedMapAttributes.maxCombo,
+                                accuracy: fcAccuracy,
+                                countMiss: 0,
+                                countMeh: this.statistics.meh,
+                                countOk: this.statistics.ok,
+                                countGood: this.statistics.good,
+                                countGreat:
+                                    this.statistics.great +
+                                    this.statistics.miss,
+                                countPerfect: this.statistics.perfect,
+                                countSliderTailHit:
+                                    this.statistics.sliderTailHit,
+                                countLargeTickMiss:
+                                    this.statistics.largeTickMiss
+                            },
+                            difficulty
+                        );
+
+                        this.pp = curPerformance.total;
+                        this.fcPP = fcPerformance.total;
+                    } finally {
+                        performanceCalc.destroy();
+                        difficultyCalc.destroy();
+                    }
+                } finally {
+                    ruleset.destroy();
+                }
+            } finally {
+                nativeMods?.destroy();
+                for (const mod of nativeModsOwned) {
+                    mod.destroy();
+                }
             }
 
             const t2 = performance.now();
-            const fcPerformance = new rosu.Performance(fcCalcOptions).calculate(
-                curPerformance
-            );
-
-            this.pp = curPerformance.pp;
-            this.fcPP = fcPerformance.pp;
-
-            curPerformance.free();
-            fcPerformance.free();
 
             wLogger.time(
                 `[${ClientType[this.game.client]}]`,
