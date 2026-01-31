@@ -1,5 +1,4 @@
 import {
-    Calculator,
     ClientType,
     GlobalConfig,
     Platform,
@@ -31,10 +30,7 @@ export class InstanceManager {
     isOverlayStarted: boolean = false;
     overlayProcess: ChildProcess | null = null;
 
-    calculator: Calculator = {
-        type: 'rosu',
-        path: 'local'
-    };
+    calculatorPath = 'local';
 
     constructor() {
         this.osuInstances = {};
@@ -128,8 +124,8 @@ export class InstanceManager {
                 }
 
                 const osuInstance = isLazer
-                    ? new LazerInstance(processId, this.calculator)
-                    : new OsuInstance(processId, this.calculator);
+                    ? new LazerInstance(processId, this.calculatorPath)
+                    : new OsuInstance(processId, this.calculatorPath);
 
                 if (!isNaN(parseFloat(args.spectateclient))) {
                     osuInstance.setTourneyIpcId(args.spectateclient);

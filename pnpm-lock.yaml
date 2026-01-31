@@ -71,6 +71,12 @@ importers:
       '@kotrikd/rosu-pp':
         specifier: 3.1.0
         version: 3.1.0
+      '@tosuapp/osu-native-napi':
+        specifier: ^1.0.2
+        version: 1.0.2
+      '@tosuapp/osu-native-wrapper':
+        specifier: ^1.0.6
+        version: 1.0.6
       adm-zip:
         specifier: ^0.5.16
         version: 0.5.16
@@ -1048,6 +1054,14 @@ packages:
   '@tootallnate/once@2.0.0':
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
+
+  '@tosuapp/osu-native-napi@1.0.2':
+    resolution: {integrity: sha512-H7sONpXPqIEuBgOnZAANddZZG4PJNm/ZOOc5GEJInyx3/dzEWJZmb7zWNGDjD1n4oJUWftbceHnj+To8hHzKHw==}
+    cpu: [x64]
+    os: [win32]
+
+  '@tosuapp/osu-native-wrapper@1.0.6':
+    resolution: {integrity: sha512-LLo5cdzHEQTKlvI1Te3/DCZ/auiBOsjW1xqzN50nlDY6fCRkPq0bzZwvRl5h+eHMnUrRs77qCOVgLB/Y1uPlUg==}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
     resolution: {integrity: sha512-fYDQA9e6yTNmA13TLVSA+WMQRc5Bn/c0EUBditUHNfMMxN7M82c38b1kEggVE3pLpZ0FwkwJkUEKMiOi52JXFA==}
@@ -3956,10 +3970,12 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   temp-file@3.4.0:
     resolution: {integrity: sha512-C5tjlC/HCtVUOi3KWVokd4vHVViOmGjtLwIh4MuzPo/nMYTV/p1urt3RnMz2IWXDdKEGJH3k5+KPxtqRsUYGtg==}
@@ -5043,6 +5059,12 @@ snapshots:
       defer-to-connect: 2.0.1
 
   '@tootallnate/once@2.0.0': {}
+
+  '@tosuapp/osu-native-napi@1.0.2': {}
+
+  '@tosuapp/osu-native-wrapper@1.0.6':
+    dependencies:
+      '@tosuapp/osu-native-napi': 1.0.2
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
