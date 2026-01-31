@@ -17,3 +17,4 @@ settings/
 packages/server/assets/homepage.min.css
 packages/pp/native/obj/
 packages/pp/native/bin/
+packages/pp/vendor/

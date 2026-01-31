@@ -26,7 +26,6 @@ public readonly struct DifficultyAttrsData
     public double AimTopWeightedSliderFactor { get; init; }
     public double AimDifficultStrainCount { get; init; }
     public double SpeedDifficultStrainCount { get; init; }
-    public double Hp { get; init; }
     public int NCircles { get; init; }
     public int NSliders { get; init; }
     public int NLargeTicks { get; init; }
@@ -58,8 +57,6 @@ public readonly struct DifficultyAttrsData
         AimTopWeightedSliderFactor = attrs.AimTopWeightedSliderFactor,
         AimDifficultStrainCount = attrs.AimDifficultStrainCount,
         SpeedDifficultStrainCount = attrs.SpeedDifficultStrainCount,
-
-        Hp = attrs.DrainRate,
 
         NCircles = attrs.HitCircleCount,
         NSliders = attrs.SliderCount,
