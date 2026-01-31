@@ -1,0 +1,23 @@
+<linker>
+  <!-- Preserve parameterless ctors -->
+  <assembly fullname="osu.Game.Rulesets.Osu">
+    <type fullname="osu.Game.Rulesets.Osu.OsuRuleset">
+      <method signature="System.Void .ctor()" />
+    </type>
+  </assembly>
+  <assembly fullname="osu.Game.Rulesets.Mania">
+    <type fullname="osu.Game.Rulesets.Mania.ManiaRuleset">
+      <method signature="System.Void .ctor()" />
+    </type>
+  </assembly>
+  <assembly fullname="osu.Game.Rulesets.Taiko">
+    <type fullname="osu.Game.Rulesets.Taiko.TaikoRuleset">
+      <method signature="System.Void .ctor()" />
+    </type>
+  </assembly>
+  <assembly fullname="osu.Game.Rulesets.Catch">
+    <type fullname="osu.Game.Rulesets.Catch.CatchRuleset">
+      <method signature="System.Void .ctor()" />
+    </type>
+  </assembly>
+</linker>
