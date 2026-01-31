@@ -1,6 +1,5 @@
 import {
     Bitness,
-    Calculator,
     ClientType,
     GameState,
     JsonSafeParse,
@@ -22,8 +21,8 @@ export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
     previousCombo: number = 0;
 
-    constructor(pid: number, calculator: Calculator) {
-        super(pid, Bitness.x64, calculator);
+    constructor(pid: number, calculatorPath: string) {
+        super(pid, Bitness.x64, calculatorPath);
         this.memory = new LazerMemory(this.process, this);
     }
 
