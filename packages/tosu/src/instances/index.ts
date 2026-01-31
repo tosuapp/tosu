@@ -2,8 +2,6 @@ import {
     Bitness,
     Calculator,
     ClientType,
-    ICalculator,
-    RosuCalculator,
     config,
     sleep,
     wLogger
@@ -72,9 +70,9 @@ export abstract class AbstractInstance {
 
     states: Partial<DataRepoList> = {};
 
-    calculator: ICalculator;
+    calculator: Calculator;
 
-    constructor(pid: number, bitness: Bitness, calculator: Calculator) {
+    constructor(pid: number, bitness: Bitness, calculatorPath: string) {
         this.pid = pid;
 
         this.process = new Process(this.pid, bitness);
@@ -99,15 +97,12 @@ export abstract class AbstractInstance {
         this.preciseDataLoop = this.preciseDataLoop.bind(this);
 
         this.initializeCalculator = this.initializeCalculator.bind(this);
-
-        this.initializeCalculator(calculator);
+        this.initializeCalculator(calculatorPath);
     }
 
-    async initializeCalculator(calculator: Calculator) {
-        this.calculator =
-            calculator.type === 'rosu'
-                ? new RosuCalculator(calculator.path)
-                : new RosuCalculator(calculator.path);
+    async initializeCalculator(calculatorPath: string) {
+        this.calculator = new Calculator(calculatorPath);
+        await this.calculator.load();
     }
 
     /**
