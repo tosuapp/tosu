@@ -141,9 +141,7 @@ export class Settings extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `settings updatestate`,
+                `Error updating settings state for client %${this.game.pid}%:`,
                 exc
             );
         }

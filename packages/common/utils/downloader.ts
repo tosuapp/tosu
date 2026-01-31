@@ -1,38 +1,7 @@
 import fs from 'fs';
 import https from 'https';
 
-import { colorText } from './logger';
-
-const progressBarWidth = 40;
-
-export const updateProgressBar = (
-    title: string,
-    progress: number,
-    message: string = ''
-): void => {
-    const coloredText = colorText('info', 'info');
-    if (message) message = ` - ${message}`;
-
-    const filledWidth = Math.round(progressBarWidth * progress);
-    const emptyWidth = progressBarWidth - filledWidth;
-    const progressBar = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
-
-    process.stdout.write(
-        `${coloredText} ${title}: [${progressBar}] ${(progress * 100).toFixed(2)}%${message}\r`
-    );
-
-    if (progress === 1) {
-        if (
-            typeof process.stdout.clearLine === 'function' &&
-            typeof process.stdout.cursorTo === 'function'
-        ) {
-            process.stdout.clearLine(0);
-            process.stdout.cursorTo(0);
-        } else {
-            process.stdout.write('\n');
-        }
-    }
-};
+import { progressManager } from './progress';
 
 /**
  * A cyperdark's downloadFile implmentation based on pure node api
@@ -45,6 +14,8 @@ export const downloadFile = (
     destination: string
 ): Promise<string> =>
     new Promise((resolve, reject) => {
+        let token: symbol | undefined;
+
         const options = {
             headers: {
                 Accept: 'application/octet-stream',
@@ -66,14 +37,24 @@ export const downloadFile = (
                 }
 
                 const file = fs.createWriteStream(destination);
+                token = progressManager.start('Downloading File');
 
-                file.on('error', (err) => {
-                    fs.unlinkSync(destination);
+                file.on('error', async (err) => {
+                    try {
+                        if (fs.existsSync(destination))
+                            fs.unlinkSync(destination);
+                    } catch {
+                        // Ignore cleanup errors to avoid masking the original download failure
+                    }
+                    if (token)
+                        await progressManager.end(token, 'Download failed');
                     reject(err);
                 });
 
-                file.on('finish', () => {
+                file.on('finish', async () => {
                     file.close();
+                    if (token)
+                        await progressManager.end(token, 'Download completed');
                     resolve(destination);
                 });
 
@@ -86,10 +67,25 @@ export const downloadFile = (
                 response.on('data', (data) => {
                     downloadedSize += data.length;
                     const progress = downloadedSize / totalSize;
-                    updateProgressBar('Downloading', progress);
+
+                    const downloadedMB = (downloadedSize / 1024 / 1024).toFixed(
+                        2
+                    );
+                    const totalMB = (totalSize / 1024 / 1024).toFixed(2);
+
+                    if (token) {
+                        progressManager.update(
+                            token,
+                            progress,
+                            `| ${downloadedMB} / ${totalMB} MB`
+                        );
+                    }
                 });
 
                 response.pipe(file);
             })
-            .on('error', reject);
+            .on('error', async (err) => {
+                if (token) await progressManager.end(token, 'Download failed');
+                reject(err);
+            });
     });

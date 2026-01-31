@@ -1,11 +1,4 @@
-import {
-    Bitness,
-    ClientType,
-    GameState,
-    config,
-    sleep,
-    wLogger
-} from '@tosu/common';
+import { Bitness, GameState, config, sleep, wLogger } from '@tosu/common';
 import fs from 'fs';
 
 import { AbstractInstance } from '@/instances/index';
@@ -22,7 +15,7 @@ export class OsuInstance extends AbstractInstance {
     }
 
     async regularDataLoop() {
-        wLogger.debug(ClientType[this.client], this.pid, 'regularDataLoop');
+        wLogger.debug(`Starting regular data loop for client %${this.pid}%`);
 
         const {
             global,
@@ -199,19 +192,10 @@ export class OsuInstance extends AbstractInstance {
                 user.updateState();
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'regularDataLoop',
-                    'error within a loop',
+                    `Error in regular data loop for client %${this.pid}%:`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'regularDataLoop',
-                    'error within a loop',
-                    exc
-                );
+                wLogger.debug(`Regular loop error details:`, exc);
             } finally {
                 await sleep(config.pollRate);
             }
@@ -245,19 +229,10 @@ export class OsuInstance extends AbstractInstance {
                 await sleep(config.preciseDataPollRate);
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'preciseDataLoop',
-                    'error within a loop',
+                    `Error in precise data loop for client %${this.pid}%:`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'preciseDataLoop',
-                    'error within a loop',
-                    exc
-                );
+                wLogger.debug(`Precise loop error details:`, exc);
             }
         }
     }

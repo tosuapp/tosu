@@ -32,9 +32,7 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             !existsSync(path.join(gameOverlayPath, 'version'))
         ) {
             // old overlay detected, removing it
-            wLogger.warn(
-                '[ingame-overlay] Old version of the ingame overlay detected. Removing...'
-            );
+            wLogger.warn('Old in-game overlay version detected. Removing...');
             await rm(gameOverlayPath, { recursive: true, force: true });
         }
 
@@ -46,9 +44,7 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             if (overlayVersion.trimEnd() !== currentVersion) {
                 await rm(gameOverlayPath, { recursive: true, force: true });
 
-                wLogger.warn(
-                    '[ingame-overlay] A newer version of the ingame overlay is available. Updating...'
-                );
+                wLogger.warn('In-game overlay update available. Updating...');
             }
         }
 
@@ -85,10 +81,10 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             await unzip(archivePath, gameOverlayPath);
             await rm(archivePath);
 
-            wLogger.info('[ingame-overlay] Ingame overlay downloaded');
+            wLogger.info('In-game overlay installed successfully');
         }
 
-        wLogger.warn(`[ingame-overlay] Launching...`);
+        wLogger.warn(`Launching in-game overlay...`);
 
         const child = spawn(
             path.join(gameOverlayPath, 'tosu-ingame-overlay.exe'),
@@ -116,21 +112,15 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             data = data.trim();
 
             if (data.startsWith('info:'))
-                wLogger.info(
-                    '[ingame-overlay]',
-                    data.replace('info:', '').trim()
-                );
+                wLogger.info(data.replace('info:', '').trim());
             else if (data.startsWith('warn:'))
-                wLogger.warn(
-                    '[ingame-overlay]',
-                    data.replace('warn:', '').trim()
-                );
-            else wLogger.debug('[ingame-overlay]', data.trim());
+                wLogger.warn(data.replace('warn:', '').trim());
+            else wLogger.debug(`Overlay Output:`, data.trim());
         });
 
         child.stderr.setEncoding('utf-8').on('data', (data: string) => {
             // redirect overlay error backtraces to debug error log
-            wLogger.error('[ingame-overlay]', data.trim());
+            wLogger.error('Overlay Error:', data.trim());
         });
 
         return child;

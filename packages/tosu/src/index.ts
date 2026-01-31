@@ -1,5 +1,6 @@
 import {
     argumentsParser,
+    cleanupLogs,
     config,
     configEvents,
     configInitialization,
@@ -9,8 +10,6 @@ import {
 } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
-import { existsSync, readdirSync, rmSync, statSync } from 'fs';
-import { dirname, join } from 'path';
 import { Process } from 'tsprocess';
 
 import { InstanceManager } from '@/instances/manager';
@@ -20,7 +19,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
 (async () => {
     context.currentVersion = currentVersion;
-    wLogger.info(`Starting tosu`);
+    wLogger.info(`Starting %tosu%`);
 
     Process.disablePowerThrottling();
 
@@ -51,7 +50,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
         const currentPath = getProgramPath();
         if (process.env.TEMP && currentPath.startsWith(process.env.TEMP)) {
             wLogger.warn(
-                'Incase if you running tosu from archive, please extract it to a folder'
+                'It appears you are running %tosu% from an archive. Please extract it to a folder before running.'
             );
             return;
         }
@@ -62,38 +61,16 @@ const currentVersion = require(process.cwd() + '/_version.js');
             currentPath.startsWith(process.env.OneDrive)
         ) {
             wLogger.warn(
-                'tosu cannot run from a OneDrive folder due to potential sync conflicts and performance issues.'
+                '%tosu% cannot run from a OneDrive folder due to potential sync conflicts and performance issues.'
             );
-            wLogger.warn('Please move tosu to different folder');
+            wLogger.warn('Please move %tosu% to a different folder.');
             return;
         }
     }
 
-    const logsPath = dirname(context.logFilePath);
-    if (existsSync(logsPath)) {
-        const logs = readdirSync(logsPath).filter(
-            (file) => file !== context.logFilePath.split('\\').pop()
-        );
-        const size =
-            logs.reduce((total, file) => {
-                const filePath = join(logsPath, file);
-                const fileSize = statSync(filePath).isFile()
-                    ? statSync(filePath).size
-                    : 0;
-                return total + fileSize;
-            }, 0) /
-            1024 /
-            1024;
+    cleanupLogs();
 
-        if (size >= 100) {
-            logs.forEach((file) => rmSync(join(logsPath, file)));
-            wLogger.debug(
-                `The logs folder was cleared due to its size. (${size.toFixed(0)} MB)`
-            );
-        }
-    }
-
-    wLogger.info('Searching for osu!');
+    wLogger.info('Searching for %osu!% process...');
 
     httpServer.start();
     instanceManager.runWatcher();

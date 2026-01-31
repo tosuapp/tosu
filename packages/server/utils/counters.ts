@@ -335,8 +335,14 @@ function rebuildJSON({
                 .replace('{GALLERY}', gallery)
                 .replace('{FOOTER}', footer);
         } catch (error) {
-            wLogger.error('rebuildJSON', item.name, (error as any).message);
-            wLogger.debug('rebuildJSON', item.name, error);
+            wLogger.error(
+                `Failed to rebuild JSON for counter %${item.name}%:`,
+                (error as any).message
+            );
+            wLogger.debug(
+                `JSON rebuild error details for %${item.name}%:`,
+                error
+            );
         }
     }
 
@@ -406,8 +412,11 @@ export function getLocalCounters(): ICounter[] {
         const array = countersListTXT.map((r) => parseTXT(r));
         return array.concat(arrayOfLocal).filter((r) => r.name !== '');
     } catch (error) {
-        wLogger.error('getLocalCounters', (error as any).message);
-        wLogger.debug('getLocalCounters', error);
+        wLogger.error(
+            'Failed to retrieve local counters:',
+            (error as any).message
+        );
+        wLogger.debug('Local counters retrieval error details:', error);
 
         return [];
     }
@@ -438,7 +447,10 @@ export function buildLocalCounters(
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildLocalCounters', 'homepage read', err);
+                wLogger.debug(
+                    'Failed to read homepage.html for local counters:',
+                    err
+                );
                 res.writeHead(404, {
                     'Content-Type': 'text/html'
                 });
@@ -517,8 +529,11 @@ export async function buildExternalCounters(
         totalLocal = exists.length;
         totalAvailable = json.length;
     } catch (error) {
-        wLogger.error('buildExternalCounters', (error as any).message);
-        wLogger.debug('buildExternalCounters', error);
+        wLogger.error(
+            'Failed to build external counters:',
+            (error as any).message
+        );
+        wLogger.debug('External counters build error details:', error);
 
         if (query != null) {
             res.writeHead(200, {
@@ -535,7 +550,10 @@ export async function buildExternalCounters(
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildExternalCounters', 'homepage read', err);
+                wLogger.debug(
+                    'Failed to read homepage.html for external counters:',
+                    err
+                );
                 res.writeHead(404, { 'Content-Type': 'text/html' });
 
                 res.end('<html>page not found</html>');
