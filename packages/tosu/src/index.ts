@@ -1,5 +1,6 @@
 import {
     argumentsParser,
+    cleanupLogs,
     config,
     configEvents,
     configInitialization,
@@ -9,8 +10,6 @@ import {
 } from '@tosu/common';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
-import { existsSync, readdirSync, rmSync, statSync } from 'fs';
-import { dirname, join } from 'path';
 import { Process } from 'tsprocess';
 
 import { InstanceManager } from '@/instances/manager';
@@ -69,56 +68,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
         }
     }
 
-    const logsPath = dirname(context.logFilePath);
-    if (existsSync(logsPath)) {
-        const logs = readdirSync(logsPath).filter(
-            (file) => file !== context.logFilePath.split('\\').pop()
-        );
-
-        const logFiles = logs.map((file) => {
-            const filePath = join(logsPath, file);
-            const stats = statSync(filePath);
-            return {
-                file,
-                filePath,
-                size: stats.isFile() ? stats.size : 0,
-                mtime: stats.mtime.getTime()
-            };
-        });
-
-        let totalSize = logFiles.reduce((acc, curr) => acc + curr.size, 0);
-        const maxSizeBytes = 100 * 1024 * 1024; // 100 MB
-        const safeLimitBytes = 90 * 1024 * 1024; // 90 MB
-
-        if (totalSize > maxSizeBytes) {
-            logFiles.sort((a, b) => a.mtime - b.mtime);
-
-            let deletedCount = 0;
-            let clearedSpace = 0;
-
-            for (const log of logFiles) {
-                if (totalSize <= safeLimitBytes) break;
-
-                try {
-                    rmSync(log.filePath);
-                    totalSize -= log.size;
-                    clearedSpace += log.size;
-                    deletedCount++;
-                } catch (e) {
-                    wLogger.error(
-                        `Failed to delete old log file: %${log.file}%`,
-                        e
-                    );
-                }
-            }
-
-            if (deletedCount > 0) {
-                wLogger.debug(
-                    `Cleaned up %${deletedCount}% old log files. Freed %${(clearedSpace / 1024 / 1024).toFixed(2)} MB%.`
-                );
-            }
-        }
-    }
+    cleanupLogs();
 
     wLogger.info('Searching for %osu!% process...');
 

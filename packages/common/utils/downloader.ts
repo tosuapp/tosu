@@ -14,6 +14,8 @@ export const downloadFile = (
     destination: string
 ): Promise<string> =>
     new Promise((resolve, reject) => {
+        let token: symbol | undefined;
+
         const options = {
             headers: {
                 Accept: 'application/octet-stream',
@@ -35,17 +37,24 @@ export const downloadFile = (
                 }
 
                 const file = fs.createWriteStream(destination);
-                const token = progressManager.start('Downloading File');
+                token = progressManager.start('Downloading File');
 
                 file.on('error', async (err) => {
-                    fs.unlinkSync(destination);
-                    await progressManager.end(token, 'Download failed');
+                    try {
+                        if (fs.existsSync(destination))
+                            fs.unlinkSync(destination);
+                    } catch {
+                        // Ignore cleanup errors to avoid masking the original download failure
+                    }
+                    if (token)
+                        await progressManager.end(token, 'Download failed');
                     reject(err);
                 });
 
                 file.on('finish', async () => {
                     file.close();
-                    await progressManager.end(token, 'Download completed');
+                    if (token)
+                        await progressManager.end(token, 'Download completed');
                     resolve(destination);
                 });
 
@@ -64,16 +73,19 @@ export const downloadFile = (
                     );
                     const totalMB = (totalSize / 1024 / 1024).toFixed(2);
 
-                    progressManager.update(
-                        token,
-                        progress,
-                        `| ${downloadedMB} / ${totalMB} MB`
-                    );
+                    if (token) {
+                        progressManager.update(
+                            token,
+                            progress,
+                            `| ${downloadedMB} / ${totalMB} MB`
+                        );
+                    }
                 });
 
                 response.pipe(file);
             })
             .on('error', async (err) => {
+                if (token) await progressManager.end(token, 'Download failed');
                 reject(err);
             });
     });

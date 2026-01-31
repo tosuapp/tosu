@@ -85,7 +85,7 @@ export async function generateReport(instanceManager: any): Promise<Report> {
             .slice(0, -1)
             .map((r) => {
                 const match = r.match(
-                    /^(\d{2}:\d{2}:\d{2}\.\d{3})\s+\[(\w+)\]\s+(.*)$/
+                    /^(\d{2}:\d{2}:\d{2}\.\d{3})\s+\[(.+?)\]\s+(.*)$/
                 );
 
                 if (match) {
