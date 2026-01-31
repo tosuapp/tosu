@@ -1,9 +1,7 @@
 import {
-    Beatmap,
     ConfigBinding,
     ConfigManager,
     JsonSafeParse,
-    PerformanceArgs,
     downloadFile,
     getCachePath,
     getProgramPath,
@@ -361,74 +359,75 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route('/api/calculate/pp', 'GET', (req, res) => {
-        const query: any = req.query;
+        res.end('');
+        // const query: any = req.query;
 
-        const osuInstance: any = req.instanceManager.getInstance(
-            req.instanceManager.focusedClient
-        );
-        if (!osuInstance) {
-            throw new Error('osu is not ready/running');
-        }
+        // const osuInstance: any = req.instanceManager.getInstance(
+        //     req.instanceManager.focusedClient
+        // );
+        // if (!osuInstance) {
+        //     throw new Error('osu is not ready/running');
+        // }
 
-        const { global, menu, beatmapPP } = osuInstance.getServices([
-            'global',
-            'menu',
-            'beatmapPP'
-        ]);
+        // const { global, menu, beatmapPP } = osuInstance.getServices([
+        //     'global',
+        //     'menu',
+        //     'beatmapPP'
+        // ]);
 
-        let beatmap: Beatmap;
-        const exists = fs.existsSync(query.path);
-        if (exists) {
-            const beatmapFilePath = path.join(
-                global.songsFolder,
-                menu.folder,
-                menu.filename
-            );
+        // let beatmap: Beatmap;
+        // const exists = fs.existsSync(query.path);
+        // if (exists) {
+        //     const beatmapFilePath = path.join(
+        //         global.songsFolder,
+        //         menu.folder,
+        //         menu.filename
+        //     );
 
-            const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
-            beatmap = osuInstance.calculator.beatmap(
-                beatmapContent,
-                query.mode
-            );
-        } else {
-            beatmap = beatmapPP.getCurrentBeatmap();
-        }
+        //     const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
+        //     beatmap = osuInstance.calculator.beatmap(
+        //         beatmapContent,
+        //         query.mode
+        //     );
+        // } else {
+        //     beatmap = beatmapPP.getCurrentBeatmap();
+        // }
 
-        const params: PerformanceArgs = {};
+        // const params: PerformanceArgs = {};
 
-        if (query.ar !== undefined) params.ar = +query.ar;
-        if (query.cs !== undefined) params.cs = +query.cs;
-        if (query.hp !== undefined) params.hp = +query.hp;
-        if (query.od !== undefined) params.od = +query.od;
+        // if (query.ar !== undefined) params.ar = +query.ar;
+        // if (query.cs !== undefined) params.cs = +query.cs;
+        // if (query.hp !== undefined) params.hp = +query.hp;
+        // if (query.od !== undefined) params.od = +query.od;
 
-        if (query.clockRate !== undefined) params.clockRate = +query.clockRate;
-        if (query.passedObjects !== undefined)
-            params.passedObjects = +query.passedObjects;
-        if (query.combo !== undefined) params.combo = +query.combo;
-        if (query.nMisses !== undefined) params.misses = +query.nMisses;
-        if (query.n100 !== undefined) params.n100 = +query.n100;
-        if (query.n300 !== undefined) params.n300 = +query.n300;
-        if (query.n50 !== undefined) params.n50 = +query.n50;
-        if (query.nGeki !== undefined) params.nGeki = +query.nGeki;
-        if (query.nKatu !== undefined) params.nKatu = +query.nKatu;
-        if (query.mods !== undefined)
-            params.mods = Array.isArray(query.mods) ? query.mods : +query.mods;
-        if (query.acc !== undefined) params.accuracy = +query.acc;
-        if (query.sliderEndHits !== undefined)
-            params.sliderEndHits = +query.sliderEndHits;
-        if (query.smallTickHits !== undefined)
-            params.smallTickHits = +query.smallTickHits;
-        if (query.largeTickHits !== undefined)
-            params.largeTickHits = +query.largeTickHits;
-        if (query.hitresultPriority !== undefined)
-            params.hitresultPriority = +query.hitresultPriority;
+        // if (query.clockRate !== undefined) params.clockRate = +query.clockRate;
+        // if (query.passedObjects !== undefined)
+        //     params.passedObjects = +query.passedObjects;
+        // if (query.combo !== undefined) params.combo = +query.combo;
+        // if (query.nMisses !== undefined) params.misses = +query.nMisses;
+        // if (query.n100 !== undefined) params.n100 = +query.n100;
+        // if (query.n300 !== undefined) params.n300 = +query.n300;
+        // if (query.n50 !== undefined) params.n50 = +query.n50;
+        // if (query.nGeki !== undefined) params.nGeki = +query.nGeki;
+        // if (query.nKatu !== undefined) params.nKatu = +query.nKatu;
+        // if (query.mods !== undefined)
+        //     params.mods = Array.isArray(query.mods) ? query.mods : +query.mods;
+        // if (query.acc !== undefined) params.accuracy = +query.acc;
+        // if (query.sliderEndHits !== undefined)
+        //     params.sliderEndHits = +query.sliderEndHits;
+        // if (query.smallTickHits !== undefined)
+        //     params.smallTickHits = +query.smallTickHits;
+        // if (query.largeTickHits !== undefined)
+        //     params.largeTickHits = +query.largeTickHits;
+        // if (query.hitresultPriority !== undefined)
+        //     params.hitresultPriority = +query.hitresultPriority;
 
-        const calculate = osuInstance.calculator.performance(params, beatmap);
-        sendJson(res, calculate);
+        // const calculate = osuInstance.calculator.performance(params, beatmap);
+        // sendJson(res, calculate);
 
-        // free beatmap only when map path specified
-        if (query.path) beatmap.free();
-        calculate.free();
+        // // free beatmap only when map path specified
+        // if (query.path) beatmap.free();
+        // calculate.free();
     });
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {
