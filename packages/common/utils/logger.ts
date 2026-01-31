@@ -140,7 +140,6 @@ process.on('SIGTERM', () => {
 });
 
 export function cleanupLogs() {
-    if (context.logFilePath === '') return;
     const logsPath = path.dirname(context.logFilePath);
     if (fs.existsSync(logsPath)) {
         const logs = fs.readdirSync(logsPath);
@@ -155,21 +154,17 @@ export function cleanupLogs() {
 
         for (const file of logs) {
             const filePath = path.join(logsPath, file);
-            try {
-                const stats = fs.statSync(filePath);
-                const size = stats.isFile() ? stats.size : 0;
-                totalSize += size;
+            const stats = fs.statSync(filePath);
+            const size = stats.isFile() ? stats.size : 0;
+            totalSize += size;
 
-                if (file !== 'latest.log') {
-                    logFiles.push({
-                        file,
-                        filePath,
-                        size,
-                        mtime: stats.mtime.getTime()
-                    });
-                }
-            } catch {
-                continue;
+            if (file !== 'latest.log') {
+                logFiles.push({
+                    file,
+                    filePath,
+                    size,
+                    mtime: stats.mtime.getTime()
+                });
             }
         }
 
