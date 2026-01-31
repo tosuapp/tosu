@@ -1,5 +1,6 @@
+import { ModsLazer } from '@tosu/common';
+
 import { Statistics } from '@/states/types';
-import { ModsLazer } from '@/utils/osuMods.types';
 
 /**
  * Used to calculate accuracy out of hits
@@ -83,7 +84,7 @@ export const calculateAccuracy = (params: {
     }
 
     if (denominator === 0) return 0;
-    return +((numerator / denominator) * 100).toFixed(2);
+    return (numerator / denominator) * 100;
 };
 
 export const calculateGrade = (params: {

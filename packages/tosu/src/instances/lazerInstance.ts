@@ -22,8 +22,8 @@ export class LazerInstance extends AbstractInstance {
     osuVersion: string;
     previousCombo: number = 0;
 
-    constructor(pid: number) {
-        super(pid, Bitness.x64);
+    constructor(pid: number, calculatorPath: string) {
+        super(pid, Bitness.x64, calculatorPath);
         this.memory = new LazerMemory(this.process, this);
     }
 
