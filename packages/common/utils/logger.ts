@@ -223,6 +223,10 @@ export function measureTime(
     descriptor: PropertyDescriptor
 ) {
     const originalMethod = descriptor.value;
+    const timings: number[] = [];
+
+    let max = 0;
+    let min = Infinity;
 
     descriptor.value = function (...args: any[]) {
         if (config.debugLog !== true) {
@@ -239,13 +243,20 @@ export function measureTime(
         const time = performance.now() - t1;
 
         if (time >= 1) {
+            timings.push(time);
+            if (timings.length > 20) timings.shift();
+
+            const average =
+                timings.reduce((sum, t) => sum + t, 0) / timings.length;
+            max = Math.max(max, time);
+            min = Math.min(min, time);
+
             const msg = client
-                ? `%${client}% ${(this as any).game.pid} ${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
-                : `%${target.constructor.name}.${propertyKey}% executed in ${time.toFixed(2)}ms`;
+                ? `%${client}% ${(this as any).game.pid} ${target.constructor.name}.${propertyKey} executed in ${time.toFixed(3)}ms (${average.toFixed(3)}/${min.toFixed(3)}/${max.toFixed(3)})`
+                : `%${target.constructor.name}.${propertyKey}% executed in ${time.toFixed(3)}ms (${average.toFixed(3)}/${min.toFixed(3)}/${max.toFixed(3)})`;
 
             wLogger.time(msg);
         }
-
         return result;
     };
 
