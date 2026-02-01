@@ -88,16 +88,16 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         hp: fixDecimals(beatmapPP.calculatedMapAttributes.hp),
         mHP: fixDecimals(beatmapPP.calculatedMapAttributes.hpConverted),
 
-        currentBpm: Math.round(beatmapPP.realtimeBPM),
-        bpm: Math.round(beatmapPP.commonBPM),
+        currentBpm: fixDecimals(beatmapPP.realtimeBPM, 4),
+        bpm: fixDecimals(beatmapPP.commonBPM, 4),
 
-        mainBpm: Math.round(beatmapPP.commonBPM),
-        maxBpm: Math.round(beatmapPP.maxBPM),
-        minBpm: Math.round(beatmapPP.minBPM),
+        mainBpm: fixDecimals(beatmapPP.commonBPM, 4),
+        maxBpm: fixDecimals(beatmapPP.maxBPM, 4),
+        minBpm: fixDecimals(beatmapPP.minBPM, 4),
 
-        mMainBpm: Math.round(beatmapPP.commonBPM),
-        mMaxBpm: Math.round(beatmapPP.maxBPM),
-        mMinBpm: Math.round(beatmapPP.minBPM),
+        mMainBpm: fixDecimals(beatmapPP.commonBPM, 4),
+        mMaxBpm: fixDecimals(beatmapPP.maxBPM, 4),
+        mMinBpm: fixDecimals(beatmapPP.minBPM, 4),
 
         mBpm:
             beatmapPP.minBPM === beatmapPP.maxBPM

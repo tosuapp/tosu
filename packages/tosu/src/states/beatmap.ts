@@ -466,9 +466,9 @@ export class BeatmapPP extends AbstractState {
 
                 this.previewtime = this.lazerBeatmap.general.previewTime;
 
-                this.commonBPM = Math.round(bpm * this.clockRate);
-                this.minBPM = Math.round(bpmMin * this.clockRate);
-                this.maxBPM = Math.round(bpmMax * this.clockRate);
+                this.commonBPM = bpm * this.clockRate;
+                this.minBPM = bpmMin * this.clockRate;
+                this.maxBPM = bpmMax * this.clockRate;
 
                 this.breaks = this.lazerBeatmap.events.breaks.map((r) => ({
                     hasEffect: r.hasEffect,
@@ -802,7 +802,7 @@ export class BeatmapPP extends AbstractState {
             this.lazerBeatmap.controlPoints.timingPoints[0]?.bpm ||
             0.0;
 
-        this.realtimeBPM = Math.round(bpm * multiply);
+        this.realtimeBPM = bpm * multiply;
 
         this.isKiai = this.kiais.some((r) => ms >= r.start && ms <= r.end);
         this.isBreak = this.breaks.some((r) => ms >= r.start && ms <= r.end);
