@@ -91,7 +91,7 @@ export type IScore = {
 export type IGameplay = IScore | string | Error;
 
 export type IKeyOverlay = KeyOverlayButton[] | string | Error;
-export type IHitErrors = number[] | string | Error;
+export type IHitErrors = { index: number; array: number[] } | string | Error;
 
 export type IGlobal =
     | {

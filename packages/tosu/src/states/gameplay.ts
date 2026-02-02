@@ -89,6 +89,7 @@ export class Gameplay extends AbstractState {
 
     previousState: string = '';
     previousPassedObjects = 0;
+    previousHitErrorIndex = 0;
 
     constructor(game: AbstractInstance) {
         super(game);
@@ -323,7 +324,9 @@ export class Gameplay extends AbstractState {
 
     updateHitErrors() {
         try {
-            const result = this.game.memory.hitErrors(this.hitErrors.length);
+            const result = this.game.memory.hitErrors(
+                this.previousHitErrorIndex
+            );
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 if (result === '') return;
@@ -336,10 +339,11 @@ export class Gameplay extends AbstractState {
                 return 'not-ready';
             }
 
-            for (const hit of result) {
+            for (const hit of result.array) {
                 this.hitErrors.push(hit);
                 this.totalHitErrors += hit;
             }
+            this.previousHitErrorIndex = result.index;
 
             this.game.resetReportCount('gameplay updateHitErrors');
         } catch (exc) {
