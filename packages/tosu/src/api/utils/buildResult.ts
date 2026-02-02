@@ -119,10 +119,10 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                     ),
                     SR: fixDecimals(beatmapPP.currAttributes.stars),
                     BPM: {
-                        realtime: fixDecimals(beatmapPP.realtimeBPM),
-                        common: fixDecimals(beatmapPP.commonBPM),
-                        min: fixDecimals(beatmapPP.minBPM),
-                        max: fixDecimals(beatmapPP.maxBPM)
+                        realtime: fixDecimals(beatmapPP.realtimeBPM, 4),
+                        common: fixDecimals(beatmapPP.commonBPM, 4),
+                        min: fixDecimals(beatmapPP.minBPM, 4),
+                        max: fixDecimals(beatmapPP.maxBPM, 4)
                     },
                     circles: beatmapPP.calculatedMapAttributes.circles,
                     sliders: beatmapPP.calculatedMapAttributes.sliders,

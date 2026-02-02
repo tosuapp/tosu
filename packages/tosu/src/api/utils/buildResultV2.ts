@@ -867,10 +867,10 @@ function buildBeatmapStats(beatmapPP: BeatmapPP) {
         },
 
         bpm: {
-            realtime: fixDecimals(beatmapPP.realtimeBPM),
-            common: fixDecimals(beatmapPP.commonBPM),
-            min: fixDecimals(beatmapPP.minBPM),
-            max: fixDecimals(beatmapPP.maxBPM)
+            realtime: fixDecimals(beatmapPP.realtimeBPM, 4),
+            common: fixDecimals(beatmapPP.commonBPM, 4),
+            min: fixDecimals(beatmapPP.minBPM, 4),
+            max: fixDecimals(beatmapPP.maxBPM, 4)
         },
 
         objects: {
