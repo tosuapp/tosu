@@ -742,7 +742,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 errors.push(error);
             }
 
-            return errors;
+            return { index: size, array: errors };
         } catch (error) {
             return error as Error;
         }

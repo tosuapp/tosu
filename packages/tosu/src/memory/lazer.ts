@@ -1197,6 +1197,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return result;
     }
 
+    private readItem(
+        items: number,
+        index: number,
+        inlined: boolean = false,
+        structSize: number = 8
+    ) {
+        return inlined
+            ? items + 0x10 + structSize * index
+            : this.process.readIntPtr(items + 0x10 + structSize * index);
+    }
+
     private readItems(
         items: number,
         size: number,
@@ -1204,23 +1215,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         structSize: number = 8
     ): number[] {
         const result: number[] = [];
-
         for (let i = 0; i < size; i++) {
-            const current = inlined
-                ? items + 0x10 + structSize * i
-                : this.process.readIntPtr(items + 0x10 + structSize * i);
-
-            result.push(current);
+            result.push(this.readItem(items, i, inlined, structSize));
         }
 
         return result;
     }
 
-    private readListItems(
-        list: number,
-        inlined: boolean = false,
-        structSize: number = 8
-    ): number[] {
+    private listItemsInfo(list: number) {
         let isArray = false;
 
         // another hacky check :D
@@ -1231,6 +1233,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const size = this.process.readInt(list + (isArray ? 0x8 : 0x10));
         const items = isArray ? list : this.process.readIntPtr(list + 0x8);
 
+        return { size, items };
+    }
+
+    private readListItems(
+        list: number,
+        inlined: boolean = false,
+        structSize: number = 8
+    ): number[] {
+        const { size, items } = this.listItemsInfo(list);
         return this.readItems(items, size, inlined, structSize);
     }
 
@@ -2240,7 +2251,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return undefined;
     }
 
-    private hitEvents(last: number): number[] {
+    private hitEvents(last: number) {
         const player = this.player();
         const scoreProcessor = this.process.readIntPtr(
             player +
@@ -2253,11 +2264,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.offsets['osu.Game.Rulesets.Scoring.ScoreProcessor']
                     .hitEvents
         );
-        const hitEvents = this.readListItems(hitEventsList, true, 0x40);
+        const { size, items } = this.listItemsInfo(hitEventsList);
 
         const result: number[] = [];
-        for (let i = last; i < hitEvents.length; i++) {
-            const hitEvent = this.readHitEvent(hitEvents[i]);
+        for (let i = last; i < size; i++) {
+            const item = this.readItem(items, i, true, 0x40);
+            const hitEvent = this.readHitEvent(item);
             if (hitEvent === undefined) {
                 continue;
             }
@@ -2265,12 +2277,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             result.push(hitEvent);
         }
 
-        return result;
+        return { index: size, array: result };
     }
 
     hitErrors(last: number): IHitErrors {
         if (this.isPlayerLoading) {
-            return [];
+            return { index: 0, array: [] };
         }
 
         return this.hitEvents(last);
