@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.18.0](https://github.com/tosuapp/tosu/compare/v4.17.2...v4.18.0) (2026-02-03)
+
+
+### Features
+
+* Allow selecting profile via `profile` query for /api/ingame` url ([a0688bf](https://github.com/tosuapp/tosu/commit/a0688bf9d6641307d76abeb72a822c3332003fed))
+* Implement ingame overlay profiles ([f154358](https://github.com/tosuapp/tosu/commit/f154358c1e0f127cd8f828bf7db8ffb2a7c417c4))
+* overhaul logger and progress bar implementation ([b15e0f2](https://github.com/tosuapp/tosu/commit/b15e0f2f022092bfc60e503f2504c131958c6859))
+* **progress:** allow multiple bars at once. ([de1d766](https://github.com/tosuapp/tosu/commit/de1d766cff6e107f126ee181a2250f4a627256e7))
+* Separate ingame-overlay profile for obs ([035d5f2](https://github.com/tosuapp/tosu/commit/035d5f2b40f1dac023df8b428c55ed4e80e91c1a))
+
+
+### Bug Fixes
+
+* FIx kiai detection ([7488a08](https://github.com/tosuapp/tosu/commit/7488a080f75f195518051fc9c8691d8acb233000))
+* Keep up to 4 decimals for bpm values ([f7b1610](https://github.com/tosuapp/tosu/commit/f7b16109e889f23b9db4eb38085807b7379b07bf))
+* Lazer hit error duplicates ([d9d590b](https://github.com/tosuapp/tosu/commit/d9d590ba3a0c4e2643033d2bdc95fdff4e7f29ff))
+* only replace highlights outside of links. ([0497f43](https://github.com/tosuapp/tosu/commit/0497f430166146f201a7bced53a55e1f32a895eb))
+* prettier CI failing. ([2b90de3](https://github.com/tosuapp/tosu/commit/2b90de328e61a9144fd1d76b4ce3a91bbe36856a))
+* update report generation for new log format ([26ef04d](https://github.com/tosuapp/tosu/commit/26ef04d9a8c02ff54a1913aafde92f803a17063d))
+
 ### [4.17.2](https://github.com/tosuapp/tosu/compare/v4.17.1...v4.17.2) (2026-01-21)
 
 
