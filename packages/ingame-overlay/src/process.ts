@@ -129,7 +129,10 @@ export class OverlayProcess {
         const window = new BrowserWindow({
             webPreferences: {
                 offscreen: {
-                    useSharedTexture: true
+                    useSharedTexture: true,
+                    // NOTE: Disable unsupported hdr texture format.
+                    // Remove when hdr support is added.
+                    sharedTexturePixelFormat: 'argb'
                 },
                 transparent: true,
                 backgroundThrottling: false,
