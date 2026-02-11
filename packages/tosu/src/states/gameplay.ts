@@ -1,13 +1,12 @@
 import {
     CalculateMods,
     ClientType,
+    GameState,
     ModsCollection,
-    NativeOsuDifficultyAttributes,
     NativeTimedOsuDifficultyAttributes,
     OsuMods,
-    OsuPerformanceCalculator,
-    Ruleset,
     ScoreInfoInput,
+    TimedLazy,
     config,
     defaultCalculatedMods,
     measureTime,
@@ -63,14 +62,9 @@ const defaultLBPlayer = {
 } as LeaderboardPlayer;
 
 export class Gameplay extends AbstractState {
+    isCalculating: boolean = false;
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
-
-    private nativeRuleset?: Ruleset;
-    private nativeMods?: ModsCollection | null;
-    private nativeDifficulty?: NativeOsuDifficultyAttributes;
-    private nativeTimedDifficulty: NativeTimedOsuDifficultyAttributes[] = [];
-    private nativePerformanceCalc?: OsuPerformanceCalculator;
 
     failed: boolean;
 
@@ -84,6 +78,9 @@ export class Gameplay extends AbstractState {
 
     statistics: Statistics;
     maximumStatistics: Statistics;
+
+    nativeMods?: ModsCollection;
+    timedLazy?: TimedLazy<NativeTimedOsuDifficultyAttributes>;
 
     unstableRate: number;
     totalHitErrors: number = 0;
@@ -170,16 +167,17 @@ export class Gameplay extends AbstractState {
         this.isLeaderboardVisible = false;
         this.leaderboardPlayer = Object.assign({}, defaultLBPlayer);
         this.leaderboardScores = [];
-
-        this.resetCalculator();
     }
 
-    resetQuick() {
+    resetGradual() {
         wLogger.debug(
             `%${ClientType[this.game.client]}%`,
-            `Quick reset of gameplay state`
+            `Reset gradual calculator`
         );
 
+        silentCatch(this.timedLazy?.destroy, this.timedLazy?.enumerator);
+
+        this.timedLazy = undefined;
         this.previousPassedObjects = 0;
     }
 
@@ -205,21 +203,6 @@ export class Gameplay extends AbstractState {
         });
 
         this.isKeyOverlayDefaultState = true;
-    }
-
-    resetCalculator() {
-        silentCatch(this.nativeRuleset?.destroy);
-        silentCatch(this.nativeMods?.destroy);
-        silentCatch(this.nativePerformanceCalc?.destroy);
-        silentCatch(this.nativeRuleset?.destroy);
-
-        this.nativeRuleset = undefined;
-        this.nativeMods = undefined;
-        this.nativePerformanceCalc = undefined;
-        this.nativeRuleset = undefined;
-
-        this.nativeDifficulty = undefined;
-        this.nativeTimedDifficulty = [];
     }
 
     @measureTime
@@ -505,6 +488,8 @@ export class Gameplay extends AbstractState {
                 'menu'
             ]);
 
+            if (!beatmapPP.ruleset) return;
+
             if (!global.gameFolder) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
@@ -513,8 +498,8 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentBeatmap = beatmapPP.getCurrentBeatmap();
-            if (!currentBeatmap) {
+            const beatmap = beatmapPP.getCurrentBeatmap();
+            if (!beatmap) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
                     `Current beatmap unavailable, skipping PP calc`
@@ -522,76 +507,87 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.checksum}:${menu.mp3Length}`;
-            const isUpdate = this.previousState !== currentState;
-
             const commonParams = {
                 mods: sanitizeMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             };
 
-            // update precalculated attributes
-            if (
-                isUpdate ||
-                !this.nativeRuleset ||
-                !this.nativeDifficulty ||
-                !this.nativePerformanceCalc
-            ) {
-                this.resetCalculator();
-
-                const performance = this.game.calculator.performance(this.mode);
-                if (performance instanceof Error) {
-                    wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `gameplay updateStarsAndPerformance Gradual not ready`,
-                        performance
-                    );
-                    return;
-                }
-
-                const attributes = this.game.calculator.attributes({
+            const currentState = `${menu.checksum}:${beatmapPP.ruleset.rulesetId}:${this.mods.checksum}:${menu.mp3Length}`;
+            if (this.previousState !== currentState || !this.timedLazy) {
+                const result = this.game.calculator.gradual({
                     lazer: commonParams.lazer,
-                    beatmap: currentBeatmap,
-                    ruleset: performance.ruleset,
+                    beatmap,
+                    ruleset: beatmapPP.ruleset!,
                     mods: commonParams.mods
                 });
-                if (attributes instanceof Error) {
-                    wLogger.debug(
+                if (result instanceof Error) {
+                    wLogger.error(
                         ClientType[this.game.client],
                         this.game.pid,
-                        `gameplay updateStarsAndPerformance Difficulty not ready`,
-                        attributes
+                        `gameplay updateStarsAndPerformance lazy not ready`,
+                        result
                     );
                     return;
                 }
 
-                this.nativeRuleset = performance.ruleset;
-                this.nativePerformanceCalc = performance.calculator;
-
-                this.nativeMods = attributes.mods;
-                this.nativeDifficulty = attributes.difficulty;
-                this.nativeTimedDifficulty = attributes.timedDifficulty;
-
+                this.nativeMods = result.mods;
+                this.timedLazy = result.timedLazy;
                 this.previousState = currentState;
+                this.previousPassedObjects = 0;
+            }
+
+            if (
+                !this.nativeMods ||
+                !this.timedLazy ||
+                !beatmapPP.attributes ||
+                !beatmapPP.performanceCalculator
+            ) {
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance not ready`
+                );
+                return;
             }
 
             const passedObjects = calculatePassedObjects(
                 this.mode,
                 this.statistics
             );
-            if (this.previousPassedObjects === passedObjects) return;
 
-            const currentAttributes =
-                this.nativeTimedDifficulty[passedObjects]?.attributes;
+            let offset = passedObjects - this.previousPassedObjects;
+            if (offset <= 0 && this.isCalculating === false) return;
+            this.isCalculating = true;
+
+            let currentDifficulty;
+            while (offset > 0) {
+                // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
+                if (global.status !== GameState.play || !this.timedLazy) break;
+
+                currentDifficulty = this.timedLazy.next(
+                    this.timedLazy.enumerator
+                );
+
+                offset--;
+            }
+            if (!currentDifficulty) {
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance no current currentAttributes`
+                );
+
+                this.isCalculating = false;
+                return;
+            }
 
             const scoreInput: ScoreInfoInput = {
-                ruleset: this.nativeRuleset,
+                ruleset: beatmapPP.ruleset,
                 legacyScore:
                     this.game.client !== ClientType.lazer
                         ? this.score
                         : undefined,
-                beatmap: currentBeatmap,
+                beatmap,
                 mods: this.nativeMods,
                 maxCombo: this.maxCombo,
                 accuracy: this.accuracy / 100,
@@ -605,13 +601,13 @@ export class Gameplay extends AbstractState {
                 countLargeTickMiss: this.statistics.largeTickMiss
             };
 
-            const currPerformance = this.nativePerformanceCalc.calculate(
+            const currPerformance = beatmapPP.performanceCalculator.calculate(
                 scoreInput,
-                currentAttributes
+                currentDifficulty.attributes
             );
 
             beatmapPP.updateCurrentAttributes(
-                currentAttributes.starRating || 0,
+                currentDifficulty.attributes.starRating || 0,
                 currPerformance.total
             );
 
@@ -629,9 +625,9 @@ export class Gameplay extends AbstractState {
                       beatmapPP.calculatedMapAttributes.holds;
 
             const calcOptions: ScoreInfoInput = {
-                ruleset: this.nativeRuleset,
+                ruleset: beatmapPP.ruleset,
                 legacyScore: !commonParams.lazer ? this.score : undefined,
-                beatmap: currentBeatmap,
+                beatmap,
                 mods: this.nativeMods,
                 maxCombo: this.maxCombo,
                 accuracy: this.accuracy / 100,
@@ -660,9 +656,9 @@ export class Gameplay extends AbstractState {
             }
 
             const maxAchievablePerformance =
-                this.nativePerformanceCalc.calculate(
+                beatmapPP.performanceCalculator.calculate(
                     calcOptions,
-                    currentAttributes
+                    currentDifficulty.attributes
                 );
 
             beatmapPP.currAttributes.maxAchievable =
@@ -693,15 +689,16 @@ export class Gameplay extends AbstractState {
                 calcOptions.countMiss = 0;
             }
 
-            const fcPerformance = this.nativePerformanceCalc.calculate(
+            const fcPerformance = beatmapPP.performanceCalculator.calculate(
                 calcOptions,
-                currentAttributes
+                currentDifficulty.attributes
             );
 
             beatmapPP.currAttributes.fcPP = fcPerformance.total;
             beatmapPP.updatePPAttributes('fc', fcPerformance);
 
             this.previousPassedObjects = passedObjects;
+            this.isCalculating = false;
 
             this.game.resetReportCount('gameplay updateStarsAndPerformance');
         } catch (exc) {

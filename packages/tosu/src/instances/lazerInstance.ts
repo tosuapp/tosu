@@ -291,7 +291,7 @@ export class LazerInstance extends AbstractInstance {
 
                         // reset before first object
                         if (global.playTime <= beatmapPP.timings.firstObj) {
-                            gameplay.resetQuick();
+                            gameplay.resetGradual();
                             gameplay.resetHitErrors();
                         }
 
@@ -299,7 +299,7 @@ export class LazerInstance extends AbstractInstance {
 
                         // support replay rewind
                         if (this.previousCombo > gameplay.combo) {
-                            gameplay.resetQuick();
+                            gameplay.resetGradual();
                         }
 
                         this.previousTime = global.playTime;
