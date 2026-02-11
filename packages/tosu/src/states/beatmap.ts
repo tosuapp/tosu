@@ -2,6 +2,7 @@ import {
     Beatmap,
     CalculateMods,
     ClientType,
+    GameState,
     ModsCollection,
     ModsLazer,
     NativeOsuDifficultyAttributes,
@@ -9,6 +10,7 @@ import {
     NativeTimedOsuDifficultyAttributes,
     OsuPerformanceCalculator,
     Ruleset,
+    TimedLazy,
     config,
     measureTime,
     sanitizeMods,
@@ -99,6 +101,8 @@ interface KiaiPoint {
 }
 
 export class BeatmapPP extends AbstractState {
+    isCalculating: boolean = false;
+
     isKiai: boolean;
     isBreak: boolean;
 
@@ -107,8 +111,9 @@ export class BeatmapPP extends AbstractState {
     beatmap?: Beatmap;
 
     ruleset?: Ruleset;
-    difficulty?: NativeOsuDifficultyAttributes;
-    timedDifficulty: NativeTimedOsuDifficultyAttributes[] = [];
+    nativeMods?: ModsCollection;
+    attributes?: NativeOsuDifficultyAttributes;
+    timedLazy?: TimedLazy<NativeTimedOsuDifficultyAttributes>;
     performanceCalculator?: OsuPerformanceCalculator;
 
     mode: number;
@@ -155,6 +160,8 @@ export class BeatmapPP extends AbstractState {
     timingPoints: TimingPoint[] = [];
     breaks: BreakPoint[] = [];
     kiais: KiaiPoint[] = [];
+
+    previousPassedObjects: number = 0;
 
     constructor(game: AbstractInstance) {
         super(game);
@@ -245,6 +252,37 @@ export class BeatmapPP extends AbstractState {
         this.timingPoints = [];
         this.breaks = [];
         this.kiais = [];
+
+        this.previousPassedObjects = 0;
+    }
+
+    resetGradual() {
+        silentCatch(this.timedLazy?.destroy, this.timedLazy?.enumerator);
+
+        this.timedLazy = undefined;
+        this.previousPassedObjects = 0;
+
+        if (!this.beatmap || !this.nativeMods || !this.ruleset) {
+            return;
+        }
+
+        const result = this.game.calculator.gradual({
+            lazer: this.game.client === ClientType.lazer,
+            beatmap: this.beatmap,
+            ruleset: this.ruleset,
+            mods: this.nativeMods
+        });
+        if (result instanceof Error) {
+            wLogger.debug(
+                ClientType[this.game.client],
+                this.game.pid,
+                `beatmap initGradual lazy not ready`,
+                result
+            );
+            return;
+        }
+
+        this.timedLazy = result.timedLazy;
     }
 
     updatePPAttributes(
@@ -369,6 +407,17 @@ export class BeatmapPP extends AbstractState {
 
                 try {
                     this.beatmap?.destroy();
+                    this.lazerBeatmap = undefined;
+
+                    silentCatch(this.ruleset?.destroy);
+                    silentCatch(this.nativeMods?.destroy);
+                    silentCatch(this.performanceCalculator?.destroy);
+
+                    this.ruleset = undefined;
+                    this.nativeMods = undefined;
+                    this.performanceCalculator = undefined;
+
+                    this.attributes = undefined;
                 } catch (exc) {
                     this.beatmap = undefined;
                     wLogger.debug(
@@ -425,7 +474,7 @@ export class BeatmapPP extends AbstractState {
                 mods: sanitizeMods(currentMods.array)
             };
 
-            const performance_ = this.game.calculator.performance(this.mode);
+            const performance_ = this.game.calculator.performance(currentMode);
             if (performance_ instanceof Error) {
                 wLogger.debug(
                     ClientType[this.game.client],
@@ -452,42 +501,35 @@ export class BeatmapPP extends AbstractState {
                 return;
             }
 
-            silentCatch(this.performanceCalculator?.destroy);
-            silentCatch(this.ruleset?.destroy);
-
             this.ruleset = performance_.ruleset;
             this.performanceCalculator = performance_.calculator;
 
-            this.difficulty = attributes.difficulty;
-            this.timedDifficulty = attributes.timedDifficulty;
+            this.nativeMods = attributes.mods;
+            this.attributes = attributes.difficulty;
 
             this.clockRate = currentMods.rate;
 
             if (config.calculatePP) {
-                try {
-                    for (const acc of [
-                        100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
-                    ]) {
-                        const result = this.performanceCalculator.calculate(
-                            {
-                                ruleset: this.ruleset,
-                                legacyScore: undefined,
-                                beatmap: this.beatmap,
-                                mods: attributes.mods,
-                                maxCombo: this.difficulty.maxCombo,
-                                accuracy: acc / 100,
-                                countGreat:
-                                    this.difficulty.hitCircleCount +
-                                    this.difficulty.sliderCount +
-                                    this.difficulty.spinnerCount,
-                                countSliderTailHit: this.difficulty.sliderCount
-                            },
-                            this.difficulty
-                        );
-                        this.ppAcc[acc as 100] = fixDecimals(result.total);
-                    }
-                } finally {
-                    attributes.mods?.destroy();
+                for (const acc of [
+                    100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90
+                ]) {
+                    const result = this.performanceCalculator.calculate(
+                        {
+                            ruleset: this.ruleset,
+                            legacyScore: undefined,
+                            beatmap: this.beatmap,
+                            mods: attributes.mods,
+                            maxCombo: this.attributes.maxCombo,
+                            accuracy: acc / 100,
+                            countGreat:
+                                this.attributes.hitCircleCount +
+                                this.attributes.sliderCount +
+                                this.attributes.spinnerCount,
+                            countSliderTailHit: this.attributes.sliderCount
+                        },
+                        this.attributes
+                    );
+                    this.ppAcc[acc as 100] = fixDecimals(result.total);
                 }
             }
 
@@ -608,17 +650,17 @@ export class BeatmapPP extends AbstractState {
                 sliders: this.lazerBeatmap.slidable,
                 spinners: this.lazerBeatmap.spinnable,
                 holds: this.lazerBeatmap.holdable,
-                maxCombo: this.difficulty.maxCombo,
-                fullStars: this.difficulty.starRating,
-                stars: this.difficulty.starRating,
-                aim: this.difficulty.aimDifficulty || 0,
-                speed: this.difficulty.speedDifficulty || 0,
-                flashlight: this.difficulty.flashlightDifficulty || 0,
-                sliderFactor: this.difficulty.sliderFactor || 0,
-                stamina: (this.difficulty as any).staminaDifficulty || 0,
-                rhythm: (this.difficulty as any).rhythmDifficulty || 0,
-                color: (this.difficulty as any).colourDifficulty || 0,
-                reading: (this.difficulty as any).readingDifficulty || 0
+                maxCombo: this.attributes.maxCombo,
+                fullStars: this.attributes.starRating,
+                stars: this.attributes.starRating,
+                aim: this.attributes.aimDifficulty || 0,
+                speed: this.attributes.speedDifficulty || 0,
+                flashlight: this.attributes.flashlightDifficulty || 0,
+                sliderFactor: this.attributes.sliderFactor || 0,
+                stamina: (this.attributes as any).staminaDifficulty || 0,
+                rhythm: (this.attributes as any).rhythmDifficulty || 0,
+                color: (this.attributes as any).colourDifficulty || 0,
+                reading: (this.attributes as any).readingDifficulty || 0
                 // hitWindow: this.difficultyAttributes.greatHitWindow
             };
 
@@ -807,28 +849,61 @@ export class BeatmapPP extends AbstractState {
         }
     }
 
-    @measureTime
     updateEditorPP() {
         try {
             if (
                 !this.beatmap ||
                 !this.performanceCalculator ||
-                !this.difficulty ||
+                !this.attributes ||
+                !this.nativeMods ||
                 !this.ruleset ||
                 !this.lazerBeatmap
             ) {
                 return;
             }
 
-            const startTime = performance.now();
-
             const { global } = this.game.getServices(['global']);
             const objectIndex = this.lazerBeatmap.hitObjects.findLastIndex(
                 (r) => r.startTime <= global.playTime
             );
+            if (objectIndex === -1) {
+                this.currAttributes.pp = 0;
+                this.currAttributes.stars = 0;
 
-            const currentDifficulty =
-                this.timedDifficulty[objectIndex > -1 ? objectIndex : 0];
+                return;
+            }
+
+            if (objectIndex - this.previousPassedObjects < 0 || !this.timedLazy)
+                this.resetGradual();
+
+            let offset = objectIndex - this.previousPassedObjects;
+            if (offset <= 0 || this.isCalculating === true) return;
+            this.isCalculating = true;
+
+            let currentDifficulty;
+            const t1 = performance.now();
+            while (offset > 0) {
+                // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
+                if (global.status !== GameState.edit || !this.timedLazy) break;
+
+                currentDifficulty = this.timedLazy.next(
+                    this.timedLazy.enumerator
+                );
+
+                offset--;
+            }
+            const t2 = performance.now();
+            if (!currentDifficulty) {
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `beatmap updateEditorPP no current currentAttributes`
+                );
+
+                this.isCalculating = false;
+                return;
+            }
+
             const curPerformance = this.performanceCalculator.calculate(
                 {
                     ruleset: this.ruleset,
@@ -843,12 +918,16 @@ export class BeatmapPP extends AbstractState {
                 currentDifficulty.attributes
             );
 
+            const t3 = performance.now();
             this.currAttributes.pp = curPerformance.total;
             this.currAttributes.stars = currentDifficulty.attributes.starRating;
 
+            this.previousPassedObjects = objectIndex;
+            this.isCalculating = false;
+
             wLogger.time(
                 `%${ClientType[this.game.client]}%`,
-                `Beatmap parsing for editor PP took %${(performance.now() - startTime).toFixed(4)}ms%`
+                `Calculating editor PP took %${(t3 - t1).toFixed(4)}ms% (${(t2 - t1).toFixed(4)}/${(t3 - t2).toFixed(4)})`
             );
 
             this.game.resetReportCount('beatmapPP updateEditorPP');
