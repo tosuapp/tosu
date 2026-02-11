@@ -131,7 +131,7 @@ export class ResultScreen extends AbstractState {
             if (
                 !beatmapPP.ruleset ||
                 !beatmapPP.performanceCalculator ||
-                !beatmapPP.difficulty
+                !beatmapPP.attributes
             )
                 return;
 
@@ -178,7 +178,7 @@ export class ResultScreen extends AbstractState {
                     countSliderTailHit: this.statistics.sliderTailHit,
                     countLargeTickMiss: this.statistics.largeTickMiss
                 },
-                beatmapPP.difficulty
+                beatmapPP.attributes
             );
 
             const calcOptions: ScoreInfoInput = {
@@ -224,7 +224,7 @@ export class ResultScreen extends AbstractState {
             const t2 = performance.now();
             const fcPerformance = beatmapPP.performanceCalculator.calculate(
                 calcOptions,
-                beatmapPP.difficulty
+                beatmapPP.attributes
             );
 
             this.pp = curPerformance.total;

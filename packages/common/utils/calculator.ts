@@ -1,5 +1,5 @@
 import rosu from '@kotrikd/rosu-pp';
-import native from '@tosuapp/osu-native-wrapper';
+import native, { ModsCollection } from '@tosuapp/osu-native-wrapper';
 import fsp from 'fs/promises';
 
 import { ModsLazer, wLogger } from '../index';
@@ -7,13 +7,15 @@ import { ModsLazer, wLogger } from '../index';
 export type {
     Beatmap,
     OsuPerformanceCalculator,
-    ScoreInfoInput
+    ScoreInfoInput,
+    TimedLazy
 } from '@tosuapp/osu-native-wrapper';
 export { Ruleset, ModsCollection } from '@tosuapp/osu-native-wrapper';
 export type {
     NativeOsuPerformanceAttributes,
     NativeOsuDifficultyAttributes,
-    NativeTimedOsuDifficultyAttributes
+    NativeTimedOsuDifficultyAttributes,
+    ManagedObjectHandle
 } from '@tosuapp/osu-native-napi';
 
 export type PerformanceArgs = rosu.PerformanceArgs;
@@ -88,8 +90,10 @@ export class Calculator {
         }
     }
 
-    mods(params: { lazer: boolean; mods: ModsLazer }) {
-        if (params.lazer && !params.mods.some((m) => m.acronym === 'CL'))
+    mods(params: { lazer: boolean; mods: ModsLazer | ModsCollection }) {
+        if (params.mods instanceof ModsCollection) return params.mods;
+
+        if (!params.lazer && !params.mods.some((m) => m.acronym === 'CL'))
             params.mods.push({ acronym: 'CL' });
 
         const nativeMods = this.calculator.ModsCollection.create();
@@ -110,7 +114,7 @@ export class Calculator {
         lazer: boolean;
         beatmap: native.Beatmap;
         ruleset: native.Ruleset;
-        mods: ModsLazer;
+        mods: ModsLazer | ModsCollection;
     }) {
         try {
             const nativeMods = this.mods(params);
@@ -121,20 +125,37 @@ export class Calculator {
                     params.beatmap
                 );
 
-            const difficulty = nativeMods
-                ? difficultyFactory.calculateWithMods(nativeMods)
-                : difficultyFactory.calculate();
-            const timedDifficulty = nativeMods
-                ? difficultyFactory.calculateWithModsTimed(nativeMods)
-                : difficultyFactory.calculateTimed();
-
+            const difficulty = difficultyFactory.calculate(nativeMods);
             difficultyFactory.destroy();
 
             return {
                 mods: nativeMods,
-                difficulty,
-                timedDifficulty
+                difficulty
             };
+        } catch (error) {
+            return error as Error;
+        }
+    }
+
+    gradual(params: {
+        lazer: boolean;
+        beatmap: native.Beatmap;
+        ruleset: native.Ruleset;
+        mods: ModsLazer | ModsCollection;
+    }) {
+        try {
+            const nativeMods = this.mods(params);
+
+            const difficultyFactory =
+                this.calculator.DifficultyCalculatorFactory.create<native.OsuDifficultyCalculator>(
+                    params.ruleset,
+                    params.beatmap
+                );
+
+            const timedLazy = difficultyFactory.calculateTimedLazy(nativeMods);
+            difficultyFactory.destroy();
+
+            return { mods: nativeMods, timedLazy };
         } catch (error) {
             return error as Error;
         }
