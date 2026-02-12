@@ -135,6 +135,8 @@ export class Gameplay extends AbstractState {
         this.isReplayUiHidden = false;
 
         this.previousPassedObjects = 0;
+        this.previousHitErrorIndex = 0;
+
         this.gradualPerformance = undefined;
         this.performanceAttributes = undefined;
         // below is data that shouldn't be reseted on retry
@@ -165,6 +167,7 @@ export class Gameplay extends AbstractState {
     resetHitErrors() {
         this.hitErrors = [];
         this.totalHitErrors = 0;
+        this.previousHitErrorIndex = 0;
     }
 
     resetKeyOverlay() {
