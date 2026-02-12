@@ -1,4 +1,5 @@
 import { ModsLazer } from '@tosu/common';
+import { HitObject } from 'osu-classes';
 
 import { Statistics } from '@/states/types';
 
@@ -231,37 +232,16 @@ export const calculateGrade = (params: {
 };
 
 export const calculatePassedObjects = (
-    mode: number,
-    statistics: Statistics
+    hitObjects: HitObject[],
+    currentTime: number,
+    previousIndex: number
 ): number => {
-    switch (mode) {
-        case 0:
-            return (
-                statistics.great +
-                statistics.ok +
-                statistics.meh +
-                statistics.miss
-            );
-        case 1:
-            return statistics.great + statistics.ok + statistics.miss;
-        case 2:
-            return (
-                statistics.great +
-                statistics.good +
-                statistics.ok +
-                statistics.meh +
-                statistics.miss
-            );
-        case 3:
-            return (
-                statistics.great +
-                statistics.perfect +
-                statistics.ok +
-                statistics.good +
-                statistics.meh +
-                statistics.miss
-            );
-        default:
-            return 0;
+    let value = -1;
+    for (let i = previousIndex; i < hitObjects.length; i++) {
+        const item = hitObjects[i];
+        if (item.startTime > currentTime) break;
+        value = i;
     }
+
+    return value;
 };
