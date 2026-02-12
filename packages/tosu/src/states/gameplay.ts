@@ -539,6 +539,7 @@ export class Gameplay extends AbstractState {
             if (
                 !this.nativeMods ||
                 !this.timedLazy ||
+                !beatmapPP.lazerBeatmap ||
                 !beatmapPP.attributes ||
                 !beatmapPP.performanceCalculator
             ) {
@@ -551,9 +552,11 @@ export class Gameplay extends AbstractState {
             }
 
             const passedObjects = calculatePassedObjects(
-                this.mode,
-                this.statistics
+                beatmapPP.lazerBeatmap.hitObjects,
+                global.playTime,
+                this.previousPassedObjects
             );
+            if (passedObjects === -1) return;
 
             let offset = passedObjects - this.previousPassedObjects;
             if (offset <= 0 && this.isCalculating === false) return;

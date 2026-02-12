@@ -24,6 +24,7 @@ import { BeatmapDecoder } from 'osu-parsers';
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
+import { calculatePassedObjects } from '@/utils/calculators';
 import { fixDecimals, safeJoin } from '@/utils/converters';
 
 interface BeatmapPPAcc {
@@ -863,20 +864,25 @@ export class BeatmapPP extends AbstractState {
             }
 
             const { global } = this.game.getServices(['global']);
-            const objectIndex = this.lazerBeatmap.hitObjects.findLastIndex(
-                (r) => r.startTime <= global.playTime
+            const passedObjects = calculatePassedObjects(
+                this.lazerBeatmap.hitObjects,
+                global.playTime,
+                this.previousPassedObjects
             );
-            if (objectIndex === -1) {
+            if (passedObjects === -1) {
                 this.currAttributes.pp = 0;
                 this.currAttributes.stars = 0;
 
                 return;
             }
 
-            if (objectIndex - this.previousPassedObjects < 0 || !this.timedLazy)
+            if (
+                passedObjects - this.previousPassedObjects < 0 ||
+                !this.timedLazy
+            )
                 this.resetGradual();
 
-            let offset = objectIndex - this.previousPassedObjects;
+            let offset = passedObjects - this.previousPassedObjects;
             if (offset <= 0 || this.isCalculating === true) return;
             this.isCalculating = true;
 
@@ -912,7 +918,7 @@ export class BeatmapPP extends AbstractState {
                     mods: ModsCollection.create(),
                     maxCombo: currentDifficulty.attributes.maxCombo,
                     accuracy: 1,
-                    countGreat: objectIndex,
+                    countGreat: passedObjects,
                     countSliderTailHit: currentDifficulty.attributes.sliderCount
                 },
                 currentDifficulty.attributes
@@ -922,7 +928,7 @@ export class BeatmapPP extends AbstractState {
             this.currAttributes.pp = curPerformance.total;
             this.currAttributes.stars = currentDifficulty.attributes.starRating;
 
-            this.previousPassedObjects = objectIndex;
+            this.previousPassedObjects = passedObjects;
             this.isCalculating = false;
 
             wLogger.time(
