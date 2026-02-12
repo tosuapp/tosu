@@ -154,6 +154,9 @@ export class Websocket {
     }
 
     async start() {
+        let message = '';
+        let values = {};
+
         while (true) {
             try {
                 const osuInstance: any = this.instanceManager.getInstance(
@@ -161,27 +164,26 @@ export class Websocket {
                 );
                 if (!osuInstance || this.clients.size === 0) {
                     await sleep(500);
-                    continue; // Exit the loop if conditions are not met
+                    continue;
                 }
 
                 const buildedData = osuInstance[this.stateFunctionName](
                     this.instanceManager
                 );
-                let message = '';
 
                 this.clients.forEach((client) => {
                     if (
                         Array.isArray(client.filters) &&
                         client.filters.length > 0
                     ) {
-                        const values = {};
+                        values = {};
                         this.applyFilter(client.filters, buildedData, values);
 
                         client.send(JSON.stringify(values));
                         return;
                     }
 
-                    if (!message) message = JSON.stringify(buildedData);
+                    message = JSON.stringify(buildedData);
                     client.send(message);
                 });
             } catch (error) {
