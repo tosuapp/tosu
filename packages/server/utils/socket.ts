@@ -154,6 +154,7 @@ export class Websocket {
     }
 
     async start() {
+        let buildedData = '';
         let message = '';
         let values = {};
 
@@ -167,7 +168,7 @@ export class Websocket {
                     continue;
                 }
 
-                const buildedData = osuInstance[this.stateFunctionName](
+                buildedData = osuInstance[this.stateFunctionName](
                     this.instanceManager
                 );
 
