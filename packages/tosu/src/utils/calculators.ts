@@ -1,4 +1,4 @@
-import { CalculateMods, Mod, ModsLazer, Rulesets } from '@tosu/common';
+import { Mod, ModsLazer, Rulesets } from '@tosu/common';
 import { HitObject } from 'osu-classes';
 
 import { Statistics } from '@/states/types';
@@ -248,6 +248,7 @@ export const calculatePassedObjects = (
 
 export const calculateBeatmapAttributes = (params: {
     isConvert: boolean;
+    isLazer: boolean;
 
     ar: number;
     cs: number;
@@ -255,11 +256,15 @@ export const calculateBeatmapAttributes = (params: {
     hp: number;
 
     mode: number;
-    mods: CalculateMods;
+    mods: ModsLazer;
+
+    rate: number;
 }) => {
-    const isEz = params.mods.array.some((r) => r.acronym === 'EZ');
-    const isHr = params.mods.array.some((r) => r.acronym === 'HR');
-    const DA = (params.mods.array as Mod[]).find((r) => r.acronym === 'DA');
+    const isEz = params.mods.some((r) => r.acronym === 'EZ');
+    const isHr = params.mods.some((r) => r.acronym === 'HR');
+    // const isV2 = params.mods.some((r) => r.acronym === 'SV2');
+
+    const DA = (params.mods as Mod[]).find((r) => r.acronym === 'DA');
     const multiply = isHr ? 1.4 : isEz ? 0.5 : 1;
 
     const AR = DA?.settings?.approach_rate ?? params.ar;
@@ -272,34 +277,38 @@ export const calculateBeatmapAttributes = (params: {
     const csConverted = isHr ? Math.min(CS * 1.3, 10) : CS * multiply;
     const hpConverted = isHr ? Math.min(HP * multiply, 10) : HP * multiply;
 
-    if (params.mods.rate !== 1) {
+    if (params.isLazer && params.mode === Rulesets.mania) {
+        // they do some magic shit here
+    }
+
+    if (params.rate !== 1) {
         arConverted =
             arConverted <= 5
-                ? 15 - (15 - arConverted) / (1 * params.mods.rate)
-                : 13 - (13 - arConverted) / (1 * params.mods.rate);
+                ? 15 - (15 - arConverted) / (1 * params.rate)
+                : 13 - (13 - arConverted) / (1 * params.rate);
 
         switch (params.mode) {
             case Rulesets.osu:
-                odConverted =
-                    13.33 - (13.33 - odConverted) / (1 * params.mods.rate);
+                odConverted = 13.33 - (13.33 - odConverted) / (1 * params.rate);
                 break;
 
             case Rulesets.taiko:
                 odConverted =
                     16.66666666666667 -
-                    (16.66666666666667 - odConverted) / (1 * params.mods.rate);
+                    (16.66666666666667 - odConverted) / (1 * params.rate);
                 break;
 
             case Rulesets.mania: {
-                // if (commonParams.lazer === true || (commonParams.lazer === false && isV2))
-                //     odMs = _OD <= 5 ? 22.4 - 0.6 * _OD : 24.9 - 1.1 * _OD;
-
-                // else if (this.mode !== currentMode)
-                //     odMs = 16;
-
-                // else
-                //     odMs = 16;
-                // odMs = Math.floor(72 - 6 * _OD);
+                // also some dark magic shit right here
+                // if (params.isLazer === false && isV2)
+                //     odConverted =
+                //         odConverted <= 5
+                //             ? 37.33 - (37.33 - odConverted)
+                //             : 22.63636363636364 -
+                //               (22.63636363636364 - odConverted);
+                // else if (params.isConvert)
+                //     odConverted = 16 - (16 - odConverted);
+                // else odConverted = 16 - (16 - odConverted);
                 break;
             }
         }
