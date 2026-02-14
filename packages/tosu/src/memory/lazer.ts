@@ -2505,11 +2505,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             case 'DA': {
                 const settings: any = {};
 
+                const odOffset = this.selectedGamemode === 3 ? 0x28 : 0x18;
+
                 const drainRateBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
                 const overallDifficultyBindable = this.process.readIntPtr(
-                    modObject + 0x18
+                    modObject + odOffset
                 );
                 const extendedLimitsBindable = this.process.readIntPtr(
                     modObject + 0x20
