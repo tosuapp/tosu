@@ -2267,17 +2267,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const { size, items } = this.listItemsInfo(hitEventsList);
 
         const result: number[] = [];
+        let index = last;
         for (let i = last; i < size; i++) {
             const item = this.readItem(items, i, true, 0x40);
-            const hitEvent = this.readHitEvent(item);
-            if (hitEvent === undefined) {
+            const error = this.readHitEvent(item);
+            if (error === undefined) {
+                index = i;
                 continue;
             }
+            if (error > 500) break; // sometimes it returns number over a 1m and we dont need that
 
-            result.push(hitEvent);
+            result.push(error);
+            index = i + 1;
         }
 
-        return { index: size, array: result };
+        return { index, array: result };
     }
 
     hitErrors(last: number): IHitErrors {
