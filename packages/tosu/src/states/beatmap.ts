@@ -24,7 +24,10 @@ import { BeatmapDecoder } from 'osu-parsers';
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
-import { calculatePassedObjects } from '@/utils/calculators';
+import {
+    calculateBeatmapAttributes,
+    calculatePassedObjects
+} from '@/utils/calculators';
 import { fixDecimals, safeJoin } from '@/utils/converters';
 
 interface BeatmapPPAcc {
@@ -638,15 +641,27 @@ export class BeatmapPP extends AbstractState {
                 `Beatmap parsing took %${(beatmapParseTime - calculationTime).toFixed(2)}ms%`
             );
 
+            const beatmapAttributes = calculateBeatmapAttributes({
+                isConvert: this.mode !== currentMode,
+
+                ar: this.beatmap.native.approachRate,
+                cs: this.beatmap.native.circleSize,
+                od: this.beatmap.native.overallDifficulty,
+                hp: this.beatmap.native.drainRate,
+
+                mode: currentMode,
+                mods: currentMods
+            });
+
             this.calculatedMapAttributes = {
                 ar: this.beatmap.native.approachRate,
-                arConverted: this.beatmap.native.approachRate, // FIXME: asd
+                arConverted: beatmapAttributes.ar,
                 cs: this.beatmap.native.circleSize,
-                csConverted: this.beatmap.native.circleSize, // FIXME: asd
+                csConverted: beatmapAttributes.cs,
                 od: this.beatmap.native.overallDifficulty,
-                odConverted: this.beatmap.native.overallDifficulty, // FIXME: asd
+                odConverted: beatmapAttributes.od,
                 hp: this.beatmap.native.drainRate,
-                hpConverted: this.beatmap.native.drainRate, // FIXME: asd
+                hpConverted: beatmapAttributes.hp,
                 circles: this.lazerBeatmap.hittable,
                 sliders: this.lazerBeatmap.slidable,
                 spinners: this.lazerBeatmap.spinnable,
