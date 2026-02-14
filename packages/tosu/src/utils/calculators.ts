@@ -1,4 +1,4 @@
-import { ModsLazer } from '@tosu/common';
+import { CalculateMods, Mod, ModsLazer, Rulesets } from '@tosu/common';
 import { HitObject } from 'osu-classes';
 
 import { Statistics } from '@/states/types';
@@ -244,4 +244,71 @@ export const calculatePassedObjects = (
     }
 
     return value;
+};
+
+export const calculateBeatmapAttributes = (params: {
+    isConvert: boolean;
+
+    ar: number;
+    cs: number;
+    od: number;
+    hp: number;
+
+    mode: number;
+    mods: CalculateMods;
+}) => {
+    const isEz = params.mods.array.some((r) => r.acronym === 'EZ');
+    const isHr = params.mods.array.some((r) => r.acronym === 'HR');
+    const DA = (params.mods.array as Mod[]).find((r) => r.acronym === 'DA');
+    const multiply = isHr ? 1.4 : isEz ? 0.5 : 1;
+
+    const AR = DA?.settings?.approach_rate ?? params.ar;
+    const CS = DA?.settings?.circle_size ?? params.cs;
+    const OD = DA?.settings?.overall_difficulty ?? params.od;
+    const HP = DA?.settings?.drain_rate ?? params.hp;
+
+    let arConverted = isHr ? Math.min(AR * multiply, 10) : AR * multiply;
+    let odConverted = isHr ? Math.min(OD * multiply, 10) : OD * multiply;
+    const csConverted = isHr ? Math.min(CS * 1.3, 10) : CS * multiply;
+    const hpConverted = isHr ? Math.min(HP * multiply, 10) : HP * multiply;
+
+    if (params.mods.rate !== 1) {
+        arConverted =
+            arConverted <= 5
+                ? 15 - (15 - arConverted) / (1 * params.mods.rate)
+                : 13 - (13 - arConverted) / (1 * params.mods.rate);
+
+        switch (params.mode) {
+            case Rulesets.osu:
+                odConverted =
+                    13.33 - (13.33 - odConverted) / (1 * params.mods.rate);
+                break;
+
+            case Rulesets.taiko:
+                odConverted =
+                    16.66666666666667 -
+                    (16.66666666666667 - odConverted) / (1 * params.mods.rate);
+                break;
+
+            case Rulesets.mania: {
+                // if (commonParams.lazer === true || (commonParams.lazer === false && isV2))
+                //     odMs = _OD <= 5 ? 22.4 - 0.6 * _OD : 24.9 - 1.1 * _OD;
+
+                // else if (this.mode !== currentMode)
+                //     odMs = 16;
+
+                // else
+                //     odMs = 16;
+                // odMs = Math.floor(72 - 6 * _OD);
+                break;
+            }
+        }
+    }
+
+    return {
+        ar: arConverted,
+        od: odConverted,
+        cs: csConverted,
+        hp: hpConverted
+    };
 };
