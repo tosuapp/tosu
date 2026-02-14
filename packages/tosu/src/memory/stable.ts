@@ -734,15 +734,18 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const items = this.process.readInt(base + 0x4);
             const size = this.process.readInt(base + 0xc);
 
-            const errors: Array<number> = [];
+            const result: number[] = [];
+            let index = last;
             for (let i = last; i < size; i++) {
-                const current = items + leaderStart + 0x4 * i;
-                const error = this.process.readInt(current);
+                const item = items + leaderStart + 0x4 * i;
+                const error = this.process.readInt(item);
+                if (error > 500) break; // sometimes it returns number over a 1m and we dont need that
 
-                errors.push(error);
+                result.push(error);
+                index = i + 1;
             }
 
-            return { index: size, array: errors };
+            return { index, array: result };
         } catch (error) {
             return error as Error;
         }
