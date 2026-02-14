@@ -643,6 +643,7 @@ export class BeatmapPP extends AbstractState {
 
             const beatmapAttributes = calculateBeatmapAttributes({
                 isConvert: this.mode !== currentMode,
+                isLazer: commonParams.lazer,
 
                 ar: this.beatmap.native.approachRate,
                 cs: this.beatmap.native.circleSize,
@@ -650,7 +651,9 @@ export class BeatmapPP extends AbstractState {
                 hp: this.beatmap.native.drainRate,
 
                 mode: currentMode,
-                mods: currentMods
+                mods: commonParams.mods,
+
+                rate: currentMods.rate
             });
 
             this.calculatedMapAttributes = {
