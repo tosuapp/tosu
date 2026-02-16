@@ -2275,7 +2275,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 index = i;
                 continue;
             }
-            if (error > 500) break; // sometimes it returns number over a 1m and we dont need that
+            if (error < -500 || error > 500) break; // sometimes it returns number over a 1m and we dont need that
 
             result.push(error);
             index = i + 1;

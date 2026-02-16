@@ -739,7 +739,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             for (let i = last; i < size; i++) {
                 const item = items + leaderStart + 0x4 * i;
                 const error = this.process.readInt(item);
-                if (error > 500) break; // sometimes it returns number over a 1m and we dont need that
+                if (error < -500 || error > 500) break; // sometimes it returns number over a 1m and we dont need that
 
                 result.push(error);
                 index = i + 1;
