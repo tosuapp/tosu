@@ -11,7 +11,7 @@ export const LogColor = {
 };
 
 export const LogSymbol = {
-    Separator: '▍',
+    Separator: '┃',
     ProgressBarFilled: '━',
     ProgressBarEmpty: '─'
 };
