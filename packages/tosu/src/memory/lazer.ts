@@ -3554,7 +3554,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     settings(): ISettings {
         const values = this.osuConfig();
-        values['client.version'] = (this.game as LazerInstance).osuVersion;
+        values['client.version'] = (this.game as LazerInstance).version;
 
         try {
             const skinManager = this.process.readIntPtr(

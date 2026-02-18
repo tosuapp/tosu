@@ -18,7 +18,6 @@ import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
-    osuVersion: string;
     previousCombo: number = 0;
 
     constructor(pid: number) {
@@ -33,16 +32,16 @@ export class LazerInstance extends AbstractInstance {
                 await fsp.mkdir(cacheFolder, { recursive: true });
 
             let attempts = 1;
-            while (attempts < 5 && !this.osuVersion) {
+            while (attempts < 5 && !this.version) {
                 if (attempts > 1)
                     wLogger.warn(
                         `Attempting to detect osu! version (Try %#${attempts}%)`
                     );
 
                 try {
-                    this.osuVersion = this.memory.gameVersion() || '';
+                    this.version = this.memory.gameVersion() || '';
 
-                    wLogger.info(`Detected osu! version: %${this.osuVersion}%`);
+                    wLogger.info(`Detected osu! version: %${this.version}%`);
 
                     break;
                 } catch (exc) {
@@ -56,7 +55,7 @@ export class LazerInstance extends AbstractInstance {
                 }
             }
 
-            if (!this.osuVersion) {
+            if (!this.version) {
                 wLogger.error(
                     `Unable to find osu! version for process %${this.pid}%. Please report this issue: https://discord.gg/WX7BTs8kwh`
                 );
@@ -69,13 +68,13 @@ export class LazerInstance extends AbstractInstance {
 
             const controller = new AbortController();
             const links = [
-                `https://tosu.app/offsets/${this.osuVersion}.json`,
-                `https://osuck.net/offsets/${this.osuVersion}.json`
+                `https://tosu.app/offsets/${this.version}.json`,
+                `https://osuck.net/offsets/${this.version}.json`
             ];
 
-            const jsonCache = path.join(cacheFolder, `${this.osuVersion}.json`);
+            const jsonCache = path.join(cacheFolder, `${this.version}.json`);
             if (
-                localOffsets.OsuVersion !== this.osuVersion &&
+                localOffsets.OsuVersion !== this.version &&
                 fs.existsSync(jsonCache)
             ) {
                 this.memory.offsets = JsonSafeParse({
@@ -85,13 +84,13 @@ export class LazerInstance extends AbstractInstance {
                 });
 
                 wLogger.info(
-                    `Loaded offsets from cache for version %${this.osuVersion}%`
+                    `Loaded offsets from cache for version %${this.version}%`
                 );
             }
 
             if (
                 this.memory.offsets === null ||
-                this.memory.offsets.OsuVersion !== this.osuVersion
+                this.memory.offsets.OsuVersion !== this.version
             ) {
                 for (let i = 0; i < links.length; i++) {
                     const link = links[i];
@@ -123,7 +122,7 @@ export class LazerInstance extends AbstractInstance {
                         if (json === null) continue;
 
                         wLogger.info(
-                            `Successfully retrieved offsets from %${host}% for version %${this.osuVersion}%`
+                            `Successfully retrieved offsets from %${host}% for version %${this.version}%`
                         );
 
                         this.memory.offsets = json;
@@ -142,7 +141,7 @@ export class LazerInstance extends AbstractInstance {
 
             if (this.memory.offsets === null) {
                 wLogger.error(
-                    `Offsets not found for osu! version %${this.osuVersion}%`
+                    `Offsets not found for osu! version %${this.version}%`
                 );
                 return;
             }
