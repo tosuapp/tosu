@@ -1,5 +1,5 @@
 import { LogColor, LogSymbol } from '../enums/logging';
-import { getLocalTime, wLogger } from './logger';
+import { runningTime, wLogger } from './logger';
 
 interface ProgressState {
     title: string;
@@ -101,7 +101,7 @@ class ProgressManager {
             lines.push('');
 
             for (const [, bar] of this.bars) {
-                const time = `${LogColor.Grey}${getLocalTime()}${LogColor.Reset}`;
+                const time = `${LogColor.Grey}${runningTime()}${LogColor.Reset}`;
                 const prefix = `${LogColor.Info}${LogSymbol.Separator} ${time}${LogColor.Reset} `;
 
                 const filledWidth = Math.round(this.barWidth * bar.progress);

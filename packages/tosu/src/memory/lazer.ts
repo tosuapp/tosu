@@ -472,7 +472,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         wLogger.debug(
-            `GameBase address updated for client %${this.pid}%: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
+            `%${ClientType[this.game.client]}%`,
+            `GameBase address updated: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
         );
     }
 
@@ -499,7 +500,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         // Check if gamebase instance is valid
         if (!this.checkIfGameBase(this.gameBaseAddress)) {
             wLogger.debug(
-                `GameBase validation failed for client %${this.pid}%, resetting...`
+                `%${ClientType[this.game.client]}%`,
+                `GameBase validation failed, resetting...`
             );
 
             const scanPattern =
@@ -1295,12 +1297,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private initModMapping(gamemode: Rulesets) {
         if (!ModsCategories[gamemode]) {
-            wLogger.warn(
-                'lazer',
-                this.pid,
-                'initModMapping',
-                `Unknown mods gamemode: ${gamemode}`
-            );
+            wLogger.warn(`Unknown lazer game mode: %${gamemode}%`);
             return;
         }
 
@@ -2969,11 +2966,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.initModMapping(gamemode);
             } catch (exc) {
                 wLogger.error(
-                    `Error initializing mod mapping for client %${this.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Error initializing mod mapping:`,
                     (exc as Error).message
                 );
                 wLogger.debug(
-                    `Error reading global mods for client %${this.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Error initializing mod mapping:`,
                     exc
                 );
             }
@@ -3582,15 +3581,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.game.reportError(
                 'settings skin',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                'settings skin',
+                `%${ClientType[this.game.client]}%`,
+                `Error reading skin name`,
                 (exc as Error).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                'settings skin',
+                `%${ClientType[this.game.client]}%`,
+                `Error reading skin name`,
                 exc
             );
         }
@@ -3697,15 +3694,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.game.reportError(
                     'settings devices',
                     10,
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    'settings devices',
+                    `%${ClientType[this.game.client]}%`,
+                    `Error reading settings`,
                     (exc as Error).message
                 );
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    'settings devices',
+                    `%${ClientType[this.game.client]}%`,
+                    `Error reading settings`,
                     exc
                 );
             }

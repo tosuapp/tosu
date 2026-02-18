@@ -31,7 +31,8 @@ export class LazerMultiSpectating extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating Lazer multispectator state for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating Lazer multispectator state:`,
                 exc
             );
         }

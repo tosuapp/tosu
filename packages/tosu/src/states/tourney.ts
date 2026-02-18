@@ -55,14 +55,16 @@ export class TourneyManager extends AbstractState {
     updateState() {
         try {
             wLogger.debug(
-                `Tourney state update started for client %${this.game.pid}%`
+                `%${ClientType[this.game.client]}%`,
+                `Tourney state update started`
             );
 
             const result = this.game.memory.tourney();
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 wLogger.debug(
-                    `Tourney state update not ready for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Tourney state update not ready:`,
                     result
                 );
                 return 'not-ready';
@@ -96,7 +98,8 @@ export class TourneyManager extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating tourney state for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating tourney state:`,
                 exc
             );
         }
@@ -114,7 +117,8 @@ export class TourneyManager extends AbstractState {
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 wLogger.debug(
-                    `Tourney user update not ready for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Tourney user update not ready:`,
                     result
                 );
                 this.reset();
@@ -145,7 +149,8 @@ export class TourneyManager extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating tourney user for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating tourney user:`,
                 exc
             );
         }

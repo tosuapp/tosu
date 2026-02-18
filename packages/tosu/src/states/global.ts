@@ -47,7 +47,8 @@ export class Global extends AbstractState {
                 if (result === '') return;
 
                 wLogger.debug(
-                    `Global state update not ready for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Global state update not ready:`,
                     result
                 );
 
@@ -81,7 +82,8 @@ export class Global extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating global state for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating global state:`,
                 exc
             );
         }
@@ -106,7 +108,8 @@ export class Global extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating precise global state for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating precise global state:`,
                 exc
             );
         }

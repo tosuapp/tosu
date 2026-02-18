@@ -9,211 +9,89 @@ import { context } from './context';
 import { ensureDirectoryExists, getDataPath } from './directories';
 import { progressManager } from './progress';
 
-export function getLocalTime() {
-    const now = new Date();
-    return (
-        now.toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        }) +
-        '.' +
-        String(now.getMilliseconds()).padStart(3, '0')
-    );
-}
-
-export function colorText(status: string, color: keyof typeof LogColor) {
-    const colorCode = LogColor[color] || LogColor.Reset;
-    const time = `${LogColor.Grey}${getLocalTime()}${LogColor.Reset}`;
-
-    return `${colorCode}${LogSymbol.Separator} ${time} ${LogColor.Reset}`;
-}
-
 const HighlightColor = '\x1b[1m\x1b[37m';
-
-function stripHighlights(text: string): string {
-    return text.replace(
-        /(^|[\s([])%((?:\\.|[^%\\])+)%(?=[.,:;!?\s)\]]|$)|(\\%)/g,
-        (match, prefix, content, escapedPercent) => {
-            if (escapedPercent) {
-                return '%';
-            }
-            if (content) {
-                return `${prefix}${content.replace(/\\%/g, '%')}`;
-            }
-
-            return match;
-        }
-    );
-}
-
-function applyHighlightStyles(text: string): string {
-    return text.replace(
-        /(^|[\s([])%((?:\\.|[^%\\])+)%(?=[.,:;!?\s)\]]|$)|(\\%)/g,
-        (match, prefix, content, escapedPercent) => {
-            if (escapedPercent) {
-                return '%';
-            }
-            if (content) {
-                const unescaped = content.replace(/\\%/g, '%');
-                return `${prefix}${HighlightColor}${unescaped}\x1b[0m`;
-            }
-
-            return match;
-        }
-    );
-}
-
-function formatConsoleArgs(args: any[]): any[] {
-    return args.map((arg) => {
-        if (typeof arg === 'string') {
-            return applyHighlightStyles(arg);
-        }
-        if (typeof arg === 'object' && arg !== null) {
-            return (
-                '\n' +
-                util.inspect(arg, { depth: 2, colors: true, compact: false })
-            );
-        }
-        return arg;
-    });
-}
-
-function formatFileArgs(args: any[]): string {
-    return args
-        .map((arg) => {
-            if (typeof arg === 'string') {
-                return stripHighlights(arg);
-            }
-            if (typeof arg === 'object') {
-                return (
-                    '\n' +
-                    util.inspect(arg, {
-                        depth: 2,
-                        colors: false,
-                        compact: false
-                    })
-                );
-            }
-            return String(arg);
-        })
-        .join(' ');
-}
-
-function logConsole(type: keyof typeof LogColor, ...args: any[]) {
-    progressManager.clear();
-
-    const coloredText = colorText(type.toLowerCase(), type);
-    console.log(coloredText, ...formatConsoleArgs(args));
-
-    progressManager.render();
-}
-
-function getFilenameFriendlyTime(date: Date) {
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const hh = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const ss = String(date.getSeconds()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}`;
-}
 
 let logStream: fs.WriteStream | null = null;
 
-const closeLogStream = () => {
-    if (logStream) {
-        logStream.end();
-        logStream = null;
-    }
-};
+export function runningTime() {
+    const time = performance.now();
 
-process.on('exit', closeLogStream);
-process.on('SIGINT', () => {
-    closeLogStream();
-    process.exit();
-});
-process.on('SIGTERM', () => {
-    closeLogStream();
-    process.exit();
-});
+    const secs = Math.floor(time / 1000);
+    const hours = `${Math.floor(secs / 3600)}`.padStart(2, '0');
+    const minutes = `${Math.floor((secs % 3600) / 60)}`.padStart(2, '0');
+    const seconds = `${Math.floor(secs % 60)}`.padStart(2, '0');
+    const milliseconds = `${Math.floor(time % 1000)}`.padStart(3, '0');
+
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+
+export function colorText(text: string, color: keyof typeof LogColor) {
+    const colorCode = LogColor[color] || LogColor.Reset;
+    return `${colorCode}${text}${LogColor.Reset}`;
+}
 
 export function cleanupLogs() {
     const logsPath = path.dirname(context.logFilePath);
-    if (fs.existsSync(logsPath)) {
-        const logs = fs.readdirSync(logsPath);
+    if (!fs.existsSync(logsPath)) return;
 
-        const logFiles: {
-            file: string;
-            filePath: string;
-            size: number;
-            mtime: number;
-        }[] = [];
-        let totalSize = 0;
+    const logs = fs.readdirSync(logsPath);
 
-        for (const file of logs) {
-            const filePath = path.join(logsPath, file);
-            const stats = fs.statSync(filePath);
-            const size = stats.isFile() ? stats.size : 0;
-            totalSize += size;
+    const logFiles: {
+        file: string;
+        filePath: string;
+        size: number;
+        mtime: number;
+    }[] = [];
+    let totalSize = 0;
 
-            if (file !== 'latest.log') {
-                logFiles.push({
-                    file,
-                    filePath,
-                    size,
-                    mtime: stats.mtime.getTime()
-                });
-            }
-        }
+    for (const file of logs) {
+        const filePath = path.join(logsPath, file);
+        const stats = fs.statSync(filePath);
+        const size = stats.isFile() ? stats.size : 0;
+        totalSize += size;
 
-        const maxSizeBytes = 100 * 1024 * 1024; // 100 MB
-        const safeLimitBytes = 90 * 1024 * 1024; // 90 MB
-
-        if (totalSize > maxSizeBytes) {
-            logFiles.sort((a, b) => a.mtime - b.mtime);
-
-            let deletedCount = 0;
-            let clearedSpace = 0;
-
-            for (const log of logFiles) {
-                if (totalSize <= safeLimitBytes) break;
-
-                try {
-                    fs.rmSync(log.filePath);
-                    totalSize -= log.size;
-                    clearedSpace += log.size;
-                    deletedCount++;
-                } catch (e) {
-                    wLogger.error(
-                        `Failed to delete old log file: %${log.file}%`,
-                        e
-                    );
-                }
-            }
-
-            if (deletedCount > 0) {
-                wLogger.debug(
-                    `Cleaned up %${deletedCount}% old log files. Freed %${(
-                        clearedSpace /
-                        1024 /
-                        1024
-                    ).toFixed(2)} MB%.`
-                );
-            }
-
-            if (totalSize > safeLimitBytes) {
-                wLogger.warn(
-                    `Log cleanup could not reach safe limit. Current total size: %${(
-                        totalSize /
-                        1024 /
-                        1024
-                    ).toFixed(2)} MB%.`
-                );
-            }
+        if (file !== 'latest.log') {
+            logFiles.push({
+                file,
+                filePath,
+                size,
+                mtime: stats.mtime.getTime()
+            });
         }
     }
+
+    const maxSizeBytes = 100 * 1024 * 1024; // 100 MB
+    const safeLimitBytes = 90 * 1024 * 1024; // 90 MB
+
+    if (totalSize < maxSizeBytes) return;
+
+    logFiles.sort((a, b) => a.mtime - b.mtime);
+
+    let deletedCount = 0;
+    let clearedSpace = 0;
+
+    for (const log of logFiles) {
+        if (totalSize <= safeLimitBytes) break;
+
+        try {
+            fs.rmSync(log.filePath);
+            totalSize -= log.size;
+            clearedSpace += log.size;
+            deletedCount++;
+        } catch (e) {
+            wLogger.error(`Failed to delete old log file: %${log.file}%`, e);
+        }
+    }
+
+    if (deletedCount === 0) return;
+
+    wLogger.debug(
+        `Cleaned up %${deletedCount}% old log files. Freed %${(
+            clearedSpace /
+            1024 /
+            1024
+        ).toFixed(2)} MB%.`
+    );
 }
 
 function logFile(type: string, ...args: any[]) {
@@ -234,7 +112,14 @@ function logFile(type: string, ...args: any[]) {
                     ? stat.birthtime
                     : stat.mtime;
 
-            const baseName = getFilenameFriendlyTime(date);
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            const ss = String(date.getSeconds()).padStart(2, '0');
+
+            const baseName = `${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}`;
             let newPath = path.join(logsPath, `${baseName}.log`);
             let counter = 1;
 
@@ -265,11 +150,29 @@ function logFile(type: string, ...args: any[]) {
     if (levelName === 'debugerror') levelName = 'derror';
     const levelLabel = `[${levelName}]`.padEnd(8, ' ');
 
-    const time = getLocalTime();
-    const message = formatFileArgs(args);
+    const time = runningTime();
+    const message = args
+        .map((arg) => {
+            if (typeof arg === 'string') {
+                return arg.replace(/%(\S+)%/g, '$1');
+            }
+            if (typeof arg === 'object') {
+                return (
+                    '\n' +
+                    util.inspect(arg, {
+                        depth: 2,
+                        colors: false,
+                        compact: false
+                    })
+                );
+            }
+            return String(arg);
+        })
+        .join(' ');
 
     logStream.write(`${time} ${levelLabel} ${message}\n`);
 }
+
 function dispatchLog(level: keyof typeof LogColor, ...args: any[]) {
     logFile(level.toLowerCase(), ...args);
 
@@ -280,7 +183,29 @@ function dispatchLog(level: keyof typeof LogColor, ...args: any[]) {
         return;
     }
 
-    logConsole(level, ...args);
+    progressManager.clear();
+
+    const formattedArgs = args.map((arg) => {
+        if (typeof arg === 'string') {
+            return arg.replace(/%(\S+)%/g, `${HighlightColor}$1\x1b[0m`);
+        }
+        if (typeof arg === 'object' && arg !== null) {
+            return (
+                '\n' +
+                util.inspect(arg, { depth: 2, colors: true, compact: false })
+            );
+        }
+        return arg;
+    });
+
+    console.log(
+        colorText(context.currentVersion, 'Grey'),
+        ` ${colorText(LogSymbol.Separator, level)} `,
+        `${LogColor.Grey}${runningTime()}${LogColor.Reset} `,
+        formattedArgs.join(' ')
+    );
+
+    progressManager.render();
 }
 
 export const wLogger = {
@@ -315,8 +240,8 @@ export function measureTime(
 
         if (time >= 1) {
             const msg = client
-                ? `${client} ${(this as any).game.pid} ${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
-                : `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`;
+                ? `%${client}% ${(this as any).game.pid} ${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
+                : `%${target.constructor.name}.${propertyKey}% executed in ${time.toFixed(2)}ms`;
 
             wLogger.time(msg);
         }
@@ -326,3 +251,20 @@ export function measureTime(
 
     return descriptor;
 }
+
+const closeLogStream = () => {
+    if (logStream) {
+        logStream.end();
+        logStream = null;
+    }
+};
+
+process.on('exit', closeLogStream);
+process.on('SIGINT', () => {
+    closeLogStream();
+    process.exit();
+});
+process.on('SIGTERM', () => {
+    closeLogStream();
+    process.exit();
+});

@@ -92,7 +92,7 @@ export class HttpServer {
                 req.method,
                 res.statusCode,
                 res.getHeader('content-type'),
-                req.url
+                decodeURIComponent(req.url || '')
             );
         });
 
