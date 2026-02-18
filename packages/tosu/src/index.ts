@@ -32,14 +32,11 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
     const isDev = process.env.NODE_ENV === 'development';
     const isConfigUpdate = config.enableAutoUpdate === true;
-    if (update !== null && update !== undefined) {
-        if (update === true) {
-            await autoUpdater('startup');
-        } else {
-            await checkUpdates('startup');
-        }
-    } else {
-        if (isDev === false && isConfigUpdate) {
+    if (!isDev) {
+        if (
+            (update !== null && update !== undefined && update === true) ??
+            isConfigUpdate
+        ) {
             await autoUpdater('startup');
         } else {
             await checkUpdates('startup');
