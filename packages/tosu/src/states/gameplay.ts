@@ -644,7 +644,9 @@ export class Gameplay extends AbstractState {
                     this.statistics.meh -
                     this.statistics.miss,
                 countPerfect: this.statistics.perfect,
-                countSliderTailHit: this.statistics.sliderTailHit,
+                countSliderTailHit:
+                    this.statistics.sliderTailHit ||
+                    currentDifficulty.attributes.sliderCount,
                 // smallTickHits: this.statistics.smallTickHit,
                 countLargeTickMiss: this.statistics.largeTickMiss
             };
@@ -679,22 +681,42 @@ export class Gameplay extends AbstractState {
                 delete calcOptions.countSliderTailHit;
                 calcOptions.accuracy = this.accuracy / 100; // FIXME: implement per mode fc accuracy
             } else {
+                delete calcOptions.legacyScore;
                 calcOptions.countGreat =
-                    this.statistics.great + this.statistics.miss;
+                    maxJudgementsAmount -
+                    this.statistics.ok -
+                    this.statistics.meh -
+                    this.statistics.miss;
                 calcOptions.maxCombo =
                     beatmapPP.calculatedMapAttributes.maxCombo;
                 calcOptions.countSliderTailHit =
-                    this.maximumStatistics.sliderTailHit;
+                    beatmapPP.attributes.sliderCount;
                 // calcOptions.smallTickHits =
                 //     this.performanceAttributes.state?.osuSmallTickHits;
                 calcOptions.countLargeTickMiss =
                     this.maximumStatistics.largeTickMiss;
                 calcOptions.countMiss = 0;
+
+                calcOptions.accuracy =
+                    calculateAccuracy({
+                        isLazer: commonParams.lazer,
+
+                        mode: this.mode,
+                        mods: commonParams.mods,
+                        statistics: {
+                            perfect: calcOptions.countPerfect || 0,
+                            great: calcOptions.countGreat || 0,
+                            good: calcOptions.countGood || 0,
+                            ok: calcOptions.countOk || 0,
+                            meh: calcOptions.countMeh || 0,
+                            miss: calcOptions.countMiss || 0
+                        }
+                    }) / 100;
             }
 
             const fcPerformance = beatmapPP.performanceCalculator.calculate(
                 calcOptions,
-                currentDifficulty.attributes
+                beatmapPP.attributes
             );
 
             beatmapPP.currAttributes.fcPP = fcPerformance.total;
