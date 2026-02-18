@@ -46,6 +46,8 @@ export abstract class AbstractInstance {
     path: string = '';
     bitness: Bitness;
 
+    version: string = '';
+
     isReady: boolean;
     isDestroyed: boolean = false;
     isTourneyManager: boolean = false;

@@ -1426,6 +1426,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
             settings['mania.scrollSpeed'] = beatmapScrollSpeed;
 
+            this.game.version = `${settings['client.version'] || ''}`;
+
             return settings;
         } catch (error) {
             return error as Error;
