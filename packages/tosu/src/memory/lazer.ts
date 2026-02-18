@@ -9,6 +9,7 @@ import {
     Rulesets,
     ScoringMode,
     config,
+    isRealNumber,
     measureTime,
     platformResolver,
     wLogger
@@ -1315,9 +1316,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             systemCategory: this.readModList(currentModMapping[5])
         } satisfies Record<keyof (typeof ModsCategories)[0], number[]>;
 
-        for (const [category, mods] of Object.entries(
-            ModsCategories[gamemode]
-        )) {
+        const categories = structuredClone(ModsCategories);
+
+        const version = this.game.version.replaceAll('.', '');
+        if (isRealNumber(version) && +version <= 20261190) {
+            categories[Rulesets.osu].funCategory.splice(7, 0, 'TC');
+            categories[Rulesets.osu].diffIncreasingCategory.splice(6, 1);
+            wLogger.debug(
+                'lazer',
+                this.pid,
+                'initModMapping',
+                `Apply mods order fix`
+            );
+        }
+
+        for (const [category, mods] of Object.entries(categories[gamemode])) {
             const categoryName = category as keyof typeof modsList;
 
             for (let i = 0; i < mods.length; i++) {
