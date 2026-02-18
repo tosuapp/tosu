@@ -1,4 +1,11 @@
-import { Bitness, GameState, config, sleep, wLogger } from '@tosu/common';
+import {
+    Bitness,
+    ClientType,
+    GameState,
+    config,
+    sleep,
+    wLogger
+} from '@tosu/common';
 import fs from 'fs';
 
 import { AbstractInstance } from '@/instances/index';
@@ -15,7 +22,10 @@ export class OsuInstance extends AbstractInstance {
     }
 
     async regularDataLoop() {
-        wLogger.debug(`Starting regular data loop for client %${this.pid}%`);
+        wLogger.debug(
+            `%${ClientType[this.client]}%`,
+            `Starting regular data loop`
+        );
 
         const {
             global,
@@ -192,7 +202,8 @@ export class OsuInstance extends AbstractInstance {
                 user.updateState();
             } catch (exc) {
                 wLogger.error(
-                    `Error in regular data loop for client %${this.pid}%:`,
+                    `%${ClientType[this.client]}%`,
+                    `Error in regular data loop:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Regular loop error details:`, exc);
@@ -229,7 +240,8 @@ export class OsuInstance extends AbstractInstance {
                 await sleep(config.preciseDataPollRate);
             } catch (exc) {
                 wLogger.error(
-                    `Error in precise data loop for client %${this.pid}%:`,
+                    `%${ClientType[this.client]}%`,
+                    `Error in precise data loop:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Precise loop error details:`, exc);

@@ -144,7 +144,8 @@ export abstract class AbstractInstance {
             return true;
         } catch (exc) {
             wLogger.error(
-                `Memory pattern resolution failed for client %${this.pid}%:`,
+                `%${ClientType[this.client]}%`,
+                `Memory pattern resolution failed:`,
                 (exc as Error).message
             );
             wLogger.debug(`Pattern resolution error details:`, exc);
@@ -154,7 +155,7 @@ export abstract class AbstractInstance {
     }
 
     start(): void {
-        wLogger.info(`Scanning memory for client %${this.pid}%...`);
+        wLogger.info(`%${ClientType[this.client]}%`, `Scanning memory...`);
 
         while (!this.isReady) {
             try {
@@ -166,13 +167,15 @@ export abstract class AbstractInstance {
 
                 const elapsedTime = `${(performance.now() - s1).toFixed(2)}ms`;
                 wLogger.info(
-                    `Memory patterns resolved for client %${this.pid}% in %${elapsedTime}%`
+                    `%${ClientType[this.client]}%`,
+                    `Memory patterns resolved in %${elapsedTime}%`
                 );
 
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    `Pattern scanning failed for client %${this.pid}%, retrying...`,
+                    `%${ClientType[this.client]}%`,
+                    `Pattern scanning failed, retrying...`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Pattern scan retry details:`, exc);
@@ -197,7 +200,9 @@ export abstract class AbstractInstance {
     async watchProcessHealth() {
         while (!this.isDestroyed) {
             if (!Process.isProcessExist(this.process.handle)) {
-                wLogger.warn(`Client process %${this.pid}% has terminated`);
+                wLogger.warn(
+                    `Client process %${ClientType[this.client]}% has terminated`
+                );
 
                 this.emitter.emit('onDestroy', this.pid);
                 this.isDestroyed = true;

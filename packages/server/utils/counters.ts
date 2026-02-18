@@ -414,7 +414,7 @@ export function getLocalCounters(): ICounter[] {
     } catch (error) {
         wLogger.error(
             'Failed to retrieve local counters:',
-            (error as any).message
+            (error as Error).message
         );
         wLogger.debug('Local counters retrieval error details:', error);
 
@@ -531,7 +531,7 @@ export async function buildExternalCounters(
     } catch (error) {
         wLogger.error(
             'Failed to build external counters:',
-            (error as any).message
+            (error as Error).message
         );
         wLogger.debug('External counters build error details:', error);
 

@@ -93,12 +93,10 @@ export function handleSocketCommands(
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    '[ws]',
-                    `commands`,
-                    command,
+                    `Failed to parse JSON for command %${command}%:`,
                     (json as Error).message
                 );
-                wLogger.debug('[ws]', `commands`, command, json);
+                wLogger.debug(`JSON parsing error details:`, json);
                 return;
             }
 
@@ -141,12 +139,10 @@ export function handleSocketCommands(
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    '[ws]',
-                    `commands`,
-                    command,
+                    `Failed to parse JSON for command %${command}%:`,
                     (json as Error).message
                 );
-                wLogger.debug('[ws]', `commands`, command, json);
+                wLogger.debug(`JSON parsing error details:`, json);
                 return;
             }
 

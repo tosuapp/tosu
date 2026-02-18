@@ -99,7 +99,8 @@ export class Gameplay extends AbstractState {
 
     init(isRetry?: boolean, from?: string) {
         wLogger.debug(
-            `Initializing gameplay state for client %${this.game.pid}% (Retry: %${isRetry}% - From: %${from}%)`
+            `%${ClientType[this.game.client]}%`,
+            `Initializing gameplay state (Retry: %${isRetry}% - From: %${from}%)`
         );
 
         this.failed = false;
@@ -156,7 +157,8 @@ export class Gameplay extends AbstractState {
 
     resetQuick() {
         wLogger.debug(
-            `Quick reset of gameplay state for client %${this.game.pid}%`
+            `%${ClientType[this.game.client]}%`,
+            `Quick reset of gameplay state`
         );
 
         this.previousPassedObjects = 0;
@@ -175,7 +177,10 @@ export class Gameplay extends AbstractState {
             return;
         }
 
-        wLogger.debug(`Resetting key overlay for client %${this.game.pid}%`);
+        wLogger.debug(
+            `%${ClientType[this.game.client]}%`,
+            `Resetting key overlay`
+        );
 
         this.keyOverlay.forEach((key) => {
             key.isPressed = false;
@@ -197,7 +202,8 @@ export class Gameplay extends AbstractState {
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 wLogger.debug(
-                    `Gameplay state update not ready for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Gameplay state update not ready:`,
                     result
                 );
                 return 'not-ready';
@@ -268,7 +274,8 @@ export class Gameplay extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating gameplay state for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating gameplay state:`,
                 exc
             );
         }
@@ -283,7 +290,8 @@ export class Gameplay extends AbstractState {
                 if (result === '') return;
 
                 wLogger.debug(
-                    `Key overlay update not ready for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Key overlay update not ready:`,
                     result
                 );
                 return 'not-ready';
@@ -302,7 +310,8 @@ export class Gameplay extends AbstractState {
             const keysLine = result.map((key) => key.count).join(':');
             if (this.cachedkeys !== keysLine) {
                 wLogger.debug(
-                    `Key overlay counts updated for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Key overlay counts updated:`,
                     keysLine
                 );
                 this.cachedkeys = keysLine;
@@ -319,7 +328,8 @@ export class Gameplay extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating key overlay for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating key overlay:`,
                 exc
             );
         }
@@ -335,7 +345,8 @@ export class Gameplay extends AbstractState {
                 if (result === '') return;
 
                 wLogger.debug(
-                    `Hit errors update not ready for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Hit errors update not ready:`,
                     result
                 );
 
@@ -359,7 +370,8 @@ export class Gameplay extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating hit errors for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating hit errors:`,
                 exc
             );
         }
@@ -432,7 +444,8 @@ export class Gameplay extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error updating leaderboard for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating leaderboard:`,
                 exc
             );
         }
@@ -443,7 +456,8 @@ export class Gameplay extends AbstractState {
         try {
             if (!config.calculatePP) {
                 wLogger.debug(
-                    `PP calculation disabled for client %${this.game.pid}%`
+                    `%${ClientType[this.game.client]}%`,
+                    `PP calculation disabled`
                 );
                 return;
             }
@@ -456,7 +470,8 @@ export class Gameplay extends AbstractState {
 
             if (!global.gameFolder) {
                 wLogger.debug(
-                    `Game folder not found for client %${this.game.pid}%, skipping PP calc`
+                    `%${ClientType[this.game.client]}%`,
+                    `Game folder not found, skipping PP calc`
                 );
                 return;
             }
@@ -464,7 +479,8 @@ export class Gameplay extends AbstractState {
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
             if (!currentBeatmap) {
                 wLogger.debug(
-                    `Current beatmap unavailable for client %${this.game.pid}%, skipping PP calc`
+                    `%${ClientType[this.game.client]}%`,
+                    `Current beatmap unavailable, skipping PP calc`
                 );
                 return;
             }
@@ -499,7 +515,8 @@ export class Gameplay extends AbstractState {
 
             if (!this.gradualPerformance || !this.performanceAttributes) {
                 wLogger.debug(
-                    `PP calc prerequisites missing for client %${this.game.pid}%:`,
+                    `%${ClientType[this.game.client]}%`,
+                    `PP calc prerequisites missing:`,
                     `gradual: ${this.gradualPerformance === undefined} - attributes: ${this.performanceAttributes === undefined}`
                 );
                 return;
@@ -632,7 +649,8 @@ export class Gameplay extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `Error in PP calculation loop for client %${this.game.pid}%:`,
+                `%${ClientType[this.game.client]}%`,
+                `Error in PP calculation loop:`,
                 exc
             );
         }

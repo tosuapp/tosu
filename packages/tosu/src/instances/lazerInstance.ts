@@ -1,5 +1,6 @@
 import {
     Bitness,
+    ClientType,
     GameState,
     JsonSafeParse,
     config,
@@ -46,7 +47,7 @@ export class LazerInstance extends AbstractInstance {
                     break;
                 } catch (exc) {
                     wLogger.debug(
-                        `Failed to find osu! version for process %${this.pid}%:`,
+                        `Failed to find osu! version for ${ClientType[this.client]} %${this.pid}%:`,
                         exc
                     );
                 } finally {
@@ -57,7 +58,7 @@ export class LazerInstance extends AbstractInstance {
 
             if (!this.version) {
                 wLogger.error(
-                    `Unable to find osu! version for process %${this.pid}%. Please report this issue: https://discord.gg/WX7BTs8kwh`
+                    `Unable to find osu! version for ${ClientType[this.client]} %${this.pid}%. Please report this issue: https://discord.gg/WX7BTs8kwh`
                 );
 
                 this.regularDataLoop();
@@ -150,7 +151,7 @@ export class LazerInstance extends AbstractInstance {
             this.preciseDataLoop();
         } catch (exc) {
             wLogger.error(
-                `Failed to initiate client instance for process %${this.pid}%:`,
+                `Failed to initiate client instance for ${ClientType[this.client]} %${this.pid}%:`,
                 (exc as Error).message
             );
             wLogger.debug(`Client initiation error details:`, exc);
@@ -325,7 +326,8 @@ export class LazerInstance extends AbstractInstance {
                 await sleep(config.pollRate);
             } catch (exc) {
                 wLogger.error(
-                    `Error in regular data loop for client %${this.pid}%:`,
+                    `%${ClientType[this.client]}%`,
+                    `Error in regular data loop:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Regular loop error details:`, exc);
@@ -359,7 +361,8 @@ export class LazerInstance extends AbstractInstance {
                 await sleep(config.preciseDataPollRate);
             } catch (exc) {
                 wLogger.error(
-                    `Error in precise data loop for client %${this.pid}%:`,
+                    `%${ClientType[this.client]}%`,
+                    `Error in precise data loop:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Precise loop error details:`, exc);
