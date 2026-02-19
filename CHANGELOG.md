@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.18.1](https://github.com/tosuapp/tosu/compare/v4.18.0...v4.18.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* Backward compatible mods order ([80e0a04](https://github.com/tosuapp/tosu/commit/80e0a04a7502d6daab289fa6b392566c14eef10a))
+* Disable checking updates in development ([e894ae2](https://github.com/tosuapp/tosu/commit/e894ae2778e324fc8900ae846eee1b2ea6a89f0b))
+* disable unsupported hdr overlay texture ([0715083](https://github.com/tosuapp/tosu/commit/07150835d7156db5a3005273cd679520a72a16af))
+* Fix `TC` mod ([cad9597](https://github.com/tosuapp/tosu/commit/cad9597f047eb71d10899b6a21091e346555c4de))
+* FIx mania DA OD detection ([5b9c7ba](https://github.com/tosuapp/tosu/commit/5b9c7ba22098581a78e0904aa65577482144afdd))
+* Fix score offset for stable/cuttingEdge ([ed765cf](https://github.com/tosuapp/tosu/commit/ed765cfa7b1079b4a06741e14c17170ed7b32bd1))
+* FIx UR skyrocketing over a million ([1ecc51f](https://github.com/tosuapp/tosu/commit/1ecc51f32d260a67d57854f5ff9343d6ab36eb62))
+* Make profile button above overlays ([e3f7d40](https://github.com/tosuapp/tosu/commit/e3f7d4024d263a0b3238579a2fa64d5541740a61))
+
 ## [4.18.0](https://github.com/tosuapp/tosu/compare/v4.17.2...v4.18.0) (2026-02-03)
 
 
