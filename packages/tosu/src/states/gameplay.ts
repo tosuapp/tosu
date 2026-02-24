@@ -600,8 +600,13 @@ export class Gameplay extends AbstractState {
                 countGood: this.statistics.good,
                 countGreat: this.statistics.great,
                 countPerfect: this.statistics.perfect,
-                countSliderTailHit: this.statistics.sliderTailHit,
-                countLargeTickMiss: this.statistics.largeTickMiss
+                countSmallTickMiss: this.statistics.smallTickMiss,
+                countSmallTickHit: this.statistics.smallTickHit,
+                countLargeTickMiss: this.statistics.largeTickMiss,
+                countLargeTickHit: this.statistics.largeTickHit,
+                countSliderTailHit:
+                    this.statistics.sliderTailHit ||
+                    currentDifficulty.attributes.sliderCount
             };
 
             const currPerformance = beatmapPP.performanceCalculator.calculate(
@@ -644,11 +649,13 @@ export class Gameplay extends AbstractState {
                     this.statistics.meh -
                     this.statistics.miss,
                 countPerfect: this.statistics.perfect,
+                countSmallTickMiss: this.statistics.smallTickMiss,
+                countSmallTickHit: this.statistics.smallTickHit,
+                countLargeTickMiss: this.statistics.largeTickMiss,
+                countLargeTickHit: this.statistics.largeTickHit,
                 countSliderTailHit:
                     this.statistics.sliderTailHit ||
-                    currentDifficulty.attributes.sliderCount,
-                // smallTickHits: this.statistics.smallTickHit,
-                countLargeTickMiss: this.statistics.largeTickMiss
+                    currentDifficulty.attributes.sliderCount
             };
             if (this.mode === 3) {
                 calcOptions.countPerfect =
@@ -677,7 +684,7 @@ export class Gameplay extends AbstractState {
                 calcOptions.countMeh = this.statistics.meh;
                 calcOptions.countMiss = this.statistics.miss;
                 delete calcOptions.countLargeTickMiss;
-                // delete calcOptions.smallTickHits;
+                delete calcOptions.countSmallTickHit;
                 delete calcOptions.countSliderTailHit;
                 calcOptions.accuracy = this.accuracy / 100; // FIXME: implement per mode fc accuracy
             } else {
