@@ -171,8 +171,13 @@ export class ResultScreen extends AbstractState {
                     countGood: this.statistics.good,
                     countGreat: this.statistics.great,
                     countPerfect: this.statistics.perfect,
-                    countSliderTailHit: this.statistics.sliderTailHit,
-                    countLargeTickMiss: this.statistics.largeTickMiss
+                    countSmallTickMiss: this.statistics.smallTickMiss || 0,
+                    countSmallTickHit: this.statistics.smallTickHit,
+                    countLargeTickMiss: this.statistics.largeTickMiss || 0,
+                    countLargeTickHit: this.statistics.largeTickHit,
+                    countSliderTailHit:
+                        this.statistics.sliderTailHit ||
+                        beatmapPP.attributes.sliderCount
                 },
                 beatmapPP.attributes
             );
@@ -193,10 +198,13 @@ export class ResultScreen extends AbstractState {
                 countGood: this.statistics.good,
                 countGreat: this.statistics.great + this.statistics.miss,
                 countPerfect: this.statistics.perfect,
-                countSliderTailHit: this.statistics.sliderTailHit,
-                // smallTickHits:
-                //     beatmapPP.performanceAttributes?.state?.osuSmallTickHits,
-                countLargeTickMiss: this.statistics.largeTickMiss
+                countSmallTickMiss: this.statistics.smallTickMiss,
+                countSmallTickHit: this.statistics.smallTickHit,
+                countLargeTickMiss: this.statistics.largeTickMiss,
+                countLargeTickHit: this.statistics.largeTickHit,
+                countSliderTailHit:
+                    this.statistics.sliderTailHit ||
+                    beatmapPP.attributes.sliderCount
             };
             if (this.mode === 3) {
                 delete calcOptions.maxCombo;
@@ -213,7 +221,7 @@ export class ResultScreen extends AbstractState {
                     this.statistics.meh +
                     this.statistics.miss;
                 delete calcOptions.countSliderTailHit;
-                // delete fcCalcOptions.smallTickHits;
+                delete calcOptions.countSmallTickHit;
                 delete calcOptions.countLargeTickMiss;
             }
 
