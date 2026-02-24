@@ -47,6 +47,12 @@ export interface Config {
         binding: 'SHOW_MP_COMMANDS';
     };
 
+    // Whether to read scroll_speed memory.
+    readManiaScrollSpeed: {
+        type: boolean;
+        binding: 'READ_MANIA_SCROLL_SPEED';
+    };
+
     // The IP address tosu should serve on.
     serverIP: {
         type: string;

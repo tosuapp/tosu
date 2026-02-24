@@ -57,6 +57,11 @@ const defaultSchema: ConfigSchema = {
         default: false,
         order: 3
     },
+    readManiaScrollSpeed: {
+        binding: 'READ_MANIA_SCROLL_SPEED',
+        default: true,
+        order: 3
+    },
     serverIP: {
         binding: 'SERVER_IP',
         default: '127.0.0.1',
