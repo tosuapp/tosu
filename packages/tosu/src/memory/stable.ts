@@ -1,7 +1,9 @@
 import {
     ClientType,
     GameState,
+    calculateMods,
     config,
+    defaultCalculatedMods,
     isAllowedValue,
     wLogger
 } from '@tosu/common';
@@ -35,7 +37,6 @@ import { LeaderboardPlayer } from '@/states/types';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import { calculateAccuracy } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
-import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type {
     BindingsList,
     ConfigList,

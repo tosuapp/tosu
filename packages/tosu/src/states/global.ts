@@ -1,9 +1,13 @@
-import { ClientType, measureTime, wLogger } from '@tosu/common';
+import {
+    CalculateMods,
+    ClientType,
+    defaultCalculatedMods,
+    measureTime,
+    wLogger
+} from '@tosu/common';
 
 import { AbstractState } from '@/states';
 import { safeJoin } from '@/utils/converters';
-import { defaultCalculatedMods } from '@/utils/osuMods';
-import { CalculateMods } from '@/utils/osuMods.types';
 
 export class Global extends AbstractState {
     isWatchingReplay: boolean = false;

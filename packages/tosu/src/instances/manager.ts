@@ -30,6 +30,8 @@ export class InstanceManager {
     isOverlayStarted: boolean = false;
     overlayProcess: ChildProcess | null = null;
 
+    calculatorPath = 'local';
+
     constructor() {
         this.osuInstances = {};
     }
@@ -133,6 +135,8 @@ export class InstanceManager {
                 if (args.devserver && args.devserver.length > 0) {
                     osuInstance.setCustomServerEndpoint(args.devserver);
                 }
+
+                await osuInstance.initializeCalculator(this.calculatorPath);
 
                 osuInstance.emitter.on(
                     'onDestroy',

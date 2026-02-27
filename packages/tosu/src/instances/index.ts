@@ -1,4 +1,11 @@
-import { Bitness, ClientType, config, sleep, wLogger } from '@tosu/common';
+import {
+    Bitness,
+    Calculator,
+    ClientType,
+    config,
+    sleep,
+    wLogger
+} from '@tosu/common';
 import EventEmitter from 'events';
 import { Process } from 'tsprocess';
 
@@ -63,6 +70,8 @@ export abstract class AbstractInstance {
 
     states: Partial<DataRepoList> = {};
 
+    calculator: Calculator;
+
     constructor(pid: number, bitness: Bitness) {
         this.pid = pid;
 
@@ -86,6 +95,13 @@ export abstract class AbstractInstance {
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
         this.preciseDataLoop = this.preciseDataLoop.bind(this);
+
+        this.initializeCalculator = this.initializeCalculator.bind(this);
+    }
+
+    async initializeCalculator(calculatorPath: string) {
+        this.calculator = new Calculator(calculatorPath);
+        await this.calculator.load();
     }
 
     /**

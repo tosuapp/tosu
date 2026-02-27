@@ -1,3 +1,5 @@
+import type { CalculateMods } from '@tosu/common';
+
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import type {
     KeyOverlayButton,
@@ -5,7 +7,6 @@ import type {
     Statistics
 } from '@/states/types';
 import type { MultiplayerTeamType } from '@/utils/multiplayer.types';
-import type { CalculateMods } from '@/utils/osuMods.types';
 import type { SettingsObject } from '@/utils/settings.types';
 
 export type ScanPatterns = {

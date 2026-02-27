@@ -1,4 +1,4 @@
-import { Rulesets } from '@tosu/common';
+import { Rulesets } from '../index';
 
 export type ModsLazer = Mod[] | { acronym: string }[];
 export type IMods = ModsLazer | string | number;

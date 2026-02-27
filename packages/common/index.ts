@@ -10,9 +10,13 @@ export * from './utils/json';
 export * from './utils/ingame';
 export * from './utils/manipulation';
 export * from './utils/context';
+export * from './utils/osuMods';
+export * from './utils/calculator';
+export * from './utils/errors';
 
 export * from './enums/osu';
 export * from './enums/tosu';
 export * from './enums/country';
 
 export * from './utils/config.types';
+export * from './utils/osuMods.types';

@@ -1,5 +1,19 @@
-import rosu, { HitResultPriority, PerformanceArgs } from '@kotrikd/rosu-pp';
-import { ClientType, config, measureTime, wLogger } from '@tosu/common';
+import {
+    CalculateMods,
+    ClientType,
+    GameState,
+    ModsCollection,
+    NativeTimedOsuDifficultyAttributes,
+    OsuMods,
+    ScoreInfoInput,
+    TimedLazy,
+    config,
+    defaultCalculatedMods,
+    measureTime,
+    sanitizeMods,
+    silentCatch,
+    wLogger
+} from '@tosu/common';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -8,9 +22,11 @@ import {
     LeaderboardPlayer,
     Statistics
 } from '@/states/types';
-import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
-import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
-import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
+import {
+    calculateAccuracy,
+    calculateGrade,
+    calculatePassedObjects
+} from '@/utils/calculators';
 
 export const defaultStatistics = {
     miss: 0,
@@ -46,11 +62,9 @@ const defaultLBPlayer = {
 } as LeaderboardPlayer;
 
 export class Gameplay extends AbstractState {
+    isCalculating: boolean = false;
     isDefaultState: boolean = true;
     isKeyOverlayDefaultState: boolean = true;
-
-    performanceAttributes: rosu.PerformanceAttributes | undefined;
-    gradualPerformance: rosu.GradualPerformance | undefined;
 
     failed: boolean;
 
@@ -64,6 +78,9 @@ export class Gameplay extends AbstractState {
 
     statistics: Statistics;
     maximumStatistics: Statistics;
+
+    nativeMods?: ModsCollection;
+    timedLazy?: TimedLazy<NativeTimedOsuDifficultyAttributes>;
 
     unstableRate: number;
     totalHitErrors: number = 0;
@@ -135,11 +152,8 @@ export class Gameplay extends AbstractState {
         this.keyOverlay = [];
         this.isReplayUiHidden = false;
 
-        this.previousPassedObjects = 0;
-        this.previousHitErrorIndex = 0;
+        this.resetGradual();
 
-        this.gradualPerformance = undefined;
-        this.performanceAttributes = undefined;
         // below is data that shouldn't be reseted on retry
         if (isRetry === true) {
             return;
@@ -155,15 +169,16 @@ export class Gameplay extends AbstractState {
         this.leaderboardScores = [];
     }
 
-    resetQuick() {
+    resetGradual() {
         wLogger.debug(
             `%${ClientType[this.game.client]}%`,
-            `Quick reset of gameplay state`
+            `Reset gradual calculator`
         );
 
+        silentCatch(this.timedLazy?.destroy, this.timedLazy?.enumerator);
+
+        this.timedLazy = undefined;
         this.previousPassedObjects = 0;
-        this.gradualPerformance = undefined;
-        this.performanceAttributes = undefined;
     }
 
     resetHitErrors() {
@@ -222,10 +237,15 @@ export class Gameplay extends AbstractState {
             this.score = result.score;
             this.playerHPSmooth = result.playerHPSmooth;
             this.playerHP = result.playerHP;
-            this.accuracy = result.accuracy;
-
             this.statistics = result.statistics;
             this.maximumStatistics = result.maximumStatistics;
+
+            this.accuracy = calculateAccuracy({
+                isLazer: this.game.client === ClientType.lazer,
+                mode: this.mode,
+                mods: this.mods.array,
+                statistics: this.statistics
+            });
 
             this.combo = result.combo;
             this.maxCombo = result.maxCombo;
@@ -260,7 +280,6 @@ export class Gameplay extends AbstractState {
             this.comboPrev = this.combo;
 
             this.updateGrade(menu.objectCount);
-            this.updateStarsAndPerformance();
             this.updateLeaderboard();
 
             this.game.resetReportCount('gameplay updateState');
@@ -452,7 +471,7 @@ export class Gameplay extends AbstractState {
     }
 
     @measureTime
-    private updateStarsAndPerformance() {
+    updateStarsAndPerformance() {
         try {
             if (!config.calculatePP) {
                 wLogger.debug(
@@ -468,6 +487,8 @@ export class Gameplay extends AbstractState {
                 'menu'
             ]);
 
+            if (!beatmapPP.ruleset) return;
+
             if (!global.gameFolder) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
@@ -476,8 +497,8 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentBeatmap = beatmapPP.getCurrentBeatmap();
-            if (!currentBeatmap) {
+            const beatmap = beatmapPP.getCurrentBeatmap();
+            if (!beatmap) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
                     `Current beatmap unavailable, skipping PP calc`
@@ -485,75 +506,123 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.checksum}:${menu.mp3Length}`;
-            const isUpdate = this.previousState !== currentState;
-
             const commonParams = {
                 mods: sanitizeMods(this.mods.array),
                 lazer: this.game.client === ClientType.lazer
             };
 
-            // update precalculated attributes
-            if (
-                isUpdate ||
-                !this.gradualPerformance ||
-                !this.performanceAttributes
-            ) {
-                this.gradualPerformance?.free();
-                this.performanceAttributes?.free();
+            const currentState = `${menu.checksum}:${beatmapPP.ruleset.rulesetId}:${this.mods.checksum}:${menu.mp3Length}`;
+            if (this.previousState !== currentState || !this.timedLazy) {
+                const result = this.game.calculator.gradual({
+                    lazer: commonParams.lazer,
+                    beatmap,
+                    ruleset: beatmapPP.ruleset!,
+                    mods: commonParams.mods
+                });
+                if (result instanceof Error) {
+                    wLogger.error(
+                        ClientType[this.game.client],
+                        this.game.pid,
+                        `gameplay updateStarsAndPerformance lazy not ready`,
+                        result
+                    );
+                    return;
+                }
 
-                const difficulty = new rosu.Difficulty(commonParams);
+                this.resetGradual();
 
-                this.gradualPerformance =
-                    difficulty.gradualPerformance(currentBeatmap);
-                this.performanceAttributes = new rosu.Performance(
-                    commonParams
-                ).calculate(currentBeatmap);
-
+                this.nativeMods = result.mods;
+                this.timedLazy = result.timedLazy;
                 this.previousState = currentState;
             }
 
-            if (!this.gradualPerformance || !this.performanceAttributes) {
+            if (
+                !this.nativeMods ||
+                !this.timedLazy ||
+                !beatmapPP.lazerBeatmap ||
+                !beatmapPP.attributes ||
+                !beatmapPP.performanceCalculator
+            ) {
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
-                    `PP calc prerequisites missing:`,
-                    `gradual: ${this.gradualPerformance === undefined} - attributes: ${this.performanceAttributes === undefined}`
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance not ready`
                 );
                 return;
             }
 
             const passedObjects = calculatePassedObjects(
-                this.mode,
-                this.statistics
+                beatmapPP.lazerBeatmap.hitObjects,
+                global.playTime,
+                this.previousPassedObjects
             );
 
-            const offset = passedObjects - this.previousPassedObjects;
-            if (offset <= 0) return;
+            let offset = passedObjects - this.previousPassedObjects;
+            if (offset <= 0 && this.isCalculating === false) return;
+            this.isCalculating = true;
 
-            const currPerformance = this.gradualPerformance.nth(
-                {
-                    nGeki: this.statistics.perfect,
-                    n300: this.statistics.great,
-                    nKatu: this.statistics.good,
-                    n100: this.statistics.ok,
-                    n50: this.statistics.meh,
-                    misses: this.statistics.miss,
-                    sliderEndHits: this.statistics.sliderTailHit,
-                    osuSmallTickHits: this.statistics.smallTickHit,
-                    osuLargeTickHits: this.statistics.largeTickHit,
-                    maxCombo: this.maxCombo
-                },
-                offset - 1
-            );
+            let currentDifficulty;
+            while (offset > 0) {
+                // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
+                if (global.status !== GameState.play || !this.timedLazy) {
+                    this.isCalculating = false;
+                    return;
+                }
 
-            if (currPerformance) {
-                beatmapPP.updateCurrentAttributes(
-                    currPerformance.difficulty.stars,
-                    currPerformance.pp
+                currentDifficulty = this.timedLazy.next(
+                    this.timedLazy.enumerator
                 );
 
-                beatmapPP.updatePPAttributes('curr', currPerformance);
+                offset--;
+                this.previousPassedObjects++;
             }
+            if (!currentDifficulty) {
+                wLogger.debug(
+                    ClientType[this.game.client],
+                    this.game.pid,
+                    `gameplay updateStarsAndPerformance no current currentAttributes`
+                );
+
+                this.isCalculating = false;
+                return;
+            }
+
+            const scoreInput: ScoreInfoInput = {
+                ruleset: beatmapPP.ruleset,
+                legacyScore:
+                    this.game.client !== ClientType.lazer
+                        ? this.score
+                        : undefined,
+                beatmap,
+                mods: this.nativeMods,
+                maxCombo: this.maxCombo,
+                accuracy: this.accuracy / 100,
+                countMiss: this.statistics.miss,
+                countMeh: this.statistics.meh,
+                countOk: this.statistics.ok,
+                countGood: this.statistics.good,
+                countGreat: this.statistics.great,
+                countPerfect: this.statistics.perfect,
+                countSmallTickMiss: this.statistics.smallTickMiss,
+                countSmallTickHit: this.statistics.smallTickHit,
+                countLargeTickMiss: this.statistics.largeTickMiss,
+                countLargeTickHit: this.statistics.largeTickHit,
+                countSliderTailHit:
+                    this.statistics.sliderTailHit ||
+                    currentDifficulty.attributes.sliderCount
+            };
+
+            const currPerformance = beatmapPP.performanceCalculator.calculate(
+                scoreInput,
+                currentDifficulty.attributes
+            );
+
+            beatmapPP.updateCurrentAttributes(
+                currentDifficulty.attributes.starRating || 0,
+                currPerformance.total
+            );
+
+            beatmapPP.updatePPAttributes('curr', currPerformance);
 
             const maxJudgementsAmount =
                 this.mode === 3 &&
@@ -566,77 +635,105 @@ export class Gameplay extends AbstractState {
                       beatmapPP.calculatedMapAttributes.spinners +
                       beatmapPP.calculatedMapAttributes.holds;
 
-            const calcOptions: PerformanceArgs = {
-                nGeki: this.statistics.perfect,
-                n300:
+            const calcOptions: ScoreInfoInput = {
+                ruleset: beatmapPP.ruleset,
+                legacyScore: !commonParams.lazer ? this.score : undefined,
+                beatmap,
+                mods: this.nativeMods,
+                maxCombo: this.maxCombo,
+                accuracy: this.accuracy / 100,
+                countMiss: this.statistics.miss,
+                countMeh: this.statistics.meh,
+                countOk: this.statistics.ok,
+                countGood: this.statistics.good,
+                countGreat:
                     maxJudgementsAmount -
                     this.statistics.ok -
                     this.statistics.meh -
                     this.statistics.miss,
-                nKatu: this.statistics.good,
-                n100: this.statistics.ok,
-                n50: this.statistics.meh,
-                misses: this.statistics.miss,
-                sliderEndHits: this.statistics.sliderTailHit,
-                smallTickHits: this.statistics.smallTickHit,
-                largeTickHits: this.statistics.largeTickHit,
-                combo: this.maxCombo,
-                ...commonParams
+                countPerfect: this.statistics.perfect,
+                countSmallTickMiss: this.statistics.smallTickMiss,
+                countSmallTickHit: this.statistics.smallTickHit,
+                countLargeTickMiss: this.statistics.largeTickMiss,
+                countLargeTickHit: this.statistics.largeTickHit,
+                countSliderTailHit:
+                    this.statistics.sliderTailHit ||
+                    currentDifficulty.attributes.sliderCount
             };
             if (this.mode === 3) {
-                calcOptions.nGeki =
+                calcOptions.countPerfect =
                     maxJudgementsAmount -
                     this.statistics.ok -
                     this.statistics.meh -
                     this.statistics.miss;
-                calcOptions.n300 = this.statistics.great;
-                calcOptions.hitresultPriority = HitResultPriority.Fastest;
-                delete calcOptions.combo;
+                calcOptions.countGreat = this.statistics.great;
+                delete calcOptions.maxCombo;
             }
 
-            const maxAchievablePerformance = new rosu.Performance(
-                calcOptions
-            ).calculate(this.performanceAttributes);
+            const maxAchievablePerformance =
+                beatmapPP.performanceCalculator.calculate(
+                    calcOptions,
+                    currentDifficulty.attributes
+                );
 
-            if (maxAchievablePerformance) {
-                beatmapPP.currAttributes.maxAchievable =
-                    maxAchievablePerformance.pp;
-            }
+            beatmapPP.currAttributes.maxAchievable =
+                maxAchievablePerformance.total;
 
             if (this.mode === 3) {
-                delete calcOptions.nGeki;
-                delete calcOptions.n300;
-                delete calcOptions.nKatu;
-                calcOptions.n100 = this.statistics.ok;
-                calcOptions.n50 = this.statistics.meh;
-                calcOptions.misses = this.statistics.miss;
-                delete calcOptions.sliderEndHits;
-                delete calcOptions.smallTickHits;
-                delete calcOptions.largeTickHits;
-                calcOptions.accuracy = this.accuracy;
-                calcOptions.hitresultPriority = HitResultPriority.Fastest;
+                delete calcOptions.countPerfect;
+                delete calcOptions.countGreat;
+                delete calcOptions.countGood;
+                calcOptions.countOk = this.statistics.ok;
+                calcOptions.countMeh = this.statistics.meh;
+                calcOptions.countMiss = this.statistics.miss;
+                delete calcOptions.countLargeTickMiss;
+                delete calcOptions.countSmallTickHit;
+                delete calcOptions.countSliderTailHit;
+                calcOptions.accuracy = this.accuracy / 100; // FIXME: implement per mode fc accuracy
             } else {
-                calcOptions.n300 = this.statistics.great + this.statistics.miss;
-                calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;
-                calcOptions.sliderEndHits =
-                    this.performanceAttributes.state?.sliderEndHits;
-                calcOptions.smallTickHits =
-                    this.performanceAttributes.state?.osuSmallTickHits;
-                calcOptions.largeTickHits =
-                    this.performanceAttributes.state?.osuLargeTickHits;
-                calcOptions.misses = 0;
+                delete calcOptions.legacyScore;
+                calcOptions.countGreat =
+                    maxJudgementsAmount -
+                    this.statistics.ok -
+                    this.statistics.meh -
+                    this.statistics.miss;
+                calcOptions.maxCombo =
+                    beatmapPP.calculatedMapAttributes.maxCombo;
+                calcOptions.countSliderTailHit =
+                    beatmapPP.attributes.sliderCount;
+                // calcOptions.smallTickHits =
+                //     this.performanceAttributes.state?.osuSmallTickHits;
+                calcOptions.countLargeTickMiss =
+                    this.maximumStatistics.largeTickMiss;
+                calcOptions.countMiss = 0;
+
+                calcOptions.accuracy =
+                    calculateAccuracy({
+                        isLazer: commonParams.lazer,
+
+                        mode: this.mode,
+                        mods: commonParams.mods,
+                        statistics: {
+                            perfect: calcOptions.countPerfect || 0,
+                            great: calcOptions.countGreat || 0,
+                            good: calcOptions.countGood || 0,
+                            ok: calcOptions.countOk || 0,
+                            meh: calcOptions.countMeh || 0,
+                            miss: calcOptions.countMiss || 0
+                        }
+                    }) / 100;
             }
 
-            const fcPerformance = new rosu.Performance(calcOptions).calculate(
-                this.performanceAttributes
+            const fcPerformance = beatmapPP.performanceCalculator.calculate(
+                calcOptions,
+                beatmapPP.attributes
             );
 
-            if (fcPerformance) {
-                beatmapPP.currAttributes.fcPP = fcPerformance.pp;
-                beatmapPP.updatePPAttributes('fc', fcPerformance);
-            }
+            beatmapPP.currAttributes.fcPP = fcPerformance.total;
+            beatmapPP.updatePPAttributes('fc', fcPerformance);
 
             this.previousPassedObjects = passedObjects;
+            this.isCalculating = false;
 
             this.game.resetReportCount('gameplay updateStarsAndPerformance');
         } catch (exc) {

@@ -135,8 +135,10 @@ export class OsuInstance extends AbstractInstance {
                     case GameState.edit:
                         if (this.previousTime === global.playTime) break;
 
+                        beatmapPP.updateEditorPP(
+                            global.playTime > this.previousTime
+                        );
                         this.previousTime = global.playTime;
-                        beatmapPP.updateEditorPP();
                         break;
 
                     case GameState.selectEdit:
@@ -154,7 +156,7 @@ export class OsuInstance extends AbstractInstance {
                         }
                         break;
 
-                    case GameState.play:
+                    case GameState.play: {
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
@@ -163,14 +165,19 @@ export class OsuInstance extends AbstractInstance {
 
                         // reset before first object
                         if (global.playTime < beatmapPP.timings.firstObj) {
-                            gameplay.resetQuick();
+                            gameplay.resetGradual();
                             gameplay.resetHitErrors();
                         }
 
-                        this.previousTime = global.playTime;
+                        const gameplayUpdate = gameplay.updateState();
+                        if (gameplayUpdate === 'not-ready') {
+                            break;
+                        }
+                        gameplay.updateStarsAndPerformance();
 
-                        gameplay.updateState();
+                        this.previousTime = global.playTime;
                         break;
+                    }
 
                     case GameState.resultScreen:
                         resultScreen.updatePerformance();

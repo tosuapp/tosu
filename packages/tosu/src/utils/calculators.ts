@@ -1,5 +1,7 @@
+import { Mod, ModsLazer, Rulesets } from '@tosu/common';
+import { HitObject } from 'osu-classes';
+
 import { Statistics } from '@/states/types';
-import { ModsLazer } from '@/utils/osuMods.types';
 
 /**
  * Used to calculate accuracy out of hits
@@ -83,7 +85,7 @@ export const calculateAccuracy = (params: {
     }
 
     if (denominator === 0) return 0;
-    return +((numerator / denominator) * 100).toFixed(2);
+    return (numerator / denominator) * 100;
 };
 
 export const calculateGrade = (params: {
@@ -230,37 +232,92 @@ export const calculateGrade = (params: {
 };
 
 export const calculatePassedObjects = (
-    mode: number,
-    statistics: Statistics
+    hitObjects: HitObject[],
+    currentTime: number,
+    previousIndex: number
 ): number => {
-    switch (mode) {
-        case 0:
-            return (
-                statistics.great +
-                statistics.ok +
-                statistics.meh +
-                statistics.miss
-            );
-        case 1:
-            return statistics.great + statistics.ok + statistics.miss;
-        case 2:
-            return (
-                statistics.great +
-                statistics.good +
-                statistics.ok +
-                statistics.meh +
-                statistics.miss
-            );
-        case 3:
-            return (
-                statistics.great +
-                statistics.perfect +
-                statistics.ok +
-                statistics.good +
-                statistics.meh +
-                statistics.miss
-            );
-        default:
-            return 0;
+    let value = previousIndex;
+    for (let i = previousIndex; i < hitObjects.length; i++) {
+        const item = hitObjects[i];
+        if (item.startTime > currentTime) break;
+        value = i + 1;
     }
+
+    return value;
+};
+
+export const calculateBeatmapAttributes = (params: {
+    isConvert: boolean;
+    isLazer: boolean;
+
+    ar: number;
+    cs: number;
+    od: number;
+    hp: number;
+
+    mode: number;
+    mods: ModsLazer;
+
+    rate: number;
+}) => {
+    const isEz = params.mods.some((r) => r.acronym === 'EZ');
+    const isHr = params.mods.some((r) => r.acronym === 'HR');
+    // const isV2 = params.mods.some((r) => r.acronym === 'SV2');
+
+    const DA = (params.mods as Mod[]).find((r) => r.acronym === 'DA');
+    const multiply = isHr ? 1.4 : isEz ? 0.5 : 1;
+
+    const AR = DA?.settings?.approach_rate ?? params.ar;
+    const CS = DA?.settings?.circle_size ?? params.cs;
+    const OD = DA?.settings?.overall_difficulty ?? params.od;
+    const HP = DA?.settings?.drain_rate ?? params.hp;
+
+    let arConverted = isHr ? Math.min(AR * multiply, 10) : AR * multiply;
+    let odConverted = isHr ? Math.min(OD * multiply, 10) : OD * multiply;
+    const csConverted = isHr ? Math.min(CS * 1.3, 10) : CS * multiply;
+    const hpConverted = isHr ? Math.min(HP * multiply, 10) : HP * multiply;
+
+    if (params.isLazer && params.mode === Rulesets.mania) {
+        // they do some magic shit here
+    }
+
+    if (params.rate !== 1) {
+        arConverted =
+            arConverted <= 5
+                ? 15 - (15 - arConverted) / (1 * params.rate)
+                : 13 - (13 - arConverted) / (1 * params.rate);
+
+        switch (params.mode) {
+            case Rulesets.osu:
+                odConverted = 13.33 - (13.33 - odConverted) / (1 * params.rate);
+                break;
+
+            case Rulesets.taiko:
+                odConverted =
+                    16.66666666666667 -
+                    (16.66666666666667 - odConverted) / (1 * params.rate);
+                break;
+
+            case Rulesets.mania: {
+                // also some dark magic shit right here
+                // if (params.isLazer === false && isV2)
+                //     odConverted =
+                //         odConverted <= 5
+                //             ? 37.33 - (37.33 - odConverted)
+                //             : 22.63636363636364 -
+                //               (22.63636363636364 - odConverted);
+                // else if (params.isConvert)
+                //     odConverted = 16 - (16 - odConverted);
+                // else odConverted = 16 - (16 - odConverted);
+                break;
+            }
+        }
+    }
+
+    return {
+        ar: arConverted,
+        od: odConverted,
+        cs: csConverted,
+        hp: hpConverted
+    };
 };
