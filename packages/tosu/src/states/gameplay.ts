@@ -152,7 +152,7 @@ export class Gameplay extends AbstractState {
         this.keyOverlay = [];
         this.isReplayUiHidden = false;
 
-        this.previousPassedObjects = 0;
+        this.resetGradual();
 
         // below is data that shouldn't be reseted on retry
         if (isRetry === true) {
@@ -280,7 +280,6 @@ export class Gameplay extends AbstractState {
             this.comboPrev = this.combo;
 
             this.updateGrade(menu.objectCount);
-            this.updateStarsAndPerformance();
             this.updateLeaderboard();
 
             this.game.resetReportCount('gameplay updateState');
@@ -472,7 +471,7 @@ export class Gameplay extends AbstractState {
     }
 
     @measureTime
-    private updateStarsAndPerformance() {
+    updateStarsAndPerformance() {
         try {
             if (!config.calculatePP) {
                 wLogger.debug(
@@ -530,10 +529,11 @@ export class Gameplay extends AbstractState {
                     return;
                 }
 
+                this.resetGradual();
+
                 this.nativeMods = result.mods;
                 this.timedLazy = result.timedLazy;
                 this.previousState = currentState;
-                this.previousPassedObjects = 0;
             }
 
             if (
@@ -565,13 +565,14 @@ export class Gameplay extends AbstractState {
             let currentDifficulty;
             while (offset > 0) {
                 // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
-                if (global.status !== GameState.play || !this.timedLazy) break;
+                if (global.status !== GameState.play || !this.timedLazy) return;
 
                 currentDifficulty = this.timedLazy.next(
                     this.timedLazy.enumerator
                 );
 
                 offset--;
+                this.previousPassedObjects += 1;
             }
             if (!currentDifficulty) {
                 wLogger.debug(
