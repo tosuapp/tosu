@@ -15,8 +15,8 @@ import { safeJoin } from '@/utils/converters';
 export class OsuInstance extends AbstractInstance {
     memory: StableMemory;
 
-    constructor(pid: number, calculatorPath: string) {
-        super(pid, Bitness.x86, calculatorPath);
+    constructor(pid: number) {
+        super(pid, Bitness.x86);
 
         this.memory = new StableMemory(this.process, this);
     }

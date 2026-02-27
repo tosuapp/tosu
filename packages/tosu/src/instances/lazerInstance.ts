@@ -21,8 +21,8 @@ export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
     previousCombo: number = 0;
 
-    constructor(pid: number, calculatorPath: string) {
-        super(pid, Bitness.x64, calculatorPath);
+    constructor(pid: number) {
+        super(pid, Bitness.x64);
         this.memory = new LazerMemory(this.process, this);
     }
 

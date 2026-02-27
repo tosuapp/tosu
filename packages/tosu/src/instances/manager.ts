@@ -124,8 +124,8 @@ export class InstanceManager {
                 }
 
                 const osuInstance = isLazer
-                    ? new LazerInstance(processId, this.calculatorPath)
-                    : new OsuInstance(processId, this.calculatorPath);
+                    ? new LazerInstance(processId)
+                    : new OsuInstance(processId);
 
                 if (!isNaN(parseFloat(args.spectateclient))) {
                     osuInstance.setTourneyIpcId(args.spectateclient);
@@ -135,6 +135,8 @@ export class InstanceManager {
                 if (args.devserver && args.devserver.length > 0) {
                     osuInstance.setCustomServerEndpoint(args.devserver);
                 }
+
+                await osuInstance.initializeCalculator(this.calculatorPath);
 
                 osuInstance.emitter.on(
                     'onDestroy',
