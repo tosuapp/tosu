@@ -265,7 +265,7 @@ export class ConfigManager {
                 .join('\n');
 
             await file.writeFile(defaults, 'utf-8');
-            wLogger.debug(`Default configuration created at %${filePath}%`);
+            wLogger.debug(`Default configuration created at %%${filePath}%%`);
         } catch (e) {
             if (!(e instanceof Error) || !('code' in e)) return;
             let cause: string = 'unknown';
@@ -348,7 +348,7 @@ export class ConfigManager {
 
             default: {
                 wLogger.warn(
-                    `Invalid type for config key %${item.binding}%. Expected %${typeof item.default}%, using default value.`
+                    `Invalid type for config key %%${item.binding}%%. Expected %%${typeof item.default}%%, using default value.`
                 );
                 break;
             }

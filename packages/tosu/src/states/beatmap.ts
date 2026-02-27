@@ -244,8 +244,8 @@ export class BeatmapPP extends AbstractState {
             };
         } catch (exc) {
             wLogger.error(
-                `%${ClientType[this.game.client]}%`,
-                `Error updating PP attributes (%${type}%):`,
+                `%%${ClientType[this.game.client]}%%`,
+                `Error updating PP attributes (%%${type}%%):`,
                 (exc as Error).message
             );
             wLogger.debug(`PP attributes update error details:`, exc);
@@ -257,8 +257,8 @@ export class BeatmapPP extends AbstractState {
 
         if (this.currAttributes.pp.toFixed(2) !== pp.toFixed(2)) {
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
-                `Current attributes updated to %${stars.toFixed(2)}★% | %${pp.toFixed(2)}pp% (max achieved: %${maxAchieved.toFixed(2)}pp%)`
+                `%%${ClientType[this.game.client]}%%`,
+                `Current attributes updated to %%${stars.toFixed(2)}★%% | %%${pp.toFixed(2)}pp%% (max achieved: %%${maxAchieved.toFixed(2)}pp%%)`
             );
         }
 
@@ -309,7 +309,7 @@ export class BeatmapPP extends AbstractState {
 
             if (menu.folder === '.' && !lazerBypass) {
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Skipping osu! theme song metadata update`,
                     {
                         SongsFolder: global.songsFolder,
@@ -322,7 +322,7 @@ export class BeatmapPP extends AbstractState {
 
             if (!menu.filename) {
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Skipping beatmap with no file name`,
                     {
                         SongsFolder: global.songsFolder,
@@ -355,7 +355,7 @@ export class BeatmapPP extends AbstractState {
                 } catch (exc) {
                     this.beatmap = undefined;
                     wLogger.debug(
-                        `%${ClientType[this.game.client]}%`,
+                        `%%${ClientType[this.game.client]}%%`,
                         `Failed to free previous beatmap instance:`,
                         exc
                     );
@@ -367,14 +367,14 @@ export class BeatmapPP extends AbstractState {
                 } catch (exc) {
                     this.performanceAttributes = undefined;
                     wLogger.debug(
-                        `%${ClientType[this.game.client]}%`,
+                        `%%${ClientType[this.game.client]}%%`,
                         `Failed to free previous PerformanceAttributes:`,
                         exc
                     );
                 }
             } catch (error) {
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Error reading beatmap file:`,
                     {
                         mapPath,
@@ -393,8 +393,8 @@ export class BeatmapPP extends AbstractState {
             const beatmapCheckTime = performance.now();
             const totalTime = (beatmapCheckTime - startTime).toFixed(2);
             wLogger.time(
-                `%${ClientType[this.game.client]}%`,
-                `Beatmap took %${totalTime}ms%`
+                `%%${ClientType[this.game.client]}%%`,
+                `Beatmap took %%${totalTime}ms%%`
             );
 
             const commonParams = {
@@ -439,7 +439,7 @@ export class BeatmapPP extends AbstractState {
 
             const calculationTime = performance.now();
             wLogger.time(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Attributes & strains calculation took %${(calculationTime - beatmapCheckTime).toFixed(2)}ms%`
             );
 
@@ -528,7 +528,7 @@ export class BeatmapPP extends AbstractState {
                     (exc as any).message
                 );
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Error in metadata timings update:`,
                     exc
                 );
@@ -537,7 +537,7 @@ export class BeatmapPP extends AbstractState {
 
             const beatmapParseTime = performance.now();
             wLogger.time(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Beatmap parsing took %${(beatmapParseTime - calculationTime).toFixed(2)}ms%`
             );
 
@@ -582,7 +582,7 @@ export class BeatmapPP extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error updating map metadata:`,
                 exc
             );
@@ -741,7 +741,7 @@ export class BeatmapPP extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error updating graph:`,
                 exc
             );
@@ -767,8 +767,8 @@ export class BeatmapPP extends AbstractState {
             const beatmapParseTime = performance.now();
             const totalTime = (beatmapParseTime - startTime).toFixed(2);
             wLogger.time(
-                `%${ClientType[this.game.client]}%`,
-                `Beatmap parsing for editor PP took %${totalTime}ms%`
+                `%%${ClientType[this.game.client]}%%`,
+                `Beatmap parsing for editor PP took %%${totalTime}ms%%`
             );
 
             const passedObjects = this.lazerBeatmap.hitObjects.filter(
@@ -799,7 +799,7 @@ export class BeatmapPP extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error updating editor PP:`,
                 exc
             );

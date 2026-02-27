@@ -144,7 +144,7 @@ export abstract class AbstractInstance {
             return true;
         } catch (exc) {
             wLogger.error(
-                `%${ClientType[this.client]}%`,
+                `%%${ClientType[this.client]}%%`,
                 `Memory pattern resolution failed:`,
                 (exc as Error).message
             );
@@ -155,7 +155,7 @@ export abstract class AbstractInstance {
     }
 
     start(): void {
-        wLogger.info(`%${ClientType[this.client]}%`, `Scanning memory...`);
+        wLogger.info(`%%${ClientType[this.client]}%%`, `Scanning memory...`);
 
         while (!this.isReady) {
             try {
@@ -167,14 +167,14 @@ export abstract class AbstractInstance {
 
                 const elapsedTime = `${(performance.now() - s1).toFixed(2)}ms`;
                 wLogger.info(
-                    `%${ClientType[this.client]}%`,
-                    `Memory patterns resolved in %${elapsedTime}%`
+                    `%%${ClientType[this.client]}%%`,
+                    `Memory patterns resolved in %%${elapsedTime}%%`
                 );
 
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    `%${ClientType[this.client]}%`,
+                    `%%${ClientType[this.client]}%%`,
                     `Pattern scanning failed, retrying...`,
                     (exc as Error).message
                 );
@@ -201,7 +201,7 @@ export abstract class AbstractInstance {
         while (!this.isDestroyed) {
             if (!Process.isProcessExist(this.process.handle)) {
                 wLogger.warn(
-                    `Client process %${ClientType[this.client]}% has terminated`
+                    `Client process %%${ClientType[this.client]}%% has terminated`
                 );
 
                 this.emitter.emit('onDestroy', this.pid);

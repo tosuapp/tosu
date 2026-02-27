@@ -54,7 +54,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
         if (platform.type === 'unknown') {
             wLogger.warn(
-                `Unsupported platform (%${process.platform}%). Unable to run updater`
+                `Unsupported platform (%%${process.platform}%%). Unable to run updater`
             );
 
             return new Error(
@@ -79,7 +79,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
         if (versionName === null || versionName === undefined) {
             wLogger.info(
-                `Failed to check updates for version %v${currentVersion}%`
+                `Failed to check updates for version %%v${currentVersion}%%`
             );
 
             return new Error('Version the same');
@@ -91,11 +91,11 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
                 currentVersion.includes('-forced')
             )
                 wLogger.info(
-                    `You're using the latest version (%v${currentVersion}%)`
+                    `You're using the latest version (%%v${currentVersion}%%)`
                 );
             else
                 wLogger.warn(
-                    `Update available: %v${currentVersion}% => %v${context.updateVersion}%`
+                    `Update available: %%v${currentVersion}%% => %%v${context.updateVersion}%%`
                 );
         }
 
@@ -127,7 +127,7 @@ export const autoUpdater = async (
             currentVersion.includes('-forced')
         ) {
             wLogger.info(
-                `You're using the latest version (%v${currentVersion}%)`
+                `You're using the latest version (%%v${currentVersion}%%)`
             );
 
             if (fs.existsSync(fileDestination)) {
@@ -146,7 +146,7 @@ export const autoUpdater = async (
         );
         if (!findAsset) {
             wLogger.info(
-                `Update files not found for platform (%${platform.type}%)`
+                `Update files not found for platform (%%${platform.type}%%)`
             );
             return 'noFiles';
         }

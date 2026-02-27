@@ -126,7 +126,7 @@ export class Server {
                 return next();
             }
 
-            wLogger.warn(`Blocked unauthorized request to %${req.url}%`, {
+            wLogger.warn(`Blocked unauthorized request to %%${req.url}%%`, {
                 origin: req.headers.origin,
                 referer: req.headers.referer
             });

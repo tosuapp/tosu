@@ -16,7 +16,7 @@ export default function buildAssetsApi(server: Server) {
             (err, content) => {
                 if (err) {
                     wLogger.debug(
-                        `Asset retrieval error for %${req.params.filePath}%:`,
+                        `Asset retrieval error for %%${req.params.filePath}%%:`,
                         err
                     );
                     res.writeHead(404, { 'Content-Type': 'text/html' });

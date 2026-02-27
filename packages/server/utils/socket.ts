@@ -86,13 +86,13 @@ export class Websocket {
             ws.originAddress = request.headers.origin || '';
             ws.remoteAddress = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
 
-            wLogger.debug(`WebSocket client connected: %${ws.id}%`);
+            wLogger.debug(`WebSocket client connected: %%${ws.id}%%`);
 
             ws.on('close', (reason, description) => {
                 this.clients.delete(ws.id);
 
                 wLogger.debug(
-                    `WebSocket client disconnected: %${ws.id}%`,
+                    `WebSocket client disconnected: %%${ws.id}%%`,
                     reason,
                     description
                 );
@@ -102,7 +102,7 @@ export class Websocket {
                 this.clients.delete(ws.id);
 
                 wLogger.debug(
-                    `WebSocket client error: %${ws.id}%`,
+                    `WebSocket client error: %%${ws.id}%%`,
                     reason,
                     description
                 );

@@ -336,11 +336,11 @@ function rebuildJSON({
                 .replace('{FOOTER}', footer);
         } catch (error) {
             wLogger.error(
-                `Failed to rebuild JSON for counter %${item.name}%:`,
+                `Failed to rebuild JSON for counter %%${item.name}%%:`,
                 (error as any).message
             );
             wLogger.debug(
-                `JSON rebuild error details for %${item.name}%:`,
+                `JSON rebuild error details for %%${item.name}%%:`,
                 error
             );
         }

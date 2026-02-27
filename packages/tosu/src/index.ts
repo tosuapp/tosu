@@ -19,7 +19,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
 (async () => {
     context.currentVersion = currentVersion;
-    wLogger.info(`Starting %tosu%`);
+    wLogger.info(`Starting %%tosu%%`);
 
     Process.disablePowerThrottling();
 
@@ -49,7 +49,7 @@ const currentVersion = require(process.cwd() + '/_version.js');
         const currentPath = getProgramPath();
         if (process.env.TEMP && currentPath.startsWith(process.env.TEMP)) {
             wLogger.warn(
-                'It appears you are running %tosu% from an archive. Please extract it to a folder before running.'
+                'It appears you are running %%tosu%% from an archive. Please extract it to a folder before running.'
             );
             return;
         }
@@ -60,16 +60,16 @@ const currentVersion = require(process.cwd() + '/_version.js');
             currentPath.startsWith(process.env.OneDrive)
         ) {
             wLogger.warn(
-                '%tosu% cannot run from a OneDrive folder due to potential sync conflicts and performance issues.'
+                '%%tosu%% cannot run from a OneDrive folder due to potential sync conflicts and performance issues.'
             );
-            wLogger.warn('Please move %tosu% to a different folder.');
+            wLogger.warn('Please move %%tosu%% to a different folder.');
             return;
         }
     }
 
     cleanupLogs();
 
-    wLogger.info('Searching for %osu!% process...');
+    wLogger.info('Searching for %%osu!%% process...');
 
     httpServer.start();
     instanceManager.runWatcher();

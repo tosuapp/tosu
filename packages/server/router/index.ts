@@ -104,7 +104,7 @@ export default function buildBaseApi(server: Server) {
                 unzip(result, folderPath)
                     .then(() => {
                         wLogger.info(
-                            `PP Counter %${folderName}% downloaded successfully (%${req.headers.referer}%)`
+                            `PP Counter %%${folderName}%% downloaded successfully (%%${req.headers.referer}%%)`
                         );
                         fs.unlinkSync(tempPath);
 
@@ -124,7 +124,7 @@ export default function buildBaseApi(server: Server) {
                         fs.unlinkSync(tempPath);
 
                         wLogger.error(
-                            `Failed to unzip counter %${folderName}%:`,
+                            `Failed to unzip counter %%${folderName}%%:`,
                             (reason as Error).message
                         );
                         wLogger.debug('Counter unzip error details:', reason);
@@ -139,7 +139,7 @@ export default function buildBaseApi(server: Server) {
                 .then(startUnzip)
                 .catch((reason) => {
                     wLogger.error(
-                        `Failed to download counter %${folderName}%:`,
+                        `Failed to download counter %%${folderName}%%:`,
                         (reason as Error).message
                     );
                     wLogger.debug(`Counter download error details:`, reason);
@@ -174,14 +174,14 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `Opening PP Counter folder: %${folderName}% (%${req.headers.referer}%)`
+                `Opening PP Counter folder: %%${folderName}%% (%%${req.headers.referer}%%)`
             );
 
             const platform = platformResolver(process.platform);
             exec(`${platform.command} "${folderPath}"`, (err) => {
                 if (err) {
                     wLogger.error(
-                        `Failed to open folder %${folderName}%:`,
+                        `Failed to open folder %%${folderName}%%:`,
                         err.message
                     );
                     wLogger.debug('Folder open error details:', err);
@@ -219,7 +219,7 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `PP Counter removed: %${folderName}% (%${req.headers.referer}%)`
+                `PP Counter removed: %%${folderName}%% (%%${req.headers.referer}%%)`
             );
 
             fs.rmSync(folderPath, { recursive: true, force: true });
@@ -251,7 +251,7 @@ export default function buildBaseApi(server: Server) {
             const settings = parseCounterSettings(folderName, 'parse');
             if (settings instanceof Error) {
                 wLogger.debug(
-                    `Failed to parse settings for %${folderName}%:`,
+                    `Failed to parse settings for %%${folderName}%%:`,
                     settings
                 );
 
@@ -261,7 +261,7 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `Settings accessed for %${folderName}% (%${req.headers.referer}%)`
+                `Settings accessed for %%${folderName}%% (%%${req.headers.referer}%%)`
             );
 
             return sendJson(res, settings);
@@ -294,7 +294,7 @@ export default function buildBaseApi(server: Server) {
                 );
                 if (result instanceof Error) {
                     wLogger.debug(
-                        `Failed to update settings for %${folderName}%:`,
+                        `Failed to update settings for %%${folderName}%%:`,
                         result
                     );
 
@@ -304,7 +304,7 @@ export default function buildBaseApi(server: Server) {
                 }
 
                 wLogger.info(
-                    `Settings re-created for %${folderName}% (%${req.headers.referer}%)`
+                    `Settings re-created for %%${folderName}%% (%%${req.headers.referer}%%)`
                 );
 
                 fs.writeFileSync(
@@ -317,13 +317,13 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `Settings saved for %${folderName}% (%${req.headers.referer}%)`
+                `Settings saved for %%${folderName}%% (%%${req.headers.referer}%%)`
             );
 
             const html = saveSettings(folderName, body as any);
             if (html instanceof Error) {
                 wLogger.debug(
-                    `Failed to save settings for %${folderName}%:`,
+                    `Failed to save settings for %%${folderName}%%:`,
                     html
                 );
 
@@ -546,10 +546,10 @@ export default function buildBaseApi(server: Server) {
             });
         } catch (error) {
             wLogger.warn(
-                `Failed to process request for %${url}%:`,
+                `Failed to process request for %%${url}%%:`,
                 (error as Error).message
             );
-            wLogger.debug(`Request error details for %${url}%:`, error);
+            wLogger.debug(`Request error details for %%${url}%%:`, error);
 
             res.writeHead(404);
             return res.end((error as Error).message || '');

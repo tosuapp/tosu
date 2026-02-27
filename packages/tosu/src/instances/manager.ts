@@ -237,7 +237,7 @@ export class InstanceManager {
 
                 if (code !== 0 && signal !== 'SIGTERM') {
                     wLogger.error(
-                        `Overlay process exited abnormally with code %${code}% ${signal ? `(%${signal}%)` : ''}`
+                        `Overlay process exited abnormally with code %%${code}%% ${signal ? `(%%${signal}%%)` : ''}`
                     );
                     return;
                 }

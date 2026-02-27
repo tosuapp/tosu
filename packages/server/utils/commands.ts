@@ -8,13 +8,13 @@ const saveDelay = debounce((overlayFrom: string, json: any) => {
     const html = saveSettings(overlayFrom, json);
     if (html instanceof Error) {
         wLogger.error(
-            `Failed to save settings for %${overlayFrom}%: ${html.message}`
+            `Failed to save settings for %%${overlayFrom}%%: ${html.message}`
         );
         wLogger.debug(`Detailed error object for failed save:`, html);
         return;
     }
 
-    wLogger.debug(`Successfully saved settings for %${overlayFrom}%`);
+    wLogger.debug(`Successfully saved settings for %%${overlayFrom}%%`);
 }, 500);
 
 export function handleSocketCommands(
@@ -22,7 +22,7 @@ export function handleSocketCommands(
     socket: ModifiedWebsocket,
     ws: Websocket
 ) {
-    wLogger.debug(`Received WebSocket command: %${data}%`);
+    wLogger.debug(`Received WebSocket command: %%${data}%%`);
     if (!data.includes(':')) {
         return;
     }
@@ -76,7 +76,7 @@ export function handleSocketCommands(
                 message = result.values;
             } catch (exc) {
                 wLogger.error(
-                    `Failed to get data for command %${command}%:`,
+                    `Failed to get data for command %%${command}%%:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Settings retrieval error details:`, exc);
@@ -93,7 +93,7 @@ export function handleSocketCommands(
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    `Failed to parse JSON for command %${command}%:`,
+                    `Failed to parse JSON for command %%${command}%%:`,
                     (json as Error).message
                 );
                 wLogger.debug(`JSON parsing error details:`, json);
@@ -112,7 +112,7 @@ export function handleSocketCommands(
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    `Failed to parse JSON for command %${command}%:`,
+                    `Failed to parse JSON for command %%${command}%%:`,
                     (json as Error).message
                 );
                 wLogger.debug(`JSON parsing error details:`, json);
@@ -139,7 +139,7 @@ export function handleSocketCommands(
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    `Failed to parse JSON for command %${command}%:`,
+                    `Failed to parse JSON for command %%${command}%%:`,
                     (json as Error).message
                 );
                 wLogger.debug(`JSON parsing error details:`, json);
@@ -149,7 +149,7 @@ export function handleSocketCommands(
             try {
                 if (!Array.isArray(json)) {
                     wLogger.error(
-                        `Invalid filter format for socket %${socket.id}% [${socket.pathname}]:`,
+                        `Invalid filter format for socket %%${socket.id}%% [${socket.pathname}]:`,
                         `Filters should be an array of strings (received: ${json})`
                     );
                     return;
@@ -159,7 +159,7 @@ export function handleSocketCommands(
                 return;
             } catch (exc) {
                 wLogger.error(
-                    `Failed to apply filters for command %${command}%:`,
+                    `Failed to apply filters for command %%${command}%%:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Filter application error details:`, exc);
@@ -176,7 +176,7 @@ export function handleSocketCommands(
         );
     } catch (exc) {
         wLogger.error(
-            `Failed to send response for command %${command}%:`,
+            `Failed to send response for command %%${command}%%:`,
             (exc as Error).message
         );
         wLogger.debug(`Command response error details:`, exc);
