@@ -179,13 +179,11 @@ export class InstanceManager {
             const instance = Object.values(this.osuInstances).find(
                 (r) => r.pid === focusedPID
             );
-            if (instance) this.focusedClient = instance.client;
+            this.focusedClient =
+                instance?.client ??
+                this.getInstance()?.client ??
+                ClientType.stable;
             this.gameFocused = instance !== undefined;
-
-            if (this.focusedClient === undefined) {
-                this.focusedClient =
-                    this.getInstance()?.client || ClientType.stable;
-            }
 
             await setTimeout(100);
         }
