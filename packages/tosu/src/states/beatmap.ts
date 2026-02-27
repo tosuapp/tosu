@@ -868,7 +868,7 @@ export class BeatmapPP extends AbstractState {
         }
     }
 
-    updateEditorPP() {
+    updateEditorPP(forward: boolean) {
         try {
             if (
                 !this.beatmap ||
@@ -881,26 +881,18 @@ export class BeatmapPP extends AbstractState {
                 return;
             }
 
+            if (!forward) this.resetGradual();
+
             const { global } = this.game.getServices(['global']);
             const passedObjects = calculatePassedObjects(
                 this.lazerBeatmap.hitObjects,
                 global.playTime,
                 this.previousPassedObjects
             );
-            if (passedObjects === -1) {
-                this.currAttributes.pp = 0;
-                this.currAttributes.stars = 0;
-
-                return;
-            }
-
-            if (
-                passedObjects - this.previousPassedObjects < 0 ||
-                !this.timedLazy
-            )
-                this.resetGradual();
 
             let offset = passedObjects - this.previousPassedObjects;
+            if (offset < 0 || !this.timedLazy) this.resetGradual();
+
             if (offset <= 0 || this.isCalculating === true) return;
             this.isCalculating = true;
 
@@ -908,13 +900,17 @@ export class BeatmapPP extends AbstractState {
             const t1 = performance.now();
             while (offset > 0) {
                 // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
-                if (global.status !== GameState.edit || !this.timedLazy) break;
+                if (global.status !== GameState.edit || !this.timedLazy) {
+                    this.isCalculating = false;
+                    return;
+                }
 
                 currentDifficulty = this.timedLazy.next(
                     this.timedLazy.enumerator
                 );
 
                 offset--;
+                this.previousPassedObjects++;
             }
             const t2 = performance.now();
             if (!currentDifficulty) {

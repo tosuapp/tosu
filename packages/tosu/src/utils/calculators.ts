@@ -236,11 +236,11 @@ export const calculatePassedObjects = (
     currentTime: number,
     previousIndex: number
 ): number => {
-    let value = -1;
+    let value = previousIndex;
     for (let i = previousIndex; i < hitObjects.length; i++) {
         const item = hitObjects[i];
         if (item.startTime > currentTime) break;
-        value = i;
+        value = i + 1;
     }
 
     return value;

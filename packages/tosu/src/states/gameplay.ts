@@ -556,7 +556,6 @@ export class Gameplay extends AbstractState {
                 global.playTime,
                 this.previousPassedObjects
             );
-            if (passedObjects === -1) return;
 
             let offset = passedObjects - this.previousPassedObjects;
             if (offset <= 0 && this.isCalculating === false) return;
@@ -565,14 +564,17 @@ export class Gameplay extends AbstractState {
             let currentDifficulty;
             while (offset > 0) {
                 // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
-                if (global.status !== GameState.play || !this.timedLazy) return;
+                if (global.status !== GameState.play || !this.timedLazy) {
+                    this.isCalculating = false;
+                    return;
+                }
 
                 currentDifficulty = this.timedLazy.next(
                     this.timedLazy.enumerator
                 );
 
                 offset--;
-                this.previousPassedObjects += 1;
+                this.previousPassedObjects++;
             }
             if (!currentDifficulty) {
                 wLogger.debug(
