@@ -13,7 +13,7 @@ export class BassDensity extends AbstractState {
             const audioVelocityBase = this.game.memory.audioVelocityBase();
             if (typeof audioVelocityBase === 'string') {
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Failed to resolve audio patterns:`,
                     audioVelocityBase
                 );
@@ -56,7 +56,7 @@ export class BassDensity extends AbstractState {
                 (exc as Error).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error updating bass density state:`,
                 exc
             );

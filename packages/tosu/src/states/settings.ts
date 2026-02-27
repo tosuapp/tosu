@@ -141,7 +141,7 @@ export class Settings extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error updating settings state:`,
                 exc
             );

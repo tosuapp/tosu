@@ -473,8 +473,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         wLogger.debug(
-            `%${ClientType[this.game.client]}%`,
-            `GameBase address updated: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
+            `%%${ClientType[this.game.client]}%%`,
+            `GameBase address updated: %%${oldAddress?.toString(16)}%% => %%${this.gameBaseAddress.toString(16)}%%`
         );
     }
 
@@ -501,7 +501,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         // Check if gamebase instance is valid
         if (!this.checkIfGameBase(this.gameBaseAddress)) {
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `GameBase validation failed, resetting...`
             );
 
@@ -523,7 +523,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.gameBase() + this.offsets['osu.Game.OsuGame'].SentryLogger
         );
         wLogger.debug(
-            `Game version check (SentryLogger): %${sentryLogger.toString(16)}%`
+            `Game version check (SentryLogger): %%${sentryLogger.toString(16)}%%`
         );
 
         const sentrySession = this.process.readIntPtr(
@@ -531,7 +531,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.offsets['osu.Game.Utils.SentryLogger'].sentrySession
         );
         wLogger.debug(
-            `Game version check (SentrySession): %${sentrySession.toString(16)}%`
+            `Game version check (SentrySession): %%${sentrySession.toString(16)}%%`
         );
 
         const localHub = this.process.readIntPtr(
@@ -539,14 +539,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.offsets['Sentry.SentrySdk+DisposeHandle']._localHub
         );
         wLogger.debug(
-            `Game version check (LocalHub): %${localHub.toString(16)}%`
+            `Game version check (LocalHub): %%${localHub.toString(16)}%%`
         );
 
         const options = this.process.readIntPtr(
             localHub + this.offsets['Sentry.Internal.Hub']._options
         );
         wLogger.debug(
-            `Game version check (Options): %${options.toString(16)}%`
+            `Game version check (Options): %%${options.toString(16)}%%`
         );
 
         const release = this.process.readSharpStringPtr(
@@ -1298,7 +1298,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private initModMapping(gamemode: Rulesets) {
         if (!ModsCategories[gamemode]) {
-            wLogger.warn(`Unknown lazer game mode: %${gamemode}%`);
+            wLogger.warn(`Unknown lazer game mode: %%${gamemode}%%`);
             return;
         }
 
@@ -2979,12 +2979,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.initModMapping(gamemode);
             } catch (exc) {
                 wLogger.error(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Error initializing mod mapping:`,
                     (exc as Error).message
                 );
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Error initializing mod mapping:`,
                     exc
                 );
@@ -3594,12 +3594,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.game.reportError(
                 'settings skin',
                 10,
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error reading skin name`,
                 (exc as Error).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error reading skin name`,
                 exc
             );
@@ -3707,12 +3707,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.game.reportError(
                     'settings devices',
                     10,
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Error reading settings`,
                     (exc as Error).message
                 );
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Error reading settings`,
                     exc
                 );

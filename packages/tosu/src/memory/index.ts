@@ -62,7 +62,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
             wLogger.debug(
-                `checkIsBasesValid ${entry[0]}: ${entry[1].toString(16).toUpperCase()} %${ClientType[this.game.client]}%`
+                `checkIsBasesValid ${entry[0]}: ${entry[1].toString(16).toUpperCase()} %%${ClientType[this.game.client]}%%`
             )
         );
         return !Object.values(this.patterns).some((base) => base === 0);

@@ -23,7 +23,7 @@ export class OsuInstance extends AbstractInstance {
 
     async regularDataLoop() {
         wLogger.debug(
-            `%${ClientType[this.client]}%`,
+            `%%${ClientType[this.client]}%%`,
             `Starting regular data loop`
         );
 
@@ -202,7 +202,7 @@ export class OsuInstance extends AbstractInstance {
                 user.updateState();
             } catch (exc) {
                 wLogger.error(
-                    `%${ClientType[this.client]}%`,
+                    `%%${ClientType[this.client]}%%`,
                     `Error in regular data loop:`,
                     (exc as Error).message
                 );
@@ -240,7 +240,7 @@ export class OsuInstance extends AbstractInstance {
                 await sleep(config.preciseDataPollRate);
             } catch (exc) {
                 wLogger.error(
-                    `%${ClientType[this.client]}%`,
+                    `%%${ClientType[this.client]}%%`,
                     `Error in precise data loop:`,
                     (exc as Error).message
                 );

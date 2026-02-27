@@ -38,7 +38,7 @@ export class ResultScreen extends AbstractState {
 
     init() {
         wLogger.debug(
-            `%${ClientType[this.game.client]}%`,
+            `%%${ClientType[this.game.client]}%%`,
             `Initializing result screen`
         );
 
@@ -66,7 +66,7 @@ export class ResultScreen extends AbstractState {
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Result screen state update not ready:`,
                     result
                 );
@@ -105,7 +105,7 @@ export class ResultScreen extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error updating result screen state:`,
                 exc
             );
@@ -128,7 +128,7 @@ export class ResultScreen extends AbstractState {
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
             if (!currentBeatmap) {
                 wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
+                    `%%${ClientType[this.game.client]}%%`,
                     `Result screen PP calc skipped: Can't get current map`
                 );
                 return;
@@ -205,8 +205,8 @@ export class ResultScreen extends AbstractState {
             fcPerformance.free();
 
             wLogger.time(
-                `%${ClientType[this.game.client]}%`,
-                `Result screen PP calc: PP: %${(t2 - t1).toFixed(2)}ms%, FC PP: %${(performance.now() - t2).toFixed(2)}ms%`
+                `%%${ClientType[this.game.client]}%%`,
+                `Result screen PP calc: PP: %%${(t2 - t1).toFixed(2)}ms%%, FC PP: %%${(performance.now() - t2).toFixed(2)}ms%%`
             );
 
             this.previousBeatmap = key;
@@ -221,7 +221,7 @@ export class ResultScreen extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Error updating result screen performance:`,
                 exc
             );

@@ -314,7 +314,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     result.push(i);
                 } catch (exc) {
                     wLogger.debug(
-                        `%${ClientType[this.game.client]}%`,
+                        `%%${ClientType[this.game.client]}%%`,
                         `Failed to read config offset:`,
                         exc
                     );
@@ -344,7 +344,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     result.push(i);
                 } catch (exc) {
                     wLogger.debug(
-                        `%${ClientType[this.game.client]}%`,
+                        `%%${ClientType[this.game.client]}%%`,
                         `Failed to read bindings offset:`,
                         exc
                     );
@@ -1124,8 +1124,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                             });
                         } catch (exc) {
                             wLogger.debug(
-                                `%${ClientType[this.game.client]}%`,
-                                `Error processing chat message %${m}%:`,
+                                `%%${ClientType[this.game.client]}%%`,
+                                `Error processing chat message %%${m}%%:`,
                                 exc
                             );
                         }
@@ -1134,8 +1134,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     return result;
                 } catch (exc) {
                     wLogger.debug(
-                        `%${ClientType[this.game.client]}%`,
-                        `Error processing chat channel %${i}%:`,
+                        `%%${ClientType[this.game.client]}%%`,
+                        `Error processing chat channel %%${i}%%:`,
                         exc
                     );
                 }
@@ -1328,12 +1328,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             this.game.reportError(
                 `beatmapScrollSpeed`,
                 10,
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Failed to read beatmap scroll speed:`,
                 (exc as any).message
             );
             wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
+                `%%${ClientType[this.game.client]}%%`,
                 `Failed to read beatmap scroll speed:`,
                 exc
             );
@@ -1393,8 +1393,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         (exc as any).message
                     );
                     wLogger.debug(
-                        `%${ClientType[this.game.client]}%`,
-                        `Failed to update config state at position %${position}%:`,
+                        `%%${ClientType[this.game.client]}%%`,
+                        `Failed to update config state at position %%${position}%%:`,
                         exc
                     );
                 }
@@ -1425,8 +1425,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         (exc as any).message
                     );
                     wLogger.debug(
-                        `%${ClientType[this.game.client]}%`,
-                        `Failed to update binding state at position %${position}%:`,
+                        `%%${ClientType[this.game.client]}%%`,
+                        `Failed to update binding state at position %%${position}%%:`,
                         exc
                     );
                 }

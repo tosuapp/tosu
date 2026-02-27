@@ -100,7 +100,7 @@ export default function buildSocket({
             }
         } catch (exc) {
             wLogger.error(
-                `WebSocket upgrade failed for %${request.url}%:`,
+                `WebSocket upgrade failed for %%${request.url}%%:`,
                 (exc as any).message
             );
             wLogger.debug(`WebSocket upgrade error details:`, exc);

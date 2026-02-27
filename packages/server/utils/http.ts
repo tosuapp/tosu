@@ -88,7 +88,7 @@ export class HttpServer {
         res.on('finish', () => {
             const elapsedTime = (performance.now() - startTime).toFixed(2);
             wLogger.time(
-                `Request processed in %${elapsedTime}ms%`,
+                `Request processed in %%${elapsedTime}ms%%`,
                 req.method,
                 res.statusCode,
                 res.getHeader('content-type'),
@@ -193,11 +193,11 @@ export class HttpServer {
                 res.statusCode = 500;
 
                 wLogger.warn(
-                    `Request to %${parsedURL.pathname}% failed:`,
+                    `Request to %%${parsedURL.pathname}%% failed:`,
                     message
                 );
                 wLogger.debug(
-                    `Route handling error for %${parsedURL.pathname}%:`,
+                    `Route handling error for %%${parsedURL.pathname}%%:`,
                     exc
                 );
 
@@ -212,7 +212,9 @@ export class HttpServer {
     listen(port: number, hostname: string) {
         this.server.listen(port, hostname, () => {
             const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
-            wLogger.info(`Dashboard server started on %http://${ip}:${port}%`);
+            wLogger.info(
+                `Dashboard server started on %%http://${ip}:${port}%%`
+            );
 
             if (config.openDashboardOnStartup === true) {
                 const command =

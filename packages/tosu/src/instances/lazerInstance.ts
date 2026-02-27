@@ -36,18 +36,18 @@ export class LazerInstance extends AbstractInstance {
             while (attempts < 5 && !this.version) {
                 if (attempts > 1)
                     wLogger.warn(
-                        `Attempting to detect osu! version (Try %#${attempts}%)`
+                        `Attempting to detect osu! version (Try %%#${attempts}%%)`
                     );
 
                 try {
                     this.version = this.memory.gameVersion() || '';
 
-                    wLogger.info(`Detected osu! version: %${this.version}%`);
+                    wLogger.info(`Detected osu! version: %%${this.version}%%`);
 
                     break;
                 } catch (exc) {
                     wLogger.debug(
-                        `Failed to find osu! version for ${ClientType[this.client]} %${this.pid}%:`,
+                        `Failed to find osu! version for ${ClientType[this.client]} %%${this.pid}%%:`,
                         exc
                     );
                 } finally {
@@ -58,7 +58,7 @@ export class LazerInstance extends AbstractInstance {
 
             if (!this.version) {
                 wLogger.error(
-                    `Unable to find osu! version for ${ClientType[this.client]} %${this.pid}%. Please report this issue: https://discord.gg/WX7BTs8kwh`
+                    `Unable to find osu! version for ${ClientType[this.client]} %%${this.pid}%%. Please report this issue: https://discord.gg/WX7BTs8kwh`
                 );
 
                 this.regularDataLoop();
@@ -85,7 +85,7 @@ export class LazerInstance extends AbstractInstance {
                 });
 
                 wLogger.info(
-                    `Loaded offsets from cache for version %${this.version}%`
+                    `Loaded offsets from cache for version %%${this.version}%%`
                 );
             }
 
@@ -107,7 +107,7 @@ export class LazerInstance extends AbstractInstance {
                         clearTimeout(timeout);
                         if (!request.ok) {
                             wLogger.error(
-                                `Failed to fetch offsets from %${host}%:`,
+                                `Failed to fetch offsets from %%${host}%%:`,
                                 request.status,
                                 request.statusText
                             );
@@ -123,7 +123,7 @@ export class LazerInstance extends AbstractInstance {
                         if (json === null) continue;
 
                         wLogger.info(
-                            `Successfully retrieved offsets from %${host}% for version %${this.version}%`
+                            `Successfully retrieved offsets from %%${host}%% for version %%${this.version}%%`
                         );
 
                         this.memory.offsets = json;
@@ -132,7 +132,7 @@ export class LazerInstance extends AbstractInstance {
                         break;
                     } catch (exc) {
                         wLogger.error(
-                            `Error fetching offsets from %${host}%:`,
+                            `Error fetching offsets from %%${host}%%:`,
                             (exc as any).message
                         );
                         wLogger.debug(`Offset fetch error details:`, exc);
@@ -142,7 +142,7 @@ export class LazerInstance extends AbstractInstance {
 
             if (this.memory.offsets === null) {
                 wLogger.error(
-                    `Offsets not found for osu! version %${this.version}%`
+                    `Offsets not found for osu! version %%${this.version}%%`
                 );
                 return;
             }
@@ -151,7 +151,7 @@ export class LazerInstance extends AbstractInstance {
             this.preciseDataLoop();
         } catch (exc) {
             wLogger.error(
-                `Failed to initiate client instance for ${ClientType[this.client]} %${this.pid}%:`,
+                `Failed to initiate client instance for ${ClientType[this.client]} %%${this.pid}%%:`,
                 (exc as Error).message
             );
             wLogger.debug(`Client initiation error details:`, exc);
@@ -159,7 +159,7 @@ export class LazerInstance extends AbstractInstance {
     }
 
     async regularDataLoop(): Promise<void> {
-        wLogger.debug(`Starting regular data loop for client %${this.pid}%`);
+        wLogger.debug(`Starting regular data loop for client %%${this.pid}%%`);
 
         const {
             global,
@@ -326,7 +326,7 @@ export class LazerInstance extends AbstractInstance {
                 await sleep(config.pollRate);
             } catch (exc) {
                 wLogger.error(
-                    `%${ClientType[this.client]}%`,
+                    `%%${ClientType[this.client]}%%`,
                     `Error in regular data loop:`,
                     (exc as Error).message
                 );
@@ -361,7 +361,7 @@ export class LazerInstance extends AbstractInstance {
                 await sleep(config.preciseDataPollRate);
             } catch (exc) {
                 wLogger.error(
-                    `%${ClientType[this.client]}%`,
+                    `%%${ClientType[this.client]}%%`,
                     `Error in precise data loop:`,
                     (exc as Error).message
                 );
