@@ -302,6 +302,8 @@ export class LazerInstance extends AbstractInstance {
                             gameplay.resetGradual();
                         }
 
+                        gameplay.updateStarsAndPerformance();
+
                         this.previousTime = global.playTime;
                         this.previousCombo = gameplay.combo;
                         break;

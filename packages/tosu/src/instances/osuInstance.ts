@@ -167,9 +167,10 @@ export class OsuInstance extends AbstractInstance {
                             gameplay.resetHitErrors();
                         }
 
-                        this.previousTime = global.playTime;
-
                         gameplay.updateState();
+                        gameplay.updateStarsAndPerformance();
+
+                        this.previousTime = global.playTime;
                         break;
 
                     case GameState.resultScreen:
