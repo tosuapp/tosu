@@ -154,7 +154,7 @@ export class OsuInstance extends AbstractInstance {
                         }
                         break;
 
-                    case GameState.play:
+                    case GameState.play: {
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
@@ -167,11 +167,15 @@ export class OsuInstance extends AbstractInstance {
                             gameplay.resetHitErrors();
                         }
 
-                        gameplay.updateState();
+                        const gameplayUpdate = gameplay.updateState();
+                        if (gameplayUpdate === 'not-ready') {
+                            break;
+                        }
                         gameplay.updateStarsAndPerformance();
 
                         this.previousTime = global.playTime;
                         break;
+                    }
 
                     case GameState.resultScreen:
                         resultScreen.updatePerformance();

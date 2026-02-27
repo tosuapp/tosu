@@ -282,7 +282,7 @@ export class LazerInstance extends AbstractInstance {
                         }
                         break;
 
-                    case GameState.play:
+                    case GameState.play: {
                         // Reset gameplay data on retry
                         if (this.previousTime > global.playTime) {
                             gameplay.init(true);
@@ -295,7 +295,10 @@ export class LazerInstance extends AbstractInstance {
                             gameplay.resetHitErrors();
                         }
 
-                        gameplay.updateState();
+                        const gameplayUpdate = gameplay.updateState();
+                        if (gameplayUpdate === 'not-ready') {
+                            break;
+                        }
 
                         // support replay rewind
                         if (this.previousCombo > gameplay.combo) {
@@ -307,6 +310,7 @@ export class LazerInstance extends AbstractInstance {
                         this.previousTime = global.playTime;
                         this.previousCombo = gameplay.combo;
                         break;
+                    }
 
                     case GameState.resultScreen:
                         resultScreen.updatePerformance();
