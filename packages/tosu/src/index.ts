@@ -32,7 +32,9 @@ const currentVersion = require(process.cwd() + '/_version.js');
 
     const isDev = process.env.NODE_ENV === 'development';
     const isConfigUpdate = config.enableAutoUpdate === true;
-    if (!isDev) {
+    if (isDev) {
+        context.updateVersion = currentVersion;
+    } else {
         if (
             (update !== null && update !== undefined && update === true) ??
             isConfigUpdate
