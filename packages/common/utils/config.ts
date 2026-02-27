@@ -19,88 +19,102 @@ import { isRealNumber } from './manipulation';
 const defaultSchema: ConfigSchema = {
     enableAutoUpdate: {
         binding: 'ENABLE_AUTOUPDATE',
-        default: true,
-        order: 1
+        default: true
     },
     openDashboardOnStartup: {
         binding: 'OPEN_DASHBOARD_ON_STARTUP',
-        default: true,
-        order: 2
+        default: true
     },
     debugLog: {
         binding: 'DEBUG_LOG',
-        default: false,
-        order: 0
+        default: false
     },
     calculatePP: {
         binding: 'CALCULATE_PP',
-        default: true,
-        order: 4
+        default: true
     },
     enableKeyOverlay: {
         binding: 'ENABLE_KEY_OVERLAY',
-        default: true,
-        order: 5
+        default: true
     },
     pollRate: {
         binding: 'POLL_RATE',
-        default: 100,
-        order: 6
+        default: 100
     },
     preciseDataPollRate: {
         binding: 'PRECISE_DATA_POLL_RATE',
-        default: 10,
-        order: 7
+        default: 10
     },
     showMpCommands: {
         binding: 'SHOW_MP_COMMANDS',
-        default: false,
-        order: 3
+        default: false
+    },
+    readManiaScrollSpeed: {
+        binding: 'READ_MANIA_SCROLL_SPEED',
+        default: true
     },
     serverIP: {
         binding: 'SERVER_IP',
-        default: '127.0.0.1',
-        order: 11
+        default: '127.0.0.1'
     },
     serverPort: {
         binding: 'SERVER_PORT',
-        default: 24050,
-        order: 12
+        default: 24050
     },
     staticFolderPath: {
         binding: 'STATIC_FOLDER_PATH',
-        default: './static',
-        order: 14
+        default: './static'
     },
     enableIngameOverlay: {
         binding: 'ENABLE_INGAME_OVERLAY',
-        default: false,
-        order: 5
+        default: false
     },
     ingameOverlayKeybind: {
         binding: 'INGAME_OVERLAY_KEYBIND',
-        default: 'Control + Shift + Space',
-        order: 9
+        default: 'Control + Shift + Space'
     },
     ingameOverlayMaxFps: {
         binding: 'INGAME_OVERLAY_MAX_FPS',
-        default: 60,
-        order: 10
+        default: 60
     },
     allowedIPs: {
         binding: 'ALLOWED_IPS',
-        default: '127.0.0.1,localhost,absolute',
-        order: 13
+        default: '127.0.0.1,localhost,absolute'
     }
 };
 
 const newlineInsertions: ConfigBinding[] = [
     'OPEN_DASHBOARD_ON_STARTUP',
-    'CALCULATE_PP',
+    'READ_MANIA_SCROLL_SPEED',
     'ENABLE_INGAME_OVERLAY',
     'PRECISE_DATA_POLL_RATE',
     'INGAME_OVERLAY_MAX_FPS',
     'ALLOWED_IPS'
+];
+
+const bindingOrder: ConfigBinding[] = [
+    'DEBUG_LOG',
+    'ENABLE_AUTOUPDATE',
+    'OPEN_DASHBOARD_ON_STARTUP',
+
+    'SHOW_MP_COMMANDS',
+    'CALCULATE_PP',
+    'READ_MANIA_SCROLL_SPEED',
+
+    'ENABLE_KEY_OVERLAY',
+    'ENABLE_INGAME_OVERLAY',
+
+    'POLL_RATE',
+    'PRECISE_DATA_POLL_RATE',
+
+    'INGAME_OVERLAY_KEYBIND',
+    'INGAME_OVERLAY_MAX_FPS',
+
+    'SERVER_IP',
+    'SERVER_PORT',
+    'ALLOWED_IPS',
+
+    'STATIC_FOLDER_PATH'
 ];
 
 export const configEvents = new EventEmitter<ConfigEvents>();
@@ -138,49 +152,45 @@ export class ConfigManager {
                 .then(dotenv.parse)
                 .catch(() => null);
 
-            if (oldEnv === null) {
-                wLogger.debug(
-                    'No legacy configuration found. Skipping migration.'
-                );
-
-                return;
-            }
-
-            const newEnv =
+            const currentEnv =
                 (await fs
                     .readFile(configPath, 'utf8')
                     .then(dotenv.parse)
                     .catch(() => null)) || {};
 
-            const migratedEnv: Record<string, string> = {};
-            for (const key in defaultSchema) {
-                if (!Object.hasOwn(defaultSchema, key)) continue;
-
-                const item = defaultSchema[key as ConfigKey];
-
-                migratedEnv[item.binding] = newEnv[item.binding];
-                migratedEnv[item.binding] ??= oldEnv[item.binding];
-                migratedEnv[item.binding] ??= `${item.default}`;
-            }
-
-            const output = Object.entries(migratedEnv)
-                .map((value) => `${value[0]}=${value[1]}`)
+            const output = Object.values(defaultSchema)
+                .toSorted(
+                    (a, b) =>
+                        bindingOrder.indexOf(a.binding) -
+                        bindingOrder.indexOf(b.binding)
+                )
+                .map((item) => {
+                    const value =
+                        currentEnv[item.binding] ??
+                        (oldEnv || {})[item.binding] ??
+                        `${item.default}`;
+                    if (newlineInsertions.includes(item.binding))
+                        return `${item.binding}=${value}\n`;
+                    return `${item.binding}=${value}`;
+                })
                 .join('\n');
 
             await fs.writeFile(configPath, output, 'utf-8');
-            wLogger.warn(`Configuration file successfully migrated.`);
 
-            const deprecated = Object.keys(oldEnv).filter(
-                (binding) => !Object.hasOwn(migratedEnv, binding)
+            const bindings = Object.values(defaultSchema).map(
+                (item) => item.binding
             );
+            const deprecated = (
+                Object.keys(oldEnv || currentEnv) as ConfigBinding[]
+            ).filter((binding) => !bindings.includes(binding));
             if (deprecated.length > 0) {
                 wLogger.warn(
                     `Removed deprecated configuration properties: %${deprecated.join(', ')}%`
                 );
             }
 
-            const newProps = Object.keys(migratedEnv).filter(
-                (binding) => !Object.hasOwn(newEnv, binding)
+            const newProps = bindings.filter(
+                (binding) => !Object.hasOwn(currentEnv, binding)
             );
             if (newProps.length > 0) {
                 wLogger.warn(
@@ -188,7 +198,10 @@ export class ConfigManager {
                 );
             }
 
-            await fs.unlink(filePath).catch(null);
+            if (oldEnv !== null || deprecated.length > 0 || newProps.length > 0)
+                wLogger.warn(`Configuration file successfully migrated.`);
+
+            if (oldEnv !== null) await fs.unlink(filePath).catch(null);
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
             wLogger.error(`Configuration migration failed:`, msg);
@@ -256,7 +269,11 @@ export class ConfigManager {
 
         try {
             const defaults = Object.values(defaultSchema)
-                .toSorted((a, b) => a.order - b.order)
+                .toSorted(
+                    (a, b) =>
+                        bindingOrder.indexOf(a.binding) -
+                        bindingOrder.indexOf(b.binding)
+                )
                 .map((value) => {
                     if (newlineInsertions.includes(value.binding))
                         return `${value.binding}=${value.default}\n`;
@@ -288,7 +305,11 @@ export class ConfigManager {
 
         try {
             const content = Object.entries(defaultSchema)
-                .toSorted((a, b) => a[1].order - b[1].order)
+                .toSorted(
+                    (a, b) =>
+                        bindingOrder.indexOf(a[1].binding) -
+                        bindingOrder.indexOf(b[1].binding)
+                )
                 .map((item) => {
                     if (newlineInsertions.includes(item[1].binding))
                         return `${item[1].binding}=${config[item[0] as ConfigKey]}\n`;

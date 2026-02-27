@@ -643,7 +643,21 @@ export function buildSettings(res: http.ServerResponse) {
                             )
                     ),
                 settingsItemHTMLv2
-
+                    .replace('{name}', 'Mania Scroll Speed')
+                    .replace(
+                        '{description}',
+                        'Allow reading scrollSpeed from game memory.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'READ_MANIA_SCROLL_SPEED')
+                            .replace(
+                                '{checked}',
+                                config.readManiaScrollSpeed ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
                     .replace('{name}', 'Key Overlay Data')
                     .replace(
                         '{description}',
