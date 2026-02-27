@@ -75,7 +75,7 @@ export abstract class AbstractInstance {
 
     calculator: Calculator;
 
-    constructor(pid: number, bitness: Bitness, calculatorPath: string) {
+    constructor(pid: number, bitness: Bitness) {
         this.pid = pid;
 
         this.process = new Process(this.pid, bitness);
@@ -100,7 +100,6 @@ export abstract class AbstractInstance {
         this.preciseDataLoop = this.preciseDataLoop.bind(this);
 
         this.initializeCalculator = this.initializeCalculator.bind(this);
-        this.initializeCalculator(calculatorPath);
     }
 
     async initializeCalculator(calculatorPath: string) {
