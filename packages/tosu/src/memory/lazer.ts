@@ -423,6 +423,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private ReplaySettingsOverlay: boolean = true;
 
     private watchingReplay: boolean = false;
+    private spectating: boolean = false;
     private status: number = 0;
 
     private modMappings: Map<string, string> = new Map();
@@ -693,7 +694,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     ]
             ) ===
                 this.process.readIntPtr(
-                    this.gameBase() + this.offsets['osu.Game.OsuGame'].osuLogo
+                    this.gameBase() +
+                        this.offsets['osu.Game.OsuGameBase'][
+                            '<API>k__BackingField'
+                        ]
                 ) &&
             this.process.readIntPtr(
                 address +
@@ -3081,25 +3085,29 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     globalPrecise(): IGlobalPrecise {
         let status = 0;
 
-        const isPlaying = this.player() !== 0;
-
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
         const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
-        const isSpectator = this.checkIfSpectator(this.currentScreen);
         const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
         const isMulti = this.checkIfMulti();
-        const isReplay = isPlaying
-            ? this.checkIfWatchingReplay(this.currentScreen)
-            : false;
 
-        if (isReplay && (isPlaying || isPlayerLoader)) {
-            this.watchingReplay = true;
-            status = GameState.play;
-        } else if (isSpectator && (isPlaying || isPlayerLoader)) {
-            status = GameState.play;
-        } else if (isPlaying || isPlayerLoader) {
+        const isPlayer = this.player() !== 0;
+        const isPlaying = isPlayer || isPlayerLoader;
+        if (isPlaying) {
+            const isSpectator = this.checkIfSpectator(this.currentScreen);
+            const isReplay = isPlayer
+                ? this.checkIfWatchingReplay(this.currentScreen)
+                : false;
+
+            if (isReplay && isSpectator) {
+                this.watchingReplay = false;
+                this.spectating = true;
+            } else if (isReplay) {
+                this.watchingReplay = true;
+                this.spectating = false;
+            }
+
             status = GameState.play;
         } else if (isSongSelectV2) {
             status = GameState.selectPlay;
@@ -3122,6 +3130,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             if (currentRoom) {
                 status = GameState.lobby;
             }
+        }
+
+        if (!isPlaying) {
+            this.spectating = this.watchingReplay = false;
         }
 
         this.status = status;
