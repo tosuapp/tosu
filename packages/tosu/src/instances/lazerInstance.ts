@@ -264,8 +264,10 @@ export class LazerInstance extends AbstractInstance {
                     case GameState.edit:
                         if (this.previousTime === global.playTime) break;
 
+                        beatmapPP.updateEditorPP(
+                            global.playTime > this.previousTime
+                        );
                         this.previousTime = global.playTime;
-                        beatmapPP.updateEditorPP();
                         break;
 
                     case GameState.selectPlay:
