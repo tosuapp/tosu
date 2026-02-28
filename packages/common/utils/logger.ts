@@ -102,15 +102,7 @@ function logFile(type: string, ...args: any[]) {
         const latestLog = path.join(logsPath, 'latest.log');
 
         if (fs.existsSync(latestLog)) {
-            const stat = fs.statSync(latestLog);
-            const birthtime = stat.birthtime.getTime();
-
-            // Use birthtime if valid; otherwise fallback to mtime (modified time).
-            // This handles filesystems that do not support birthtime or return invalid values.
-            const date =
-                !isNaN(birthtime) && birthtime > 0
-                    ? stat.birthtime
-                    : stat.mtime;
+            const date = fs.statSync(latestLog).mtime;
 
             const yyyy = date.getFullYear();
             const mm = String(date.getMonth() + 1).padStart(2, '0');
