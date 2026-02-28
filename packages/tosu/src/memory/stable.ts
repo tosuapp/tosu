@@ -748,7 +748,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 const error = this.process.readInt(item);
 
                 // sometimes it returns number over a 1m and we dont need that
-                if (error < -500 || error > 500) {
+                if (error < -3000 || error > 3000) {
                     wLogger.error(
                         `%${ClientType[this.game.client]}%`,
                         `strange value in hitErrors: %${error}%`
