@@ -2282,10 +2282,18 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             const item = this.readItem(items, i, true, 0x40);
             const error = this.readHitEvent(item);
             if (error === undefined) {
-                index = i;
+                index = i + 1;
                 continue;
             }
-            if (error < -500 || error > 500) break; // sometimes it returns number over a 1m and we dont need that
+
+            // sometimes it returns number over a 1m and we dont need that
+            if (error < -500 || error > 500) {
+                wLogger.error(
+                    `%${ClientType[this.game.client]}%`,
+                    `strange value in hitErrors: %${error}%`
+                );
+                break;
+            }
 
             result.push(error);
             index = i + 1;
