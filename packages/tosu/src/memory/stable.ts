@@ -1432,10 +1432,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 }
             }
 
-            const beatmapScrollSpeed = this.beatmapScrollSpeed(
-                settings['mania.scrollSpeed'] as number
-            );
-            settings['mania.scrollSpeed'] = beatmapScrollSpeed;
+            if (config.readManiaScrollSpeed) {
+                const beatmapScrollSpeed = this.beatmapScrollSpeed(
+                    settings['mania.scrollSpeed'] as number
+                );
+                settings['mania.scrollSpeed'] = beatmapScrollSpeed;
+            }
 
             this.game.version = `${settings['client.version'] || ''}`;
 
