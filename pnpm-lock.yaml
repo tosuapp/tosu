@@ -75,8 +75,8 @@ importers:
         specifier: 1.0.8
         version: 1.0.8
       '@tosuapp/osu-native-wrapper':
-        specifier: ^1.0.8
-        version: 1.0.8
+        specifier: ^1.0.10
+        version: 1.0.10
       adm-zip:
         specifier: ^0.5.16
         version: 0.5.16
@@ -1060,8 +1060,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@tosuapp/osu-native-wrapper@1.0.8':
-    resolution: {integrity: sha512-V6dJsIPvTbzNrL+jXuLJ3DF62seAYYGhLhxlX2tzLwMT9Y288fs34tDv6QQE5fu1QTjdCdFIpboM9kyMFS9Z7Q==}
+  '@tosuapp/osu-native-wrapper@1.0.10':
+    resolution: {integrity: sha512-vui508kl0VAVC+g2ZxHXXWlRVP8H6wYvBtBwmz1KRoKAkBA1EmWd75OQPqicSvtaYbLRfely34WuT48aYlmCSg==}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
     resolution: {integrity: sha512-fYDQA9e6yTNmA13TLVSA+WMQRc5Bn/c0EUBditUHNfMMxN7M82c38b1kEggVE3pLpZ0FwkwJkUEKMiOi52JXFA==}
@@ -5064,7 +5064,7 @@ snapshots:
 
   '@tosuapp/osu-native-napi@1.0.8': {}
 
-  '@tosuapp/osu-native-wrapper@1.0.8':
+  '@tosuapp/osu-native-wrapper@1.0.10':
     dependencies:
       '@tosuapp/osu-native-napi': 1.0.8
 
