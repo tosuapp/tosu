@@ -231,16 +231,16 @@ export const calculateGrade = (params: {
     return rank;
 };
 
-export const calculatePassedObjects = (
+export const calculatePassedObjectsIndex = (
     hitObjects: HitObject[],
     currentTime: number,
     previousIndex: number
 ): number => {
     let value = previousIndex;
-    for (let i = previousIndex; i < hitObjects.length; i++) {
+    for (let i = Math.max(previousIndex, 0); i < hitObjects.length; i++) {
         const item = hitObjects[i];
-        if (item.startTime > currentTime) break;
-        value = i + 1;
+        if (item.startTime >= currentTime) break;
+        value = i;
     }
 
     return value;

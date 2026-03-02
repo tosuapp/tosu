@@ -26,7 +26,7 @@ import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import {
     calculateBeatmapAttributes,
-    calculatePassedObjects
+    calculatePassedObjectsIndex
 } from '@/utils/calculators';
 import { fixDecimals, safeJoin } from '@/utils/converters';
 
@@ -165,7 +165,7 @@ export class BeatmapPP extends AbstractState {
     breaks: BreakPoint[] = [];
     kiais: KiaiPoint[] = [];
 
-    previousPassedObjects: number = 0;
+    passedObjectIndex: number = -1;
 
     constructor(game: AbstractInstance) {
         super(game);
@@ -257,14 +257,14 @@ export class BeatmapPP extends AbstractState {
         this.breaks = [];
         this.kiais = [];
 
-        this.previousPassedObjects = 0;
+        this.resetGradual();
     }
 
     resetGradual() {
         silentCatch(this.timedLazy?.destroy, this.timedLazy?.enumerator);
 
         this.timedLazy = undefined;
-        this.previousPassedObjects = 0;
+        this.passedObjectIndex = -1;
 
         if (!this.beatmap || !this.nativeMods || !this.ruleset) {
             return;
@@ -881,24 +881,31 @@ export class BeatmapPP extends AbstractState {
                 return;
             }
 
-            if (!forward) this.resetGradual();
+            if (!forward || !this.timedLazy) this.resetGradual();
 
             const { global } = this.game.getServices(['global']);
-            const passedObjects = calculatePassedObjects(
+            const index = calculatePassedObjectsIndex(
                 this.lazerBeatmap.hitObjects,
                 global.playTime,
-                this.previousPassedObjects
+                this.passedObjectIndex
             );
 
-            let offset = passedObjects - this.previousPassedObjects;
-            if (offset < 0 || !this.timedLazy) this.resetGradual();
+            if (index === -1) {
+                this.currAttributes.pp = 0;
+                this.currAttributes.stars = 0;
+            }
 
-            if (offset <= 0 || this.isCalculating === true) return;
+            if (
+                index < 0 ||
+                this.passedObjectIndex >= index ||
+                this.isCalculating === true
+            )
+                return;
             this.isCalculating = true;
 
-            let currentDifficulty;
             const t1 = performance.now();
-            while (offset > 0) {
+            let currentDifficulty;
+            while (this.passedObjectIndex < index) {
                 // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
                 if (global.status !== GameState.edit || !this.timedLazy) {
                     this.isCalculating = false;
@@ -909,8 +916,7 @@ export class BeatmapPP extends AbstractState {
                     this.timedLazy.enumerator
                 );
 
-                offset--;
-                this.previousPassedObjects++;
+                this.passedObjectIndex++;
             }
             const t2 = performance.now();
             if (!currentDifficulty) {
@@ -932,7 +938,7 @@ export class BeatmapPP extends AbstractState {
                     mods: ModsCollection.create(),
                     maxCombo: currentDifficulty.attributes.maxCombo,
                     accuracy: 1,
-                    countGreat: passedObjects,
+                    countGreat: this.passedObjectIndex + 1,
                     countSliderTailHit: currentDifficulty.attributes.sliderCount
                 },
                 currentDifficulty.attributes
@@ -942,7 +948,6 @@ export class BeatmapPP extends AbstractState {
             this.currAttributes.pp = curPerformance.total;
             this.currAttributes.stars = currentDifficulty.attributes.starRating;
 
-            this.previousPassedObjects = passedObjects;
             this.isCalculating = false;
 
             wLogger.time(
@@ -965,6 +970,8 @@ export class BeatmapPP extends AbstractState {
                 `Error updating editor PP:`,
                 exc
             );
+
+            this.isCalculating = false;
         }
     }
 

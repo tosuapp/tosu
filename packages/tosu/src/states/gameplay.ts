@@ -25,7 +25,7 @@ import {
 import {
     calculateAccuracy,
     calculateGrade,
-    calculatePassedObjects
+    calculatePassedObjectsIndex
 } from '@/utils/calculators';
 
 export const defaultStatistics = {
@@ -105,7 +105,7 @@ export class Gameplay extends AbstractState {
     private cachedkeys: string = '';
 
     previousState: string = '';
-    previousPassedObjects = 0;
+    passedObjectIndex: number = -1;
     previousHitErrorIndex = 0;
 
     constructor(game: AbstractInstance) {
@@ -178,7 +178,7 @@ export class Gameplay extends AbstractState {
         silentCatch(this.timedLazy?.destroy, this.timedLazy?.enumerator);
 
         this.timedLazy = undefined;
-        this.previousPassedObjects = 0;
+        this.passedObjectIndex = -1;
     }
 
     resetHitErrors() {
@@ -280,7 +280,7 @@ export class Gameplay extends AbstractState {
             this.comboPrev = this.combo;
 
             this.updateGrade(menu.objectCount);
-            this.updateLeaderboard();
+            // this.updateLeaderboard();
 
             this.game.resetReportCount('gameplay updateState');
         } catch (exc) {
@@ -551,18 +551,21 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const passedObjects = calculatePassedObjects(
+            const index = calculatePassedObjectsIndex(
                 beatmapPP.lazerBeatmap.hitObjects,
                 global.playTime,
-                this.previousPassedObjects
+                this.passedObjectIndex
             );
-
-            let offset = passedObjects - this.previousPassedObjects;
-            if (offset <= 0 && this.isCalculating === false) return;
+            if (
+                index < 0 ||
+                this.passedObjectIndex >= index ||
+                this.isCalculating === true
+            )
+                return;
             this.isCalculating = true;
 
             let currentDifficulty;
-            while (offset > 0) {
+            while (this.passedObjectIndex < index) {
                 // edge case: it can froze tosu if it starts recalculating huge amount of objects while user exited from gameplay
                 if (global.status !== GameState.play || !this.timedLazy) {
                     this.isCalculating = false;
@@ -573,8 +576,7 @@ export class Gameplay extends AbstractState {
                     this.timedLazy.enumerator
                 );
 
-                offset--;
-                this.previousPassedObjects++;
+                this.passedObjectIndex++;
             }
             if (!currentDifficulty) {
                 wLogger.debug(
@@ -732,7 +734,6 @@ export class Gameplay extends AbstractState {
             beatmapPP.currAttributes.fcPP = fcPerformance.total;
             beatmapPP.updatePPAttributes('fc', fcPerformance);
 
-            this.previousPassedObjects = passedObjects;
             this.isCalculating = false;
 
             this.game.resetReportCount('gameplay updateStarsAndPerformance');
@@ -750,6 +751,8 @@ export class Gameplay extends AbstractState {
                 `Error in PP calculation loop:`,
                 exc
             );
+
+            this.isCalculating = false;
         }
     }
 }
