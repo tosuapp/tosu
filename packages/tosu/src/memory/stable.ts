@@ -7,6 +7,7 @@ import {
 } from '@tosu/common';
 import { getContentType } from '@tosu/server';
 
+import { OsuVersion } from '@/instances';
 import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
@@ -556,9 +557,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             // [[Ruleset + 0x68] + 0x38] + 0x64
             const mode = this.process.readInt(scoreBase + 0x64);
 
-            const scoreOffset = this.game.version.includes('cuttingedge')
-                ? 0xfc
-                : 0x100;
+            const scoreOffset =
+                this.game.version.includes('cuttingedge') ||
+                this.game.version.includes('tourney')
+                    ? 0xfc
+                    : 0x100;
             const score = this.process.readInt(rulesetAddr + scoreOffset);
 
             // [[Ruleset + 0x68] + 0x40] + 0x14
@@ -1439,7 +1442,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 settings['mania.scrollSpeed'] = beatmapScrollSpeed;
             }
 
-            this.game.version = `${settings['client.version'] || ''}`;
+            this.game.version = `${(settings['client.version'] as OsuVersion) || ''}`;
 
             return settings;
         } catch (error) {

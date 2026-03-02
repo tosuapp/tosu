@@ -34,6 +34,9 @@ export interface DataRepoList {
     lazerMultiSpectating: LazerMultiSpectating;
 }
 
+export type OsuVersion = `b${number}${'tourney' | 'cuttingedge' | ''}`;
+export type OsuLazerVersion = `${number}.${number}.${number}`;
+
 export abstract class AbstractInstance {
     errorsCount: { [key: string | number]: number } = {};
 
@@ -46,7 +49,7 @@ export abstract class AbstractInstance {
     path: string = '';
     bitness: Bitness;
 
-    version: string = '';
+    version: OsuVersion | OsuLazerVersion | '' = '';
 
     isReady: boolean;
     isDestroyed: boolean = false;
