@@ -10,6 +10,7 @@ import { ensureDirectoryExists, getDataPath } from './directories';
 import { progressManager } from './progress';
 
 const HighlightColor = '\x1b[1m\x1b[37m';
+const HighlightRegex = /%(.*?)%/g;
 
 let logStream: fs.WriteStream | null = null;
 
@@ -146,7 +147,7 @@ function logFile(type: string, ...args: any[]) {
     const message = args
         .map((arg) => {
             if (typeof arg === 'string') {
-                return arg.replace(/%(\S+)%/g, '$1');
+                return arg.replaceAll(HighlightRegex, '$1');
             }
             if (typeof arg === 'object') {
                 return (
@@ -179,7 +180,7 @@ function dispatchLog(level: keyof typeof LogColor, ...args: any[]) {
 
     const formattedArgs = args.map((arg) => {
         if (typeof arg === 'string') {
-            return arg.replace(/%(\S+)%/g, `${HighlightColor}$1\x1b[0m`);
+            return arg.replaceAll(HighlightRegex, `${HighlightColor}$1\x1b[0m`);
         }
         if (typeof arg === 'object' && arg !== null) {
             return (
