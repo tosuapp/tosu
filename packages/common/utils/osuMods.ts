@@ -15,6 +15,14 @@ export const defaultCalculatedMods = {
     rate: 1
 } as CalculateMods;
 
+export const intModSettings: string[] = [
+    'retries',
+    'restart',
+    'seed',
+    'direction',
+    'style'
+];
+
 export const modsName = (modsNumber: number, order?: boolean): string => {
     let bit = 1;
 
