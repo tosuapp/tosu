@@ -4,7 +4,7 @@
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {
-        "genver": "npx genversion _version.js",
+        "genver": "npx genversion src/_version.js",
         "ts:run": "cross-env NODE_ENV=development ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
         "ts:compile": "ncc build src/index.ts -o dist -m -d",
         "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
