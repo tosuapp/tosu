@@ -2,7 +2,7 @@ import rosu from '@kotrikd/rosu-pp';
 import native, { ModsCollection } from '@tosuapp/osu-native-wrapper';
 import fsp from 'fs/promises';
 
-import { ModsLazer, wLogger } from '../index';
+import { DT, ModsLazer, intModSettings, isRealNumber, wLogger } from '../index';
 
 export type {
     Beatmap,
@@ -98,10 +98,41 @@ export class Calculator {
 
         const nativeMods = this.calculator.ModsCollection.create();
         for (let i = 0; i < params.mods.length; i++) {
-            const mod = params.mods[i];
+            const mod = params.mods[i] as DT;
 
             try {
-                nativeMods!.add(this.calculator.Mod.create(mod.acronym));
+                const nativeMod = this.calculator.Mod.create(mod.acronym);
+                if (typeof mod.settings === 'object') {
+                    for (const key in mod.settings) {
+                        const value = (mod.settings as any)[key];
+
+                        try {
+                            if (value === true || value === false)
+                                nativeMod.setSettingBool(key, value);
+                            else if (
+                                isRealNumber(value) &&
+                                intModSettings.includes(key)
+                            )
+                                nativeMod.setSettingInteger(key, +value);
+                            else if (
+                                isRealNumber(value) &&
+                                !intModSettings.includes(key)
+                            )
+                                nativeMod.setSettingFloat(
+                                    key,
+                                    parseFloat(value)
+                                );
+                        } catch (error) {
+                            wLogger.error(
+                                'building mods failed',
+                                (error as Error).message
+                            );
+                            wLogger.debug('building mods failed', mod, error);
+                        }
+                    }
+                }
+
+                nativeMods!.add(nativeMod);
             } catch {
                 continue;
             }
