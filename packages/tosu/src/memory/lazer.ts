@@ -18,6 +18,7 @@ import { getContentType } from '@tosu/server';
 import path from 'path';
 
 import localOffsets from '@/assets/offsets.json';
+import { OsuLazerVersion } from '@/instances';
 import { LazerInstance } from '@/instances/lazerInstance';
 import { AbstractMemory } from '@/memory';
 import type {
@@ -555,7 +556,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.offsets['Sentry.SentryOptions']['<Release>k__BackingField']
         );
 
-        return release?.split('@')?.[1];
+        return release?.split('@')?.[1] as OsuLazerVersion;
     }
 
     private screenStack() {
