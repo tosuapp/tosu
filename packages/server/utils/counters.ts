@@ -468,7 +468,7 @@ export function buildLocalCounters(
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -569,7 +569,7 @@ export async function buildExternalCounters(
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -901,7 +901,7 @@ export function buildSettings(res: http.ServerResponse) {
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -945,7 +945,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -978,7 +978,7 @@ export function buildEmptyPage(res: http.ServerResponse) {
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
