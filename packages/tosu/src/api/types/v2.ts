@@ -222,6 +222,8 @@ export interface Beatmap {
     titleUnicode: string;
     mapper: string;
     version: string;
+    source: string;
+    tags: string;
     stats: Stats;
 }
 

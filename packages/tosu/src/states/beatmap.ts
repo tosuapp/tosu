@@ -457,7 +457,7 @@ export class BeatmapPP extends AbstractState {
                         parseEditor: false,
                         parseGeneral: true,
                         parseStoryboard: false,
-                        parseMetadata: false
+                        parseMetadata: true
                     }
                 );
 
