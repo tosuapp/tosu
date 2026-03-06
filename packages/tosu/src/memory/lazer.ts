@@ -79,7 +79,8 @@ export interface Offsets {
     'osu.Game.OsuGame': {
         osuLogo: number;
         ScreenStack: number;
-        SentryLogger: number;
+        SentryLogger?: number;
+        sentryLogger: number;
         channelManager: number;
         '<frameworkConfig>k__BackingField': number;
         chatOverlay: number;
@@ -103,7 +104,10 @@ export interface Offsets {
         rulesetConfigCache: number;
         realm: number;
     };
-    'osu.Game.Screens.SelectV2.SoloSongSelect': {
+    'osu.Game.Screens.Select.SoloSongSelect': {
+        '<game>k__BackingField': number;
+    };
+    'osu.Game.Screens.SelectV2.SoloSongSelect'?: {
         '<game>k__BackingField': number;
     };
     'osu.Game.Screens.Play.SubmittingPlayer': {
@@ -522,7 +526,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     gameVersion() {
         const sentryLogger = this.process.readIntPtr(
-            this.gameBase() + this.offsets['osu.Game.OsuGame'].SentryLogger
+            this.gameBase() +
+                (this.offsets['osu.Game.OsuGame'].SentryLogger ||
+                    this.offsets['osu.Game.OsuGame'].sentryLogger)
         );
         wLogger.debug(
             `Game version check (SentryLogger): %${sentryLogger.toString(16)}%`
@@ -569,7 +575,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return (
             this.process.readIntPtr(
                 address +
-                    this.offsets['osu.Game.Screens.SelectV2.SoloSongSelect'][
+                    (this.offsets['osu.Game.Screens.SelectV2.SoloSongSelect'] ||
+                        this.offsets['osu.Game.Screens.Select.SoloSongSelect'])[
                         '<game>k__BackingField'
                     ]
             ) === this.gameBase()
