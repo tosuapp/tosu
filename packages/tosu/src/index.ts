@@ -36,7 +36,7 @@ const currentVersion = require('./_version.js');
         context.updateVersion = currentVersion;
     } else {
         if (
-            (update !== null && update !== undefined && update === true) ??
+            (update !== null && update !== undefined && update === true) ||
             isConfigUpdate
         ) {
             await autoUpdater('startup');
