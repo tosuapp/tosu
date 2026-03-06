@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.19.0](https://github.com/tosuapp/tosu/compare/v4.18.1...v4.19.0) (2026-03-06)
+
+
+### Features
+
+* Add `source` and `tags` to beatmap ([bef46e1](https://github.com/tosuapp/tosu/commit/bef46e13546eed1d4845eadb12eec90bac17840d))
+* Allow disabling reading mania scroll speed ([801bc7c](https://github.com/tosuapp/tosu/commit/801bc7c479989f4e60926c99914517d5dfe80230))
+* Display `10` latest logs in report file ([cfcef46](https://github.com/tosuapp/tosu/commit/cfcef46557197ddac72a933571b4bbabfba56da1))
+
+
+### Bug Fixes
+
+* Fix `osu is not ready/running` when osu clearly running ([dff7d63](https://github.com/tosuapp/tosu/commit/dff7d63f3a1f09b09eda1366cd10f9c55ffb3bce))
+* Fix config migration ([856aef6](https://github.com/tosuapp/tosu/commit/856aef6c7f1e52e00adb3ea7647ff53a54561d95))
+* Fix editor state ([4722b68](https://github.com/tosuapp/tosu/commit/4722b685f55b50fb8639b6a45852de583aa2312e))
+* Fix logger regex ([dd64156](https://github.com/tosuapp/tosu/commit/dd64156265f35a38a0b6ace34d6f6ddfa0c87a24))
+* FIx mania hit errors ([fa0815e](https://github.com/tosuapp/tosu/commit/fa0815e857b5dcec4ab0b68b674d7886ef4b1b3e))
+* Fix score offset for tourney client ([b399686](https://github.com/tosuapp/tosu/commit/b399686feec41e9856b3fc11a3607574fd623857))
+* Rename offset fields due to moved song select ([e278c35](https://github.com/tosuapp/tosu/commit/e278c35c2a40f309d29f0585189e57e0acde4bfe))
+* Use `mtime` instead of `birthtime` in log file name ([341b48a](https://github.com/tosuapp/tosu/commit/341b48a8fe655d7dec12d744048c347a1ccd445b))
+
 ### [4.18.1](https://github.com/tosuapp/tosu/compare/v4.18.0...v4.18.1) (2026-02-19)
 
 
