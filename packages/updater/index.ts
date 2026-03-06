@@ -13,7 +13,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
 
 // NOTE: _version.js packs with pkg support in tosu build
-const currentVersion = require(process.cwd() + '/_version.js');
+const currentVersion = require(process.cwd() + '/src/_version.js');
 
 const platform = platformResolver(process.platform);
 
