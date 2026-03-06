@@ -1,5 +1,6 @@
 import {
     checkGameOverlayConfig,
+    context,
     downloadFile,
     getProgramPath,
     platformResolver,
@@ -12,8 +13,6 @@ import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 
-// NOTE: _version.js packs with pkg support in tosu build
-const currentVersion = require(process.cwd() + '/_version.js');
 const platform = platformResolver(process.platform);
 
 export async function runOverlay(): Promise<ChildProcess | Error> {
@@ -41,7 +40,7 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
                 path.join(gameOverlayPath, 'version'),
                 'utf8'
             );
-            if (overlayVersion.trimEnd() !== currentVersion) {
+            if (overlayVersion.trimEnd() !== context.currentVersion) {
                 await rm(gameOverlayPath, { recursive: true, force: true });
 
                 wLogger.warn('In-game overlay update available. Updating...');
@@ -57,7 +56,7 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             await mkdir(gameOverlayPath, { recursive: true });
 
             const request = await fetch(
-                `https://api.github.com/repos/tosuapp/tosu/releases/tags/v${currentVersion}`
+                `https://api.github.com/repos/tosuapp/tosu/releases/tags/v${context.currentVersion}`
             );
             const json = (await request.json()) as any;
             const {

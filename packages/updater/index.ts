@@ -12,9 +12,6 @@ import fs from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
 
-// NOTE: _version.js packs with pkg support in tosu build
-const currentVersion = require(process.cwd() + '/_version.js');
-
 const platform = platformResolver(process.platform);
 
 const fileDestination = path.join(getProgramPath(), 'update.zip');
@@ -74,12 +71,11 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
             assets: { name: string; browser_download_url: string }[];
         } = json;
 
-        context.currentVersion = currentVersion;
-        context.updateVersion = versionName || currentVersion;
+        context.updateVersion = versionName || context.currentVersion;
 
         if (versionName === null || versionName === undefined) {
             wLogger.info(
-                `Failed to check updates for version %v${currentVersion}%`
+                `Failed to check updates for version %v${context.currentVersion}%`
             );
 
             return new Error('Version the same');
@@ -87,15 +83,15 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
         if (from === 'startup') {
             if (
-                versionName.includes(currentVersion) ||
-                currentVersion.includes('-forced')
+                versionName.includes(context.currentVersion) ||
+                context.currentVersion.includes('-forced')
             )
                 wLogger.info(
-                    `You're using the latest version (%v${currentVersion}%)`
+                    `You're using the latest version (%v${context.currentVersion}%)`
                 );
             else
                 wLogger.warn(
-                    `Update available: %v${currentVersion}% => %v${context.updateVersion}%`
+                    `Update available: %v${context.currentVersion}% => %v${context.updateVersion}%`
                 );
         }
 
@@ -104,8 +100,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
         wLogger.error(`Update check failed:`, (exc as any).message);
         wLogger.debug(`Update check error details:`, exc);
 
-        context.currentVersion = currentVersion;
-        context.updateVersion = currentVersion;
+        context.updateVersion = context.currentVersion;
 
         return exc as Error;
     }
@@ -123,11 +118,11 @@ export const autoUpdater = async (
 
         const { assets, versionName } = check;
         if (
-            versionName.includes(currentVersion) ||
-            currentVersion.includes('-forced')
+            versionName.includes(context.currentVersion) ||
+            context.currentVersion.includes('-forced')
         ) {
             wLogger.info(
-                `You're using the latest version (%v${currentVersion}%)`
+                `You're using the latest version (%v${context.currentVersion}%)`
             );
 
             if (fs.existsSync(fileDestination)) {
