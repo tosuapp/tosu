@@ -348,6 +348,9 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             mapper: menu.creator,
             version: menu.difficulty,
 
+            source: beatmapPP.lazerBeatmap?.metadata.source || '',
+            tags: beatmapPP.lazerBeatmap?.metadata.tags.join(' ') || '',
+
             stats: buildBeatmapStats(beatmapPP)
         },
         play: buildPlay(gameplay, beatmapPP, currentMods),
