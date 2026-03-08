@@ -1,4 +1,4 @@
-import { config, wLogger } from '@tosu/common';
+import { config, platformResolver, wLogger } from '@tosu/common';
 import { exec } from 'child_process';
 import http, { IncomingMessage, ServerResponse } from 'http';
 
@@ -215,15 +215,9 @@ export class HttpServer {
             wLogger.info(`Dashboard server started on %http://${ip}:${port}%`);
 
             if (config.openDashboardOnStartup === true) {
-                const command =
-                    process.platform === 'win32'
-                        ? 'start'
-                        : process.platform === 'darwin'
-                          ? 'open'
-                          : 'xdg-open';
-
+                const platform = platformResolver(process.platform);
                 exec(
-                    `${command} http://${ip}:${port}`,
+                    `${platform.command} http://${ip}:${port}`,
                     (error, stdout, stderr) => {
                         if (error || stderr) {
                             return;

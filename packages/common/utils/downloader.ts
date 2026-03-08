@@ -1,6 +1,8 @@
+import crypto from 'crypto';
 import fs from 'fs';
 import https from 'https';
 
+import { wLogger } from './logger';
 import { progressManager } from './progress';
 
 /**
@@ -89,3 +91,30 @@ export const downloadFile = (
                 reject(err);
             });
     });
+
+export async function verifyDownload(
+    githubDigest: `${string}:${string}`,
+    filePath: string
+): Promise<boolean> {
+    try {
+        const [hashAlgorithm, apiChecksum] = githubDigest.split(':');
+        const checksum = crypto
+            .createHash(hashAlgorithm)
+            .update(await fs.promises.readFile(filePath))
+            .digest('hex');
+
+        if (apiChecksum !== checksum) {
+            wLogger.error(
+                `Download verification: file checksum doesn't match - ${apiChecksum} ${checksum} `
+            );
+            return false;
+        }
+
+        return true;
+    } catch (exc) {
+        wLogger.error(`Download verification failed:`, (exc as Error).message);
+        wLogger.debug('Auto-update error details:', exc);
+
+        return false;
+    }
+}
