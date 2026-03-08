@@ -5,6 +5,7 @@ import {
     getProgramPath,
     platformResolver,
     unzip,
+    verifyDownload,
     wLogger
 } from '@tosu/common';
 import { ChildProcess, ChildProcessByStdio, spawn } from 'node:child_process';
@@ -62,7 +63,11 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             const {
                 assets
             }: {
-                assets: { name: string; browser_download_url: string }[];
+                assets: {
+                    name: string;
+                    digest: `${string}:${string}`;
+                    browser_download_url: string;
+                }[];
             } = json;
 
             const findAsset = assets.find(
@@ -76,6 +81,12 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             }
 
             await downloadFile(findAsset.browser_download_url, archivePath);
+
+            const verify = await verifyDownload(findAsset.digest, archivePath);
+            if (verify === false) {
+                await rm(archivePath);
+                return new Error('Unable to verify downloaded executable');
+            }
 
             await unzip(archivePath, gameOverlayPath);
             await rm(archivePath);
