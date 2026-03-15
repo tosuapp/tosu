@@ -5,6 +5,7 @@ import {
     platformResolver,
     sleep,
     unzip,
+    verifyDownload,
     wLogger
 } from '@tosu/common';
 import { spawn } from 'child_process';
@@ -68,7 +69,11 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
             name: versionName
         }: {
             name: string;
-            assets: { name: string; browser_download_url: string }[];
+            assets: {
+                name: string;
+                digest: `${string}:${string}`;
+                browser_download_url: string;
+            }[];
         } = json;
 
         context.updateVersion = versionName || context.currentVersion;
@@ -146,15 +151,18 @@ export const autoUpdater = async (
             return 'noFiles';
         }
 
-        const downloadAsset = await downloadFile(
-            findAsset.browser_download_url,
-            fileDestination
-        );
+        await downloadFile(findAsset.browser_download_url, fileDestination);
+
+        const verify = await verifyDownload(findAsset.digest, fileDestination);
+        if (verify === false) {
+            await fs.promises.rm(fileDestination);
+            return;
+        }
 
         const currentExecutablePath = process.argv[0]; // Path to the current executable
 
         await fs.promises.rename(currentExecutablePath, backupExecutablePath);
-        await unzip(downloadAsset, getProgramPath());
+        await unzip(fileDestination, getProgramPath());
 
         // close request to allow destroy server
         if (from === 'server' && res) {
