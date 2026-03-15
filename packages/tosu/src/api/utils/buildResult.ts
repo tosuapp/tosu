@@ -1,4 +1,9 @@
-import { ClientType, CountryCodes, GameState } from '@tosu/common';
+import {
+    CalculateMods,
+    ClientType,
+    CountryCodes,
+    GameState
+} from '@tosu/common';
 import path from 'path';
 
 import {
@@ -13,7 +18,6 @@ import { IUserProtected } from '@/memory/types';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer

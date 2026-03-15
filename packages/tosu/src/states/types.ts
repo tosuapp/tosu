@@ -1,4 +1,4 @@
-import { CalculateMods } from '@/utils/osuMods.types';
+import { CalculateMods } from '@tosu/common';
 
 export interface Statistics {
     /** geki */
