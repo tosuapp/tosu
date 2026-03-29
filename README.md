@@ -181,13 +181,8 @@ Sponsorship & Thank notice
 * Github: [@storycraft](https://github.com/storycraft)
 <br>
 
-😪 **ck**
-* _**headache provider**_
-* Website: https://osuck.net
-* Github: [@cyperdark](https://github.com/cyperdark)
 
-
-<br />
+<br>
 
 ## 🤝 Contributing
 
