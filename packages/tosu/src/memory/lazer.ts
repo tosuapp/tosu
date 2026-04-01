@@ -78,7 +78,10 @@ export interface Offsets {
     OsuVersion: string;
     'osu.Game.OsuGame': {
         osuLogo: number;
-        ScreenStack: number;
+        // TODO: Remove old field after 6~ months
+        ScreenStack?: number;
+        '<ScreenStack>k__BackingField': number;
+        // TODO: Remove old field
         SentryLogger?: number;
         sentryLogger: number;
         channelManager: number;
@@ -104,9 +107,14 @@ export interface Offsets {
         rulesetConfigCache: number;
         realm: number;
     };
-    'osu.Game.Screens.Select.SoloSongSelect': {
+    'osu.Game.Screens.Select.SongSelect': {
         '<game>k__BackingField': number;
     };
+    // TODO: Remove old field after 6~ months
+    'osu.Game.Screens.Select.SoloSongSelect'?: {
+        '<game>k__BackingField': number;
+    };
+    // TODO: Remove old field after 6~ months
     'osu.Game.Screens.SelectV2.SoloSongSelect'?: {
         '<game>k__BackingField': number;
     };
@@ -404,7 +412,7 @@ const frameworkConfigList = [
     FrameworkSetting.CursorSensitivity
 ];
 
-const expectedVtableValue: number = 7696598171648;
+const expectedVtableValue: number = 7730957910016;
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     offsets: Offsets = localOffsets;
@@ -567,16 +575,23 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private screenStack() {
         return this.process.readIntPtr(
-            this.gameBase() + this.offsets['osu.Game.OsuGame'].ScreenStack
+            this.gameBase() +
+                (this.offsets['osu.Game.OsuGame'].ScreenStack ||
+                    this.offsets['osu.Game.OsuGame'][
+                        '<ScreenStack>k__BackingField'
+                    ])
         );
     }
 
-    private checkIfSongSelectV2(address: number) {
+    private checkIfSongSelect(address: number) {
         return (
             this.process.readIntPtr(
                 address +
-                    (this.offsets['osu.Game.Screens.SelectV2.SoloSongSelect'] ||
-                        this.offsets['osu.Game.Screens.Select.SoloSongSelect'])[
+                    (this.offsets['osu.Game.Screens.Select.SoloSongSelect'] ||
+                        this.offsets[
+                            'osu.Game.Screens.SelectV2.SoloSongSelect'
+                        ] ||
+                        this.offsets['osu.Game.Screens.Select.SongSelect'])[
                         '<game>k__BackingField'
                     ]
             ) === this.gameBase()
@@ -3102,7 +3117,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         let status = 0;
 
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
-        const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
+        const isSongSelect = this.checkIfSongSelect(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
         const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
@@ -3125,7 +3140,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             }
 
             status = GameState.play;
-        } else if (isSongSelectV2) {
+        } else if (isSongSelect) {
             status = GameState.selectPlay;
         } else if (isResultScreen) {
             status = GameState.resultScreen;
