@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.19.2](https://github.com/tosuapp/tosu/compare/v4.19.1...v4.19.2) (2026-04-02)
+
+
+### Bug Fixes
+
+* remove songSelectV2 ([83ac9ee](https://github.com/tosuapp/tosu/commit/83ac9ee34d1617f0f07ed6700a8a850524209f9a))
+* Verify downloaded file by their checksum ([d76e451](https://github.com/tosuapp/tosu/commit/d76e451939b62a376b6d62a546acc3fe715dbc3b))
+
 ### [4.19.1](https://github.com/tosuapp/tosu/compare/v4.19.0...v4.19.1) (2026-03-06)
 
 
