@@ -1,9 +1,10 @@
 packages:
-  # all packages in direct subdirs of packages/
-  - 'packages/*'
-
+  - packages/*
 onlyBuiltDependencies:
   - '@jellybrick/ffi-napi'
   - '@jellybrick/ref-napi'
   - electron
   - esbuild
+overrides:
+  tosu-lazer-pp: link:tosu-lazer-pp
+  '@tosu/pp': link:../tosu-lazer-pp
