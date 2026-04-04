@@ -245,12 +245,12 @@ export class LazerInstance extends AbstractInstance {
                         continue;
                     }
 
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousState = currentState;
                 }
 
                 if (global.gameFolder && updateGraph) {
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousMP3Length = menu.mp3Length;
                 }
 
