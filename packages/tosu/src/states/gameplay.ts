@@ -586,11 +586,8 @@ export class Gameplay extends AbstractState {
 
             const maxAchievablePerformance =
                 currentBeatmap.calculatePerformance(currDiffAttrs, calcOptions);
-
-            if (maxAchievablePerformance) {
-                beatmapPP.currAttributes.maxAchievable =
-                    maxAchievablePerformance.pp;
-            }
+            beatmapPP.currAttributes.maxAchievable =
+                maxAchievablePerformance.pp;
 
             if (this.mode === 3) {
                 calcOptions.oks = this.statistics.ok;
