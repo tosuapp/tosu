@@ -102,6 +102,7 @@ export class BeatmapPP extends AbstractState {
     difficultyAttributes?: DifficultyAttrs;
     diffStrains?: StrainsData;
     scoreGenerator?: ScoreGenerator;
+    maxScore?: ScoreInfoData;
     performanceAttributes?: PerformanceAttrsData;
 
     mode: number;
@@ -407,12 +408,11 @@ export class BeatmapPP extends AbstractState {
 
             // TODO:: gamemodes except std calculate accuracy without using provided one, needs workaround
             this.scoreGenerator = this.beatmap.createScoreGenerator(mods);
-            const fullScoreInfo: ScoreInfoData =
-                this.scoreGenerator.createPerfectScore();
+            this.maxScore = this.scoreGenerator.createPerfectScore();
 
             this.performanceAttributes = this.beatmap.calculatePerformance(
                 this.difficultyAttributes,
-                fullScoreInfo
+                this.maxScore
             );
             this.clockRate = currentMods.rate;
 
@@ -426,7 +426,7 @@ export class BeatmapPP extends AbstractState {
                     const data = this.beatmap.calculatePerformance(
                         this.difficultyAttributes,
                         {
-                            ...fullScoreInfo,
+                            ...this.maxScore,
                             accuracy: acc / 100
                         }
                     );

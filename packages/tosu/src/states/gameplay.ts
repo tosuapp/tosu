@@ -569,20 +569,11 @@ export class Gameplay extends AbstractState {
 
             const calcOptions: ScoreInfoData = {
                 ...scoreInfo,
-                perfects: this.statistics.perfect,
                 greats:
                     maxJudgementsAmount -
                     this.statistics.ok -
                     this.statistics.meh -
-                    this.statistics.miss,
-                goods: this.statistics.good,
-                oks: this.statistics.ok,
-                mehs: this.statistics.meh,
-                misses: this.statistics.miss,
-                sliderEndHits: this.statistics.sliderTailHit,
-                smallTickHits: this.statistics.smallTickHit,
-                largeTickHits: this.statistics.largeTickHit,
-                maxCombo: this.maxCombo
+                    this.statistics.miss
             };
             if (this.mode === 3) {
                 calcOptions.perfects =
@@ -611,13 +602,12 @@ export class Gameplay extends AbstractState {
                     this.statistics.great + this.statistics.miss;
                 calcOptions.maxCombo =
                     beatmapPP.calculatedMapAttributes.maxCombo;
-                // TODO
-                // calcOptions.sliderEndHits =
-                //     this.performanceAttributes.state?.sliderEndHits;
-                // calcOptions.smallTickHits =
-                //     this.performanceAttributes.state?.osuSmallTickHits;
-                // calcOptions.largeTickHits =
-                //     this.performanceAttributes.state?.osuLargeTickHits;
+                calcOptions.sliderEndHits =
+                    beatmapPP.maxScore?.sliderEndHits || 0;
+                calcOptions.smallTickHits =
+                    beatmapPP.maxScore?.smallTickHits || 0;
+                calcOptions.largeTickHits =
+                    beatmapPP.maxScore?.largeTickHits || 0;
                 calcOptions.misses = 0;
             }
 
