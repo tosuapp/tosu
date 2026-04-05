@@ -10,10 +10,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      tosu:
-        specifier: link:packages/tosu
-        version: link:packages/tosu
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.3
@@ -253,7 +249,6 @@ packages:
 
   '@asdf-overlay/core@1.1.2':
     resolution: {integrity: sha512-ChQxw/LlTNA3386VBa88ah0JyPREQG1z18wQFqh/weDgn5Y6skQBpEEYZz3lFr8m0wI3t/6WO67ibXQOYpy4cw==}
-    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.1.2':
