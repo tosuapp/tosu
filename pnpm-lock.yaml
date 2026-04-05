@@ -170,7 +170,7 @@ importers:
         version: link:../ingame-overlay-updater
       '@tosu/pp':
         specifier: github:storycraft/tosu-lazer-pp#main
-        version: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369
+        version: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/d1700acc5107021c00a99ae319d087149250d4fe
       '@tosu/server':
         specifier: workspace:*
         version: link:../server
@@ -222,7 +222,7 @@ importers:
         version: 3.2.0
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@25.0.3)(typescript@5.9.3)
+        version: 10.9.2(@types/node@25.0.3)(typescript@6.0.2)
 
   packages/tsprocess:
     dependencies:
@@ -1075,8 +1075,8 @@ packages:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
 
-  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369':
-    resolution: {tarball: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369}
+  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/d1700acc5107021c00a99ae319d087149250d4fe':
+    resolution: {tarball: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/d1700acc5107021c00a99ae319d087149250d4fe}
     version: 0.1.0
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
@@ -4209,6 +4209,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  typescript@6.0.2:
+    resolution: {integrity: sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   uglify-js@3.19.3:
     resolution: {integrity: sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==}
     engines: {node: '>=0.8.0'}
@@ -5182,7 +5187,9 @@ snapshots:
 
   '@tootallnate/once@2.0.0': {}
 
-  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369': {}
+  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/d1700acc5107021c00a99ae319d087149250d4fe':
+    dependencies:
+      typescript: 6.0.2
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
@@ -8851,7 +8858,7 @@ snapshots:
       picomatch: 4.0.3
       typescript: 5.9.3
 
-  ts-node@10.9.2(@types/node@25.0.3)(typescript@5.9.3):
+  ts-node@10.9.2(@types/node@25.0.3)(typescript@6.0.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.12
@@ -8865,7 +8872,7 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 5.9.3
+      typescript: 6.0.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
@@ -8935,6 +8942,8 @@ snapshots:
   typedarray@0.0.6: {}
 
   typescript@5.9.3: {}
+
+  typescript@6.0.2: {}
 
   uglify-js@3.19.3:
     optional: true
