@@ -4,8 +4,8 @@ import {
     type DifficultyAttrs,
     HitWindows,
     type PerformanceAttrsData,
-    type ScoreGenerator,
     type ScoreInfoData,
+    ScoreSimulator,
     type StrainsData
 } from '@tosu/pp';
 import fs from 'fs';
@@ -101,7 +101,6 @@ export class BeatmapPP extends AbstractState {
     lazerBeatmap?: ParsedBeatmap;
     difficultyAttributes?: DifficultyAttrs;
     diffStrains?: StrainsData;
-    scoreGenerator?: ScoreGenerator;
     maxScore?: ScoreInfoData;
     performanceAttributes?: PerformanceAttrsData;
 
@@ -406,9 +405,7 @@ export class BeatmapPP extends AbstractState {
             this.diffStrains = gradual.getCurrentStrains();
             const difficulty = this.difficultyAttributes.getData();
 
-            // TODO:: gamemodes except std calculate accuracy without using provided one, needs workaround
-            this.scoreGenerator = this.beatmap.createScoreGenerator(mods);
-            this.maxScore = this.scoreGenerator.createPerfectScore();
+            this.maxScore = ScoreSimulator.createScore(this.beatmap, mods, 1.0);
 
             this.performanceAttributes = this.beatmap.calculatePerformance(
                 this.difficultyAttributes,
@@ -425,10 +422,11 @@ export class BeatmapPP extends AbstractState {
                 ]) {
                     const data = this.beatmap.calculatePerformance(
                         this.difficultyAttributes,
-                        {
-                            ...this.maxScore,
-                            accuracy: acc / 100
-                        }
+                        ScoreSimulator.createScore(
+                            this.beatmap,
+                            mods,
+                            acc / 100
+                        )
                     );
 
                     ppAcc[acc] = fixDecimals(data.pp);
@@ -747,7 +745,6 @@ export class BeatmapPP extends AbstractState {
                 !this.beatmap ||
                 !this.beatmapContent ||
                 !this.performanceAttributes ||
-                !this.scoreGenerator ||
                 !this.lazerBeatmap
             ) {
                 return;
@@ -777,7 +774,12 @@ export class BeatmapPP extends AbstractState {
             const diffData = diffAttrs.getData();
             const curPerformance = this.beatmap.calculatePerformance(
                 diffAttrs,
-                this.scoreGenerator.createPartialPerfectScore(passedObjects + 1)
+                ScoreSimulator.createPartialScore(
+                    this.beatmap,
+                    passedObjects + 1,
+                    mods,
+                    1.0
+                )
             );
 
             this.currAttributes.pp = curPerformance.pp;
