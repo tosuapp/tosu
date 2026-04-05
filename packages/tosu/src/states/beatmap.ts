@@ -404,31 +404,9 @@ export class BeatmapPP extends AbstractState {
             const difficulty = this.difficultyAttributes.getData();
 
             // TODO:: gamemodes except std calculate accuracy without using provided one, needs workaround
-            const fullScoreInfo: ScoreInfoData = {
-                totalScore: 0,
-                accuracy: 1.0,
-                mods,
-                maxCombo: difficulty.maxCombo,
-                largeTickHits: 0,
-                largeTickMisses: 0,
-                smallTickHits: 0,
-                smallTickMisses: 0,
-                largeBonuses: 0,
-                smallBonuses: 0,
-                ignoreHits: 0,
-                ignoreMisses: 0,
-                comboBreaks: 0,
-                sliderEndHits: difficulty.nSliders,
-                perfects: 0,
-                greats:
-                    difficulty.nCircles +
-                    difficulty.nSliders +
-                    difficulty.nSpinners,
-                goods: 0,
-                oks: 0,
-                mehs: 0,
-                misses: 0
-            };
+            const fullScoreInfo: ScoreInfoData =
+                this.beatmap.createPerfectScore(mods);
+            console.log(fullScoreInfo);
 
             this.performanceAttributes = this.beatmap.calculatePerformance(
                 this.difficultyAttributes,
