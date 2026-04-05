@@ -54,7 +54,6 @@
     "node": ">=20.11.1"
   },
   "dependencies": {
-    "@tosu/pp": "link:../tosu-lazer-pp",
-    "tosu-lazer-pp": "link:tosu-lazer-pp"
+    "tosu": "link:packages/tosu"
   }
 }
