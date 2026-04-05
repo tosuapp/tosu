@@ -47,7 +47,7 @@ export function fromLegacyHitResults(
  */
 export function toLegacyHits(mode: number, statistics: Statistics): Hits3 {
     const hits: Hits3 = {
-        0: statistics.miss,
+        0: getMiss(mode, statistics),
         50: getN50(mode, statistics),
         100: getN100(mode, statistics),
         300: statistics.great,
@@ -163,6 +163,19 @@ function getN50(mode: number, statistics: Statistics) {
             return statistics.meh;
         case 2:
             return statistics.smallTickHit;
+        default:
+            return 0;
+    }
+}
+
+function getMiss(mode: number, statistics: Statistics) {
+    switch (mode) {
+        case 0:
+        case 1:
+        case 3:
+            return statistics.miss;
+        case 2:
+            return statistics.miss + statistics.largeTickMiss;
         default:
             return 0;
     }
