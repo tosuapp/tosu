@@ -405,7 +405,10 @@ export class BeatmapPP extends AbstractState {
             this.diffStrains = gradual.getCurrentStrains();
             const difficulty = this.difficultyAttributes.getData();
 
-            this.maxScore = ScoreSimulator.createScore(this.beatmap, mods, 1.0);
+            this.maxScore = {
+                ...ScoreSimulator.createScore(this.beatmap, mods, 1.0),
+                maxCombo: difficulty.maxCombo
+            };
 
             this.performanceAttributes = this.beatmap.calculatePerformance(
                 this.difficultyAttributes,
@@ -422,11 +425,14 @@ export class BeatmapPP extends AbstractState {
                 ]) {
                     const data = this.beatmap.calculatePerformance(
                         this.difficultyAttributes,
-                        ScoreSimulator.createScore(
-                            this.beatmap,
-                            mods,
-                            acc / 100
-                        )
+                        {
+                            ...ScoreSimulator.createScore(
+                                this.beatmap,
+                                mods,
+                                acc / 100
+                            ),
+                            maxCombo: this.maxScore.maxCombo
+                        }
                     );
 
                     ppAcc[acc] = fixDecimals(data.pp);
@@ -776,12 +782,15 @@ export class BeatmapPP extends AbstractState {
             const diffData = diffAttrs.getData();
             const curPerformance = this.beatmap.calculatePerformance(
                 diffAttrs,
-                ScoreSimulator.createPartialScore(
-                    this.beatmap,
-                    passedObjects + 1,
-                    mods,
-                    1.0
-                )
+                {
+                    ...ScoreSimulator.createPartialScore(
+                        this.beatmap,
+                        passedObjects + 1,
+                        mods,
+                        1.0
+                    ),
+                    maxCombo: diffData.maxCombo
+                }
             );
 
             this.currAttributes.pp = curPerformance.pp;
