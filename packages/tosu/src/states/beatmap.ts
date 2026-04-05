@@ -767,9 +767,10 @@ export class BeatmapPP extends AbstractState {
                 `Beatmap parsing for editor PP took %${totalTime}ms%`
             );
 
-            const passedObjects = this.lazerBeatmap.hitObjects.findLastIndex(
-                (r) => r.startTime <= global.playTime
-            );
+            const passedObjects =
+                this.lazerBeatmap.hitObjects.findLastIndex(
+                    (r) => r.startTime <= global.playTime
+                ) + 1;
 
             const mods = this.game.client !== ClientType.lazer ? ['CL'] : [];
             const diffCalc =
@@ -785,7 +786,7 @@ export class BeatmapPP extends AbstractState {
                 {
                     ...ScoreSimulator.createPartialScore(
                         this.beatmap,
-                        passedObjects + 1,
+                        passedObjects,
                         mods,
                         1.0
                     ),
