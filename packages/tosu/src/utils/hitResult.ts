@@ -3,7 +3,7 @@ import type { Statistics } from '@/states/types';
 
 /**
  * Perform conversion from legacy hit results to lazer hit statistics
- * base on https://github.com/ppy/osu/blob/master/osu.Game/Scoring/Legacy/ScoreInfoExtensions.cs
+ * based on https://github.com/ppy/osu/blob/master/osu.Game/Scoring/Legacy/ScoreInfoExtensions.cs
  */
 export function fromLegacyHitResults(
     mode: number,
