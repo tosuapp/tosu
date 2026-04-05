@@ -10,10 +10,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      tosu:
-        specifier: link:packages/tosu
-        version: link:packages/tosu
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.3
