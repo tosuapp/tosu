@@ -1,10 +1,13 @@
 packages:
   - packages/*
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - electron-winstaller
 onlyBuiltDependencies:
   - '@jellybrick/ffi-napi'
   - '@jellybrick/ref-napi'
+  - '@tosu/pp'
   - electron
   - esbuild
 overrides:
-  tosu-lazer-pp: link:tosu-lazer-pp
-  '@tosu/pp': link:../tosu-lazer-pp
+  tosu: link:packages/tosu
