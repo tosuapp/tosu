@@ -372,7 +372,11 @@ export class BeatmapPP extends AbstractState {
             }
 
             this.beatmap = Beatmap.parse(this.beatmapContent);
-            if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode) {
+            // Catch beatmap needs conversion even if it's already in the correct mode what.
+            if (
+                this.beatmap.mode === 2 ||
+                (this.beatmap.mode !== 0 && this.beatmap.mode !== currentMode)
+            ) {
                 const converted = this.beatmap.convert(currentMode);
                 if (!converted) {
                     wLogger.debug(
