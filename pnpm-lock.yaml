@@ -11,9 +11,6 @@ importers:
 
   .:
     dependencies:
-      '@tosu/pp':
-        specifier: github:storycraft/tosu-lazer-pp#main
-        version: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369
       tosu:
         specifier: link:packages/tosu
         version: link:packages/tosu
