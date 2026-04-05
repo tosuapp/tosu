@@ -35,7 +35,8 @@ import { Gameplay } from '@/states/gameplay';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { CalculateMods } from '@/utils/osuMods.types';
+import { toLegacyHits } from '@/utils/hitResult';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
@@ -601,18 +602,10 @@ const buildLazerTourneyData = (
                         },
 
                         hits: {
-                            300: client.score!.statistics.great,
-                            geki: client.score!.statistics.perfect,
-                            100: client.score!.statistics.ok,
-                            katu: client.score!.statistics.good,
-                            50: client.score!.statistics.meh,
-                            0: client.score!.statistics.miss,
-                            sliderEndHits:
-                                client.score!.statistics.sliderTailHit || 0,
-                            smallTickHits:
-                                client.score!.statistics.smallTickHit || 0,
-                            largeTickHits:
-                                client.score!.statistics.largeTickHit || 0,
+                            ...toLegacyHits(
+                                client.score!.mode,
+                                client.score!.statistics
+                            ),
                             // TODO: ADD SLIDERBREAKS
                             sliderBreaks: 0
                         },
