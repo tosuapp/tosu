@@ -11,7 +11,7 @@
   "dependencies": {
     "node-addon-api": "^8.5.0",
     "@tosu/common": "workspace:*",
-    "node-gyp": "^11.5.0"
+    "node-gyp": "^12.2.0"
   },
   "files": [
     "lib",
