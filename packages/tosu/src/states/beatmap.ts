@@ -768,7 +768,9 @@ export class BeatmapPP extends AbstractState {
             const mods = this.game.client !== ClientType.lazer ? ['CL'] : [];
             const diffCalc =
                 this.beatmap.createGradualDifficultyCalculator(mods);
-            diffCalc.skip(passedObjects);
+            if (passedObjects > 0) {
+                diffCalc.skip(passedObjects);
+            }
 
             const diffAttrs = diffCalc.createDifficultyAttrs();
             const diffData = diffAttrs.getData();
