@@ -52,8 +52,5 @@
   },
   "engines": {
     "node": ">=20.11.1"
-  },
-  "dependencies": {
-    "tosu": "link:packages/tosu"
   }
 }
