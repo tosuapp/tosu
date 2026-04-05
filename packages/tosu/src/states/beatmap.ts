@@ -4,6 +4,7 @@ import {
     type DifficultyAttrs,
     HitWindows,
     type PerformanceAttrsData,
+    type ScoreGenerator,
     type ScoreInfoData,
     type StrainsData
 } from '@tosu/pp';
@@ -100,6 +101,7 @@ export class BeatmapPP extends AbstractState {
     lazerBeatmap?: ParsedBeatmap;
     difficultyAttributes?: DifficultyAttrs;
     diffStrains?: StrainsData;
+    scoreGenerator?: ScoreGenerator;
     performanceAttributes?: PerformanceAttrsData;
 
     mode: number;
@@ -404,9 +406,9 @@ export class BeatmapPP extends AbstractState {
             const difficulty = this.difficultyAttributes.getData();
 
             // TODO:: gamemodes except std calculate accuracy without using provided one, needs workaround
+            this.scoreGenerator = this.beatmap.createScoreGenerator(mods);
             const fullScoreInfo: ScoreInfoData =
-                this.beatmap.createPerfectScore(mods);
-            console.log(fullScoreInfo);
+                this.scoreGenerator.createPerfectScore();
 
             this.performanceAttributes = this.beatmap.calculatePerformance(
                 this.difficultyAttributes,
@@ -745,6 +747,7 @@ export class BeatmapPP extends AbstractState {
                 !this.beatmap ||
                 !this.beatmapContent ||
                 !this.performanceAttributes ||
+                !this.scoreGenerator ||
                 !this.lazerBeatmap
             ) {
                 return;
@@ -774,28 +777,7 @@ export class BeatmapPP extends AbstractState {
             const diffData = diffAttrs.getData();
             const curPerformance = this.beatmap.calculatePerformance(
                 diffAttrs,
-                {
-                    totalScore: 0,
-                    accuracy: 1.0,
-                    mods,
-                    maxCombo: diffData.maxCombo,
-                    largeTickHits: 0,
-                    largeTickMisses: 0,
-                    smallTickHits: 0,
-                    smallTickMisses: 0,
-                    largeBonuses: 0,
-                    smallBonuses: 0,
-                    ignoreHits: 0,
-                    ignoreMisses: 0,
-                    comboBreaks: 0,
-                    sliderEndHits: diffData.nSliders,
-                    perfects: 0,
-                    greats: passedObjects + 1,
-                    goods: 0,
-                    oks: 0,
-                    mehs: 0,
-                    misses: 0
-                } satisfies ScoreInfoData
+                this.scoreGenerator.createPartialPerfectScore(passedObjects + 1)
             );
 
             this.currAttributes.pp = curPerformance.pp;
