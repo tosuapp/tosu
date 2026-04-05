@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      '@tosu/pp':
+        specifier: github:storycraft/tosu-lazer-pp#main
+        version: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369
       tosu:
         specifier: link:packages/tosu
         version: link:packages/tosu
@@ -170,7 +173,7 @@ importers:
         version: link:../ingame-overlay-updater
       '@tosu/pp':
         specifier: github:storycraft/tosu-lazer-pp#main
-        version: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/29095361e6c062ceaaf8234c45353df5ee28f100
+        version: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369
       '@tosu/server':
         specifier: workspace:*
         version: link:../server
@@ -1075,8 +1078,8 @@ packages:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
 
-  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/29095361e6c062ceaaf8234c45353df5ee28f100':
-    resolution: {tarball: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/29095361e6c062ceaaf8234c45353df5ee28f100}
+  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369':
+    resolution: {tarball: https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369}
     version: 0.1.0
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
@@ -5182,7 +5185,7 @@ snapshots:
 
   '@tootallnate/once@2.0.0': {}
 
-  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/29095361e6c062ceaaf8234c45353df5ee28f100': {}
+  '@tosu/pp@https://codeload.github.com/storycraft/tosu-lazer-pp/tar.gz/ec328cd17f6169cff7ffead0cd64f8e94ec32369': {}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
