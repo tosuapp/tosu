@@ -524,6 +524,7 @@ export class Gameplay extends AbstractState {
                 totalScore: this.score,
                 accuracy: this.accuracy / 100,
                 mods,
+                maxCombo: this.maxCombo,
                 perfects: this.statistics.perfect,
                 greats: this.statistics.great,
                 goods: this.statistics.good,
@@ -532,15 +533,14 @@ export class Gameplay extends AbstractState {
                 misses: this.statistics.miss,
                 sliderEndHits: this.statistics.sliderTailHit,
                 smallTickHits: this.statistics.smallTickHit,
-                smallTickMisses: this.statistics.smallTickMiss || 0,
+                smallTickMisses: this.statistics.smallTickMiss,
                 largeTickHits: this.statistics.largeTickHit,
-                largeTickMisses: this.statistics.largeTickMiss || 0,
-                largeBonuses: this.statistics.largeBonus || 0,
-                smallBonuses: this.statistics.smallBonus || 0,
-                comboBreaks: this.statistics.comboBreak || 0,
-                ignoreHits: this.statistics.ignoreHit || 0,
-                ignoreMisses: this.statistics.ignoreMiss || 0,
-                maxCombo: this.maxCombo
+                largeTickMisses: this.statistics.largeTickMiss,
+                largeBonuses: this.statistics.largeBonus,
+                smallBonuses: this.statistics.smallBonus,
+                comboBreaks: this.statistics.comboBreak,
+                ignoreHits: this.statistics.ignoreHit,
+                ignoreMisses: this.statistics.ignoreMiss
             };
 
             const currPerformance = currentBeatmap.calculatePerformance(
