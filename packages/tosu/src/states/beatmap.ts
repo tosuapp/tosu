@@ -383,12 +383,6 @@ export class BeatmapPP extends AbstractState {
                 }
 
                 this.beatmap = converted;
-            } else if (this.beatmap.mode === 2) {
-                // Catch beatmap needs conversion even if it's already in the correct mode what.
-                const converted = this.beatmap.convert(this.beatmap.mode);
-                if (converted) {
-                    this.beatmap = converted;
-                }
             }
 
             const beatmapCheckTime = performance.now();
