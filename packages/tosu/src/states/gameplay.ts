@@ -474,7 +474,7 @@ export class Gameplay extends AbstractState {
             }
 
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
-            if (!currentBeatmap) {
+            if (!currentBeatmap || !beatmapPP.difficultyAttributes) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
                     `Current beatmap unavailable, skipping PP calc`
@@ -585,7 +585,10 @@ export class Gameplay extends AbstractState {
             }
 
             const maxAchievablePerformance =
-                currentBeatmap.calculatePerformance(currDiffAttrs, calcOptions);
+                currentBeatmap.calculatePerformance(
+                    beatmapPP.difficultyAttributes,
+                    calcOptions
+                );
             beatmapPP.currAttributes.maxAchievable =
                 maxAchievablePerformance.pp;
 
@@ -609,7 +612,7 @@ export class Gameplay extends AbstractState {
             }
 
             const fcPerformance = currentBeatmap.calculatePerformance(
-                currDiffAttrs,
+                beatmapPP.difficultyAttributes,
                 calcOptions
             );
 
