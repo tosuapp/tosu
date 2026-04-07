@@ -598,7 +598,14 @@ export class Gameplay extends AbstractState {
 
             const fcPerformance = currentBeatmap.calculatePerformance(
                 beatmapPP.difficultyAttributes,
-                ScoreSimulator.createScore(currentBeatmap, mods, this.accuracy)
+                {
+                    ...ScoreSimulator.createScore(
+                        currentBeatmap,
+                        mods,
+                        this.accuracy / 100
+                    ),
+                    maxCombo: beatmapPP.calculatedMapAttributes.maxCombo
+                }
             );
             beatmapPP.currAttributes.fcPP = fcPerformance.pp;
             beatmapPP.updatePPAttributes('fc', fcPerformance);
