@@ -1,5 +1,9 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
-import { GradualDifficulty, type ScoreInfoData } from '@tosu/pp';
+import {
+    GradualDifficulty,
+    type ScoreInfoData,
+    ScoreSimulator
+} from '@tosu/pp';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -592,34 +596,12 @@ export class Gameplay extends AbstractState {
             beatmapPP.currAttributes.maxAchievable =
                 maxAchievablePerformance.pp;
 
-            if (this.mode === 3) {
-                calcOptions.oks = this.statistics.ok;
-                calcOptions.mehs = this.statistics.meh;
-                calcOptions.misses = this.statistics.miss;
-                calcOptions.accuracy = this.accuracy / 100;
-            } else {
-                calcOptions.greats =
-                    this.statistics.great + this.statistics.miss;
-                calcOptions.maxCombo =
-                    beatmapPP.calculatedMapAttributes.maxCombo;
-                calcOptions.sliderEndHits =
-                    beatmapPP.maxScore?.sliderEndHits || 0;
-                calcOptions.smallTickHits =
-                    beatmapPP.maxScore?.smallTickHits || 0;
-                calcOptions.largeTickHits =
-                    beatmapPP.maxScore?.largeTickHits || 0;
-                calcOptions.misses = 0;
-            }
-
             const fcPerformance = currentBeatmap.calculatePerformance(
                 beatmapPP.difficultyAttributes,
-                calcOptions
+                ScoreSimulator.createScore(currentBeatmap, mods, this.accuracy)
             );
-
-            if (fcPerformance) {
-                beatmapPP.currAttributes.fcPP = fcPerformance.pp;
-                beatmapPP.updatePPAttributes('fc', fcPerformance);
-            }
+            beatmapPP.currAttributes.fcPP = fcPerformance.pp;
+            beatmapPP.updatePPAttributes('fc', fcPerformance);
 
             this.previousPassedObjects = passedObjects;
 
