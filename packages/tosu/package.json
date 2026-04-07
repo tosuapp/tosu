@@ -13,7 +13,7 @@
         "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
-        "@tosu/pp": "github:storycraft/tosu-lazer-pp#main",
+        "@tosu/pp": "github:tosuapp/lazer-calculator#main&path:lib",
         "@tosu/common": "workspace:*",
         "@tosu/ingame-overlay-updater": "workspace:*",
         "@tosu/server": "workspace:*",
