@@ -13,9 +13,9 @@
         "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
-        "@tosu/pp": "github:tosuapp/lazer-calculator#main&path:lib",
         "@tosu/common": "workspace:*",
         "@tosu/ingame-overlay-updater": "workspace:*",
+        "@tosu/pp": "github:tosuapp/lazer-calculator#main&path:/lib",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
         "osu-catch-stable": "^4.0.1",
