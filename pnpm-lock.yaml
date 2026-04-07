@@ -163,7 +163,7 @@ importers:
         version: link:../ingame-overlay-updater
       '@tosu/pp':
         specifier: github:tosuapp/lazer-calculator#main&path:/lib
-        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/b04325808bc30f9a60b9824d298585d3e80721de#path:/lib
+        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/ed6a99482aee792ab90ae7b9348ec11aa7397825#path:/lib
       '@tosu/server':
         specifier: workspace:*
         version: link:../server
@@ -1068,8 +1068,8 @@ packages:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
 
-  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/b04325808bc30f9a60b9824d298585d3e80721de#path:/lib':
-    resolution: {path: /lib, tarball: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/b04325808bc30f9a60b9824d298585d3e80721de}
+  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/ed6a99482aee792ab90ae7b9348ec11aa7397825#path:/lib':
+    resolution: {path: /lib, tarball: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/ed6a99482aee792ab90ae7b9348ec11aa7397825}
     version: 0.1.0
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
@@ -5180,7 +5180,7 @@ snapshots:
 
   '@tootallnate/once@2.0.0': {}
 
-  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/b04325808bc30f9a60b9824d298585d3e80721de#path:/lib': {}
+  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/ed6a99482aee792ab90ae7b9348ec11aa7397825#path:/lib': {}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
