@@ -1,19 +1,11 @@
-import type { Hits3 } from '@/api/types/v2';
+import type { Hits2, Hits3 } from '@/api/types/v2';
 import type { Statistics } from '@/states/types';
 
 /**
  * Perform conversion from legacy hit results to lazer hit statistics
  * based on https://github.com/ppy/osu/blob/master/osu.Game/Scoring/Legacy/ScoreInfoExtensions.cs
  */
-export function fromLegacyHitResults(
-    mode: number,
-    geki: number,
-    n300: number,
-    katu: number,
-    n100: number,
-    n50: number,
-    miss: number
-): Statistics {
+export function fromLegacyHitResults(mode: number, hits: Hits2): Statistics {
     const statistics: Statistics = {
         perfect: 0,
         great: 0,
@@ -32,13 +24,13 @@ export function fromLegacyHitResults(
         ignoreHit: 0,
         comboBreak: 0
     };
-    statistics.great = n300;
-    statistics.miss = miss;
+    statistics.great = hits['300'];
+    statistics.miss = hits['0'];
 
-    addGeki(mode, geki, statistics);
-    addKatu(mode, katu, statistics);
-    addN100(mode, n100, statistics);
-    addN50(mode, n50, statistics);
+    addGeki(mode, hits.geki, statistics);
+    addKatu(mode, hits.katu, statistics);
+    addN100(mode, hits['100'], statistics);
+    addN50(mode, hits['50'], statistics);
     return statistics;
 }
 
