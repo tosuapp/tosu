@@ -32,13 +32,13 @@ export function fromLegacyHitResults(
         ignoreHit: 0,
         comboBreak: 0
     };
+    statistics.great = n300;
+    statistics.miss = miss;
 
     addGeki(mode, geki, statistics);
-    statistics.great = n300;
     addKatu(mode, katu, statistics);
     addN100(mode, n100, statistics);
     addN50(mode, n50, statistics);
-    statistics.miss = miss;
     return statistics;
 }
 
@@ -46,7 +46,7 @@ export function fromLegacyHitResults(
  * Perform conversion from lazer hit statistics to legacy hit results
  */
 export function toLegacyHits(mode: number, statistics: Statistics): Hits3 {
-    const hits: Hits3 = {
+    return {
         0: getMiss(mode, statistics),
         50: getN50(mode, statistics),
         100: getN100(mode, statistics),
@@ -57,8 +57,6 @@ export function toLegacyHits(mode: number, statistics: Statistics): Hits3 {
         smallTickHits: statistics.smallTickHit,
         largeTickHits: statistics.largeTickHit
     };
-
-    return hits;
 }
 
 function addGeki(mode: number, geki: number, statistics: Statistics) {
