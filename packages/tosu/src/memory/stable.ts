@@ -470,15 +470,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
-            const statistics = fromLegacyHitResults(
-                mode,
-                hitGeki,
-                hit300,
-                hitKatu,
-                hit100,
-                hit50,
-                hitMiss
-            );
+            const statistics = fromLegacyHitResults(mode, {
+                '300': hit300,
+                '100': hit100,
+                '50': hit50,
+                '0': hitMiss,
+                geki: hitGeki,
+                katu: hitKatu
+            });
             return {
                 onlineId,
                 playerName,
@@ -614,15 +613,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 playerHPSmooth,
                 playerHP,
                 accuracy,
-                statistics: fromLegacyHitResults(
-                    mode,
-                    hitGeki,
-                    hit300,
-                    hitKatu,
-                    hit100,
-                    hit50,
-                    hitMiss
-                ),
+                statistics: fromLegacyHitResults(mode, {
+                    '300': hit300,
+                    '100': hit100,
+                    '50': hit50,
+                    '0': hitMiss,
+                    geki: hitGeki,
+                    katu: hitKatu
+                }),
                 maximumStatistics: Object.assign({}, defaultStatistics),
                 combo,
                 maxCombo
@@ -1280,15 +1278,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             }
         }
 
-        const statistics = fromLegacyHitResults(
-            mode,
-            0,
-            this.process.readShort(entry + 0x8a),
-            0,
-            this.process.readShort(entry + 0x88),
-            this.process.readShort(entry + 0x8c),
-            this.process.readShort(entry + 0x92)
-        );
+        const statistics = fromLegacyHitResults(mode, {
+            geki: 0,
+            '300': this.process.readShort(entry + 0x8a),
+            katu: 0,
+            '100': this.process.readShort(entry + 0x88),
+            '50': this.process.readShort(entry + 0x8c),
+            '0': this.process.readShort(entry + 0x92)
+        });
 
         return {
             userId,
