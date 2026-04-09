@@ -14,7 +14,7 @@ import {
     Statistics
 } from '@/states/types';
 import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
-import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
+import { defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
 export const defaultStatistics = {
@@ -494,16 +494,10 @@ export class Gameplay extends AbstractState {
             const currentState = `${menu.checksum}:${menu.gamemode}:${this.mods.checksum}:${menu.mp3Length}`;
             const isUpdate = this.previousState !== currentState;
 
-            const mods = sanitizeMods(this.mods.array).map((r) => r.acronym);
-            if (this.game.client !== ClientType.lazer) {
-                // Add classic mod if client is not on lazer.
-                mods.push('CL');
-            }
-
             // update precalculated attributes
             if (isUpdate || !this.gradualPerformance) {
                 this.gradualPerformance =
-                    currentBeatmap.createGradualDifficultyCalculator(mods);
+                    currentBeatmap.createGradualDifficultyCalculator();
 
                 this.previousState = currentState;
             }
@@ -548,7 +542,6 @@ export class Gameplay extends AbstractState {
             const scoreInfo: ScoreInfoData = {
                 totalScore: this.score,
                 accuracy: this.accuracy / 100,
-                mods,
                 maxCombo: this.maxCombo,
                 perfects: this.statistics.perfect,
                 greats: this.statistics.great,

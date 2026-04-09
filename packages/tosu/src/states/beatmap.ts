@@ -1,9 +1,10 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import {
-    Beatmap,
     type DifficultyAttrs,
     HitWindows,
+    type LazerMod,
     type PerformanceAttrsData,
+    PlayBeatmap,
     type ScoreInfoData,
     ScoreSimulator,
     type StrainsData
@@ -97,7 +98,7 @@ export class BeatmapPP extends AbstractState {
     isKiai: boolean;
     isBreak: boolean;
 
-    beatmap?: Beatmap;
+    beatmap?: PlayBeatmap;
     lazerBeatmap?: ParsedBeatmap;
     difficultyAttributes?: DifficultyAttrs;
     diffStrains?: StrainsData;
@@ -371,7 +372,7 @@ export class BeatmapPP extends AbstractState {
                 return 'not-ready';
             }
 
-            this.beatmap = Beatmap.parse(this.beatmapContent);
+            this.beatmap = PlayBeatmap.parse(this.beatmapContent);
             if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode) {
                 const converted = this.beatmap.convert(currentMode);
                 if (!converted) {
@@ -392,21 +393,31 @@ export class BeatmapPP extends AbstractState {
                 `Beatmap took %${totalTime}ms%`
             );
 
-            const mods = sanitizeMods(currentMods.array).map((r) => r.acronym);
+            const mods: LazerMod[] = sanitizeMods(currentMods.array).map(
+                (mod) => {
+                    return {
+                        acronym: mod.acronym,
+                        settings:
+                            'settings' in mod && mod.settings
+                                ? new Map(Object.entries(mod.settings))
+                                : new Map()
+                    };
+                }
+            );
             if (this.game.client !== ClientType.lazer) {
                 // Add classic mod if client is not on lazer.
-                mods.push('CL');
+                mods.push({ acronym: 'CL', settings: new Map() });
             }
+            this.beatmap.applyMods(mods);
 
-            const gradual =
-                this.beatmap.createGradualDifficultyCalculator(mods);
+            const gradual = this.beatmap.createGradualDifficultyCalculator();
             gradual.skipToEnd();
             this.difficultyAttributes = gradual.createDifficultyAttrs();
             this.diffStrains = gradual.getCurrentStrains();
             const difficulty = this.difficultyAttributes.getData();
 
             this.maxScore = {
-                ...ScoreSimulator.createScore(this.beatmap, mods, 1.0),
+                ...ScoreSimulator.createScore(this.beatmap, 1.0),
                 maxCombo: difficulty.maxCombo
             };
 
@@ -428,7 +439,6 @@ export class BeatmapPP extends AbstractState {
                         {
                             ...ScoreSimulator.createScore(
                                 this.beatmap,
-                                mods,
                                 acc / 100
                             ),
                             maxCombo: this.maxScore.maxCombo
@@ -544,8 +554,9 @@ export class BeatmapPP extends AbstractState {
                 `Beatmap parsing took %${(beatmapParseTime - calculationTime).toFixed(2)}ms%`
             );
 
-            const originalDifficulty = this.beatmap.getBeatmapDifficulty([]);
-            const convertedDifficulty = this.beatmap.getBeatmapDifficulty(mods);
+            const originalDifficulty =
+                this.beatmap.getOriginalBeatmapDifficulty();
+            const convertedDifficulty = this.beatmap.getBeatmapDifficulty();
             this.calculatedMapAttributes = {
                 ar: originalDifficulty.approachRate,
                 arConverted: convertedDifficulty.approachRate,
@@ -774,9 +785,7 @@ export class BeatmapPP extends AbstractState {
                     (r) => r.startTime <= global.playTime
                 ) + 1;
 
-            const mods = this.game.client !== ClientType.lazer ? ['CL'] : [];
-            const diffCalc =
-                this.beatmap.createGradualDifficultyCalculator(mods);
+            const diffCalc = this.beatmap.createGradualDifficultyCalculator();
             if (passedObjects > 0) {
                 diffCalc.skip(passedObjects);
             }
@@ -789,7 +798,6 @@ export class BeatmapPP extends AbstractState {
                     ...ScoreSimulator.createPartialScore(
                         this.beatmap,
                         passedObjects,
-                        mods,
                         1.0
                     ),
                     maxCombo: diffData.maxCombo
