@@ -589,9 +589,6 @@ export class Gameplay extends AbstractState {
                     beatmapPP.maxScore.smallTickHits -
                     this.statistics.smallTickMiss
             };
-            if (this.game.client !== ClientType.lazer) {
-                calcOptions.sliderEndHits = beatmapPP.maxScore.sliderEndHits;
-            }
 
             if (this.mode === 3) {
                 calcOptions.perfects =
