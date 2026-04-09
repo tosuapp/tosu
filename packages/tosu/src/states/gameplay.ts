@@ -4,6 +4,7 @@ import {
     GradualDifficulty,
     type ScoreInfoData
 } from '@tosu/pp';
+import type { IHasDuration } from 'osu-classes';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -516,10 +517,26 @@ export class Gameplay extends AbstractState {
                 return;
             }
 
-            const passedObjects = calculatePassedObjects(
+            let passedObjects = calculatePassedObjects(
                 this.mode,
                 this.statistics
             );
+            // Check if hit object is actually ended
+            if (
+                passedObjects > 0 &&
+                beatmapPP.lazerBeatmap?.hitObjects[passedObjects - 1]
+            ) {
+                const hitObject =
+                    beatmapPP.lazerBeatmap.hitObjects[passedObjects - 1];
+                if ('endTime' in hitObject) {
+                    const endTime = (hitObject as unknown as IHasDuration)
+                        .endTime;
+
+                    if (endTime > global.playTime) {
+                        passedObjects -= 1;
+                    }
+                }
+            }
 
             const offset = passedObjects - this.previousPassedObjects;
             if (offset <= 0) return;
