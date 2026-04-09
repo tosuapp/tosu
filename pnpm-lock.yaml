@@ -162,7 +162,7 @@ importers:
         specifier: workspace:*
         version: link:../ingame-overlay-updater
       '@tosu/pp':
-        specifier: github:tosuapp/lazer-calculator#feat/lazer-mod&path:/lib
+        specifier: github:tosuapp/lazer-calculator#main&path:/lib
         version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/ffd1a4682618d4ab246531c2c3885f193494c9b1#path:/lib
       '@tosu/server':
         specifier: workspace:*
