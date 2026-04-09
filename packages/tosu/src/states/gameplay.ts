@@ -566,11 +566,22 @@ export class Gameplay extends AbstractState {
 
             const calcOptions: ScoreInfoData = {
                 ...scoreInfo,
+                // Calculate max archivable combo based difference between gradual max combo and current max combo
+                maxCombo:
+                    beatmapPP.maxScore.maxCombo -
+                    (currDiff.maxCombo - this.maxCombo),
                 greats:
                     beatmapPP.maxScore.greats -
                     this.statistics.ok -
                     this.statistics.meh -
-                    this.statistics.miss
+                    this.statistics.miss,
+                largeTickHits:
+                    beatmapPP.maxScore.largeTickHits -
+                    this.statistics.largeTickMiss,
+                // Small hit ticks doesn't affect combo but only accuracy.
+                smallTickHits:
+                    beatmapPP.maxScore.smallTickHits -
+                    this.statistics.smallTickMiss
             };
             if (this.mode === 3) {
                 calcOptions.perfects =
@@ -601,11 +612,8 @@ export class Gameplay extends AbstractState {
                 calcOptions.greats +=
                     calcOptions.misses + calcOptions.comboBreaks;
             }
-            calcOptions.largeTickHits = beatmapPP.maxScore.largeTickHits;
+            calcOptions.largeTickHits += calcOptions.largeTickMisses;
             calcOptions.largeTickMisses = 0;
-            // Small hit ticks doesn't affect combo but only accuracy.
-            calcOptions.smallTickHits =
-                beatmapPP.maxScore.smallTickHits - calcOptions.smallTickMisses;
             calcOptions.sliderEndHits = beatmapPP.maxScore.sliderEndHits;
             calcOptions.comboBreaks = 0;
             calcOptions.misses = 0;
