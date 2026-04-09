@@ -604,7 +604,7 @@ export class Gameplay extends AbstractState {
             beatmapPP.currAttributes.maxAchievable =
                 maxAchievablePerformance.pp;
 
-            calcOptions.maxCombo = beatmapPP.calculatedMapAttributes.maxCombo;
+            calcOptions.maxCombo = beatmapPP.maxScore.maxCombo;
             if (this.mode === 3) {
                 calcOptions.perfects +=
                     calcOptions.misses + calcOptions.comboBreaks;
