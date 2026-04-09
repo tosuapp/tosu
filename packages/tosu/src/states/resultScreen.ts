@@ -4,7 +4,7 @@ import type { ScoreInfoData } from '@tosu/pp';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { calculateGrade } from '@/utils/calculators';
-import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
+import { defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods } from '@/utils/osuMods.types';
 
 import { defaultStatistics } from './gameplay';
@@ -135,17 +135,10 @@ export class ResultScreen extends AbstractState {
                 return;
             }
 
-            const mods = sanitizeMods(this.mods.array).map((r) => r.acronym);
-            if (this.game.client !== ClientType.lazer) {
-                // Add classic mod if client is not on lazer.
-                mods.push('CL');
-            }
-
             const calcOptions: ScoreInfoData = {
                 totalScore: this.score,
                 maxCombo: this.maxCombo,
                 accuracy: this.accuracy / 100,
-                mods,
                 largeTickHits: this.statistics.largeTickHit,
                 largeTickMisses: this.statistics.largeTickMiss || 0,
                 smallTickHits: this.statistics.smallTickHit,
