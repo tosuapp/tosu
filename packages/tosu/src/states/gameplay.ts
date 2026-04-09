@@ -566,7 +566,7 @@ export class Gameplay extends AbstractState {
 
             const calcOptions: ScoreInfoData = {
                 ...scoreInfo,
-                // Calculate max archivable combo based difference between gradual max combo and current max combo
+                // Calculate max archivable combo based difference between gradual and current max combo
                 maxCombo:
                     beatmapPP.maxScore.maxCombo -
                     (currDiff.maxCombo - this.maxCombo),
@@ -578,6 +578,10 @@ export class Gameplay extends AbstractState {
                 largeTickHits:
                     beatmapPP.maxScore.largeTickHits -
                     this.statistics.largeTickMiss,
+                // Calculate max archivable slider end hits based difference between gradual and current hits
+                sliderEndHits:
+                    beatmapPP.maxScore.sliderEndHits -
+                    (currDiff.nSliders - this.statistics.sliderTailHit),
                 // Small hit ticks doesn't affect combo but only accuracy.
                 smallTickHits:
                     beatmapPP.maxScore.smallTickHits -
