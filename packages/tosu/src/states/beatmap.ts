@@ -667,8 +667,10 @@ export class BeatmapPP extends AbstractState {
             switch (this.beatmap.mode) {
                 case 0:
                     updateWithOffset('aim', this.diffStrains.aim);
-                    // TODO:: remove aimNoSliders
-                    updateWithOffset('aimNoSliders', new Float64Array());
+                    updateWithOffset(
+                        'aimNoSliders',
+                        this.diffStrains.aimWithoutSliders
+                    );
                     updateWithOffset('flashlight', this.diffStrains.flashlight);
                     updateWithOffset('speed', this.diffStrains.speed);
 
