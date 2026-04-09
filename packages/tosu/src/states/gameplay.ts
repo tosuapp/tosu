@@ -566,10 +566,12 @@ export class Gameplay extends AbstractState {
 
             const calcOptions: ScoreInfoData = {
                 ...scoreInfo,
-                // Calculate max archivable combo based difference between gradual and current max combo
-                maxCombo:
+                // Calculate max archivable combo based difference between gradual and current combo
+                maxCombo: Math.max(
+                    this.maxCombo,
                     beatmapPP.maxScore.maxCombo -
-                    (currDiff.maxCombo - this.maxCombo),
+                        (currDiff.maxCombo - this.combo)
+                ),
                 greats:
                     beatmapPP.maxScore.greats -
                     this.statistics.ok -
