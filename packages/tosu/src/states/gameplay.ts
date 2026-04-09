@@ -610,6 +610,7 @@ export class Gameplay extends AbstractState {
             if (this.mode === 3) {
                 calcOptions.perfects =
                     beatmapPP.maxScore.perfects -
+                    this.statistics.good -
                     this.statistics.ok -
                     this.statistics.meh -
                     this.statistics.miss;
