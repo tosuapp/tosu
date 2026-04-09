@@ -36,6 +36,7 @@ import { LeaderboardPlayer } from '@/states/types';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import { calculateAccuracy } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
+import { fromLegacyHitResults } from '@/utils/hitResult';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type {
     BindingsList,
@@ -469,19 +470,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
-            const hits = {
-                perfect: hitGeki,
-                great: hit300,
-                good: hitKatu,
-                ok: hit100,
-                meh: hit50,
-                miss: hitMiss,
-
-                sliderTailHit: 0,
-                smallTickHit: 0,
-                largeTickHit: 0
-            };
-
+            const statistics = fromLegacyHitResults(mode, {
+                '300': hit300,
+                '100': hit100,
+                '50': hit50,
+                '0': hitMiss,
+                geki: hitGeki,
+                katu: hitKatu
+            });
             return {
                 onlineId,
                 playerName,
@@ -493,9 +489,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     isLazer: false,
                     mode,
                     mods: mods.array,
-                    statistics: hits
+                    statistics
                 }),
-                statistics: hits,
+                statistics,
                 maximumStatistics: Object.assign({}, defaultStatistics),
                 date
             };
@@ -617,17 +613,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 playerHPSmooth,
                 playerHP,
                 accuracy,
-                statistics: {
-                    perfect: hitGeki,
-                    great: hit300,
-                    good: hitKatu,
-                    ok: hit100,
-                    meh: hit50,
-                    miss: hitMiss,
-                    sliderTailHit: 0,
-                    smallTickHit: 0,
-                    largeTickHit: 0
-                },
+                statistics: fromLegacyHitResults(mode, {
+                    '300': hit300,
+                    '100': hit100,
+                    '50': hit50,
+                    '0': hitMiss,
+                    geki: hitGeki,
+                    katu: hitKatu
+                }),
                 maximumStatistics: Object.assign({}, defaultStatistics),
                 combo,
                 maxCombo
@@ -1285,18 +1278,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             }
         }
 
-        const hits = {
-            perfect: 0,
-            great: this.process.readShort(entry + 0x8a),
-            good: 0,
-            ok: this.process.readShort(entry + 0x88),
-            meh: this.process.readShort(entry + 0x8c),
-            miss: this.process.readShort(entry + 0x92),
-
-            sliderTailHit: 0,
-            smallTickHit: 0,
-            largeTickHit: 0
-        };
+        const statistics = fromLegacyHitResults(mode, {
+            geki: 0,
+            '300': this.process.readShort(entry + 0x8a),
+            katu: 0,
+            '100': this.process.readShort(entry + 0x88),
+            '50': this.process.readShort(entry + 0x8c),
+            '0': this.process.readShort(entry + 0x92)
+        });
 
         return {
             userId,
@@ -1311,9 +1300,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 isLazer: false,
                 mode,
                 mods: mods.array,
-                statistics: hits
+                statistics
             }),
-            statistics: hits,
+            statistics,
             team: this.process.readInt(base + 0x40),
             position: this.process.readInt(base + 0x2c),
             isPassing: Boolean(this.process.readByte(base + 0x4b))

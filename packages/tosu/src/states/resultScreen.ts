@@ -1,10 +1,10 @@
-import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
 import { ClientType, measureTime, wLogger } from '@tosu/common';
+import type { ScoreInfoData } from '@tosu/pp';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { calculateGrade } from '@/utils/calculators';
-import { defaultCalculatedMods, sanitizeMods } from '@/utils/osuMods';
+import { defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods } from '@/utils/osuMods.types';
 
 import { defaultStatistics } from './gameplay';
@@ -126,7 +126,8 @@ export class ResultScreen extends AbstractState {
             }
 
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
-            if (!currentBeatmap) {
+            const diffAttrs = beatmapPP.difficultyAttributes;
+            if (!currentBeatmap || !diffAttrs) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
                     `Result screen PP calc skipped: Can't get current map`
@@ -134,75 +135,62 @@ export class ResultScreen extends AbstractState {
                 return;
             }
 
-            const commonParams = {
-                mods: sanitizeMods(this.mods.array),
-                lazer: this.game.client === ClientType.lazer
-            };
-
-            const calcOptions: rosu.PerformanceArgs = {
-                nGeki: this.statistics.perfect,
-                n300: this.statistics.great,
-                nKatu: this.statistics.good,
-                n100: this.statistics.ok,
-                n50: this.statistics.meh,
-                misses: this.statistics.miss,
-                sliderEndHits: this.statistics.sliderTailHit,
-                smallTickHits: this.statistics.smallTickHit,
+            const calcOptions: ScoreInfoData = {
+                totalScore: this.score,
+                maxCombo: this.maxCombo,
+                accuracy: this.accuracy / 100,
                 largeTickHits: this.statistics.largeTickHit,
-                combo: this.maxCombo,
-                ...commonParams
+                largeTickMisses: this.statistics.largeTickMiss || 0,
+                smallTickHits: this.statistics.smallTickHit,
+                smallTickMisses: this.statistics.smallTickMiss || 0,
+                sliderEndHits: this.statistics.sliderTailHit,
+                comboBreaks: this.statistics.comboBreak || 0,
+                ignoreHits: this.statistics.ignoreHit || 0,
+                ignoreMisses: this.statistics.ignoreMiss || 0,
+                largeBonuses: this.statistics.largeBonus || 0,
+                smallBonuses: this.statistics.smallBonus || 0,
+                perfects: this.statistics.perfect,
+                greats: this.statistics.great,
+                goods: this.statistics.good,
+                oks: this.statistics.ok,
+                mehs: this.statistics.meh,
+                misses: this.statistics.miss
             };
 
             const t1 = performance.now();
-            const curPerformance = new rosu.Performance(calcOptions).calculate(
-                currentBeatmap
+            const curPerformance = currentBeatmap.calculatePerformance(
+                diffAttrs,
+                calcOptions
             );
 
-            const fcCalcOptions: rosu.PerformanceArgs = {
-                nGeki: this.statistics.perfect,
-                n300: this.statistics.great + this.statistics.miss,
-                nKatu: this.statistics.good,
-                n100: this.statistics.ok,
-                n50: this.statistics.meh,
+            const fcCalcOptions: ScoreInfoData = {
+                ...calcOptions,
+                greats: this.statistics.great + this.statistics.miss,
                 misses: 0,
-                sliderEndHits:
-                    beatmapPP.performanceAttributes?.state?.sliderEndHits,
-                smallTickHits:
-                    beatmapPP.performanceAttributes?.state?.osuSmallTickHits,
-                largeTickHits:
-                    beatmapPP.performanceAttributes?.state?.osuLargeTickHits,
-                combo: beatmapPP.calculatedMapAttributes.maxCombo,
-                ...commonParams
+                maxCombo: beatmapPP.calculatedMapAttributes.maxCombo
             };
             if (this.mode === 3) {
-                fcCalcOptions.nGeki =
+                fcCalcOptions.perfects =
                     this.statistics.perfect +
                     this.statistics.ok +
                     this.statistics.meh +
                     this.statistics.miss;
-                fcCalcOptions.n300 = this.statistics.great;
-                fcCalcOptions.nKatu = this.statistics.good;
-                fcCalcOptions.n100 = 0;
-                fcCalcOptions.n50 = 0;
+                fcCalcOptions.greats = this.statistics.great;
+                fcCalcOptions.goods = this.statistics.good;
+                fcCalcOptions.oks = 0;
+                fcCalcOptions.mehs = 0;
                 fcCalcOptions.misses = 0;
-                delete fcCalcOptions.sliderEndHits;
-                delete fcCalcOptions.smallTickHits;
-                delete fcCalcOptions.largeTickHits;
-                delete fcCalcOptions.combo;
-                fcCalcOptions.accuracy = this.accuracy;
-                fcCalcOptions.hitresultPriority = HitResultPriority.Fastest;
+                fcCalcOptions.accuracy = this.accuracy / 100;
             }
 
             const t2 = performance.now();
-            const fcPerformance = new rosu.Performance(fcCalcOptions).calculate(
-                curPerformance
+            const fcPerformance = currentBeatmap.calculatePerformance(
+                diffAttrs,
+                fcCalcOptions
             );
 
             this.pp = curPerformance.pp;
             this.fcPP = fcPerformance.pp;
-
-            curPerformance.free();
-            fcPerformance.free();
 
             wLogger.time(
                 `%${ClientType[this.game.client]}%`,
