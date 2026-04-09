@@ -1,8 +1,8 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import {
+    AccuracyCalculator,
     GradualDifficulty,
-    type ScoreInfoData,
-    ScoreSimulator
+    type ScoreInfoData
 } from '@tosu/pp';
 
 import { AbstractInstance } from '@/instances';
@@ -478,7 +478,11 @@ export class Gameplay extends AbstractState {
             }
 
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
-            if (!currentBeatmap || !beatmapPP.difficultyAttributes) {
+            if (
+                !currentBeatmap ||
+                !beatmapPP.difficultyAttributes ||
+                !beatmapPP.maxScore
+            ) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
                     `Current beatmap unavailable, skipping PP calc`
@@ -560,33 +564,26 @@ export class Gameplay extends AbstractState {
 
             beatmapPP.updatePPAttributes('curr', currPerformance);
 
-            const maxJudgementsAmount =
-                this.mode === 3 &&
-                (this.game.client === ClientType.lazer ||
-                    this.mods.array.includes({ acronym: 'SV2' }))
-                    ? beatmapPP.calculatedMapAttributes.circles +
-                      2 * beatmapPP.calculatedMapAttributes.sliders
-                    : beatmapPP.calculatedMapAttributes.circles +
-                      beatmapPP.calculatedMapAttributes.sliders +
-                      beatmapPP.calculatedMapAttributes.spinners +
-                      beatmapPP.calculatedMapAttributes.holds;
-
             const calcOptions: ScoreInfoData = {
                 ...scoreInfo,
                 greats:
-                    maxJudgementsAmount -
+                    beatmapPP.maxScore.greats -
                     this.statistics.ok -
                     this.statistics.meh -
                     this.statistics.miss
             };
             if (this.mode === 3) {
                 calcOptions.perfects =
-                    maxJudgementsAmount -
+                    beatmapPP.maxScore.perfects -
                     this.statistics.ok -
                     this.statistics.meh -
                     this.statistics.miss;
                 calcOptions.greats = this.statistics.great;
             }
+            calcOptions.accuracy = AccuracyCalculator.calculate(
+                currentBeatmap,
+                calcOptions
+            );
 
             const maxAchievablePerformance =
                 currentBeatmap.calculatePerformance(
@@ -596,16 +593,30 @@ export class Gameplay extends AbstractState {
             beatmapPP.currAttributes.maxAchievable =
                 maxAchievablePerformance.pp;
 
+            calcOptions.maxCombo = beatmapPP.calculatedMapAttributes.maxCombo;
+            if (this.mode === 3) {
+                calcOptions.perfects +=
+                    calcOptions.misses + calcOptions.comboBreaks;
+            } else {
+                calcOptions.greats +=
+                    calcOptions.misses + calcOptions.comboBreaks;
+            }
+            calcOptions.largeTickHits = beatmapPP.maxScore.largeTickHits;
+            calcOptions.largeTickMisses = 0;
+            // Small hit ticks doesn't affect combo but only accuracy.
+            calcOptions.smallTickHits =
+                beatmapPP.maxScore.smallTickHits - calcOptions.smallTickMisses;
+            calcOptions.sliderEndHits = beatmapPP.maxScore.sliderEndHits;
+            calcOptions.comboBreaks = 0;
+            calcOptions.misses = 0;
+            calcOptions.accuracy = AccuracyCalculator.calculate(
+                currentBeatmap,
+                calcOptions
+            );
+
             const fcPerformance = currentBeatmap.calculatePerformance(
                 beatmapPP.difficultyAttributes,
-                {
-                    ...ScoreSimulator.createScore(
-                        currentBeatmap,
-                        mods,
-                        this.accuracy / 100
-                    ),
-                    maxCombo: beatmapPP.calculatedMapAttributes.maxCombo
-                }
+                calcOptions
             );
             beatmapPP.currAttributes.fcPP = fcPerformance.pp;
             beatmapPP.updatePPAttributes('fc', fcPerformance);
