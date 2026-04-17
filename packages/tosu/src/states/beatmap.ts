@@ -410,7 +410,7 @@ export class BeatmapPP extends AbstractState {
             }
             this.beatmap.applyMods(mods);
 
-            const gradual = this.beatmap.createGradualDifficultyCalculator();
+            const gradual = this.beatmap.createGradualDifficulty();
             gradual.skipToEnd();
             this.difficultyAttributes = gradual.createDifficultyAttrs();
             this.diffStrains = gradual.getCurrentStrains();
@@ -785,7 +785,7 @@ export class BeatmapPP extends AbstractState {
                     (r) => r.startTime <= global.playTime
                 ) + 1;
 
-            const diffCalc = this.beatmap.createGradualDifficultyCalculator();
+            const diffCalc = this.beatmap.createGradualDifficulty();
             if (passedObjects > 0) {
                 diffCalc.skip(passedObjects);
             }
