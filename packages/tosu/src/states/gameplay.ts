@@ -497,7 +497,7 @@ export class Gameplay extends AbstractState {
             // update precalculated attributes
             if (isUpdate || !this.gradualPerformance) {
                 this.gradualPerformance =
-                    currentBeatmap.createGradualDifficultyCalculator();
+                    currentBeatmap.createGradualDifficulty();
 
                 this.previousState = currentState;
             }
