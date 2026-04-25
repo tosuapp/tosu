@@ -523,6 +523,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 return 'gameplayBase is zero';
             }
 
+            console.log('gamePlayBase:', gameplayBase.toString(16));
+
             const scoreBase = this.process.readInt(gameplayBase + 0x38);
             if (scoreBase === 0) {
                 return 'scoreBase is zero';
@@ -557,12 +559,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             // [[Ruleset + 0x68] + 0x38] + 0x64
             const mode = this.process.readInt(scoreBase + 0x64);
 
-            const scoreOffset =
-                this.game.version.includes('cuttingedge') ||
-                this.game.version.includes('tourney')
-                    ? 0xfc
-                    : 0x100;
-            const score = this.process.readInt(rulesetAddr + scoreOffset);
+            const score = this.process.readInt(rulesetAddr + 0xfc);
 
             // [[Ruleset + 0x68] + 0x40] + 0x14
             const playerHPSmooth =
