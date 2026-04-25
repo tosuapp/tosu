@@ -523,8 +523,6 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 return 'gameplayBase is zero';
             }
 
-            console.log('gamePlayBase:', gameplayBase.toString(16));
-
             const scoreBase = this.process.readInt(gameplayBase + 0x38);
             if (scoreBase === 0) {
                 return 'scoreBase is zero';
