@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.19.3](https://github.com/tosuapp/tosu/compare/v4.19.2...v4.19.3) (2026-04-25)
+
+
+### Bug Fixes
+
+* score offset ([0e00de4](https://github.com/tosuapp/tosu/commit/0e00de41de923d5cab9e1adc3080044aecd09ae4))
+
 ### [4.19.2](https://github.com/tosuapp/tosu/compare/v4.19.1...v4.19.2) (2026-04-02)
 
 
