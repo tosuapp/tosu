@@ -1,4 +1,4 @@
-import { CalculateMods } from '@/utils/osuMods.types';
+import { CalculateMods } from '@tosu/common';
 
 export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
