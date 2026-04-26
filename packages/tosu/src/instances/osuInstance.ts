@@ -112,7 +112,7 @@ export class OsuInstance extends AbstractInstance {
                     );
                     if (metadataUpdate === 'not-ready') continue;
 
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousState = currentState;
                 }
 
@@ -121,7 +121,7 @@ export class OsuInstance extends AbstractInstance {
                     global.gameFolder &&
                     updateGraph
                 ) {
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousMP3Length = menu.mp3Length;
                 }
 

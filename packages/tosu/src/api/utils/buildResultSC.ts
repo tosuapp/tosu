@@ -10,6 +10,7 @@ import path from 'path';
 
 import { InstanceManager } from '@/instances/manager';
 import { fixDecimals } from '@/utils/converters';
+import { toLegacyHits } from '@/utils/hitResult';
 
 import { ApiAnswer } from '../types/sc';
 
@@ -47,6 +48,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
               : menu.gamemode;
 
     const firstGraph = beatmapPP.strainsAll.series[0];
+    const hits = toLegacyHits(gameplay.mode, gameplay.statistics);
     return {
         osuIsRunning: 1,
         chatIsEnabled: global.chatStatus > 0 ? 1 : 0,
@@ -175,12 +177,12 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             M2Count: gameplay.keyOverlay.at(3)?.count ?? 0
         }),
 
-        geki: gameplay.statistics.perfect,
-        c300: gameplay.statistics.great,
-        katsu: gameplay.statistics.good,
-        c100: gameplay.statistics.ok,
-        c50: gameplay.statistics.meh,
-        miss: gameplay.statistics.miss,
+        geki: hits.geki,
+        c300: hits['300'],
+        katsu: hits.katu,
+        c100: hits['100'],
+        c50: hits['50'],
+        miss: hits['0'],
         sliderBreaks: gameplay.hitSB,
 
         acc: fixDecimals(gameplay.accuracy),

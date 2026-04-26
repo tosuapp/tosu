@@ -13,6 +13,7 @@ import { IUserProtected } from '@/memory/types';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
+import { toLegacyHits } from '@/utils/hitResult';
 import { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
@@ -67,6 +68,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
               ? resultScreen.mods
               : global.menuMods;
 
+    const hits = toLegacyHits(gameplay.mode, gameplay.statistics);
     return {
         client: ClientType[osuInstance.client],
         settings: {
@@ -172,12 +174,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 smooth: gameplay.playerHPSmooth
             },
             hits: {
-                300: gameplay.statistics.great,
-                geki: gameplay.statistics.perfect,
-                100: gameplay.statistics.ok,
-                katu: gameplay.statistics.good,
-                50: gameplay.statistics.meh,
-                0: gameplay.statistics.miss,
+                ...hits,
                 sliderBreaks: gameplay.hitSB,
                 grade: {
                     current: gameplay.gradeCurrent,

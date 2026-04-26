@@ -1,29 +1,21 @@
 import { CalculateMods } from '@/utils/osuMods.types';
 
 export interface Statistics {
-    /** geki */
     perfect: number;
-    /** h300 */
     great: number;
-    /** katu */
     good: number;
-    /** h100 */
     ok: number;
-    /** h50 */
     meh: number;
-    /** h0 */
     miss: number;
-
-    smallTickMiss?: number;
+    smallTickMiss: number;
     smallTickHit: number;
-    largeTickMiss?: number;
+    largeTickMiss: number;
     largeTickHit: number;
-    smallBonus?: number;
-    largeBonus?: number;
-    ignoreMiss?: number;
-    ignoreHit?: number;
-    comboBreak?: number;
-    /** sliderEndHits */
+    smallBonus: number;
+    largeBonus: number;
+    ignoreMiss: number;
+    ignoreHit: number;
+    comboBreak: number;
     sliderTailHit: number;
     legacyComboIncrease?: number;
 }
