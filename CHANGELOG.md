@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.19.4](https://github.com/tosuapp/tosu/compare/v4.19.3...v4.19.4) (2026-05-01)
+
+
+### Features
+
+* mouse handler got new offset ([0416e29](https://github.com/tosuapp/tosu/commit/0416e29f208eddde5182c8cbb6d752e86132d939))
+
 ### [4.19.3](https://github.com/tosuapp/tosu/compare/v4.19.2...v4.19.3) (2026-04-25)
 
 
