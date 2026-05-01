@@ -3731,7 +3731,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         values['tablet.pressureThreshold'] = pressureThreshold;
                     }
 
-                    if (i === 5) {
+                    if (i === 6) {
                         const userRelativeMode =
                             this.process.readByte(
                                 this.process.readIntPtr(
