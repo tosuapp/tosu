@@ -32,6 +32,7 @@ import type {
     ILazerSpectatorEntry,
     ILeaderboard,
     IMP3Length,
+    IMatchmakingStats,
     IMenu,
     IResultScreen,
     IScore,
@@ -267,6 +268,14 @@ export interface Offsets {
         '<Username>k__BackingField': number;
         countryCodeString: number;
         statistics: number;
+        MatchmakingStatistics: number;
+    };
+    'osu.Game.Online.API.Requests.Responses.APIUserMatchmakingStatistics': {
+        '<Rating>k__BackingField': number;
+        '<Rank>k__BackingField': number;
+        '<Plays>k__BackingField': number;
+        '<FirstPlacements>k__BackingField': number;
+        '<IsRatingProvisional>k__BackingField': number;
     };
     'osu.Game.Online.Chat.ChannelManager': {
         joinedChannels: number;
@@ -1898,7 +1907,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 performancePoints: 0,
                 rawBanchoStatus: 0,
                 backgroundColour: 0xffffffff,
-                rawLoginStatus: 0
+                rawLoginStatus: 0,
+                matchmaking: null
             };
         }
 
@@ -1964,6 +1974,57 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             gamemode = Rulesets.osu;
         }
 
+        const userMatchmakingStatistics =
+            this.offsets[
+                'osu.Game.Online.API.Requests.Responses.APIUserMatchmakingStatistics'
+            ];
+
+        const matchmakingArray = this.process.readIntPtr(
+            user +
+                this.offsets['osu.Game.Online.API.Requests.Responses.APIUser']
+                    .MatchmakingStatistics
+        );
+        const matchmakingCount = this.process.readInt(matchmakingArray + 0x8);
+
+        let matchmaking: IMatchmakingStats | null = null;
+
+        if (matchmakingCount > 0) {
+            const elem = this.process.readIntPtr(matchmakingArray + 0x10);
+            const rankHasValue = this.process.readByte(
+                elem + userMatchmakingStatistics['<Rank>k__BackingField']
+            );
+            matchmaking = {
+                rating: this.process.readInt(
+                    elem + userMatchmakingStatistics['<Rating>k__BackingField']
+                ),
+                rank: rankHasValue
+                    ? this.process.readInt(
+                          elem +
+                              userMatchmakingStatistics[
+                                  '<Rank>k__BackingField'
+                              ] +
+                              0x4
+                      )
+                    : null,
+                plays: this.process.readInt(
+                    elem + userMatchmakingStatistics['<Plays>k__BackingField']
+                ),
+                wins: this.process.readInt(
+                    elem +
+                        userMatchmakingStatistics[
+                            '<FirstPlacements>k__BackingField'
+                        ]
+                ),
+                isProvisional:
+                    this.process.readByte(
+                        elem +
+                            userMatchmakingStatistics[
+                                '<IsRatingProvisional>k__BackingField'
+                            ]
+                    ) !== 0
+            };
+        }
+
         return {
             id: userId,
             name: this.process.readSharpStringPtr(
@@ -1992,7 +2053,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             performancePoints: pp,
             rawBanchoStatus: 0,
             backgroundColour: 0xffffffff,
-            rawLoginStatus: 0
+            rawLoginStatus: 0,
+            matchmaking
         };
     }
 

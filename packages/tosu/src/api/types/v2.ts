@@ -190,6 +190,14 @@ export interface NumberName {
     name: string;
 }
 
+export interface MatchmakingStats {
+    rating: number;
+    rank: number | null;
+    plays: number;
+    wins: number;
+    isProvisional: boolean;
+}
+
 export interface Profile {
     userStatus: NumberName;
     banchoStatus: NumberName;
@@ -204,6 +212,7 @@ export interface Profile {
     globalRank: number;
     countryCode: NumberName;
     backgroundColour: string;
+    matchmaking: MatchmakingStats | null;
 }
 
 export interface Beatmap {

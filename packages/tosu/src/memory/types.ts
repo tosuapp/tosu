@@ -19,6 +19,14 @@ export type ScanPatterns = {
 
 export type IAudioVelocityBase = number[] | string;
 
+export interface IMatchmakingStats {
+    rating: number;
+    rank: number | null;
+    plays: number;
+    wins: number;
+    isProvisional: boolean;
+}
+
 export interface IUserProtected {
     name: string;
     accuracy: number;
@@ -33,6 +41,7 @@ export interface IUserProtected {
     rawBanchoStatus: number;
     backgroundColour: number;
     rawLoginStatus: number;
+    matchmaking: IMatchmakingStats | null;
 }
 
 export type IUser = Error | IUserProtected;
