@@ -1,5 +1,5 @@
-import rosu, { HitResultPriority, PerformanceArgs } from '@kotrikd/rosu-pp';
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
+import rosu, { HitResultPriority, PerformanceArgs } from 'rosu-pp-js';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -590,7 +590,7 @@ export class Gameplay extends AbstractState {
                     this.statistics.meh -
                     this.statistics.miss;
                 calcOptions.n300 = this.statistics.great;
-                calcOptions.hitresultPriority = HitResultPriority.Fastest;
+                calcOptions.hitresultPriority = HitResultPriority.BestCase;
                 delete calcOptions.combo;
             }
 
@@ -614,7 +614,7 @@ export class Gameplay extends AbstractState {
                 delete calcOptions.smallTickHits;
                 delete calcOptions.largeTickHits;
                 calcOptions.accuracy = this.accuracy;
-                calcOptions.hitresultPriority = HitResultPriority.Fastest;
+                calcOptions.hitresultPriority = HitResultPriority.BestCase;
             } else {
                 calcOptions.n300 = this.statistics.great + this.statistics.miss;
                 calcOptions.combo = beatmapPP.calculatedMapAttributes.maxCombo;

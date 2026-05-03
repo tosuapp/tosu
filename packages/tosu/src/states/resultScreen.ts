@@ -1,5 +1,5 @@
-import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
 import { ClientType, measureTime, wLogger } from '@tosu/common';
+import rosu, { HitResultPriority } from 'rosu-pp-js';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
@@ -190,7 +190,7 @@ export class ResultScreen extends AbstractState {
                 delete fcCalcOptions.largeTickHits;
                 delete fcCalcOptions.combo;
                 fcCalcOptions.accuracy = this.accuracy;
-                fcCalcOptions.hitresultPriority = HitResultPriority.Fastest;
+                fcCalcOptions.hitresultPriority = HitResultPriority.BestCase;
             }
 
             const t2 = performance.now();
