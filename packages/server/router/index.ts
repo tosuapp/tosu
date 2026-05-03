@@ -1,4 +1,3 @@
-import rosu from '@kotrikd/rosu-pp';
 import {
     ConfigBinding,
     ConfigManager,
@@ -15,6 +14,7 @@ import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import rosu from 'rosu-pp-js';
 
 import { Server, sendJson } from '../index';
 import {

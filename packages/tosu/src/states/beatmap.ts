@@ -1,8 +1,8 @@
-import rosu, { HitResultPriority } from '@kotrikd/rosu-pp';
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import fs from 'fs';
 import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
+import rosu, { HitResultPriority } from 'rosu-pp-js';
 
 import { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
@@ -427,7 +427,7 @@ export class BeatmapPP extends AbstractState {
                         mods: sanitizeMods(currentMods.array),
                         accuracy: acc,
                         lazer: this.game.client === ClientType.lazer,
-                        hitresultPriority: HitResultPriority.Fastest
+                        hitresultPriority: HitResultPriority.BestCase
                     }).calculate(this.performanceAttributes);
                     ppAcc[acc] = fixDecimals(calculate.pp);
 
