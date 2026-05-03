@@ -118,15 +118,15 @@ importers:
 
   packages/server:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: 3.1.0
-        version: 3.1.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
+      rosu-pp-js:
+        specifier: 4.0.1
+        version: 4.0.1
       semver:
         specifier: ^7.7.3
         version: 7.7.3
@@ -155,9 +155,6 @@ importers:
 
   packages/tosu:
     dependencies:
-      '@kotrikd/rosu-pp':
-        specifier: 3.1.0
-        version: 3.1.0
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
@@ -191,6 +188,9 @@ importers:
       resedit:
         specifier: ^2.0.3
         version: 2.0.3
+      rosu-pp-js:
+        specifier: 4.0.1
+        version: 4.0.1
       semver:
         specifier: ^7.7.3
         version: 7.7.3
@@ -246,7 +246,6 @@ packages:
 
   '@asdf-overlay/core@1.1.2':
     resolution: {integrity: sha512-ChQxw/LlTNA3386VBa88ah0JyPREQG1z18wQFqh/weDgn5Y6skQBpEEYZz3lFr8m0wI3t/6WO67ibXQOYpy4cw==}
-    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.1.2':
@@ -809,9 +808,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@kotrikd/rosu-pp@3.1.0':
-    resolution: {integrity: sha512-QECWxB8jG3wBnt5HD37gQNfFLr46/+WQSr68DHAuPXBoteOwf6zrVoxGiV0smZE+GXeMUhRDjGrfnnROGgNm3w==}
-
   '@malept/cross-spawn-promise@2.0.0':
     resolution: {integrity: sha512-1DpKU0Z5ThltBwjNySMC14g0CkbyhCaz9FkhxqNsZI6uAPJXFS8cMXlBKo26FJ8ZuW6S9GCMcR9IO5k2X5/9Fg==}
     engines: {node: '>= 12.13.0'}
@@ -1212,6 +1208,7 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@yao-pkg/pkg-fetch@3.5.31':
     resolution: {integrity: sha512-qBLFfCXJECsxMlvwamhdWR65LWI7Cnb40dmI+1NIr1Nfk8Ddc8luZIJsRRZER9UrY13X1NJZSRORsqIPYDsJbw==}
@@ -3652,6 +3649,9 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  rosu-pp-js@4.0.1:
+    resolution: {integrity: sha512-yEjhglfSrDVV3aBkd61RgaMqdKbLIX3225gkHS67+IboVZwC2PCmbDl7yaBDV4CSQTtkEEhWIpwdhHTJnoVOcQ==}
+
   safe-array-concat@1.1.3:
     resolution: {integrity: sha512-AURm5f0jYEOydBj7VQlVvDrjeFgthDdEF5H1dP+6mNpoXOMo1quQqJ4wvJDyRZ9+pO3kGWoOdmV08cSv2aJV6Q==}
     engines: {node: '>=0.4'}
@@ -4868,8 +4868,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
-
-  '@kotrikd/rosu-pp@3.1.0': {}
 
   '@malept/cross-spawn-promise@2.0.0':
     dependencies:
@@ -8144,6 +8142,8 @@ snapshots:
       '@rollup/rollup-win32-x64-gnu': 4.54.0
       '@rollup/rollup-win32-x64-msvc': 4.54.0
       fsevents: 2.3.3
+
+  rosu-pp-js@4.0.1: {}
 
   safe-array-concat@1.1.3:
     dependencies:
