@@ -313,7 +313,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 name: CountryCodes[user.countryCode]?.toUpperCase() || ''
             },
 
-            backgroundColour: user.backgroundColour?.toString(16)
+            backgroundColour: user.backgroundColour?.toString(16),
+            matchmaking: user.matchmaking
         },
         beatmap: {
             isKiai: beatmapPP.isKiai,
