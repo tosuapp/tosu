@@ -82,11 +82,11 @@ importers:
   packages/ingame-overlay:
     dependencies:
       '@asdf-overlay/core':
-        specifier: ^1.1.2
-        version: 1.1.2
+        specifier: ^1.2.2
+        version: 1.2.2
       '@asdf-overlay/electron':
-        specifier: ^1.1.2
-        version: 1.1.2(@asdf-overlay/core@1.1.2)(electron@39.5.1)
+        specifier: ^1.2.2
+        version: 1.2.2(@asdf-overlay/core@1.2.2)(electron@39.5.1)
     devDependencies:
       '@types/node':
         specifier: ^24.10.4
@@ -244,16 +244,15 @@ packages:
   7zip-bin@5.2.0:
     resolution: {integrity: sha512-ukTPVhqG4jNzMro2qA9HSCSSVJN3aN7tlb+hfqYCt3ER0yWroeA2VR38MNrOHLQ/cVj+DaIMad0kFCtWWowh/A==}
 
-  '@asdf-overlay/core@1.1.2':
-    resolution: {integrity: sha512-ChQxw/LlTNA3386VBa88ah0JyPREQG1z18wQFqh/weDgn5Y6skQBpEEYZz3lFr8m0wI3t/6WO67ibXQOYpy4cw==}
-    cpu: [x64, arm64]
+  '@asdf-overlay/core@1.2.2':
+    resolution: {integrity: sha512-8v9dqmPvVy/sx5QV3NBQkwsjSujKnYjct0Z1V7lIvO9DXoSftBQbIZBa0IcHpvwWzV4BtOSBSuY7mieKGQJWRQ==}
     os: [win32]
 
-  '@asdf-overlay/electron@1.1.2':
-    resolution: {integrity: sha512-7l8ycDUoXUi+fGodxw1BrJ6Mr9BMYENuHE0/iza2DAmroXM+U28hD380uz51vKhnv/UnEqB1YUYmL0RHAb1qbg==}
+  '@asdf-overlay/electron@1.2.2':
+    resolution: {integrity: sha512-GqxMXf02epYgANIFxGSEw61V3RzaE7J6Ps4lR1iNq9faHI0R2uhsI8nGK2calWXYr/tAVj+jVPBxKeeT545fxw==}
     peerDependencies:
-      '@asdf-overlay/core': 1.1.2
-      electron: ^39.2.7
+      '@asdf-overlay/core': 1.2.2
+      electron: ^40.1.0
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -3962,6 +3961,10 @@ packages:
     engines: {node: '>=10'}
     deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
+  tar@7.5.13:
+    resolution: {integrity: sha512-tOG/7GyXpFevhXVh8jOPJrmtRpOTsYqUIkVdVooZYJS/z8WhfQUX8RJILmeuJNinGAMSu1veBr4asSHFt5/hng==}
+    engines: {node: '>=18'}
+
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
@@ -4334,11 +4337,11 @@ snapshots:
 
   7zip-bin@5.2.0: {}
 
-  '@asdf-overlay/core@1.1.2': {}
+  '@asdf-overlay/core@1.2.2': {}
 
-  '@asdf-overlay/electron@1.1.2(@asdf-overlay/core@1.1.2)(electron@39.5.1)':
+  '@asdf-overlay/electron@1.2.2(@asdf-overlay/core@1.2.2)(electron@39.5.1)':
     dependencies:
-      '@asdf-overlay/core': 1.1.2
+      '@asdf-overlay/core': 1.2.2
       electron: 39.5.1
 
   '@babel/code-frame@7.27.1':
@@ -5709,7 +5712,7 @@ snapshots:
       minipass-pipeline: 1.2.4
       p-map: 7.0.4
       ssri: 12.0.0
-      tar: 7.5.2
+      tar: 7.5.13
       unique-filename: 4.0.0
 
   cacheable-lookup@5.0.4: {}
@@ -7621,7 +7624,7 @@ snapshots:
       nopt: 8.1.0
       proc-log: 5.0.0
       semver: 7.7.3
-      tar: 7.5.2
+      tar: 7.5.13
       tinyglobby: 0.2.15
       which: 5.0.0
     transitivePeerDependencies:
@@ -8532,6 +8535,14 @@ snapshots:
       minizlib: 2.1.2
       mkdirp: 1.0.4
       yallist: 4.0.0
+
+  tar@7.5.13:
+    dependencies:
+      '@isaacs/fs-minipass': 4.0.1
+      chownr: 3.0.0
+      minipass: 7.1.2
+      minizlib: 3.1.0
+      yallist: 5.0.0
 
   tar@7.5.2:
     dependencies:
