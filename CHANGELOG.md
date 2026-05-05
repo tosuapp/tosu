@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.20.0](https://github.com/tosuapp/tosu/compare/v4.19.4...v4.20.0) (2026-05-05)
+
+
+### Features
+
+* implemenet reading matchmaking stats ([bef4485](https://github.com/tosuapp/tosu/commit/bef4485b68b5e939deea5b2ff6aad62e256c03f6))
+* rosu pp update ([726f3d8](https://github.com/tosuapp/tosu/commit/726f3d8ab40f5af07c92e46c54c61c27051b5f63))
+
+
+### Bug Fixes
+
+* lockfile ([e9fccef](https://github.com/tosuapp/tosu/commit/e9fccefc325e0579ddfb8aa259f30f991d75050a))
+* pnpm-lock broken ([868c98b](https://github.com/tosuapp/tosu/commit/868c98b56fbce3dfc5295bd70ea3331460786ab2))
+
 ### [4.19.4](https://github.com/tosuapp/tosu/compare/v4.19.3...v4.19.4) (2026-05-01)
 
 
