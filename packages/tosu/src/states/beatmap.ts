@@ -3,6 +3,7 @@ import {
     type DifficultyAttrs,
     HitWindows,
     type LazerMod,
+    type PeakStrains,
     type PerformanceAttrsData,
     PlayBeatmap,
     type ScoreInfoData,
@@ -617,56 +618,49 @@ export class BeatmapPP extends AbstractState {
                 xaxis: []
             };
 
-            let oldStrains: number[] = [];
-
-            let strainsAmount = 0;
+            let oldStrains: PeakStrains;
             switch (this.beatmap.mode) {
-                case 0:
-                    strainsAmount = this.diffStrains.aim.length || 0;
-                    break;
-
                 case 1:
-                    strainsAmount = this.diffStrains.color.length || 0;
+                    oldStrains = this.diffStrains.color;
                     break;
-
                 case 2:
-                    strainsAmount = this.diffStrains.movement.length || 0;
+                    oldStrains = this.diffStrains.movement;
                     break;
-
                 case 3:
-                    strainsAmount = this.diffStrains.strains.length || 0;
+                    oldStrains = this.diffStrains.strains;
+                    break;
+                default:
+                    oldStrains = this.diffStrains.aim;
                     break;
             }
 
-            // Current lazer impl hardcodes each sections to 400
-            const sectionOffsetTime = 400;
             const firstObjectTime =
                 this.timings.firstNonSpinnerObj / this.clockRate;
             const lastObjectTime =
-                firstObjectTime + strainsAmount * sectionOffsetTime;
+                firstObjectTime +
+                oldStrains.value.length * oldStrains.sectionLength;
             const mp3LengthTime = menu.mp3Length / this.clockRate;
 
-            const LEFT_OFFSET = Math.floor(firstObjectTime / sectionOffsetTime);
+            const LEFT_OFFSET = Math.floor(
+                firstObjectTime / oldStrains.sectionLength
+            );
 
             const RIGHT_OFFSET =
                 mp3LengthTime >= lastObjectTime
                     ? Math.ceil(
-                          (mp3LengthTime - lastObjectTime) / sectionOffsetTime
+                          (mp3LengthTime - lastObjectTime) /
+                              oldStrains.sectionLength
                       )
                     : 0;
 
-            const updateWithOffset = (
-                name: string,
-                values: Float64Array | undefined
-            ) => {
-                if (values instanceof Float64Array !== true) return;
+            const updateWithOffset = (name: string, strains: PeakStrains) => {
                 let data: number[] = [];
 
                 if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
                     data = Array(LEFT_OFFSET).fill(-100);
                 }
 
-                data = data.concat(Array.from(values));
+                data = data.concat(Array.from(strains.value));
 
                 if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
                     data = data.concat(Array(RIGHT_OFFSET).fill(-100));
@@ -684,40 +678,37 @@ export class BeatmapPP extends AbstractState {
                     );
                     updateWithOffset('flashlight', this.diffStrains.flashlight);
                     updateWithOffset('speed', this.diffStrains.speed);
-
-                    oldStrains = Array.from(this.diffStrains.aim);
                     break;
                 case 1:
                     updateWithOffset('color', this.diffStrains.color);
                     updateWithOffset('rhythm', this.diffStrains.rhythm);
                     updateWithOffset('stamina', this.diffStrains.stamina);
-
-                    oldStrains = Array.from(this.diffStrains.color);
                     break;
                 case 2:
                     updateWithOffset('movement', this.diffStrains.movement);
-
-                    oldStrains = Array.from(this.diffStrains.movement);
                     break;
                 case 3:
                     updateWithOffset('strains', this.diffStrains.strains);
-
-                    oldStrains = Array.from(this.diffStrains.strains);
                     break;
                 default:
                 // no-default
             }
 
+            let oldStrainsArray = Array.from(oldStrains.value);
             if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
-                oldStrains = Array(LEFT_OFFSET).fill(0).concat(oldStrains);
+                oldStrainsArray = Array(LEFT_OFFSET)
+                    .fill(0)
+                    .concat(oldStrainsArray);
             }
 
             if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
-                oldStrains = oldStrains.concat(Array(RIGHT_OFFSET).fill(0));
+                oldStrainsArray = oldStrainsArray.concat(
+                    Array(RIGHT_OFFSET).fill(0)
+                );
             }
 
             for (let i = 0; i < LEFT_OFFSET; i++) {
-                resultStrains.xaxis.push(i * sectionOffsetTime);
+                resultStrains.xaxis.push(i * oldStrains.sectionLength);
             }
 
             const total =
@@ -726,17 +717,17 @@ export class BeatmapPP extends AbstractState {
                 RIGHT_OFFSET;
             for (let i = 0; i < total; i++) {
                 resultStrains.xaxis.push(
-                    firstObjectTime + i * sectionOffsetTime
+                    firstObjectTime + i * oldStrains.sectionLength
                 );
             }
 
             for (let i = 0; i < RIGHT_OFFSET; i++) {
                 resultStrains.xaxis.push(
-                    lastObjectTime + i * sectionOffsetTime
+                    lastObjectTime + i * oldStrains.sectionLength
                 );
             }
 
-            this.strains = oldStrains;
+            this.strains = oldStrainsArray;
             this.strainsAll = resultStrains;
 
             this.game.resetReportCount('beatmapPP updateGraph');

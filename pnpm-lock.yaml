@@ -123,7 +123,7 @@ importers:
         version: link:../common
       '@tosu/pp':
         specifier: github:tosuapp/lazer-calculator#main&path:/lib
-        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/68d6c7289a913eb9cce680c716918a8a1b9db53a#path:/lib
+        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
@@ -166,7 +166,7 @@ importers:
         version: link:../ingame-overlay-updater
       '@tosu/pp':
         specifier: github:tosuapp/lazer-calculator#main&path:/lib
-        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/68d6c7289a913eb9cce680c716918a8a1b9db53a#path:/lib
+        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib
       '@tosu/server':
         specifier: workspace:*
         version: link:../server
@@ -1051,8 +1051,8 @@ packages:
     resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
     engines: {node: '>= 10'}
 
-  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/68d6c7289a913eb9cce680c716918a8a1b9db53a#path:/lib':
-    resolution: {path: /lib, tarball: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/68d6c7289a913eb9cce680c716918a8a1b9db53a}
+  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib':
+    resolution: {path: /lib, tarball: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33}
     version: 0.1.0
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
@@ -5166,7 +5166,7 @@ snapshots:
 
   '@tootallnate/once@2.0.1': {}
 
-  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/68d6c7289a913eb9cce680c716918a8a1b9db53a#path:/lib': {}
+  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib': {}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
