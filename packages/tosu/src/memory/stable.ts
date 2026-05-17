@@ -289,7 +289,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 performancePoints,
                 rawBanchoStatus,
                 backgroundColour,
-                rawLoginStatus
+                rawLoginStatus,
+                matchmaking: null
             };
         } catch (exc) {
             return exc as Error;
