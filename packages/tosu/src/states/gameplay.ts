@@ -522,9 +522,8 @@ export class Gameplay extends AbstractState {
             ) {
                 const hitObject =
                     beatmapPP.lazerBeatmap.hitObjects[passedObjects - 1];
-                if ('endTime' in hitObject) {
-                    const endTime = (hitObject as unknown as IHasDuration)
-                        .endTime;
+                if ('endTime' in hitObject && 'duration' in hitObject) {
+                    const endTime = (hitObject as IHasDuration).endTime;
 
                     if (endTime > global.playTime) {
                         passedObjects -= 1;
