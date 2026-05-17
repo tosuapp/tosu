@@ -10,6 +10,7 @@ import {
     unzip,
     wLogger
 } from '@tosu/common';
+import type { PlayBeatmap } from '@tosu/pp';
 import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
@@ -387,7 +388,13 @@ export default function buildBaseApi(server: Server) {
             const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
             beatmap = new rosu.Beatmap(beatmapContent);
         } else {
-            beatmap = beatmapPP.getCurrentBeatmap();
+            const playBeatmap: PlayBeatmap | undefined =
+                beatmapPP.getCurrentBeatmap();
+            if (!playBeatmap) {
+                throw new Error('No beatmap currently playing');
+            }
+
+            beatmap = new rosu.Beatmap(playBeatmap.encodeToLegacyOsu());
         }
 
         if (query.mode !== undefined) beatmap.convert(query.mode);
@@ -424,8 +431,7 @@ export default function buildBaseApi(server: Server) {
         const calculate = new rosu.Performance(params).calculate(beatmap);
         sendJson(res, calculate);
 
-        // free beatmap only when map path specified
-        if (query.path) beatmap.free();
+        beatmap.free();
         calculate.free();
     });
 
