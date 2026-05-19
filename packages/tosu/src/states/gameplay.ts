@@ -501,15 +501,6 @@ export class Gameplay extends AbstractState {
                 this.previousState = currentState;
             }
 
-            if (!this.gradualPerformance) {
-                wLogger.debug(
-                    `%${ClientType[this.game.client]}%`,
-                    `PP calc prerequisites missing:`,
-                    `gradual: ${this.gradualPerformance === undefined}`
-                );
-                return;
-            }
-
             const passedObjects = calculatePassedObjects(
                 beatmapPP.lazerBeatmap?.hitObjects || [],
                 global.playTime,
@@ -518,9 +509,17 @@ export class Gameplay extends AbstractState {
             );
 
             const offset = passedObjects - this.previousPassedObjects;
-            if (offset <= 0) return;
+            if (offset <= 0) {
+                if (offset === 0) return;
 
-            this.gradualPerformance.skip(offset);
+                // Mostly for lazer replay, correct position on rewind
+                this.gradualPerformance =
+                    currentBeatmap.createGradualDifficulty();
+                this.gradualPerformance.skip(passedObjects);
+            } else {
+                this.gradualPerformance.skip(offset);
+            }
+
             const currDiffAttrs =
                 this.gradualPerformance.createDifficultyAttrs();
 
