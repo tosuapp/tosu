@@ -3,7 +3,7 @@ import {
     AccuracyCalculator,
     GradualDifficulty,
     type ScoreInfoData
-} from '@tosu/pp';
+} from '@tosuapp/lazer-calculator';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';

@@ -10,8 +10,8 @@ import {
     unzip,
     wLogger
 } from '@tosu/common';
-import type { PlayBeatmap } from '@tosu/pp';
 import { autoUpdater } from '@tosu/updater';
+import type { PlayBeatmap } from '@tosuapp/lazer-calculator';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';

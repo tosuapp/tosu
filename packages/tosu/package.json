@@ -15,7 +15,7 @@
     "dependencies": {
         "@tosu/common": "workspace:*",
         "@tosu/ingame-overlay-updater": "workspace:*",
-        "@tosu/pp": "github:tosuapp/lazer-calculator#main&path:/lib",
+        "@tosuapp/lazer-calculator": "0.1.0-20260522.1",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
         "osu-catch-stable": "^4.0.1",

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "rosu-pp-js": "4.0.1",
-    "@tosu/pp": "github:tosuapp/lazer-calculator#main&path:/lib",
+    "@tosuapp/lazer-calculator": "0.1.0-20260522.1",
     "@tosu/common": "workspace:*",
     "@tosu/updater": "workspace:*",
     "semver": "^7.7.3",

@@ -121,12 +121,12 @@ importers:
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
-      '@tosu/pp':
-        specifier: github:tosuapp/lazer-calculator#main&path:/lib
-        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
+      '@tosuapp/lazer-calculator':
+        specifier: 0.1.0-20260522.1
+        version: 0.1.0-20260522.1
       rosu-pp-js:
         specifier: 4.0.1
         version: 4.0.1
@@ -164,15 +164,15 @@ importers:
       '@tosu/ingame-overlay-updater':
         specifier: workspace:*
         version: link:../ingame-overlay-updater
-      '@tosu/pp':
-        specifier: github:tosuapp/lazer-calculator#main&path:/lib
-        version: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib
       '@tosu/server':
         specifier: workspace:*
         version: link:../server
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
+      '@tosuapp/lazer-calculator':
+        specifier: 0.1.0-20260522.1
+        version: 0.1.0-20260522.1
       osu-catch-stable:
         specifier: ^4.0.1
         version: 4.0.1(osu-classes@3.1.0)
@@ -1051,9 +1051,8 @@ packages:
     resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
     engines: {node: '>= 10'}
 
-  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib':
-    resolution: {path: /lib, tarball: https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33}
-    version: 0.1.0
+  '@tosuapp/lazer-calculator@0.1.0-20260522.1':
+    resolution: {integrity: sha512-b1U5cGfehSdQnsy2h3zEYHp/HDAJqU8WDwfWY4FNZmWsXWAhoaLtFHrpMpEXGOWbfWAYmAnREGhkYCFCwpPm+Q==}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
     resolution: {integrity: sha512-fYDQA9e6yTNmA13TLVSA+WMQRc5Bn/c0EUBditUHNfMMxN7M82c38b1kEggVE3pLpZ0FwkwJkUEKMiOi52JXFA==}
@@ -4694,7 +4693,7 @@ snapshots:
 
   '@electron/universal@2.0.1':
     dependencies:
-      '@electron/asar': 3.2.18
+      '@electron/asar': 3.4.1
       '@malept/cross-spawn-promise': 2.0.0
       debug: 4.4.3
       dir-compare: 4.2.0
@@ -5166,7 +5165,7 @@ snapshots:
 
   '@tootallnate/once@2.0.1': {}
 
-  '@tosu/pp@https://codeload.github.com/tosuapp/lazer-calculator/tar.gz/58ef07870ed98d80bd2cedd32f435df0f02f3c33#path:/lib': {}
+  '@tosuapp/lazer-calculator@0.1.0-20260522.1': {}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
