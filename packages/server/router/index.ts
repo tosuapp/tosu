@@ -11,7 +11,6 @@ import {
     wLogger
 } from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
-import type { PlayBeatmap } from '@tosuapp/lazer-calculator';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -388,13 +387,12 @@ export default function buildBaseApi(server: Server) {
             const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
             beatmap = new rosu.Beatmap(beatmapContent);
         } else {
-            const playBeatmap: PlayBeatmap | undefined =
-                beatmapPP.getCurrentBeatmap();
-            if (!playBeatmap) {
+            const beatmapContent: string | undefined = beatmapPP.beatmapContent;
+            if (!beatmapContent) {
                 throw new Error('No beatmap currently playing');
             }
 
-            beatmap = new rosu.Beatmap(playBeatmap.encodeToLegacyOsu());
+            beatmap = new rosu.Beatmap(beatmapContent);
         }
 
         if (query.mode !== undefined) beatmap.convert(query.mode);
