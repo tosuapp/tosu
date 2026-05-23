@@ -1,3 +1,5 @@
+import type { HitObject, IHasDuration } from 'osu-classes';
+
 import { Statistics } from '@/states/types';
 import { ModsLazer } from '@/utils/osuMods.types';
 
@@ -229,10 +231,40 @@ export const calculateGrade = (params: {
     return rank;
 };
 
-export const calculatePassedObjects = (
+/**
+ * Calculate passed objects based on time and statistics
+ */
+export function calculatePassedObjects(
+    hitObjects: HitObject[],
+    time: number,
     mode: number,
     statistics: Statistics
-): number => {
+): number {
+    const passedObjects = passedObjectsFromStatistics(mode, statistics);
+
+    // Check if last object is actually ended
+    if (passedObjects > 0 && hitObjects[passedObjects - 1]) {
+        const lastHitObject = hitObjects[passedObjects - 1];
+
+        if ('endTime' in lastHitObject && 'duration' in lastHitObject) {
+            const endTime = (lastHitObject as IHasDuration).endTime;
+
+            if (endTime > time) {
+                return passedObjects - 1;
+            }
+        }
+    }
+
+    return passedObjects;
+}
+
+/**
+ * Expect passed objects based on statistics
+ */
+function passedObjectsFromStatistics(
+    mode: number,
+    statistics: Statistics
+): number {
     switch (mode) {
         case 0:
             return (
@@ -263,4 +295,4 @@ export const calculatePassedObjects = (
         default:
             return 0;
     }
-};
+}
