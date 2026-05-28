@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.21.0](https://github.com/tosuapp/tosu/compare/v4.20.0...v4.21.0) (2026-05-28)
+
+
+### Features
+
+* aim no slider strains ([12bb097](https://github.com/tosuapp/tosu/commit/12bb097ab781f24fc1023f119ed4e7b38f0cb9e9))
+* calculate max, fc score accuracy properly ([02d2ccd](https://github.com/tosuapp/tosu/commit/02d2ccd234ce06903e10642503bd6d2de30dc09f))
+* hit result conversion from, to lazer/stable ([8f185e3](https://github.com/tosuapp/tosu/commit/8f185e3dbb0feaa2fc732c63fc9c7ce2a7840ca7))
+* lazer mod settings ([dede820](https://github.com/tosuapp/tosu/commit/dede8208942c254fa134587cfa24ddb2b6bafdc1))
+* rename createGradualDifficultyCalculator to createGradualDifficulty ([7849d9d](https://github.com/tosuapp/tosu/commit/7849d9dcbc073e868079e70859e8a701fe4ab0d1))
+* switch to lazer pp calc ([a71b3c7](https://github.com/tosuapp/tosu/commit/a71b3c7d5906515a034f830dd292f78e6facb338))
+* use osu-tools score simulator for custom accuracies ([589b5ca](https://github.com/tosuapp/tosu/commit/589b5ca736080f5c930465a5cbbb891c773470d0))
+* use released version of lazer calculator ([1f92eb2](https://github.com/tosuapp/tosu/commit/1f92eb27104aead116e6f3dc87ad1c346ebf3aa8))
+* use ScoreGenerator for perfect score and editor pp ([49c1732](https://github.com/tosuapp/tosu/commit/49c173281009b0c273999850755c956cf3ae8498))
+
+
+### Bug Fixes
+
+* attempt to fix postinstall @tosu/pp ([8e54270](https://github.com/tosuapp/tosu/commit/8e54270a5fa10297ca32e9290ef0c7cf1735e627))
+* catch pp ([7f58ab6](https://github.com/tosuapp/tosu/commit/7f58ab659028bd5d624bfcf8b408a36c4a466153))
+* check endTime to check last object is actually passed ([8307e2f](https://github.com/tosuapp/tosu/commit/8307e2f7d200e99238f3f0a494c293f749274d0f))
+* check passedObjects ([adea8d8](https://github.com/tosuapp/tosu/commit/adea8d8722e4376adc6b3c8c9543731c7772df34))
+* ci build attempt[#3](https://github.com/tosuapp/tosu/issues/3) ([8a4cb15](https://github.com/tosuapp/tosu/commit/8a4cb159866cae4d375ca8523d6d37ed7c0d5413))
+* ci build attempt[#4](https://github.com/tosuapp/tosu/issues/4) ([ed40c4b](https://github.com/tosuapp/tosu/commit/ed40c4b3c9be194e28d3d768cace74b6ad191a19))
+* conversion check ([928a9c8](https://github.com/tosuapp/tosu/commit/928a9c8452775f89e283648e22ace97ac6adb82b))
+* divide by 100 for acc ([1abf07e](https://github.com/tosuapp/tosu/commit/1abf07ecc69fed93afc838feef9b73a59e962656))
+* exclude good for max pp ([49c448c](https://github.com/tosuapp/tosu/commit/49c448c41089ee1b98bc21cebad2b6a307976a07))
+* gameplay max, fc pp calculated from gradual difficulty instead of total difficulty ([07e334b](https://github.com/tosuapp/tosu/commit/07e334b989f5e2d2a95cd4c9a0c267531a7ea2ad))
+* ignore slider end hits for stable ([ea8d420](https://github.com/tosuapp/tosu/commit/ea8d420b0d83f71bc9677154494380b43df3b292))
+* include combo ([e629de4](https://github.com/tosuapp/tosu/commit/e629de44ee334f8ecac8cd89609b5125f5e4bd99))
+* max achivable combo calc ([f759eab](https://github.com/tosuapp/tosu/commit/f759eab4c87fb52ea1d9b1c3e78fd319ad76f782))
+* max archievable sliderEndHits ([10ed360](https://github.com/tosuapp/tosu/commit/10ed36084089b42c68efb1f619500d0fe9a6a2f7))
+* max, fc acc for classic mod ([7ef1419](https://github.com/tosuapp/tosu/commit/7ef1419bd4f1fdfbd03b5b9c2a010137915aa502))
+* miss count conversion for catch ([3713c0c](https://github.com/tosuapp/tosu/commit/3713c0c023daaa2a87f4995240df98ff00b61584))
+* move legacy beatmap conversion to @tosu/pp ([086b5a3](https://github.com/tosuapp/tosu/commit/086b5a3d76e8fe464e04754966e20f85eb5b2596))
+* passedObjects editorpp ([87fda1b](https://github.com/tosuapp/tosu/commit/87fda1bae16b507ef961510873b6a612c50b5423))
+* patch path ([2937fdd](https://github.com/tosuapp/tosu/commit/2937fdd6b346f75736c201229c1b12c119a14a68))
+* perfect score ([fe24b0d](https://github.com/tosuapp/tosu/commit/fe24b0ddcf9ab008e2c8928cf7999d5ad42b87d8))
+* perform conversion from lazer beatmap to rosu beatmap ([8694bd7](https://github.com/tosuapp/tosu/commit/8694bd79eb53391789ff7743eb35761f4faea538))
+* result screen ([a7e954f](https://github.com/tosuapp/tosu/commit/a7e954f3f547e77d0c5dfb8c1ab819f573545d01))
+* ticks and archivable maxCombo calc ([6d2de59](https://github.com/tosuapp/tosu/commit/6d2de5952ab53979b4c9fa7e046d1ca8c6d36b26))
+* typo ([6cbaa9a](https://github.com/tosuapp/tosu/commit/6cbaa9a58d11e80df61d2ffacd33bea74244339b))
+* ugly interface assertion ([e5487a8](https://github.com/tosuapp/tosu/commit/e5487a888eb3c287095d356e4f42b48d4ac75cd7))
+* update offset calc ([e8e8628](https://github.com/tosuapp/tosu/commit/e8e8628e4aeca93ec25a44a34e052723f76fe122))
+* update offset calc ([3a7eddf](https://github.com/tosuapp/tosu/commit/3a7eddf148c299515efa46d0a4ef276be91272d7))
+* update vtable on 2026.525.0 ([130bc7c](https://github.com/tosuapp/tosu/commit/130bc7c523fad670c9cb2ef508108ee889d3658c))
+* use patched version for lower nodejs ver ([c4dea38](https://github.com/tosuapp/tosu/commit/c4dea3827bffae410099b69f34ee2afedeba01fc))
+* use score simulator to match old fc pp behavior ([3e2d847](https://github.com/tosuapp/tosu/commit/3e2d84735d316be062dbcb4f3c347644bba12f7e))
+
 ## [4.20.0](https://github.com/tosuapp/tosu/compare/v4.19.4...v4.20.0) (2026-05-05)
 
 
