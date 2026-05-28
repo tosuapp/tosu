@@ -421,7 +421,7 @@ const frameworkConfigList = [
     FrameworkSetting.CursorSensitivity
 ];
 
-const expectedVtableValue: number = 7730957910016;
+const expectedVtableValue: number = 7765317648384;
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     offsets: Offsets = localOffsets;
