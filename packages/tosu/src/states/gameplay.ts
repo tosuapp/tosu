@@ -525,6 +525,7 @@ export class Gameplay extends AbstractState {
 
             const scoreInfo: ScoreInfoData = {
                 totalScore: this.score,
+                isLegacyScore: this.game.client === ClientType.stable,
                 accuracy: 0.0,
                 maxCombo: this.maxCombo,
                 perfects: this.statistics.perfect,

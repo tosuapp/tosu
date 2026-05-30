@@ -140,6 +140,7 @@ export class ResultScreen extends AbstractState {
 
             const calcOptions: ScoreInfoData = {
                 totalScore: this.score,
+                isLegacyScore: this.game.client === ClientType.stable,
                 maxCombo: this.maxCombo,
                 accuracy: 0.0,
                 largeTickHits: this.statistics.largeTickHit,
