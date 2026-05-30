@@ -525,7 +525,8 @@ export class Gameplay extends AbstractState {
 
             const scoreInfo: ScoreInfoData = {
                 totalScore: this.score,
-                accuracy: this.accuracy / 100,
+                isLegacyScore: this.game.client === ClientType.stable,
+                accuracy: 0.0,
                 maxCombo: this.maxCombo,
                 perfects: this.statistics.perfect,
                 greats: this.statistics.great,
@@ -544,6 +545,11 @@ export class Gameplay extends AbstractState {
                 ignoreHits: this.statistics.ignoreHit,
                 ignoreMisses: this.statistics.ignoreMiss
             };
+            // Do not trust client accuracy for performance calculation, calculate it based on hit results
+            scoreInfo.accuracy = AccuracyCalculator.calculate(
+                currentBeatmap,
+                scoreInfo
+            );
 
             const currPerformance = currentBeatmap.calculatePerformance(
                 currDiffAttrs,

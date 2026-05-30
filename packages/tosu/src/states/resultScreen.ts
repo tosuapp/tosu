@@ -1,5 +1,8 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
-import type { ScoreInfoData } from '@tosuapp/lazer-calculator';
+import {
+    AccuracyCalculator,
+    type ScoreInfoData
+} from '@tosuapp/lazer-calculator';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
@@ -137,8 +140,9 @@ export class ResultScreen extends AbstractState {
 
             const calcOptions: ScoreInfoData = {
                 totalScore: this.score,
+                isLegacyScore: this.game.client === ClientType.stable,
                 maxCombo: this.maxCombo,
-                accuracy: this.accuracy / 100,
+                accuracy: 0.0,
                 largeTickHits: this.statistics.largeTickHit,
                 largeTickMisses: this.statistics.largeTickMiss || 0,
                 smallTickHits: this.statistics.smallTickHit,
@@ -156,6 +160,11 @@ export class ResultScreen extends AbstractState {
                 mehs: this.statistics.meh,
                 misses: this.statistics.miss
             };
+            // Do not trust client accuracy for performance calculation, calculate it based on hit results
+            calcOptions.accuracy = AccuracyCalculator.calculate(
+                currentBeatmap,
+                calcOptions
+            );
 
             const t1 = performance.now();
             const curPerformance = currentBeatmap.calculatePerformance(
