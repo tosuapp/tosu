@@ -82,9 +82,6 @@ export interface Offsets {
         // TODO: Remove old field after 6~ months
         ScreenStack?: number;
         '<ScreenStack>k__BackingField': number;
-        // TODO: Remove old field
-        SentryLogger?: number;
-        sentryLogger: number;
         channelManager: number;
         '<frameworkConfig>k__BackingField': number;
         chatOverlay: number;
@@ -375,18 +372,6 @@ export interface Offsets {
     'osu.Framework.Input.Handlers.Mouse.MouseHandler': {
         '<UseRelativeMode>k__BackingField': number;
     };
-    'osu.Game.Utils.SentryLogger': {
-        sentrySession: number;
-    };
-    'Sentry.SentrySdk+DisposeHandle': {
-        _localHub: number;
-    };
-    'Sentry.Internal.Hub': {
-        _options: number;
-    };
-    'Sentry.SentryOptions': {
-        '<Release>k__BackingField': number;
-    };
 }
 
 const localConfigList = [
@@ -542,49 +527,6 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return this.gameBaseAddress;
-    }
-
-    gameVersion() {
-        const sentryLogger = this.process.readIntPtr(
-            this.gameBase() +
-                (this.offsets['osu.Game.OsuGame'].SentryLogger ||
-                    this.offsets['osu.Game.OsuGame'].sentryLogger)
-        );
-        wLogger.debug(
-            `Game version check (SentryLogger): %${sentryLogger.toString(16)}%`
-        );
-
-        const sentrySession = this.process.readIntPtr(
-            sentryLogger +
-                this.offsets['osu.Game.Utils.SentryLogger'].sentrySession
-        );
-        wLogger.debug(
-            `Game version check (SentrySession): %${sentrySession.toString(16)}%`
-        );
-
-        if (!sentrySession) return undefined;
-
-        const localHub = this.process.readIntPtr(
-            sentrySession +
-                this.offsets['Sentry.SentrySdk+DisposeHandle']._localHub
-        );
-        wLogger.debug(
-            `Game version check (LocalHub): %${localHub.toString(16)}%`
-        );
-
-        const options = this.process.readIntPtr(
-            localHub + this.offsets['Sentry.Internal.Hub']._options
-        );
-        wLogger.debug(
-            `Game version check (Options): %${options.toString(16)}%`
-        );
-
-        const release = this.process.readSharpStringPtr(
-            options +
-                this.offsets['Sentry.SentryOptions']['<Release>k__BackingField']
-        );
-
-        return release?.split('@')?.[1] as OsuLazerVersion;
     }
 
     private screenStack() {
