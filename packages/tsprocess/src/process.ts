@@ -1,5 +1,6 @@
 import { wLogger } from '@tosu/common';
 import { existsSync, readFileSync } from 'node:fs';
+import { readlink } from 'node:fs/promises';
 import { dirname as pathDirname, join as pathJoin } from 'path';
 
 import ProcessUtils from '.';
@@ -305,5 +306,25 @@ export class Process {
         }
 
         return ProcessUtils.batchScan(this.handle, patterns);
+    }
+
+    async getRootPath() {
+        if (process.platform === 'win32') {
+            // same as path()
+            return pathDirname(ProcessUtils.getProcessPath(this.handle));
+        }
+
+        if (process.platform === 'linux') {
+            try {
+                const exePath = await readlink(`/proc/${this.id}/exe`);
+                return pathJoin(`/proc/${this.id}/root`, pathDirname(exePath));
+            } catch {
+                wLogger.error(
+                    `Failed to get exe path using /proc, try run with sudo`
+                );
+            }
+        }
+
+        throw new Error('getRootPath is not implemented for this platform');
     }
 }

@@ -18,7 +18,6 @@ import { getContentType } from '@tosu/server';
 import path from 'path';
 
 import localOffsets from '@/assets/offsets.json';
-import { OsuLazerVersion } from '@/instances';
 import { LazerInstance } from '@/instances/lazerInstance';
 import { AbstractMemory } from '@/memory';
 import type {
@@ -77,6 +76,7 @@ interface KeyCounter {
 
 export interface Offsets {
     OsuVersion: string;
+    GameBaseVtable?: number;
     'osu.Game.OsuGame': {
         osuLogo: number;
         // TODO: Remove old field after 6~ months
@@ -421,7 +421,8 @@ const frameworkConfigList = [
     FrameworkSetting.CursorSensitivity
 ];
 
-const expectedVtableValue: number = 7765317648384;
+// VTABLE FROM 2026.518.0
+const FALLBACK_GAME_BASE_VTABLE: number = 7730957910016;
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     offsets: Offsets = localOffsets;
@@ -509,8 +510,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 return false;
             }
 
-            // might potentially change
-            return this.process.readLong(vtable) === expectedVtableValue;
+            const expected =
+                this.offsets.GameBaseVtable || FALLBACK_GAME_BASE_VTABLE;
+
+            return this.process.readLong(vtable) === expected;
         } catch {
             return false;
         }
@@ -558,6 +561,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         wLogger.debug(
             `Game version check (SentrySession): %${sentrySession.toString(16)}%`
         );
+
+        if (!sentrySession) return undefined;
 
         const localHub = this.process.readIntPtr(
             sentrySession +

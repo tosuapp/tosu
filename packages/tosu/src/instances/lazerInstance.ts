@@ -32,29 +32,8 @@ export class LazerInstance extends AbstractInstance {
             if (!fs.existsSync(cacheFolder))
                 await fsp.mkdir(cacheFolder, { recursive: true });
 
-            let attempts = 1;
-            while (attempts < 5 && !this.version) {
-                if (attempts > 1)
-                    wLogger.warn(
-                        `Attempting to detect osu! version (Try %#${attempts}%)`
-                    );
-
-                try {
-                    this.version = this.memory.gameVersion() || '';
-
-                    wLogger.info(`Detected osu! version: %${this.version}%`);
-
-                    break;
-                } catch (exc) {
-                    wLogger.debug(
-                        `Failed to find osu! version for ${ClientType[this.client]} %${this.pid}%:`,
-                        exc
-                    );
-                } finally {
-                    attempts++;
-                    await sleep(1000);
-                }
-            }
+            // @ts-expect-error who write this type?
+            this.version = await this.getOsuVersion();
 
             if (!this.version) {
                 wLogger.error(
@@ -367,6 +346,37 @@ export class LazerInstance extends AbstractInstance {
                 );
                 wLogger.debug(`Precise loop error details:`, exc);
             }
+        }
+    }
+
+    async getOsuVersion() {
+        const rootPath = await this.process.getRootPath();
+        let osuDepsJson = {
+            libraries: {}
+        };
+        try {
+            const osuDepsRaw = await fsp.readFile(
+                path.join(rootPath, 'osu!.deps.json'),
+                'utf-8'
+            );
+            osuDepsJson = JSON.parse(osuDepsRaw);
+        } catch {
+            wLogger.error("Can't read osu dependencies");
+        }
+
+        const osuLib = Object.keys(osuDepsJson.libraries).find((key) =>
+            key.startsWith('osu!/')
+        );
+        try {
+            // key example: osu!/2026.525.0-lazer | osu!/2026.518.0-tachyon
+            const osuVersion =
+                osuLib?.split('/').at(-1)?.split('-').at(0) || '';
+
+            wLogger.info(`Detected osu! version: %${osuVersion}%`);
+            return osuVersion;
+        } catch {
+            wLogger.error("Can't read osu! version");
+            return '';
         }
     }
 }
