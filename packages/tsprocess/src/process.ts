@@ -342,9 +342,14 @@ export class Process {
 
     async readFileAsOwner(filePath: string): Promise<string> {
         const uid = await this.getOwnerUid();
+        const { stdout: usernameRaw } = await execFile('id', [
+            '-un',
+            uid.toString()
+        ]);
+        const username = usernameRaw.trim();
         const { stdout } = await execFile('runuser', [
             '-u',
-            `#${uid}`,
+            username,
             '--',
             'cat',
             filePath
