@@ -355,10 +355,18 @@ export class LazerInstance extends AbstractInstance {
             libraries: {}
         };
         try {
-            const osuDepsRaw = await fsp.readFile(
-                path.join(rootPath, 'osu!.deps.json'),
-                'utf-8'
-            );
+            const filePath = path.join(rootPath, 'osu!.deps.json');
+            const isAppImage =
+                process.platform === 'linux' &&
+                rootPath.includes('/tmp/.mount_');
+            const isRoot =
+                process.platform === 'linux' && process.getuid?.() === 0;
+
+            const osuDepsRaw =
+                isRoot && isAppImage
+                    ? await this.process.readFileAsOwner(filePath)
+                    : await fsp.readFile(filePath, 'utf-8');
+
             osuDepsJson = JSON.parse(osuDepsRaw);
         } catch {
             wLogger.error("Can't read osu dependencies");
