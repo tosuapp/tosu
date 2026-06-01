@@ -411,7 +411,8 @@ export enum ManiaScrollingDirection {
     down = 1
 }
 
-export enum LazerRankedPlayStage {
+// Extracted as-is from "https://github.com/ppy/osu/blob/101cfffb80577e1910cb741b496743c2427617fa/osu.Game/Online/Multiplayer/MatchTypes/RankedPlay/RankedPlayStage.cs"
+export enum RankedPlayStage {
     /**
      * Waiting for clients to join.
      */

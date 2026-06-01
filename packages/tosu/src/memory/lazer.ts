@@ -5,8 +5,8 @@ import {
     GameState,
     LazerHitResults,
     LazerManiaSetting,
-    LazerRankedPlayStage,
     LazerSettings,
+    RankedPlayStage,
     Rulesets,
     ScoringMode,
     config,
@@ -28,13 +28,13 @@ import type {
     IGlobalPrecise,
     IHitErrors,
     IKeyOverlay,
-    ILazerRankedPlay,
     ILazerSpectator,
     ILazerSpectatorEntry,
     ILeaderboard,
     IMP3Length,
     IMatchmakingStats,
     IMenu,
+    IRankedPlay,
     IResultScreen,
     IScore,
     ISettings,
@@ -3642,9 +3642,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return { chat: chatItems, spectatingClients };
     }
 
-    rankedPlay(): ILazerRankedPlay | 'not-ready' {
-        // idk about this
-
+    rankedPlay(): IRankedPlay | 'not-ready' {
         const multiplayerClient = this.multiplayerClient();
 
         if (!multiplayerClient) {
@@ -3672,43 +3670,43 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return 'not-ready';
         }
 
-        const maybeStage = this.process.readInt(
+        const stage = this.process.readInt(
             state +
                 this.offsets[
                     'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
                 ]['<Stage>k__BackingField']
         );
-        if (maybeStage < 0 || maybeStage > LazerRankedPlayStage.Ended) {
+        if (stage < 0 || stage > RankedPlayStage.Ended) {
             return 'not-ready';
         }
 
-        const maybeRound = this.process.readInt(
+        const round = this.process.readInt(
             state +
                 this.offsets[
                     'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
                 ]['<CurrentRound>k__BackingField']
         );
-        if (maybeRound < 1 || maybeRound > 50) {
+        if (round < 1 || round > 50) {
             return 'not-ready';
         }
 
-        const maybeStarRating = this.process.readDouble(
+        const starRating = this.process.readDouble(
             state +
                 this.offsets[
                     'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
                 ]['<StarRating>k__BackingField']
         );
-        if (maybeStarRating < 0 || maybeStarRating > 20) {
+        if (starRating < 0 || starRating > 20) {
             return 'not-ready';
         }
 
-        const maybeDamage = this.process.readDouble(
+        const damage = this.process.readDouble(
             state +
                 this.offsets[
                     'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
                 ]['<DamageMultiplier>k__BackingField']
         );
-        if (maybeDamage < 0) {
+        if (damage < 0) {
             return 'not-ready';
         }
 
@@ -3727,10 +3725,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         return {
-            stage: maybeStage,
-            currentRound: maybeRound,
-            starRating: maybeStarRating,
-            damageMultiplier: maybeDamage,
+            stage,
+            currentRound: round,
+            starRating,
+            damageMultiplier: damage,
             users: users.map((u) => ({
                 id: u.key,
                 info: {

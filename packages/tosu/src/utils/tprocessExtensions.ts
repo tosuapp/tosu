@@ -9,10 +9,6 @@ export function readNullableInt(
     process: Process,
     address: number
 ): number | undefined {
-    // if (process.readByte(address + 4) === 0) {
-    //     return undefined;
-    // }
-    // return process.readInt(address);
     if (process.readByte(address) === 0) {
         return undefined;
     }

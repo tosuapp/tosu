@@ -18,11 +18,11 @@ import type {
     IGlobalPrecise,
     IHitErrors,
     IKeyOverlay,
-    ILazerRankedPlay,
     ILeaderboard,
     IMP3Length,
     IMenu,
     IOffsets,
+    IRankedPlay,
     IResultScreen,
     ISettings,
     ITourney,
@@ -1448,7 +1448,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         }
     }
 
-    rankedPlay(): ILazerRankedPlay | 'not-ready' {
-        throw new Error('в стабиле нет ранкед плея..');
+    rankedPlay(): IRankedPlay | 'not-ready' {
+        throw new Error('Stable does not have Ranked Play.');
     }
 }

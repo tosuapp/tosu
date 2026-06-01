@@ -1,4 +1,4 @@
-import { LazerRankedPlayStage } from '@tosu/common/enums/osu';
+import type { RankedPlayStage } from '@tosu/common/enums/osu';
 
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import type {
@@ -211,19 +211,19 @@ export type ILazerSpectator =
       }
     | undefined;
 
-export type ILazerRankedPlayUserInfo = {
+export type IRankedPlayUserInfo = {
     rating: number;
     life: number;
     roundsWon: number;
     damageMultiplier: number;
 };
 
-export type ILazerRankedPlay = {
-    stage: LazerRankedPlayStage;
+export type IRankedPlay = {
+    stage: RankedPlayStage;
     currentRound: number;
     damageMultiplier: number;
     starRating: number;
-    users: { id: number; info: ILazerRankedPlayUserInfo }[];
+    users: { id: number; info: IRankedPlayUserInfo }[];
     activeUserId: number | undefined;
     winningUserId: number | undefined;
 };
