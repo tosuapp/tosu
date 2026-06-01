@@ -371,14 +371,15 @@ export class LazerInstance extends AbstractInstance {
             wLogger.error("Can't read osu dependencies");
         }
 
-        const osuLib = Object.keys(osuDepsJson.libraries).find((key) =>
-            key.startsWith('osu!/')
-        );
+        const osuLib =
+            Object.keys(osuDepsJson.libraries).find((key) =>
+                key.startsWith('osu!/')
+            ) || '';
         try {
             // key example: osu!/2026.525.0-lazer | osu!/2026.518.0-tachyon
-            const osuVersion = osuLib?.slice(
-                text.indexOf('/') + 1,
-                text.indexOf('-')
+            const osuVersion = osuLib.slice(
+                osuLib.indexOf('/') + 1,
+                osuLib.indexOf('-')
             );
 
             wLogger.info(`Detected osu! version: %${osuVersion}%`);
