@@ -376,8 +376,10 @@ export class LazerInstance extends AbstractInstance {
         );
         try {
             // key example: osu!/2026.525.0-lazer | osu!/2026.518.0-tachyon
-            const osuVersion =
-                osuLib?.split('/').at(-1)?.split('-').at(0) || '';
+            const osuVersion = osuLib?.slice(
+                text.indexOf('/') + 1,
+                text.indexOf('-')
+            );
 
             wLogger.info(`Detected osu! version: %${osuVersion}%`);
             return osuVersion;
