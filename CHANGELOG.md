@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.22.1](https://github.com/tosuapp/tosu/compare/v4.22.0...v4.22.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* build ([c3e1d10](https://github.com/tosuapp/tosu/commit/c3e1d104a40b91c57c3cb800208e213a4f2c6b04))
+
 ## [4.22.0](https://github.com/tosuapp/tosu/compare/v4.21.0...v4.22.0) (2026-06-01)
 
 
