@@ -32,8 +32,7 @@ export class LazerInstance extends AbstractInstance {
             if (!fs.existsSync(cacheFolder))
                 await fsp.mkdir(cacheFolder, { recursive: true });
 
-            // @ts-expect-error who write this type?
-            this.version = await this.getOsuVersion();
+            this.version = (await this.getOsuVersion()) as typeof this.version;
 
             if (!this.version) {
                 wLogger.error(
