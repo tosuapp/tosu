@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.22.0](https://github.com/tosuapp/tosu/compare/v4.21.0...v4.22.0) (2026-06-01)
+
+
+### Features
+
+* dynamic vtable and osu version from osu deps ([078c6a9](https://github.com/tosuapp/tosu/commit/078c6a9ce952d3e1605e908eb56b735adf767a44))
+
+
+### Bug Fixes
+
+* bicycle for AppImage ([9784c88](https://github.com/tosuapp/tosu/commit/9784c884a6e955249cbfcfa81f679c766011ba7d))
+* bicycle for AppImage ([ae65c5c](https://github.com/tosuapp/tosu/commit/ae65c5ccbc938edd2178a36f53f581a5aa315590))
+* do not trust client accuracy for pp ([b9f68ef](https://github.com/tosuapp/tosu/commit/b9f68efed11766197664c114dc2fbc5e2aebf254))
+
 ## [4.21.0](https://github.com/tosuapp/tosu/compare/v4.20.0...v4.21.0) (2026-05-28)
 
 
