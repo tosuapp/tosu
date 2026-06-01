@@ -410,3 +410,55 @@ export enum ManiaScrollingDirection {
     up = 0,
     down = 1
 }
+
+export enum LazerRankedPlayStage {
+    /**
+     * Waiting for clients to join.
+     */
+    WaitForJoin,
+
+    /**
+     * Period of time before the round starts.
+     */
+    RoundWarmup,
+
+    /**
+     * Users are discarding cards and drawing new ones.
+     */
+    CardDiscard,
+
+    /**
+     * Users have finished discarding their cards.
+     */
+    FinishCardDiscard,
+
+    /**
+     * The active user is selecting a card to play.
+     */
+    CardPlay,
+
+    /**
+     * The active user has made a selection, both players should now start downloading it.
+     */
+    FinishCardPlay,
+
+    /**
+     * Period of time before gameplay starts.
+     */
+    GameplayWarmup,
+
+    /**
+     * Gameplay is in progress.
+     */
+    Gameplay,
+
+    /**
+     * Users are viewing the gameplay results
+     */
+    Results,
+
+    /**
+     * The match has concluded.
+     */
+    Ended
+}

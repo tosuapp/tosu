@@ -5,6 +5,7 @@ import {
     GameState,
     LazerHitResults,
     LazerManiaSetting,
+    LazerRankedPlayStage,
     LazerSettings,
     Rulesets,
     ScoringMode,
@@ -27,6 +28,7 @@ import type {
     IGlobalPrecise,
     IHitErrors,
     IKeyOverlay,
+    ILazerRankedPlay,
     ILazerSpectator,
     ILazerSpectatorEntry,
     ILeaderboard,
@@ -64,6 +66,10 @@ import {
     ModsAcronyms,
     ModsCategories
 } from '@/utils/osuMods.types';
+import {
+    readNullableInt,
+    readSharpDictionaryIntToRef
+} from '@/utils/tprocessExtensions';
 
 type LazerPatternData = {
     scalingContainerTargetDrawSize: number;
@@ -159,7 +165,9 @@ export interface Offsets {
         '<client>k__BackingField': number;
     };
     'osu.Game.Online.Multiplayer.MultiplayerRoom': {
+        RoomID: number;
         '<ChannelID>k__BackingField': number;
+        '<MatchState>k__BackingField': number;
     };
     'osu.Game.Screens.Spectate.SpectatorScreen': {
         '<spectatorClient>k__BackingField': number;
@@ -371,6 +379,24 @@ export interface Offsets {
     };
     'osu.Framework.Input.Handlers.Mouse.MouseHandler': {
         '<UseRelativeMode>k__BackingField': number;
+    };
+    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState': {
+        '<Stage>k__BackingField': number;
+        '<CurrentRound>k__BackingField': number;
+        '<DamageMultiplier>k__BackingField': number;
+        '<Users>k__BackingField': number;
+        '<ActiveUserId>k__BackingField': number;
+        '<StarRating>k__BackingField': number;
+        '<WinningUserId>k__BackingField': number;
+    };
+    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo': {
+        '<Rating>k__BackingField': number;
+        '<Life>k__BackingField': number;
+        '<Hand>k__BackingField': number;
+        '<RatingAfter>k__BackingField': number;
+        DamageInfo: number;
+        '<RoundsWon>k__BackingField': number;
+        '<DamageMultiplier>k__BackingField': number;
     };
 }
 
@@ -3614,6 +3640,141 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return { chat: chatItems, spectatingClients };
+    }
+
+    rankedPlay(): ILazerRankedPlay | 'not-ready' {
+        // idk about this
+
+        const multiplayerClient = this.multiplayerClient();
+
+        if (!multiplayerClient) {
+            return 'not-ready';
+        }
+
+        const room = this.process.readIntPtr(
+            multiplayerClient +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerClient']
+                    .room
+        );
+
+        if (!room) {
+            return 'not-ready';
+        }
+
+        const state = this.process.readIntPtr(
+            room +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerRoom'][
+                    '<MatchState>k__BackingField'
+                ]
+        );
+
+        if (!state) {
+            return 'not-ready';
+        }
+
+        const maybeStage = this.process.readInt(
+            state +
+                this.offsets[
+                    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                ]['<Stage>k__BackingField']
+        );
+        if (maybeStage < 0 || maybeStage > LazerRankedPlayStage.Ended) {
+            return 'not-ready';
+        }
+
+        const maybeRound = this.process.readInt(
+            state +
+                this.offsets[
+                    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                ]['<CurrentRound>k__BackingField']
+        );
+        if (maybeRound < 1 || maybeRound > 50) {
+            return 'not-ready';
+        }
+
+        const maybeStarRating = this.process.readDouble(
+            state +
+                this.offsets[
+                    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                ]['<StarRating>k__BackingField']
+        );
+        if (maybeStarRating < 0 || maybeStarRating > 20) {
+            return 'not-ready';
+        }
+
+        const maybeDamage = this.process.readDouble(
+            state +
+                this.offsets[
+                    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                ]['<DamageMultiplier>k__BackingField']
+        );
+        if (maybeDamage < 0) {
+            return 'not-ready';
+        }
+
+        // i believe its proved this state is rankedplay state
+
+        const usersDictionary = this.process.readIntPtr(
+            state +
+                this.offsets[
+                    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                ]['<Users>k__BackingField']
+        );
+
+        const users = readSharpDictionaryIntToRef(
+            this.process,
+            usersDictionary
+        );
+
+        return {
+            stage: maybeStage,
+            currentRound: maybeRound,
+            starRating: maybeStarRating,
+            damageMultiplier: maybeDamage,
+            users: users.map((u) => ({
+                id: u.key,
+                info: {
+                    rating: this.process.readInt(
+                        u.address +
+                            this.offsets[
+                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                            ]['<Rating>k__BackingField']
+                    ),
+                    life: this.process.readInt(
+                        u.address +
+                            this.offsets[
+                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                            ]['<Life>k__BackingField']
+                    ),
+                    roundsWon: this.process.readInt(
+                        u.address +
+                            this.offsets[
+                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                            ]['<RoundsWon>k__BackingField']
+                    ),
+                    damageMultiplier: this.process.readDouble(
+                        u.address +
+                            this.offsets[
+                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                            ]['<DamageMultiplier>k__BackingField']
+                    )
+                }
+            })),
+            activeUserId: readNullableInt(
+                this.process,
+                state +
+                    this.offsets[
+                        'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                    ]['<ActiveUserId>k__BackingField']
+            ),
+            winningUserId: readNullableInt(
+                this.process,
+                state +
+                    this.offsets[
+                        'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                    ]['<WinningUserId>k__BackingField']
+            )
+        };
     }
 
     settings(): ISettings {

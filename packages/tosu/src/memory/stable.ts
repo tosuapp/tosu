@@ -18,6 +18,7 @@ import type {
     IGlobalPrecise,
     IHitErrors,
     IKeyOverlay,
+    ILazerRankedPlay,
     ILeaderboard,
     IMP3Length,
     IMenu,
@@ -1445,5 +1446,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         } catch (error) {
             return error as Error;
         }
+    }
+
+    rankedPlay(): ILazerRankedPlay | 'not-ready' {
+        throw new Error('в стабиле нет ранкед плея..');
     }
 }

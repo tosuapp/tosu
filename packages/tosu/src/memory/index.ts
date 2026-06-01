@@ -9,6 +9,7 @@ import type {
     IGlobalPrecise,
     IHitErrors,
     IKeyOverlay,
+    ILazerRankedPlay,
     ILeaderboard,
     IMP3Length,
     IMenu,
@@ -58,6 +59,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat;
     abstract tourneyUser(): ITourneyUser;
     abstract leaderboard(mode: number): ILeaderboard;
+    abstract rankedPlay(): ILazerRankedPlay | 'not-ready';
 
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>

@@ -1,3 +1,5 @@
+import { LazerRankedPlayStage } from '@tosu/common/enums/osu';
+
 import type { ITourneyManagerChatItem } from '@/states/tourney';
 import type {
     KeyOverlayButton,
@@ -208,5 +210,22 @@ export type ILazerSpectator =
           spectatingClients: ILazerSpectatorEntry[];
       }
     | undefined;
+
+export type ILazerRankedPlayUserInfo = {
+    rating: number;
+    life: number;
+    roundsWon: number;
+    damageMultiplier: number;
+};
+
+export type ILazerRankedPlay = {
+    stage: LazerRankedPlayStage;
+    currentRound: number;
+    damageMultiplier: number;
+    starRating: number;
+    users: { id: number; info: ILazerRankedPlayUserInfo }[];
+    activeUserId: number | undefined;
+    winningUserId: number | undefined;
+};
 
 export type ISettings = SettingsObject | Error;
