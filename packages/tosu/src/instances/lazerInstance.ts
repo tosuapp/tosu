@@ -32,29 +32,7 @@ export class LazerInstance extends AbstractInstance {
             if (!fs.existsSync(cacheFolder))
                 await fsp.mkdir(cacheFolder, { recursive: true });
 
-            let attempts = 1;
-            while (attempts < 5 && !this.version) {
-                if (attempts > 1)
-                    wLogger.warn(
-                        `Attempting to detect osu! version (Try %#${attempts}%)`
-                    );
-
-                try {
-                    this.version = this.memory.gameVersion() || '';
-
-                    wLogger.info(`Detected osu! version: %${this.version}%`);
-
-                    break;
-                } catch (exc) {
-                    wLogger.debug(
-                        `Failed to find osu! version for ${ClientType[this.client]} %${this.pid}%:`,
-                        exc
-                    );
-                } finally {
-                    attempts++;
-                    await sleep(1000);
-                }
-            }
+            this.version = (await this.getOsuVersion()) as typeof this.version;
 
             if (!this.version) {
                 wLogger.error(
@@ -367,6 +345,47 @@ export class LazerInstance extends AbstractInstance {
                 );
                 wLogger.debug(`Precise loop error details:`, exc);
             }
+        }
+    }
+
+    async getOsuVersion() {
+        const rootPath = await this.process.getRootPath();
+        let osuDepsJson = {
+            libraries: {}
+        };
+        try {
+            const filePath = path.join(rootPath, 'osu!.deps.json');
+            const isAppImage =
+                process.platform === 'linux' &&
+                rootPath.includes('/tmp/.mount_');
+            const isRoot =
+                process.platform === 'linux' && process.getuid?.() === 0;
+
+            const osuDepsRaw =
+                isRoot && isAppImage
+                    ? await this.process.readFileAsOwner(filePath)
+                    : await fsp.readFile(filePath, 'utf-8');
+
+            osuDepsJson = JSON.parse(osuDepsRaw);
+        } catch {
+            wLogger.error("Can't read osu dependencies");
+        }
+
+        const osuLib = Object.keys(osuDepsJson.libraries).find((key) =>
+            key.startsWith('osu!/')
+        );
+        try {
+            // key example: osu!/2026.525.0-lazer | osu!/2026.518.0-tachyon
+            const osuVersion = osuLib?.slice(
+                text.indexOf('/') + 1,
+                text.indexOf('-')
+            );
+
+            wLogger.info(`Detected osu! version: %${osuVersion}%`);
+            return osuVersion;
+        } catch {
+            wLogger.error("Can't read osu! version");
+            return '';
         }
     }
 }

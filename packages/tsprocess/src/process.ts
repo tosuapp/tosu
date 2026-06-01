@@ -1,8 +1,13 @@
 import { wLogger } from '@tosu/common';
+import { execFile as execFileCb } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { readFile as readFileAsync, readlink } from 'node:fs/promises';
+import { promisify } from 'node:util';
 import { dirname as pathDirname, join as pathJoin } from 'path';
 
 import ProcessUtils from '.';
+
+const execFile = promisify(execFileCb);
 
 export interface ProcessInfo {
     id: number;
@@ -305,5 +310,50 @@ export class Process {
         }
 
         return ProcessUtils.batchScan(this.handle, patterns);
+    }
+
+    async getRootPath() {
+        if (process.platform === 'win32') {
+            // same as path()
+            return pathDirname(ProcessUtils.getProcessPath(this.handle));
+        }
+
+        if (process.platform === 'linux') {
+            try {
+                const exePath = await readlink(`/proc/${this.id}/exe`);
+                return pathJoin(`/proc/${this.id}/root`, pathDirname(exePath));
+            } catch {
+                wLogger.error(
+                    `Failed to get exe path using /proc, try run with sudo`
+                );
+            }
+        }
+
+        throw new Error('getRootPath is not implemented for this platform');
+    }
+
+    async getOwnerUid(): Promise<number> {
+        const status = await readFileAsync(`/proc/${this.id}/status`, 'utf-8');
+        const uidLine = status.split('\n').find((l) => l.startsWith('Uid:'));
+        if (!uidLine)
+            throw new Error(`Could not find Uid in /proc/${this.id}/status`);
+        return parseInt(uidLine.split(/\s+/)[1], 10);
+    }
+
+    async readFileAsOwner(filePath: string): Promise<string> {
+        const uid = await this.getOwnerUid();
+        const { stdout: usernameRaw } = await execFile('id', [
+            '-un',
+            uid.toString()
+        ]);
+        const username = usernameRaw.trim();
+        const { stdout } = await execFile('runuser', [
+            '-u',
+            username,
+            '--',
+            'cat',
+            filePath
+        ]);
+        return stdout;
     }
 }
