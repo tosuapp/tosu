@@ -3710,14 +3710,18 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             return 'not-ready';
         }
 
-        // i believe its proved this state is rankedplay state
-
         const usersDictionary = this.process.readIntPtr(
             state +
                 this.offsets[
                     'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
                 ]['<Users>k__BackingField']
         );
+
+        if (!usersDictionary) {
+            return 'not-ready';
+        }
+
+        // i believe its proved this state is rankedplay state
 
         const users = readSharpDictionaryIntToRef(
             this.process,
