@@ -218,14 +218,16 @@ export type IRankedPlayUserInfo = {
     damageMultiplier: number;
 };
 
-export type IRankedPlay = {
-    stage: RankedPlayStage;
-    currentRound: number;
-    damageMultiplier: number;
-    starRating: number;
-    users: { id: number; info: IRankedPlayUserInfo }[];
-    activeUserId: number | undefined;
-    winningUserId: number | undefined;
-};
+export type IRankedPlay =
+    | {
+          stage: RankedPlayStage;
+          currentRound: number;
+          damageMultiplier: number;
+          starRating: number;
+          users: { id: number; info: IRankedPlayUserInfo }[];
+          activeUserId: number | undefined;
+          winningUserId: number | undefined;
+      }
+    | string;
 
 export type ISettings = SettingsObject | Error;

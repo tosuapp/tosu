@@ -59,7 +59,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract tourneyChat(messages: ITourneyManagerChatItem[]): ITourneyChat;
     abstract tourneyUser(): ITourneyUser;
     abstract leaderboard(mode: number): ILeaderboard;
-    abstract rankedPlay(): IRankedPlay | 'not-ready';
+    abstract rankedPlay(): IRankedPlay;
 
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
