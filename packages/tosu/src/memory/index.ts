@@ -14,6 +14,7 @@ import type {
     IMenu,
     IRankedPlay,
     IResultScreen,
+    IRoom,
     ISettings,
     ITourney,
     ITourneyChat,
@@ -60,6 +61,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract tourneyUser(): ITourneyUser;
     abstract leaderboard(mode: number): ILeaderboard;
     abstract rankedPlay(): IRankedPlay;
+    abstract room(): IRoom;
 
     checkIsBasesValid(): boolean {
         Object.entries(this.patterns).map((entry) =>
