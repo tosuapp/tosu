@@ -16,6 +16,7 @@ import { LazerMultiSpectating } from '@/states/lazerMultiSpectating';
 import { Menu } from '@/states/menu';
 import { RankedPlay } from '@/states/rankedplay';
 import { ResultScreen } from '@/states/resultScreen';
+import { Room } from '@/states/room';
 import { Settings } from '@/states/settings';
 import { TourneyManager } from '@/states/tourney';
 import { User } from '@/states/user';
@@ -34,6 +35,7 @@ export interface DataRepoList {
     user: User;
     lazerMultiSpectating: LazerMultiSpectating;
     rankedPlay: RankedPlay;
+    room: Room;
 }
 
 export type OsuVersion = `b${number}${'tourney' | 'cuttingedge' | ''}`;
@@ -89,6 +91,7 @@ export abstract class AbstractInstance {
         this.set('user', new User(this));
         this.set('lazerMultiSpectating', new LazerMultiSpectating(this));
         this.set('rankedPlay', new RankedPlay(this));
+        this.set('room', new Room(this));
 
         this.watchProcessHealth = this.watchProcessHealth.bind(this);
         this.preciseDataLoop = this.preciseDataLoop.bind(this);
