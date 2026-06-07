@@ -3832,7 +3832,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     ].UserID
             );
 
-            const apiUser = this.process.readInt(
+            const apiUser = this.process.readIntPtr(
                 current +
                     this.offsets[
                         'osu.Game.Online.Multiplayer.MultiplayerRoomUser'
