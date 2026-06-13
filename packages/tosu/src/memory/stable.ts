@@ -515,7 +515,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 return 'RulesetAddr is 0';
             }
 
-            const gameplayBase = this.process.readInt(rulesetAddr + 0x68);
+            const gameplayBase = this.process.readInt(rulesetAddr + 0x64);
             if (gameplayBase === 0) {
                 return 'gameplayBase is zero';
             }
@@ -539,11 +539,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const retries = this.process.readInt(
                 this.process.readInt(baseAddr - 0x33) + 0x8
             );
-            // [[[Ruleset + 0x68] + 0x38] + 0x28]
+            // [[[Ruleset + 0x64] + 0x38] + 0x28]
             const playerName = this.process.readSharpString(
                 this.process.readInt(scoreBase + 0x28)
             );
-            // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
+            // [[[Ruleset + 0x64] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x64] + 0x38] + 0x1C] + 0x8
             const modsInt =
                 this.process.readInt(
                     this.process.readInt(scoreBase + 0x1c) + 0xc
@@ -551,17 +551,17 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 this.process.readInt(
                     this.process.readInt(scoreBase + 0x1c) + 0x8
                 );
-            // [[Ruleset + 0x68] + 0x38] + 0x64
+            // [[Ruleset + 0x64] + 0x38] + 0x64
             const mode = this.process.readInt(scoreBase + 0x64);
 
-            const score = this.process.readInt(rulesetAddr + 0xfc);
+            const score = this.process.readInt(scoreBase + 0x78);
 
-            // [[Ruleset + 0x68] + 0x40] + 0x14
+            // [[Ruleset + 0x64] + 0x40] + 0x14
             const playerHPSmooth =
                 this.process.readDouble(hpBarBase + 0x14) || 0;
-            // [[Ruleset + 0x68] + 0x40] + 0x1C
+            // [[Ruleset + 0x64] + 0x40] + 0x1C
             const playerHP = this.process.readDouble(hpBarBase + 0x1c);
-            // [[Ruleset + 0x68] + 0x48] + 0xC
+            // [[Ruleset + 0x64] + 0x48] + 0xC
             const accuracy = this.process.readDouble(
                 this.process.readInt(gameplayBase + 0x48) + 0xc
             );
@@ -575,21 +575,21 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             let combo = 0;
             let maxCombo = 0;
             if (global.playTime >= beatmapPP.timings.firstObj - 100) {
-                // [[Ruleset + 0x68] + 0x38] + 0x88
+                // [[Ruleset + 0x64] + 0x38] + 0x88
                 hit100 = this.process.readShort(scoreBase + 0x88);
-                // [[Ruleset + 0x68] + 0x38] + 0x8A
+                // [[Ruleset + 0x64] + 0x38] + 0x8A
                 hit300 = this.process.readShort(scoreBase + 0x8a);
-                // [[Ruleset + 0x68] + 0x38] + 0x8C
+                // [[Ruleset + 0x64] + 0x38] + 0x8C
                 hit50 = this.process.readShort(scoreBase + 0x8c);
-                // [[Ruleset + 0x68] + 0x38] + 0x8E
+                // [[Ruleset + 0x64] + 0x38] + 0x8E
                 hitGeki = this.process.readShort(scoreBase + 0x8e);
-                // [[Ruleset + 0x68] + 0x38] + 0x90
+                // [[Ruleset + 0x64] + 0x38] + 0x90
                 hitKatu = this.process.readShort(scoreBase + 0x90);
-                // [[Ruleset + 0x68] + 0x38] + 0x92
+                // [[Ruleset + 0x64] + 0x38] + 0x92
                 hitMiss = this.process.readShort(scoreBase + 0x92);
-                // [[Ruleset + 0x68] + 0x38] + 0x94
+                // [[Ruleset + 0x64] + 0x38] + 0x94
                 combo = this.process.readShort(scoreBase + 0x94);
-                // [[Ruleset + 0x68] + 0x38] + 0x68
+                // [[Ruleset + 0x64] + 0x38] + 0x68
                 maxCombo = this.process.readShort(scoreBase + 0x68);
             }
 
@@ -634,7 +634,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
             if (rulesetAddr === 0) return 'rulesetAddr is zero';
 
-            const keyOverlayPtr = this.process.readUInt(rulesetAddr + 0xb0);
+            const keyOverlayPtr = this.process.readUInt(rulesetAddr + 0xac);
             if (keyOverlayPtr === 0) {
                 if (mode === 3 || mode === 1) return '';
 
@@ -721,7 +721,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
             if (rulesetAddr === 0) return 'RulesetAddr is 0';
 
-            const gameplayBase = this.process.readInt(rulesetAddr + 0x68);
+            const gameplayBase = this.process.readInt(rulesetAddr + 0x64);
             if (gameplayBase === 0) return 'gameplayBase is zero';
 
             const scoreBase = this.process.readInt(gameplayBase + 0x38);
@@ -1189,7 +1189,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     0x4
             );
 
-            const base = this.process.readInt(rulesetAddr + 0x7c);
+            const base = this.process.readInt(rulesetAddr + 0x78);
 
             if (base === 0) {
                 return [false, undefined, []];
