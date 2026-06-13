@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.22.2](https://github.com/tosuapp/tosu/compare/v4.22.1...v4.22.2) (2026-06-13)
+
+
+### Bug Fixes
+
+* gameplay new offsets ([dc0ae8e](https://github.com/tosuapp/tosu/commit/dc0ae8e29b671eb3b7c64c7e3ea37a383e04c9ea))
+
 ### [4.22.1](https://github.com/tosuapp/tosu/compare/v4.22.0...v4.22.1) (2026-06-01)
 
 
