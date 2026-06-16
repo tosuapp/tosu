@@ -1,6 +1,5 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import {
-    AccuracyCalculator,
     GradualDifficulty,
     type ScoreInfoData
 } from '@tosuapp/lazer-calculator';
@@ -546,10 +545,8 @@ export class Gameplay extends AbstractState {
                 ignoreMisses: this.statistics.ignoreMiss
             };
             // Do not trust client accuracy for performance calculation, calculate it based on hit results
-            scoreInfo.accuracy = AccuracyCalculator.calculate(
-                currentBeatmap,
-                scoreInfo
-            );
+            scoreInfo.accuracy =
+                this.gradualPerformance.calculateProgressiveAccuracy(scoreInfo);
 
             const currPerformance = currentBeatmap.calculatePerformance(
                 currDiffAttrs,
@@ -599,10 +596,8 @@ export class Gameplay extends AbstractState {
                     this.statistics.miss;
                 calcOptions.greats = this.statistics.great;
             }
-            calcOptions.accuracy = AccuracyCalculator.calculate(
-                currentBeatmap,
-                calcOptions
-            );
+            calcOptions.accuracy =
+                currentBeatmap.calculateAccuracy(calcOptions);
 
             const maxAchievablePerformance =
                 currentBeatmap.calculatePerformance(
@@ -625,10 +620,8 @@ export class Gameplay extends AbstractState {
             calcOptions.sliderEndHits = beatmapPP.maxScore.sliderEndHits;
             calcOptions.comboBreaks = 0;
             calcOptions.misses = 0;
-            calcOptions.accuracy = AccuracyCalculator.calculate(
-                currentBeatmap,
-                calcOptions
-            );
+            calcOptions.accuracy =
+                currentBeatmap.calculateAccuracy(calcOptions);
 
             const fcPerformance = currentBeatmap.calculatePerformance(
                 beatmapPP.difficultyAttributes,

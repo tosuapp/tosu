@@ -7,7 +7,6 @@ import {
     type PerformanceAttrsData,
     PlayBeatmap,
     type ScoreInfoData,
-    ScoreSimulator,
     type StrainsData
 } from '@tosuapp/lazer-calculator';
 import fs from 'fs';
@@ -418,7 +417,7 @@ export class BeatmapPP extends AbstractState {
             const difficulty = this.difficultyAttributes.getData();
 
             this.maxScore = {
-                ...ScoreSimulator.createScore(this.beatmap, 1.0),
+                ...this.beatmap.createScore(1.0),
                 maxCombo: difficulty.maxCombo
             };
 
@@ -438,10 +437,7 @@ export class BeatmapPP extends AbstractState {
                     const data = this.beatmap.calculatePerformance(
                         this.difficultyAttributes,
                         {
-                            ...ScoreSimulator.createScore(
-                                this.beatmap,
-                                acc / 100
-                            ),
+                            ...this.beatmap.createScore(acc / 100),
                             maxCombo: this.maxScore.maxCombo
                         }
                     );
@@ -786,11 +782,7 @@ export class BeatmapPP extends AbstractState {
             const curPerformance = this.beatmap.calculatePerformance(
                 diffAttrs,
                 {
-                    ...ScoreSimulator.createPartialScore(
-                        this.beatmap,
-                        passedObjects,
-                        1.0
-                    ),
+                    ...diffCalc.createProgressiveScore(1.0),
                     maxCombo: diffData.maxCombo
                 }
             );
