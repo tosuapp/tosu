@@ -168,8 +168,8 @@ importers:
         specifier: workspace:*
         version: link:../updater
       '@tosuapp/lazer-calculator':
-        specifier: 0.2.0-20260610.0
-        version: 0.2.0-20260610.0
+        specifier: v0.4.0-20260616.0
+        version: 0.4.0-20260616.0
       osu-catch-stable:
         specifier: ^4.0.1
         version: 4.0.1(osu-classes@3.1.0)
@@ -1048,8 +1048,8 @@ packages:
     resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
     engines: {node: '>= 10'}
 
-  '@tosuapp/lazer-calculator@0.2.0-20260610.0':
-    resolution: {integrity: sha512-KwHU8C3Sv+vTW4GXBM7PGsddwy9rwrPg5HW8xiyNKJrUZ6W7P69GxRYejbQeeLXngkKvkXl0+CX391S06J2Nuw==}
+  '@tosuapp/lazer-calculator@0.4.0-20260616.0':
+    resolution: {integrity: sha512-8ua7me5lhoxll8rSoZu1k+GkDTYmKIJ5k5oyZN1Uk/7J7ujqdpz2+ZdAvXH0X7rsm7aussv+SWZPA+8N4PPjTg==}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
     resolution: {integrity: sha512-fYDQA9e6yTNmA13TLVSA+WMQRc5Bn/c0EUBditUHNfMMxN7M82c38b1kEggVE3pLpZ0FwkwJkUEKMiOi52JXFA==}
@@ -5162,7 +5162,7 @@ snapshots:
 
   '@tootallnate/once@2.0.1': {}
 
-  '@tosuapp/lazer-calculator@0.2.0-20260610.0': {}
+  '@tosuapp/lazer-calculator@0.4.0-20260616.0': {}
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
