@@ -168,7 +168,7 @@ importers:
         specifier: workspace:*
         version: link:../updater
       '@tosuapp/lazer-calculator':
-        specifier: v0.4.0-20260616.0
+        specifier: 0.4.0-20260616.0
         version: 0.4.0-20260616.0
       osu-catch-stable:
         specifier: ^4.0.1
