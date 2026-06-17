@@ -11,7 +11,7 @@ import {
     type StrainsData
 } from '@tosuapp/lazer-calculator';
 import fs from 'fs';
-import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
+import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 
 import { BeatmapStrains } from '@/api/types/v1';
@@ -80,7 +80,6 @@ interface BeatmapPPCurrentAttributes {
 
 interface BeatmapPPTimings {
     firstObj: number;
-    firstNonSpinnerObj: number;
     full: number;
 }
 
@@ -144,7 +143,6 @@ export class BeatmapPP extends AbstractState {
 
     timings: BeatmapPPTimings = {
         firstObj: 0,
-        firstNonSpinnerObj: 0,
         full: 0
     };
 
@@ -235,7 +233,6 @@ export class BeatmapPP extends AbstractState {
         };
         this.timings = {
             firstObj: 0,
-            firstNonSpinnerObj: 0,
             full: 0
         };
         this.timingPoints = [];
@@ -502,11 +499,6 @@ export class BeatmapPP extends AbstractState {
                 this.timings.firstObj = Math.round(
                     this.lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
                 );
-                this.timings.firstNonSpinnerObj = Math.round(
-                    this.lazerBeatmap.hitObjects.find(
-                        (r) => !(r.hitType & HitType.Spinner)
-                    )?.startTime ?? 0
-                );
                 this.timings.full = Math.round(this.lazerBeatmap.totalLength);
 
                 this.mode = this.lazerBeatmap.mode;
@@ -634,8 +626,7 @@ export class BeatmapPP extends AbstractState {
                     break;
             }
 
-            const firstObjectTime =
-                this.timings.firstNonSpinnerObj / this.clockRate;
+            const firstObjectTime = this.timings.firstObj / this.clockRate;
             const lastObjectTime =
                 firstObjectTime +
                 oldStrains.value.length * oldStrains.sectionLength;
