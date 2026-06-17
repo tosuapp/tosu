@@ -1,6 +1,5 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import {
-    AccuracyCalculator,
     GradualDifficulty,
     type ScoreInfoData
 } from '@tosuapp/lazer-calculator';
@@ -12,7 +11,7 @@ import {
     LeaderboardPlayer,
     Statistics
 } from '@/states/types';
-import { calculateGrade, calculatePassedObjects } from '@/utils/calculators';
+import { calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods } from '@/utils/osuMods';
 import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
@@ -91,7 +90,7 @@ export class Gameplay extends AbstractState {
     private cachedkeys: string = '';
 
     previousState: string = '';
-    previousPassedObjects = 0;
+    previousPlayTime = 0;
     previousHitErrorIndex = 0;
 
     constructor(game: AbstractInstance) {
@@ -138,7 +137,7 @@ export class Gameplay extends AbstractState {
         this.keyOverlay = [];
         this.isReplayUiHidden = false;
 
-        this.previousPassedObjects = 0;
+        this.previousPlayTime = 0;
         this.previousHitErrorIndex = 0;
 
         this.gradualPerformance = undefined;
@@ -163,7 +162,7 @@ export class Gameplay extends AbstractState {
             `Quick reset of gameplay state`
         );
 
-        this.previousPassedObjects = 0;
+        this.previousPlayTime = 0;
         this.gradualPerformance = undefined;
     }
 
@@ -501,24 +500,17 @@ export class Gameplay extends AbstractState {
                 this.previousState = currentState;
             }
 
-            const passedObjects = calculatePassedObjects(
-                beatmapPP.lazerBeatmap?.hitObjects || [],
-                global.playTime,
-                this.mode,
-                this.statistics
-            );
-
-            const offset = passedObjects - this.previousPassedObjects;
-            if (offset <= 0) {
-                if (offset === 0) return;
+            const timeOffset = global.playTime - this.previousPlayTime;
+            if (timeOffset <= 0) {
+                if (timeOffset === 0) return;
 
                 // Mostly for lazer replay, correct position on rewind
                 this.gradualPerformance =
                     currentBeatmap.createGradualDifficulty();
-                this.gradualPerformance.skip(passedObjects);
-            } else {
-                this.gradualPerformance.skip(offset);
             }
+
+            const offset = this.gradualPerformance.skipToTime(global.playTime);
+            if (offset === 0) return;
 
             const currDiffAttrs =
                 this.gradualPerformance.createDifficultyAttrs();
@@ -546,10 +538,8 @@ export class Gameplay extends AbstractState {
                 ignoreMisses: this.statistics.ignoreMiss
             };
             // Do not trust client accuracy for performance calculation, calculate it based on hit results
-            scoreInfo.accuracy = AccuracyCalculator.calculate(
-                currentBeatmap,
-                scoreInfo
-            );
+            scoreInfo.accuracy =
+                this.gradualPerformance.calculateProgressiveAccuracy(scoreInfo);
 
             const currPerformance = currentBeatmap.calculatePerformance(
                 currDiffAttrs,
@@ -599,10 +589,8 @@ export class Gameplay extends AbstractState {
                     this.statistics.miss;
                 calcOptions.greats = this.statistics.great;
             }
-            calcOptions.accuracy = AccuracyCalculator.calculate(
-                currentBeatmap,
-                calcOptions
-            );
+            calcOptions.accuracy =
+                currentBeatmap.calculateAccuracy(calcOptions);
 
             const maxAchievablePerformance =
                 currentBeatmap.calculatePerformance(
@@ -625,10 +613,8 @@ export class Gameplay extends AbstractState {
             calcOptions.sliderEndHits = beatmapPP.maxScore.sliderEndHits;
             calcOptions.comboBreaks = 0;
             calcOptions.misses = 0;
-            calcOptions.accuracy = AccuracyCalculator.calculate(
-                currentBeatmap,
-                calcOptions
-            );
+            calcOptions.accuracy =
+                currentBeatmap.calculateAccuracy(calcOptions);
 
             const fcPerformance = currentBeatmap.calculatePerformance(
                 beatmapPP.difficultyAttributes,
@@ -637,7 +623,7 @@ export class Gameplay extends AbstractState {
             beatmapPP.currAttributes.fcPP = fcPerformance.pp;
             beatmapPP.updatePPAttributes('fc', fcPerformance);
 
-            this.previousPassedObjects = passedObjects;
+            this.previousPlayTime = global.playTime;
 
             this.game.resetReportCount('gameplay updateStarsAndPerformance');
         } catch (exc) {

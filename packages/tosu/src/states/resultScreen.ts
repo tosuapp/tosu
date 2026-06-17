@@ -1,8 +1,5 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
-import {
-    AccuracyCalculator,
-    type ScoreInfoData
-} from '@tosuapp/lazer-calculator';
+import { type ScoreInfoData } from '@tosuapp/lazer-calculator';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
@@ -161,10 +158,8 @@ export class ResultScreen extends AbstractState {
                 misses: this.statistics.miss
             };
             // Do not trust client accuracy for performance calculation, calculate it based on hit results
-            calcOptions.accuracy = AccuracyCalculator.calculate(
-                currentBeatmap,
-                calcOptions
-            );
+            calcOptions.accuracy =
+                currentBeatmap.calculateAccuracy(calcOptions);
 
             const t1 = performance.now();
             const curPerformance = currentBeatmap.calculatePerformance(
