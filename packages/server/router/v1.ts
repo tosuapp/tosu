@@ -17,6 +17,7 @@ export default function buildV1Api(app: HttpServer) {
         }
 
         directoryWalker({
+            req,
             res,
             baseUrl: url,
             pathname: req.params.filePath,

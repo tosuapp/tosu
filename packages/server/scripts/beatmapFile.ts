@@ -85,6 +85,7 @@ export function beatmapFileShortcut(
     }
 
     res.writeHead(200, {
+        'Accept-Ranges': 'bytes',
         'Content-Type': fileMimetype,
         'Content-Length': fileStat.size
     });
