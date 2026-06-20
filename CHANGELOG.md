@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.22.3](https://github.com/tosuapp/tosu/compare/v4.22.2...v4.22.3) (2026-06-20)
+
+
+### Bug Fixes
+
+* Allow range for overlay mp4/mp3 files ([6942951](https://github.com/tosuapp/tosu/commit/6942951c8962daeb9960f3e3fe4d478efbe65fd7))
+* Fix graph offset ([b7e9d90](https://github.com/tosuapp/tosu/commit/b7e9d90dcdb766a5e1411b8418093282471d86d4))
+* Improve `failed to fetch offsets` message ([d2fd72c](https://github.com/tosuapp/tosu/commit/d2fd72c6986c0ef892fa578b602496832e6b5bda))
+* incorrect accuracy calculation of beatmap subset in std ([a7c420a](https://github.com/tosuapp/tosu/commit/a7c420a4591340ffd51b63bd8702f7f4bdeaebd2))
+* replace incorrect hit object counting heuristic to time based ([818c1d8](https://github.com/tosuapp/tosu/commit/818c1d8bada7f47171ce4fdcc6f788a714dd412d))
+
 ### [4.22.2](https://github.com/tosuapp/tosu/compare/v4.22.1...v4.22.2) (2026-06-13)
 
 
