@@ -10,11 +10,7 @@ export class RankedPlay extends AbstractState {
     updateState() {
         try {
             const play = this.game.memory.rankedPlay();
-            if (play === 'not-ready') {
-                this.info = undefined;
-            } else {
-                this.info = play;
-            }
+           this.info = play !== 'not-ready' ? play : undefined;
         } catch (exc) {
             this.info = undefined;
 
