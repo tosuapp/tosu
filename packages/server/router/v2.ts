@@ -50,6 +50,7 @@ export default function buildV2Api(app: HttpServer) {
         }
 
         directoryWalker({
+            req,
             res,
             baseUrl: url,
             pathname: req.params.filePath,
@@ -85,6 +86,7 @@ export default function buildV2Api(app: HttpServer) {
 
         const folder = path.join(global.gameFolder, 'Skins', global.skinFolder);
         directoryWalker({
+            req,
             res,
             baseUrl: url,
             pathname: req.params.filePath,

@@ -543,6 +543,7 @@ export default function buildBaseApi(server: Server) {
                 : url;
             directoryWalker({
                 _htmlRedirect: true,
+                req,
                 res,
                 baseUrl: url,
                 pathname: selectIndexHTML,
