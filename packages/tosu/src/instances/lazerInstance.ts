@@ -100,7 +100,7 @@ export class LazerInstance extends AbstractInstance {
                         });
                         if (json === null) {
                             wLogger.debug(
-                                `Malformed offsets on %${host}%:`,
+                                `Broken response from %${host}%:`,
                                 request.status,
                                 request.statusText
                             );
