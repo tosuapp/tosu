@@ -212,6 +212,7 @@ export type ILazerSpectator =
     | undefined;
 
 export type IRankedPlayUserInfo = {
+    id: number;
     rating: number;
     life: number;
     roundsWon: number;
@@ -224,7 +225,7 @@ export type IRankedPlay =
           currentRound: number;
           damageMultiplier: number;
           starRating: number;
-          users: { id: number; info: IRankedPlayUserInfo }[];
+          users: IRankedPlayUserInfo[];
           activeUserId: number | undefined;
           winningUserId: number | undefined;
       }

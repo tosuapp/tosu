@@ -3728,32 +3728,30 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             damageMultiplier: damage,
             users: users.map((u) => ({
                 id: u.key,
-                info: {
-                    rating: this.process.readInt(
-                        u.address +
-                            this.offsets[
-                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
-                            ]['<Rating>k__BackingField']
-                    ),
-                    life: this.process.readInt(
-                        u.address +
-                            this.offsets[
-                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
-                            ]['<Life>k__BackingField']
-                    ),
-                    roundsWon: this.process.readInt(
-                        u.address +
-                            this.offsets[
-                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
-                            ]['<RoundsWon>k__BackingField']
-                    ),
-                    damageMultiplier: this.process.readDouble(
-                        u.address +
-                            this.offsets[
-                                'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
-                            ]['<DamageMultiplier>k__BackingField']
-                    )
-                }
+                rating: this.process.readInt(
+                    u.address +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                        ]['<Rating>k__BackingField']
+                ),
+                life: this.process.readInt(
+                    u.address +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                        ]['<Life>k__BackingField']
+                ),
+                roundsWon: this.process.readInt(
+                    u.address +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                        ]['<RoundsWon>k__BackingField']
+                ),
+                damageMultiplier: this.process.readDouble(
+                    u.address +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                        ]['<DamageMultiplier>k__BackingField']
+                )
             })),
             activeUserId: this.process.readNullableInt(
                 state +
