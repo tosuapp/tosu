@@ -84,7 +84,7 @@ export class LazerInstance extends AbstractInstance {
 
                         clearTimeout(timeout);
                         if (!request.ok) {
-                            wLogger.error(
+                            wLogger.debug(
                                 `Failed to fetch offsets from %${host}%:`,
                                 request.status,
                                 request.statusText
@@ -98,10 +98,17 @@ export class LazerInstance extends AbstractInstance {
                             payload: text,
                             defaultValue: null
                         });
-                        if (json === null) continue;
+                        if (json === null) {
+                            wLogger.debug(
+                                `Broken response from %${host}%:`,
+                                request.status,
+                                request.statusText
+                            );
+                            continue;
+                        }
 
                         wLogger.info(
-                            `Successfully retrieved offsets from %${host}% for version %${this.version}%`
+                            `Successfully retrieved offsets for version %${this.version}%`
                         );
 
                         this.memory.offsets = json;
@@ -115,6 +122,13 @@ export class LazerInstance extends AbstractInstance {
                         );
                         wLogger.debug(`Offset fetch error details:`, exc);
                     }
+                }
+
+                if (this.memory.offsets.OsuVersion !== this.version) {
+                    wLogger.error(
+                        `Failed to fetch offsets for %${this.version}%, report to devs: https://discord.gg/WX7BTs8kwh`
+                    );
+                    return;
                 }
             }
 
