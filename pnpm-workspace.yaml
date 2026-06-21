@@ -1,6 +1,6 @@
 packages:
-  # all packages in direct subdirs of packages/
   - packages/*
 onlyBuiltDependencies:
   - '@tosuapp/lazer-calculator'
   - electron
+  - esbuild

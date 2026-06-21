@@ -30,8 +30,8 @@
     },
     "devDependencies": {
         "@types/semver": "^7.7.1",
-        "@vercel/ncc": "^0.38.4",
-        "@yao-pkg/pkg": "^6.11.0",
+        "@vercel/ncc": "^0.44.0",
+        "@yao-pkg/pkg": "^6.20.0",
         "cross-env": "^7.0.3",
         "genversion": "^3.2.0",
         "ts-node": "^10.9.2"
