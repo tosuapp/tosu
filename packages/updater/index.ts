@@ -178,6 +178,9 @@ export const autoUpdater = async (
             path.dirname(process.argv[0]),
             `tosu${platform.fileType}`
         );
+
+        await fs.promises.chmod(correctExecutablePath, 0o755);
+
         spawn(`"${correctExecutablePath}"`, process.argv.slice(1), {
             detached: true,
             shell: true,
