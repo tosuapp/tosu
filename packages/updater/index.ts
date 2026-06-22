@@ -179,7 +179,12 @@ export const autoUpdater = async (
             `tosu${platform.fileType}`
         );
 
-        await fs.promises.chmod(correctExecutablePath, 0o755);
+        if (platform.type === 'linux') {
+            const stats = await fs.promises.stat(backupExecutablePath);
+            await fs.promises
+                .chmod(currentExecutablePath, stats.mode)
+                .catch(() => null);
+        }
 
         spawn(`"${correctExecutablePath}"`, process.argv.slice(1), {
             detached: true,
