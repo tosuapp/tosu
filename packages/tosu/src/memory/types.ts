@@ -225,9 +225,9 @@ export type IRankedPlay =
           currentRound: number;
           damageMultiplier: number;
           starRating: number;
+          activeUserId: number;
+          winningUserId: number;
           users: IRankedPlayUserInfo[];
-          activeUserId: number | undefined;
-          winningUserId: number | undefined;
       }
     | string;
 

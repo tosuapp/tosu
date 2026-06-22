@@ -3726,6 +3726,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             currentRound: round,
             starRating,
             damageMultiplier: damage,
+            activeUserId:
+                this.process.readNullableInt(
+                    state +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                        ]['<ActiveUserId>k__BackingField']
+                ) || -1,
+            winningUserId:
+                this.process.readNullableInt(
+                    state +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
+                        ]['<WinningUserId>k__BackingField']
+                ) || -1,
             users: users.map((u) => ({
                 id: u.key,
                 rating: this.process.readInt(
@@ -3752,19 +3766,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                             'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
                         ]['<DamageMultiplier>k__BackingField']
                 )
-            })),
-            activeUserId: this.process.readNullableInt(
-                state +
-                    this.offsets[
-                        'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
-                    ]['<ActiveUserId>k__BackingField']
-            ),
-            winningUserId: this.process.readNullableInt(
-                state +
-                    this.offsets[
-                        'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState'
-                    ]['<WinningUserId>k__BackingField']
-            )
+            }))
         };
     }
 
