@@ -163,7 +163,7 @@ export const autoUpdater = async (
             return;
         }
 
-        await fs.promises.rename(executablePath, backupExecutablePath);
+        await fs.promises.rename(process.argv[0], backupExecutablePath);
         await unzip(updateArchivePath, getProgramPath());
 
         // close request to allow destroy server
