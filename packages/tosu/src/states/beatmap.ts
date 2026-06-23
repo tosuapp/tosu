@@ -237,6 +237,11 @@ export class BeatmapPP extends AbstractState {
         this.timingPoints = [];
         this.breaks = [];
         this.kiais = [];
+
+        ppModuleManager.events.on('changed', () => {
+            // TODO: update playBeatmap
+            this.updateGraph();
+        });
     }
 
     updatePPAttributes(type: 'curr' | 'fc', attributes: PerformanceAttrsData) {
