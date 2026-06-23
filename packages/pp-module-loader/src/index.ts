@@ -30,7 +30,9 @@ const ppModuleManager = {
             currentCalculator = await resolveCalculator(module);
             wLogger.info('[calculator]', 'Successfully loaded calculator.');
         } catch (err) {
-            wLogger.error('[calculator] Failed to load external calculator');
+            wLogger.error(
+                '[calculator] Failed to load external calculator. Falling back to internal calculator.'
+            );
             wLogger.debug('Failed to load calculator:', err);
             currentCalculator = internalCalculator;
         }
