@@ -32,7 +32,7 @@ const ppModuleManager = {
         } catch (err) {
             wLogger.error('[calculator] Failed to load external calculator');
             wLogger.debug('Failed to load calculator:', err);
-            return;
+            currentCalculator = internalCalculator;
         }
 
         this.events.emit('changed');
