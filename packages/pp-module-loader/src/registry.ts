@@ -4,7 +4,7 @@ import { SemVer } from 'semver';
 
 import type { PpModule } from '.';
 import { dependencies } from '../package.json';
-import { getPrebuiltPackageName } from './package';
+import { getFullPrebuiltPackageName } from './package';
 
 const CALCULATOR_VERSION = new SemVer(
     dependencies['@tosuapp/lazer-calculator']
@@ -16,7 +16,7 @@ const VERSION_RANGE = `^${CALCULATOR_VERSION.version}`;
 
 export const onlinePpRegistry = {
     async fetch(): Promise<PpModule[]> {
-        const pkg = await npmRegistry.getPackage(getPrebuiltPackageName());
+        const pkg = await npmRegistry.getPackage(getFullPrebuiltPackageName());
         const list: PpModule[] = [];
 
         for (const version in pkg.versions) {
@@ -38,7 +38,7 @@ export const onlinePpRegistry = {
 
 export async function resolveDistTag(tag: string): Promise<string | undefined> {
     const dist = (await npmRegistry.getDistTags(
-        getPrebuiltPackageName()
+        getFullPrebuiltPackageName()
     )) as Record<string, string>;
 
     if (!dist[tag] || !isCompatiableVersion(dist[tag])) {
