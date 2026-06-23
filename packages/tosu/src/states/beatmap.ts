@@ -94,6 +94,10 @@ interface KiaiPoint {
 }
 
 export class BeatmapPP extends AbstractState {
+    currentMods?: CalculateMods;
+    currentMode: number;
+    lazerBypass: boolean;
+
     isKiai: boolean;
     isBreak: boolean;
 
@@ -156,6 +160,9 @@ export class BeatmapPP extends AbstractState {
     }
 
     init() {
+        this.currentMode = 0;
+        this.lazerBypass = false;
+
         this.isKiai = false;
         this.isBreak = false;
 
@@ -239,7 +246,15 @@ export class BeatmapPP extends AbstractState {
         this.kiais = [];
 
         ppModuleManager.events.on('changed', () => {
-            // TODO: update playBeatmap
+            // TODO: remove temp hack
+            if (this.currentMods) {
+                this.updateMapMetadata(
+                    this.currentMods,
+                    this.currentMode,
+                    this.lazerBypass
+                );
+            }
+
             this.updateGraph();
         });
     }
@@ -313,6 +328,11 @@ export class BeatmapPP extends AbstractState {
         currentMode: number,
         lazerBypass: boolean = false
     ) {
+        // TODO remove
+        this.currentMods = currentMods;
+        this.currentMode = currentMode;
+        this.lazerBypass = lazerBypass;
+
         try {
             const startTime = performance.now();
 
