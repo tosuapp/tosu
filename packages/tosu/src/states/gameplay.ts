@@ -1,4 +1,5 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
+import { ppModuleManager } from '@tosu/pp-module-loader';
 import type {
     GradualDifficulty,
     ScoreInfoData
@@ -154,6 +155,10 @@ export class Gameplay extends AbstractState {
         this.isLeaderboardVisible = false;
         this.leaderboardPlayer = Object.assign({}, defaultLBPlayer);
         this.leaderboardScores = [];
+
+        ppModuleManager.events.on('changed', () => {
+            this.resetQuick();
+        });
     }
 
     resetQuick() {
