@@ -12,7 +12,7 @@ export type PpModule =
     | { type: 'internal' }
     | { type: 'dist-tag'; tag: string }
     | { type: 'release'; version: string }
-    | { type: 'external'; path: string };
+    | { type: 'local'; path: string };
 
 export { ppModuleManager, onlinePpRegistry };
 
@@ -30,7 +30,7 @@ const ppModuleManager = {
             currentCalculator = await resolveCalculator(module);
             wLogger.info('[calculator]', 'Successfully loaded calculator.');
         } catch (err) {
-            wLogger.error('[calculator] Failed to load calculator');
+            wLogger.error('[calculator] Failed to load external calculator');
             wLogger.debug('Failed to load calculator:', err);
             return;
         }
@@ -54,9 +54,10 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
 
             const version = await resolveDistTag(module.tag);
             if (!version) {
-                throw new Error(
-                    `tag "${module.tag}" is not found or not compatible`
-                );
+                const msg = `tag "${module.tag}" is not found or not compatible`;
+                wLogger.error('[calculator]', msg);
+
+                throw new Error(msg);
             }
 
             return loadCalculator(await downloadCalculator(version));
@@ -71,10 +72,10 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
             return loadCalculator(await downloadCalculator(module.version));
         }
 
-        case 'external': {
+        case 'local': {
             wLogger.info(
                 '[calculator]',
-                `Using external calculator from "${module.path}"`
+                `Using local calculator from "${module.path}"`
             );
 
             return loadCalculator(module.path);

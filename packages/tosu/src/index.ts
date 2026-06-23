@@ -8,6 +8,7 @@ import {
     getProgramPath,
     wLogger
 } from '@tosu/common';
+import { ppModuleManager } from '@tosu/pp-module-loader';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
 import { Process } from 'tsprocess';
@@ -83,6 +84,18 @@ const currentVersion = require('./_version.js');
         'change',
         instanceManager.handleConfigUpdate.bind(instanceManager)
     );
+
+    ppModuleManager.load({
+        type: 'dist-tag',
+        tag: config.ppChannel
+    });
+
+    configEvents.addListener('change', () => {
+        ppModuleManager.load({
+            type: 'dist-tag',
+            tag: config.ppChannel
+        });
+    });
 
     if (config.enableIngameOverlay) instanceManager.startOverlay();
 })();

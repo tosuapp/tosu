@@ -33,6 +33,10 @@ const defaultSchema: ConfigSchema = {
         binding: 'CALCULATE_PP',
         default: true
     },
+    ppChannel: {
+        binding: 'PP_CHANNEL',
+        default: 'latest'
+    },
     enableKeyOverlay: {
         binding: 'ENABLE_KEY_OVERLAY',
         default: true
