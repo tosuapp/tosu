@@ -20,14 +20,14 @@ export const onlinePpRegistry = {
         const list: PpModule[] = [];
 
         for (const version in pkg.versions) {
-            if (!semver.satisfies(version, VERSION_RANGE)) continue;
+            if (!isCompatiableVersion(version)) continue;
 
             list.push({ type: 'release', version });
         }
 
         for (const tag in pkg['dist-tags']) {
             const version = pkg['dist-tags'][tag];
-            if (!semver.satisfies(version, VERSION_RANGE)) continue;
+            if (!isCompatiableVersion(version)) continue;
 
             list.push({ type: 'dist-tag', tag });
         }
@@ -41,9 +41,15 @@ export async function resolveDistTag(tag: string): Promise<string | undefined> {
         getPrebuiltPackageName()
     )) as Record<string, string>;
 
-    if (!dist[tag] || !semver.satisfies(dist[tag], VERSION_RANGE)) {
+    if (!dist[tag] || !isCompatiableVersion(dist[tag])) {
         return;
     }
 
     return dist[tag];
+}
+
+function isCompatiableVersion(version: string): boolean {
+    return semver.satisfies(version, VERSION_RANGE, {
+        includePrerelease: true
+    });
 }
