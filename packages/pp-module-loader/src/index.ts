@@ -54,7 +54,9 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
 
             const version = await resolveDistTag(module.tag);
             if (!version) {
-                throw new Error(`tag "${module.tag}" is not found`);
+                throw new Error(
+                    `tag "${module.tag}" is not found or not compatible`
+                );
             }
 
             return loadCalculator(await downloadCalculator(version));
