@@ -36,11 +36,12 @@ export async function downloadCalculator(version: string): Promise<string> {
             cwd: folderPath,
             strip: 1
         });
-
-        await fs.rm(archivePath, { force: true });
     } catch (err) {
         await fs.rm(folderPath, { recursive: true, force: true });
+
         throw err;
+    } finally {
+        await fs.rm(archivePath, { force: true });
     }
 
     return folderPath;
