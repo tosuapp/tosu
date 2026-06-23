@@ -1,8 +1,8 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
-import {
+import type {
     GradualDifficulty,
-    type ScoreInfoData
-} from '@tosuapp/lazer-calculator';
+    ScoreInfoData
+} from '@tosu/pp-module-loader/types';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';

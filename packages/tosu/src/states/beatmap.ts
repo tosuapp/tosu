@@ -1,14 +1,14 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
-import {
-    type DifficultyAttrs,
-    HitWindows,
-    type LazerMod,
-    type PeakStrains,
-    type PerformanceAttrsData,
+import { ppModuleManager } from '@tosu/pp-module-loader';
+import type {
+    DifficultyAttrs,
+    LazerMod,
+    PeakStrains,
+    PerformanceAttrsData,
     PlayBeatmap,
-    type ScoreInfoData,
-    type StrainsData
-} from '@tosuapp/lazer-calculator';
+    ScoreInfoData,
+    StrainsData
+} from '@tosu/pp-module-loader/types';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
@@ -369,7 +369,9 @@ export class BeatmapPP extends AbstractState {
                 return 'not-ready';
             }
 
-            this.beatmap = PlayBeatmap.parse(this.beatmapContent);
+            this.beatmap = ppModuleManager.current.PlayBeatmap.parse(
+                this.beatmapContent
+            );
             if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode) {
                 const converted = this.beatmap.convert(currentMode);
                 if (!converted) {
@@ -570,7 +572,7 @@ export class BeatmapPP extends AbstractState {
                 rhythm: difficulty.rhythm,
                 color: difficulty.color,
                 reading: difficulty.reading,
-                hitWindow: HitWindows.getGreatHitWindow(
+                hitWindow: ppModuleManager.current.HitWindows.getGreatHitWindow(
                     this.beatmap.mode,
                     convertedDifficulty.overallDifficulty
                 )
