@@ -3,33 +3,41 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as tar from 'tar';
 
-import { getPrebuiltPackageName } from './package';
+import { getFullPrebuiltPackageName, getPrebuiltPackageName } from './package';
 
 const CALCULATOR_FOLDER = 'pp-calculator';
 
 export async function downloadCalculator(version: string): Promise<string> {
+    const fullPackageName = getFullPrebuiltPackageName();
     const packageName = getPrebuiltPackageName();
+
     const folderPath = path.join(
         CALCULATOR_FOLDER,
         `${packageName}-${version}`
+    );
+    const archivePath = path.join(
+        CALCULATOR_FOLDER,
+        `${packageName}-${version}.tgz`
     );
 
     if (await fs.stat(folderPath).catch(() => false)) {
         return folderPath;
     }
 
-    const filePath = await downloadFile(
-        `https://registry.npmjs.org/${packageName}/-/${packageName}-${version}.tgz`,
-        CALCULATOR_FOLDER
+    await fs.mkdir(CALCULATOR_FOLDER, { recursive: true });
+    await downloadFile(
+        `https://registry.npmjs.org/${fullPackageName}/-/${packageName}-${version}.tgz`,
+        archivePath
     );
     try {
+        await fs.mkdir(folderPath, { recursive: true });
         await tar.x({
-            file: filePath,
+            file: archivePath,
             cwd: folderPath,
             strip: 1
         });
 
-        await fs.rm(filePath, { force: true });
+        await fs.rm(archivePath, { force: true });
     } catch (err) {
         await fs.rm(folderPath, { recursive: true, force: true });
         throw err;
