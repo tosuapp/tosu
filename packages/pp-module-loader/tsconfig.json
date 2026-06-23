@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "lib": ["ES2023"],
+      "types": [
+        "node"
+      ],
+      "module": "preserve",
+      "moduleResolution": "bundler",
+      "noEmit": true,
+      "allowJs": true,
+      "esModuleInterop": true,
+      "sourceMap": false,
+      "declaration": false,
+      "strict": true,
+      "noImplicitAny": true,
+      "resolveJsonModule": true,
+      "target": "ES2020",
+      "paths": {
+        "@/*": ["./src/*"]
+      }
+    },
+    "include": [
+      "./src"
+, "types.ts", "src/index.ts"    ]
+  }
