@@ -10,6 +10,7 @@ config.ini
 tosu.exe
 _version.js
 **/tosu/gameOverlay/
+**/tosu/pp-calculator/
 **/tosu/game-overlay/
 **/tosu/.cache/
 logs/
