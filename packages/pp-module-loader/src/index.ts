@@ -14,8 +14,6 @@ export type PpModule =
     | { type: 'release'; version: string }
     | { type: 'local'; path: string };
 
-export { ppModuleManager, onlinePpRegistry };
-
 let currentCalculator = internalCalculator;
 
 const ppModuleManager = {
@@ -88,3 +86,5 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
 function loadCalculator(path: string): LazerCalculator {
     return require(resolve(process.cwd(), path)) as LazerCalculator;
 }
+
+export { ppModuleManager, onlinePpRegistry };
