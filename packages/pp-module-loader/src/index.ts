@@ -4,6 +4,7 @@ import EventEmitter from 'node:events';
 import { resolve } from 'node:path';
 
 import { downloadCalculator } from './downloader';
+import { isCompatiableVersion } from './package';
 import { onlinePpRegistry, resolveDistTag } from './registry';
 
 export type LazerCalculator = typeof import('@tosuapp/lazer-calculator');
@@ -68,6 +69,13 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
                 '[calculator]',
                 `Using release "${module.version}" calculator`
             );
+
+            if (!isCompatiableVersion(module.version)) {
+                const msg = `release "${module.version}" is not compatible`;
+                wLogger.error('[calculator]', msg);
+
+                throw new Error(msg);
+            }
 
             return loadCalculator(await downloadCalculator(module.version));
         }
