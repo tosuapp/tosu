@@ -81,7 +81,7 @@ export class LazerInstance extends AbstractInstance {
                             method: 'GET',
                             signal: controller.signal,
                             headers: {
-                                'User-Agent': `tosu ${this.version} (https://tosu.app; i@kotrik.ru)`
+                                'User-Agent': `tosu/${this.version} (https://tosu.app; i@kotrik.ru)`
                             }
                         });
 
