@@ -79,7 +79,10 @@ export class LazerInstance extends AbstractInstance {
                     try {
                         const request = await fetch(link, {
                             method: 'GET',
-                            signal: controller.signal
+                            signal: controller.signal,
+                            headers: {
+                                'User-Agent': `tosu ${this.version} (https://tosu.app; i@kotrik.ru)`
+                            }
                         });
 
                         clearTimeout(timeout);
