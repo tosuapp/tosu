@@ -489,7 +489,11 @@ export async function buildExternalCounters(
     let totalAvailable = 0;
 
     try {
-        const request: any = await fetch('https://tosu.app/api.json');
+        const request: any = await fetch('https://tosu.app/api.json', {
+            headers: {
+                'User-Agent': `tosu/${context.currentVersion} (https://tosu.app; i@kotrik.ru)`
+            }
+        });
         const json: ICounter[] = await request.json();
 
         const exists = getLocalCounters();
