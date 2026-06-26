@@ -124,9 +124,6 @@ importers:
       '@tosuapp/lazer-calculator':
         specifier: 0.4.0-20260616.0
         version: 0.4.0-20260616.0
-      npm-registry-sdk:
-        specifier: ^1.2.1
-        version: 1.2.1
       semver:
         specifier: ^7.7.3
         version: 7.8.0
@@ -137,9 +134,6 @@ importers:
       '@types/node':
         specifier: ^24.10.4
         version: 24.10.4
-      '@types/npm-registry-fetch':
-        specifier: ^8.0.9
-        version: 8.0.9
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
@@ -274,7 +268,6 @@ packages:
 
   '@asdf-overlay/core@1.2.2':
     resolution: {integrity: sha512-8v9dqmPvVy/sx5QV3NBQkwsjSujKnYjct0Z1V7lIvO9DXoSftBQbIZBa0IcHpvwWzV4BtOSBSuY7mieKGQJWRQ==}
-    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.2.2':
@@ -1304,9 +1297,6 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node-fetch@2.6.13':
-    resolution: {integrity: sha512-QGpRVpzSaUs30JBSGPjOg4Uveu384erbHBoT1zeONvyCfwQxIkUshLAOqN/k9EjGviPRmWTTe6aH2qySWKTVSw==}
-
   '@types/node@20.19.27':
     resolution: {integrity: sha512-N2clP5pJhB2YnZJ3PIHFk5RkygRX5WO/5f0WC08tp0wd+sv0rsJk3MqWn3CbNmT2J505a5336jaQj4ph1AdMug==}
 
@@ -1322,15 +1312,6 @@ packages:
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
 
-  '@types/npm-package-arg@6.1.4':
-    resolution: {integrity: sha512-vDgdbMy2QXHnAruzlv68pUtXCjmqUk3WrBAsRboRovsOmxbfn/WiYCjmecyKjGztnMps5dWp4Uq2prp+Ilo17Q==}
-
-  '@types/npm-registry-fetch@8.0.9':
-    resolution: {integrity: sha512-7NxvodR5Yrop3pb6+n8jhJNyzwOX0+6F+iagNEoi9u1CGxruYAwZD8pvGc9prIkL0+FdX5Xp0p80J9QPrGUp/g==}
-
-  '@types/npmlog@7.0.0':
-    resolution: {integrity: sha512-hJWbrKFvxKyWwSUXjZMYTINsSOY6IclhvGOZ97M8ac2tmR9hMwmTnYaMdpGhvju9ctWLTPhCS+eLfQNluiEjQQ==}
-
   '@types/plist@3.0.5':
     resolution: {integrity: sha512-E6OCaRmAe4WDmWNsL/9RMqdkkzDCY1etutkflWk4c+AcjDU07Pcz1fQwTX0TQz+Pxqn9i4L1TU3UFpjnrcDgxA==}
 
@@ -1339,9 +1320,6 @@ packages:
 
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
-
-  '@types/ssri@7.1.5':
-    resolution: {integrity: sha512-odD/56S3B51liILSk5aXJlnYt99S6Rt9EFDDqGtJM26rKHApHcwyU/UoYHrzKkdkHMAIquGWCuHtQTbes+FRQw==}
 
   '@types/verror@1.10.11':
     resolution: {integrity: sha512-RlDm9K7+o5stv0Co8i8ZRGxDbrTxhJtgjqjFyVh/tXQyl/rYtTKlnTvZ88oSTeYREWurwx20Js4kTuKCsFkUtg==}
@@ -3456,9 +3434,6 @@ packages:
     resolution: {integrity: sha512-DlL+XwOy3NxAQ8xuC0okPgK46iuVNAK01YN7RueYBqqFeGsBjV9XmCAzAdgt+667bCl5kPh9EqKKDwnaPG1I7A==}
     engines: {node: '>=10'}
 
-  npm-registry-sdk@1.2.1:
-    resolution: {integrity: sha512-VJe64lpxnFv0wFYsvEKYGNh9DXD4CMSEJ2fySrzWDxYSrtzx/hhlZ8NYm3I1qeBYMenklS44SbTjYVFGQJLGDg==}
-
   npm-run-path@5.3.0:
     resolution: {integrity: sha512-ppwTtiJZq0O/ai0z7yfudtBpWIoxM8yE6nHi1X47eFR2EWORqfbu6CnPlNsjeN683eT0qG6H/Pyf9fCcvjnnnQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -5494,11 +5469,6 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node-fetch@2.6.13':
-    dependencies:
-      '@types/node': 24.10.4
-      form-data: 4.0.5
-
   '@types/node@20.19.27':
     dependencies:
       undici-types: 6.21.0
@@ -5517,20 +5487,6 @@ snapshots:
 
   '@types/normalize-package-data@2.4.4': {}
 
-  '@types/npm-package-arg@6.1.4': {}
-
-  '@types/npm-registry-fetch@8.0.9':
-    dependencies:
-      '@types/node': 24.10.4
-      '@types/node-fetch': 2.6.13
-      '@types/npm-package-arg': 6.1.4
-      '@types/npmlog': 7.0.0
-      '@types/ssri': 7.1.5
-
-  '@types/npmlog@7.0.0':
-    dependencies:
-      '@types/node': 24.10.4
-
   '@types/plist@3.0.5':
     dependencies:
       '@types/node': 24.10.4
@@ -5542,10 +5498,6 @@ snapshots:
       '@types/node': 24.10.4
 
   '@types/semver@7.7.1': {}
-
-  '@types/ssri@7.1.5':
-    dependencies:
-      '@types/node': 24.10.4
 
   '@types/verror@1.10.11':
     optional: true
@@ -8152,8 +8104,6 @@ snapshots:
   normalize-path@3.0.0: {}
 
   normalize-url@6.1.0: {}
-
-  npm-registry-sdk@1.2.1: {}
 
   npm-run-path@5.3.0:
     dependencies:

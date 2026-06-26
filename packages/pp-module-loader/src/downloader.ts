@@ -1,18 +1,24 @@
-import { downloadFile, getCachePath } from '@tosu/common';
+import { downloadFile, getCachePath, verifyDownload } from '@tosu/common';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as tar from 'tar';
 
-import { getFullPrebuiltPackageName, getPrebuiltPackageName } from './package';
+import { getPrebuiltPackageName } from './package';
+import type { NpmPackageDist } from './registry/types';
 
-export async function downloadCalculator(version: string): Promise<string> {
-    const fullPackageName = getFullPrebuiltPackageName();
+export async function downloadCalculator(
+    version: string,
+    dist?: NpmPackageDist
+): Promise<string> {
     const packageName = getPrebuiltPackageName();
 
-    const calculatorFolder = getCalculatorPath();
-    const folderPath = path.join(calculatorFolder, `${packageName}-${version}`);
+    const calculatorRootPath = getCalculatorPath();
+    const folderPath = path.join(
+        calculatorRootPath,
+        `${packageName}-${version}`
+    );
     const archivePath = path.join(
-        calculatorFolder,
+        calculatorRootPath,
         `${packageName}-${version}.tgz`
     );
 
@@ -20,12 +26,21 @@ export async function downloadCalculator(version: string): Promise<string> {
         return folderPath;
     }
 
-    await fs.mkdir(calculatorFolder, { recursive: true });
-    await downloadFile(
-        `https://registry.npmjs.org/${fullPackageName}/-/${packageName}-${version}.tgz`,
-        archivePath
-    );
+    if (!dist) {
+        throw new Error(
+            `Calculator version: "${version}" is not available for download.`
+        );
+    }
+
+    await fs.mkdir(calculatorRootPath, { recursive: true });
     try {
+        await downloadFile(dist.tarball, archivePath);
+
+        if (!(await verifyDownload(`sha1:${dist.shasum}`, archivePath))) {
+            await fs.rm(archivePath);
+            throw new Error('Download verification failed.');
+        }
+
         await fs.mkdir(folderPath, { recursive: true });
         await tar.x({
             file: archivePath,

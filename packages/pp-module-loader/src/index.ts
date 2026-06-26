@@ -4,8 +4,8 @@ import EventEmitter from 'node:events';
 import { resolve } from 'node:path';
 
 import { downloadCalculator } from './downloader';
-import { isCompatiableVersion } from './package';
-import { onlinePpRegistry, resolveDistTag } from './registry';
+import { isCompatibleVersion } from './package';
+import { onlinePpRegistry } from './registry';
 
 export type LazerCalculator = typeof import('@tosuapp/lazer-calculator');
 
@@ -53,15 +53,17 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
                 `Using dist-tag "${module.tag}" calculator`
             );
 
-            const version = await resolveDistTag(module.tag);
-            if (!version) {
-                const msg = `tag "${module.tag}" is not found or not compatible`;
+            const pkg = await onlinePpRegistry.fetch(module.tag);
+            if (!pkg || !isCompatibleVersion(pkg.version)) {
+                const msg = `tag "${module.tag}" is not available or not compatible`;
                 wLogger.error('[calculator]', msg);
 
                 throw new Error(msg);
             }
 
-            return loadCalculator(await downloadCalculator(version));
+            return loadCalculator(
+                await downloadCalculator(pkg.version, pkg.dist)
+            );
         }
 
         case 'release': {
@@ -70,14 +72,24 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
                 `Using release "${module.version}" calculator`
             );
 
-            if (!isCompatiableVersion(module.version)) {
+            if (!isCompatibleVersion(module.version)) {
                 const msg = `release "${module.version}" is not compatible`;
                 wLogger.error('[calculator]', msg);
 
                 throw new Error(msg);
             }
 
-            return loadCalculator(await downloadCalculator(module.version));
+            const pkg = await onlinePpRegistry.fetch(module.version);
+            if (!pkg) {
+                wLogger.warn(
+                    '[calculator]',
+                    `Unable to fetch release information "${module.version}" from registry.`
+                );
+            }
+
+            return loadCalculator(
+                await downloadCalculator(module.version, pkg?.dist)
+            );
         }
 
         case 'local': {

@@ -7,13 +7,11 @@
     "dependencies": {
         "@tosu/common": "workspace:*",
         "@tosuapp/lazer-calculator": "0.4.0-20260616.0",
-        "npm-registry-sdk": "^1.2.1",
         "semver": "^7.7.3",
         "tar": "^7.5.16"
     },
     "devDependencies": {
         "@types/node": "^24.10.4",
-        "@types/npm-registry-fetch": "^8.0.9",
         "@types/semver": "^7.7.1"
     }
 }
