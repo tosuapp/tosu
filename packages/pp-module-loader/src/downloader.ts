@@ -1,22 +1,18 @@
-import { downloadFile } from '@tosu/common';
+import { downloadFile, getCachePath } from '@tosu/common';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as tar from 'tar';
 
 import { getFullPrebuiltPackageName, getPrebuiltPackageName } from './package';
 
-const CALCULATOR_FOLDER = 'pp-calculator';
-
 export async function downloadCalculator(version: string): Promise<string> {
     const fullPackageName = getFullPrebuiltPackageName();
     const packageName = getPrebuiltPackageName();
 
-    const folderPath = path.join(
-        CALCULATOR_FOLDER,
-        `${packageName}-${version}`
-    );
+    const calculatorFolder = getCalculatorPath();
+    const folderPath = path.join(calculatorFolder, `${packageName}-${version}`);
     const archivePath = path.join(
-        CALCULATOR_FOLDER,
+        calculatorFolder,
         `${packageName}-${version}.tgz`
     );
 
@@ -24,7 +20,7 @@ export async function downloadCalculator(version: string): Promise<string> {
         return folderPath;
     }
 
-    await fs.mkdir(CALCULATOR_FOLDER, { recursive: true });
+    await fs.mkdir(calculatorFolder, { recursive: true });
     await downloadFile(
         `https://registry.npmjs.org/${fullPackageName}/-/${packageName}-${version}.tgz`,
         archivePath
@@ -45,4 +41,8 @@ export async function downloadCalculator(version: string): Promise<string> {
     }
 
     return folderPath;
+}
+
+function getCalculatorPath(): string {
+    return path.join(getCachePath(), 'calculators');
 }
