@@ -157,7 +157,7 @@ export abstract class AbstractInstance {
         }
     }
 
-    start(): void {
+    start(): boolean {
         wLogger.info(`%${ClientType[this.client]}%`, `Scanning memory...`);
 
         while (!this.isReady) {
@@ -182,14 +182,13 @@ export abstract class AbstractInstance {
                     (exc as Error).message
                 );
                 wLogger.debug(`Pattern scan retry details:`, exc);
-
-                this.emitter.emit('onResolveFailed', this.pid);
-                return;
+                return false;
             }
         }
 
         this.initiate();
         this.watchProcessHealth();
+        return true;
     }
 
     initiate() {
