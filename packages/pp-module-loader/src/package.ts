@@ -13,7 +13,7 @@ export function getFullPrebuiltPackageName() {
     return `@tosuapp/${getPrebuiltPackageName()}`;
 }
 
-export function isCompatiableVersion(version: string): boolean {
+export function isCompatibleVersion(version: string): boolean {
     return semver.satisfies(version, VERSION_RANGE, {
         includePrerelease: true
     });
