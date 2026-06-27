@@ -8,7 +8,7 @@ import {
     PlayBeatmap,
     type ScoreInfoData,
     type StrainsData
-} from '@tosuapp/lazer-calculator';
+} from '@tosuapp/lazer-calculator-prebuilt';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
