@@ -39,7 +39,7 @@ const defaultSchema: ConfigSchema = {
     },
     pollRate: {
         binding: 'POLL_RATE',
-        default: 100
+        default: 150
     },
     preciseDataPollRate: {
         binding: 'PRECISE_DATA_POLL_RATE',
@@ -225,6 +225,7 @@ export class ConfigManager {
             .catch(() => ({}) as Record<ConfigBinding, string>);
 
         this.refreshConfig(env, false);
+        this.validateConfig();
         this.startConfigWatcher();
 
         this.initialized = true;
@@ -298,10 +299,34 @@ export class ConfigManager {
     }
 
     /**
+     * Validates the in-memory config and clamps out-of-range values back into
+     * their allowed bounds, so invalid values never get persisted or used.
+     */
+    public static validateConfig() {
+        const minPollRate = defaultSchema.pollRate.default;
+        if (config.pollRate < minPollRate) {
+            wLogger.warn(
+                `Config %POLL_RATE% value %${config.pollRate}% is below the minimum %${minPollRate}%, clamping.`
+            );
+            config.pollRate = minPollRate;
+        }
+
+        const minPrecisePollRate = defaultSchema.preciseDataPollRate.default;
+        if (config.preciseDataPollRate < minPrecisePollRate) {
+            wLogger.warn(
+                `Config %PRECISE_DATA_POLL_RATE% value %${config.pollRate}% is below the minimum %${minPrecisePollRate}%, clamping.`
+            );
+            config.pollRate = minPollRate;
+        }
+    }
+
+    /**
      * Writes the current config object to the .env file.
      */
     public static async updateEnv() {
         const oldHash = this.previousFileHash;
+
+        this.validateConfig();
 
         try {
             const content = Object.entries(defaultSchema)
@@ -437,6 +462,7 @@ export class ConfigManager {
                             dotenv.parse(content);
 
                         this.refreshConfig(newEnv, true);
+                        this.validateConfig();
                     } catch (exc) {
                         const msg =
                             exc instanceof Error ? exc.message : String(exc);
