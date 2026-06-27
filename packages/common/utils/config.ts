@@ -39,11 +39,13 @@ const defaultSchema: ConfigSchema = {
     },
     pollRate: {
         binding: 'POLL_RATE',
-        default: 150
+        default: 150,
+        min: 100
     },
     preciseDataPollRate: {
         binding: 'PRECISE_DATA_POLL_RATE',
-        default: 30
+        default: 10,
+        min: 1
     },
     showMpCommands: {
         binding: 'SHOW_MP_COMMANDS',
@@ -303,7 +305,7 @@ export class ConfigManager {
      * their allowed bounds, so invalid values never get persisted or used.
      */
     public static validateConfig() {
-        const minPollRate = defaultSchema.pollRate.default;
+        const minPollRate = defaultSchema.pollRate.min!;
         if (config.pollRate < minPollRate) {
             wLogger.warn(
                 `Config %POLL_RATE% value %${config.pollRate}% is below the minimum %${minPollRate}%, clamping.`
@@ -311,12 +313,12 @@ export class ConfigManager {
             config.pollRate = minPollRate;
         }
 
-        const minPrecisePollRate = defaultSchema.preciseDataPollRate.default;
+        const minPrecisePollRate = defaultSchema.preciseDataPollRate.min!;
         if (config.preciseDataPollRate < minPrecisePollRate) {
             wLogger.warn(
                 `Config %PRECISE_DATA_POLL_RATE% value %${config.pollRate}% is below the minimum %${minPrecisePollRate}%, clamping.`
             );
-            config.pollRate = minPollRate;
+            config.preciseDataPollRate = minPrecisePollRate;
         }
     }
 

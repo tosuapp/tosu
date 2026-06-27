@@ -397,7 +397,6 @@ export interface Combo2 {
 }
 
 export interface TosuPreciseAnswer {
-    currentTime: number;
     keys: KeyOverlay;
     hitErrors: number[];
     tourney: PreciseTourney[];

@@ -59,13 +59,9 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         return { error: 'not_ready' };
     }
 
-    const { global, gameplay } = osuInstance.getServices([
-        'gameplay',
-        'global'
-    ]);
+    const { gameplay } = osuInstance.getServices(['gameplay']);
 
     return {
-        currentTime: global.playTime,
         keys: {
             k1: {
                 isPressed: gameplay.keyOverlay.at(0)?.isPressed ?? false,
