@@ -43,7 +43,7 @@ const defaultSchema: ConfigSchema = {
     },
     preciseDataPollRate: {
         binding: 'PRECISE_DATA_POLL_RATE',
-        default: 10
+        default: 30
     },
     showMpCommands: {
         binding: 'SHOW_MP_COMMANDS',
