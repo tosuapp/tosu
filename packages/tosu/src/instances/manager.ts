@@ -138,13 +138,12 @@ export class InstanceManager {
                     'onDestroy',
                     this.onProcessDestroy.bind(this)
                 );
-                osuInstance.emitter.on(
-                    'onResolveFailed',
-                    this.onProcessDestroy.bind(this)
-                );
 
                 this.osuInstances[processId] = osuInstance;
-                osuInstance.start();
+                if (!osuInstance.start()) {
+                    this.onProcessDestroy(processId);
+                    continue;
+                }
 
                 if (this.overlayProcess) {
                     this.overlayProcess.send({
