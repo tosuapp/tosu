@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.23.0](https://github.com/tosuapp/tosu/compare/v4.22.3...v4.23.0) (2026-06-27)
+
+
+### Features
+
+* scorev2 processor ([6bac033](https://github.com/tosuapp/tosu/commit/6bac033a6054871bd44934a5b81096a6fb12dd51))
+* tosu ua ([4780080](https://github.com/tosuapp/tosu/commit/47800800e195eee91dd0207390834e81560d2f0a))
+* tosu ua ([0ded28d](https://github.com/tosuapp/tosu/commit/0ded28dac566a4cc88b7df1b97b3bcf7c909a595))
+
+
+### Bug Fixes
+
+* also increase precise poll rate ([9aebc48](https://github.com/tosuapp/tosu/commit/9aebc487fdc9da2968f4b5533cff664d5cf2e49c))
+* increase poll rate and re-validate config on startup ([5179cfd](https://github.com/tosuapp/tosu/commit/5179cfd39ec7bfb3d61ffac8e59b54987a576f75))
+* overlay not attaching to osu sometimes ([#640](https://github.com/tosuapp/tosu/issues/640)) ([116be02](https://github.com/tosuapp/tosu/commit/116be02f1757f7109b0c6c3ab4567e45a2386e0e)), closes [#618](https://github.com/tosuapp/tosu/issues/618)
+
 ### [4.22.3](https://github.com/tosuapp/tosu/compare/v4.22.2...v4.22.3) (2026-06-20)
 
 
