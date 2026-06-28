@@ -24,14 +24,10 @@ export const onlinePpRegistry = {
         return list;
     },
 
-    async fetch(specifier: string): Promise<NpmPackageVersion | undefined> {
-        try {
-            const pkg = await npmFetch<NpmPackageVersion>(
-                `${getFullPrebuiltPackageName()}/${specifier}`
-            );
-
-            return pkg;
-        } catch {}
+    fetch(specifier: string): Promise<NpmPackageVersion> {
+        return npmFetch<NpmPackageVersion>(
+            `${getFullPrebuiltPackageName()}/${specifier}`
+        );
     }
 };
 

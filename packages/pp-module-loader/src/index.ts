@@ -54,8 +54,8 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
             );
 
             const pkg = await onlinePpRegistry.fetch(module.tag);
-            if (!pkg || !isCompatibleVersion(pkg.version)) {
-                const msg = `tag "${module.tag}" is not available or not compatible`;
+            if (!isCompatibleVersion(pkg.version)) {
+                const msg = `tag "${module.tag}" is not compatible`;
                 wLogger.error('[calculator]', msg);
 
                 throw new Error(msg);
@@ -82,12 +82,6 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
             return loadCalculator(
                 await downloadCalculator(module.version, async () => {
                     const pkg = await onlinePpRegistry.fetch(module.version);
-                    if (!pkg) {
-                        throw new Error(
-                            `Calculator version: "${module.version}" is not available for download.`
-                        );
-                    }
-
                     return pkg.dist;
                 })
             );
