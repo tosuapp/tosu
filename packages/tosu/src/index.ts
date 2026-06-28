@@ -6,6 +6,7 @@ import {
     configInitialization,
     context,
     getProgramPath,
+    isRealBoolean,
     wLogger
 } from '@tosu/common';
 import { Server } from '@tosu/server';
@@ -31,14 +32,13 @@ const currentVersion = require('./_version.js');
     const { update, onedrive: onedriveBypass } = argumentsParser(process.argv);
 
     const isDev = process.env.NODE_ENV === 'development';
-    const isConfigUpdate = config.enableAutoUpdate === true;
+    const isUpdate = isRealBoolean(update)
+        ? update
+        : config.enableAutoUpdate === true;
     if (isDev) {
         context.updateVersion = currentVersion;
     } else {
-        if (
-            (update !== null && update !== undefined && update === true) ||
-            isConfigUpdate
-        ) {
+        if (isUpdate) {
             await autoUpdater('startup');
         } else {
             await checkUpdates('startup');
