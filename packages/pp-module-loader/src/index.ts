@@ -62,7 +62,7 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
             }
 
             return loadCalculator(
-                await downloadCalculator(pkg.version, pkg.dist)
+                await downloadCalculator(pkg.version, () => pkg.dist)
             );
         }
 
@@ -79,16 +79,17 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
                 throw new Error(msg);
             }
 
-            const pkg = await onlinePpRegistry.fetch(module.version);
-            if (!pkg) {
-                wLogger.warn(
-                    '[calculator]',
-                    `Unable to fetch release information "${module.version}" from registry.`
-                );
-            }
-
             return loadCalculator(
-                await downloadCalculator(module.version, pkg?.dist)
+                await downloadCalculator(module.version, async () => {
+                    const pkg = await onlinePpRegistry.fetch(module.version);
+                    if (!pkg) {
+                        throw new Error(
+                            `Calculator version: "${module.version}" is not available for download.`
+                        );
+                    }
+
+                    return pkg.dist;
+                })
             );
         }
 

@@ -8,7 +8,7 @@ import type { NpmPackageDist } from './registry/types';
 
 export async function downloadCalculator(
     version: string,
-    dist?: NpmPackageDist
+    fetchDist: () => Promise<NpmPackageDist> | NpmPackageDist
 ): Promise<string> {
     const packageName = getPrebuiltPackageName();
 
@@ -26,12 +26,7 @@ export async function downloadCalculator(
         return folderPath;
     }
 
-    if (!dist) {
-        throw new Error(
-            `Calculator version: "${version}" is not available for download.`
-        );
-    }
-
+    const dist = await fetchDist();
     await fs.mkdir(calculatorRootPath, { recursive: true });
     try {
         await downloadFile(dist.tarball, archivePath);
