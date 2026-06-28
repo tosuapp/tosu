@@ -2,7 +2,7 @@ import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import {
     GradualDifficulty,
     type ScoreInfoData
-} from '@tosuapp/lazer-calculator';
+} from '@tosuapp/lazer-calculator-prebuilt';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';

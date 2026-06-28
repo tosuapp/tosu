@@ -167,9 +167,9 @@ importers:
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater
-      '@tosuapp/lazer-calculator':
-        specifier: 0.4.0-20260616.0
-        version: 0.4.0-20260616.0
+      '@tosuapp/lazer-calculator-prebuilt':
+        specifier: 0.4.1-20260627-main.1
+        version: 0.4.1-20260627-main.1
       osu-catch-stable:
         specifier: ^4.0.1
         version: 4.0.1(osu-classes@3.1.0)
@@ -246,7 +246,6 @@ packages:
 
   '@asdf-overlay/core@1.2.4':
     resolution: {integrity: sha512-nyELpjZL5768NoQmViYmK6aMGNYyaX/D5pohzmKOwzJRD4Y50C045JSXJNCorWi5VmAL9JdRt8HM8oTBf0g28w==}
-    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.2.4':
@@ -1209,8 +1208,20 @@ packages:
     resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
     engines: {node: '>= 10'}
 
-  '@tosuapp/lazer-calculator@0.4.0-20260616.0':
-    resolution: {integrity: sha512-8ua7me5lhoxll8rSoZu1k+GkDTYmKIJ5k5oyZN1Uk/7J7ujqdpz2+ZdAvXH0X7rsm7aussv+SWZPA+8N4PPjTg==}
+  '@tosuapp/lazer-calculator-linux-x64@0.4.1-20260627-main.1':
+    resolution: {integrity: sha512-nPiyWs4/M9jzrTHqxkg3Xq8DiFdQlxBOzwnf/SGV+kGTVC4sRHeviAUzgMIV6y2+7QNphkOQLEgDxQU91T5C6g==}
+    cpu: [x64]
+    os: [linux]
+
+  '@tosuapp/lazer-calculator-prebuilt@0.4.1-20260627-main.1':
+    resolution: {integrity: sha512-X/+0ueAerIOqHGwU/hmnQVto5QMv/5i8zWduEqlmMbV8MOoxOXcAHV6AxQYfjIHSUGYz1JowVK/nJpg+Hsp73Q==}
+    cpu: [x64]
+    os: [win32, linux]
+
+  '@tosuapp/lazer-calculator-win32-x64@0.4.1-20260627-main.1':
+    resolution: {integrity: sha512-dS2r+4CiJMraJgDhZ15LgGzOXXwWwFWYLYz/fybvtzhg8RM7ozDnuCrMecWQcNrXPVAioCM58CLKxkk6J5s0qA==}
+    cpu: [x64]
+    os: [win32]
 
   '@trivago/prettier-plugin-sort-imports@5.2.2':
     resolution: {integrity: sha512-fYDQA9e6yTNmA13TLVSA+WMQRc5Bn/c0EUBditUHNfMMxN7M82c38b1kEggVE3pLpZ0FwkwJkUEKMiOi52JXFA==}
@@ -5394,7 +5405,16 @@ snapshots:
 
   '@tootallnate/once@2.0.1': {}
 
-  '@tosuapp/lazer-calculator@0.4.0-20260616.0': {}
+  '@tosuapp/lazer-calculator-linux-x64@0.4.1-20260627-main.1':
+    optional: true
+
+  '@tosuapp/lazer-calculator-prebuilt@0.4.1-20260627-main.1':
+    optionalDependencies:
+      '@tosuapp/lazer-calculator-linux-x64': 0.4.1-20260627-main.1
+      '@tosuapp/lazer-calculator-win32-x64': 0.4.1-20260627-main.1
+
+  '@tosuapp/lazer-calculator-win32-x64@0.4.1-20260627-main.1':
+    optional: true
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
     dependencies:
