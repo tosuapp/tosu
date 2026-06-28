@@ -4,6 +4,12 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    semver:
+      specifier: ^7.8.5
+      version: 7.8.5
+
 importers:
 
   .:
@@ -125,8 +131,8 @@ importers:
         specifier: 0.4.0-20260616.0
         version: 0.4.0-20260616.0
       semver:
-        specifier: ^7.7.3
-        version: 7.8.0
+        specifier: 'catalog:'
+        version: 7.8.5
       tar:
         specifier: ^7.5.16
         version: 7.5.16
@@ -214,8 +220,8 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       semver:
-        specifier: ^7.7.3
-        version: 7.8.0
+        specifier: 'catalog:'
+        version: 7.8.5
       tsprocess:
         specifier: workspace:*
         version: link:../tsprocess
@@ -268,7 +274,6 @@ packages:
 
   '@asdf-overlay/core@1.2.4':
     resolution: {integrity: sha512-nyELpjZL5768NoQmViYmK6aMGNYyaX/D5pohzmKOwzJRD4Y50C045JSXJNCorWi5VmAL9JdRt8HM8oTBf0g28w==}
-    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@1.2.4':
@@ -3964,6 +3969,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   serialize-error@7.0.1:
     resolution: {integrity: sha512-8I8TjW5KMOKsZQTvoxjuSIa7foAwPWGOts+6o7sgjz41/qMD9VQHEDxi6PBvK2l0MXUmqZyNpUK+T2tQaaElvw==}
     engines: {node: '>=10'}
@@ -5613,7 +5623,7 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.13)
       picocolors: 1.1.1
       progress: 2.0.3
-      semver: 7.8.0
+      semver: 7.8.5
       tar-fs: 3.1.1
       yargs: 16.2.0
     transitivePeerDependencies:
@@ -8018,7 +8028,7 @@ snapshots:
 
   node-abi@3.92.0:
     dependencies:
-      semver: 7.8.0
+      semver: 7.8.5
 
   node-abi@4.24.0:
     dependencies:
@@ -8652,6 +8662,8 @@ snapshots:
   semver@7.7.3: {}
 
   semver@7.8.0: {}
+
+  semver@7.8.5: {}
 
   serialize-error@7.0.1:
     dependencies:

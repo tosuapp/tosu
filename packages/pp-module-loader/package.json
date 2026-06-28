@@ -7,7 +7,7 @@
     "dependencies": {
         "@tosu/common": "workspace:*",
         "@tosuapp/lazer-calculator": "0.4.0-20260616.0",
-        "semver": "^7.7.3",
+        "semver": "catalog:",
         "tar": "^7.5.16"
     },
     "devDependencies": {

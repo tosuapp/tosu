@@ -25,7 +25,7 @@
         "osu-standard-stable": "^5.0.1",
         "osu-taiko-stable": "^5.0.1",
         "resedit": "^2.0.3",
-        "semver": "^7.7.3",
+        "semver": "catalog:",
         "tsprocess": "workspace:*"
     },
     "devDependencies": {
