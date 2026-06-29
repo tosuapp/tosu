@@ -316,7 +316,7 @@ export class ConfigManager {
         const minPrecisePollRate = defaultSchema.preciseDataPollRate.min!;
         if (config.preciseDataPollRate < minPrecisePollRate) {
             wLogger.warn(
-                `Config %PRECISE_DATA_POLL_RATE% value %${config.pollRate}% is below the minimum %${minPrecisePollRate}%, clamping.`
+                `Config %PRECISE_DATA_POLL_RATE% value %${config.preciseDataPollRate}% is below the minimum %${minPrecisePollRate}%, clamping.`
             );
             config.preciseDataPollRate = minPrecisePollRate;
         }
