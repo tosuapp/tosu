@@ -554,7 +554,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             // [[Ruleset + 0x64] + 0x38] + 0x64
             const mode = this.process.readInt(scoreBase + 0x64);
 
-            const score = this.process.readInt(scoreBase + 0x78);
+            const scoreProcessor = this.process.readInt(scoreBase + 0x54);
+            const score =
+                scoreProcessor === 0
+                    ? this.process.readInt(scoreBase + 0x78) // v1
+                    : this.process.readInt(rulesetAddr + 0xf8); // v2/spectate
 
             // [[Ruleset + 0x64] + 0x40] + 0x14
             const playerHPSmooth =

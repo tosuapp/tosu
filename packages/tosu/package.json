@@ -1,6 +1,6 @@
 {
     "name": "tosu",
-    "version": "4.22.3",
+    "version": "4.23.0",
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {
@@ -15,7 +15,7 @@
     "dependencies": {
         "@tosu/common": "workspace:*",
         "@tosu/ingame-overlay-updater": "workspace:*",
-        "@tosuapp/lazer-calculator": "0.4.1-20260622.1",
+        "@tosuapp/lazer-calculator-prebuilt": "0.5.0-20260702-main.0",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
         "osu-catch-stable": "^4.0.1",
@@ -30,8 +30,8 @@
     },
     "devDependencies": {
         "@types/semver": "^7.7.1",
-        "@vercel/ncc": "^0.38.4",
-        "@yao-pkg/pkg": "^6.11.0",
+        "@vercel/ncc": "^0.44.0",
+        "@yao-pkg/pkg": "^6.20.0",
         "cross-env": "^7.0.3",
         "genversion": "^3.2.0",
         "ts-node": "^10.9.2"

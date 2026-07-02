@@ -959,16 +959,14 @@ function buildPlay(
                     total: fixDecimals(beatmapPP.currAttributes.pp)
                 },
                 fc: {
-                    aim: fixDecimals(beatmapPP.currPPAttributes.ppAim),
-                    speed: fixDecimals(beatmapPP.currPPAttributes.ppSpeed),
-                    accuracy: fixDecimals(
-                        beatmapPP.currPPAttributes.ppAccuracy
-                    ),
+                    aim: fixDecimals(beatmapPP.fcPPAttributes.ppAim),
+                    speed: fixDecimals(beatmapPP.fcPPAttributes.ppSpeed),
+                    accuracy: fixDecimals(beatmapPP.fcPPAttributes.ppAccuracy),
                     difficulty: fixDecimals(
-                        beatmapPP.currPPAttributes.ppDifficulty
+                        beatmapPP.fcPPAttributes.ppDifficulty
                     ),
                     flashlight: fixDecimals(
-                        beatmapPP.currPPAttributes.ppFlashlight
+                        beatmapPP.fcPPAttributes.ppFlashlight
                     ),
                     total: fixDecimals(beatmapPP.currAttributes.fcPP)
                 }

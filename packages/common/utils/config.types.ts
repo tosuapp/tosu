@@ -112,6 +112,7 @@ export type ConfigSchema = {
     [K in ConfigKey]: {
         binding: Config[K]['binding'];
         default: Config[K]['type'];
+        min?: number;
     };
 };
 

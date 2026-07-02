@@ -15,11 +15,12 @@ import path from 'path';
 
 const platform = platformResolver(process.platform);
 
-const fileDestination = path.join(getProgramPath(), 'update.zip');
+const updateArchivePath = path.join(getProgramPath(), 'update.zip');
 const backupExecutablePath = path.join(
     getProgramPath(),
     `tosu_old${platform.fileType}`
 );
+const executablePath = path.join(getProgramPath(), `tosu${platform.fileType}`);
 
 const deleteNotLocked = async (filePath: string) => {
     try {
@@ -41,8 +42,8 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
     try {
         if (from === 'startup') {
-            if (fs.existsSync(fileDestination)) {
-                await deleteNotLocked(fileDestination);
+            if (fs.existsSync(updateArchivePath)) {
+                await deleteNotLocked(updateArchivePath);
             }
 
             if (fs.existsSync(backupExecutablePath)) {
@@ -130,8 +131,8 @@ export const autoUpdater = async (
                 `You're using the latest version (%v${context.currentVersion}%)`
             );
 
-            if (fs.existsSync(fileDestination)) {
-                await deleteNotLocked(fileDestination);
+            if (fs.existsSync(updateArchivePath)) {
+                await deleteNotLocked(updateArchivePath);
             }
 
             if (fs.existsSync(backupExecutablePath)) {
@@ -151,18 +152,19 @@ export const autoUpdater = async (
             return 'noFiles';
         }
 
-        await downloadFile(findAsset.browser_download_url, fileDestination);
+        await downloadFile(findAsset.browser_download_url, updateArchivePath);
 
-        const verify = await verifyDownload(findAsset.digest, fileDestination);
+        const verify = await verifyDownload(
+            findAsset.digest,
+            updateArchivePath
+        );
         if (verify === false) {
-            await fs.promises.rm(fileDestination);
+            await fs.promises.rm(updateArchivePath);
             return;
         }
 
-        const currentExecutablePath = process.argv[0]; // Path to the current executable
-
-        await fs.promises.rename(currentExecutablePath, backupExecutablePath);
-        await unzip(fileDestination, getProgramPath());
+        await fs.promises.rename(process.argv[0], backupExecutablePath);
+        await unzip(updateArchivePath, getProgramPath());
 
         // close request to allow destroy server
         if (from === 'server' && res) {
@@ -174,11 +176,14 @@ export const autoUpdater = async (
 
         wLogger.info('Restarting program to apply updates...');
 
-        const correctExecutablePath = path.join(
-            path.dirname(process.argv[0]),
-            `tosu${platform.fileType}`
-        );
-        spawn(`"${correctExecutablePath}"`, process.argv.slice(1), {
+        if (platform.type === 'linux') {
+            const stats = await fs.promises.stat(backupExecutablePath);
+            await fs.promises
+                .chmod(executablePath, stats.mode)
+                .catch(() => null);
+        }
+
+        spawn(`"${executablePath}"`, process.argv.slice(1), {
             detached: true,
             shell: true,
             stdio: 'ignore'
