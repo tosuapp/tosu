@@ -90,11 +90,13 @@ const currentVersion = require('./_version.js');
         tag: config.ppChannel
     });
 
-    configEvents.addListener('change', () => {
-        ppModuleManager.load({
-            type: 'dist-tag',
-            tag: config.ppChannel
-        });
+    configEvents.on('change', (oldConfig) => {
+        if (oldConfig.ppChannel !== config.ppChannel) {
+            ppModuleManager.load({
+                type: 'dist-tag',
+                tag: config.ppChannel
+            });
+        }
     });
 
     if (config.enableIngameOverlay) instanceManager.startOverlay();
