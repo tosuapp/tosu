@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <title>tosu ingame</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-  <title>tosu ingame</title>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./src/ingame.css" />
+    <link rel="stylesheet" href="./src/homepage.scss" />
+    <link rel="stylesheet" href="./assets/icons/style.css" />
+    <link rel="stylesheet" href="./assets/fonts/style.css" />
 
-  <link rel="stylesheet" href="/assets/ingame.css" />
-  <link rel="stylesheet" href="/assets/homepage.min.css" />
-  <link rel="stylesheet" href="/assets/icons/style.css" />
-  <link rel="stylesheet" href="/assets/fonts/style.css" />
-
-  <link rel="preload" as="image" href="/assets/images/39979.png" />
-</head>
+    <link rel="preload" as="image" href="./assets/images/39979.png" />
+  </head>
 
 <body class="ingame">
   <div class="copyright">Tosu.app</div>
@@ -73,7 +72,7 @@
       <div class="scroll">
         <div v-if="available_overlays.length == 0" class="no-available">
           <span>You have 0 overlays</span><br />
-          <a href="http://127.0.0.1:24050/available?ingame=true" target="_blank">
+          <a href="/available?ingame=true" target="_blank">
             Download more
             <i class="icon-link"></i>
           </a>
@@ -92,7 +91,7 @@
         }" ref="overlay_ctx">
       <div class="cm-buttons">
         <a v-if="profile.overlays[context_overlay.index]._settings == true" class="ctx-button btn-settings"
-          :href="`http://127.0.0.1:24050/settings?overlay=${profile.overlays[context_overlay.index].folderName}&ingame=true`"
+          :href="`/settings?overlay=${profile.overlays[context_overlay.index].folderName}&ingame=true`"
           target="_blank" @click.left="notification({
                 text: `Settings opened in separate window`,
                 classes: ['green'],
@@ -178,7 +177,7 @@
       </div>
     </transition-group>
 
-    <a href="http://127.0.0.1:24050/available?ingame=true" target="_blank" class="ctx-button download-more">
+    <a href="/available?ingame=true" target="_blank" class="ctx-button download-more">
       <i class="icon-link"></i>
       Download more overlays
     </a>
@@ -206,9 +205,7 @@
   </div>
 
 
-  <script src="/assets/vue.js"></script>
-  <script type="module" src="/assets/ingame.js"></script>
-  <script type="module" src="/assets/homepage.js"></script>
-</body>
-
+    <script type="module" src="./src/ingame.js"></script>
+    <script type="module" src="./src/homepage.js"></script>
+  </body>
 </html>

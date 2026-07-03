@@ -3,12 +3,8 @@
   "version": "0.0.1",
   "description": "",
   "author": "cyperdark",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "prepare": "npm run build",
-    "build": "tsc"
-  },
+  "main": "index.ts",
+  "scripts": {},
   "dependencies": {
     "@tosu/common": "workspace:*"
   }
