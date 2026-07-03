@@ -4,7 +4,7 @@ import { load } from 'resedit/cjs';
 import semverParse from 'semver/functions/parse';
 
 async function windowsPostBuild(output: string) {
-    const packageVersion = require(path.join(process.cwd(), '_version.js'));
+    const packageVersion = require(path.join(__dirname, '_version.js'));
 
     const ResEdit = await load();
     const exe = ResEdit.NtExecutable.from(fs.readFileSync(output));

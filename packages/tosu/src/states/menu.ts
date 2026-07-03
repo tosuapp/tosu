@@ -42,9 +42,8 @@ export class Menu extends AbstractState {
                 if (result === '') return;
 
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `menu updateState`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Menu state update not ready:`,
                     result
                 );
                 return 'not-ready';
@@ -119,9 +118,8 @@ export class Menu extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `menu updateState`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating menu state:`,
                 exc
             );
         }
@@ -136,9 +134,8 @@ export class Menu extends AbstractState {
                 if (result === '') return;
 
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `menu updateMP3Length`,
+                    `%${ClientType[this.game.client]}%`,
+                    `MP3 length update not ready:`,
                     result
                 );
 
@@ -157,9 +154,8 @@ export class Menu extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `menu updateMP3Length`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating MP3 length:`,
                 exc
             );
         }

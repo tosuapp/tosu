@@ -9,6 +9,7 @@ import {
     Rulesets,
     ScoringMode,
     config,
+    isRealNumber,
     measureTime,
     platformResolver,
     wLogger
@@ -30,6 +31,7 @@ import type {
     ILazerSpectatorEntry,
     ILeaderboard,
     IMP3Length,
+    IMatchmakingStats,
     IMenu,
     IResultScreen,
     IScore,
@@ -74,10 +76,12 @@ interface KeyCounter {
 
 export interface Offsets {
     OsuVersion: string;
+    GameBaseVtable?: number;
     'osu.Game.OsuGame': {
         osuLogo: number;
-        ScreenStack: number;
-        SentryLogger: number;
+        // TODO: Remove old field after 6~ months
+        ScreenStack?: number;
+        '<ScreenStack>k__BackingField': number;
         channelManager: number;
         '<frameworkConfig>k__BackingField': number;
         chatOverlay: number;
@@ -101,7 +105,15 @@ export interface Offsets {
         rulesetConfigCache: number;
         realm: number;
     };
-    'osu.Game.Screens.SelectV2.SoloSongSelect': {
+    'osu.Game.Screens.Select.SongSelect': {
+        '<game>k__BackingField': number;
+    };
+    // TODO: Remove old field after 6~ months
+    'osu.Game.Screens.Select.SoloSongSelect'?: {
+        '<game>k__BackingField': number;
+    };
+    // TODO: Remove old field after 6~ months
+    'osu.Game.Screens.SelectV2.SoloSongSelect'?: {
         '<game>k__BackingField': number;
     };
     'osu.Game.Screens.Play.SubmittingPlayer': {
@@ -253,6 +265,14 @@ export interface Offsets {
         '<Username>k__BackingField': number;
         countryCodeString: number;
         statistics: number;
+        MatchmakingStatistics: number;
+    };
+    'osu.Game.Online.API.Requests.Responses.APIUserMatchmakingStatistics': {
+        '<Rating>k__BackingField': number;
+        '<Rank>k__BackingField': number;
+        '<Plays>k__BackingField': number;
+        '<FirstPlacements>k__BackingField': number;
+        '<IsRatingProvisional>k__BackingField': number;
     };
     'osu.Game.Online.Chat.ChannelManager': {
         joinedChannels: number;
@@ -352,18 +372,6 @@ export interface Offsets {
     'osu.Framework.Input.Handlers.Mouse.MouseHandler': {
         '<UseRelativeMode>k__BackingField': number;
     };
-    'osu.Game.Utils.SentryLogger': {
-        sentrySession: number;
-    };
-    'Sentry.SentrySdk+DisposeHandle': {
-        _localHub: number;
-    };
-    'Sentry.Internal.Hub': {
-        _options: number;
-    };
-    'Sentry.SentryOptions': {
-        '<Release>k__BackingField': number;
-    };
 }
 
 const localConfigList = [
@@ -398,7 +406,8 @@ const frameworkConfigList = [
     FrameworkSetting.CursorSensitivity
 ];
 
-const expectedVtableValue: number = 7696598171648;
+// VTABLE FROM 2026.518.0
+const FALLBACK_GAME_BASE_VTABLE: number = 7730957910016;
 
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     offsets: Offsets = localOffsets;
@@ -422,6 +431,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private ReplaySettingsOverlay: boolean = true;
 
     private watchingReplay: boolean = false;
+    private spectating: boolean = false;
     private status: number = 0;
 
     private modMappings: Map<string, string> = new Map();
@@ -472,10 +482,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         );
 
         wLogger.debug(
-            'lazer',
-            this.pid,
-            'updateGameBaseAddress',
-            `${oldAddress?.toString(16)} => ${this.gameBaseAddress.toString(16)}`
+            `%${ClientType[this.game.client]}%`,
+            `GameBase address updated: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
         );
     }
 
@@ -487,8 +495,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 return false;
             }
 
-            // might potentially change
-            return this.process.readLong(vtable) === expectedVtableValue;
+            const expected =
+                this.offsets.GameBaseVtable || FALLBACK_GAME_BASE_VTABLE;
+
+            return this.process.readLong(vtable) === expected;
         } catch {
             return false;
         }
@@ -501,7 +511,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         // Check if gamebase instance is valid
         if (!this.checkIfGameBase(this.gameBaseAddress)) {
-            wLogger.debug('lazer', this.pid, 'GameBase has been reset');
+            wLogger.debug(
+                `%${ClientType[this.game.client]}%`,
+                `GameBase validation failed, resetting...`
+            );
 
             const scanPattern =
                 this.scanPatterns.scalingContainerTargetDrawSize;
@@ -516,63 +529,25 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return this.gameBaseAddress;
     }
 
-    gameVersion() {
-        const sentryLogger = this.process.readIntPtr(
-            this.gameBase() + this.offsets['osu.Game.OsuGame'].SentryLogger
-        );
-        wLogger.debug(
-            'lazer',
-            'gameVersion',
-            'SentryLogger',
-            sentryLogger.toString(16)
-        );
-
-        const sentrySession = this.process.readIntPtr(
-            sentryLogger +
-                this.offsets['osu.Game.Utils.SentryLogger'].sentrySession
-        );
-        wLogger.debug(
-            'lazer',
-            'gameVersion',
-            'sentrySession',
-            sentrySession.toString(16)
-        );
-
-        const localHub = this.process.readIntPtr(
-            sentrySession +
-                this.offsets['Sentry.SentrySdk+DisposeHandle']._localHub
-        );
-        wLogger.debug(
-            'lazer',
-            'gameVersion',
-            'localHub',
-            localHub.toString(16)
-        );
-
-        const options = this.process.readIntPtr(
-            localHub + this.offsets['Sentry.Internal.Hub']._options
-        );
-        wLogger.debug('lazer', 'gameVersion', 'options', options.toString(16));
-
-        const release = this.process.readSharpStringPtr(
-            options +
-                this.offsets['Sentry.SentryOptions']['<Release>k__BackingField']
-        );
-
-        return release?.split('@')?.[1];
-    }
-
     private screenStack() {
         return this.process.readIntPtr(
-            this.gameBase() + this.offsets['osu.Game.OsuGame'].ScreenStack
+            this.gameBase() +
+                (this.offsets['osu.Game.OsuGame'].ScreenStack ||
+                    this.offsets['osu.Game.OsuGame'][
+                        '<ScreenStack>k__BackingField'
+                    ])
         );
     }
 
-    private checkIfSongSelectV2(address: number) {
+    private checkIfSongSelect(address: number) {
         return (
             this.process.readIntPtr(
                 address +
-                    this.offsets['osu.Game.Screens.SelectV2.SoloSongSelect'][
+                    (this.offsets['osu.Game.Screens.Select.SoloSongSelect'] ||
+                        this.offsets[
+                            'osu.Game.Screens.SelectV2.SoloSongSelect'
+                        ] ||
+                        this.offsets['osu.Game.Screens.Select.SongSelect'])[
                         '<game>k__BackingField'
                     ]
             ) === this.gameBase()
@@ -698,7 +673,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     ]
             ) ===
                 this.process.readIntPtr(
-                    this.gameBase() + this.offsets['osu.Game.OsuGame'].osuLogo
+                    this.gameBase() +
+                        this.offsets['osu.Game.OsuGameBase'][
+                            '<API>k__BackingField'
+                        ]
                 ) &&
             this.process.readIntPtr(
                 address +
@@ -1205,6 +1183,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return result;
     }
 
+    private readItem(
+        items: number,
+        index: number,
+        inlined: boolean = false,
+        structSize: number = 8
+    ) {
+        return inlined
+            ? items + 0x10 + structSize * index
+            : this.process.readIntPtr(items + 0x10 + structSize * index);
+    }
+
     private readItems(
         items: number,
         size: number,
@@ -1212,23 +1201,14 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         structSize: number = 8
     ): number[] {
         const result: number[] = [];
-
         for (let i = 0; i < size; i++) {
-            const current = inlined
-                ? items + 0x10 + structSize * i
-                : this.process.readIntPtr(items + 0x10 + structSize * i);
-
-            result.push(current);
+            result.push(this.readItem(items, i, inlined, structSize));
         }
 
         return result;
     }
 
-    private readListItems(
-        list: number,
-        inlined: boolean = false,
-        structSize: number = 8
-    ): number[] {
+    private listItemsInfo(list: number) {
         let isArray = false;
 
         // another hacky check :D
@@ -1239,6 +1219,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         const size = this.process.readInt(list + (isArray ? 0x8 : 0x10));
         const items = isArray ? list : this.process.readIntPtr(list + 0x8);
 
+        return { size, items };
+    }
+
+    private readListItems(
+        list: number,
+        inlined: boolean = false,
+        structSize: number = 8
+    ): number[] {
+        const { size, items } = this.listItemsInfo(list);
         return this.readItems(items, size, inlined, structSize);
     }
 
@@ -1292,12 +1281,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private initModMapping(gamemode: Rulesets) {
         if (!ModsCategories[gamemode]) {
-            wLogger.warn(
-                'lazer',
-                this.pid,
-                'initModMapping',
-                `Unknown mods gamemode: ${gamemode}`
-            );
+            wLogger.warn(`Unknown lazer game mode: %${gamemode}%`);
             return;
         }
 
@@ -1312,9 +1296,21 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             systemCategory: this.readModList(currentModMapping[5])
         } satisfies Record<keyof (typeof ModsCategories)[0], number[]>;
 
-        for (const [category, mods] of Object.entries(
-            ModsCategories[gamemode]
-        )) {
+        const categories = structuredClone(ModsCategories);
+
+        const version = this.game.version.replaceAll('.', '');
+        if (isRealNumber(version) && +version <= 20261190) {
+            categories[Rulesets.osu].funCategory.splice(7, 0, 'TC');
+            categories[Rulesets.osu].diffIncreasingCategory.splice(6, 1);
+            wLogger.debug(
+                'lazer',
+                this.pid,
+                'initModMapping',
+                `Apply mods order fix`
+            );
+        }
+
+        for (const [category, mods] of Object.entries(categories[gamemode])) {
             const categoryName = category as keyof typeof modsList;
 
             for (let i = 0; i < mods.length; i++) {
@@ -1858,7 +1854,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 performancePoints: 0,
                 rawBanchoStatus: 0,
                 backgroundColour: 0xffffffff,
-                rawLoginStatus: 0
+                rawLoginStatus: 0,
+                matchmaking: null
             };
         }
 
@@ -1924,6 +1921,57 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             gamemode = Rulesets.osu;
         }
 
+        const userMatchmakingStatistics =
+            this.offsets[
+                'osu.Game.Online.API.Requests.Responses.APIUserMatchmakingStatistics'
+            ];
+
+        const matchmakingArray = this.process.readIntPtr(
+            user +
+                this.offsets['osu.Game.Online.API.Requests.Responses.APIUser']
+                    .MatchmakingStatistics
+        );
+        const matchmakingCount = this.process.readInt(matchmakingArray + 0x8);
+
+        let matchmaking: IMatchmakingStats | null = null;
+
+        if (matchmakingCount > 0) {
+            const elem = this.process.readIntPtr(matchmakingArray + 0x10);
+            const rankHasValue = this.process.readByte(
+                elem + userMatchmakingStatistics['<Rank>k__BackingField']
+            );
+            matchmaking = {
+                rating: this.process.readInt(
+                    elem + userMatchmakingStatistics['<Rating>k__BackingField']
+                ),
+                rank: rankHasValue
+                    ? this.process.readInt(
+                          elem +
+                              userMatchmakingStatistics[
+                                  '<Rank>k__BackingField'
+                              ] +
+                              0x4
+                      )
+                    : null,
+                plays: this.process.readInt(
+                    elem + userMatchmakingStatistics['<Plays>k__BackingField']
+                ),
+                wins: this.process.readInt(
+                    elem +
+                        userMatchmakingStatistics[
+                            '<FirstPlacements>k__BackingField'
+                        ]
+                ),
+                isProvisional:
+                    this.process.readByte(
+                        elem +
+                            userMatchmakingStatistics[
+                                '<IsRatingProvisional>k__BackingField'
+                            ]
+                    ) !== 0
+            };
+        }
+
         return {
             id: userId,
             name: this.process.readSharpStringPtr(
@@ -1952,7 +2000,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             performancePoints: pp,
             rawBanchoStatus: 0,
             backgroundColour: 0xffffffff,
-            rawLoginStatus: 0
+            rawLoginStatus: 0,
+            matchmaking
         };
     }
 
@@ -2248,7 +2297,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return undefined;
     }
 
-    private hitEvents(last: number): number[] {
+    private hitEvents(last: number) {
         const player = this.player();
         const scoreProcessor = this.process.readIntPtr(
             player +
@@ -2261,24 +2310,37 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.offsets['osu.Game.Rulesets.Scoring.ScoreProcessor']
                     .hitEvents
         );
-        const hitEvents = this.readListItems(hitEventsList, true, 0x40);
+        const { size, items } = this.listItemsInfo(hitEventsList);
 
         const result: number[] = [];
-        for (let i = last; i < hitEvents.length; i++) {
-            const hitEvent = this.readHitEvent(hitEvents[i]);
-            if (hitEvent === undefined) {
+        let index = last;
+        for (let i = last; i < size; i++) {
+            const item = this.readItem(items, i, true, 0x40);
+            const error = this.readHitEvent(item);
+            if (error === undefined) {
+                index = i + 1;
                 continue;
             }
 
-            result.push(hitEvent);
+            // sometimes it returns number over a 1m and we dont need that
+            if (error < -10_000 || error > 10_000) {
+                wLogger.error(
+                    `%${ClientType[this.game.client]}%`,
+                    `strange value in hitErrors: %${error}%`
+                );
+                break;
+            }
+
+            result.push(error);
+            index = i + 1;
         }
 
-        return result;
+        return { index, array: result };
     }
 
     hitErrors(last: number): IHitErrors {
         if (this.isPlayerLoading) {
-            return [];
+            return { index: 0, array: [] };
         }
 
         return this.hitEvents(last);
@@ -2501,11 +2563,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             case 'DA': {
                 const settings: any = {};
 
+                const odOffset = this.selectedGamemode === 3 ? 0x28 : 0x18;
+
                 const drainRateBindable = this.process.readIntPtr(
                     modObject + 0x10
                 );
                 const overallDifficultyBindable = this.process.readIntPtr(
-                    modObject + 0x18
+                    modObject + odOffset
                 );
                 const extendedLimitsBindable = this.process.readIntPtr(
                     modObject + 0x20
@@ -2959,13 +3023,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.initModMapping(gamemode);
             } catch (exc) {
                 wLogger.error(
-                    'lazer',
-                    this.pid,
-                    'global',
-                    'mods',
+                    `%${ClientType[this.game.client]}%`,
+                    `Error initializing mod mapping:`,
                     (exc as Error).message
                 );
-                wLogger.debug('lazer', this.pid, 'global', 'mods', exc);
+                wLogger.debug(
+                    `%${ClientType[this.game.client]}%`,
+                    `Error initializing mod mapping:`,
+                    exc
+                );
             }
         }
 
@@ -3059,27 +3125,31 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     globalPrecise(): IGlobalPrecise {
         let status = 0;
 
-        const isPlaying = this.player() !== 0;
-
         const isResultScreen = this.checkIfResultScreen(this.currentScreen);
-        const isSongSelectV2 = this.checkIfSongSelectV2(this.currentScreen);
+        const isSongSelect = this.checkIfSongSelect(this.currentScreen);
         const isPlayerLoader = this.checkIfPlayerLoader(this.currentScreen);
         const isEditor = this.checkIfEditor(this.currentScreen);
-        const isSpectator = this.checkIfSpectator(this.currentScreen);
         const isMultiSelect = this.checkIfMultiSelect(this.currentScreen);
         const isMulti = this.checkIfMulti();
-        const isReplay = isPlaying
-            ? this.checkIfWatchingReplay(this.currentScreen)
-            : false;
 
-        if (isReplay && (isPlaying || isPlayerLoader)) {
-            this.watchingReplay = true;
+        const isPlayer = this.player() !== 0;
+        const isPlaying = isPlayer || isPlayerLoader;
+        if (isPlaying) {
+            const isSpectator = this.checkIfSpectator(this.currentScreen);
+            const isReplay = isPlayer
+                ? this.checkIfWatchingReplay(this.currentScreen)
+                : false;
+
+            if (isReplay && isSpectator) {
+                this.watchingReplay = false;
+                this.spectating = true;
+            } else if (isReplay) {
+                this.watchingReplay = true;
+                this.spectating = false;
+            }
+
             status = GameState.play;
-        } else if (isSpectator && (isPlaying || isPlayerLoader)) {
-            status = GameState.play;
-        } else if (isPlaying || isPlayerLoader) {
-            status = GameState.play;
-        } else if (isSongSelectV2) {
+        } else if (isSongSelect) {
             status = GameState.selectPlay;
         } else if (isResultScreen) {
             status = GameState.resultScreen;
@@ -3100,6 +3170,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             if (currentRoom) {
                 status = GameState.lobby;
             }
+        }
+
+        if (!isPlaying) {
+            this.spectating = this.watchingReplay = false;
         }
 
         this.status = status;
@@ -3544,7 +3618,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     settings(): ISettings {
         const values = this.osuConfig();
-        values['client.version'] = (this.game as LazerInstance).osuVersion;
+        values['client.version'] = (this.game as LazerInstance).version;
 
         try {
             const skinManager = this.process.readIntPtr(
@@ -3572,15 +3646,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             this.game.reportError(
                 'settings skin',
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                'settings skin',
+                `%${ClientType[this.game.client]}%`,
+                `Error reading skin name`,
                 (exc as Error).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                'settings skin',
+                `%${ClientType[this.game.client]}%`,
+                `Error reading skin name`,
                 exc
             );
         }
@@ -3668,7 +3740,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         values['tablet.pressureThreshold'] = pressureThreshold;
                     }
 
-                    if (i === 5) {
+                    if (i === 6) {
                         const userRelativeMode =
                             this.process.readByte(
                                 this.process.readIntPtr(
@@ -3687,15 +3759,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 this.game.reportError(
                     'settings devices',
                     10,
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    'settings devices',
+                    `%${ClientType[this.game.client]}%`,
+                    `Error reading settings`,
                     (exc as Error).message
                 );
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    'settings devices',
+                    `%${ClientType[this.game.client]}%`,
+                    `Error reading settings`,
                     exc
                 );
             }

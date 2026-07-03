@@ -34,6 +34,9 @@ export interface DataRepoList {
     lazerMultiSpectating: LazerMultiSpectating;
 }
 
+export type OsuVersion = `b${number}${'tourney' | 'cuttingedge' | ''}`;
+export type OsuLazerVersion = `${number}.${number}.${number}`;
+
 export abstract class AbstractInstance {
     errorsCount: { [key: string | number]: number } = {};
 
@@ -45,6 +48,8 @@ export abstract class AbstractInstance {
     process: Process;
     path: string = '';
     bitness: Bitness;
+
+    version: OsuVersion | OsuLazerVersion | '' = '';
 
     isReady: boolean;
     isDestroyed: boolean = false;
@@ -142,24 +147,18 @@ export abstract class AbstractInstance {
             return true;
         } catch (exc) {
             wLogger.error(
-                ClientType[this.client],
-                this.pid,
-                'resolvePatterns',
+                `%${ClientType[this.client]}%`,
+                `Memory pattern resolution failed:`,
                 (exc as Error).message
             );
-            wLogger.debug(
-                ClientType[this.client],
-                this.pid,
-                'resolvePatterns',
-                exc
-            );
+            wLogger.debug(`Pattern resolution error details:`, exc);
 
             return false;
         }
     }
 
-    start(): void {
-        wLogger.info(`[${this.pid} ${this.client}] Running memory chimera...`);
+    start(): boolean {
+        wLogger.info(`%${ClientType[this.client]}%`, `Scanning memory...`);
 
         while (!this.isReady) {
             try {
@@ -171,33 +170,25 @@ export abstract class AbstractInstance {
 
                 const elapsedTime = `${(performance.now() - s1).toFixed(2)}ms`;
                 wLogger.info(
-                    ClientType[this.client],
-                    this.pid,
-                    `All patterns resolved within ${elapsedTime}`
+                    `%${ClientType[this.client]}%`,
+                    `Memory patterns resolved in %${elapsedTime}%`
                 );
 
                 this.isReady = true;
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'Pattern scanning failed, Trying one more time...',
+                    `%${ClientType[this.client]}%`,
+                    `Pattern scanning failed, retrying...`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'Pattern scanning failed, Trying one more time...',
-                    exc
-                );
-
-                this.emitter.emit('onResolveFailed', this.pid);
-                return;
+                wLogger.debug(`Pattern scan retry details:`, exc);
+                return false;
             }
         }
 
         this.initiate();
         this.watchProcessHealth();
+        return true;
     }
 
     initiate() {
@@ -212,9 +203,7 @@ export abstract class AbstractInstance {
         while (!this.isDestroyed) {
             if (!Process.isProcessExist(this.process.handle)) {
                 wLogger.warn(
-                    ClientType[this.client],
-                    this.pid,
-                    'osu!.exe got destroyed'
+                    `Client process %${ClientType[this.client]}% has terminated`
                 );
 
                 this.emitter.emit('onDestroy', this.pid);

@@ -1,10 +1,10 @@
 {
     "name": "tosu",
-    "version": "4.17.2",
+    "version": "4.23.0",
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {
-        "genver": "npx genversion _version.js",
+        "genver": "npx genversion src/_version.js",
         "ts:run": "cross-env NODE_ENV=development ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
         "ts:compile": "ncc build src/index.ts -o dist -m -d",
         "run:dev": "pnpm run genver && pnpm --filter @tosu/pages build && pnpm run ts:run src/index.ts",
@@ -13,9 +13,9 @@
         "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-assets && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
-        "@kotrikd/rosu-pp": "3.1.0",
         "@tosu/common": "workspace:*",
         "@tosu/ingame-overlay-updater": "workspace:*",
+        "@tosuapp/lazer-calculator-prebuilt": "0.4.1-20260627-main.1",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
         "osu-catch-stable": "^4.0.1",
@@ -30,8 +30,8 @@
     },
     "devDependencies": {
         "@types/semver": "^7.7.1",
-        "@vercel/ncc": "^0.38.4",
-        "@yao-pkg/pkg": "^6.11.0",
+        "@vercel/ncc": "^0.44.0",
+        "@yao-pkg/pkg": "^6.20.0",
         "cross-env": "^7.0.3",
         "genversion": "^3.2.0",
         "ts-node": "^10.9.2"

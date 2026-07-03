@@ -1,4 +1,3 @@
-import rosu from '@kotrikd/rosu-pp';
 import {
     ConfigBinding,
     ConfigManager,
@@ -15,6 +14,7 @@ import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import rosu from 'rosu-pp-js';
 
 import { Server, sendJson } from '../index';
 import {
@@ -104,13 +104,15 @@ export default function buildBaseApi(server: Server) {
                 unzip(result, folderPath)
                     .then(() => {
                         wLogger.info(
-                            `PP Counter downloaded: ${folderName} (${req.headers.referer})`
+                            `PP Counter %${folderName}% downloaded successfully (%${req.headers.referer}%)`
                         );
                         fs.unlinkSync(tempPath);
 
                         server.WS_COMMANDS.socket.emit(
                             'message',
-                            `getCounters:__ingame__`
+                            'unzip',
+                            'getOverlays',
+                            `__ingame__`
                         );
 
                         sendJson(res, {
@@ -122,11 +124,10 @@ export default function buildBaseApi(server: Server) {
                         fs.unlinkSync(tempPath);
 
                         wLogger.error(
-                            '[overlay-unzip]',
-                            folderName,
+                            `Failed to unzip counter %${folderName}%:`,
                             (reason as Error).message
                         );
-                        wLogger.debug('[overlay-unzip]', folderName, reason);
+                        wLogger.debug('Counter unzip error details:', reason);
 
                         sendJson(res, {
                             error: (reason as Error).message
@@ -138,11 +139,10 @@ export default function buildBaseApi(server: Server) {
                 .then(startUnzip)
                 .catch((reason) => {
                     wLogger.error(
-                        '[overlay-download]',
-                        folderName,
+                        `Failed to download counter %${folderName}%:`,
                         (reason as Error).message
                     );
-                    wLogger.debug(`[overlay-download]`, folderName, reason);
+                    wLogger.debug(`Counter download error details:`, reason);
 
                     sendJson(res, {
                         error: (reason as Error).message
@@ -174,24 +174,17 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `PP Counter opened: ${folderName} (${req.headers.referer})`
+                `Opening PP Counter folder: %${folderName}% (%${req.headers.referer}%)`
             );
 
             const platform = platformResolver(process.platform);
             exec(`${platform.command} "${folderPath}"`, (err) => {
                 if (err) {
                     wLogger.error(
-                        '/counters/open',
-                        req.query.name,
-                        'Error opening folder',
+                        `Failed to open folder %${folderName}%:`,
                         err.message
                     );
-                    wLogger.debug(
-                        '/counters/open',
-                        req.query.name,
-                        'Error opening folder',
-                        err
-                    );
+                    wLogger.debug('Folder open error details:', err);
 
                     return sendJson(res, {
                         error: `Error opening folder: ${err.message}`
@@ -226,12 +219,17 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `PP Counter removed: ${folderName} (${req.headers.referer})`
+                `PP Counter removed: %${folderName}% (%${req.headers.referer}%)`
             );
 
             fs.rmSync(folderPath, { recursive: true, force: true });
 
-            server.WS_COMMANDS.socket.emit('message', `getCounters:__ingame__`);
+            server.WS_COMMANDS.socket.emit(
+                'message',
+                'remove',
+                'getOverlays',
+                `__ingame__`
+            );
 
             return sendJson(res, {
                 status: 'deleted'
@@ -252,7 +250,10 @@ export default function buildBaseApi(server: Server) {
 
             const settings = parseCounterSettings(folderName, 'parse');
             if (settings instanceof Error) {
-                wLogger.debug(`[overlay-settings]`, folderName, settings);
+                wLogger.debug(
+                    `Failed to parse settings for %${folderName}%:`,
+                    settings
+                );
 
                 return sendJson(res, {
                     error: settings.message
@@ -260,7 +261,7 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `Settings accessed: ${folderName} (${req.headers.referer})`
+                `Settings accessed for %${folderName}% (%${req.headers.referer}%)`
             );
 
             return sendJson(res, settings);
@@ -293,9 +294,7 @@ export default function buildBaseApi(server: Server) {
                 );
                 if (result instanceof Error) {
                     wLogger.debug(
-                        `[overlay-settings]`,
-                        'update',
-                        folderName,
+                        `Failed to update settings for %${folderName}%:`,
                         result
                     );
 
@@ -305,7 +304,7 @@ export default function buildBaseApi(server: Server) {
                 }
 
                 wLogger.info(
-                    `Settings re:created: ${folderName} (${req.headers.referer})`
+                    `Settings re-created for %${folderName}% (%${req.headers.referer}%)`
                 );
 
                 fs.writeFileSync(
@@ -318,12 +317,15 @@ export default function buildBaseApi(server: Server) {
             }
 
             wLogger.info(
-                `Settings saved: ${folderName} (${req.headers.referer})`
+                `Settings saved for %${folderName}% (%${req.headers.referer}%)`
             );
 
             const html = saveSettings(folderName, body as any);
             if (html instanceof Error) {
-                wLogger.debug(`[overlay-settings]`, 'save', folderName, html);
+                wLogger.debug(
+                    `Failed to save settings for %${folderName}%:`,
+                    html
+                );
 
                 return sendJson(res, {
                     error: html.message
@@ -332,7 +334,9 @@ export default function buildBaseApi(server: Server) {
 
             server.WS_COMMANDS.socket.emit(
                 'message',
-                `getSettings:${folderName}`
+                'save settings',
+                'getSettings',
+                folderName
             );
 
             return sendJson(res, { result: 'success' });
@@ -383,7 +387,12 @@ export default function buildBaseApi(server: Server) {
             const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
             beatmap = new rosu.Beatmap(beatmapContent);
         } else {
-            beatmap = beatmapPP.getCurrentBeatmap();
+            const beatmapContent: string | undefined = beatmapPP.beatmapContent;
+            if (!beatmapContent) {
+                throw new Error('No beatmap currently playing');
+            }
+
+            beatmap = new rosu.Beatmap(beatmapContent);
         }
 
         if (query.mode !== undefined) beatmap.convert(query.mode);
@@ -420,8 +429,7 @@ export default function buildBaseApi(server: Server) {
         const calculate = new rosu.Performance(params).calculate(beatmap);
         sendJson(res, calculate);
 
-        // free beatmap only when map path specified
-        if (query.path) beatmap.free();
+        beatmap.free();
         calculate.free();
     });
 
@@ -451,7 +459,7 @@ export default function buildBaseApi(server: Server) {
             'utf8',
             (err, content) => {
                 if (err) {
-                    wLogger.debug('/ingame', err);
+                    wLogger.debug(`Failed to read ingame.html:`, err);
                     res.writeHead(500);
                     return res.end(`Server Error: ${err.code}`);
                 }
@@ -470,7 +478,7 @@ export default function buildBaseApi(server: Server) {
     server.app.route('/favicon.ico', 'GET', (req, res) => {
         fs.readFile(path.join(pkgHtmlPath, 'favicon.ico'), (err, content) => {
             if (err) {
-                wLogger.debug(`/${'favicon.ico'}`, err);
+                wLogger.debug(`Failed to read favicon.ico:`, err);
                 res.writeHead(404, { 'Content-Type': 'text/html' });
 
                 res.end('<html>page not found</html>');
@@ -535,14 +543,18 @@ export default function buildBaseApi(server: Server) {
                 : url;
             directoryWalker({
                 _htmlRedirect: true,
+                req,
                 res,
                 baseUrl: url,
                 pathname: selectIndexHTML,
                 folderPath: staticPath
             });
         } catch (error) {
-            wLogger.warn(`[server] ${url}`, (error as Error).message);
-            wLogger.debug(`[server] ${url}`, error);
+            wLogger.warn(
+                `Failed to process request for %${url}%:`,
+                (error as Error).message
+            );
+            wLogger.debug(`Request error details for %${url}%:`, error);
 
             res.writeHead(404);
             return res.end((error as Error).message || '');

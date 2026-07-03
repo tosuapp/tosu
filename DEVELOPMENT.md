@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- `Typescript` >=5.3.3
-- `Node.js` >=20.11.1
+- `Typescript` >=5.9.3
+- `Node.js` >=24.14.0
 - `Rust` >= any
 - `pnpm` >= 10.10.0
 

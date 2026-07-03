@@ -5,6 +5,7 @@ import {
     platformResolver,
     sleep,
     unzip,
+    verifyDownload,
     wLogger
 } from '@tosu/common';
 import { spawn } from 'child_process';
@@ -12,16 +13,14 @@ import fs from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
 
-// NOTE: _version.js packs with pkg support in tosu build
-const currentVersion = require(process.cwd() + '/_version.js');
-
 const platform = platformResolver(process.platform);
 
-const fileDestination = path.join(getProgramPath(), 'update.zip');
+const updateArchivePath = path.join(getProgramPath(), 'update.zip');
 const backupExecutablePath = path.join(
     getProgramPath(),
     `tosu_old${platform.fileType}`
 );
+const executablePath = path.join(getProgramPath(), `tosu${platform.fileType}`);
 
 const deleteNotLocked = async (filePath: string) => {
     try {
@@ -33,18 +32,18 @@ const deleteNotLocked = async (filePath: string) => {
             return;
         }
 
-        wLogger.error('[updater]', 'deleteNotLocked', (err as any).message);
-        wLogger.debug('[updater]', 'deleteNotLocked', err);
+        wLogger.error('Failed to delete unlocked file', (err as any).message);
+        wLogger.debug('Delete failure details', err);
     }
 };
 
 export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
-    wLogger.info('[updater]', 'Checking updates');
+    wLogger.info('Checking for updates...');
 
     try {
         if (from === 'startup') {
-            if (fs.existsSync(fileDestination)) {
-                await deleteNotLocked(fileDestination);
+            if (fs.existsSync(updateArchivePath)) {
+                await deleteNotLocked(updateArchivePath);
             }
 
             if (fs.existsSync(backupExecutablePath)) {
@@ -54,8 +53,7 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
         if (platform.type === 'unknown') {
             wLogger.warn(
-                '[updater]',
-                `Unsupported platform (${process.platform}). Unable to run updater`
+                `Unsupported platform (%${process.platform}%). Unable to run updater`
             );
 
             return new Error(
@@ -72,16 +70,18 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
             name: versionName
         }: {
             name: string;
-            assets: { name: string; browser_download_url: string }[];
+            assets: {
+                name: string;
+                digest: `${string}:${string}`;
+                browser_download_url: string;
+            }[];
         } = json;
 
-        context.currentVersion = currentVersion;
-        context.updateVersion = versionName || currentVersion;
+        context.updateVersion = versionName || context.currentVersion;
 
         if (versionName === null || versionName === undefined) {
             wLogger.info(
-                '[updater]',
-                `Failed to check updates v${currentVersion}`
+                `Failed to check updates for version %v${context.currentVersion}%`
             );
 
             return new Error('Version the same');
@@ -89,27 +89,24 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
 
         if (from === 'startup') {
             if (
-                versionName.includes(currentVersion) ||
-                currentVersion.includes('-forced')
+                versionName.includes(context.currentVersion) ||
+                context.currentVersion.includes('-forced')
             )
                 wLogger.info(
-                    '[updater]',
-                    `You're using latest version v${currentVersion}`
+                    `You're using the latest version (%v${context.currentVersion}%)`
                 );
             else
                 wLogger.warn(
-                    '[updater]',
-                    `Update available v${currentVersion} => v${context.updateVersion}`
+                    `Update available: %v${context.currentVersion}% => %v${context.updateVersion}%`
                 );
         }
 
         return { assets, versionName };
     } catch (exc) {
-        wLogger.error('[updater]', `checkUpdates`, (exc as any).message);
-        wLogger.debug('[updater]', `checkUpdates`, exc);
+        wLogger.error(`Update check failed:`, (exc as any).message);
+        wLogger.debug(`Update check error details:`, exc);
 
-        context.currentVersion = currentVersion;
-        context.updateVersion = currentVersion;
+        context.updateVersion = context.currentVersion;
 
         return exc as Error;
     }
@@ -127,16 +124,15 @@ export const autoUpdater = async (
 
         const { assets, versionName } = check;
         if (
-            versionName.includes(currentVersion) ||
-            currentVersion.includes('-forced')
+            versionName.includes(context.currentVersion) ||
+            context.currentVersion.includes('-forced')
         ) {
             wLogger.info(
-                '[updater]',
-                `You're using latest version v${currentVersion}`
+                `You're using the latest version (%v${context.currentVersion}%)`
             );
 
-            if (fs.existsSync(fileDestination)) {
-                await deleteNotLocked(fileDestination);
+            if (fs.existsSync(updateArchivePath)) {
+                await deleteNotLocked(updateArchivePath);
             }
 
             if (fs.existsSync(backupExecutablePath)) {
@@ -151,21 +147,24 @@ export const autoUpdater = async (
         );
         if (!findAsset) {
             wLogger.info(
-                '[updater]',
-                `Files to update not found (${platform.type})`
+                `Update files not found for platform (%${platform.type}%)`
             );
             return 'noFiles';
         }
 
-        const downloadAsset = await downloadFile(
-            findAsset.browser_download_url,
-            fileDestination
+        await downloadFile(findAsset.browser_download_url, updateArchivePath);
+
+        const verify = await verifyDownload(
+            findAsset.digest,
+            updateArchivePath
         );
+        if (verify === false) {
+            await fs.promises.rm(updateArchivePath);
+            return;
+        }
 
-        const currentExecutablePath = process.argv[0]; // Path to the current executable
-
-        await fs.promises.rename(currentExecutablePath, backupExecutablePath);
-        await unzip(downloadAsset, getProgramPath());
+        await fs.promises.rename(process.argv[0], backupExecutablePath);
+        await unzip(updateArchivePath, getProgramPath());
 
         // close request to allow destroy server
         if (from === 'server' && res) {
@@ -175,26 +174,29 @@ export const autoUpdater = async (
 
         await sleep(100);
 
-        wLogger.info('[updater]', 'Restarting program');
+        wLogger.info('Restarting program to apply updates...');
 
-        const correctExecutablePath = path.join(
-            path.dirname(process.argv[0]),
-            `tosu${platform.fileType}`
-        );
-        spawn(`"${correctExecutablePath}"`, process.argv.slice(1), {
+        if (platform.type === 'linux') {
+            const stats = await fs.promises.stat(backupExecutablePath);
+            await fs.promises
+                .chmod(executablePath, stats.mode)
+                .catch(() => null);
+        }
+
+        spawn(`"${executablePath}"`, process.argv.slice(1), {
             detached: true,
             shell: true,
             stdio: 'ignore'
         }).unref();
 
-        wLogger.info('[updater]', 'Closing program');
+        wLogger.info('Closing program...');
 
         await sleep(1000);
 
         process.exit();
     } catch (exc) {
-        wLogger.error('[updater]', 'autoUpdater', (exc as any).message);
-        wLogger.debug('[updater]', 'autoUpdater', exc);
+        wLogger.error('Auto-update failed:', (exc as any).message);
+        wLogger.debug('Auto-update error details:', exc);
 
         if (from === 'server' && res) {
             res.setHeader('Content-Type', 'application/json');

@@ -1,5 +1,6 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
 
+import { IMatchmakingStats } from '@/memory/types';
 import { AbstractState } from '@/states';
 
 export class User extends AbstractState {
@@ -16,6 +17,7 @@ export class User extends AbstractState {
     rawBanchoStatus: number;
     backgroundColour: number;
     rawLoginStatus: number;
+    matchmaking: IMatchmakingStats | null;
 
     @measureTime
     updateState() {
@@ -36,6 +38,7 @@ export class User extends AbstractState {
             this.rawBanchoStatus = profile.rawBanchoStatus;
             this.backgroundColour = profile.backgroundColour;
             this.rawLoginStatus = profile.rawLoginStatus;
+            this.matchmaking = profile.matchmaking;
 
             this.game.resetReportCount('user updateState');
         } catch (exc) {
@@ -48,9 +51,8 @@ export class User extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `user updateState`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating user state:`,
                 exc
             );
         }

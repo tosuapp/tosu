@@ -7,6 +7,7 @@ import {
 } from '@tosu/common';
 import { getContentType } from '@tosu/server';
 
+import { OsuVersion } from '@/instances';
 import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
@@ -35,6 +36,7 @@ import { LeaderboardPlayer } from '@/states/types';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import { calculateAccuracy } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
+import { fromLegacyHitResults } from '@/utils/hitResult';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import type {
     BindingsList,
@@ -287,7 +289,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 performancePoints,
                 rawBanchoStatus,
                 backgroundColour,
-                rawLoginStatus
+                rawLoginStatus,
+                matchmaking: null
             };
         } catch (exc) {
             return exc as Error;
@@ -313,7 +316,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
                     result.push(i);
                 } catch (exc) {
-                    wLogger.debug('stable', this.pid, 'configOffsets', exc);
+                    wLogger.debug(
+                        `%${ClientType[this.game.client]}%`,
+                        `Failed to read config offset:`,
+                        exc
+                    );
                 }
             }
 
@@ -339,7 +346,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
                     result.push(i);
                 } catch (exc) {
-                    wLogger.debug('stable', this.pid, 'bindingsOffsets', exc);
+                    wLogger.debug(
+                        `%${ClientType[this.game.client]}%`,
+                        `Failed to read bindings offset:`,
+                        exc
+                    );
                 }
             }
 
@@ -460,19 +471,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             if (mods instanceof Error)
                 mods = Object.assign({}, defaultCalculatedMods);
 
-            const hits = {
-                perfect: hitGeki,
-                great: hit300,
-                good: hitKatu,
-                ok: hit100,
-                meh: hit50,
-                miss: hitMiss,
-
-                sliderTailHit: 0,
-                smallTickHit: 0,
-                largeTickHit: 0
-            };
-
+            const statistics = fromLegacyHitResults(mode, {
+                '300': hit300,
+                '100': hit100,
+                '50': hit50,
+                '0': hitMiss,
+                geki: hitGeki,
+                katu: hitKatu
+            });
             return {
                 onlineId,
                 playerName,
@@ -484,9 +490,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     isLazer: false,
                     mode,
                     mods: mods.array,
-                    statistics: hits
+                    statistics
                 }),
-                statistics: hits,
+                statistics,
                 maximumStatistics: Object.assign({}, defaultStatistics),
                 date
             };
@@ -509,7 +515,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 return 'RulesetAddr is 0';
             }
 
-            const gameplayBase = this.process.readInt(rulesetAddr + 0x68);
+            const gameplayBase = this.process.readInt(rulesetAddr + 0x64);
             if (gameplayBase === 0) {
                 return 'gameplayBase is zero';
             }
@@ -533,11 +539,11 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const retries = this.process.readInt(
                 this.process.readInt(baseAddr - 0x33) + 0x8
             );
-            // [[[Ruleset + 0x68] + 0x38] + 0x28]
+            // [[[Ruleset + 0x64] + 0x38] + 0x28]
             const playerName = this.process.readSharpString(
                 this.process.readInt(scoreBase + 0x28)
             );
-            // [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x68] + 0x38] + 0x1C] + 0x8
+            // [[[Ruleset + 0x64] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x64] + 0x38] + 0x1C] + 0x8
             const modsInt =
                 this.process.readInt(
                     this.process.readInt(scoreBase + 0x1c) + 0xc
@@ -545,15 +551,21 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 this.process.readInt(
                     this.process.readInt(scoreBase + 0x1c) + 0x8
                 );
-            // [[Ruleset + 0x68] + 0x38] + 0x64
+            // [[Ruleset + 0x64] + 0x38] + 0x64
             const mode = this.process.readInt(scoreBase + 0x64);
-            const score = this.process.readInt(rulesetAddr + 0xfc);
-            // [[Ruleset + 0x68] + 0x40] + 0x14
+
+            const scoreProcessor = this.process.readInt(scoreBase + 0x54);
+            const score =
+                scoreProcessor === 0
+                    ? this.process.readInt(scoreBase + 0x78) // v1
+                    : this.process.readInt(rulesetAddr + 0xf8); // v2/spectate
+
+            // [[Ruleset + 0x64] + 0x40] + 0x14
             const playerHPSmooth =
                 this.process.readDouble(hpBarBase + 0x14) || 0;
-            // [[Ruleset + 0x68] + 0x40] + 0x1C
+            // [[Ruleset + 0x64] + 0x40] + 0x1C
             const playerHP = this.process.readDouble(hpBarBase + 0x1c);
-            // [[Ruleset + 0x68] + 0x48] + 0xC
+            // [[Ruleset + 0x64] + 0x48] + 0xC
             const accuracy = this.process.readDouble(
                 this.process.readInt(gameplayBase + 0x48) + 0xc
             );
@@ -567,21 +579,21 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             let combo = 0;
             let maxCombo = 0;
             if (global.playTime >= beatmapPP.timings.firstObj - 100) {
-                // [[Ruleset + 0x68] + 0x38] + 0x88
+                // [[Ruleset + 0x64] + 0x38] + 0x88
                 hit100 = this.process.readShort(scoreBase + 0x88);
-                // [[Ruleset + 0x68] + 0x38] + 0x8A
+                // [[Ruleset + 0x64] + 0x38] + 0x8A
                 hit300 = this.process.readShort(scoreBase + 0x8a);
-                // [[Ruleset + 0x68] + 0x38] + 0x8C
+                // [[Ruleset + 0x64] + 0x38] + 0x8C
                 hit50 = this.process.readShort(scoreBase + 0x8c);
-                // [[Ruleset + 0x68] + 0x38] + 0x8E
+                // [[Ruleset + 0x64] + 0x38] + 0x8E
                 hitGeki = this.process.readShort(scoreBase + 0x8e);
-                // [[Ruleset + 0x68] + 0x38] + 0x90
+                // [[Ruleset + 0x64] + 0x38] + 0x90
                 hitKatu = this.process.readShort(scoreBase + 0x90);
-                // [[Ruleset + 0x68] + 0x38] + 0x92
+                // [[Ruleset + 0x64] + 0x38] + 0x92
                 hitMiss = this.process.readShort(scoreBase + 0x92);
-                // [[Ruleset + 0x68] + 0x38] + 0x94
+                // [[Ruleset + 0x64] + 0x38] + 0x94
                 combo = this.process.readShort(scoreBase + 0x94);
-                // [[Ruleset + 0x68] + 0x38] + 0x68
+                // [[Ruleset + 0x64] + 0x38] + 0x68
                 maxCombo = this.process.readShort(scoreBase + 0x68);
             }
 
@@ -601,17 +613,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 playerHPSmooth,
                 playerHP,
                 accuracy,
-                statistics: {
-                    perfect: hitGeki,
-                    great: hit300,
-                    good: hitKatu,
-                    ok: hit100,
-                    meh: hit50,
-                    miss: hitMiss,
-                    sliderTailHit: 0,
-                    smallTickHit: 0,
-                    largeTickHit: 0
-                },
+                statistics: fromLegacyHitResults(mode, {
+                    '300': hit300,
+                    '100': hit100,
+                    '50': hit50,
+                    '0': hitMiss,
+                    geki: hitGeki,
+                    katu: hitKatu
+                }),
                 maximumStatistics: Object.assign({}, defaultStatistics),
                 combo,
                 maxCombo
@@ -629,7 +638,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
             if (rulesetAddr === 0) return 'rulesetAddr is zero';
 
-            const keyOverlayPtr = this.process.readUInt(rulesetAddr + 0xb0);
+            const keyOverlayPtr = this.process.readUInt(rulesetAddr + 0xac);
             if (keyOverlayPtr === 0) {
                 if (mode === 3 || mode === 1) return '';
 
@@ -716,7 +725,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             );
             if (rulesetAddr === 0) return 'RulesetAddr is 0';
 
-            const gameplayBase = this.process.readInt(rulesetAddr + 0x68);
+            const gameplayBase = this.process.readInt(rulesetAddr + 0x64);
             if (gameplayBase === 0) return 'gameplayBase is zero';
 
             const scoreBase = this.process.readInt(gameplayBase + 0x38);
@@ -728,15 +737,26 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const items = this.process.readInt(base + 0x4);
             const size = this.process.readInt(base + 0xc);
 
-            const errors: Array<number> = [];
+            const result: number[] = [];
+            let index = last;
             for (let i = last; i < size; i++) {
-                const current = items + leaderStart + 0x4 * i;
-                const error = this.process.readInt(current);
+                const item = items + leaderStart + 0x4 * i;
+                const error = this.process.readInt(item);
 
-                errors.push(error);
+                // sometimes it returns number over a 1m and we dont need that
+                if (error < -10_000 || error > 10_000) {
+                    wLogger.error(
+                        `%${ClientType[this.game.client]}%`,
+                        `strange value in hitErrors: %${error}%`
+                    );
+                    break;
+                }
+
+                result.push(error);
+                index = i + 1;
             }
 
-            return errors;
+            return { index, array: result };
         } catch (error) {
             return error as Error;
         }
@@ -1108,10 +1128,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                             });
                         } catch (exc) {
                             wLogger.debug(
-                                'stable',
-                                this.pid,
-                                'tourneyChat',
-                                `message loop ${m}`,
+                                `%${ClientType[this.game.client]}%`,
+                                `Error processing chat message %${m}%:`,
                                 exc
                             );
                         }
@@ -1120,10 +1138,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     return result;
                 } catch (exc) {
                     wLogger.debug(
-                        'stable',
-                        this.pid,
-                        'tourneyChat',
-                        `chat loop ${i}`,
+                        `%${ClientType[this.game.client]}%`,
+                        `Error processing chat channel %${i}%:`,
                         exc
                     );
                 }
@@ -1177,7 +1193,7 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                     0x4
             );
 
-            const base = this.process.readInt(rulesetAddr + 0x7c);
+            const base = this.process.readInt(rulesetAddr + 0x78);
 
             if (base === 0) {
                 return [false, undefined, []];
@@ -1262,18 +1278,14 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             }
         }
 
-        const hits = {
-            perfect: 0,
-            great: this.process.readShort(entry + 0x8a),
-            good: 0,
-            ok: this.process.readShort(entry + 0x88),
-            meh: this.process.readShort(entry + 0x8c),
-            miss: this.process.readShort(entry + 0x92),
-
-            sliderTailHit: 0,
-            smallTickHit: 0,
-            largeTickHit: 0
-        };
+        const statistics = fromLegacyHitResults(mode, {
+            geki: 0,
+            '300': this.process.readShort(entry + 0x8a),
+            katu: 0,
+            '100': this.process.readShort(entry + 0x88),
+            '50': this.process.readShort(entry + 0x8c),
+            '0': this.process.readShort(entry + 0x92)
+        });
 
         return {
             userId,
@@ -1288,9 +1300,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 isLazer: false,
                 mode,
                 mods: mods.array,
-                statistics: hits
+                statistics
             }),
-            statistics: hits,
+            statistics,
             team: this.process.readInt(base + 0x40),
             position: this.process.readInt(base + 0x2c),
             isPassing: Boolean(this.process.readByte(base + 0x4b))
@@ -1316,15 +1328,13 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             this.game.reportError(
                 `beatmapScrollSpeed`,
                 10,
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapScrollSpeed`,
+                `%${ClientType[this.game.client]}%`,
+                `Failed to read beatmap scroll speed:`,
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `beatmapScrollSpeed`,
+                `%${ClientType[this.game.client]}%`,
+                `Failed to read beatmap scroll speed:`,
                 exc
             );
 
@@ -1383,9 +1393,8 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         (exc as any).message
                     );
                     wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateConfigState [${position}]`,
+                        `%${ClientType[this.game.client]}%`,
+                        `Failed to update config state at position %${position}%:`,
                         exc
                     );
                 }
@@ -1416,18 +1425,21 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                         (exc as any).message
                     );
                     wLogger.debug(
-                        ClientType[this.game.client],
-                        this.game.pid,
-                        `settings updateBindingState [${position}]`,
+                        `%${ClientType[this.game.client]}%`,
+                        `Failed to update binding state at position %${position}%:`,
                         exc
                     );
                 }
             }
 
-            const beatmapScrollSpeed = this.beatmapScrollSpeed(
-                settings['mania.scrollSpeed'] as number
-            );
-            settings['mania.scrollSpeed'] = beatmapScrollSpeed;
+            if (config.readManiaScrollSpeed) {
+                const beatmapScrollSpeed = this.beatmapScrollSpeed(
+                    settings['mania.scrollSpeed'] as number
+                );
+                settings['mania.scrollSpeed'] = beatmapScrollSpeed;
+            }
+
+            this.game.version = `${(settings['client.version'] as OsuVersion) || ''}`;
 
             return settings;
         } catch (error) {

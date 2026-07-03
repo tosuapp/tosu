@@ -44,7 +44,7 @@ jobs:
 
       - name: 🛠️ - Install Node
         uses: actions/setup-node@v3
-        with: { node-version: 20.11.1 }
+        with: { node-version: 24.14.0 }
 
       - name: 🛠️ - Install Deps
         run: npm install -g pnpm@10.10.0 && pnpm install --frozen-lockfile
@@ -64,7 +64,7 @@ jobs:
       - name: 📦 - Prepare overlay for upload
         if: ${{ matrix.os == 'windows-latest' }}
         shell: bash
-        run: sed -nE "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/p" packages/tosu/_version.js > packages/ingame-overlay/pack/win-unpacked/version
+        run: sed -nE "s/.*'([0-9]+\.[0-9]+\.[0-9]+)'.*/\1/p" packages/tosu/src/_version.js > packages/ingame-overlay/pack/win-unpacked/version
 
       - name: 🚀 - Upload artifacts for windows
         id: upload-artifact-windows

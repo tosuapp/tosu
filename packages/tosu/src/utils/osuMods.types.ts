@@ -142,6 +142,7 @@ export const ModsCategories = {
             'DT',
             'NC',
             'HD',
+            'TC',
             'FL',
             'BL',
             'ST',
@@ -157,7 +158,6 @@ export const ModsCategories = {
             'DF',
             'WU',
             'WD',
-            'TC',
             'BR',
             'AD',
             'MU',
@@ -245,7 +245,7 @@ export const ModsCategories = {
         funCategory: ['WU', 'WD', 'MU', 'AS'],
         systemCategory: ['TD', 'SV2']
     }
-} as const;
+};
 
 export enum OsuMods {
     Nomod = 0,

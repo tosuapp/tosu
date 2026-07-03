@@ -81,6 +81,10 @@ export class OverlayProcess {
             luid,
             window.webContents
         );
+
+        this.surface.events.on('error', (error: unknown) => {
+            console.error(error);
+        });
     }
 
     private openConfiguration() {
@@ -105,6 +109,7 @@ export class OverlayProcess {
             pid,
             5000
         );
+
         const [hwnd, width, height, luid] = await new Promise<
             [number, number, number, GpuLuid]
         >((resolve) =>
@@ -129,7 +134,10 @@ export class OverlayProcess {
         const window = new BrowserWindow({
             webPreferences: {
                 offscreen: {
-                    useSharedTexture: true
+                    useSharedTexture: true,
+                    // NOTE: Disable unsupported hdr texture format.
+                    // Remove when hdr support is added.
+                    sharedTexturePixelFormat: 'argb'
                 },
                 transparent: true,
                 backgroundThrottling: false,

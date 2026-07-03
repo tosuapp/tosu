@@ -35,7 +35,8 @@ import { Gameplay } from '@/states/gameplay';
 import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
-import { CalculateMods } from '@/utils/osuMods.types';
+import { toLegacyHits } from '@/utils/hitResult';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer,
@@ -313,7 +314,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
                 name: CountryCodes[user.countryCode]?.toUpperCase() || ''
             },
 
-            backgroundColour: user.backgroundColour?.toString(16)
+            backgroundColour: user.backgroundColour?.toString(16),
+            matchmaking: user.matchmaking
         },
         beatmap: {
             isKiai: beatmapPP.isKiai,
@@ -347,6 +349,9 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
 
             mapper: menu.creator,
             version: menu.difficulty,
+
+            source: beatmapPP.lazerBeatmap?.metadata.source || '',
+            tags: beatmapPP.lazerBeatmap?.metadata.tags.join(' ') || '',
 
             stats: buildBeatmapStats(beatmapPP)
         },
@@ -598,18 +603,10 @@ const buildLazerTourneyData = (
                         },
 
                         hits: {
-                            300: client.score!.statistics.great,
-                            geki: client.score!.statistics.perfect,
-                            100: client.score!.statistics.ok,
-                            katu: client.score!.statistics.good,
-                            50: client.score!.statistics.meh,
-                            0: client.score!.statistics.miss,
-                            sliderEndHits:
-                                client.score!.statistics.sliderTailHit || 0,
-                            smallTickHits:
-                                client.score!.statistics.smallTickHit || 0,
-                            largeTickHits:
-                                client.score!.statistics.largeTickHit || 0,
+                            ...toLegacyHits(
+                                client.score!.mode,
+                                client.score!.statistics
+                            ),
                             // TODO: ADD SLIDERBREAKS
                             sliderBreaks: 0
                         },
@@ -867,10 +864,10 @@ function buildBeatmapStats(beatmapPP: BeatmapPP) {
         },
 
         bpm: {
-            realtime: fixDecimals(beatmapPP.realtimeBPM),
-            common: fixDecimals(beatmapPP.commonBPM),
-            min: fixDecimals(beatmapPP.minBPM),
-            max: fixDecimals(beatmapPP.maxBPM)
+            realtime: fixDecimals(beatmapPP.realtimeBPM, 4),
+            common: fixDecimals(beatmapPP.commonBPM, 4),
+            min: fixDecimals(beatmapPP.minBPM, 4),
+            max: fixDecimals(beatmapPP.maxBPM, 4)
         },
 
         objects: {
@@ -962,16 +959,14 @@ function buildPlay(
                     total: fixDecimals(beatmapPP.currAttributes.pp)
                 },
                 fc: {
-                    aim: fixDecimals(beatmapPP.currPPAttributes.ppAim),
-                    speed: fixDecimals(beatmapPP.currPPAttributes.ppSpeed),
-                    accuracy: fixDecimals(
-                        beatmapPP.currPPAttributes.ppAccuracy
-                    ),
+                    aim: fixDecimals(beatmapPP.fcPPAttributes.ppAim),
+                    speed: fixDecimals(beatmapPP.fcPPAttributes.ppSpeed),
+                    accuracy: fixDecimals(beatmapPP.fcPPAttributes.ppAccuracy),
                     difficulty: fixDecimals(
-                        beatmapPP.currPPAttributes.ppDifficulty
+                        beatmapPP.fcPPAttributes.ppDifficulty
                     ),
                     flashlight: fixDecimals(
-                        beatmapPP.currPPAttributes.ppFlashlight
+                        beatmapPP.fcPPAttributes.ppFlashlight
                     ),
                     total: fixDecimals(beatmapPP.currAttributes.fcPP)
                 }

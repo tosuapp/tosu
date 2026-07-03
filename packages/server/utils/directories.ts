@@ -1,10 +1,22 @@
 import { getStaticPath, wLogger } from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
+import { OutgoingHttpHeaders } from 'http2';
 import path from 'path';
 
-import { getContentType } from '../index';
+import { ExtendedIncomingMessage, getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
+
+const allowedRangeExtensions = [
+    '.mp3',
+    '.wav',
+    '.ogg',
+    '.gif',
+    '.webm',
+    '.mp4',
+    '.avi',
+    '.webp'
+];
 
 function isPathDirectory(path: string) {
     const stat = fs.statSync(path);
@@ -13,6 +25,7 @@ function isPathDirectory(path: string) {
 
 export function directoryWalker({
     _htmlRedirect,
+    req,
     res,
     baseUrl,
     folderPath,
@@ -20,6 +33,7 @@ export function directoryWalker({
 }: {
     _htmlRedirect?: boolean;
 
+    req: ExtendedIncomingMessage;
     res: http.ServerResponse;
     baseUrl: string;
 
@@ -67,6 +81,8 @@ export function directoryWalker({
         });
     }
 
+    const fileSize = fs.statSync(filePath).size;
+
     return fs.readFile(
         filePath,
         isHTML === true ? 'utf8' : null,
@@ -110,7 +126,39 @@ export function directoryWalker({
                 content = addCounterMetadata(content.toString(), filePath);
             }
 
-            res.writeHead(200, { 'Content-Type': contentType });
+            if (req.headers.range) {
+                const range = req.headers.range
+                    .replace('bytes=', '')
+                    .split('-');
+                const start = parseInt(range[0]);
+                const end = range[1] ? parseInt(range[1]) : fileSize - 1;
+
+                if (start >= fileSize || end >= fileSize) {
+                    res.writeHead(416, {
+                        'Content-Range': `bytes */${fileSize}`
+                    });
+                    return res.end();
+                }
+
+                res.writeHead(206, {
+                    'Accept-Ranges': 'bytes',
+                    'Content-Type': contentType,
+                    'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                    'Content-Length': end - start + 1
+                });
+
+                fs.createReadStream(filePath, { start, end }).pipe(res);
+                return;
+            }
+
+            const headOptions: OutgoingHttpHeaders = {
+                'Content-Type': contentType
+            };
+            if (allowedRangeExtensions.includes(path.extname(pathname))) {
+                headOptions['Accept-Ranges'] = 'bytes';
+                headOptions['Content-Length'] = fs.statSync(filePath).size;
+            }
+            res.writeHead(200, headOptions);
             res.end(content, 'utf-8');
         }
     );
@@ -154,8 +202,11 @@ export function addCounterMetadata(html: string, filePath: string) {
 
         return html;
     } catch (error) {
-        wLogger.error('addCounterMetadata', (error as any).message);
-        wLogger.debug('addCounterMetadata', error);
+        wLogger.error(
+            'Failed to add counter metadata:',
+            (error as any).message
+        );
+        wLogger.debug('Counter metadata error details:', error);
 
         return '';
     }

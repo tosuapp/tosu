@@ -2,6 +2,209 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.23.0](https://github.com/tosuapp/tosu/compare/v4.22.3...v4.23.0) (2026-06-27)
+
+
+### Features
+
+* scorev2 processor ([6bac033](https://github.com/tosuapp/tosu/commit/6bac033a6054871bd44934a5b81096a6fb12dd51))
+* tosu ua ([4780080](https://github.com/tosuapp/tosu/commit/47800800e195eee91dd0207390834e81560d2f0a))
+* tosu ua ([0ded28d](https://github.com/tosuapp/tosu/commit/0ded28dac566a4cc88b7df1b97b3bcf7c909a595))
+
+
+### Bug Fixes
+
+* also increase precise poll rate ([9aebc48](https://github.com/tosuapp/tosu/commit/9aebc487fdc9da2968f4b5533cff664d5cf2e49c))
+* increase poll rate and re-validate config on startup ([5179cfd](https://github.com/tosuapp/tosu/commit/5179cfd39ec7bfb3d61ffac8e59b54987a576f75))
+* overlay not attaching to osu sometimes ([#640](https://github.com/tosuapp/tosu/issues/640)) ([116be02](https://github.com/tosuapp/tosu/commit/116be02f1757f7109b0c6c3ab4567e45a2386e0e)), closes [#618](https://github.com/tosuapp/tosu/issues/618)
+
+### [4.22.3](https://github.com/tosuapp/tosu/compare/v4.22.2...v4.22.3) (2026-06-20)
+
+
+### Bug Fixes
+
+* Allow range for overlay mp4/mp3 files ([6942951](https://github.com/tosuapp/tosu/commit/6942951c8962daeb9960f3e3fe4d478efbe65fd7))
+* Fix graph offset ([b7e9d90](https://github.com/tosuapp/tosu/commit/b7e9d90dcdb766a5e1411b8418093282471d86d4))
+* Improve `failed to fetch offsets` message ([d2fd72c](https://github.com/tosuapp/tosu/commit/d2fd72c6986c0ef892fa578b602496832e6b5bda))
+* incorrect accuracy calculation of beatmap subset in std ([a7c420a](https://github.com/tosuapp/tosu/commit/a7c420a4591340ffd51b63bd8702f7f4bdeaebd2))
+* replace incorrect hit object counting heuristic to time based ([818c1d8](https://github.com/tosuapp/tosu/commit/818c1d8bada7f47171ce4fdcc6f788a714dd412d))
+
+### [4.22.2](https://github.com/tosuapp/tosu/compare/v4.22.1...v4.22.2) (2026-06-13)
+
+
+### Bug Fixes
+
+* gameplay new offsets ([dc0ae8e](https://github.com/tosuapp/tosu/commit/dc0ae8e29b671eb3b7c64c7e3ea37a383e04c9ea))
+
+### [4.22.1](https://github.com/tosuapp/tosu/compare/v4.22.0...v4.22.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* build ([c3e1d10](https://github.com/tosuapp/tosu/commit/c3e1d104a40b91c57c3cb800208e213a4f2c6b04))
+
+## [4.22.0](https://github.com/tosuapp/tosu/compare/v4.21.0...v4.22.0) (2026-06-01)
+
+
+### Features
+
+* dynamic vtable and osu version from osu deps ([078c6a9](https://github.com/tosuapp/tosu/commit/078c6a9ce952d3e1605e908eb56b735adf767a44))
+
+
+### Bug Fixes
+
+* bicycle for AppImage ([9784c88](https://github.com/tosuapp/tosu/commit/9784c884a6e955249cbfcfa81f679c766011ba7d))
+* bicycle for AppImage ([ae65c5c](https://github.com/tosuapp/tosu/commit/ae65c5ccbc938edd2178a36f53f581a5aa315590))
+* do not trust client accuracy for pp ([b9f68ef](https://github.com/tosuapp/tosu/commit/b9f68efed11766197664c114dc2fbc5e2aebf254))
+
+## [4.21.0](https://github.com/tosuapp/tosu/compare/v4.20.0...v4.21.0) (2026-05-28)
+
+
+### Features
+
+* aim no slider strains ([12bb097](https://github.com/tosuapp/tosu/commit/12bb097ab781f24fc1023f119ed4e7b38f0cb9e9))
+* calculate max, fc score accuracy properly ([02d2ccd](https://github.com/tosuapp/tosu/commit/02d2ccd234ce06903e10642503bd6d2de30dc09f))
+* hit result conversion from, to lazer/stable ([8f185e3](https://github.com/tosuapp/tosu/commit/8f185e3dbb0feaa2fc732c63fc9c7ce2a7840ca7))
+* lazer mod settings ([dede820](https://github.com/tosuapp/tosu/commit/dede8208942c254fa134587cfa24ddb2b6bafdc1))
+* rename createGradualDifficultyCalculator to createGradualDifficulty ([7849d9d](https://github.com/tosuapp/tosu/commit/7849d9dcbc073e868079e70859e8a701fe4ab0d1))
+* switch to lazer pp calc ([a71b3c7](https://github.com/tosuapp/tosu/commit/a71b3c7d5906515a034f830dd292f78e6facb338))
+* use osu-tools score simulator for custom accuracies ([589b5ca](https://github.com/tosuapp/tosu/commit/589b5ca736080f5c930465a5cbbb891c773470d0))
+* use released version of lazer calculator ([1f92eb2](https://github.com/tosuapp/tosu/commit/1f92eb27104aead116e6f3dc87ad1c346ebf3aa8))
+* use ScoreGenerator for perfect score and editor pp ([49c1732](https://github.com/tosuapp/tosu/commit/49c173281009b0c273999850755c956cf3ae8498))
+
+
+### Bug Fixes
+
+* attempt to fix postinstall @tosu/pp ([8e54270](https://github.com/tosuapp/tosu/commit/8e54270a5fa10297ca32e9290ef0c7cf1735e627))
+* catch pp ([7f58ab6](https://github.com/tosuapp/tosu/commit/7f58ab659028bd5d624bfcf8b408a36c4a466153))
+* check endTime to check last object is actually passed ([8307e2f](https://github.com/tosuapp/tosu/commit/8307e2f7d200e99238f3f0a494c293f749274d0f))
+* check passedObjects ([adea8d8](https://github.com/tosuapp/tosu/commit/adea8d8722e4376adc6b3c8c9543731c7772df34))
+* ci build attempt[#3](https://github.com/tosuapp/tosu/issues/3) ([8a4cb15](https://github.com/tosuapp/tosu/commit/8a4cb159866cae4d375ca8523d6d37ed7c0d5413))
+* ci build attempt[#4](https://github.com/tosuapp/tosu/issues/4) ([ed40c4b](https://github.com/tosuapp/tosu/commit/ed40c4b3c9be194e28d3d768cace74b6ad191a19))
+* conversion check ([928a9c8](https://github.com/tosuapp/tosu/commit/928a9c8452775f89e283648e22ace97ac6adb82b))
+* divide by 100 for acc ([1abf07e](https://github.com/tosuapp/tosu/commit/1abf07ecc69fed93afc838feef9b73a59e962656))
+* exclude good for max pp ([49c448c](https://github.com/tosuapp/tosu/commit/49c448c41089ee1b98bc21cebad2b6a307976a07))
+* gameplay max, fc pp calculated from gradual difficulty instead of total difficulty ([07e334b](https://github.com/tosuapp/tosu/commit/07e334b989f5e2d2a95cd4c9a0c267531a7ea2ad))
+* ignore slider end hits for stable ([ea8d420](https://github.com/tosuapp/tosu/commit/ea8d420b0d83f71bc9677154494380b43df3b292))
+* include combo ([e629de4](https://github.com/tosuapp/tosu/commit/e629de44ee334f8ecac8cd89609b5125f5e4bd99))
+* max achivable combo calc ([f759eab](https://github.com/tosuapp/tosu/commit/f759eab4c87fb52ea1d9b1c3e78fd319ad76f782))
+* max archievable sliderEndHits ([10ed360](https://github.com/tosuapp/tosu/commit/10ed36084089b42c68efb1f619500d0fe9a6a2f7))
+* max, fc acc for classic mod ([7ef1419](https://github.com/tosuapp/tosu/commit/7ef1419bd4f1fdfbd03b5b9c2a010137915aa502))
+* miss count conversion for catch ([3713c0c](https://github.com/tosuapp/tosu/commit/3713c0c023daaa2a87f4995240df98ff00b61584))
+* move legacy beatmap conversion to @tosu/pp ([086b5a3](https://github.com/tosuapp/tosu/commit/086b5a3d76e8fe464e04754966e20f85eb5b2596))
+* passedObjects editorpp ([87fda1b](https://github.com/tosuapp/tosu/commit/87fda1bae16b507ef961510873b6a612c50b5423))
+* patch path ([2937fdd](https://github.com/tosuapp/tosu/commit/2937fdd6b346f75736c201229c1b12c119a14a68))
+* perfect score ([fe24b0d](https://github.com/tosuapp/tosu/commit/fe24b0ddcf9ab008e2c8928cf7999d5ad42b87d8))
+* perform conversion from lazer beatmap to rosu beatmap ([8694bd7](https://github.com/tosuapp/tosu/commit/8694bd79eb53391789ff7743eb35761f4faea538))
+* result screen ([a7e954f](https://github.com/tosuapp/tosu/commit/a7e954f3f547e77d0c5dfb8c1ab819f573545d01))
+* ticks and archivable maxCombo calc ([6d2de59](https://github.com/tosuapp/tosu/commit/6d2de5952ab53979b4c9fa7e046d1ca8c6d36b26))
+* typo ([6cbaa9a](https://github.com/tosuapp/tosu/commit/6cbaa9a58d11e80df61d2ffacd33bea74244339b))
+* ugly interface assertion ([e5487a8](https://github.com/tosuapp/tosu/commit/e5487a888eb3c287095d356e4f42b48d4ac75cd7))
+* update offset calc ([e8e8628](https://github.com/tosuapp/tosu/commit/e8e8628e4aeca93ec25a44a34e052723f76fe122))
+* update offset calc ([3a7eddf](https://github.com/tosuapp/tosu/commit/3a7eddf148c299515efa46d0a4ef276be91272d7))
+* update vtable on 2026.525.0 ([130bc7c](https://github.com/tosuapp/tosu/commit/130bc7c523fad670c9cb2ef508108ee889d3658c))
+* use patched version for lower nodejs ver ([c4dea38](https://github.com/tosuapp/tosu/commit/c4dea3827bffae410099b69f34ee2afedeba01fc))
+* use score simulator to match old fc pp behavior ([3e2d847](https://github.com/tosuapp/tosu/commit/3e2d84735d316be062dbcb4f3c347644bba12f7e))
+
+## [4.20.0](https://github.com/tosuapp/tosu/compare/v4.19.4...v4.20.0) (2026-05-05)
+
+
+### Features
+
+* implemenet reading matchmaking stats ([bef4485](https://github.com/tosuapp/tosu/commit/bef4485b68b5e939deea5b2ff6aad62e256c03f6))
+* rosu pp update ([726f3d8](https://github.com/tosuapp/tosu/commit/726f3d8ab40f5af07c92e46c54c61c27051b5f63))
+
+
+### Bug Fixes
+
+* lockfile ([e9fccef](https://github.com/tosuapp/tosu/commit/e9fccefc325e0579ddfb8aa259f30f991d75050a))
+* pnpm-lock broken ([868c98b](https://github.com/tosuapp/tosu/commit/868c98b56fbce3dfc5295bd70ea3331460786ab2))
+
+### [4.19.4](https://github.com/tosuapp/tosu/compare/v4.19.3...v4.19.4) (2026-05-01)
+
+
+### Features
+
+* mouse handler got new offset ([0416e29](https://github.com/tosuapp/tosu/commit/0416e29f208eddde5182c8cbb6d752e86132d939))
+
+### [4.19.3](https://github.com/tosuapp/tosu/compare/v4.19.2...v4.19.3) (2026-04-25)
+
+
+### Bug Fixes
+
+* score offset ([0e00de4](https://github.com/tosuapp/tosu/commit/0e00de41de923d5cab9e1adc3080044aecd09ae4))
+
+### [4.19.2](https://github.com/tosuapp/tosu/compare/v4.19.1...v4.19.2) (2026-04-02)
+
+
+### Bug Fixes
+
+* remove songSelectV2 ([83ac9ee](https://github.com/tosuapp/tosu/commit/83ac9ee34d1617f0f07ed6700a8a850524209f9a))
+* Verify downloaded file by their checksum ([d76e451](https://github.com/tosuapp/tosu/commit/d76e451939b62a376b6d62a546acc3fe715dbc3b))
+
+### [4.19.1](https://github.com/tosuapp/tosu/compare/v4.19.0...v4.19.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* Fix auto updater ([6746bce](https://github.com/tosuapp/tosu/commit/6746bce906407671688eb82260c56134d53175d2))
+
+## [4.19.0](https://github.com/tosuapp/tosu/compare/v4.18.1...v4.19.0) (2026-03-06)
+
+
+### Features
+
+* Add `source` and `tags` to beatmap ([bef46e1](https://github.com/tosuapp/tosu/commit/bef46e13546eed1d4845eadb12eec90bac17840d))
+* Allow disabling reading mania scroll speed ([801bc7c](https://github.com/tosuapp/tosu/commit/801bc7c479989f4e60926c99914517d5dfe80230))
+* Display `10` latest logs in report file ([cfcef46](https://github.com/tosuapp/tosu/commit/cfcef46557197ddac72a933571b4bbabfba56da1))
+
+
+### Bug Fixes
+
+* Fix `osu is not ready/running` when osu clearly running ([dff7d63](https://github.com/tosuapp/tosu/commit/dff7d63f3a1f09b09eda1366cd10f9c55ffb3bce))
+* Fix config migration ([856aef6](https://github.com/tosuapp/tosu/commit/856aef6c7f1e52e00adb3ea7647ff53a54561d95))
+* Fix editor state ([4722b68](https://github.com/tosuapp/tosu/commit/4722b685f55b50fb8639b6a45852de583aa2312e))
+* Fix logger regex ([dd64156](https://github.com/tosuapp/tosu/commit/dd64156265f35a38a0b6ace34d6f6ddfa0c87a24))
+* FIx mania hit errors ([fa0815e](https://github.com/tosuapp/tosu/commit/fa0815e857b5dcec4ab0b68b674d7886ef4b1b3e))
+* Fix score offset for tourney client ([b399686](https://github.com/tosuapp/tosu/commit/b399686feec41e9856b3fc11a3607574fd623857))
+* Rename offset fields due to moved song select ([e278c35](https://github.com/tosuapp/tosu/commit/e278c35c2a40f309d29f0585189e57e0acde4bfe))
+* Use `mtime` instead of `birthtime` in log file name ([341b48a](https://github.com/tosuapp/tosu/commit/341b48a8fe655d7dec12d744048c347a1ccd445b))
+
+### [4.18.1](https://github.com/tosuapp/tosu/compare/v4.18.0...v4.18.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* Backward compatible mods order ([80e0a04](https://github.com/tosuapp/tosu/commit/80e0a04a7502d6daab289fa6b392566c14eef10a))
+* Disable checking updates in development ([e894ae2](https://github.com/tosuapp/tosu/commit/e894ae2778e324fc8900ae846eee1b2ea6a89f0b))
+* disable unsupported hdr overlay texture ([0715083](https://github.com/tosuapp/tosu/commit/07150835d7156db5a3005273cd679520a72a16af))
+* Fix `TC` mod ([cad9597](https://github.com/tosuapp/tosu/commit/cad9597f047eb71d10899b6a21091e346555c4de))
+* FIx mania DA OD detection ([5b9c7ba](https://github.com/tosuapp/tosu/commit/5b9c7ba22098581a78e0904aa65577482144afdd))
+* Fix score offset for stable/cuttingEdge ([ed765cf](https://github.com/tosuapp/tosu/commit/ed765cfa7b1079b4a06741e14c17170ed7b32bd1))
+* FIx UR skyrocketing over a million ([1ecc51f](https://github.com/tosuapp/tosu/commit/1ecc51f32d260a67d57854f5ff9343d6ab36eb62))
+* Make profile button above overlays ([e3f7d40](https://github.com/tosuapp/tosu/commit/e3f7d4024d263a0b3238579a2fa64d5541740a61))
+
+## [4.18.0](https://github.com/tosuapp/tosu/compare/v4.17.2...v4.18.0) (2026-02-03)
+
+
+### Features
+
+* Allow selecting profile via `profile` query for /api/ingame` url ([a0688bf](https://github.com/tosuapp/tosu/commit/a0688bf9d6641307d76abeb72a822c3332003fed))
+* Implement ingame overlay profiles ([f154358](https://github.com/tosuapp/tosu/commit/f154358c1e0f127cd8f828bf7db8ffb2a7c417c4))
+* overhaul logger and progress bar implementation ([b15e0f2](https://github.com/tosuapp/tosu/commit/b15e0f2f022092bfc60e503f2504c131958c6859))
+* **progress:** allow multiple bars at once. ([de1d766](https://github.com/tosuapp/tosu/commit/de1d766cff6e107f126ee181a2250f4a627256e7))
+* Separate ingame-overlay profile for obs ([035d5f2](https://github.com/tosuapp/tosu/commit/035d5f2b40f1dac023df8b428c55ed4e80e91c1a))
+
+
+### Bug Fixes
+
+* FIx kiai detection ([7488a08](https://github.com/tosuapp/tosu/commit/7488a080f75f195518051fc9c8691d8acb233000))
+* Keep up to 4 decimals for bpm values ([f7b1610](https://github.com/tosuapp/tosu/commit/f7b16109e889f23b9db4eb38085807b7379b07bf))
+* Lazer hit error duplicates ([d9d590b](https://github.com/tosuapp/tosu/commit/d9d590ba3a0c4e2643033d2bdc95fdff4e7f29ff))
+* only replace highlights outside of links. ([0497f43](https://github.com/tosuapp/tosu/commit/0497f430166146f201a7bced53a55e1f32a895eb))
+* prettier CI failing. ([2b90de3](https://github.com/tosuapp/tosu/commit/2b90de328e61a9144fd1d76b4ce3a91bbe36856a))
+* update report generation for new log format ([26ef04d](https://github.com/tosuapp/tosu/commit/26ef04d9a8c02ff54a1913aafde92f803a17063d))
+
 ### [4.17.2](https://github.com/tosuapp/tosu/compare/v4.17.1...v4.17.2) (2026-01-21)
 
 

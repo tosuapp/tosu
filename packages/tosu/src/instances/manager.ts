@@ -138,13 +138,12 @@ export class InstanceManager {
                     'onDestroy',
                     this.onProcessDestroy.bind(this)
                 );
-                osuInstance.emitter.on(
-                    'onResolveFailed',
-                    this.onProcessDestroy.bind(this)
-                );
 
                 this.osuInstances[processId] = osuInstance;
-                osuInstance.start();
+                if (!osuInstance.start()) {
+                    this.onProcessDestroy(processId);
+                    continue;
+                }
 
                 if (this.overlayProcess) {
                     this.overlayProcess.send({
@@ -154,8 +153,8 @@ export class InstanceManager {
                 }
             }
         } catch (exc) {
-            wLogger.error('[manager]', 'handleProcesses', (exc as any).message);
-            wLogger.debug('[manager]', 'handleProcesses', exc);
+            wLogger.error('Process management failed:', (exc as any).message);
+            wLogger.debug('Process management error details:', exc);
         }
     }
 
@@ -179,13 +178,11 @@ export class InstanceManager {
             const instance = Object.values(this.osuInstances).find(
                 (r) => r.pid === focusedPID
             );
-            if (instance) this.focusedClient = instance.client;
+            this.focusedClient =
+                instance?.client ??
+                this.getInstance()?.client ??
+                ClientType.stable;
             this.gameFocused = instance !== undefined;
-
-            if (this.focusedClient === undefined) {
-                this.focusedClient =
-                    this.getInstance()?.client || ClientType.stable;
-            }
 
             await setTimeout(100);
         }
@@ -207,8 +204,7 @@ export class InstanceManager {
                 (child as NodeJS.ErrnoException)?.code === 'EPERM'
             ) {
                 wLogger.warn(
-                    '[ingame-overlay]',
-                    'Unable to delete previous version, please close osu clients to continue'
+                    'Unable to update overlay: File locked. Please close running osu! clients.'
                 );
                 await this.checkInstances();
 
@@ -216,8 +212,11 @@ export class InstanceManager {
                 this.startOverlay();
                 return;
             } else if (child instanceof Error) {
-                wLogger.error('[ingame-overlay]', (child as any).message);
-                wLogger.debug('[ingame-overlay]', child);
+                wLogger.error(
+                    'Failed to start overlay process:',
+                    (child as any).message
+                );
+                wLogger.debug('Overlay process startup error details:', child);
 
                 return;
             }
@@ -226,7 +225,7 @@ export class InstanceManager {
                 this.isOverlayStarted = false;
                 this.overlayProcess = null;
 
-                wLogger.warn('[ingame-overlay]', 'run error', err);
+                wLogger.warn('Overlay process runtime error:', err);
             });
 
             child.on('exit', (code, signal) => {
@@ -235,13 +234,12 @@ export class InstanceManager {
 
                 if (code !== 0 && signal !== 'SIGTERM') {
                     wLogger.error(
-                        '[ingame-overlay]',
-                        `Unknown exit code: ${code} ${signal ? `(${signal})` : ''}`
+                        `Overlay process exited abnormally with code %${code}% ${signal ? `(%${signal}%)` : ''}`
                     );
                     return;
                 }
 
-                wLogger.warn('[ingame-overlay]', 'Exited...');
+                wLogger.warn('Overlay process has exited');
             });
 
             this.overlayProcess = child;
@@ -253,8 +251,8 @@ export class InstanceManager {
                 });
             }
         } catch (exc) {
-            wLogger.error('[ingame-overlay]', (exc as any).message);
-            wLogger.debug('[ingame-overlay]', exc);
+            wLogger.error('Overlay startup failed:', (exc as any).message);
+            wLogger.debug('Overlay startup error details:', exc);
         }
     }
 
@@ -294,8 +292,11 @@ export class InstanceManager {
                 }
             }
         } catch (exc) {
-            wLogger.error('[ingame-config-update]', (exc as any).message);
-            wLogger.debug('[ingame-config-update]', exc);
+            wLogger.error(
+                'Failed to update overlay configuration:',
+                (exc as any).message
+            );
+            wLogger.debug('Overlay config update error details:', exc);
         }
     }
 
@@ -330,7 +331,7 @@ export class InstanceManager {
             return;
         }
 
-        wLogger.warn('[ingame-overlay]', 'Stopping...');
+        wLogger.warn('Stopping in-game overlay process...');
         const overlayProcess = this.overlayProcess;
         overlayProcess.kill();
 

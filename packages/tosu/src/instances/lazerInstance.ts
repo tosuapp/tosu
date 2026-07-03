@@ -19,7 +19,6 @@ import { AbstractInstance } from '.';
 
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
-    osuVersion: string;
     previousCombo: number = 0;
 
     constructor(pid: number) {
@@ -33,41 +32,11 @@ export class LazerInstance extends AbstractInstance {
             if (!fs.existsSync(cacheFolder))
                 await fsp.mkdir(cacheFolder, { recursive: true });
 
-            let attempts = 1;
-            while (attempts < 5 && !this.osuVersion) {
-                if (attempts > 1)
-                    wLogger.warn(
-                        ClientType[this.client],
-                        `Trying to find osu version #${attempts}`
-                    );
+            this.version = (await this.getOsuVersion()) as typeof this.version;
 
-                try {
-                    this.osuVersion = this.memory.gameVersion() || '';
-
-                    wLogger.info(
-                        ClientType[this.client],
-                        `Version: ${this.osuVersion}`
-                    );
-
-                    break;
-                } catch (exc) {
-                    wLogger.debug(
-                        ClientType[this.client],
-                        this.pid,
-                        'Unable to find osu version',
-                        exc
-                    );
-                } finally {
-                    attempts++;
-                    await sleep(1000);
-                }
-            }
-
-            if (!this.osuVersion) {
+            if (!this.version) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'Unable to find osu version, report to devs: https://discord.gg/WX7BTs8kwh'
+                    `Unable to find osu! version for ${ClientType[this.client]} %${this.pid}%. Please report this issue: https://discord.gg/WX7BTs8kwh`
                 );
 
                 this.regularDataLoop();
@@ -78,13 +47,13 @@ export class LazerInstance extends AbstractInstance {
 
             const controller = new AbortController();
             const links = [
-                `https://tosu.app/offsets/${this.osuVersion}.json`,
-                `https://osuck.net/offsets/${this.osuVersion}.json`
+                `https://tosu.app/offsets/${this.version}.json`,
+                `https://osuck.net/offsets/${this.version}.json`
             ];
 
-            const jsonCache = path.join(cacheFolder, `${this.osuVersion}.json`);
+            const jsonCache = path.join(cacheFolder, `${this.version}.json`);
             if (
-                localOffsets.OsuVersion !== this.osuVersion &&
+                localOffsets.OsuVersion !== this.version &&
                 fs.existsSync(jsonCache)
             ) {
                 this.memory.offsets = JsonSafeParse({
@@ -94,16 +63,13 @@ export class LazerInstance extends AbstractInstance {
                 });
 
                 wLogger.info(
-                    ClientType[this.client],
-                    this.pid,
-                    'reading offsets from cache',
-                    this.osuVersion
+                    `Loaded offsets from cache for version %${this.version}%`
                 );
             }
 
             if (
                 this.memory.offsets === null ||
-                this.memory.offsets.OsuVersion !== this.osuVersion
+                this.memory.offsets.OsuVersion !== this.version
             ) {
                 for (let i = 0; i < links.length; i++) {
                     const link = links[i];
@@ -113,16 +79,16 @@ export class LazerInstance extends AbstractInstance {
                     try {
                         const request = await fetch(link, {
                             method: 'GET',
-                            signal: controller.signal
+                            signal: controller.signal,
+                            headers: {
+                                'User-Agent': `tosu/${this.version} (https://tosu.app; i@kotrik.ru)`
+                            }
                         });
 
                         clearTimeout(timeout);
                         if (!request.ok) {
-                            wLogger.error(
-                                ClientType[this.client],
-                                this.pid,
-                                'initiate fetch',
-                                host,
+                            wLogger.debug(
+                                `Failed to fetch offsets from %${host}%:`,
                                 request.status,
                                 request.statusText
                             );
@@ -135,14 +101,17 @@ export class LazerInstance extends AbstractInstance {
                             payload: text,
                             defaultValue: null
                         });
-                        if (json === null) continue;
+                        if (json === null) {
+                            wLogger.debug(
+                                `Broken response from %${host}%:`,
+                                request.status,
+                                request.statusText
+                            );
+                            continue;
+                        }
 
                         wLogger.info(
-                            ClientType[this.client],
-                            this.pid,
-                            'searching offsets online',
-                            host,
-                            this.osuVersion
+                            `Successfully retrieved offsets for version %${this.version}%`
                         );
 
                         this.memory.offsets = json;
@@ -151,27 +120,24 @@ export class LazerInstance extends AbstractInstance {
                         break;
                     } catch (exc) {
                         wLogger.error(
-                            ClientType[this.client],
-                            this.pid,
-                            'initiate fetch',
+                            `Error fetching offsets from %${host}%:`,
                             (exc as any).message
                         );
-                        wLogger.debug(
-                            ClientType[this.client],
-                            this.pid,
-                            'initiate fetch',
-                            exc
-                        );
+                        wLogger.debug(`Offset fetch error details:`, exc);
                     }
+                }
+
+                if (this.memory.offsets.OsuVersion !== this.version) {
+                    wLogger.error(
+                        `Failed to fetch offsets for %${this.version}%, report to devs: https://discord.gg/WX7BTs8kwh`
+                    );
+                    return;
                 }
             }
 
             if (this.memory.offsets === null) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'offsets not found for this version',
-                    this.osuVersion
+                    `Offsets not found for osu! version %${this.version}%`
                 );
                 return;
             }
@@ -180,17 +146,15 @@ export class LazerInstance extends AbstractInstance {
             this.preciseDataLoop();
         } catch (exc) {
             wLogger.error(
-                ClientType[this.client],
-                this.pid,
-                'initiate',
+                `Failed to initiate client instance for ${ClientType[this.client]} %${this.pid}%:`,
                 (exc as Error).message
             );
-            wLogger.debug(ClientType[this.client], this.pid, 'initiate', exc);
+            wLogger.debug(`Client initiation error details:`, exc);
         }
     }
 
     async regularDataLoop(): Promise<void> {
-        wLogger.debug(ClientType[this.client], this.pid, 'regularDataLoop');
+        wLogger.debug(`Starting regular data loop for client %${this.pid}%`);
 
         const {
             global,
@@ -276,12 +240,12 @@ export class LazerInstance extends AbstractInstance {
                         continue;
                     }
 
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousState = currentState;
                 }
 
                 if (global.gameFolder && updateGraph) {
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousMP3Length = menu.mp3Length;
                 }
 
@@ -357,19 +321,11 @@ export class LazerInstance extends AbstractInstance {
                 await sleep(config.pollRate);
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'regularDataLoop',
-                    'error within a loop',
+                    `%${ClientType[this.client]}%`,
+                    `Error in regular data loop:`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'regularDataLoop',
-                    'error within a loop',
-                    exc
-                );
+                wLogger.debug(`Regular loop error details:`, exc);
             }
         }
     }
@@ -400,20 +356,54 @@ export class LazerInstance extends AbstractInstance {
                 await sleep(config.preciseDataPollRate);
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'preciseDataLoop',
-                    'error within a loop',
+                    `%${ClientType[this.client]}%`,
+                    `Error in precise data loop:`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'preciseDataLoop',
-                    'error within a loop',
-                    exc
-                );
+                wLogger.debug(`Precise loop error details:`, exc);
             }
+        }
+    }
+
+    async getOsuVersion() {
+        const rootPath = await this.process.getRootPath();
+        let osuDepsJson = {
+            libraries: {}
+        };
+        try {
+            const filePath = path.join(rootPath, 'osu!.deps.json');
+            const isAppImage =
+                process.platform === 'linux' &&
+                rootPath.includes('/tmp/.mount_');
+            const isRoot =
+                process.platform === 'linux' && process.getuid?.() === 0;
+
+            const osuDepsRaw =
+                isRoot && isAppImage
+                    ? await this.process.readFileAsOwner(filePath)
+                    : await fsp.readFile(filePath, 'utf-8');
+
+            osuDepsJson = JSON.parse(osuDepsRaw);
+        } catch {
+            wLogger.error("Can't read osu dependencies");
+        }
+
+        const osuLib =
+            Object.keys(osuDepsJson.libraries).find((key) =>
+                key.startsWith('osu!/')
+            ) || '';
+        try {
+            // key example: osu!/2026.525.0-lazer | osu!/2026.518.0-tachyon
+            const osuVersion = osuLib.slice(
+                osuLib.indexOf('/') + 1,
+                osuLib.indexOf('-')
+            );
+
+            wLogger.info(`Detected osu! version: %${osuVersion}%`);
+            return osuVersion;
+        } catch {
+            wLogger.error("Can't read osu! version");
+            return '';
         }
     }
 }

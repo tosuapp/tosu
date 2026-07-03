@@ -190,6 +190,14 @@ export interface NumberName {
     name: string;
 }
 
+export interface MatchmakingStats {
+    rating: number;
+    rank: number | null;
+    plays: number;
+    wins: number;
+    isProvisional: boolean;
+}
+
 export interface Profile {
     userStatus: NumberName;
     banchoStatus: NumberName;
@@ -204,6 +212,7 @@ export interface Profile {
     globalRank: number;
     countryCode: NumberName;
     backgroundColour: string;
+    matchmaking: MatchmakingStats | null;
 }
 
 export interface Beatmap {
@@ -222,6 +231,8 @@ export interface Beatmap {
     titleUnicode: string;
     mapper: string;
     version: string;
+    source: string;
+    tags: string;
     stats: Stats;
 }
 
@@ -386,7 +397,6 @@ export interface Combo2 {
 }
 
 export interface TosuPreciseAnswer {
-    currentTime: number;
     keys: KeyOverlay;
     hitErrors: number[];
     tourney: PreciseTourney[];

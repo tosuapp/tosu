@@ -16,8 +16,8 @@ const DOUBLE_POWERS_10 = [
  * @param decimalNumber number with big amount of numbers after dot
  * @returns float number with two digits after
  */
-export const fixDecimals = (decimalNumber: number) =>
-    parseFloat((decimalNumber || 0).toFixed(2));
+export const fixDecimals = (decimalNumber: number, amount = 2) =>
+    parseFloat((decimalNumber || 0).toFixed(amount));
 
 /**
  * Converts raw .NET's dateData to Date object

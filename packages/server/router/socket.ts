@@ -21,11 +21,14 @@ export default function buildSocket({
     app.server.on('upgrade', function (request, socket, head) {
         const allowed = isRequestAllowed(request);
         if (!allowed) {
-            wLogger.warn('[ws]', 'External request detected', request.url, {
-                address: request.socket.remoteAddress,
-                origin: request.headers.origin,
-                referer: request.headers.referer
-            });
+            wLogger.warn(
+                'Blocked external WebSocket request to %' + request.url + '%',
+                {
+                    address: request.socket.remoteAddress,
+                    origin: request.headers.origin,
+                    referer: request.headers.referer
+                }
+            );
 
             socket.write('HTTP/1.1 403 Not Found\r\n\r\n');
             socket.destroy();
@@ -96,8 +99,11 @@ export default function buildSocket({
                 );
             }
         } catch (exc) {
-            wLogger.error('[ws]', request.url, (exc as any).message);
-            wLogger.debug('[ws]', request.url, exc);
+            wLogger.error(
+                `WebSocket upgrade failed for %${request.url}%:`,
+                (exc as any).message
+            );
+            wLogger.debug(`WebSocket upgrade error details:`, exc);
         }
     });
 }

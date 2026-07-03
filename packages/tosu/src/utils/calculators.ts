@@ -228,39 +228,3 @@ export const calculateGrade = (params: {
 
     return rank;
 };
-
-export const calculatePassedObjects = (
-    mode: number,
-    statistics: Statistics
-): number => {
-    switch (mode) {
-        case 0:
-            return (
-                statistics.great +
-                statistics.ok +
-                statistics.meh +
-                statistics.miss
-            );
-        case 1:
-            return statistics.great + statistics.ok + statistics.miss;
-        case 2:
-            return (
-                statistics.great +
-                statistics.good +
-                statistics.ok +
-                statistics.meh +
-                statistics.miss
-            );
-        case 3:
-            return (
-                statistics.great +
-                statistics.perfect +
-                statistics.ok +
-                statistics.good +
-                statistics.meh +
-                statistics.miss
-            );
-        default:
-            return 0;
-    }
-};

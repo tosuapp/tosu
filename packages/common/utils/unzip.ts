@@ -13,8 +13,8 @@ export const unzip = (zipPath: string, extractPath: string): Promise<string> =>
             zip.extractAllTo(extractPath, true);
             resolve(extractPath);
         } catch (error) {
-            wLogger.error('[unzip]', (error as any).message);
-            wLogger.debug('[unzip]', error);
+            wLogger.error('Failed to unzip archive:', (error as any).message);
+            wLogger.debug('Unzip error details:', error);
             reject(error);
         }
     });

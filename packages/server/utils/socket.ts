@@ -8,7 +8,7 @@ type Filter = string | { field: string; keys: Filter[] };
 export interface ModifiedWebsocket extends WebSocket {
     id: string;
     pathname: string;
-    query: { [key: string]: any };
+    query: Record<string, string>;
 
     filters: Filter[];
 
@@ -24,7 +24,8 @@ export class Websocket {
     private stateFunctionName: string;
     private onMessageCallback: (
         data: string,
-        socket: ModifiedWebsocket
+        socket: ModifiedWebsocket,
+        ws: Websocket
     ) => void;
 
     private onConnectionCallback: (id: string, url: string | undefined) => void;
@@ -46,7 +47,11 @@ export class Websocket {
             | 'getStateV2'
             | 'getPreciseData'
             | string;
-        onMessageCallback?: (data: string, socket: ModifiedWebsocket) => void;
+        onMessageCallback?: (
+            data: string,
+            socket: ModifiedWebsocket,
+            ws: Websocket
+        ) => void;
         onConnectionCallback?: (id: string, url: string | undefined) => void;
     }) {
         this.socket = new WebSocket.Server({ noServer: true });
@@ -81,23 +86,31 @@ export class Websocket {
             ws.originAddress = request.headers.origin || '';
             ws.remoteAddress = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
 
-            wLogger.debug('[ws]', 'connected', ws.id);
+            wLogger.debug(`WebSocket client connected: %${ws.id}%`);
 
             ws.on('close', (reason, description) => {
                 this.clients.delete(ws.id);
 
-                wLogger.debug('[ws]', 'closed', ws.id, reason, description);
+                wLogger.debug(
+                    `WebSocket client disconnected: %${ws.id}%`,
+                    reason,
+                    description
+                );
             });
 
             ws.on('error', (reason: any, description: any) => {
                 this.clients.delete(ws.id);
 
-                wLogger.debug('[ws]', 'error', ws.id, reason, description);
+                wLogger.debug(
+                    `WebSocket client error: %${ws.id}%`,
+                    reason,
+                    description
+                );
             });
 
             if (typeof this.onMessageCallback === 'function') {
                 ws.on('message', (data) => {
-                    this.onMessageCallback(data.toString(), ws);
+                    this.onMessageCallback(data.toString(), ws, this);
                 });
             }
 
@@ -108,18 +121,32 @@ export class Websocket {
         });
 
         // resend commands internally "this.socket.emit"
-        this.socket.on('message', (data) => {
-            this.clients.forEach((client) => {
-                // skip sending settings to wrong overlay
-                if (
-                    data.startsWith('getSettings:') &&
-                    !data.endsWith(encodeURI(client.query.l || ''))
-                )
-                    return;
+        this.socket.on(
+            'message',
+            (
+                id: string,
+                command: string,
+                overlayName: string,
+                payload?: string
+            ) => {
+                this.clients.forEach((client) => {
+                    if (client.id === id) return;
 
-                client.emit('message', data);
-            });
-        });
+                    // skip sending settings to wrong overlay
+                    if (
+                        (command === 'getSettings' ||
+                            command === 'updateSettings') &&
+                        overlayName !== decodeURI(client.query.l || '')
+                    )
+                        return;
+
+                    client.emit(
+                        'message',
+                        [command, overlayName, payload].join(':')
+                    );
+                });
+            }
+        );
 
         if (this.pollRateFieldName) {
             this.start();
@@ -127,6 +154,9 @@ export class Websocket {
     }
 
     async start() {
+        let message = '';
+        let values = {};
+
         while (true) {
             try {
                 const osuInstance: any = this.instanceManager.getInstance(
@@ -134,32 +164,34 @@ export class Websocket {
                 );
                 if (!osuInstance || this.clients.size === 0) {
                     await sleep(500);
-                    continue; // Exit the loop if conditions are not met
+                    continue;
                 }
 
                 const buildedData = osuInstance[this.stateFunctionName](
                     this.instanceManager
                 );
-                let message = '';
 
                 this.clients.forEach((client) => {
                     if (
                         Array.isArray(client.filters) &&
                         client.filters.length > 0
                     ) {
-                        const values = {};
+                        values = {};
                         this.applyFilter(client.filters, buildedData, values);
 
                         client.send(JSON.stringify(values));
                         return;
                     }
 
-                    if (!message) message = JSON.stringify(buildedData);
+                    message = JSON.stringify(buildedData);
                     client.send(message);
                 });
             } catch (error) {
-                wLogger.error('[ws]', 'loop', (error as any).message);
-                wLogger.debug('[ws]', 'loop', error);
+                wLogger.error(
+                    'WebSocket data loop failed:',
+                    (error as any).message
+                );
+                wLogger.debug('WebSocket loop error details:', error);
             }
 
             if (this.pollRateFieldName)

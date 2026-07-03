@@ -55,18 +55,16 @@ export class TourneyManager extends AbstractState {
     updateState() {
         try {
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `tourney updateState starting`
+                `%${ClientType[this.game.client]}%`,
+                `Tourney state update started`
             );
 
             const result = this.game.memory.tourney();
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `tourney updateState`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Tourney state update not ready:`,
                     result
                 );
                 return 'not-ready';
@@ -100,9 +98,8 @@ export class TourneyManager extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `tourney updateState`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating tourney state:`,
                 exc
             );
         }
@@ -120,9 +117,8 @@ export class TourneyManager extends AbstractState {
             if (result instanceof Error) throw result;
             if (typeof result === 'string') {
                 wLogger.debug(
-                    ClientType[this.game.client],
-                    this.game.pid,
-                    `tourney updateUser`,
+                    `%${ClientType[this.game.client]}%`,
+                    `Tourney user update not ready:`,
                     result
                 );
                 this.reset();
@@ -153,9 +149,8 @@ export class TourneyManager extends AbstractState {
                 (exc as any).message
             );
             wLogger.debug(
-                ClientType[this.game.client],
-                this.game.pid,
-                `tourney updateUser`,
+                `%${ClientType[this.game.client]}%`,
+                `Error updating tourney user:`,
                 exc
             );
         }

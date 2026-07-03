@@ -19,88 +19,104 @@ import { isRealNumber } from './manipulation';
 const defaultSchema: ConfigSchema = {
     enableAutoUpdate: {
         binding: 'ENABLE_AUTOUPDATE',
-        default: true,
-        order: 1
+        default: true
     },
     openDashboardOnStartup: {
         binding: 'OPEN_DASHBOARD_ON_STARTUP',
-        default: true,
-        order: 2
+        default: true
     },
     debugLog: {
         binding: 'DEBUG_LOG',
-        default: false,
-        order: 0
+        default: false
     },
     calculatePP: {
         binding: 'CALCULATE_PP',
-        default: true,
-        order: 4
+        default: true
     },
     enableKeyOverlay: {
         binding: 'ENABLE_KEY_OVERLAY',
-        default: true,
-        order: 5
+        default: true
     },
     pollRate: {
         binding: 'POLL_RATE',
-        default: 100,
-        order: 6
+        default: 150,
+        min: 100
     },
     preciseDataPollRate: {
         binding: 'PRECISE_DATA_POLL_RATE',
         default: 10,
-        order: 7
+        min: 1
     },
     showMpCommands: {
         binding: 'SHOW_MP_COMMANDS',
-        default: false,
-        order: 3
+        default: false
+    },
+    readManiaScrollSpeed: {
+        binding: 'READ_MANIA_SCROLL_SPEED',
+        default: true
     },
     serverIP: {
         binding: 'SERVER_IP',
-        default: '127.0.0.1',
-        order: 11
+        default: '127.0.0.1'
     },
     serverPort: {
         binding: 'SERVER_PORT',
-        default: 24050,
-        order: 12
+        default: 24050
     },
     staticFolderPath: {
         binding: 'STATIC_FOLDER_PATH',
-        default: './static',
-        order: 14
+        default: './static'
     },
     enableIngameOverlay: {
         binding: 'ENABLE_INGAME_OVERLAY',
-        default: false,
-        order: 5
+        default: false
     },
     ingameOverlayKeybind: {
         binding: 'INGAME_OVERLAY_KEYBIND',
-        default: 'Control + Shift + Space',
-        order: 9
+        default: 'Control + Shift + Space'
     },
     ingameOverlayMaxFps: {
         binding: 'INGAME_OVERLAY_MAX_FPS',
-        default: 60,
-        order: 10
+        default: 60
     },
     allowedIPs: {
         binding: 'ALLOWED_IPS',
-        default: '127.0.0.1,localhost,absolute',
-        order: 13
+        default: '127.0.0.1,localhost,absolute'
     }
 };
 
 const newlineInsertions: ConfigBinding[] = [
     'OPEN_DASHBOARD_ON_STARTUP',
-    'CALCULATE_PP',
+    'READ_MANIA_SCROLL_SPEED',
     'ENABLE_INGAME_OVERLAY',
     'PRECISE_DATA_POLL_RATE',
     'INGAME_OVERLAY_MAX_FPS',
     'ALLOWED_IPS'
+];
+
+const bindingOrder: ConfigBinding[] = [
+    'DEBUG_LOG',
+    'ENABLE_AUTOUPDATE',
+    'OPEN_DASHBOARD_ON_STARTUP',
+
+    'SHOW_MP_COMMANDS',
+    'CALCULATE_PP',
+    'READ_MANIA_SCROLL_SPEED',
+
+    'ENABLE_KEY_OVERLAY',
+    'ENABLE_INGAME_OVERLAY',
+
+    'POLL_RATE',
+    'PRECISE_DATA_POLL_RATE',
+
+    'INGAME_OVERLAY_KEYBIND',
+    'INGAME_OVERLAY_MAX_FPS',
+
+    'SERVER_IP',
+    'SERVER_PORT',
+    'ALLOWED_IPS',
+
+    'STATIC_FOLDER_PATH'
 ];
 
 export const configEvents = new EventEmitter<ConfigEvents>();
@@ -138,61 +154,60 @@ export class ConfigManager {
                 .then(dotenv.parse)
                 .catch(() => null);
 
-            if (oldEnv === null) {
-                wLogger.debug(
-                    '[config] No old config found. Skipping migration..'
-                );
-
-                return;
-            }
-
-            const newEnv =
+            const currentEnv =
                 (await fs
                     .readFile(configPath, 'utf8')
                     .then(dotenv.parse)
                     .catch(() => null)) || {};
 
-            const migratedEnv: Record<string, string> = {};
-            for (const key in defaultSchema) {
-                if (!Object.hasOwn(defaultSchema, key)) continue;
-
-                const item = defaultSchema[key as ConfigKey];
-
-                migratedEnv[item.binding] = newEnv[item.binding];
-                migratedEnv[item.binding] ??= oldEnv[item.binding];
-                migratedEnv[item.binding] ??= `${item.default}`;
-            }
-
-            const output = Object.entries(migratedEnv)
-                .map((value) => `${value[0]}=${value[1]}`)
+            const output = Object.values(defaultSchema)
+                .toSorted(
+                    (a, b) =>
+                        bindingOrder.indexOf(a.binding) -
+                        bindingOrder.indexOf(b.binding)
+                )
+                .map((item) => {
+                    const value =
+                        currentEnv[item.binding] ??
+                        (oldEnv || {})[item.binding] ??
+                        `${item.default}`;
+                    if (newlineInsertions.includes(item.binding))
+                        return `${item.binding}=${value}\n`;
+                    return `${item.binding}=${value}`;
+                })
                 .join('\n');
 
             await fs.writeFile(configPath, output, 'utf-8');
-            wLogger.warn(`[config] Your config file has been migrated.`);
 
-            const deprecated = Object.keys(oldEnv).filter(
-                (binding) => !Object.hasOwn(migratedEnv, binding)
+            const bindings = Object.values(defaultSchema).map(
+                (item) => item.binding
             );
+            const deprecated = (
+                Object.keys(oldEnv || currentEnv) as ConfigBinding[]
+            ).filter((binding) => !bindings.includes(binding));
             if (deprecated.length > 0) {
                 wLogger.warn(
-                    `[config] Deprecated properties: ${deprecated.join(', ')}.`
+                    `Removed deprecated configuration properties: %${deprecated.join(', ')}%`
                 );
             }
 
-            const newProps = Object.keys(migratedEnv).filter(
-                (binding) => !Object.hasOwn(newEnv, binding)
+            const newProps = bindings.filter(
+                (binding) => !Object.hasOwn(currentEnv, binding)
             );
             if (newProps.length > 0) {
                 wLogger.warn(
-                    `[config] New properties: ${newProps.join(', ')}.`
+                    `Added new configuration properties: %${newProps.join(', ')}%`
                 );
             }
 
-            await fs.unlink(filePath).catch(null);
+            if (oldEnv !== null || deprecated.length > 0 || newProps.length > 0)
+                wLogger.warn(`Configuration file successfully migrated.`);
+
+            if (oldEnv !== null) await fs.unlink(filePath).catch(null);
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
-            wLogger.error(`[config] Failed to migrate config: ${msg}`);
-            wLogger.debug(`[config] Migration error: ${e}`);
+            wLogger.error(`Configuration migration failed:`, msg);
+            wLogger.debug(`Migration error details:`, e);
         }
     }
 
@@ -212,6 +227,7 @@ export class ConfigManager {
             .catch(() => ({}) as Record<ConfigBinding, string>);
 
         this.refreshConfig(env, false);
+        this.validateConfig();
         this.startConfigWatcher();
 
         this.initialized = true;
@@ -256,7 +272,11 @@ export class ConfigManager {
 
         try {
             const defaults = Object.values(defaultSchema)
-                .toSorted((a, b) => a.order - b.order)
+                .toSorted(
+                    (a, b) =>
+                        bindingOrder.indexOf(a.binding) -
+                        bindingOrder.indexOf(b.binding)
+                )
                 .map((value) => {
                     if (newlineInsertions.includes(value.binding))
                         return `${value.binding}=${value.default}\n`;
@@ -265,7 +285,7 @@ export class ConfigManager {
                 .join('\n');
 
             await file.writeFile(defaults, 'utf-8');
-            wLogger.debug(`[config] Config file created at '${filePath}'.`);
+            wLogger.debug(`Default configuration created at %${filePath}%`);
         } catch (e) {
             if (!(e instanceof Error) || !('code' in e)) return;
             let cause: string = 'unknown';
@@ -273,10 +293,32 @@ export class ConfigManager {
             if (e.code === 'EPERM') cause = 'missing write permissions.';
             else if (e.code === 'ENOSPC') cause = 'disk full.';
 
-            wLogger.error(`[config] Failed to write config file: ${cause}`);
-            wLogger.debug(`[config] Failed to write config file: ${e}`);
+            wLogger.error(`Failed to create configuration file:`, cause);
+            wLogger.debug(`Configuration write error details:`, e);
         } finally {
             await file.close();
+        }
+    }
+
+    /**
+     * Validates the in-memory config and clamps out-of-range values back into
+     * their allowed bounds, so invalid values never get persisted or used.
+     */
+    public static validateConfig() {
+        const minPollRate = defaultSchema.pollRate.min!;
+        if (config.pollRate < minPollRate) {
+            wLogger.warn(
+                `Config %POLL_RATE% value %${config.pollRate}% is below the minimum %${minPollRate}%, clamping.`
+            );
+            config.pollRate = minPollRate;
+        }
+
+        const minPrecisePollRate = defaultSchema.preciseDataPollRate.min!;
+        if (config.preciseDataPollRate < minPrecisePollRate) {
+            wLogger.warn(
+                `Config %PRECISE_DATA_POLL_RATE% value %${config.preciseDataPollRate}% is below the minimum %${minPrecisePollRate}%, clamping.`
+            );
+            config.preciseDataPollRate = minPrecisePollRate;
         }
     }
 
@@ -286,9 +328,15 @@ export class ConfigManager {
     public static async updateEnv() {
         const oldHash = this.previousFileHash;
 
+        this.validateConfig();
+
         try {
             const content = Object.entries(defaultSchema)
-                .toSorted((a, b) => a[1].order - b[1].order)
+                .toSorted(
+                    (a, b) =>
+                        bindingOrder.indexOf(a[1].binding) -
+                        bindingOrder.indexOf(b[1].binding)
+                )
                 .map((item) => {
                     if (newlineInsertions.includes(item[1].binding))
                         return `${item[1].binding}=${config[item[0] as ConfigKey]}\n`;
@@ -301,7 +349,7 @@ export class ConfigManager {
             this.previousFileHash = newHash;
 
             await fs.writeFile(configPath, content, 'utf-8');
-            wLogger.debug('[config] Config file saved successfully.');
+            wLogger.debug('Configuration saved successfully.');
 
             dotenv.config({ path: configPath, override: true });
         } catch (e) {
@@ -313,8 +361,8 @@ export class ConfigManager {
             if (e.code === 'EPERM') cause = 'missing write permissions.';
             else if (e.code === 'ENOSPC') cause = 'disk full.';
 
-            wLogger.error(`[config] Failed to update config file: ${cause}`);
-            wLogger.debug(`[config] Failed to update config file: ${e}`);
+            wLogger.error(`Failed to save configuration:`, cause);
+            wLogger.debug(`Configuration save error details:`, e);
         }
     }
 
@@ -348,7 +396,7 @@ export class ConfigManager {
 
             default: {
                 wLogger.warn(
-                    `[config] Value of '${item.binding}' is not of type '${typeof item.default}'. Using default value.`
+                    `Invalid type for config key %${item.binding}%. Expected %${typeof item.default}%, using default value.`
                 );
                 break;
             }
@@ -382,7 +430,7 @@ export class ConfigManager {
      */
     private static async startConfigWatcher(): Promise<void> {
         const watcher = fs.watch(configPath);
-        wLogger.debug('[config] Started config watcher..');
+        wLogger.debug('Started configuration file watcher.');
 
         // initial file hash calculation
         this.previousFileHash = await fs
@@ -410,20 +458,20 @@ export class ConfigManager {
                         this.previousFileHash = currentHash;
 
                         wLogger.debug(
-                            '[config] File changed. Refreshing config...'
+                            'Configuration file changed. Reloading...'
                         );
                         const newEnv: Record<ConfigBinding, string> =
                             dotenv.parse(content);
 
                         this.refreshConfig(newEnv, true);
+                        this.validateConfig();
                     } catch (exc) {
                         const msg =
                             exc instanceof Error ? exc.message : String(exc);
-                        wLogger.error(
-                            `[config] Failed to reload config: ${msg}`
-                        );
+                        wLogger.error(`Failed to reload configuration:`, msg);
                         wLogger.debug(
-                            `[config] Failed to reload config: ${exc}`
+                            `Configuration reload error details:`,
+                            exc
                         );
                     }
 

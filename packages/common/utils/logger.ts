@@ -1,91 +1,214 @@
-import fsp from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
+import util from 'util';
 
+import { LogColor, LogSymbol } from '../enums/logging';
 import { ClientType } from '../enums/tosu';
 import { config } from './config';
 import { context } from './context';
 import { ensureDirectoryExists, getDataPath } from './directories';
+import { progressManager } from './progress';
 
-const colors = {
-    info: '\x1b[1m\x1b[40m\x1b[42m',
-    error: '\x1b[1m\x1b[37m\x1b[41m',
-    debug: '\x1b[1m\x1b[37m\x1b[44m',
-    time: '\x1b[1m\x1b[37m\x1b[48;5;239m',
-    debugError: '\x1b[1m\x1b[37m\x1b[45m',
-    warn: '\x1b[1m\x1b[40m\x1b[43m',
-    reset: '\x1b[0m',
-    grey: '\x1b[90m'
-};
+const HighlightColor = '\x1b[1m\x1b[37m';
+const HighlightRegex = /%(.*?)%/g;
 
-export function colorText(status: string, color: keyof typeof colors) {
-    const colorCode = colors[color] || colors.reset;
-    const timestamp = new Date().toISOString().split('T')[1].replace('Z', '');
+let logStream: fs.WriteStream | null = null;
 
-    const time = `${colors.grey}${timestamp}${colors.reset}`;
-    const version = `${colors.grey}v${context.currentVersion}${colors.reset}`;
-    return `${time} ${version} ${colorCode} ${status.toUpperCase()} ${colors.reset}`;
+export function runningTime() {
+    const time = performance.now();
+
+    const secs = Math.floor(time / 1000);
+    const hours = `${Math.floor(secs / 3600)}`.padStart(2, '0');
+    const minutes = `${Math.floor((secs % 3600) / 60)}`.padStart(2, '0');
+    const seconds = `${Math.floor(secs % 60)}`.padStart(2, '0');
+    const milliseconds = `${Math.floor(time % 1000)}`.padStart(3, '0');
+
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
-export const wLogger = {
-    info: (...args: any) => {
-        const coloredText = colorText('info', 'info');
-        console.log(coloredText, ...args);
+export function colorText(text: string, color: keyof typeof LogColor) {
+    const colorCode = LogColor[color] || LogColor.Reset;
+    return `${colorCode}${text}${LogColor.Reset}`;
+}
 
-        writeLog('info', args);
-    },
-    debug: (...args: any) => {
-        writeLog('debug', args);
+export function cleanupLogs() {
+    const logsPath = path.dirname(context.logFilePath);
+    if (!fs.existsSync(logsPath)) return;
 
-        if (config.debugLog !== true) return;
+    const logs = fs.readdirSync(logsPath);
 
-        const coloredText = colorText('debug', 'debug');
-        console.log(coloredText, ...args);
-    },
-    time: (...args: any) => {
-        writeLog('time', args);
+    const logFiles: {
+        file: string;
+        filePath: string;
+        size: number;
+        mtime: number;
+    }[] = [];
+    let totalSize = 0;
 
-        if (config.debugLog !== true) return;
+    for (const file of logs) {
+        const filePath = path.join(logsPath, file);
+        const stats = fs.statSync(filePath);
+        const size = stats.isFile() ? stats.size : 0;
+        totalSize += size;
 
-        const coloredText = colorText('time', 'time');
-        console.log(coloredText, ...args);
-    },
-    debugError: (...args: any) => {
-        if (config.debugLog !== true) return;
-
-        const coloredText = colorText('debugError', 'debugError');
-        console.log(coloredText, ...args);
-
-        writeLog('debugError', args);
-    },
-    error: (...args: any) => {
-        const coloredText = colorText('error', 'error');
-        console.log(coloredText, ...args);
-
-        writeLog('error', args);
-    },
-    warn: (...args: any) => {
-        const coloredText = colorText('warn', 'warn');
-        console.log(coloredText, ...args);
-
-        writeLog('warn', args);
+        if (file !== 'latest.log') {
+            logFiles.push({
+                file,
+                filePath,
+                size,
+                mtime: stats.mtime.getTime()
+            });
+        }
     }
-};
 
-function writeLog(type: string, ...args: any[]) {
+    const maxSizeBytes = 100 * 1024 * 1024; // 100 MB
+    const safeLimitBytes = 90 * 1024 * 1024; // 90 MB
+
+    if (totalSize < maxSizeBytes) return;
+
+    logFiles.sort((a, b) => a.mtime - b.mtime);
+
+    let deletedCount = 0;
+    let clearedSpace = 0;
+
+    for (const log of logFiles) {
+        if (totalSize <= safeLimitBytes) break;
+
+        try {
+            fs.rmSync(log.filePath);
+            totalSize -= log.size;
+            clearedSpace += log.size;
+            deletedCount++;
+        } catch (e) {
+            wLogger.error(`Failed to delete old log file: %${log.file}%`, e);
+        }
+    }
+
+    if (deletedCount === 0) return;
+
+    wLogger.debug(
+        `Cleaned up %${deletedCount}% old log files. Freed %${(
+            clearedSpace /
+            1024 /
+            1024
+        ).toFixed(2)} MB%.`
+    );
+}
+
+function logFile(type: string, ...args: any[]) {
     if (context.logFilePath === '') {
         const logsPath = path.join(getDataPath(), 'logs');
         ensureDirectoryExists(logsPath);
 
-        context.logFilePath = path.join(logsPath, `${Date.now()}.txt`);
-        wLogger.debug(`logs path: ${logsPath}`);
+        const latestLog = path.join(logsPath, 'latest.log');
+
+        if (fs.existsSync(latestLog)) {
+            const date = fs.statSync(latestLog).mtime;
+
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            const ss = String(date.getSeconds()).padStart(2, '0');
+
+            const baseName = `${yyyy}-${mm}-${dd} ${hh}-${min}-${ss}`;
+            let newPath = path.join(logsPath, `${baseName}.log`);
+            let counter = 1;
+
+            while (fs.existsSync(newPath)) {
+                newPath = path.join(logsPath, `${baseName}-${counter}.log`);
+                counter++;
+            }
+
+            try {
+                fs.renameSync(latestLog, newPath);
+            } catch (e) {
+                console.error(`Failed to rename latest.log:`, e);
+            }
+        }
+
+        context.logFilePath = latestLog;
+        wLogger.debug(`Logs path initialized at: %${logsPath}%`);
     }
 
-    fsp.appendFile(
-        context.logFilePath,
-        `${new Date().toISOString()} ${type} ${args.join(' ')}\n`,
-        'utf8'
-    ).catch((reason) => console.log(`writeLog`, reason));
+    if (!logStream) {
+        logStream = fs.createWriteStream(context.logFilePath, { flags: 'a' });
+        logStream.on('error', (err) => {
+            console.error('Log stream error:', err);
+        });
+    }
+
+    let levelName = type.toLowerCase();
+    if (levelName === 'debugerror') levelName = 'derror';
+    const levelLabel = `[${levelName}]`.padEnd(8, ' ');
+
+    const time = runningTime();
+    const message = args
+        .map((arg) => {
+            if (typeof arg === 'string') {
+                return arg.replaceAll(HighlightRegex, '$1');
+            }
+            if (typeof arg === 'object') {
+                return (
+                    '\n' +
+                    util.inspect(arg, {
+                        depth: 2,
+                        colors: false,
+                        compact: false
+                    })
+                );
+            }
+            return String(arg);
+        })
+        .join(' ');
+
+    logStream.write(`${time} ${levelLabel} ${message}\n`);
 }
+
+function dispatchLog(level: keyof typeof LogColor, ...args: any[]) {
+    logFile(level.toLowerCase(), ...args);
+
+    if (
+        (level === 'Debug' || level === 'Time' || level === 'DebugError') &&
+        config.debugLog === false
+    ) {
+        return;
+    }
+
+    progressManager.clear();
+
+    const formattedArgs = args.map((arg) => {
+        if (typeof arg === 'string') {
+            return arg.replaceAll(HighlightRegex, `${HighlightColor}$1\x1b[0m`);
+        }
+        if (typeof arg === 'object' && arg !== null) {
+            return (
+                '\n' +
+                util.inspect(arg, { depth: 2, colors: true, compact: false })
+            );
+        }
+        return arg;
+    });
+
+    console.log(
+        colorText(context.currentVersion, 'Grey'),
+        ` ${colorText(LogSymbol.Separator, level)} `,
+        `${LogColor.Grey}${runningTime()}${LogColor.Reset} `,
+        formattedArgs.join(' ')
+    );
+
+    progressManager.render();
+}
+
+export const wLogger = {
+    info: (...args: any) => dispatchLog('Info', ...args),
+    debug: (...args: any) => dispatchLog('Debug', ...args),
+    time: (...args: any) => dispatchLog('Time', ...args),
+    debugError: (...args: any) => dispatchLog('DebugError', ...args),
+    error: (...args: any) => dispatchLog('Error', ...args),
+    warn: (...args: any) => dispatchLog('Warn', ...args)
+};
 
 export function measureTime(
     target: any,
@@ -108,20 +231,12 @@ export function measureTime(
         const result = originalMethod.apply(this, args);
         const time = performance.now() - t1;
 
-        if (time >= 1 && client) {
-            const coloredText = colorText('time', 'time');
-            console.log(
-                coloredText,
-                client,
-                (this as any).game.pid,
-                `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
-            );
-        } else if (time >= 1) {
-            const coloredText = colorText('time', 'time');
-            console.log(
-                coloredText,
-                `${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
-            );
+        if (time >= 1) {
+            const msg = client
+                ? `%${client}% ${(this as any).game.pid} ${target.constructor.name}.${propertyKey} executed in ${time.toFixed(2)}ms`
+                : `%${target.constructor.name}.${propertyKey}% executed in ${time.toFixed(2)}ms`;
+
+            wLogger.time(msg);
         }
 
         return result;
@@ -129,3 +244,20 @@ export function measureTime(
 
     return descriptor;
 }
+
+const closeLogStream = () => {
+    if (logStream) {
+        logStream.end();
+        logStream = null;
+    }
+};
+
+process.on('exit', closeLogStream);
+process.on('SIGINT', () => {
+    closeLogStream();
+    process.exit();
+});
+process.on('SIGTERM', () => {
+    closeLogStream();
+    process.exit();
+});

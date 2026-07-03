@@ -22,7 +22,10 @@ export class OsuInstance extends AbstractInstance {
     }
 
     async regularDataLoop() {
-        wLogger.debug(ClientType[this.client], this.pid, 'regularDataLoop');
+        wLogger.debug(
+            `%${ClientType[this.client]}%`,
+            `Starting regular data loop`
+        );
 
         const {
             global,
@@ -109,7 +112,7 @@ export class OsuInstance extends AbstractInstance {
                     );
                     if (metadataUpdate === 'not-ready') continue;
 
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousState = currentState;
                 }
 
@@ -118,7 +121,7 @@ export class OsuInstance extends AbstractInstance {
                     global.gameFolder &&
                     updateGraph
                 ) {
-                    beatmapPP.updateGraph(currentMods.array);
+                    beatmapPP.updateGraph();
                     this.previousMP3Length = menu.mp3Length;
                 }
 
@@ -199,19 +202,11 @@ export class OsuInstance extends AbstractInstance {
                 user.updateState();
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'regularDataLoop',
-                    'error within a loop',
+                    `%${ClientType[this.client]}%`,
+                    `Error in regular data loop:`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'regularDataLoop',
-                    'error within a loop',
-                    exc
-                );
+                wLogger.debug(`Regular loop error details:`, exc);
             } finally {
                 await sleep(config.pollRate);
             }
@@ -245,19 +240,11 @@ export class OsuInstance extends AbstractInstance {
                 await sleep(config.preciseDataPollRate);
             } catch (exc) {
                 wLogger.error(
-                    ClientType[this.client],
-                    this.pid,
-                    'preciseDataLoop',
-                    'error within a loop',
+                    `%${ClientType[this.client]}%`,
+                    `Error in precise data loop:`,
                     (exc as Error).message
                 );
-                wLogger.debug(
-                    ClientType[this.client],
-                    this.pid,
-                    'preciseDataLoop',
-                    'error within a loop',
-                    exc
-                );
+                wLogger.debug(`Precise loop error details:`, exc);
             }
         }
     }

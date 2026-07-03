@@ -335,8 +335,14 @@ function rebuildJSON({
                 .replace('{GALLERY}', gallery)
                 .replace('{FOOTER}', footer);
         } catch (error) {
-            wLogger.error('rebuildJSON', item.name, (error as any).message);
-            wLogger.debug('rebuildJSON', item.name, error);
+            wLogger.error(
+                `Failed to rebuild JSON for counter %${item.name}%:`,
+                (error as any).message
+            );
+            wLogger.debug(
+                `JSON rebuild error details for %${item.name}%:`,
+                error
+            );
         }
     }
 
@@ -406,8 +412,11 @@ export function getLocalCounters(): ICounter[] {
         const array = countersListTXT.map((r) => parseTXT(r));
         return array.concat(arrayOfLocal).filter((r) => r.name !== '');
     } catch (error) {
-        wLogger.error('getLocalCounters', (error as any).message);
-        wLogger.debug('getLocalCounters', error);
+        wLogger.error(
+            'Failed to retrieve local counters:',
+            (error as Error).message
+        );
+        wLogger.debug('Local counters retrieval error details:', error);
 
         return [];
     }
@@ -438,7 +447,10 @@ export function buildLocalCounters(
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildLocalCounters', 'homepage read', err);
+                wLogger.debug(
+                    'Failed to read homepage.html for local counters:',
+                    err
+                );
                 res.writeHead(404, {
                     'Content-Type': 'text/html'
                 });
@@ -456,7 +468,7 @@ export function buildLocalCounters(
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -477,7 +489,11 @@ export async function buildExternalCounters(
     let totalAvailable = 0;
 
     try {
-        const request: any = await fetch('https://tosu.app/api.json');
+        const request: any = await fetch('https://tosu.app/api.json', {
+            headers: {
+                'User-Agent': `tosu/${context.currentVersion} (https://tosu.app; i@kotrik.ru)`
+            }
+        });
         const json: ICounter[] = await request.json();
 
         const exists = getLocalCounters();
@@ -517,8 +533,11 @@ export async function buildExternalCounters(
         totalLocal = exists.length;
         totalAvailable = json.length;
     } catch (error) {
-        wLogger.error('buildExternalCounters', (error as any).message);
-        wLogger.debug('buildExternalCounters', error);
+        wLogger.error(
+            'Failed to build external counters:',
+            (error as Error).message
+        );
+        wLogger.debug('External counters build error details:', error);
 
         if (query != null) {
             res.writeHead(200, {
@@ -535,7 +554,10 @@ export async function buildExternalCounters(
         'utf8',
         (err, content) => {
             if (err) {
-                wLogger.debug('buildExternalCounters', 'homepage read', err);
+                wLogger.debug(
+                    'Failed to read homepage.html for external counters:',
+                    err
+                );
                 res.writeHead(404, { 'Content-Type': 'text/html' });
 
                 res.end('<html>page not found</html>');
@@ -551,7 +573,7 @@ export async function buildExternalCounters(
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -625,7 +647,21 @@ export function buildSettings(res: http.ServerResponse) {
                             )
                     ),
                 settingsItemHTMLv2
-
+                    .replace('{name}', 'Mania Scroll Speed')
+                    .replace(
+                        '{description}',
+                        'Allow reading scrollSpeed from game memory.'
+                    )
+                    .replace(
+                        '{input-1}',
+                        settingsSwitchHTML
+                            .replace('{id}', 'READ_MANIA_SCROLL_SPEED')
+                            .replace(
+                                '{checked}',
+                                config.readManiaScrollSpeed ? 'checked' : ''
+                            )
+                    ),
+                settingsItemHTMLv2
                     .replace('{name}', 'Key Overlay Data')
                     .replace(
                         '{description}',
@@ -869,7 +905,7 @@ export function buildSettings(res: http.ServerResponse) {
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -913,7 +949,7 @@ export function buildInstructionLocal(res: http.ServerResponse) {
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
@@ -946,7 +982,7 @@ export function buildEmptyPage(res: http.ServerResponse) {
                 html = html
                     .replace('{OLD}', context.currentVersion)
                     .replace('{NEW}', context.updateVersion)
-                    .replace('update-available hidden', 'update-available');
+                    .replace('hidden update-available', 'update-available');
             }
 
             res.writeHead(200, {
