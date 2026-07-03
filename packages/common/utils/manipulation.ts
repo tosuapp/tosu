@@ -23,12 +23,16 @@ export async function fileMD5(filepath: string) {
     return crypto.createHash('md5').update(content).digest('hex');
 }
 
-export function isRealNumber(value: any) {
+export function isRealNumber(value: any): value is number {
     if (typeof value === 'number') return value - value === 0;
     if (typeof value === 'string' && value.trim() !== '')
         return Number.isFinite ? Number.isFinite(+value) : isFinite(+value);
 
     return false;
+}
+
+export function isRealBoolean(value: any): value is boolean {
+    return Object.prototype.toString.call(value) === '[object Boolean]';
 }
 
 export function isAllowedValue(

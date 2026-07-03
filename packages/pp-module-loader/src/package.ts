@@ -3,7 +3,7 @@ import * as semver from 'semver';
 import { dependencies } from '../package.json';
 
 const CALCULATOR_VERSION = new semver.SemVer(
-    dependencies['@tosuapp/lazer-calculator']
+    dependencies['@tosuapp/lazer-calculator-prebuilt']
 );
 
 const PLATFORM_KEY = `${process.platform}-${process.arch}`;

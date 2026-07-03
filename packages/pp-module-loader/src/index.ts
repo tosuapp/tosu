@@ -1,5 +1,5 @@
 import { wLogger } from '@tosu/common';
-import * as internalCalculator from '@tosuapp/lazer-calculator';
+import * as internalCalculator from '@tosuapp/lazer-calculator-prebuilt';
 import EventEmitter from 'node:events';
 import { resolve } from 'node:path';
 
@@ -7,7 +7,8 @@ import { downloadCalculator } from './downloader';
 import { isCompatibleVersion } from './package';
 import { onlinePpRegistry } from './registry';
 
-export type LazerCalculator = typeof import('@tosuapp/lazer-calculator');
+export type LazerCalculator =
+    typeof import('@tosuapp/lazer-calculator-prebuilt');
 
 export type PpModule =
     | { type: 'internal' }

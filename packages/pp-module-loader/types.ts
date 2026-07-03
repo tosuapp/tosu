@@ -1,1 +1,1 @@
-export type * from '@tosuapp/lazer-calculator';
+export type * from '@tosuapp/lazer-calculator-prebuilt';
