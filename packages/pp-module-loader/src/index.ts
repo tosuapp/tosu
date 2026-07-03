@@ -28,12 +28,12 @@ const ppModuleManager = {
     async load(module: PpModule): Promise<void> {
         try {
             currentCalculator = await resolveCalculator(module);
-            wLogger.info('[calculator]', 'Successfully loaded calculator.');
+            wLogger.info('Successfully loaded external pp calculator.');
         } catch (err) {
             wLogger.error(
-                '[calculator] Failed to load external calculator. Falling back to internal calculator.'
+                'Failed to load external pp calculator. Falling back to internal pp calculator.'
             );
-            wLogger.debug('Failed to load calculator:', err);
+            wLogger.debug('Failed to load pp calculator:', err);
             currentCalculator = internalCalculator;
         }
 
@@ -44,20 +44,19 @@ const ppModuleManager = {
 async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
     switch (module.type) {
         case 'internal': {
-            wLogger.info('[calculator]', 'Using internal calculator');
+            wLogger.info('Using internal pp calculator');
             return internalCalculator;
         }
 
         case 'dist-tag': {
             wLogger.info(
-                '[calculator]',
-                `Using dist-tag "${module.tag}" calculator`
+                `Loading external pp calculator. channel: ${module.tag}`
             );
 
             const pkg = await onlinePpRegistry.fetch(module.tag);
             if (!isCompatibleVersion(pkg.version)) {
-                const msg = `tag "${module.tag}" is not compatible`;
-                wLogger.error('[calculator]', msg);
+                const msg = `Incompatible pp calculator. channel: ${module.tag}`;
+                wLogger.error(msg);
 
                 throw new Error(msg);
             }
@@ -69,13 +68,12 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
 
         case 'release': {
             wLogger.info(
-                '[calculator]',
-                `Using release "${module.version}" calculator`
+                `Loading external pp calculator. version: ${module.version}`
             );
 
             if (!isCompatibleVersion(module.version)) {
-                const msg = `release "${module.version}" is not compatible`;
-                wLogger.error('[calculator]', msg);
+                const msg = `Incompatible pp calculator. version: ${module.version}`;
+                wLogger.error(msg);
 
                 throw new Error(msg);
             }
@@ -89,10 +87,7 @@ async function resolveCalculator(module: PpModule): Promise<LazerCalculator> {
         }
 
         case 'local': {
-            wLogger.info(
-                '[calculator]',
-                `Using local calculator from "${module.path}"`
-            );
+            wLogger.info(`Loading local pp calculator. path: ${module.path}`);
 
             return loadCalculator(module.path);
         }
