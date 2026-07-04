@@ -101,7 +101,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         gameplay,
         resultScreen,
         beatmapPP,
-        user
+        user,
+        rankedPlay
     } = osuInstance.getServices([
         'settings',
         'bassDensity',
@@ -110,7 +111,8 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         'gameplay',
         'resultScreen',
         'beatmapPP',
-        'user'
+        'user',
+        'rankedPlay'
     ]);
 
     const currentMods =
@@ -142,6 +144,7 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
             playTime: global.gameTime,
             playCount: 0 // need counting
         },
+        rankedPlay: rankedPlay.info,
         settings: {
             interfaceVisible: global.showInterface,
             replayUIVisible: global.isReplayUiHidden === false,
