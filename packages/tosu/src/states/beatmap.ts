@@ -663,6 +663,7 @@ export class BeatmapPP extends AbstractState {
                         'aimNoSliders',
                         this.diffStrains.aimWithoutSliders
                     );
+                    updateWithOffset('reading', this.diffStrains.reading);
                     updateWithOffset('flashlight', this.diffStrains.flashlight);
                     updateWithOffset('speed', this.diffStrains.speed);
                     break;
@@ -670,6 +671,7 @@ export class BeatmapPP extends AbstractState {
                     updateWithOffset('color', this.diffStrains.color);
                     updateWithOffset('rhythm', this.diffStrains.rhythm);
                     updateWithOffset('stamina', this.diffStrains.stamina);
+                    updateWithOffset('reading', this.diffStrains.reading);
                     break;
                 case 2:
                     updateWithOffset('movement', this.diffStrains.movement);
