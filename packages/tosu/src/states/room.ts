@@ -10,11 +10,7 @@ export class Room extends AbstractState {
     updateState() {
         try {
             const room = this.game.memory.room();
-            if (room === 'not-ready') {
-                this.info = undefined;
-            } else {
-                this.info = room;
-            }
+            this.info = room !== 'not-ready' ? room : undefined;
         } catch (exc) {
             this.info = undefined;
 
