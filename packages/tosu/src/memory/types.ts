@@ -232,19 +232,17 @@ export type IRankedPlay =
       }
     | string;
 
+export type IRoomUser = {
+    id: number;
+    username: string;
+    countryCode: CountryCodes;
+    avatarUrl: string | undefined;
+};
+
 export type IRoom =
     | {
           roomID: number;
-          users: {
-              id: number;
-              info:
-                  | {
-                        username: string;
-                        countryCode: CountryCodes;
-                        avatarUrl: string | undefined;
-                    }
-                  | undefined;
-          }[];
+          users: IRoomUser[];
       }
     | string;
 

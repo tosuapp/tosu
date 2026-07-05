@@ -37,6 +37,7 @@ import type {
     IRankedPlay,
     IResultScreen,
     IRoom,
+    IRoomUser,
     IScore,
     ISettings,
     ITourney,
@@ -3809,16 +3810,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             multiplayerUsers + 0x10
         );
 
-        const users: {
-            id: number;
-            info:
-                | {
-                      username: string;
-                      countryCode: CountryCodes;
-                      avatarUrl: string | undefined;
-                  }
-                | undefined;
-        }[] = [];
+        const users: IRoomUser[] = [];
 
         for (let i = 0; i < multiplayerUsersCount; i++) {
             const current = this.process.readIntPtr(
@@ -3839,21 +3831,15 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     ]['<User>k__BackingField']
             );
 
+            // during my tests, this field was never null. but just in case, lets skip a user if its null
             if (apiUser) {
                 const user = this.readUser(apiUser);
 
                 users.push({
                     id: userId,
-                    info: {
-                        username: user.name,
-                        countryCode: user.countryCode,
-                        avatarUrl: user.avatarUrl
-                    }
-                });
-            } else {
-                users.push({
-                    id: userId,
-                    info: undefined
+                    username: user.name,
+                    countryCode: user.countryCode,
+                    avatarUrl: user.avatarUrl
                 });
             }
         }
