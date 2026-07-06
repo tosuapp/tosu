@@ -1,0 +1,33 @@
+{
+    "ts-node": {
+      "files": true
+    },
+    "compilerOptions": {
+      "rootDir": "../..",
+      "composite": true,
+      "lib": ["ES2023"],
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "allowJs": true,
+      "esModuleInterop": true,
+      "outDir": "dist",
+      "sourceMap": false,
+      "strict": true,
+      "noImplicitAny": true,
+      "resolveJsonModule": true,
+      "target": "ES2020",
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "strictPropertyInitialization": false,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["src/*"],
+        "tosu/*": ["src/*"], // ncc hack for tosu/server
+      },
+      "typeRoots": [
+        "./src/@types"
+      ]
+    },
+    "exclude": ["node_modules"],
+    "include": ["src"]
+  }

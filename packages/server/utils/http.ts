@@ -1,11 +1,12 @@
 import { config, platformResolver, wLogger } from '@tosu/common';
 import { exec } from 'child_process';
 import http, { IncomingMessage, ServerResponse } from 'http';
+import type { InstanceManager } from 'tosu/instances/manager';
 
 import { sendJson } from './index';
 
 export interface ExtendedIncomingMessage extends IncomingMessage {
-    instanceManager: any;
+    instanceManager: InstanceManager;
     body: string;
     query: { [key: string]: string };
     params: { [key: string]: string };

@@ -8,7 +8,6 @@
     "allowJs": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "rootDir": "./",
     "sourceMap": false,
     "declaration": false,
     "strict": true,
@@ -16,6 +15,11 @@
     "target": "ES2020",
     "strictPropertyInitialization": false,
     "baseUrl": ".",
+    "paths": {
+      "tosu/*": [
+        "../tosu/src/*"
+      ]
+    }
   },
   "exclude": [
     "node_modules",
@@ -24,4 +28,5 @@
   "include": [
     "**/*"
   ],
+  "references": [{ "path": "../tosu/tsconfig.base.json" }]
 }

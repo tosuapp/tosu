@@ -1,10 +1,11 @@
 import { JsonSafeParse, debounce, wLogger } from '@tosu/common';
 
 import { getLocalCounters, saveSettings } from './counters';
+import type { bodyPayload } from './counters.types';
 import { parseCounterSettings } from './parseSettings';
 import { ModifiedWebsocket, Websocket } from './socket';
 
-const saveDelay = debounce((overlayFrom: string, json: any) => {
+const saveDelay = debounce((overlayFrom: string, json: bodyPayload[]) => {
     const html = saveSettings(overlayFrom, json);
     if (html instanceof Error) {
         wLogger.error(
@@ -39,7 +40,7 @@ export function handleSocketCommands(
     const legacyPayload = data.substring(firstIndex + 1);
     const payload = data.substring(SecondIndex + 1);
 
-    let message: any;
+    let message: unknown;
 
     const overlayFrom = decodeURI(socket.query?.l || '');
     switch (command) {

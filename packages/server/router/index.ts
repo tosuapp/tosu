@@ -38,7 +38,7 @@ const pkgAssetsPath =
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance(
+        const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
@@ -360,9 +360,9 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route('/api/calculate/pp', 'GET', (req, res) => {
-        const query: any = req.query;
+        const query = req.query;
 
-        const osuInstance: any = req.instanceManager.getInstance(
+        const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
@@ -395,7 +395,9 @@ export default function buildBaseApi(server: Server) {
             beatmap = new rosu.Beatmap(beatmapContent);
         }
 
-        if (query.mode !== undefined) beatmap.convert(query.mode);
+        if (query.mode !== undefined) {
+            beatmap.convert(Number.parseInt(query.mode));
+        }
 
         const params: rosu.PerformanceArgs = {};
 

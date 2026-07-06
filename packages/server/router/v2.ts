@@ -7,7 +7,7 @@ import { directoryWalker } from '../utils/directories';
 
 export default function buildV2Api(app: HttpServer) {
     app.route('/json/v2', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance(
+        const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
@@ -19,7 +19,7 @@ export default function buildV2Api(app: HttpServer) {
     });
 
     app.route('/json/v2/precise', 'GET', (req, res) => {
-        const osuInstance: any = req.instanceManager.getInstance(
+        const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
@@ -38,14 +38,14 @@ export default function buildV2Api(app: HttpServer) {
 
     app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
-        const osuInstance: any = req.instanceManager.getInstance(
+        const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
             throw new Error('osu is not ready/running');
         }
         const global = osuInstance.get('global');
-        if (global.songsFolder === '') {
+        if (!global || global.songsFolder === '') {
             throw new Error('osu is not ready/running');
         }
 
@@ -61,7 +61,7 @@ export default function buildV2Api(app: HttpServer) {
     app.route(/^\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
 
-        const osuInstance: any = req.instanceManager.getInstance(
+        const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
@@ -70,6 +70,7 @@ export default function buildV2Api(app: HttpServer) {
 
         const global = osuInstance.get('global');
         if (
+            !global ||
             (global.gameFolder === '' && global.skinFolder === '') ||
             (global.gameFolder == null && global.skinFolder == null)
         ) {
