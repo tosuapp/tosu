@@ -57,5 +57,5 @@ async function windowsPostBuild(output: string) {
 }
 
 if (process.platform === 'win32') {
-    windowsPostBuild(path.join(import.meta.dirname, '../', './dist/tosu.exe'));
+    await windowsPostBuild(path.join(import.meta.dirname, '../', './dist/tosu.exe'));
 }
