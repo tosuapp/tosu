@@ -249,6 +249,21 @@
     .status-warn {
       color: #dfdf53
     }
+
+    #truncation-banner {
+      display: none;
+      align-items: center;
+      gap: 0.6em;
+      padding: 0.6em 1em;
+      border-radius: 0.4em;
+      font-weight: 700;
+      color: var(--background-1);
+      background-color: #dfdf53;
+
+      span {
+        font-size: 1.2em;
+      }
+    }
   </style>
 </head>
 
@@ -261,6 +276,11 @@
 
     <!-- <button class="button export-button" onclick="exportJson()">Export to JSON</button> -->
   </header>
+
+  <div id="truncation-banner">
+    <span>&#9888;</span>
+    <p>These logs were truncated. The point at which they were truncated can be found within the logs below.</p>
+  </div>
 
   <main>
     <div class="group os-cfg">

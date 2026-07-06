@@ -434,15 +434,13 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {
+        let report;
+        let iterator;
+        let first;
         try {
-            const report = await generateReport(req.instanceManager);
-            const html = await generateReportHTML(report);
-
-            res.writeHead(200, {
-                'Content-Type': 'text/html; charset=utf-8',
-                'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
-            });
-            res.end(html, 'utf-8');
+            report = await generateReport(req.instanceManager);
+            iterator = generateReportHTML(report)[Symbol.asyncIterator]();
+            first = await iterator.next();
         } catch (err) {
             res.writeHead(500, {
                 'Content-Type': 'text/plain; charset=utf-8'
@@ -450,6 +448,22 @@ export default function buildBaseApi(server: Server) {
             res.end(
                 `Server Error: ${(err as Error).message || 'Unknown error'}`
             );
+            return;
+        }
+
+        res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
+        });
+
+        try {
+            for (; !first.done; first = await iterator.next()) {
+                res.write(first.value, 'utf-8');
+            }
+            res.end();
+        } catch (err) {
+            wLogger.error('Failed to stream report', (err as Error).message);
+            res.end();
         }
     });
 
