@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "noEmit": false,
     "declaration": true,
+    "declarationMap": true,
     "allowSyntheticDefaultImports": true,
     "declarationDir": "dist",
     "outDir": "dist",
