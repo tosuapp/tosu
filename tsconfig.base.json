@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "ES2023"
+    ],
+    "target": "es2023",
+    "ignoreDeprecations": "6.0",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "sourceMap": false,
+    "declaration": false,
+    "noEmit": true,
+    "strict": true,
+  }
+}
