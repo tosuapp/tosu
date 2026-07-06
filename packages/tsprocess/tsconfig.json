@@ -1,14 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "./src",
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "allowSyntheticDefaultImports": true,
-    "declarationDir": "dist",
-    "outDir": "dist",
+    "declarationDir": "./dist",
+    "outDir": "./dist",
   },
   "include": [
-    "src"
+    "./src"
   ]
 }
