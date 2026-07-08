@@ -459,11 +459,11 @@ export default function buildBaseApi(server: Server) {
 
         try {
             await pipeline(Readable.from(generateReportHTML(report)), res);
-            res.end();
         } catch (err) {
-            // Destroy the entire response because header is already sent.
+            // Headers are already sent; log and abort the response.
+            wLogger.warn('Failed to stream report:', (err as Error).message);
+            wLogger.debug('Report streaming error details:', err);
             res.destroy();
-            throw err;
         }
     });
 
