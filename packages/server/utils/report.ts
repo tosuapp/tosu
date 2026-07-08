@@ -87,7 +87,7 @@ export async function generateReport(instanceManager: any): Promise<Report> {
             logFiles.map(async (fileName) => {
                 const filePath = path.join(logsPath, fileName);
                 return {
-                    path: filePath,
+                    filePath,
                     mtime: (await stat(filePath)).mtime
                 };
             })
@@ -97,9 +97,9 @@ export async function generateReport(instanceManager: any): Promise<Report> {
         .slice(0, 10);
 
     const logs: [string, LogLine[]][] = await Promise.all(
-        logEntries.map(async ({ path, mtime }) => {
+        logEntries.map(async ({ filePath, mtime }) => {
             const rl = readline.createInterface({
-                input: createReadStream(path),
+                input: createReadStream(filePath),
                 crlfDelay: Infinity
             });
 
