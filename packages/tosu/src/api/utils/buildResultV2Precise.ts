@@ -1,5 +1,38 @@
 import { ApiAnswerPrecise as ApiAnswer, PreciseTourney } from '@/api/types/v2';
 import { InstanceManager } from '@/instances/manager';
+import { Gameplay } from '@/states/gameplay';
+
+const buildKeys = (gameplay: Gameplay) => ({
+    k1: {
+        isPressed: gameplay.keyOverlay.at(0)?.isPressed ?? false,
+        count: gameplay.keyOverlay.at(0)?.count ?? 0
+    },
+    k2: {
+        isPressed: gameplay.keyOverlay.at(1)?.isPressed ?? false,
+        count: gameplay.keyOverlay.at(1)?.count ?? 0
+    },
+    m1: {
+        isPressed: gameplay.keyOverlay.at(2)?.isPressed ?? false,
+        count: gameplay.keyOverlay.at(2)?.count ?? 0
+    },
+    m2: {
+        isPressed: gameplay.keyOverlay.at(3)?.isPressed ?? false,
+        count: gameplay.keyOverlay.at(3)?.count ?? 0
+    }
+});
+
+const buildReplayFrame = (
+    gameplay: Gameplay,
+    keys: ReturnType<typeof buildKeys>
+) => {
+    if (gameplay.replayFrame === null) {
+        return null;
+    }
+
+    return gameplay.replayFrame;
+};
+
+const buildReplayFrames = (gameplay: Gameplay) => gameplay.replayFrames;
 
 const buildTourneyData = (
     instanceManager: InstanceManager
@@ -19,31 +52,11 @@ const buildTourneyData = (
         .sort((a, b) => a.ipcId - b.ipcId)
         .map((instance): PreciseTourney => {
             const { gameplay } = instance.getServices(['gameplay']);
+            const keys = buildKeys(gameplay);
 
             return {
                 ipcId: instance.ipcId,
-                keys: {
-                    k1: {
-                        isPressed:
-                            gameplay.keyOverlay.at(0)?.isPressed ?? false,
-                        count: gameplay.keyOverlay.at(0)?.count ?? 0
-                    },
-                    k2: {
-                        isPressed:
-                            gameplay.keyOverlay.at(1)?.isPressed ?? false,
-                        count: gameplay.keyOverlay.at(1)?.count ?? 0
-                    },
-                    m1: {
-                        isPressed:
-                            gameplay.keyOverlay.at(2)?.isPressed ?? false,
-                        count: gameplay.keyOverlay.at(2)?.count ?? 0
-                    },
-                    m2: {
-                        isPressed:
-                            gameplay.keyOverlay.at(3)?.isPressed ?? false,
-                        count: gameplay.keyOverlay.at(3)?.count ?? 0
-                    }
-                },
+                keys,
                 hitErrors: gameplay.hitErrors
             };
         });
@@ -60,27 +73,13 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     }
 
     const { gameplay } = osuInstance.getServices(['gameplay']);
+    const keys = buildKeys(gameplay);
 
     return {
-        keys: {
-            k1: {
-                isPressed: gameplay.keyOverlay.at(0)?.isPressed ?? false,
-                count: gameplay.keyOverlay.at(0)?.count ?? 0
-            },
-            k2: {
-                isPressed: gameplay.keyOverlay.at(1)?.isPressed ?? false,
-                count: gameplay.keyOverlay.at(1)?.count ?? 0
-            },
-            m1: {
-                isPressed: gameplay.keyOverlay.at(2)?.isPressed ?? false,
-                count: gameplay.keyOverlay.at(2)?.count ?? 0
-            },
-            m2: {
-                isPressed: gameplay.keyOverlay.at(3)?.isPressed ?? false,
-                count: gameplay.keyOverlay.at(3)?.count ?? 0
-            }
-        },
+        keys,
         hitErrors: gameplay.hitErrors,
+        replayFrame: buildReplayFrame(gameplay, keys),
+        replayFrames: buildReplayFrames(gameplay),
         tourney: buildTourneyData(instanceManager)
     };
 };

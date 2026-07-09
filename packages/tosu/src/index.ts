@@ -19,8 +19,9 @@ import { InstanceManager } from '@/instances/manager';
 const currentVersion = require('./_version.js');
 
 (async () => {
+    process.title = 'tosu-kumori';
     context.currentVersion = currentVersion;
-    wLogger.info(`Starting %tosu%`);
+    wLogger.info(`Starting %tosu-kumori%`);
 
     Process.disablePowerThrottling();
 

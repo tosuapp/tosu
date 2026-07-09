@@ -23,7 +23,7 @@ const defaultSchema: ConfigSchema = {
     },
     openDashboardOnStartup: {
         binding: 'OPEN_DASHBOARD_ON_STARTUP',
-        default: true
+        default: false
     },
     debugLog: {
         binding: 'DEBUG_LOG',
@@ -61,7 +61,7 @@ const defaultSchema: ConfigSchema = {
     },
     serverPort: {
         binding: 'SERVER_PORT',
-        default: 24050
+        default: 24051
     },
     staticFolderPath: {
         binding: 'STATIC_FOLDER_PATH',

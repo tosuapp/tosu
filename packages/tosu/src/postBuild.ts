@@ -3,6 +3,16 @@ import path from 'path';
 import { load } from 'resedit/cjs';
 import semverParse from 'semver/functions/parse';
 
+const IMAGE_SUBSYSTEM_WINDOWS_GUI = 2;
+
+function setWindowsSubsystem(output: Buffer, subsystem: number) {
+    const peHeaderOffset = output.readUInt32LE(0x3c);
+    const optionalHeaderOffset = peHeaderOffset + 24;
+    const subsystemOffset = optionalHeaderOffset + 0x44;
+
+    output.writeUInt16LE(subsystem, subsystemOffset);
+}
+
 async function windowsPostBuild(output: string) {
     const packageVersion = require(path.join(__dirname, '_version.js'));
 
@@ -32,9 +42,12 @@ async function windowsPostBuild(output: string) {
     vi.setStringValues(
         { lang: 1033, codepage: 1200 },
         {
-            ProductName: 'tosu',
-            FileDescription: 'osu! memory reader, built in typescript',
-            CompanyName: 'KotRik',
+            ProductName: 'tosu-kumori',
+            FileDescription:
+                'Kumori patched osu! memory reader, built in TypeScript',
+            CompanyName: 'Kumori / KotRik',
+            InternalName: 'tosu-kumori',
+            OriginalFilename: 'tosu-kumori.exe',
             LegalCopyright: '© KotRik. All rights reserved.'
         }
     );
@@ -54,9 +67,12 @@ async function windowsPostBuild(output: string) {
     );
     vi.outputToResourceEntries(res.entries);
     res.outputResource(exe);
-    fs.writeFileSync(output, Buffer.from(exe.generate()));
+
+    const generated = Buffer.from(exe.generate());
+    setWindowsSubsystem(generated, IMAGE_SUBSYSTEM_WINDOWS_GUI);
+    fs.writeFileSync(output, generated);
 }
 
 if (process.platform === 'win32') {
-    windowsPostBuild(path.join(__dirname, '../', './dist/tosu.exe'));
+    windowsPostBuild(path.join(__dirname, '../', './dist/tosu-kumori.exe'));
 }

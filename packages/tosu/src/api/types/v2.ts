@@ -401,6 +401,8 @@ export interface Combo2 {
 export interface TosuPreciseAnswer {
     keys: KeyOverlay;
     hitErrors: number[];
+    replayFrame: ReplayFrame | null;
+    replayFrames: ReplayFrame[];
     tourney: PreciseTourney[];
 }
 
@@ -420,6 +422,19 @@ interface KeyOverlay {
 interface KeyOverlayButton {
     isPressed: boolean;
     count: number;
+}
+
+interface ReplayFrame {
+    mapTimeMs: number;
+    position: {
+        x: number;
+        y: number;
+    };
+    leftPressed: boolean;
+    rightPressed: boolean;
+    focused: boolean;
+    paused: boolean;
+    sequence?: number;
 }
 
 export interface Performance {

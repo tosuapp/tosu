@@ -35,6 +35,8 @@ import type {
     IMatchmakingStats,
     IMenu,
     IRankedPlay,
+    IReplayFrame,
+    IReplayFrames,
     IResultScreen,
     IScore,
     ISettings,
@@ -437,7 +439,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private scanPatterns: ScanPatterns = {
         scalingContainerTargetDrawSize: {
             pattern:
-                '00 00 80 44 00 00 40 44 00 00 00 00 ?? ?? ?? ?? 00 00 00 00',
+                '00 00 80 44 00 00 40 44 00 00 00 00 00 ?? ?? ?? 00 00 00 00',
             offset: 0,
             nonZeroMask: true
         }
@@ -2366,6 +2368,333 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         }
 
         return this.hitEvents(last);
+    }
+
+    replayFrame(): IReplayFrame {
+        if (this.isPlayerLoading) {
+            return 'player loading';
+        }
+
+        if (this.selectedGamemode !== 0) {
+            return null;
+        }
+
+        const player = this.player();
+        if (!player) {
+            return null;
+        }
+
+        const score = this.currentScore(player);
+        if (!score) {
+            return 'score unavailable';
+        }
+
+        try {
+            return this.latestOsuReplayFrame(score);
+        } catch (exc) {
+            return exc instanceof Error ? exc : new Error(String(exc));
+        }
+    }
+
+    replayFrames(lastSequence = 0): IReplayFrames {
+        if (this.isPlayerLoading) {
+            return 'player loading';
+        }
+
+        if (this.selectedGamemode !== 0) {
+            return null;
+        }
+
+        const player = this.player();
+        if (!player) {
+            return null;
+        }
+
+        const score = this.currentScore(player);
+        if (!score) {
+            return 'score unavailable';
+        }
+
+        try {
+            return this.osuReplayFramesAfter(score, lastSequence);
+        } catch (exc) {
+            return exc instanceof Error ? exc : new Error(String(exc));
+        }
+    }
+
+    private latestOsuReplayFrame(score: number): IReplayFrame {
+        const scoreReplayOffset = 0x10;
+        const replayFramesOffset = 0x8;
+
+        const replay = this.process.readIntPtr(score + scoreReplayOffset);
+        if (!replay) {
+            return 'replay unavailable';
+        }
+
+        const framesList = this.process.readIntPtr(replay + replayFramesOffset);
+        if (!this.isReadablePointer(framesList)) {
+            return 'replay frames unavailable';
+        }
+
+        const { size, items } = this.listItemsInfo(framesList);
+        if (!items || size <= 0) {
+            return 'replay frames empty';
+        }
+
+        if (size > 1_000_000) {
+            return `invalid replay frame count: ${size}`;
+        }
+
+        const timeOffset = this.findOsuReplayFrameTimeOffset(items, size);
+        if (timeOffset === null) {
+            return 'replay frame time offset unavailable';
+        }
+
+        const frame = this.readOsuReplayFrameAt(items, size - 1, timeOffset);
+        if (frame === null) {
+            return 'latest replay frame unavailable';
+        }
+
+        return frame;
+    }
+
+    private osuReplayFramesAfter(
+        score: number,
+        lastSequence: number
+    ): IReplayFrames {
+        const scoreReplayOffset = 0x10;
+        const replayFramesOffset = 0x8;
+
+        const replay = this.process.readIntPtr(score + scoreReplayOffset);
+        if (!replay) {
+            return 'replay unavailable';
+        }
+
+        const framesList = this.process.readIntPtr(replay + replayFramesOffset);
+        if (!this.isReadablePointer(framesList)) {
+            return 'replay frames unavailable';
+        }
+
+        const { size, items } = this.listItemsInfo(framesList);
+        if (!items || size <= 0) {
+            return 'replay frames empty';
+        }
+
+        if (size > 1_000_000) {
+            return `invalid replay frame count: ${size}`;
+        }
+
+        const startIndex = Math.max(
+            0,
+            Math.min(size, Math.floor(lastSequence))
+        );
+        const maxFramesPerTick = 512;
+        const limitedStartIndex = Math.max(startIndex, size - maxFramesPerTick);
+        const timeOffset = this.findOsuReplayFrameTimeOffset(items, size);
+        if (timeOffset === null) {
+            return 'replay frame time offset unavailable';
+        }
+
+        const frames = [];
+
+        for (let index = limitedStartIndex; index < size; index++) {
+            const frame = this.readOsuReplayFrameAt(items, index, timeOffset);
+            if (frame !== null) {
+                frames.push(frame);
+            }
+        }
+
+        return frames;
+    }
+
+    private readOsuReplayFrameAt(
+        items: number,
+        index: number,
+        replayFrameTimeOffset: number
+    ) {
+        const osuReplayFramePositionOffset = 0x20;
+        const osuReplayFrameActionsOffset = 0x18;
+
+        const frame = this.readItem(items, index);
+        if (!frame) {
+            return null;
+        }
+
+        const mapTimeMs = this.process.readDouble(
+            frame + replayFrameTimeOffset
+        );
+        const x = this.process.readFloat(frame + osuReplayFramePositionOffset);
+        const y = this.process.readFloat(
+            frame + osuReplayFramePositionOffset + 0x4
+        );
+
+        if (!this.isSaneReplayFrame(mapTimeMs, x, y)) {
+            return null;
+        }
+
+        const { leftPressed, rightPressed } =
+            this.readOsuReplayFrameActionsFromFrame(
+                frame,
+                osuReplayFrameActionsOffset
+            );
+
+        return {
+            mapTimeMs,
+            position: { x, y },
+            leftPressed,
+            rightPressed,
+            focused: true,
+            paused: this.status !== GameState.play,
+            sequence: index + 1
+        };
+    }
+
+    private findOsuReplayFrameTimeOffset(items: number, size: number) {
+        if (size < 2) {
+            return null;
+        }
+
+        const candidates = [0x8, 0x10, 0x18, 0x28, 0x30];
+        let bestOffset: number | null = null;
+        let bestScore = Number.NEGATIVE_INFINITY;
+        const sampleCount = Math.min(size, 64);
+        const step = Math.max(1, Math.floor(size / sampleCount));
+
+        for (const offset of candidates) {
+            let previous: number | null = null;
+            let first: number | null = null;
+            let last: number | null = null;
+            let monotonic = true;
+            let saneCount = 0;
+            let index = 0;
+
+            while (index < size && saneCount < sampleCount) {
+                const frame = this.readItem(items, index);
+                if (!frame) {
+                    monotonic = false;
+                    break;
+                }
+
+                let time: number;
+                try {
+                    time = this.process.readDouble(frame + offset);
+                } catch {
+                    monotonic = false;
+                    break;
+                }
+
+                if (
+                    !Number.isFinite(time) ||
+                    time <= -300_000 ||
+                    time >= 12 * 60 * 60 * 1000
+                ) {
+                    monotonic = false;
+                    break;
+                }
+
+                if (previous !== null && time < previous - 0.001) {
+                    monotonic = false;
+                    break;
+                }
+
+                first ??= time;
+                last = time;
+                previous = time;
+                saneCount++;
+                index += step;
+            }
+
+            if (!monotonic || saneCount < Math.min(size, 4)) {
+                continue;
+            }
+
+            const span = (last ?? 0) - (first ?? 0);
+            if (size > 1 && span <= 0.001) {
+                continue;
+            }
+
+            const score = saneCount * 1000 + span;
+            if (score > bestScore) {
+                bestOffset = offset;
+                bestScore = score;
+            }
+        }
+
+        return bestOffset;
+    }
+
+    private isSaneReplayFrame(time: number, x: number, y: number) {
+        return (
+            Number.isFinite(time) &&
+            Number.isFinite(x) &&
+            Number.isFinite(y) &&
+            time > -300_000 &&
+            time < 12 * 60 * 60 * 1000 &&
+            x > -10_000 &&
+            x < 10_000 &&
+            y > -10_000 &&
+            y < 10_000
+        );
+    }
+
+    private isReadablePointer(address: number) {
+        return Number.isFinite(address) && address > 0x10000;
+    }
+
+    private readOsuReplayFrameActionsFromFrame(
+        frame: number,
+        actionsOffset: number
+    ) {
+        for (const offset of [actionsOffset, actionsOffset + 0x8]) {
+            try {
+                const actionsList = this.process.readIntPtr(frame + offset);
+                const result = this.readOsuReplayFrameActions(actionsList);
+                if (result.readable) {
+                    return result;
+                }
+            } catch {
+                // Frame time/position is still useful if the actions field layout changed.
+            }
+        }
+
+        return { leftPressed: false, rightPressed: false };
+    }
+
+    private readOsuReplayFrameActions(actionsList: number) {
+        let leftPressed = false;
+        let rightPressed = false;
+
+        if (!this.isReadablePointer(actionsList)) {
+            return { leftPressed, rightPressed, readable: false };
+        }
+
+        let size = 0;
+        let items = 0;
+        try {
+            ({ size, items } = this.listItemsInfo(actionsList));
+        } catch {
+            return { leftPressed, rightPressed, readable: false };
+        }
+
+        if (!items || size <= 0 || size > 16) {
+            return {
+                leftPressed,
+                rightPressed,
+                readable: size === 0
+            };
+        }
+
+        for (let i = 0; i < size; i++) {
+            const action = this.process.readInt(items + 0x10 + 0x4 * i);
+
+            if (action === 0) {
+                leftPressed = true;
+            } else if (action === 1) {
+                rightPressed = true;
+            }
+        }
+
+        return { leftPressed, rightPressed, readable: true };
     }
 
     private readMod(acronym: ModsAcronyms, modObject: number): Mod {

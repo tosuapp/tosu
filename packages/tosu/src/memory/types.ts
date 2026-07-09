@@ -104,6 +104,26 @@ export type IGameplay = IScore | string | Error;
 export type IKeyOverlay = KeyOverlayButton[] | string | Error;
 export type IHitErrors = { index: number; array: number[] } | string | Error;
 
+export type IReplayFrame =
+    | {
+          mapTimeMs: number;
+          position: { x: number; y: number };
+          leftPressed: boolean;
+          rightPressed: boolean;
+          focused: boolean;
+          paused: boolean;
+          sequence?: number;
+      }
+    | null
+    | string
+    | Error;
+
+export type IReplayFrames =
+    | Exclude<IReplayFrame, null | string | Error>[]
+    | null
+    | string
+    | Error;
+
 export type IGlobal =
     | {
           isWatchingReplay: boolean;

@@ -350,10 +350,12 @@ export class LazerInstance extends AbstractInstance {
                         if (config.enableKeyOverlay) {
                             gameplay.updateKeyOverlay();
                         }
+                        gameplay.updateReplayFrame(global.playTime);
                         gameplay.updateHitErrors();
                         break;
                     default:
                         gameplay.resetKeyOverlay();
+                        gameplay.resetReplayFrame();
                         break;
                 }
 

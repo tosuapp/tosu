@@ -1260,7 +1260,7 @@ async function openCounter(element) {
   let target = element.parentElement.parentElement.parentElement;
 
 
-  if (folderName == 'tosu.exe') {
+  if (folderName == 'tosu-kumori.exe') {
     success_text = 'Tosu folder opened';
     target = element.parentElement;
   }

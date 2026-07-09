@@ -164,7 +164,7 @@ export default function buildBaseApi(server: Server) {
 
             const staticPath = getStaticPath();
             let folderPath = path.join(staticPath, decodeURI(folderName));
-            if (folderName === 'tosu.exe') folderPath = getProgramPath();
+            if (folderName === 'tosu-kumori.exe') folderPath = getProgramPath();
             else if (folderName === 'static.exe') folderPath = getStaticPath();
 
             if (!fs.existsSync(folderPath)) {

@@ -26,6 +26,19 @@ export interface KeyOverlayButton {
     count: number;
 }
 
+export interface ReplayFrame {
+    mapTimeMs: number;
+    position: {
+        x: number;
+        y: number;
+    };
+    leftPressed: boolean;
+    rightPressed: boolean;
+    focused: boolean;
+    paused: boolean;
+    sequence?: number;
+}
+
 export interface LeaderboardPlayer {
     userId: number;
     name: string;

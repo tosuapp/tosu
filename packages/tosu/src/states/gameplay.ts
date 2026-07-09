@@ -9,6 +9,7 @@ import { AbstractState } from '@/states/index';
 import {
     KeyOverlayButton,
     LeaderboardPlayer,
+    ReplayFrame,
     Statistics
 } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
@@ -81,6 +82,8 @@ export class Gameplay extends AbstractState {
     gradeCurrent: string;
     gradeExpected: string;
     keyOverlay: KeyOverlayButton[];
+    replayFrame: ReplayFrame | null;
+    replayFrames: ReplayFrame[];
     isReplayUiHidden: boolean;
 
     isLeaderboardVisible: boolean = false;
@@ -92,6 +95,7 @@ export class Gameplay extends AbstractState {
     previousState: string = '';
     previousPlayTime = 0;
     previousHitErrorIndex = 0;
+    previousReplayFrameSequence = 0;
 
     constructor(game: AbstractInstance) {
         super(game);
@@ -135,6 +139,8 @@ export class Gameplay extends AbstractState {
 
         this.gradeExpected = this.gradeCurrent;
         this.keyOverlay = [];
+        this.replayFrame = null;
+        this.replayFrames = [];
         this.isReplayUiHidden = false;
 
         this.previousPlayTime = 0;
@@ -188,6 +194,12 @@ export class Gameplay extends AbstractState {
         });
 
         this.isKeyOverlayDefaultState = true;
+    }
+
+    resetReplayFrame() {
+        this.replayFrame = null;
+        this.replayFrames = [];
+        this.previousReplayFrameSequence = 0;
     }
 
     @measureTime
@@ -375,6 +387,103 @@ export class Gameplay extends AbstractState {
                 exc
             );
         }
+    }
+
+    updateReplayFrame(fallbackMapTimeMs?: number) {
+        try {
+            const replayFramesReader = (this.game.memory as any).replayFrames;
+            if (typeof replayFramesReader === 'function') {
+                const framesResult = replayFramesReader.call(
+                    this.game.memory,
+                    this.previousReplayFrameSequence
+                );
+                if (framesResult instanceof Error) throw framesResult;
+                if (typeof framesResult === 'string') {
+                    if (framesResult === '') return;
+
+                    wLogger.debug(
+                        `%${ClientType[this.game.client]}%`,
+                        `Replay frame update not ready:`,
+                        framesResult
+                    );
+                    return 'not-ready';
+                }
+
+                if (Array.isArray(framesResult)) {
+                    this.replayFrames = framesResult;
+
+                    if (this.replayFrames.length > 0) {
+                        this.replayFrame =
+                            this.replayFrames[this.replayFrames.length - 1];
+                        this.previousReplayFrameSequence =
+                            this.replayFrame.sequence ??
+                            this.previousReplayFrameSequence;
+                    }
+
+                    this.game.resetReportCount('gameplay updateReplayFrame');
+                    return;
+                }
+            }
+
+            const result = this.game.memory.replayFrame();
+            if (result instanceof Error) throw result;
+            if (typeof result === 'string') {
+                if (result === '') return;
+
+                wLogger.debug(
+                    `%${ClientType[this.game.client]}%`,
+                    `Replay frame update not ready:`,
+                    result
+                );
+                return 'not-ready';
+            }
+
+            this.replayFrame = result;
+            this.replayFrames =
+                this.replayFrame === null ? [] : [this.replayFrame];
+            this.previousReplayFrameSequence =
+                this.replayFrame?.sequence ?? this.previousReplayFrameSequence;
+            this.game.resetReportCount('gameplay updateReplayFrame');
+        } catch (exc) {
+            this.game.reportError(
+                'gameplay updateReplayFrame',
+                20,
+                ClientType[this.game.client],
+                this.game.pid,
+                `gameplay updateReplayFrame`,
+                (exc as any).message
+            );
+            wLogger.debug(
+                `%${ClientType[this.game.client]}%`,
+                `Error updating replay frame:`,
+                exc
+            );
+        }
+    }
+
+    private withFallbackReplayFrameTime(
+        frame: ReplayFrame | null,
+        fallbackMapTimeMs?: number
+    ): ReplayFrame | null {
+        if (
+            frame === null ||
+            fallbackMapTimeMs === undefined ||
+            !Number.isFinite(fallbackMapTimeMs)
+        ) {
+            return frame;
+        }
+
+        if (
+            Number.isFinite(frame.mapTimeMs) &&
+            (frame.mapTimeMs === 0 || Math.abs(frame.mapTimeMs) >= 0.001)
+        ) {
+            return frame;
+        }
+
+        return {
+            ...frame,
+            mapTimeMs: fallbackMapTimeMs
+        };
     }
 
     private calculateUR(): number {

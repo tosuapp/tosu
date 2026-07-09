@@ -230,10 +230,12 @@ export class OsuInstance extends AbstractInstance {
                         if (config.enableKeyOverlay) {
                             gameplay.updateKeyOverlay();
                         }
+                        gameplay.updateReplayFrame();
                         gameplay.updateHitErrors();
                         break;
                     default:
                         gameplay.resetKeyOverlay();
+                        gameplay.resetReplayFrame();
                         break;
                 }
 

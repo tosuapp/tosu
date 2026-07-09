@@ -23,6 +23,7 @@ import type {
     IMenu,
     IOffsets,
     IRankedPlay,
+    IReplayFrame,
     IResultScreen,
     ISettings,
     ITourney,
@@ -761,6 +762,10 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
         } catch (error) {
             return error as Error;
         }
+    }
+
+    replayFrame(): IReplayFrame {
+        return null;
     }
 
     global(): IGlobal {

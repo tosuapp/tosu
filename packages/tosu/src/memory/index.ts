@@ -13,6 +13,7 @@ import type {
     IMP3Length,
     IMenu,
     IRankedPlay,
+    IReplayFrame,
     IResultScreen,
     ISettings,
     ITourney,
@@ -51,6 +52,7 @@ export abstract class AbstractMemory<M extends Record<string, number>> {
     abstract gameplay(): IGameplay;
     abstract keyOverlay(mode: number): IKeyOverlay;
     abstract hitErrors(last: number): IHitErrors;
+    abstract replayFrame(): IReplayFrame;
     abstract global(): IGlobal;
     abstract globalPrecise(): IGlobalPrecise;
     abstract menu(previousChecksum: string): IMenu;
