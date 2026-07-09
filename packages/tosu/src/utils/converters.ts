@@ -88,8 +88,18 @@ export const numberFromDecimal = (
 export const safeJoin = (...paths: string[]): string => {
     const cleaned = paths.map((path) => {
         if (!path) return '';
-        return path.trim().replace(/[/\\]+/g, sep);
+
+        return (
+            (/^[/\\]{2}/.test(path) ? sep : '') +
+            path.trim().replace(/[/\\]+/g, sep)
+        );
     });
 
-    return normalize(join(...cleaned));
+    let result = normalize(join(...cleaned));
+
+    if (/^[/\\]{2}/.test(cleaned[0] || '') && !result.startsWith(sep + sep)) {
+        result = sep + result;
+    }
+
+    return result;
 };
