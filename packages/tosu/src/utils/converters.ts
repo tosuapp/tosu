@@ -86,20 +86,16 @@ export const numberFromDecimal = (
  * @returns {string} The safely joined path.
  */
 export const safeJoin = (...paths: string[]): string => {
+    // UNC (\\server\share) paths only exist on Windows, so only preserve
+    // the leading double slash/backslash when running on win32.
+    const isUnc = process.platform === 'win32' && /^[/\\]{2}/.test(paths[0] || '');
+
     const cleaned = paths.map((path) => {
         if (!path) return '';
-
-        return (
-            (/^[/\\]{2}/.test(path) ? sep : '') +
-            path.trim().replace(/[/\\]+/g, sep)
-        );
+        return path.trim().replace(/[/\\]+/g, sep);
     });
 
-    let result = normalize(join(...cleaned));
+    const result = normalize(join(...cleaned));
 
-    if (/^[/\\]{2}/.test(cleaned[0] || '') && !result.startsWith(sep + sep)) {
-        result = sep + result;
-    }
-
-    return result;
+    return isUnc && !result.startsWith(sep + sep) ? sep + result : result;
 };
