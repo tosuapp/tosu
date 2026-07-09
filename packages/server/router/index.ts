@@ -13,6 +13,8 @@ import {
 import { autoUpdater } from '@tosu/updater';
 import { exec } from 'child_process';
 import fs from 'fs';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import path from 'path';
 import rosu from 'rosu-pp-js';
 
@@ -29,7 +31,11 @@ import {
 import { type ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
-import { generateReport, generateReportHTML } from '../utils/report';
+import {
+    type Report,
+    generateReport,
+    generateReportHTML
+} from '../utils/report';
 
 const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
 
@@ -431,15 +437,13 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {
+        let report: Report;
         try {
-            const report = await generateReport(req.instanceManager);
-            const html = await generateReportHTML(report);
-
+            report = await generateReport(req.instanceManager);
             res.writeHead(200, {
                 'Content-Type': 'text/html; charset=utf-8',
                 'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
             });
-            res.end(html, 'utf-8');
         } catch (err) {
             res.writeHead(500, {
                 'Content-Type': 'text/plain; charset=utf-8'
@@ -447,6 +451,16 @@ export default function buildBaseApi(server: Server) {
             res.end(
                 `Server Error: ${(err as Error).message || 'Unknown error'}`
             );
+            return;
+        }
+
+        try {
+            await pipeline(Readable.from(generateReportHTML(report)), res);
+        } catch (err) {
+            // Headers are already sent; log and abort the response.
+            wLogger.warn('Failed to stream report:', (err as Error).message);
+            wLogger.debug('Report streaming error details:', err);
+            res.destroy();
         }
     });
 
