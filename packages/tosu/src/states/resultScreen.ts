@@ -1,5 +1,5 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
-import { type ScoreInfoData } from '@tosuapp/lazer-calculator';
+import type { ScoreInfoData } from '@tosu/pp-module-loader/types';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
