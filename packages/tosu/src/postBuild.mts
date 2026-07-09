@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import { load } from 'resedit/cjs';
-import semverParse from 'semver/functions/parse';
+import * as ResEdit from 'resedit';
+import { parse as semverParse } from 'semver';
 
 const IMAGE_SUBSYSTEM_WINDOWS_GUI = 2;
 
@@ -14,13 +14,14 @@ function setWindowsSubsystem(output: Buffer, subsystem: number) {
 }
 
 async function windowsPostBuild(output: string) {
-    const packageVersion = require(path.join(__dirname, '_version.js'));
+    const packageVersion = await import(
+        new URL('./_version.js', import.meta.url).href
+    ).then((mod) => mod.default);
 
-    const ResEdit = await load();
-    const exe = ResEdit.NtExecutable.from(fs.readFileSync(output));
+    const exe = ResEdit.NtExecutable.from(await fs.readFile(output));
     const res = ResEdit.NtExecutableResource.from(exe);
     const iconFile = ResEdit.Data.IconFile.from(
-        fs.readFileSync(path.join(__dirname, 'assets', 'icon.ico'))
+        await fs.readFile(path.join(import.meta.dirname, 'assets', 'icon.ico'))
     );
 
     ResEdit.Resource.IconGroupEntry.replaceIconsForResource(
@@ -70,9 +71,11 @@ async function windowsPostBuild(output: string) {
 
     const generated = Buffer.from(exe.generate());
     setWindowsSubsystem(generated, IMAGE_SUBSYSTEM_WINDOWS_GUI);
-    fs.writeFileSync(output, generated);
+    await fs.writeFile(output, generated);
 }
 
 if (process.platform === 'win32') {
-    windowsPostBuild(path.join(__dirname, '../', './dist/tosu-kumori.exe'));
+    await windowsPostBuild(
+        path.join(import.meta.dirname, '../', './dist/tosu-kumori.exe')
+    );
 }
