@@ -1,17 +1,15 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "lib": [
-      "ES2023"
-    ],
-    "target": "ES2020",
-    "module":"CommonJS",
-    "sourceMap": true,
+    "rootDir": "./src",
+    "noEmit": false,
     "declaration": true,
+    "declarationMap": true,
     "allowSyntheticDefaultImports": true,
-    "declarationDir": "dist",
-    "outDir": "dist",
+    "declarationDir": "./dist",
+    "outDir": "./dist",
   },
   "include": [
-    "src"
+    "./src"
   ]
 }
