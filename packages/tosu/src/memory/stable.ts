@@ -7,7 +7,7 @@ import {
 } from '@tosu/common';
 import { getContentType } from '@tosu/server';
 
-import { OsuVersion } from '@/instances';
+import { type OsuVersion } from '@/instances';
 import { AbstractMemory } from '@/memory';
 import type {
     IAudioVelocityBase,
@@ -33,7 +33,7 @@ import type {
 } from '@/memory/types';
 import { defaultStatistics } from '@/states/gameplay';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
-import { LeaderboardPlayer } from '@/states/types';
+import type { LeaderboardPlayer } from '@/states/types';
 import { Bindings, VirtualKeyCode } from '@/utils/bindings';
 import { calculateAccuracy } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';

@@ -1,6 +1,7 @@
 {
   "name": "@tosu/updater",
   "version": "0.0.1",
+  "type": "module",
   "description": "",
   "author": "cyperdark",
   "main": "index.ts",

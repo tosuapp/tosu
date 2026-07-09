@@ -19,7 +19,7 @@ import {
 } from '@tosu/common';
 import path from 'path';
 
-import {
+import type {
     ApiAnswer,
     Leaderboard,
     Play,
@@ -29,10 +29,10 @@ import {
 } from '@/api/types/v2';
 import { LazerInstance } from '@/instances/lazerInstance';
 import { InstanceManager } from '@/instances/manager';
-import { IUserProtected } from '@/memory/types';
+import type { IUserProtected } from '@/memory/types';
 import { BeatmapPP } from '@/states/beatmap';
 import { Gameplay } from '@/states/gameplay';
-import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
+import type { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { toLegacyHits } from '@/utils/hitResult';

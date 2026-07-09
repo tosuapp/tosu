@@ -1,5 +1,5 @@
-import { Statistics } from '@/states/types';
-import { ModsLazer } from '@/utils/osuMods.types';
+import { type Statistics } from '@/states/types';
+import { type ModsLazer } from '@/utils/osuMods.types';
 
 /**
  * Used to calculate accuracy out of hits

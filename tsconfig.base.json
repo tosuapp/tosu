@@ -5,13 +5,15 @@
     ],
     "target": "es2023",
     "ignoreDeprecations": "6.0",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
+    "isolatedModules": true,
     "noImplicitAny": true,
     "sourceMap": false,
     "declaration": false,
     "noEmit": true,
     "strict": true,
+    "verbatimModuleSyntax": true
   }
 }

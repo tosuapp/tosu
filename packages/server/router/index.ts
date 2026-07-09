@@ -1,5 +1,5 @@
 import {
-    ConfigBinding,
+    type ConfigBinding,
     ConfigManager,
     JsonSafeParse,
     downloadFile,
@@ -28,7 +28,7 @@ import {
     getLocalCounters,
     saveSettings
 } from '../utils/counters';
-import { ISettings } from '../utils/counters.types';
+import { type ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
 import { parseCounterSettings } from '../utils/parseSettings';
 import {
@@ -37,10 +37,7 @@ import {
     generateReportHTML
 } from '../utils/report';
 
-const pkgAssetsPath =
-    'pkg' in process
-        ? path.join(__dirname, 'assets')
-        : path.join(__dirname, '../assets');
+const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
 
 export default function buildBaseApi(server: Server) {
     server.app.route('/json', 'GET', (req, res) => {

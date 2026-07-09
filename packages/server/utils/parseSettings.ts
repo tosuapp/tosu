@@ -7,7 +7,11 @@ import {
 import fs from 'fs';
 import path from 'path';
 
-import { ISettings, ISettingsCompact, bodyPayload } from './counters.types';
+import type {
+    ISettings,
+    ISettingsCompact,
+    bodyPayload
+} from './counters.types';
 
 export function parseCounterSettings(
     folderName: string,
