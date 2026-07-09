@@ -3,6 +3,11 @@
   "compilerOptions": {
     "allowJs": true,
     "strictPropertyInitialization": false,
+    "paths": {
+      "tosu/*": [
+        "../tosu/src/*"
+      ]
+    }
   },
   "exclude": [
     "./node_modules"
@@ -10,4 +15,5 @@
   "include": [
     "./**/*"
   ],
+  "references": [{ "path": "../tosu/tsconfig.base.json" }]
 }

@@ -4,7 +4,7 @@ import { directoryWalker } from '../utils/directories';
 export default function buildV1Api(app: HttpServer) {
     app.route(/^\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
         const url = req.pathname || '/';
-        const osuInstance: any = req.instanceManager.getInstance(
+        const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
         if (!osuInstance) {
@@ -12,7 +12,7 @@ export default function buildV1Api(app: HttpServer) {
         }
 
         const global = osuInstance.get('global');
-        if (global.songsFolder === '') {
+        if (!global || global.songsFolder === '') {
             throw new Error('osu is not ready/running');
         }
 

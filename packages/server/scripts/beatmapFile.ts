@@ -10,7 +10,7 @@ export function beatmapFileShortcut(
     res: ServerResponse,
     beatmapFileType: 'audio' | 'background' | 'file'
 ) {
-    const osuInstance: any = req.instanceManager.getInstance(
+    const osuInstance = req.instanceManager.getInstance(
         req.instanceManager.focusedClient
     );
     if (!osuInstance) {
