@@ -8,7 +8,11 @@ import {
     verifyDownload,
     wLogger
 } from '@tosu/common';
-import { ChildProcess, ChildProcessByStdio, spawn } from 'node:child_process';
+import {
+    ChildProcess,
+    type ChildProcessByStdio,
+    spawn
+} from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';

@@ -32,6 +32,11 @@ export interface PatternResult {
     index: number;
 }
 
+export interface DictionaryIntToRefEntry {
+    key: number;
+    address: number;
+}
+
 export class Process {
     public id: number;
     public handle: number;
@@ -222,6 +227,38 @@ export class Process {
             const address = items + 0x8 + 0x10 * i;
 
             result.push(address);
+        }
+
+        return result;
+    }
+
+    readNullableInt(address: number): number | undefined {
+        if (this.readByte(address) === 0) {
+            return undefined;
+        }
+        return this.readInt(address + 0x4);
+    }
+
+    readSharpDictionaryIntToRef(address: number): DictionaryIntToRefEntry[] {
+        const result = [];
+
+        const entriesArray = this.readIntPtr(address + 0x8 + 0x8);
+
+        const entriesLength = this.readInt(entriesArray + 0x8);
+        for (let i = 0; i < entriesLength; i++) {
+            const entrySize = 24;
+            const entry = entriesArray + 0x8 + 0x8 + i * entrySize;
+
+            const hash = this.readInt(entry + 0x8);
+            if (hash === 0) continue;
+
+            const entryAddress = this.readIntPtr(entry);
+            const entryKey = this.readInt(entry + 0x10);
+
+            result.push({
+                key: entryKey,
+                address: entryAddress
+            });
         }
 
         return result;

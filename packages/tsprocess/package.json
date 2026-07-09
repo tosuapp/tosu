@@ -1,12 +1,12 @@
 {
   "name": "tsprocess",
   "version": "1.0.1",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "tsc",
-    "postinstall": "node-gyp clean configure build"
+    "build": "tsc"
   },
   "dependencies": {
     "node-addon-api": "^8.5.0",

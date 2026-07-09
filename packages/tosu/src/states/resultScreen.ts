@@ -5,10 +5,10 @@ import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods } from '@/utils/osuMods';
-import { CalculateMods } from '@/utils/osuMods.types';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 import { defaultStatistics } from './gameplay';
-import { Statistics } from './types';
+import type { Statistics } from './types';
 
 export class ResultScreen extends AbstractState {
     onlineId: number;

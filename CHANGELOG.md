@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.24.0](https://github.com/tosuapp/tosu/compare/v4.23.0...v4.24.0) (2026-07-04)
+
+
+### Features
+
+* introduce reading strain graph ([eed7ff2](https://github.com/tosuapp/tosu/commit/eed7ff2023c2ffafc76fc79b7191a3e26b410ccd))
+* replace lazer calculator to prebuilt ([#643](https://github.com/tosuapp/tosu/issues/643)) ([a0217a9](https://github.com/tosuapp/tosu/commit/a0217a9f255f0698f65da817498a8f374d636a26))
+
+
+### Bug Fixes
+
+* Fix executable permissions after update (for linux) ([7401c7f](https://github.com/tosuapp/tosu/commit/7401c7fd861af74c01c0102bc435b41f1ba32af1))
+* Fix updater skipping cli flag in some cases ([6f13a66](https://github.com/tosuapp/tosu/commit/6f13a662f5dcf2d7bdb7bdc62c971b54406cd9b9))
+* handle surface update error ([#642](https://github.com/tosuapp/tosu/issues/642)) ([947263e](https://github.com/tosuapp/tosu/commit/947263e0f35b6e048bb6bb04830f04c538faf745))
+* remove redundant postinstall hook on tsprocess ([2b47c5f](https://github.com/tosuapp/tosu/commit/2b47c5f0054f7f1805253c032622caff5156d1f0))
+* wrong release ([392b68b](https://github.com/tosuapp/tosu/commit/392b68bb11b90367712451d68f838a463f10afef))
+* wrong skill pp values for fc ([#645](https://github.com/tosuapp/tosu/issues/645)) ([13e1cf2](https://github.com/tosuapp/tosu/commit/13e1cf243439bd383c5e8679030a21172c996df1))
+
 ## [4.23.0](https://github.com/tosuapp/tosu/compare/v4.22.3...v4.23.0) (2026-06-27)
 
 

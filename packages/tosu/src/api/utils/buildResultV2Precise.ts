@@ -1,4 +1,7 @@
-import { ApiAnswerPrecise as ApiAnswer, PreciseTourney } from '@/api/types/v2';
+import type {
+    ApiAnswerPrecise as ApiAnswer,
+    PreciseTourney
+} from '@/api/types/v2';
 import { InstanceManager } from '@/instances/manager';
 
 const buildTourneyData = (

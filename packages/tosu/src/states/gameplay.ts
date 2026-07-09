@@ -7,14 +7,14 @@ import type {
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
-import {
+import type {
     KeyOverlayButton,
     LeaderboardPlayer,
     Statistics
 } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods } from '@/utils/osuMods';
-import { CalculateMods, OsuMods } from '@/utils/osuMods.types';
+import { type CalculateMods, OsuMods } from '@/utils/osuMods.types';
 
 export const defaultStatistics = {
     miss: 0,

@@ -1,15 +1,16 @@
 {
     "name": "tosu",
-    "version": "4.23.0",
+    "version": "4.24.0",
+    "type": "module",
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {
-        "genver": "npx genversion src/_version.js",
-        "ts:run": "cross-env NODE_ENV=development ts-node --transpile-only -r tsconfig-paths/register --project tsconfig.json",
-        "ts:compile": "ncc build src/index.ts -o dist -m -d",
-        "run:dev": "pnpm run genver && pnpm run ts:run src/index.ts",
+        "genver": "npx genversion -es src/_version.js",
+        "ts:run": "cross-env NODE_ENV=development tsx",
+        "ts:compile": "rolldown -c rolldown.config.mjs",
+        "run:dev": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && node --enable-source-maps dist/index.js",
         "compile:prepare-htmls": "cp -rf node_modules/@tosu/server/assets ./dist",
-        "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.ts",
+        "compile:win": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.mts",
         "compile:linux": "pnpm run genver && pnpm run ts:compile && pnpm run compile:prepare-htmls && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
     },
     "dependencies": {
@@ -30,10 +31,10 @@
     },
     "devDependencies": {
         "@types/semver": "^7.7.1",
-        "@vercel/ncc": "^0.44.0",
+        "rolldown": "^1.1.5",
         "@yao-pkg/pkg": "^6.20.0",
         "cross-env": "^7.0.3",
         "genversion": "^3.2.0",
-        "ts-node": "^10.9.2"
+        "tsx": "^4.23.0"
     }
 }

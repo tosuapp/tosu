@@ -13,12 +13,12 @@ import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 
-import { BeatmapStrains } from '@/api/types/v1';
+import type { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals, safeJoin } from '@/utils/converters';
 import { sanitizeMods } from '@/utils/osuMods';
-import { CalculateMods } from '@/utils/osuMods.types';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
     '100': number;
@@ -690,6 +690,7 @@ export class BeatmapPP extends AbstractState {
                         'aimNoSliders',
                         this.diffStrains.aimWithoutSliders
                     );
+                    updateWithOffset('reading', this.diffStrains.reading);
                     updateWithOffset('flashlight', this.diffStrains.flashlight);
                     updateWithOffset('speed', this.diffStrains.speed);
                     break;
@@ -697,6 +698,7 @@ export class BeatmapPP extends AbstractState {
                     updateWithOffset('color', this.diffStrains.color);
                     updateWithOffset('rhythm', this.diffStrains.rhythm);
                     updateWithOffset('stamina', this.diffStrains.stamina);
+                    updateWithOffset('reading', this.diffStrains.reading);
                     break;
                 case 2:
                     updateWithOffset('movement', this.diffStrains.movement);
