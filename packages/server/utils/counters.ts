@@ -12,7 +12,7 @@ import path from 'path';
 import semver from 'semver';
 
 import { getContentType } from '../utils';
-import { ICounter, bodyPayload } from './counters.types';
+import type { ICounter, bodyPayload } from './counters.types';
 import {
     authorHTML,
     authorLinksHTML,
@@ -35,16 +35,7 @@ import {
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
 
-/**
- * ТАК КАК БЛЯТЬ У НАС В ЖЫЭСЕ
- * НЕ ПРИДУМАЛИ НОРМАЛЬНО ПАКЕТИРОВАТЬ ГОВНО БЕЗ ВЕБПАКА
- * ИДЕМ И ПИЛИМ КОСТЫЛИ
- * kys js!
- */
-const pkgAssetsPath =
-    'pkg' in process
-        ? path.join(__dirname, 'assets')
-        : path.join(__dirname, '../assets');
+const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
 
 function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);

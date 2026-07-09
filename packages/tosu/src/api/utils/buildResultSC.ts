@@ -12,7 +12,7 @@ import { InstanceManager } from '@/instances/manager';
 import { fixDecimals } from '@/utils/converters';
 import { toLegacyHits } from '@/utils/hitResult';
 
-import { ApiAnswer } from '../types/sc';
+import type { ApiAnswer } from '../types/sc';
 
 export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
     const osuInstance = instanceManager.getInstance(

@@ -3,7 +3,7 @@ import { JsonSafeParse, debounce, wLogger } from '@tosu/common';
 import { getLocalCounters, saveSettings } from './counters';
 import type { bodyPayload } from './counters.types';
 import { parseCounterSettings } from './parseSettings';
-import { ModifiedWebsocket, Websocket } from './socket';
+import { type ModifiedWebsocket, Websocket } from './socket';
 
 const saveDelay = debounce((overlayFrom: string, json: bodyPayload[]) => {
     const html = saveSettings(overlayFrom, json);

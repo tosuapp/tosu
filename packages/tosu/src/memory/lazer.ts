@@ -45,7 +45,7 @@ import type {
     ScanPatterns
 } from '@/memory/types';
 import type { ITourneyManagerChatItem } from '@/states/tourney';
-import {
+import type {
     KeyOverlayButton,
     LeaderboardPlayer,
     Statistics
@@ -56,14 +56,14 @@ import {
     numberFromDecimal
 } from '@/utils/converters';
 import {
-    MultiplayerTeamType,
+    type MultiplayerTeamType,
     MultiplayerUserState
 } from '@/utils/multiplayer.types';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
 import {
-    CalculateMods,
-    Mod,
-    ModsAcronyms,
+    type CalculateMods,
+    type Mod,
+    type ModsAcronyms,
     ModsCategories
 } from '@/utils/osuMods.types';
 

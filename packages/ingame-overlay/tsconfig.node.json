@@ -8,7 +8,6 @@
       "./types/files.d.ts",
       "electron-vite/node"
     ],
-    "baseUrl": ".",
     "paths": {
       "@assets/*": [
         "./assets/*"
