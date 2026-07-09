@@ -131,8 +131,8 @@ importers:
         specifier: ^7.7.3
         version: 7.8.0
       systeminformation:
-        specifier: ^5.27.16
-        version: 5.27.17
+        specifier: ^5.31.14
+        version: 5.31.14
       ws:
         specifier: ^8.18.3
         version: 8.18.3
@@ -1215,7 +1215,6 @@ packages:
 
   '@tosuapp/lazer-calculator-prebuilt@0.5.0-20260702-main.0':
     resolution: {integrity: sha512-H/Ip0gZoP+zTbGUWw46by7/Y4kZ9vugoO8KhdEKBIpGdktQUAeNC00z/I9Hi1nIF4fTtlWFBbkem3xXh9UPSXw==}
-    cpu: [x64]
     os: [win32, linux]
 
   '@tosuapp/lazer-calculator-win32-x64@0.5.0-20260702-main.0':
@@ -4198,8 +4197,8 @@ packages:
     resolution: {integrity: sha512-MeQTA1r0litLUf0Rp/iisCaL8761lKAZHaimlbGK4j0HysC4PLfqygQj9srcs0m2RdtDYnF8UuYyKpbjHYp7Jw==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  systeminformation@5.27.17:
-    resolution: {integrity: sha512-aWH+WoKHOGV5qBI9IPzFSwmLXrUSukF8aKXhWDZU990kKs65b+LSD69/1P0PKDweu9o8oCMW9QkJGG9R8FLi5A==}
+  systeminformation@5.31.14:
+    resolution: {integrity: sha512-nefRpMCsAI4m71/6JHH//KPaP/d5nTuRVxEtQ7N7SlBrX18DAcC+5Z1JKZYeN9Iw49qMx95BTo/gBMk3Y2H6+g==}
     engines: {node: '>=8.0.0'}
     os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
     hasBin: true
@@ -8960,7 +8959,7 @@ snapshots:
     dependencies:
       '@pkgr/core': 0.2.9
 
-  systeminformation@5.27.17: {}
+  systeminformation@5.31.14: {}
 
   tapable@2.3.0: {}
 
