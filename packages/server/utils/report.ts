@@ -112,10 +112,7 @@ export async function generateReport(instanceManager: any): Promise<Report> {
     };
 }
 
-const pkgAssetsPath =
-    'pkg' in process
-        ? path.join(__dirname, 'assets')
-        : path.join(__dirname, '../assets');
+const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
 
 export async function generateReportHTML(report: Report): Promise<string> {
     const rawHtml = await readFile(
