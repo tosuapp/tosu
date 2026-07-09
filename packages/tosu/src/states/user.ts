@@ -1,6 +1,6 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
 
-import { IMatchmakingStats } from '@/memory/types';
+import type { IMatchmakingStats } from '@/memory/types';
 import { AbstractState } from '@/states';
 
 export class User extends AbstractState {

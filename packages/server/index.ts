@@ -1,4 +1,4 @@
-import { GlobalConfig, config, wLogger } from '@tosu/common';
+import { type GlobalConfig, config, wLogger } from '@tosu/common';
 
 import buildAssetsApi from './router/assets';
 import buildBaseApi from './router/index';

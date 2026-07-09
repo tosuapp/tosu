@@ -4,7 +4,7 @@ import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
 import path from 'path';
 
-import {
+import type {
     ConfigBinding,
     ConfigEvents,
     ConfigItem,

@@ -74,7 +74,6 @@ export function getCachePath() {
 }
 
 export function getProgramPath() {
-    if ('pkg' in process) return path.dirname(process.execPath);
     return process.cwd();
 }
 

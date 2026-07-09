@@ -1,5 +1,5 @@
-import { ConfigKey, config, sleep, wLogger } from '@tosu/common';
-import WebSocket from 'ws';
+import { type ConfigKey, config, sleep, wLogger } from '@tosu/common';
+import { WebSocket, WebSocketServer } from 'ws';
 
 import { getUniqueID } from './hashing';
 
@@ -30,7 +30,7 @@ export class Websocket {
 
     private onConnectionCallback: (id: string, url: string | undefined) => void;
 
-    socket: WebSocket.Server;
+    socket: WebSocketServer;
     clients = new Map<string, ModifiedWebsocket>();
 
     constructor({
@@ -54,7 +54,7 @@ export class Websocket {
         ) => void;
         onConnectionCallback?: (id: string, url: string | undefined) => void;
     }) {
-        this.socket = new WebSocket.Server({ noServer: true });
+        this.socket = new WebSocketServer({ noServer: true });
 
         this.instanceManager = instanceManager;
         this.pollRateFieldName = pollRateFieldName;

@@ -1,9 +1,9 @@
 import { textMD5 } from '@tosu/common';
 
 import {
-    CalculateMods,
-    IMods,
-    ModsLazer,
+    type CalculateMods,
+    type IMods,
+    type ModsLazer,
     ModsOrder,
     bitValues
 } from '@/utils/osuMods.types';

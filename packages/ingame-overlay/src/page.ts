@@ -9,7 +9,7 @@ export async function loadMainPage(webContents: WebContents) {
         await webContents.loadURL(process.env.ELECTRON_RENDERER_URL);
     } else {
         await webContents.loadFile(
-            path.join(__dirname, '../renderer/index.html')
+            path.join(import.meta.dirname, '../renderer/index.html')
         );
     }
 }
@@ -17,4 +17,7 @@ export async function loadMainPage(webContents: WebContents) {
 /**
  * Path to preload script
  */
-export const preloadPath = path.join(__dirname, '../preload/index.js');
+export const preloadPath = path.join(
+    import.meta.dirname,
+    '../preload/index.js'
+);

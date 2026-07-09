@@ -1,7 +1,7 @@
 import {
     ClientType,
-    GlobalConfig,
-    Platform,
+    type GlobalConfig,
+    type Platform,
     argumentsParser,
     checkGameOverlayConfig,
     config,
@@ -13,7 +13,7 @@ import { ChildProcess } from 'node:child_process';
 import { setTimeout } from 'node:timers/promises';
 import { Process } from 'tsprocess';
 
-import { AbstractInstance } from '@/instances';
+import type { AbstractInstance } from '@/instances';
 
 import { LazerInstance } from './lazerInstance';
 import { OsuInstance } from './osuInstance';

@@ -1,7 +1,7 @@
 import { ClientType, CountryCodes, GameState } from '@tosu/common';
 import path from 'path';
 
-import {
+import type {
     ApiAnswer,
     LeaderboardPlayer,
     TourneyIpcClient,
@@ -9,12 +9,12 @@ import {
 } from '@/api/types/v1';
 import { LazerInstance } from '@/instances/lazerInstance';
 import { InstanceManager } from '@/instances/manager';
-import { IUserProtected } from '@/memory/types';
-import { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
+import type { IUserProtected } from '@/memory/types';
+import type { LeaderboardPlayer as MemoryLeaderboardPlayer } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { fixDecimals } from '@/utils/converters';
 import { toLegacyHits } from '@/utils/hitResult';
-import { CalculateMods } from '@/utils/osuMods.types';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 const convertMemoryPlayerToResult = (
     memoryPlayer: MemoryLeaderboardPlayer

@@ -1,4 +1,4 @@
-import { CalculateMods } from '@/utils/osuMods.types';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 export interface Statistics {
     perfect: number;

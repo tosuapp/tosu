@@ -24,7 +24,7 @@ export const downloadFile = (
                 'User-Agent': '@tosuapp/tosu'
             },
             agent: new https.Agent({
-                secureOptions: require('node:crypto').constants.SSL_OP_ALL
+                secureOptions: crypto.constants.SSL_OP_ALL
             })
         };
 
