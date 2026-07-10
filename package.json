@@ -6,6 +6,7 @@
   "scripts": {
     "prepare": "husky install",
     "start": "pnpm run -C packages/tosu run:dev",
+    "watch": "pnpm run -C packages/tosu watch",
     "build:win": "pnpm run -C packages/tosu compile:win",
     "build:linux": "pnpm run -C packages/tosu compile:linux",
     "build:overlay": "pnpm run -C \"packages/ingame-overlay\" dist",
