@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { defineConfig } from 'rolldown';
 import { replacePlugin } from 'rolldown/plugins';
+import copy from 'rollup-plugin-copy';
 
 export default defineConfig([
     {
@@ -21,10 +22,24 @@ export default defineConfig([
             dir: 'dist',
             assetFileNames: '[name]-[hash][extname]'
         },
+        watch: {
+            buildDelay: 500
+        },
         plugins: [
             rosuPlugin(),
             replacePlugin({
                 __dirname: 'import.meta.dirname'
+            }),
+            // Copy server assets
+            copy({
+                copyOnce: true,
+                targets: [
+                    {
+                        src: './node_modules/@tosu/server/assets/**/*',
+                        dest: 'dist/assets'
+                    }
+                ],
+                verbose: true
             })
         ]
     }

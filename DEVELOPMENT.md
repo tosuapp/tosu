@@ -30,9 +30,15 @@ npm install -g pnpm
 pnpm install
 ```
 
-5. To run tosu in dev mode
+5. Run tosu in dev mode
+* Standalone mode:
 ```
 pnpm run start
+```
+
+* Watch mode:
+```
+pnpm run watch
 ```
 
 
