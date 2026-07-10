@@ -299,6 +299,17 @@ export class Process {
         );
     }
 
+    scanAll(pattern: string, nonZeroMask: boolean = false): number[] {
+        const result = Process.buildPattern(pattern);
+
+        return ProcessUtils.scanAll(
+            this.handle,
+            result.signature,
+            result.mask,
+            nonZeroMask
+        );
+    }
+
     scan(
         pattern: string,
         callback: (address: number) => void,

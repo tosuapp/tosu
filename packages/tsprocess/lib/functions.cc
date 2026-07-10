@@ -294,6 +294,34 @@ Napi::Value scan(const Napi::CallbackInfo &args) {
   return env.Undefined();
 }
 
+Napi::Value scan_all(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() < 4) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
+  auto signature_buffer = args[1].As<Napi::Uint8Array>();
+  auto mask_buffer = args[2].As<Napi::Uint8Array>();
+  auto non_zero_mask = args[3].As<Napi::Boolean>().Value();
+
+  auto signature = std::vector<uint8_t>(signature_buffer.ByteLength());
+  memcpy(signature.data(), signature_buffer.Data(), signature_buffer.ByteLength());
+
+  auto mask = std::vector<uint8_t>(mask_buffer.ByteLength());
+  memcpy(mask.data(), mask_buffer.Data(), mask_buffer.ByteLength());
+
+  const auto results = memory::find_pattern_all(handle, signature, mask, non_zero_mask);
+
+  auto result_array = Napi::Array::New(env, results.size());
+  for (size_t i = 0; i < results.size(); i++) {
+    result_array.Set(i, Napi::Number::New(env, static_cast<double>(results[i])));
+  }
+
+  return result_array;
+}
+
 Napi::Value find_processes(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
   if (args.Length() < 1) {
@@ -526,6 +554,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["readCSharpString"] = Napi::Function::New(env, read_csharp_string);
   exports["scanSync"] = Napi::Function::New(env, scan_sync);
   exports["scan"] = Napi::Function::New(env, scan);
+  exports["scanAll"] = Napi::Function::New(env, scan_all);
   exports["batchScan"] = Napi::Function::New(env, batch_scan);
   exports["openProcess"] = Napi::Function::New(env, open_process);
   exports["closeHandle"] = Napi::Function::New(env, close_handle);
