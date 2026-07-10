@@ -42,7 +42,7 @@ We welcome the use of AI tools to assist in your workflow (such as refactoring o
 
 > [!WARNING]
 > Any submission that appears to be mostly AI-generated boilerplate will be rejected.
-> We do not condone "vibe-coding" (generating code without understanding it) just for the sake of submitting an overlay.
+> We do not condone "vibe-coding" (generating code without understanding it) just for the sake of submitting.
 
 You must understand how your code works and be prepared to explain specific segments of your submission if asked by maintainers during the PR review.
 
