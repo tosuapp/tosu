@@ -97,5 +97,5 @@ export const safeJoin = (...paths: string[]): string => {
 
     const result = normalize(join(...cleaned));
 
-    return isUnc && !result.startsWith(sep + sep) ? sep + result : result;
+    return isUnc ? sep + result : result;
 };
