@@ -98,6 +98,7 @@ Runtime config is loaded from a `tosu.env` file (dotenv); the schema (env bindin
 - Do NOT add "Generated with Claude Code" or co-author footers to commits or PRs
 - Keep commit messages concise and descriptive
 - PR descriptions should focus on what changed and why
+- Mention in the PR that it was created using AI ​​agent (mandatory write your agent name)
 - Do NOT mark PRs as "ready for review" (`gh pr ready`) - leave PRs in draft mode and let the user decide when to mark them ready
 
 ## Task Decomposition and Verification
