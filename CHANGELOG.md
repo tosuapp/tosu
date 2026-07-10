@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.25.0](https://github.com/tosuapp/tosu/compare/v4.24.0...v4.25.0) (2026-07-10)
+
+
+### Features
+
+* chunked report streaming, concurrent log io ([cc9e442](https://github.com/tosuapp/tosu/commit/cc9e4426ccf1d53fc8f1eb5c0d852bc6f0206e27))
+* remove unnecessary codes, streaming error handling ([c8d3ac8](https://github.com/tosuapp/tosu/commit/c8d3ac85eef5e62e87b6cff2ee6e840bc959ec8b))
+* replace asset copy to bundler plugin, add watcher ([62235bb](https://github.com/tosuapp/tosu/commit/62235bbc0cef93dc17a6ad84cb167919c4d20717))
+* switch from ncc to rolldown ([5ede3dc](https://github.com/tosuapp/tosu/commit/5ede3dc4a13846f7f6d3cd12e09617cfe6bc4efa))
+* switch tsconfig module resolution ([0414eb6](https://github.com/tosuapp/tosu/commit/0414eb6e531ea6dd47ad698257023929e677034f))
+* tosu types in @tosu/server ([3c77ccf](https://github.com/tosuapp/tosu/commit/3c77ccf4d6107f9e6eab16d57d9b06451828f9e4))
+* trying to play with anchors between builds ([9a17a25](https://github.com/tosuapp/tosu/commit/9a17a253fae594f55d99d7f921ac42ab50c496f4))
+
+
+### Bug Fixes
+
+* getProgramPath ([4d18436](https://github.com/tosuapp/tosu/commit/4d18436a4371ad3c0354a21c3d7e922f0c66b29f))
+* peer dependency tsv6 ([042744d](https://github.com/tosuapp/tosu/commit/042744dc3fc9e4f3ab9dcdf08557bbaa66213592))
+* rootDir ([1a8b708](https://github.com/tosuapp/tosu/commit/1a8b708a2009c44074a2ef6fafe7ecbda337da4d))
+* tsprocess ([e458ebc](https://github.com/tosuapp/tosu/commit/e458ebcb7889aa07d0267c0bc311af7d227087c4))
+* tsprocess emit ([40f7535](https://github.com/tosuapp/tosu/commit/40f753528d99314eb360479f566edbbea965ff83))
+
 ## [4.24.0](https://github.com/tosuapp/tosu/compare/v4.23.0...v4.24.0) (2026-07-04)
 
 
