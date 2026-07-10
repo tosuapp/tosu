@@ -1,4 +1,6 @@
 import { type ConfigKey, config, sleep, wLogger } from '@tosu/common';
+import type { AbstractInstance } from 'tosu/instances';
+import type { InstanceManager } from 'tosu/instances/manager';
 import { WebSocket, WebSocketServer } from 'ws';
 
 import { getUniqueID } from './hashing';
@@ -18,10 +20,14 @@ export interface ModifiedWebsocket extends WebSocket {
     remoteAddress: string;
 }
 
+type StateFunctionKey<T> = {
+    [K in keyof T]: T[K] extends (instanceManager: InstanceManager) => unknown
+        ? K
+        : never;
+}[keyof T];
+
 export class Websocket {
-    private instanceManager: any;
-    private pollRateFieldName: ConfigKey | '';
-    private stateFunctionName: string;
+    private instanceManager: InstanceManager;
     private onMessageCallback: (
         data: string,
         socket: ModifiedWebsocket,
@@ -40,13 +46,9 @@ export class Websocket {
         onMessageCallback,
         onConnectionCallback
     }: {
-        instanceManager: any;
+        instanceManager: InstanceManager;
         pollRateFieldName: ConfigKey | '';
-        stateFunctionName:
-            | 'getState'
-            | 'getStateV2'
-            | 'getPreciseData'
-            | string;
+        stateFunctionName: StateFunctionKey<AbstractInstance> | '';
         onMessageCallback?: (
             data: string,
             socket: ModifiedWebsocket,
@@ -57,8 +59,6 @@ export class Websocket {
         this.socket = new WebSocketServer({ noServer: true });
 
         this.instanceManager = instanceManager;
-        this.pollRateFieldName = pollRateFieldName;
-        this.stateFunctionName = stateFunctionName;
 
         if (typeof onMessageCallback === 'function') {
             this.onMessageCallback = onMessageCallback;
@@ -70,10 +70,13 @@ export class Websocket {
         this.handle = this.handle.bind(this);
         this.start = this.start.bind(this);
 
-        this.handle();
+        this.handle(pollRateFieldName, stateFunctionName);
     }
 
-    handle() {
+    handle(
+        pollRateFieldName: ConfigKey | '',
+        stateFunctionName: StateFunctionKey<AbstractInstance> | ''
+    ) {
         this.socket.on('connection', (ws: ModifiedWebsocket, request) => {
             ws.id = getUniqueID();
 
@@ -98,7 +101,7 @@ export class Websocket {
                 );
             });
 
-            ws.on('error', (reason: any, description: any) => {
+            ws.on('error', (reason: unknown, description: unknown) => {
                 this.clients.delete(ws.id);
 
                 wLogger.debug(
@@ -148,18 +151,21 @@ export class Websocket {
             }
         );
 
-        if (this.pollRateFieldName) {
-            this.start();
+        if (pollRateFieldName && stateFunctionName !== '') {
+            this.start(pollRateFieldName, stateFunctionName);
         }
     }
 
-    async start() {
+    async start(
+        pollRateFieldName: ConfigKey,
+        stateFunctionName: StateFunctionKey<AbstractInstance>
+    ) {
         let message = '';
         let values = {};
 
         while (true) {
             try {
-                const osuInstance: any = this.instanceManager.getInstance(
+                const osuInstance = this.instanceManager.getInstance(
                     this.instanceManager.focusedClient
                 );
                 if (!osuInstance || this.clients.size === 0) {
@@ -167,7 +173,7 @@ export class Websocket {
                     continue;
                 }
 
-                const buildedData = osuInstance[this.stateFunctionName](
+                const buildedData = osuInstance[stateFunctionName](
                     this.instanceManager
                 );
 
@@ -194,8 +200,7 @@ export class Websocket {
                 wLogger.debug('WebSocket loop error details:', error);
             }
 
-            if (this.pollRateFieldName)
-                await sleep(config[this.pollRateFieldName] as number);
+            await sleep(config[pollRateFieldName] as number);
         }
     }
 

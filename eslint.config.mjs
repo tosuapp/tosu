@@ -81,5 +81,23 @@ export default [
             'no-useless-constructor': 'off',
             '@typescript-eslint/no-unused-vars': 'off'
         }
+    },
+
+    // Enforce type only imports for the "tosu" module in the server package to prevent cyclic dependency.
+    {
+        files: ['./packages/server/**/*.ts'],
+        rules: {
+            '@typescript-eslint/no-restricted-imports': [
+                'error',
+                {
+                    patterns: [
+                        {
+                            regex: '^tosu(/.*)?',
+                            allowTypeImports: true
+                        }
+                    ]
+                }
+            ]
+        }
     }
 ];
