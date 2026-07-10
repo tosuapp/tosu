@@ -436,10 +436,9 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
     private scanPatterns: ScanPatterns = {
         scalingContainerTargetDrawSize: {
-            pattern:
-                '00 00 80 44 00 00 40 44 00 00 00 00 ?? ?? ?? ?? 00 00 00 00',
+            pattern: '00 00 80 44 00 00 40 44',
             offset: 0,
-            nonZeroMask: true
+            nonZeroMask: false
         }
     };
 
@@ -484,29 +483,69 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private updateGameBaseAddress() {
         const oldAddress = this.gameBaseAddress;
 
-        const scalingContainerTargetDrawSize = this.getPattern(
-            'scalingContainerTargetDrawSize'
+        const scanPattern = this.scanPatterns.scalingContainerTargetDrawSize;
+        const candidates = this.process.scanAll(
+            scanPattern.pattern,
+            scanPattern.nonZeroMask
         );
 
-        const externalLinkOpener = this.process.readIntPtr(
-            scalingContainerTargetDrawSize - 0x24
-        );
+        for (const match of candidates) {
+            const anchor = match + (scanPattern.offset || 0);
 
-        const api = this.process.readIntPtr(
-            externalLinkOpener +
-                this.offsets['osu.Game.Online.Chat.ExternalLinkOpener'][
-                    '<api>k__BackingField'
-                ]
-        );
+            const gameBaseAddress = this.resolveGameBaseFromAnchor(anchor);
+            if (gameBaseAddress === null) {
+                continue;
+            }
 
-        this.gameBaseAddress = this.process.readIntPtr(
-            api + this.offsets['osu.Game.Online.API.APIAccess'].game
-        );
+            this.setPattern('scalingContainerTargetDrawSize', anchor);
+            this.gameBaseAddress = gameBaseAddress;
 
-        wLogger.debug(
+            wLogger.debug(
+                `%${ClientType[this.game.client]}%`,
+                `GameBase address updated: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
+            );
+
+            return;
+        }
+
+        wLogger.error(
             `%${ClientType[this.game.client]}%`,
-            `GameBase address updated: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
+            `Failed to resolve GameBase from %${candidates.length}% candidate(s)`
         );
+    }
+
+    private resolveGameBaseFromAnchor(anchor: number): number | null {
+        // Byte distance from the ScalingContainerTargetDrawSize Vector2 field back
+        // to externalLinkOpener pointer inside OsuGame. It shifts between osu!
+        // versions (0x24 on older builds, 0x28 on newer) and neither field's offset
+        // ships in offsets.json, so sweep the small aligned window and let the
+        // GameBase vtable check pick the correct one per client version.
+        for (const delta of [0x24, 0x28, 0x2c, 0x20, 0x30, 0x1c, 0x34]) {
+            try {
+                const externalLinkOpener = this.process.readIntPtr(
+                    anchor - delta
+                );
+
+                const api = this.process.readIntPtr(
+                    externalLinkOpener +
+                        this.offsets['osu.Game.Online.Chat.ExternalLinkOpener'][
+                            '<api>k__BackingField'
+                        ]
+                );
+
+                const gameBaseAddress = this.process.readIntPtr(
+                    api + this.offsets['osu.Game.Online.API.APIAccess'].game
+                );
+
+                if (this.checkIfGameBase(gameBaseAddress)) {
+                    return gameBaseAddress;
+                }
+            } catch {
+                // wrong delta for this build — try the next candidate offset
+            }
+        }
+
+        return null;
     }
 
     private checkIfGameBase(address: number): boolean {
@@ -527,24 +566,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     }
 
     private gameBase() {
-        if (!this.gameBaseAddress) {
-            this.updateGameBaseAddress();
-        }
-
-        // Check if gamebase instance is valid
-        if (!this.checkIfGameBase(this.gameBaseAddress)) {
-            wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
-                `GameBase validation failed, resetting...`
-            );
-
-            const scanPattern =
-                this.scanPatterns.scalingContainerTargetDrawSize;
-            this.setPattern(
-                'scalingContainerTargetDrawSize',
-                this.process.scanSync(scanPattern.pattern) + scanPattern.offset!
-            );
-
+        if (
+            !this.gameBaseAddress ||
+            !this.checkIfGameBase(this.gameBaseAddress)
+        ) {
             this.updateGameBaseAddress();
         }
 
