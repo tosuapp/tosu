@@ -526,7 +526,7 @@ export default function buildBaseApi(server: Server) {
 
             if (url === '/settings') {
                 if (req.query.overlay) return buildEmptyPage(res);
-                return buildSettings(res);
+                return await buildSettings(res);
             }
             if (url === '/local-overlays') return buildInstructionLocal(res);
             if (url === '/available') {

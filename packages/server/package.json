@@ -12,6 +12,7 @@
     "rosu-pp-js": "4.0.1",
     "@tosu/common": "workspace:*",
     "@tosu/updater": "workspace:*",
+    "@tosu/pp-module-loader": "workspace:*",
     "semver": "^7.7.3",
     "systeminformation": "^5.31.14",
     "ws": "^8.18.3"
