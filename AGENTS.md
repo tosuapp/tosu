@@ -95,7 +95,7 @@ Runtime config is loaded from a `tosu.env` file (dotenv); the schema (env bindin
 - This repo uses **Conventional Commits** — `standard-version` reads them to bump the version and generate the changelog. Prefix accordingly (`fix:`, `feat:`, `chore:`…), and don't hand-edit the changelog or version.
 - Keep commit messages concise and descriptive; PR descriptions focus on **what changed and why**.
 - Branch from `master`; changes land via PR (GitHub flow). Lint before pushing (`pnpm run prettier:fix && pnpm run lint:fix`) — a pre-commit hook runs lint-staged.
-- Do NOT add "Generated with Claude Code" or co-author footers to commits or PRs
+- Do NOT add "Generated with Claude Code" or co-author footers to commits
 - Keep commit messages concise and descriptive
 - PR descriptions should focus on what changed and why
 - Mention in the PR that it was created using AI ​​agent (mandatory write your agent name)
