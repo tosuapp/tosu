@@ -36,5 +36,15 @@ We use GitHub issues to track public bugs. Report a bug by [opening a new issue]
 
 People *love* thorough bug reports. I'm not even kidding.
 
+# Generative AI Policy
+
+We welcome the use of AI tools to assist in your workflow (such as refactoring or generating helper functions), provided that you remain in control of your code.
+
+> [!WARNING]
+> Any submission that appears to be mostly AI-generated boilerplate will be rejected.
+> We do not condone "vibe-coding" (generating code without understanding it) just for the sake of submitting an overlay.
+
+You must understand how your code works and be prepared to explain specific segments of your submission if asked by maintainers during the PR review.
+
 ## References
 This document was adapted from the open-source contribution guidelines for [Facebook's Draft](https://github.com/facebookarchive/draft-js/blob/main/CONTRIBUTING.md)
