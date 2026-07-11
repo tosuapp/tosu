@@ -1,5 +1,5 @@
-import { IRankedPlay, IRoom } from '@/memory/types';
-import { CalculateMods } from '@/utils/osuMods.types';
+import { type IRankedPlay, type IRoom } from '@/memory/types';
+import { type CalculateMods } from '@/utils/osuMods.types';
 
 export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
