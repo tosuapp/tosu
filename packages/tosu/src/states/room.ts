@@ -1,6 +1,6 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
 
-import { IRoom } from '@/memory/types';
+import { type IRoom } from '@/memory/types';
 import { AbstractState } from '@/states/index';
 
 export class Room extends AbstractState {
