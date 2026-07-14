@@ -88,7 +88,8 @@ export const numberFromDecimal = (
 export const safeJoin = (...paths: string[]): string => {
     // UNC (\\server\share) paths only exist on Windows, so only preserve
     // the leading double slash/backslash when running on win32.
-    const isUnc = process.platform === 'win32' && /^[/\\]{2}/.test(paths[0] || '');
+    const isUnc =
+        process.platform === 'win32' && /^[/\\]{2}/.test(paths[0] || '');
 
     const cleaned = paths.map((path) => {
         if (!path) return '';
