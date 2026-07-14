@@ -36,6 +36,7 @@ void *open_process(uint32_t id);
 void close_handle(void *handle);
 bool is_process_64bit(uint32_t id);
 bool is_process_exist(void *process);
+uint64_t get_process_start_time(void *process);
 std::string get_process_path(void *process);
 std::string get_process_command_line(void *process);
 std::string get_process_cwd(void *process);
