@@ -397,6 +397,17 @@ Napi::Value is_process_64bit(const Napi::CallbackInfo &args) {
   return Napi::Boolean::New(env, memory::is_process_64bit(process_id));
 }
 
+Napi::Value get_process_start_time(const Napi::CallbackInfo &args) {
+  Napi::Env env = args.Env();
+  if (args.Length() < 1) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  auto handle = reinterpret_cast<void *>(args[0].As<Napi::Number>().Int64Value());
+  return Napi::Number::New(env, static_cast<double>(memory::get_process_start_time(handle)));
+}
+
 Napi::Value get_process_path(const Napi::CallbackInfo &args) {
   Napi::Env env = args.Env();
   if (args.Length() < 1) {
@@ -560,6 +571,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
   exports["closeHandle"] = Napi::Function::New(env, close_handle);
   exports["findProcesses"] = Napi::Function::New(env, find_processes);
   exports["isProcessExist"] = Napi::Function::New(env, is_process_exist);
+  exports["getProcessStartTime"] = Napi::Function::New(env, get_process_start_time);
   exports["isProcess64bit"] = Napi::Function::New(env, is_process_64bit);
   exports["getProcessPath"] = Napi::Function::New(env, get_process_path);
   exports["getProcessCommandLine"] = Napi::Function::New(env, get_process_command_line);

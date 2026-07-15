@@ -56,6 +56,10 @@ export class Process {
         return ProcessUtils.isProcessExist(handle);
     }
 
+    getStartTime(): number {
+        return ProcessUtils.getProcessStartTime(this.handle);
+    }
+
     static isProcess64bit(pid: number): boolean {
         return ProcessUtils.isProcess64bit(pid);
     }

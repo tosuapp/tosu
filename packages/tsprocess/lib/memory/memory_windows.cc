@@ -73,6 +73,27 @@ bool memory::is_process_exist(void *handle) {
   return false;
 }
 
+// Returns the process creation time as unix epoch milliseconds, or 0 on failure.
+uint64_t memory::get_process_start_time(void *handle) {
+  FILETIME creation{}, exit{}, kernel{}, user{};
+  if (!GetProcessTimes(handle, &creation, &exit, &kernel, &user)) {
+    return 0;
+  }
+
+  ULARGE_INTEGER ticks;
+  ticks.LowPart = creation.dwLowDateTime;
+  ticks.HighPart = creation.dwHighDateTime;
+
+  // FILETIME counts 100ns intervals since 1601-01-01. 116444736000000000 is the
+  // interval count between 1601 and the unix epoch (1970-01-01).
+  constexpr uint64_t epochDelta = 116444736000000000ULL;
+  if (ticks.QuadPart < epochDelta) {
+    return 0;
+  }
+
+  return (ticks.QuadPart - epochDelta) / 10000ULL;
+}
+
 bool memory::is_process_64bit(uint32_t id) {
   HANDLE process_handle = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, id);
   BOOL is_wow64 = FALSE;
