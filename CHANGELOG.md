@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.25.1](https://github.com/tosuapp/tosu/compare/v4.25.0...v4.25.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* behaviour when lazer starts before tosu and fails on memory ([0458c09](https://github.com/tosuapp/tosu/commit/0458c097e63b55ac4e3d5898d62d13f403df746f))
+
 ## [4.25.0](https://github.com/tosuapp/tosu/compare/v4.24.0...v4.25.0) (2026-07-10)
 
 
