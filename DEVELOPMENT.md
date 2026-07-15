@@ -27,9 +27,14 @@ To build and run tosu locally, you need the following tools installed on your sy
 
 To start tosu in development mode with hot-reloading:
 ```bash
-pnpm run start
+pnpm run watch
 ```
 This compiles the packages and runs the main server. The software will poll for a running osu! or osu!lazer process and attach to it automatically.
+
+Standard mode (without hot-reloading):
+```bash
+pnpm run start
+```
 
 ### Running Specific Files
 If you are developing or testing specific components, you can use the sub-package ts runners:
