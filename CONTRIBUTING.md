@@ -43,7 +43,7 @@ When submitting a Pull Request, please fill out the PR description with the foll
 2. **Solution**: Explain how your code resolves the problem.
 3. **Affected Files**: List of modified files.
 4. **Verification**: Outline how you tested the changes (what game version, config, etc.).
-5. **AI Declaration**: Declare if you used generative AI tools to assist in writing the code (specify the model and version).
+5. **AI Declaration**: Declare if you used generative AI tools to assist in writing the code (specify the company, model, and version).
 
 ## Generative AI Policy
 

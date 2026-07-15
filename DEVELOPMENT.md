@@ -8,8 +8,7 @@ To build and run tosu locally, you need the following tools installed on your sy
 
 * **Node.js**: Version 24 or newer is recommended.
 * **pnpm**: The package manager used by the monorepo workspace.
-* **Rust Toolchain**: Required to compile the `tsprocess` native C++ addon.
-* **C++ Build Tools**: Such as Visual Studio Build Tools (Windows) or build-essential (Linux) for Node-GYP.
+* **C++ Build Tools**: Such as Visual Studio Build Tools (Windows) or build-essential (Linux), required by node-gyp to compile the `tsprocess` native addon.
 
 ## Project Setup
 

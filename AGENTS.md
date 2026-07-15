@@ -2,6 +2,8 @@
 
 This document provides a comprehensive guide to the **tosu** codebase architecture, system modules, memory-reading workflow, and development workflows. It serves as an entry point for developers and AI agents to understand the project structure and rules for contributions.
 
+For environment setup, running in development mode, and compiling binaries, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ## Software Description
 
 **tosu** is a real-time memory reader and overlay host for osu! (supporting both stable and lazer). The software attaches to a running osu! process and scans its memory space using pre-configured signature patterns to resolve base pointers. It walks these pointers to read real-time game state data (such as hit statistics and key presses) while side-loading the active beatmap from disk to calculate performance point (PP) attributes. Finally, this compiled state is exposed over HTTP and WebSockets to be consumed by client overlays.
@@ -54,6 +56,8 @@ The server exposes several WebSocket endpoints for overlays and client connectio
   The native, actively maintained general data endpoint that broadcasts general game state updates.
 * **v2 Precise Endpoint (`/websocket/v2/precise`)**
   A high-frequency native endpoint designed for rapid data streaming of indicators that must be fetched faster (such as hit errors and key presses).
+* **Commands Channel (`/websocket/commands`)**
+  An internal command/control endpoint used by the dashboard and the in-game overlay to receive control notifications (such as overlay list refreshes and settings updates) rather than game state data.
 
 ## Performance Points (PP) Calculations
 
@@ -62,7 +66,7 @@ Performance Points (PP) measure a player's accuracy, difficulty, and speed on a 
 * **tosu PP Processor (`@tosuapp/lazer-calculator-prebuilt`)**
   A custom, stripped-down version of the osu!lazer game processor maintained directly by the tosu team. It is packaged as a prebuilt native addon for performance.
 * **Legacy PP Calculator (`rosu-pp-js`)**
-  An external third-party library used only for legacy and non-migrated code paths.
+  An external third-party library used only for legacy and non-migrated code paths, such as the `/api/calculate/pp` HTTP endpoint.
 
 To ensure stability, tosu side-loads beatmap content. Instead of reading files from memory, the reader extracts the beatmap file path from the game's memory, reads the physical `.osu` file from disk via `fs.readFileSync`, and passes the content to the native `@tosuapp/lazer-calculator-prebuilt` parser to compute strains, difficulty, and PP attributes.
 
