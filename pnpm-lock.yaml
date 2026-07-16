@@ -149,6 +149,9 @@ importers:
       '@tosu/common':
         specifier: workspace:*
         version: link:../common
+      '@tosu/pp-module-loader':
+        specifier: workspace:*
+        version: link:../pp-module-loader
       '@tosu/updater':
         specifier: workspace:*
         version: link:../updater

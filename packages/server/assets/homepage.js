@@ -953,7 +953,8 @@ document.querySelectorAll('.text-input input').forEach((i) =>
 document.querySelectorAll('.textarea-input textarea')
   .forEach((i) => i.addEventListener('change', () => checkSettingsChanges()));
 
-
+document.querySelectorAll('.select-input select')
+  .forEach((i) => i.addEventListener('change', () => checkSettingsChanges()));
 
 const isNumberValid = (num) => {
   if (typeof num === 'number') return num - num === 0;
@@ -963,7 +964,7 @@ const isNumberValid = (num) => {
 };
 
 const checkSettingsChanges = () => {
-  const settings = document.querySelectorAll('.settings input, .settings textarea');
+  const settings = document.querySelectorAll('.settings input, .settings textarea, .settings select');
 
   const hasChanges = Array.from(settings).some((s) => {
     const currentValue = s.type === 'checkbox' ? s.checked : s.value;
@@ -1333,7 +1334,7 @@ async function saveSettings() {
     let settings = {};
 
     document.querySelectorAll('.settings *[data-id]').forEach((s) => {
-        const input = s.querySelector('input, textarea');
+        const input = s.querySelector('input, textarea, select');
         if (!input) return;
 
           const value = input.type == 'checkbox' ? input.checked : input.value;

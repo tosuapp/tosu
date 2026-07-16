@@ -1,6 +1,7 @@
 {
     "name": "@tosu/pp-module-loader",
     "version": "0.1.0",
+    "type": "module",
     "description": "Load and manage pp calculators",
     "main": "src/index.ts",
     "scripts": {},
