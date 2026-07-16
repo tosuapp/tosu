@@ -56,6 +56,10 @@ export class Process {
         return ProcessUtils.isProcessExist(handle);
     }
 
+    getStartTime(): number {
+        return ProcessUtils.getProcessStartTime(this.handle);
+    }
+
     static isProcess64bit(pid: number): boolean {
         return ProcessUtils.isProcess64bit(pid);
     }
@@ -292,6 +296,17 @@ export class Process {
         const result = Process.buildPattern(pattern);
 
         return ProcessUtils.scanSync(
+            this.handle,
+            result.signature,
+            result.mask,
+            nonZeroMask
+        );
+    }
+
+    scanAll(pattern: string, nonZeroMask: boolean = false): number[] {
+        const result = Process.buildPattern(pattern);
+
+        return ProcessUtils.scanAll(
             this.handle,
             result.signature,
             result.mask,

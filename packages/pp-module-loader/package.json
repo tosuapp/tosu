@@ -6,7 +6,7 @@
     "scripts": {},
     "dependencies": {
         "@tosu/common": "workspace:*",
-        "@tosuapp/lazer-calculator-prebuilt": "0.5.0-20260702-main.0",
+        "@tosuapp/lazer-calculator-prebuilt": "0.5.0-20260715-main.0",
         "semver": "catalog:",
         "tar": "^7.5.16"
     },

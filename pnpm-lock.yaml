@@ -128,8 +128,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@tosuapp/lazer-calculator-prebuilt':
-        specifier: 0.5.0-20260702-main.0
-        version: 0.5.0-20260702-main.0
+        specifier: 0.5.0-20260715-main.0
+        version: 0.5.0-20260715-main.0
       semver:
         specifier: 'catalog:'
         version: 7.8.5
@@ -1526,17 +1526,18 @@ packages:
     resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
     engines: {node: '>= 10'}
 
-  '@tosuapp/lazer-calculator-linux-x64@0.5.0-20260702-main.0':
-    resolution: {integrity: sha512-0i23bFibUQhjhPnffKzuxA+NPzAQhcoU9Zp6/bXZ3K+h/tKm7o4k7/vl4eKZuOl8Ox8goaWG/kowCZ/tNObGtg==}
+  '@tosuapp/lazer-calculator-linux-x64@0.5.0-20260715-main.0':
+    resolution: {integrity: sha512-Kijl0kbi9JHLMGglbFS1UjlVGyxKK95H9R+Qu5B4Y+K7hVR2V5/F0/sMl+1+kN6XXAbwjZQLgZh1vsjwdS9WoQ==}
     cpu: [x64]
     os: [linux]
 
-  '@tosuapp/lazer-calculator-prebuilt@0.5.0-20260702-main.0':
-    resolution: {integrity: sha512-H/Ip0gZoP+zTbGUWw46by7/Y4kZ9vugoO8KhdEKBIpGdktQUAeNC00z/I9Hi1nIF4fTtlWFBbkem3xXh9UPSXw==}
+  '@tosuapp/lazer-calculator-prebuilt@0.5.0-20260715-main.0':
+    resolution: {integrity: sha512-9lFZSolJiyxHyCA3a3DlGqMlI51D5eUwWjwbBPcy23Cc9hvEQ0yOxzhQguKh4zq5ndwIOiq0hFbZO2ruFCcyFA==}
+    cpu: [x64]
     os: [win32, linux]
 
-  '@tosuapp/lazer-calculator-win32-x64@0.5.0-20260702-main.0':
-    resolution: {integrity: sha512-YQx1yzkqv9tuk+zvPoRO374JFksqQ4COeHNBmR6C9ltEww8Q/gMNKKDI31msJFXzOLOSwhgWIh5aFNa+ZamA1w==}
+  '@tosuapp/lazer-calculator-win32-x64@0.5.0-20260715-main.0':
+    resolution: {integrity: sha512-an1DnYpM6zdOdvXu3XQkoDfbgWGpitGo5dPohJQmEHYk8P4G+2eXLDnJS2E4TDQS06E/jhnRFl45J+XZhMXQ9Q==}
     cpu: [x64]
     os: [win32]
 
@@ -4030,7 +4031,6 @@ packages:
     engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
     deprecated: |-
       You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
-
       (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 
   queue-microtask@1.2.3:
@@ -5837,15 +5837,15 @@ snapshots:
 
   '@tootallnate/once@2.0.1': {}
 
-  '@tosuapp/lazer-calculator-linux-x64@0.5.0-20260702-main.0':
+  '@tosuapp/lazer-calculator-linux-x64@0.5.0-20260715-main.0':
     optional: true
 
-  '@tosuapp/lazer-calculator-prebuilt@0.5.0-20260702-main.0':
+  '@tosuapp/lazer-calculator-prebuilt@0.5.0-20260715-main.0':
     optionalDependencies:
-      '@tosuapp/lazer-calculator-linux-x64': 0.5.0-20260702-main.0
-      '@tosuapp/lazer-calculator-win32-x64': 0.5.0-20260702-main.0
+      '@tosuapp/lazer-calculator-linux-x64': 0.5.0-20260715-main.0
+      '@tosuapp/lazer-calculator-win32-x64': 0.5.0-20260715-main.0
 
-  '@tosuapp/lazer-calculator-win32-x64@0.5.0-20260702-main.0':
+  '@tosuapp/lazer-calculator-win32-x64@0.5.0-20260715-main.0':
     optional: true
 
   '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.4)':
