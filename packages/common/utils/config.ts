@@ -12,7 +12,7 @@ import type {
     ConfigSchema,
     GlobalConfig
 } from './config.types';
-import { getConfigPath } from './directories';
+import { getConfigPath, getStaticPath } from './directories';
 import { wLogger } from './logger';
 import { isRealNumber } from './manipulation';
 
@@ -492,5 +492,5 @@ export async function configInitialization() {
     await ConfigManager.initialize(configPath);
 
     // Create user-specified static folder
-    await fs.mkdir(config.staticFolderPath, { recursive: true }).catch(null);
+    await fs.mkdir(getStaticPath(), { recursive: true }).catch(null);
 }
