@@ -2,7 +2,6 @@ import { createHash } from 'crypto';
 import * as dotenv from 'dotenv';
 import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
-import { homedir } from 'node:os';
 import path from 'path';
 
 import type {
@@ -13,7 +12,7 @@ import type {
     ConfigSchema,
     GlobalConfig
 } from './config.types';
-import { getConfigPath, getStaticPath } from './directories';
+import { getConfigPath, getDataPath, getStaticPath } from './directories';
 import { wLogger } from './logger';
 import { isRealNumber } from './manipulation';
 
@@ -68,9 +67,7 @@ const defaultSchema: ConfigSchema = {
         binding: 'STATIC_FOLDER_PATH',
         default:
             process.platform === 'linux'
-                ? process.env.XDG_DATA_HOME
-                    ? path.join(process.env.XDG_DATA_HOME, 'tosu', 'static')
-                    : path.join(homedir(), '.local', 'share', 'tosu', 'static')
+                ? path.join(getDataPath(), 'static')
                 : './static'
     },
     enableIngameOverlay: {
