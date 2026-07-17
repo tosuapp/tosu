@@ -12,6 +12,7 @@ on:
       - "pnpm-lock.yaml"
   pull_request:
     paths:
+      - ".github/workflows/**/*"
       - "packages/**/*"
       - "package.json"
       - "pnpm-lock.yaml"
