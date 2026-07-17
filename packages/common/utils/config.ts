@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 import * as dotenv from 'dotenv';
 import EventEmitter from 'node:events';
 import fs from 'node:fs/promises';
+import { homedir } from 'node:os';
 import path from 'path';
 
 import type {
@@ -65,7 +66,12 @@ const defaultSchema: ConfigSchema = {
     },
     staticFolderPath: {
         binding: 'STATIC_FOLDER_PATH',
-        default: './static'
+        default:
+            process.platform === 'linux'
+                ? process.env.XDG_DATA_HOME
+                    ? path.join(process.env.XDG_DATA_HOME, 'tosu', 'static')
+                    : path.join(homedir(), '.local', 'share', 'tosu', 'static')
+                : './static'
     },
     enableIngameOverlay: {
         binding: 'ENABLE_INGAME_OVERLAY',
