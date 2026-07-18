@@ -563,7 +563,8 @@ export class Gameplay extends AbstractState {
                         this.combo,
                         scoreInfo,
                         currDiff,
-                        beatmapPP.maxScore
+                        beatmapPP.maxScore,
+                        beatmapPP.difficultyAttributes.getData()
                     )
                 );
 

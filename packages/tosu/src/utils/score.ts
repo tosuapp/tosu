@@ -11,18 +11,42 @@ import type {
  * @param current Current score data.
  * @param curDiff Current difficulty attributes.
  * @param max Maximum possible score.
+ * @param beatmapDiff Current beatmap difficulty attributes.
  */
 export function calculateMaxAchievableScore(
     beatmap: PlayBeatmap,
     combo: number,
     current: ScoreInfoData,
     curDiff: DifficultyAttrsData,
-    max: ScoreInfoData
+    max: ScoreInfoData,
+    beatmapDiff: DifficultyAttrsData
 ): ScoreInfoData {
     const score = populateMaxHits(beatmap.mode, current, curDiff, max);
     // Calculate max achievable combo using current max combo or current combo plus remaining combo
     const remainingCombo = max.maxCombo - curDiff.maxCombo;
     score.maxCombo = Math.max(score.maxCombo, combo + remainingCombo);
+
+    // If the current score is a legacy score and std, calculate the max achievable score.
+    // This is required because std pp calculation uses legacy score values for miss estimation.
+    // See https://osu.ppy.sh/wiki/en/Gameplay/Score/ScoreV1/osu%21 for formula reference.
+    // REMOVE: When there are proper way to calculate total score.
+    if (current.isLegacyScore && beatmap.mode === 0) {
+        // Combo multiplier sum base in remaining section.
+        const comboMultiplierBase =
+            Math.max(curDiff.maxCombo - 1, 0) +
+            Math.max(max.maxCombo - 1, 0) -
+            1;
+
+        // Adjusted combo multiplier sum base in remaining section adding current combo.
+        const adjustedComboMultiplierBase =
+            Math.max(combo - 1, 0) * 2 + remainingCombo - 1;
+
+        const remainingScore =
+            (approxStdMaxScore(beatmapDiff) - approxStdMaxScore(curDiff)) *
+            (adjustedComboMultiplierBase / comboMultiplierBase);
+
+        score.totalScore += remainingScore;
+    }
 
     score.accuracy = beatmap.calculateAccuracy(score);
     return score;
@@ -123,4 +147,18 @@ function getMaxHit(mode: number, score: ScoreInfoData) {
         default:
             return score.greats;
     }
+}
+
+/**
+ * Approximate the total score for osu! based on combo score and hit objects.
+ * The returned score doesn't include any bonus scores.
+ * But they are not meaningful in pp calculation.
+ *
+ * REMOVE: When there are proper way to calculate total score.
+ */
+function approxStdMaxScore(diff: DifficultyAttrsData): number {
+    return (
+        diff.maximumLegacyComboScore +
+        (diff.nCircles + diff.nSliders + diff.nSpinners) * 300
+    );
 }
