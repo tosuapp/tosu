@@ -152,7 +152,6 @@ function getMaxHit(mode: number, score: ScoreInfoData) {
 /**
  * Approximate the total score for osu! based on combo score and hit objects.
  * The returned score doesn't include any bonus scores.
- * But they are not meaningful in pp calculation.
  *
  * REMOVE: When there are proper way to calculate total score.
  */
