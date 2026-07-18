@@ -14,6 +14,7 @@ import type {
 import { calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods } from '@/utils/osuMods';
 import { type CalculateMods, OsuMods } from '@/utils/osuMods.types';
+import { calculateFcScore, calculateMaxAchievableScore } from '@/utils/score';
 
 export const defaultStatistics = {
     miss: 0,
@@ -554,71 +555,29 @@ export class Gameplay extends AbstractState {
 
             beatmapPP.updatePPAttributes('curr', currPerformance);
 
-            const calcOptions: ScoreInfoData = {
-                ...scoreInfo,
-                // Calculate max archivable combo based difference between gradual and current combo
-                maxCombo: Math.max(
-                    this.maxCombo,
-                    beatmapPP.maxScore.maxCombo -
-                        (currDiff.maxCombo - this.combo)
-                ),
-                greats:
-                    beatmapPP.maxScore.greats -
-                    this.statistics.ok -
-                    this.statistics.meh -
-                    this.statistics.miss,
-                largeTickHits:
-                    beatmapPP.maxScore.largeTickHits -
-                    this.statistics.largeTickMiss,
-                // Calculate max archivable slider end hits based difference between gradual and current hits
-                sliderEndHits:
-                    beatmapPP.maxScore.sliderEndHits -
-                    (currDiff.nSliders - this.statistics.sliderTailHit),
-                // Small hit ticks doesn't affect combo but only accuracy.
-                smallTickHits:
-                    beatmapPP.maxScore.smallTickHits -
-                    this.statistics.smallTickMiss
-            };
-
-            if (this.mode === 3) {
-                calcOptions.perfects =
-                    beatmapPP.maxScore.perfects -
-                    this.statistics.good -
-                    this.statistics.ok -
-                    this.statistics.meh -
-                    this.statistics.miss;
-                calcOptions.greats = this.statistics.great;
-            }
-            calcOptions.accuracy =
-                currentBeatmap.calculateAccuracy(calcOptions);
-
             const maxAchievablePerformance =
                 currentBeatmap.calculatePerformance(
                     beatmapPP.difficultyAttributes,
-                    calcOptions
+                    calculateMaxAchievableScore(
+                        currentBeatmap,
+                        this.combo,
+                        scoreInfo,
+                        currDiff,
+                        beatmapPP.maxScore
+                    )
                 );
+
             beatmapPP.currAttributes.maxAchievable =
                 maxAchievablePerformance.pp;
 
-            calcOptions.maxCombo = beatmapPP.maxScore.maxCombo;
-            if (this.mode === 3) {
-                calcOptions.perfects +=
-                    calcOptions.misses + calcOptions.comboBreaks;
-            } else {
-                calcOptions.greats +=
-                    calcOptions.misses + calcOptions.comboBreaks;
-            }
-            calcOptions.largeTickHits += calcOptions.largeTickMisses;
-            calcOptions.largeTickMisses = 0;
-            calcOptions.sliderEndHits = beatmapPP.maxScore.sliderEndHits;
-            calcOptions.comboBreaks = 0;
-            calcOptions.misses = 0;
-            calcOptions.accuracy =
-                currentBeatmap.calculateAccuracy(calcOptions);
-
             const fcPerformance = currentBeatmap.calculatePerformance(
                 beatmapPP.difficultyAttributes,
-                calcOptions
+                calculateFcScore(
+                    currentBeatmap,
+                    scoreInfo,
+                    currDiff,
+                    beatmapPP.maxScore
+                )
             );
             beatmapPP.currAttributes.fcPP = fcPerformance.pp;
             beatmapPP.updatePPAttributes('fc', fcPerformance);
