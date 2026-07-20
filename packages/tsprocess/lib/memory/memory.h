@@ -36,6 +36,7 @@ void *open_process(uint32_t id);
 void close_handle(void *handle);
 bool is_process_64bit(uint32_t id);
 bool is_process_exist(void *process);
+uint64_t get_process_start_time(void *process);
 std::string get_process_path(void *process);
 std::string get_process_command_line(void *process);
 std::string get_process_cwd(void *process);
@@ -176,6 +177,52 @@ inline std::vector<PatternResult> batch_find_pattern(void *process, std::vector<
 
       if (patterns.size() == results.size()) {
         return results;
+      }
+    }
+  }
+
+  return results;
+}
+
+inline std::vector<uintptr_t>
+find_pattern_all(void *process, const std::vector<uint8_t> signature, const std::vector<uint8_t> mask, bool non_zero_mask) {
+  const auto regions = query_regions(process);
+
+  auto results = std::vector<uintptr_t>();
+
+  if (signature.empty()) {
+    return results;
+  }
+
+  for (auto &region : regions) {
+    auto buffer = std::vector<uint8_t>(region.size);
+    if (!read_buffer(process, region.address, region.size, buffer.data())) {
+      continue;
+    }
+
+    if (buffer.size() < signature.size()) {
+      continue;
+    }
+
+    for (size_t i = 0; i + signature.size() <= buffer.size(); ++i) {
+      bool found = true;
+      for (size_t j = 0; j < signature.size(); ++j) {
+        if (non_zero_mask) {
+          if ((buffer[i + j] == signature[j] && mask[j] == 1) || (mask[j] == 0 && buffer[i + j] != 0)) {
+            continue;
+          }
+        } else {
+          if (buffer[i + j] == signature[j] || mask[j] == 0) {
+            continue;
+          }
+        }
+
+        found = false;
+        break;
+      }
+
+      if (found) {
+        results.push_back(region.address + i);
       }
     }
   }

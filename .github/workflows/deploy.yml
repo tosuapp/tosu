@@ -12,6 +12,7 @@ on:
       - "pnpm-lock.yaml"
   pull_request:
     paths:
+      - ".github/workflows/**/*"
       - "packages/**/*"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -34,7 +35,7 @@ jobs:
     name: "build for ${{ matrix.os }}"
     steps:
       - name: 🛎️ - Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: 📐 - Define variables (1)
         if: github.event_name == 'pull_request'
@@ -43,7 +44,7 @@ jobs:
         run: echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
 
       - name: 🛠️ - Install Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with: { node-version: 24.14.0 }
 
       - name: 🛠️ - Install Deps
@@ -69,7 +70,7 @@ jobs:
       - name: 🚀 - Upload artifacts for windows
         id: upload-artifact-windows
         if: ${{ matrix.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: {
           name: "tosu-windows-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/tosu/dist/tosu.exe
@@ -77,7 +78,7 @@ jobs:
       
       - name: 🚀 - Upload overlay artifacts for windows
         if: ${{ matrix.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: {
           name: "tosu-overlay-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/ingame-overlay/pack/win-unpacked/*
@@ -85,7 +86,7 @@ jobs:
 
       - name: 🚀 - Upload artifacts for linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: {
           name: "tosu-linux-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}",
           path: packages/tosu/dist/tosu

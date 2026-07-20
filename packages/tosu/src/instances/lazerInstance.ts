@@ -28,6 +28,18 @@ export class LazerInstance extends AbstractInstance {
 
     override async initiate() {
         try {
+            const startTime = this.process.getStartTime();
+            const age = startTime > 0 ? Date.now() - startTime : 0;
+            const waitMs = Math.max(0, 15 * 1000 - age);
+
+            if (waitMs > 0) {
+                wLogger.info(
+                    `%${ClientType[this.client]}%`,
+                    `Waiting %${(waitMs / 1000).toFixed(1)}s% for lazer startup before reading memory...`
+                );
+                await sleep(waitMs);
+            }
+
             const cacheFolder = getCachePath();
             if (!fs.existsSync(cacheFolder))
                 await fsp.mkdir(cacheFolder, { recursive: true });

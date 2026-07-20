@@ -1,4 +1,5 @@
-import { GlobalConfig, config, wLogger } from '@tosu/common';
+import { type GlobalConfig, config, wLogger } from '@tosu/common';
+import type { InstanceManager } from 'tosu/instances/manager';
 
 import buildAssetsApi from './router/assets';
 import buildBaseApi from './router/index';
@@ -12,7 +13,7 @@ import { isRequestAllowed } from './utils/index';
 import { Websocket } from './utils/socket';
 
 export class Server {
-    instanceManager: any;
+    instanceManager: InstanceManager;
     app = new HttpServer();
 
     WS_V1: Websocket;
@@ -21,7 +22,7 @@ export class Server {
     WS_V2_PRECISE: Websocket;
     WS_COMMANDS: Websocket;
 
-    constructor({ instanceManager }: { instanceManager: any }) {
+    constructor({ instanceManager }: { instanceManager: InstanceManager }) {
         this.instanceManager = instanceManager;
 
         this.middlewares();
@@ -54,7 +55,7 @@ export class Server {
             onMessageCallback: handleSocketCommands
         });
         this.WS_COMMANDS = new Websocket({
-            instanceManager: '',
+            instanceManager: this.instanceManager,
             pollRateFieldName: '',
             stateFunctionName: '',
             onMessageCallback: handleSocketCommands

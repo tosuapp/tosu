@@ -1,6 +1,6 @@
 import { ClientType, measureTime, wLogger } from '@tosu/common';
 
-import { IRankedPlay } from '@/memory/types';
+import type { IRankedPlay } from '@/memory/types';
 import { AbstractState } from '@/states/index';
 
 export class RankedPlay extends AbstractState {

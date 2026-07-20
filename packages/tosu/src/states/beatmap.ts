@@ -13,12 +13,12 @@ import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 
-import { BeatmapStrains } from '@/api/types/v1';
+import type { BeatmapStrains } from '@/api/types/v1';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals, safeJoin } from '@/utils/converters';
 import { sanitizeMods } from '@/utils/osuMods';
-import { CalculateMods } from '@/utils/osuMods.types';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 interface BeatmapPPAcc {
     '100': number;

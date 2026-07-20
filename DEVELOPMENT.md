@@ -1,51 +1,57 @@
+# tosu Development Guide
 
+This guide walks you through setting up your local environment, running the application in development mode, and compiling binaries.
 
-## Requirements
+## System Prerequisites
 
-- `Typescript` >=6.0.3
-- `Node.js` >=24.14.0
-- `Rust` >= any
-- `pnpm` >= 10.10.0
+To build and run tosu locally, you need the following tools installed on your system:
 
-<br />
+* **Node.js**: Version 24 or newer is recommended.
+* **pnpm**: The package manager used by the monorepo workspace.
+* **C++ Build Tools**: Such as Visual Studio Build Tools (Windows) or build-essential (Linux), required by node-gyp to compile the `tsprocess` native addon.
 
-1. Clone repository
+## Project Setup
 
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/tosuapp/tosu.git
+   cd tosu
+   ```
+
+2. Install dependencies (this will automatically build the native `tsprocess` C++ addon):
+   ```bash
+   pnpm install
+   ```
+
+## Running in Development
+
+To start tosu in development mode with hot-reloading:
+```bash
+pnpm run watch
 ```
-git clone https://github.com/tosuapp/tosu.git
-```
+This compiles the packages and runs the main server. The software will poll for a running osu! or osu!lazer process and attach to it automatically.
 
-2. Go to project folder
-```
-cd tosu
-```
-
-3. Install pnpm
-```
-npm install -g pnpm
-```
-
-4. Install dependencies
-```
-pnpm install
-```
-
-5. To run tosu in dev mode
-```
+Standard mode (without hot-reloading):
+```bash
 pnpm run start
 ```
 
-
-6. Compile tosu
-
-For Windows:
-```
-pnpm install && pnpm build:win
+### Running Specific Files
+If you are developing or testing specific components, you can use the sub-package ts runners:
+```bash
+pnpm --filter tosu run ts:run <file-path>
 ```
 
-For Linux
-```
-pnpm install && pnpm build:linux
-```
+## Compilation
 
-7. Go to `/tosu/packages/tosu/dist`, and there is your's tosu build
+You can compile a single self-contained binary file. The build outputs will be placed in `packages/tosu/dist/`.
+
+* **For Windows**:
+  ```bash
+  pnpm build:win
+  ```
+
+* **For Linux**:
+  ```bash
+  pnpm build:linux
+  ```

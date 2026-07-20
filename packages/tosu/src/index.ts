@@ -16,7 +16,7 @@ import { Process } from 'tsprocess';
 import { InstanceManager } from '@/instances/manager';
 
 // NOTE: _version.js packs with pkg support in tosu build
-const currentVersion = require('./_version.js');
+import { version as currentVersion } from './_version.js';
 
 (async () => {
     context.currentVersion = currentVersion;

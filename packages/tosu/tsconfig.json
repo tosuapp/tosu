@@ -1,25 +1,7 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "../..",
-    "allowJs": true,
-    "resolveJsonModule": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "typeRoots": [
-      "./src/@types"
-    ]
-  },
-  "exclude": [
-    "./node_modules"
-  ],
-  "include": [
-    "./src"
-  ]
+    "composite": false,
+    "noEmit": true
+  }
 }

@@ -1,10 +1,10 @@
 import { getStaticPath, wLogger } from '@tosu/common';
 import fs from 'fs';
 import http from 'http';
-import { OutgoingHttpHeaders } from 'http2';
+import type { OutgoingHttpHeaders } from 'http2';
 import path from 'path';
 
-import { ExtendedIncomingMessage, getContentType } from '../index';
+import { type ExtendedIncomingMessage, getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
 
 const allowedRangeExtensions = [

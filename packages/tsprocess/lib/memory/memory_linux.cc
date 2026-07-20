@@ -72,6 +72,18 @@ bool memory::is_process_exist(void *process) {
   return true;
 }
 
+// Returns the process creation time as unix epoch milliseconds, or 0 on failure.
+// /proc/<pid> is created when the process starts, so its ctime approximates it.
+uint64_t memory::get_process_start_time(void *process) {
+  const auto pid = reinterpret_cast<uintptr_t>(process);
+  struct stat sts;
+  const auto proc_path = "/proc/" + std::to_string(pid);
+  if (stat(proc_path.c_str(), &sts) != 0) {
+    return 0;
+  }
+  return static_cast<uint64_t>(sts.st_ctime) * 1000ULL;
+}
+
 bool memory::is_process_64bit(uint32_t id) {
   const auto exe_path = "/proc/" + std::to_string(id) + "/exe";
 

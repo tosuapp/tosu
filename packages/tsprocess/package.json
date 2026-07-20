@@ -1,6 +1,7 @@
 {
   "name": "tsprocess",
   "version": "1.0.1",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

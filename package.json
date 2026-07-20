@@ -1,11 +1,12 @@
 {
   "author": "Mikhail Babynichev",
   "license": "GPL-3.0",
-  "version": "4.24.0",
+  "version": "4.25.1",
   "packageManager": "pnpm@10.10.0",
   "scripts": {
     "prepare": "husky install",
     "start": "pnpm run -C packages/tosu run:dev",
+    "watch": "pnpm run -C packages/tosu watch",
     "build:win": "pnpm run -C packages/tosu compile:win",
     "build:linux": "pnpm run -C packages/tosu compile:linux",
     "build:overlay": "pnpm run -C \"packages/ingame-overlay\" dist",

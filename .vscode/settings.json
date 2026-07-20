@@ -5,4 +5,5 @@
     },
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
+    "js/ts.tsdk.path": "node_modules\\typescript\\lib",
 }
