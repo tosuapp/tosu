@@ -1,4 +1,4 @@
-import { join, normalize } from 'path';
+import { join } from 'path';
 
 const DOUBLE_POWERS_10 = [
     1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13,
@@ -91,5 +91,5 @@ export const numberFromDecimal = (
  * @returns {string} The safely joined path.
  */
 export const safeJoin = (...paths: string[]): string => {
-    return normalize(join(...paths.map((path) => path.trim())));
+    return join(...paths.map((path) => path.trim()));
 };
