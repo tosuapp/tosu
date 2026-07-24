@@ -981,6 +981,60 @@ a {
     }
   }
 
+  .select-input {
+    display: flex;
+    align-items: center;
+    background-color: #242d37;
+    border-radius: 0.3em;
+    width: fit-content;
+    height: fit-content;
+
+    select {
+      display: flex;
+      padding: 0 0.6em;
+      border: 0;
+      outline: 0;
+      font-size: 1rem;
+      width: fit-content;
+      min-width: 5rem;
+      max-width: 40rem;
+      height: fit-content;
+      min-height: 2rem;
+      max-height: 10rem;
+      field-sizing: content;
+      line-height: 1.7rem;
+      font-family: monospace;
+      text-align: center;
+      font-weight: bold;
+      background: transparent;
+      color: var(--block-color-1);
+
+      option {
+        background-color: var(--background-1)
+      }
+    }
+
+    &:hover,
+    &:focus-within {
+      select {
+        color: #6593c5;
+      }
+    }
+  }
+
+  .settings-item-v2:has(div > .select-input) {
+    & div>p {
+      color: #6593c5;
+      font-weight: bold;
+      opacity: 100%;
+      margin-right: 0.4rem;
+    }
+
+    & p {
+      opacity: 70%;
+    }
+  }
+
   .settings-save-button {
     position: sticky;
     bottom: 2rem;

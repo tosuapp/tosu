@@ -23,6 +23,12 @@ export interface Config {
         binding: 'CALCULATE_PP';
     };
 
+    // The channel to use for calculating performance points data.
+    ppChannel: {
+        type: string;
+        binding: 'PP_CHANNEL';
+    };
+
     // Whether tosu should read osu!'s built-in key overlay data.
     enableKeyOverlay: {
         type: boolean;

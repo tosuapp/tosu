@@ -103,6 +103,15 @@ export const settingsTextInputHTML = `
 </div>
 `;
 
+export const settingsSelectHTML = `
+<div class="select-input" data-id="{id}">
+  <select>
+    <option value disabled selected hidden>Select an option</option>
+    {options}
+  </select>
+</div>
+`;
+
 export const settingsTextareaInputHTML = `
 <div class="textarea-input" data-id="{id}">
   <textarea>{value}</textarea>
