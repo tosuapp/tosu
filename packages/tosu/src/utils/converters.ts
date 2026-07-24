@@ -82,6 +82,11 @@ export const numberFromDecimal = (
 /**
  * Joins given paths safely, uses system path separator and normalizes the joined path.
  *
+ * ## Note
+ * Sometimes path string read from the memory is invalid.
+ * Examples include trailing spaces or double slashes.
+ * This function cover those cases and ensure that the path is correctly joined.
+ *
  * @param {...string} paths - The paths to join.
  * @returns {string} The safely joined path.
  */
