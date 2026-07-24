@@ -41,11 +41,14 @@ export function calculateMaxAchievableScore(
         const adjustedComboMultiplierBase =
             Math.max(combo - 1, 0) * 2 + remainingCombo - 1;
 
-        const remainingScore =
-            (approxStdMaxScore(beatmapDiff) - approxStdMaxScore(curDiff)) *
+        const remainingAccScore =
+            stdMaxAccScore(beatmapDiff) - stdMaxAccScore(curDiff);
+        const remainingComboScore =
+            (beatmapDiff.maximumLegacyComboScore -
+                curDiff.maximumLegacyComboScore) *
             (adjustedComboMultiplierBase / comboMultiplierBase);
 
-        score.totalScore += remainingScore;
+        score.totalScore += remainingAccScore + remainingComboScore;
     }
 
     score.accuracy = beatmap.calculateAccuracy(score);
@@ -150,14 +153,11 @@ function getMaxHit(mode: number, score: ScoreInfoData) {
 }
 
 /**
- * Approximate the total score for osu! based on combo score and hit objects.
- * The returned score doesn't include any bonus scores.
+ * Approximate the total accuracy score for osu! based on hit objects.
+ * The returned accuracy score doesn't include any bonus scores.
  *
  * REMOVE: When there are proper way to calculate total score.
  */
-function approxStdMaxScore(diff: DifficultyAttrsData): number {
-    return (
-        diff.maximumLegacyComboScore +
-        (diff.nCircles + diff.nSliders + diff.nSpinners) * 300
-    );
+function stdMaxAccScore(diff: DifficultyAttrsData): number {
+    return (diff.nCircles + diff.nSliders + diff.nSpinners) * 300;
 }
