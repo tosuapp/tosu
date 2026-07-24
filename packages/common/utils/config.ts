@@ -12,7 +12,7 @@ import type {
     ConfigSchema,
     GlobalConfig
 } from './config.types';
-import { getConfigPath } from './directories';
+import { getConfigPath, getDataPath, getStaticPath } from './directories';
 import { wLogger } from './logger';
 import { isRealNumber } from './manipulation';
 
@@ -65,7 +65,10 @@ const defaultSchema: ConfigSchema = {
     },
     staticFolderPath: {
         binding: 'STATIC_FOLDER_PATH',
-        default: './static'
+        default:
+            process.platform === 'linux'
+                ? path.join(getDataPath(), 'static')
+                : './static'
     },
     enableIngameOverlay: {
         binding: 'ENABLE_INGAME_OVERLAY',
@@ -492,5 +495,5 @@ export async function configInitialization() {
     await ConfigManager.initialize(configPath);
 
     // Create user-specified static folder
-    await fs.mkdir(config.staticFolderPath, { recursive: true }).catch(null);
+    await fs.mkdir(getStaticPath(), { recursive: true }).catch(null);
 }
