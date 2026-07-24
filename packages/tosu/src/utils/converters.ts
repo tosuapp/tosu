@@ -1,4 +1,4 @@
-import { join, normalize, sep } from 'path';
+import { join } from 'path';
 
 const DOUBLE_POWERS_10 = [
     1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13,
@@ -82,14 +82,14 @@ export const numberFromDecimal = (
 /**
  * Joins given paths safely, uses system path separator and normalizes the joined path.
  *
+ * ## Note
+ * Sometimes path string read from the memory is invalid.
+ * Examples include trailing spaces or double slashes.
+ * This function cover those cases and ensure that the path is correctly joined.
+ *
  * @param {...string} paths - The paths to join.
  * @returns {string} The safely joined path.
  */
 export const safeJoin = (...paths: string[]): string => {
-    const cleaned = paths.map((path) => {
-        if (!path) return '';
-        return path.trim().replace(/[/\\]+/g, sep);
-    });
-
-    return normalize(join(...cleaned));
+    return join(...paths.map((path) => path.trim()));
 };
