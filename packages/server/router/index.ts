@@ -467,25 +467,30 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route(/\/api\/ingame/, 'GET', (req, res) => {
-        fs.readFile(
-            path.join(pkgAssetsPath, 'ingame.html'),
-            'utf8',
-            (err, content) => {
-                if (err) {
-                    wLogger.debug(`Failed to read ingame.html:`, err);
-                    res.writeHead(500);
-                    return res.end(`Server Error: ${err.code}`);
-                }
+        // TODO: Temporary disabled for dev purposes.
+        //  Should be re-enabled before merging.
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+        return res.end('This page is no longer available.');
 
-                const counters = getLocalCounters();
-                content += `\n\n\n<script>\rwindow.COUNTERS = ${JSON.stringify(counters)}\r</script>\n`;
-
-                res.writeHead(200, {
-                    'Content-Type': 'text/html; charset=utf-8'
-                });
-                res.end(content, 'utf-8');
-            }
-        );
+        // fs.readFile(
+        //     path.join(pkgAssetsPath, 'ingame.html'),
+        //     'utf8',
+        //     (err, content) => {
+        //         if (err) {
+        //             wLogger.debug(`Failed to read ingame.html:`, err);
+        //             res.writeHead(500);
+        //             return res.end(`Server Error: ${err.code}`);
+        //         }
+        //
+        //         const counters = getLocalCounters();
+        //         content += `\n\n\n<script>\rwindow.COUNTERS = ${JSON.stringify(counters)}\r</script>\n`;
+        //
+        //         res.writeHead(200, {
+        //             'Content-Type': 'text/html; charset=utf-8'
+        //         });
+        //         res.end(content, 'utf-8');
+        //     }
+        // );
     });
 
     server.app.route('/favicon.ico', 'GET', (req, res) => {
@@ -515,53 +520,66 @@ export default function buildBaseApi(server: Server) {
                 return res.end();
             }
 
-            if (url === '/') {
-                const parseAddress = new URL(
-                    req.headers.host
-                        ? `http://${req.headers.host}/`
-                        : req.headers.referer ||
-                              `http://${req.socket.remoteAddress}/`
-                );
-
-                return buildLocalCounters(res, parseAddress.hostname);
+            // TODO: Temporary disabled for dev purposes.
+            //  Should be re-enabled before merging.
+            if (
+                ['/', '/settings', '/local-overlays', '/available'].includes(
+                    url
+                )
+            ) {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain; charset=utf-8'
+                });
+                return res.end('This page is no longer available.');
             }
 
-            if (url === '/settings') {
-                if (req.query.overlay) return buildEmptyPage(res);
-                return buildSettings(res);
-            }
-            if (url === '/local-overlays') return buildInstructionLocal(res);
-            if (url === '/available') {
-                const parseAddress = new URL(
-                    req.headers.host
-                        ? `http://${req.headers.host}/`
-                        : req.headers.referer ||
-                              `http://${req.socket.remoteAddress}/`
-                );
-                return buildExternalCounters(res, parseAddress.hostname);
-            }
-
-            const staticPath = getStaticPath();
-
-            const extension = path.extname(url);
-
-            // ignore empty and one letter extension (extension returned with .)
-            if (extension.length < 3 && !url.endsWith('/')) {
-                res.writeHead(301, { Location: url + '/' });
-                return res.end();
-            }
-
-            const selectIndexHTML = url.endsWith('/')
-                ? url + 'index.html'
-                : url;
-            directoryWalker({
-                _htmlRedirect: true,
-                req,
-                res,
-                baseUrl: url,
-                pathname: selectIndexHTML,
-                folderPath: staticPath
-            });
+            // if (url === '/') {
+            //     const parseAddress = new URL(
+            //         req.headers.host
+            //             ? `http://${req.headers.host}/`
+            //             : req.headers.referer ||
+            //                   `http://${req.socket.remoteAddress}/`
+            //     );
+            //
+            //     return buildLocalCounters(res, parseAddress.hostname);
+            // }
+            //
+            // if (url === '/settings') {
+            //     if (req.query.overlay) return buildEmptyPage(res);
+            //     return buildSettings(res);
+            // }
+            // if (url === '/local-overlays') return buildInstructionLocal(res);
+            // if (url === '/available') {
+            //     const parseAddress = new URL(
+            //         req.headers.host
+            //             ? `http://${req.headers.host}/`
+            //             : req.headers.referer ||
+            //                   `http://${req.socket.remoteAddress}/`
+            //     );
+            //     return buildExternalCounters(res, parseAddress.hostname);
+            // }
+            //
+            // const staticPath = getStaticPath();
+            //
+            // const extension = path.extname(url);
+            //
+            // // ignore empty and one letter extension (extension returned with .)
+            // if (extension.length < 3 && !url.endsWith('/')) {
+            //     res.writeHead(301, { Location: url + '/' });
+            //     return res.end();
+            // }
+            //
+            // const selectIndexHTML = url.endsWith('/')
+            //     ? url + 'index.html'
+            //     : url;
+            // directoryWalker({
+            //     _htmlRedirect: true,
+            //     req,
+            //     res,
+            //     baseUrl: url,
+            //     pathname: selectIndexHTML,
+            //     folderPath: staticPath
+            // });
         } catch (error) {
             wLogger.warn(
                 `Failed to process request for %${url}%:`,
