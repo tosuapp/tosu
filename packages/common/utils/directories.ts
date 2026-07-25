@@ -113,3 +113,60 @@ export function getConfigPath() {
     }
     return getProgramPath();
 }
+
+export interface LocalOverlayFolder {
+    folderName: string;
+    folderPath: string;
+    entryPath: string;
+    metadataPath?: string;
+    settingsPath?: string;
+}
+
+/**
+ * Scans the static directory for valid 1-level overlay folders.
+ * Prefers `index.html` as the entry file; fallbacks to any `*.html` file.
+ *
+ * @param staticPath The absolute path to the static overlays directory.
+ * @returns An array of discovered local overlay folder details.
+ */
+export function scanLocalOverlays(staticPath: string): LocalOverlayFolder[] {
+    if (!fs.existsSync(staticPath)) return [];
+
+    const entries = fs.readdirSync(staticPath, { withFileTypes: true });
+    const overlays: LocalOverlayFolder[] = [];
+
+    for (const entry of entries) {
+        if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+
+        const folderPath = path.join(staticPath, entry.name);
+        const files = fs.readdirSync(folderPath);
+
+        let entryName = files.find((f) => f.toLowerCase() === 'index.html');
+        if (!entryName) {
+            entryName = files.find((f) => f.toLowerCase().endsWith('.html'));
+        }
+
+        if (!entryName) continue;
+
+        const hasMetadata = files.some(
+            (f) => f.toLowerCase() === 'metadata.txt'
+        );
+        const hasSettings = files.some(
+            (f) => f.toLowerCase() === 'settings.json'
+        );
+
+        overlays.push({
+            folderName: entry.name,
+            folderPath,
+            entryPath: path.join(folderPath, entryName),
+            metadataPath: hasMetadata
+                ? path.join(folderPath, 'metadata.txt')
+                : undefined,
+            settingsPath: hasSettings
+                ? path.join(folderPath, 'settings.json')
+                : undefined
+        });
+    }
+
+    return overlays;
+}
