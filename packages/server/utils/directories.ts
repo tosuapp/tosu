@@ -99,7 +99,7 @@ export function directoryWalker({
                         }
 
                         if (isHTML === true) {
-                            html = addCounterMetadata(html, filePath);
+                            html = injectOverlayRuntime(html, filePath);
                         }
 
                         res.writeHead(200, {
@@ -123,7 +123,7 @@ export function directoryWalker({
             }
 
             if (isHTML === true) {
-                content = addCounterMetadata(content.toString(), filePath);
+                content = injectOverlayRuntime(content.toString(), filePath);
             }
 
             if (req.headers.range) {
@@ -189,7 +189,7 @@ export function readDirectory(
     });
 }
 
-export function addCounterMetadata(html: string, filePath: string) {
+export function injectOverlayRuntime(html: string, filePath: string): string {
     try {
         const staticPath = getStaticPath();
 
