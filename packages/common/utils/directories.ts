@@ -3,6 +3,7 @@ import { homedir } from 'os';
 import path from 'path';
 
 import { config } from './config';
+import { wLogger } from './logger';
 
 export function ensureDirectoryExists(dir: string) {
     if (!fs.existsSync(dir)) {
@@ -127,45 +128,69 @@ export interface LocalOverlayFolder {
  * Prefers `index.html` as the entry file; fallbacks to any `*.html` file.
  *
  * @param staticPath The absolute path to the static overlays directory.
+ * @param target Optional specific overlay folder name to scan.
  * @returns An array of discovered local overlay folder details.
  */
-export function scanLocalOverlays(staticPath: string): LocalOverlayFolder[] {
-    if (!fs.existsSync(staticPath)) return [];
+export function scanLocalOverlays(
+    staticPath: string,
+    target?: string
+): LocalOverlayFolder[] {
+    if (!fs.existsSync(staticPath) || (target && target.startsWith('.')))
+        return [];
 
-    const entries = fs.readdirSync(staticPath, { withFileTypes: true });
+    const entries = target
+        ? [{ name: target, isDirectory: () => true }]
+        : fs.readdirSync(staticPath, { withFileTypes: true });
+
     const overlays: LocalOverlayFolder[] = [];
 
     for (const entry of entries) {
         if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
 
         const folderPath = path.join(staticPath, entry.name);
-        const files = fs.readdirSync(folderPath);
+        if (!fs.existsSync(folderPath)) continue;
 
-        let entryName = files.find((f) => f.toLowerCase() === 'index.html');
-        if (!entryName) {
-            entryName = files.find((f) => f.toLowerCase().endsWith('.html'));
+        try {
+            const files = fs.readdirSync(folderPath);
+
+            let entryName = files.find((f) => f.toLowerCase() === 'index.html');
+            if (!entryName) {
+                entryName = files.find((f) =>
+                    f.toLowerCase().endsWith('.html')
+                );
+            }
+
+            if (!entryName) {
+                wLogger.debug(
+                    `Skipping overlay folder %${entry.name}%: No HTML entry file found.`
+                );
+                continue;
+            }
+
+            const hasMetadata = files.some(
+                (f) => f.toLowerCase() === 'metadata.txt'
+            );
+            const hasSettings = files.some(
+                (f) => f.toLowerCase() === 'settings.json'
+            );
+
+            overlays.push({
+                folderName: entry.name,
+                folderPath,
+                entryPath: path.join(folderPath, entryName),
+                metadataPath: hasMetadata
+                    ? path.join(folderPath, 'metadata.txt')
+                    : undefined,
+                settingsPath: hasSettings
+                    ? path.join(folderPath, 'settings.json')
+                    : undefined
+            });
+        } catch (error) {
+            wLogger.debug(
+                `Failed to scan overlay folder %${entry.name}%:`,
+                (error as Error).message
+            );
         }
-
-        if (!entryName) continue;
-
-        const hasMetadata = files.some(
-            (f) => f.toLowerCase() === 'metadata.txt'
-        );
-        const hasSettings = files.some(
-            (f) => f.toLowerCase() === 'settings.json'
-        );
-
-        overlays.push({
-            folderName: entry.name,
-            folderPath,
-            entryPath: path.join(folderPath, entryName),
-            metadataPath: hasMetadata
-                ? path.join(folderPath, 'metadata.txt')
-                : undefined,
-            settingsPath: hasSettings
-                ? path.join(folderPath, 'settings.json')
-                : undefined
-        });
     }
 
     return overlays;
