@@ -189,6 +189,153 @@ export function readDirectory(
     });
 }
 
+export interface HttpContext {
+    req: ExtendedIncomingMessage;
+    res: http.ServerResponse;
+}
+
+export interface ServeStaticOptions {
+    ctx: HttpContext;
+    root: string;
+    pathname: string;
+    isOverlay?: boolean;
+}
+
+async function resolveStaticPath({
+    root,
+    pathname
+}: Pick<ServeStaticOptions, 'root' | 'pathname'>): Promise<{
+    targetPath: string;
+    stats: fs.Stats;
+    needsRedirect?: boolean;
+} | null> {
+    let cleanedUrl: string;
+    try {
+        cleanedUrl = decodeURIComponent(pathname);
+    } catch (error) {
+        wLogger.debug(
+            `Failed to decode URL pathname %${pathname}%:`,
+            (error as Error).message
+        );
+        return null;
+    }
+
+    const resolvedFolder = path.resolve(root);
+    let targetPath = path.resolve(
+        resolvedFolder,
+        cleanedUrl.replace(/^[/\\]+/, '')
+    );
+
+    if (!targetPath.startsWith(resolvedFolder)) {
+        wLogger.warn(`Blocked potential path traversal request: %${pathname}%`);
+        return null;
+    }
+
+    try {
+        let stats = await fs.promises.stat(targetPath);
+
+        if (stats.isDirectory()) {
+            if (!pathname.endsWith('/')) {
+                return { targetPath, stats, needsRedirect: true };
+            }
+            targetPath = path.join(targetPath, 'index.html');
+            stats = await fs.promises.stat(targetPath);
+        }
+
+        return { targetPath, stats };
+    } catch (err: any) {
+        if (err?.code !== 'ENOENT') {
+            wLogger.debug(
+                `Failed to stat path %${targetPath}%:`,
+                (err as Error).message
+            );
+        }
+        return null;
+    }
+}
+
+interface StreamByteRangeOptions {
+    ctx: HttpContext;
+    targetPath: string;
+    fileSize: number;
+    contentType: string;
+}
+
+function streamByteRange({
+    ctx,
+    targetPath,
+    fileSize,
+    contentType
+}: StreamByteRangeOptions) {
+    const { req, res } = ctx;
+    const range = (req.headers.range || '').replace('bytes=', '').split('-');
+    const start = parseInt(range[0], 10);
+    const end = range[1] ? parseInt(range[1], 10) : fileSize - 1;
+
+    if (start >= fileSize || end >= fileSize) {
+        res.writeHead(416, { 'Content-Range': `bytes */${fileSize}` });
+        return res.end();
+    }
+
+    res.writeHead(206, {
+        'Accept-Ranges': 'bytes',
+        'Content-Type': contentType,
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Content-Length': end - start + 1
+    });
+
+    return fs.createReadStream(targetPath, { start, end }).pipe(res);
+}
+
+export async function serveStaticFile(options: ServeStaticOptions) {
+    const { ctx, root, pathname, isOverlay = true } = options;
+    const { req, res } = ctx;
+
+    const resolved = await resolveStaticPath({ root, pathname });
+    if (!resolved) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        return res.end('404 Not Found');
+    }
+
+    const { targetPath, stats, needsRedirect } = resolved;
+
+    if (needsRedirect) {
+        res.writeHead(301, { Location: req.pathname + '/' });
+        return res.end();
+    }
+
+    const contentType = getContentType(targetPath);
+
+    if (isOverlay && targetPath.endsWith('.html')) {
+        try {
+            const rawContent = await fs.promises.readFile(targetPath, 'utf8');
+            res.writeHead(200, { 'Content-Type': contentType });
+            return res.end(injectOverlayRuntime(rawContent, targetPath));
+        } catch {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            return res.end('Server Error');
+        }
+    }
+
+    if (req.headers.range) {
+        return streamByteRange({
+            ctx,
+            targetPath,
+            fileSize: stats.size,
+            contentType
+        });
+    }
+
+    const headOptions: OutgoingHttpHeaders = { 'Content-Type': contentType };
+    if (allowedRangeExtensions.includes(path.extname(targetPath))) {
+        headOptions['Accept-Ranges'] = 'bytes';
+        headOptions['Content-Length'] = stats.size;
+    }
+
+    res.writeHead(200, headOptions);
+    return fs.createReadStream(targetPath).pipe(res);
+}
+
 export function injectOverlayRuntime(html: string, filePath: string): string {
     try {
         const staticPath = getStaticPath();
