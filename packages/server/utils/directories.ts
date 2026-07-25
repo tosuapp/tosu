@@ -197,6 +197,10 @@ export function injectOverlayRuntime(html: string, filePath: string): string {
 
         const injection = `
         <script>
+            if (window.top !== window.self) {
+                const noop = () => {};
+                console.log = console.info = console.warn = console.debug = noop;
+            }
             window.COUNTER_PATH = "${counterPath}";
         </script>`.trim();
 
