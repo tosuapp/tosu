@@ -196,6 +196,11 @@ export function injectOverlayRuntime(html: string, filePath: string): string {
         const counterPath = relativeDir.replace(/\\/g, '/');
 
         const injection = `
+        <style>
+            html, body {
+                background: transparent !important;
+            }
+        </style>
         <script>
             if (window.top !== window.self) {
                 const noop = () => {};
