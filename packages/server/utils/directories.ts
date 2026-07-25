@@ -192,22 +192,29 @@ export function readDirectory(
 export function injectOverlayRuntime(html: string, filePath: string): string {
     try {
         const staticPath = getStaticPath();
+        const relativeDir = path.relative(staticPath, path.dirname(filePath));
+        const counterPath = relativeDir.replace(/\\/g, '/');
 
-        const counterPath = path
-            .dirname(filePath.replace(staticPath, ''))
-            .replace(/^(\\\\\\|\\\\|\\|\/|\/\/)/, '')
-            .replace(/\\/gm, '/');
+        const injection = `
+        <script>
+            window.COUNTER_PATH = "${counterPath}";
+        </script>`.trim();
 
-        html += `\n\n\n<script>\rwindow.COUNTER_PATH=\`${counterPath}\`\r</script>\n`;
+        if (/<head[^>]*>/i.test(html)) {
+            return html.replace(
+                /<head[^>]*>/i,
+                (match) => `${match}\n${injection}`
+            );
+        }
 
-        return html;
+        return `${injection}\n${html}`;
     } catch (error) {
         wLogger.error(
-            'Failed to add counter metadata:',
-            (error as any).message
+            'Failed to inject overlay runtime:',
+            (error as Error).message
         );
-        wLogger.debug('Counter metadata error details:', error);
+        wLogger.debug('Overlay runtime injection error details:', error);
 
-        return '';
+        return html;
     }
 }
