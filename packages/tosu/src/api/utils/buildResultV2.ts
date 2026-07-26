@@ -23,6 +23,7 @@ import type {
     ApiAnswer,
     Leaderboard,
     Play,
+    Stats,
     Tourney,
     TourneyChatMessages,
     TourneyClients
@@ -583,6 +584,8 @@ const buildLazerTourneyData = (
                                 total: 0
                             },
 
+                            hitWindow: {},
+
                             maxCombo: 0
                             // not supported end
                         }
@@ -807,7 +810,7 @@ const buildTourneyData = (
     };
 };
 
-function buildBeatmapStats(beatmapPP: BeatmapPP) {
+function buildBeatmapStats(beatmapPP: BeatmapPP): Stats {
     return {
         stars: {
             live: fixDecimals(beatmapPP.currAttributes.stars),
@@ -835,8 +838,8 @@ function buildBeatmapStats(beatmapPP: BeatmapPP) {
             reading: beatmapPP.calculatedMapAttributes.reading
                 ? fixDecimals(beatmapPP.calculatedMapAttributes.reading)
                 : undefined,
-            hitWindow: beatmapPP.calculatedMapAttributes.hitWindow
-                ? fixDecimals(beatmapPP.calculatedMapAttributes.hitWindow)
+            hitWindow: beatmapPP.calculatedMapAttributes.hitWindow?.great
+                ? fixDecimals(beatmapPP.calculatedMapAttributes.hitWindow.great)
                 : undefined,
             total: fixDecimals(beatmapPP.calculatedMapAttributes.fullStars)
         },
@@ -884,6 +887,8 @@ function buildBeatmapStats(beatmapPP: BeatmapPP) {
                 beatmapPP.calculatedMapAttributes.spinners +
                 beatmapPP.calculatedMapAttributes.holds
         },
+
+        hitWindow: beatmapPP.calculatedMapAttributes.hitWindow,
 
         maxCombo: beatmapPP.calculatedMapAttributes.maxCombo
     };

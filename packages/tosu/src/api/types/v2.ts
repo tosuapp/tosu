@@ -1,5 +1,7 @@
-import { IRankedPlay } from '@/memory/types';
-import { CalculateMods } from '@/utils/osuMods.types';
+import type { OsuHitResult } from '@tosuapp/lazer-calculator-prebuilt';
+
+import type { IRankedPlay } from '@/memory/types';
+import type { CalculateMods } from '@/utils/osuMods.types';
 
 export type ApiAnswer = TosuAPi | { error?: string };
 export type ApiAnswerPrecise = TosuPreciseAnswer | { error?: string };
@@ -238,6 +240,10 @@ export interface Beatmap {
     stats: Stats;
 }
 
+export type HitWindow = Partial<
+    Record<Uncapitalize<keyof typeof OsuHitResult>, number>
+>;
+
 export interface Stats {
     stars: Stars;
     ar: Ar;
@@ -246,6 +252,7 @@ export interface Stats {
     hp: Hp;
     bpm: Bpm;
     objects: Objects;
+    hitWindow: HitWindow;
     maxCombo: number;
 }
 
