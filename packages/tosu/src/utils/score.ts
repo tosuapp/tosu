@@ -159,5 +159,8 @@ function getMaxHit(mode: number, score: ScoreInfoData) {
  * REMOVE: When there are proper way to calculate total score.
  */
 function stdMaxAccScore(diff: DifficultyAttrsData): number {
-    return (diff.nCircles + diff.nSliders + diff.nSpinners) * 300;
+    return (
+        (diff.nCircles + diff.nSliders + diff.nSpinners) *
+        (300 + diff.nestedScorePerObject)
+    );
 }
