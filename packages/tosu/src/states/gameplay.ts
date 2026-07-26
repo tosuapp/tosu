@@ -1,8 +1,9 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
-import {
+import { ppModuleManager } from '@tosu/pp-module-loader';
+import type {
     GradualDifficulty,
-    type ScoreInfoData
-} from '@tosuapp/lazer-calculator-prebuilt';
+    ScoreInfoData
+} from '@tosu/pp-module-loader/types';
 
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states/index';
@@ -154,6 +155,10 @@ export class Gameplay extends AbstractState {
         this.isLeaderboardVisible = false;
         this.leaderboardPlayer = Object.assign({}, defaultLBPlayer);
         this.leaderboardScores = [];
+
+        ppModuleManager.events.on('changed', () => {
+            this.resetQuick();
+        });
     }
 
     resetQuick() {

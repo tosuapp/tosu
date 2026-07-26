@@ -1,14 +1,14 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
-import {
-    type DifficultyAttrs,
-    HitWindows,
-    type LazerMod,
-    type PeakStrains,
-    type PerformanceAttrsData,
+import { ppModuleManager } from '@tosu/pp-module-loader';
+import type {
+    DifficultyAttrs,
+    LazerMod,
+    PeakStrains,
+    PerformanceAttrsData,
     PlayBeatmap,
-    type ScoreInfoData,
-    type StrainsData
-} from '@tosuapp/lazer-calculator-prebuilt';
+    ScoreInfoData,
+    StrainsData
+} from '@tosu/pp-module-loader/types';
 import fs from 'fs';
 import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
@@ -94,6 +94,10 @@ interface KiaiPoint {
 }
 
 export class BeatmapPP extends AbstractState {
+    currentMods?: CalculateMods;
+    currentMode: number;
+    lazerBypass: boolean;
+
     isKiai: boolean;
     isBreak: boolean;
 
@@ -156,6 +160,9 @@ export class BeatmapPP extends AbstractState {
     }
 
     init() {
+        this.currentMode = 0;
+        this.lazerBypass = false;
+
         this.isKiai = false;
         this.isBreak = false;
 
@@ -237,6 +244,19 @@ export class BeatmapPP extends AbstractState {
         this.timingPoints = [];
         this.breaks = [];
         this.kiais = [];
+
+        ppModuleManager.events.on('changed', () => {
+            // TODO: remove temp hack
+            if (this.currentMods) {
+                this.updateMapMetadata(
+                    this.currentMods,
+                    this.currentMode,
+                    this.lazerBypass
+                );
+            }
+
+            this.updateGraph();
+        });
     }
 
     updatePPAttributes(type: 'curr' | 'fc', attributes: PerformanceAttrsData) {
@@ -308,6 +328,11 @@ export class BeatmapPP extends AbstractState {
         currentMode: number,
         lazerBypass: boolean = false
     ) {
+        // TODO remove
+        this.currentMods = currentMods;
+        this.currentMode = currentMode;
+        this.lazerBypass = lazerBypass;
+
         try {
             const startTime = performance.now();
 
@@ -369,7 +394,9 @@ export class BeatmapPP extends AbstractState {
                 return 'not-ready';
             }
 
-            this.beatmap = PlayBeatmap.parse(this.beatmapContent);
+            this.beatmap = ppModuleManager.current.PlayBeatmap.parse(
+                this.beatmapContent
+            );
             if (this.beatmap.mode === 0 && this.beatmap.mode !== currentMode) {
                 const converted = this.beatmap.convert(currentMode);
                 if (!converted) {
@@ -570,7 +597,7 @@ export class BeatmapPP extends AbstractState {
                 rhythm: difficulty.rhythm,
                 color: difficulty.color,
                 reading: difficulty.reading,
-                hitWindow: HitWindows.getGreatHitWindow(
+                hitWindow: ppModuleManager.current.HitWindows.getGreatHitWindow(
                     this.beatmap.mode,
                     convertedDifficulty.overallDifficulty
                 )

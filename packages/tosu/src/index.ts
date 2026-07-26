@@ -9,6 +9,7 @@ import {
     isRealBoolean,
     wLogger
 } from '@tosu/common';
+import { ppModuleManager } from '@tosu/pp-module-loader';
 import { Server } from '@tosu/server';
 import { autoUpdater, checkUpdates } from '@tosu/updater';
 import { Process } from 'tsprocess';
@@ -83,6 +84,20 @@ import { version as currentVersion } from './_version.js';
         'change',
         instanceManager.handleConfigUpdate.bind(instanceManager)
     );
+
+    ppModuleManager.load({
+        type: 'dist-tag',
+        tag: config.ppChannel
+    });
+
+    configEvents.on('change', (oldConfig) => {
+        if (oldConfig.ppChannel !== config.ppChannel) {
+            ppModuleManager.load({
+                type: 'dist-tag',
+                tag: config.ppChannel
+            });
+        }
+    });
 
     if (config.enableIngameOverlay) instanceManager.startOverlay();
 })();

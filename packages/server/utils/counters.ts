@@ -6,6 +6,7 @@ import {
     recursiveFilesSearch,
     wLogger
 } from '@tosu/common';
+import { onlinePpRegistry } from '@tosu/pp-module-loader';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -29,6 +30,7 @@ import {
     settingsGroupHTML,
     settingsItemHTMLv2,
     settingsNumberInputHTML,
+    settingsSelectHTML,
     settingsSwitchHTML,
     settingsTextInputHTML,
     settingsTextareaInputHTML
@@ -575,7 +577,7 @@ export async function buildExternalCounters(
     );
 }
 
-export function buildSettings(res: http.ServerResponse) {
+export async function buildSettings(res: http.ServerResponse) {
     const generalGroup = settingsGroupHTML
         .replace('{header}', 'General')
         .replace(
@@ -617,6 +619,8 @@ export function buildSettings(res: http.ServerResponse) {
                 .join('\n')
         );
 
+    const ppCalculators = await onlinePpRegistry.fetchAll();
+
     const dataGroup = settingsGroupHTML
         .replace('{header}', 'Data Fetching')
         .replace(
@@ -635,6 +639,29 @@ export function buildSettings(res: http.ServerResponse) {
                             .replace(
                                 '{checked}',
                                 config.calculatePP ? 'checked' : ''
+                            )
+                    ),
+
+                settingsItemHTMLv2
+                    .replace('{name}', 'PP Calculator Channel')
+                    .replace(
+                        '{description}',
+                        'Version channel to use for PP calculator.'
+                    )
+                    .replace(
+                        '{input-2}',
+                        settingsSelectHTML
+                            .replace('{id}', 'PP_CHANNEL')
+                            .replace('{value}', config.ppChannel)
+                            .replace(
+                                '{options}',
+                                ppCalculators
+                                    .filter((r) => r.type === 'dist-tag')
+                                    .map(
+                                        (option) =>
+                                            `<option value="${option.tag}" ${option.tag === config.ppChannel ? 'selected' : ''}>${option.tag}</option>`
+                                    )
+                                    .join('')
                             )
                     ),
                 settingsItemHTMLv2
