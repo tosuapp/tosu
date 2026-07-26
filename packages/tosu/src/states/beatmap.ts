@@ -396,12 +396,12 @@ export class BeatmapPP extends AbstractState {
                     settings:
                         'settings' in mod && mod.settings
                             ? new Map(Object.entries(mod.settings))
-                            : undefined
+                            : new Map()
                 })
             );
             if (this.game.client !== ClientType.lazer) {
                 // Add classic mod if client is not on lazer.
-                mods.push({ acronym: 'CL' });
+                mods.push({ acronym: 'CL', settings: new Map() });
             }
             this.beatmap.applyMods(mods);
 
