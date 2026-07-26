@@ -16,3 +16,4 @@ export * from './enums/tosu';
 export * from './enums/country';
 
 export * from './utils/config.types';
+export * from './utils/config.schema';
