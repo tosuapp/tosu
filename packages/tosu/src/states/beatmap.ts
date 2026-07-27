@@ -546,7 +546,6 @@ export class BeatmapPP extends AbstractState {
                 this.beatmap.getOriginalBeatmapDifficulty();
             const convertedDifficulty = this.beatmap.getBeatmapDifficulty();
 
-            const hitWindows = this.beatmap.createHitWindows();
             this.calculatedMapAttributes = {
                 ar: originalDifficulty.approachRate,
                 arConverted: convertedDifficulty.approachRate,
@@ -572,14 +571,12 @@ export class BeatmapPP extends AbstractState {
                 color: difficulty.color,
                 reading: difficulty.reading,
                 hitWindow: Object.fromEntries(
-                    Array.from(hitWindows.allAvailableWindows()).map(
-                        ([key, value]) => [
-                            OsuHitResult[key].replace(/^./, (s) =>
-                                s.toLowerCase()
-                            ),
-                            value / this.clockRate
-                        ]
-                    )
+                    Array.from(
+                        this.beatmap.createHitWindows().allAvailableWindows()
+                    ).map(([key, value]) => [
+                        OsuHitResult[key].replace(/^./, (s) => s.toLowerCase()),
+                        value / this.clockRate
+                    ])
                 )
             };
 
