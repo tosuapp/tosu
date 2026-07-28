@@ -6,6 +6,7 @@ import { AbstractState } from '@/states';
 import { calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods } from '@/utils/osuMods';
 import type { CalculateMods } from '@/utils/osuMods.types';
+import { calculateFcScore } from '@/utils/score';
 
 import { defaultStatistics } from './gameplay';
 import type { Statistics } from './types';
@@ -127,7 +128,7 @@ export class ResultScreen extends AbstractState {
 
             const currentBeatmap = beatmapPP.getCurrentBeatmap();
             const diffAttrs = beatmapPP.difficultyAttributes;
-            if (!currentBeatmap || !diffAttrs) {
+            if (!currentBeatmap || !diffAttrs || !beatmapPP.maxScore) {
                 wLogger.debug(
                     `%${ClientType[this.game.client]}%`,
                     `Result screen PP calc skipped: Can't get current map`
@@ -167,30 +168,15 @@ export class ResultScreen extends AbstractState {
                 calcOptions
             );
 
-            const fcCalcOptions: ScoreInfoData = {
-                ...calcOptions,
-                greats: this.statistics.great + this.statistics.miss,
-                misses: 0,
-                maxCombo: beatmapPP.calculatedMapAttributes.maxCombo
-            };
-            if (this.mode === 3) {
-                fcCalcOptions.perfects =
-                    this.statistics.perfect +
-                    this.statistics.ok +
-                    this.statistics.meh +
-                    this.statistics.miss;
-                fcCalcOptions.greats = this.statistics.great;
-                fcCalcOptions.goods = this.statistics.good;
-                fcCalcOptions.oks = 0;
-                fcCalcOptions.mehs = 0;
-                fcCalcOptions.misses = 0;
-                fcCalcOptions.accuracy = this.accuracy / 100;
-            }
-
             const t2 = performance.now();
             const fcPerformance = currentBeatmap.calculatePerformance(
                 diffAttrs,
-                fcCalcOptions
+                calculateFcScore(
+                    currentBeatmap,
+                    calcOptions,
+                    diffAttrs.getData(),
+                    beatmapPP.maxScore
+                )
             );
 
             this.pp = curPerformance.pp;

@@ -1,8 +1,8 @@
 import { ClientType, config, measureTime, wLogger } from '@tosu/common';
 import {
     type DifficultyAttrs,
-    HitWindows,
     type LazerMod,
+    OsuHitResult,
     type PeakStrains,
     type PerformanceAttrsData,
     PlayBeatmap,
@@ -391,15 +391,13 @@ export class BeatmapPP extends AbstractState {
             );
 
             const mods: LazerMod[] = sanitizeMods(currentMods.array).map(
-                (mod) => {
-                    return {
-                        acronym: mod.acronym,
-                        settings:
-                            'settings' in mod && mod.settings
-                                ? new Map(Object.entries(mod.settings))
-                                : new Map()
-                    };
-                }
+                (mod) => ({
+                    acronym: mod.acronym,
+                    settings:
+                        'settings' in mod && mod.settings
+                            ? new Map(Object.entries(mod.settings))
+                            : new Map()
+                })
             );
             if (this.game.client !== ClientType.lazer) {
                 // Add classic mod if client is not on lazer.
@@ -546,6 +544,8 @@ export class BeatmapPP extends AbstractState {
             const originalDifficulty =
                 this.beatmap.getOriginalBeatmapDifficulty();
             const convertedDifficulty = this.beatmap.getBeatmapDifficulty();
+
+            const hitWindows = this.beatmap.createHitWindows();
             this.calculatedMapAttributes = {
                 ar: originalDifficulty.approachRate,
                 arConverted: convertedDifficulty.approachRate,
@@ -570,10 +570,8 @@ export class BeatmapPP extends AbstractState {
                 rhythm: difficulty.rhythm,
                 color: difficulty.color,
                 reading: difficulty.reading,
-                hitWindow: HitWindows.getGreatHitWindow(
-                    this.beatmap.mode,
-                    convertedDifficulty.overallDifficulty
-                )
+                hitWindow:
+                    hitWindows.windowFor(OsuHitResult.Great) / this.clockRate
             };
 
             this.game.resetReportCount('beatmapPP updateMapMetadata');
