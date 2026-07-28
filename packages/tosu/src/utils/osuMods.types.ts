@@ -278,7 +278,7 @@ export enum OsuMods {
     Key1 = 1 << 26,
     Key3 = 1 << 27,
     Key2 = 1 << 28,
-    LastMod = 1 << 29,
+    ScoreV2 = 1 << 29,
     keyMod = Key1 |
         Key2 |
         Key3 |

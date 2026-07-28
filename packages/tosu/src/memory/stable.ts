@@ -39,6 +39,7 @@ import { calculateAccuracy } from '@/utils/calculators';
 import { netDateBinaryToDate } from '@/utils/converters';
 import { fromLegacyHitResults } from '@/utils/hitResult';
 import { calculateMods, defaultCalculatedMods } from '@/utils/osuMods';
+import { OsuMods } from '@/utils/osuMods.types';
 import type {
     BindingsList,
     ConfigList,
@@ -544,18 +545,26 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
             const playerName = this.process.readSharpString(
                 this.process.readInt(scoreBase + 0x28)
             );
+
+            // [[Ruleset + 0x64] + 0x38] + 0x64
+            const mode = this.process.readInt(scoreBase + 0x64);
+
+            const scoreProcessor = this.process.readInt(scoreBase + 0x54);
+
             // [[[Ruleset + 0x64] + 0x38] + 0x1C] + 0xC ^ [[[Ruleset + 0x64] + 0x38] + 0x1C] + 0x8
-            const modsInt =
+            let modsInt =
                 this.process.readInt(
                     this.process.readInt(scoreBase + 0x1c) + 0xc
                 ) ^
                 this.process.readInt(
                     this.process.readInt(scoreBase + 0x1c) + 0x8
                 );
-            // [[Ruleset + 0x64] + 0x38] + 0x64
-            const mode = this.process.readInt(scoreBase + 0x64);
 
-            const scoreProcessor = this.process.readInt(scoreBase + 0x54);
+            // Scorev2 is not on mods if it's specified as a win condition.
+            if (scoreProcessor !== 0) {
+                modsInt |= OsuMods.ScoreV2;
+            }
+
             const score =
                 scoreProcessor === 0
                     ? this.process.readInt(scoreBase + 0x78) // v1
