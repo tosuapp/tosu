@@ -8,9 +8,6 @@ import { registerTosuProtocol } from './protocol';
 
 // prefer discrete gpu on laptop
 app.commandLine.appendSwitch('force_high_performance_gpu');
-// disable view scaling on hidpi
-app.commandLine.appendSwitch('high-dpi-support', '1');
-app.commandLine.appendSwitch('force-device-scale-factor', '1');
 // run in process gpu, reduce overheads
 app.commandLine.appendSwitch('in-process-gpu');
 app.commandLine.appendSwitch('disable-direct-composition');
