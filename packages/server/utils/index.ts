@@ -77,7 +77,12 @@ export function getContentType(text: string) {
     return contentType;
 }
 
-export function sendJson(response: http.ServerResponse, json: object | any[]) {
+export function sendJson(
+    response: http.ServerResponse,
+    json: object | any[],
+    statusCode?: number
+) {
+    if (statusCode) response.statusCode = statusCode;
     response.setHeader('Content-Type', 'application/json');
 
     try {
