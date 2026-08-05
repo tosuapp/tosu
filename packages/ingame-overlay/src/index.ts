@@ -14,6 +14,11 @@ app.commandLine.appendSwitch('force-device-scale-factor', '1');
 // run in process gpu, reduce overheads
 app.commandLine.appendSwitch('in-process-gpu');
 app.commandLine.appendSwitch('disable-direct-composition');
+// disable third party storage partitioning, to avoid issues with overlays using isolated storage
+app.commandLine.appendSwitch(
+    'disable-features',
+    'ThirdPartyStoragePartitioning'
+);
 
 (async () => {
     // Dev mode
