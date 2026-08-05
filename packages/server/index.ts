@@ -3,6 +3,7 @@ import type { InstanceManager } from 'tosu/instances/manager';
 
 import buildAssetsApi from './router/assets';
 import buildBaseApi from './router/index';
+import buildOverlaysApi from './router/overlays';
 import buildSCApi from './router/scApi';
 import buildSocket from './router/socket';
 import buildV1Api from './router/v1';
@@ -66,6 +67,7 @@ export class Server {
         buildSCApi(this.app);
 
         buildV2Api(this.app);
+        buildOverlaysApi(this.app);
 
         buildSocket({
             app: this.app,
