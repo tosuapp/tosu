@@ -22,7 +22,7 @@ app.commandLine.appendSwitch('disable-direct-composition');
     // Check single instance and ignore manually launched instance without ipc
     if (!app.requestSingleInstanceLock()) {
         console.log(
-            'warn: Another instance is already running, please close it first. Exiting...'
+            'warn: Another instance is already running. Please close it first. Exiting...'
         );
         return;
     } else if (!process.channel) {
