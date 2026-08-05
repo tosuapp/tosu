@@ -14,6 +14,7 @@ import { Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 
 import type { BeatmapStrains } from '@/api/types/v1';
+import type { HitWindow } from '@/api/types/v2';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals, safeJoin } from '@/utils/converters';
@@ -58,7 +59,7 @@ interface BeatmapAttributes {
     rhythm?: number | undefined;
     color?: number | undefined;
     reading?: number | undefined;
-    hitWindow?: number | undefined;
+    hitWindow: HitWindow;
 }
 
 interface BeatmapPPAttributes {
@@ -207,7 +208,7 @@ export class BeatmapPP extends AbstractState {
             rhythm: 0.0,
             color: 0.0,
             reading: 0.0,
-            hitWindow: 0.0
+            hitWindow: {}
         };
         this.currAttributes = {
             stars: 0.0,
@@ -545,7 +546,6 @@ export class BeatmapPP extends AbstractState {
                 this.beatmap.getOriginalBeatmapDifficulty();
             const convertedDifficulty = this.beatmap.getBeatmapDifficulty();
 
-            const hitWindows = this.beatmap.createHitWindows();
             this.calculatedMapAttributes = {
                 ar: originalDifficulty.approachRate,
                 arConverted: convertedDifficulty.approachRate,
@@ -570,8 +570,14 @@ export class BeatmapPP extends AbstractState {
                 rhythm: difficulty.rhythm,
                 color: difficulty.color,
                 reading: difficulty.reading,
-                hitWindow:
-                    hitWindows.windowFor(OsuHitResult.Great) / this.clockRate
+                hitWindow: Object.fromEntries(
+                    Array.from(
+                        this.beatmap.createHitWindows().allAvailableWindows()
+                    ).map(([key, value]) => [
+                        OsuHitResult[key].replace(/^./, (s) => s.toLowerCase()),
+                        value / this.clockRate
+                    ])
+                )
             };
 
             this.game.resetReportCount('beatmapPP updateMapMetadata');
