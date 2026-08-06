@@ -1,4 +1,9 @@
-import { type ConfigBinding, JsonSafeParse, wLogger } from '@tosu/common';
+import {
+    type ConfigBinding,
+    ConfigManager,
+    JsonSafeParse,
+    wLogger
+} from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
 import fs from 'fs';
 import { Readable } from 'node:stream';
