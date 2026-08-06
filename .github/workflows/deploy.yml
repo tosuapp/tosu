@@ -26,6 +26,13 @@ permissions:
 
 jobs:
   build:
+    if: |
+      github.event_name != 'pull_request' || (
+        !contains(github.event.pull_request.labels.*.name, 'skip ci') &&
+        !contains(github.event.pull_request.labels.*.name, 'skip-ci') &&
+        !contains(github.event.pull_request.title, '[skip ci]') &&
+        !contains(github.event.pull_request.body, '[skip ci]')
+      )
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-latest ]
