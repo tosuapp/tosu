@@ -17,11 +17,7 @@ export class Server {
     instanceManager: InstanceManager;
     app = new HttpServer();
 
-    WS_V1: Websocket;
-    WS_SC: Websocket;
-    WS_V2: Websocket;
-    WS_V2_PRECISE: Websocket;
-    WS_COMMANDS: Websocket;
+    sockets: Record<string, Websocket> = {};
 
     constructor({ instanceManager }: { instanceManager: InstanceManager }) {
         this.instanceManager = instanceManager;
@@ -30,37 +26,38 @@ export class Server {
     }
 
     start() {
-        this.WS_V1 = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getState',
-            onMessageCallback: handleSocketCommands
-        });
-        this.WS_SC = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getStateSC',
-            onMessageCallback: handleSocketCommands
-        });
-
-        this.WS_V2 = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getStateV2',
-            onMessageCallback: handleSocketCommands
-        });
-        this.WS_V2_PRECISE = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'preciseDataPollRate',
-            stateFunctionName: 'getPreciseData',
-            onMessageCallback: handleSocketCommands
-        });
-        this.WS_COMMANDS = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: '',
-            stateFunctionName: '',
-            onMessageCallback: handleSocketCommands
-        });
+        this.sockets = {
+            v1: new Websocket({
+                instanceManager: this.instanceManager,
+                pollRateFieldName: 'pollRate',
+                stateFunctionName: 'getState',
+                onMessageCallback: handleSocketCommands
+            }),
+            sc: new Websocket({
+                instanceManager: this.instanceManager,
+                pollRateFieldName: 'pollRate',
+                stateFunctionName: 'getStateSC',
+                onMessageCallback: handleSocketCommands
+            }),
+            v2: new Websocket({
+                instanceManager: this.instanceManager,
+                pollRateFieldName: 'pollRate',
+                stateFunctionName: 'getStateV2',
+                onMessageCallback: handleSocketCommands
+            }),
+            v2Precise: new Websocket({
+                instanceManager: this.instanceManager,
+                pollRateFieldName: 'preciseDataPollRate',
+                stateFunctionName: 'getPreciseData',
+                onMessageCallback: handleSocketCommands
+            }),
+            commands: new Websocket({
+                instanceManager: this.instanceManager,
+                pollRateFieldName: '',
+                stateFunctionName: '',
+                onMessageCallback: handleSocketCommands
+            })
+        };
 
         buildAssetsApi(this);
         buildV1Api(this.app);
@@ -69,15 +66,7 @@ export class Server {
         buildV2Api(this.app);
         buildOverlaysApi(this.app);
 
-        buildSocket({
-            app: this.app,
-
-            WS_V1: this.WS_V1,
-            WS_SC: this.WS_SC,
-            WS_V2: this.WS_V2,
-            WS_V2_PRECISE: this.WS_V2_PRECISE,
-            WS_COMMANDS: this.WS_COMMANDS
-        });
+        buildSocket(this);
 
         buildBaseApi(this);
 

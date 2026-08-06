@@ -104,7 +104,7 @@ export default function buildLegacyCountersApi(server: Server) {
                         );
                         fs.unlinkSync(tempPath);
 
-                        server.WS_COMMANDS.socket.emit(
+                        server.sockets.commands?.socket.emit(
                             'message',
                             'unzip',
                             'getOverlays',
@@ -224,7 +224,7 @@ export default function buildLegacyCountersApi(server: Server) {
 
             fs.rmSync(folderPath, { recursive: true, force: true });
 
-            server.WS_COMMANDS.socket.emit(
+            server.sockets.commands?.socket.emit(
                 'message',
                 'remove',
                 'getOverlays',
@@ -336,7 +336,7 @@ export default function buildLegacyCountersApi(server: Server) {
                 });
             }
 
-            server.WS_COMMANDS.socket.emit(
+            server.sockets.commands?.socket.emit(
                 'message',
                 'save settings',
                 'getSettings',
