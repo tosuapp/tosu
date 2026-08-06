@@ -1,24 +1,17 @@
 import { wLogger } from '@tosu/common';
 
-import { HttpServer, Websocket, isRequestAllowed } from '../index';
+import { Server, Websocket, isRequestAllowed } from '../index';
 
-export default function buildSocket({
-    app,
+export default function buildSocket(server: Server) {
+    const routeMap: Record<string, Websocket | undefined> = {
+        '/ws': server.sockets.v1,
+        '/tokens': server.sockets.sc,
+        '/websocket/v2': server.sockets.v2,
+        '/websocket/v2/precise': server.sockets.v2Precise,
+        '/websocket/commands': server.sockets.commands
+    };
 
-    WS_V1,
-    WS_SC,
-    WS_V2,
-    WS_V2_PRECISE,
-    WS_COMMANDS
-}: {
-    app: HttpServer;
-    WS_V1: Websocket;
-    WS_SC: Websocket;
-    WS_V2: Websocket;
-    WS_V2_PRECISE: Websocket;
-    WS_COMMANDS: Websocket;
-}) {
-    app.server.on('upgrade', function (request, socket, head) {
+    server.app.server.on('upgrade', (request, socket, head) => {
         const allowed = isRequestAllowed(request);
         if (!allowed) {
             wLogger.warn(
@@ -44,57 +37,14 @@ export default function buildSocket({
                 (value, key) => ((request as any).query[key] = value)
             );
 
-            if (parsedURL.pathname === '/ws') {
-                WS_V1.socket.handleUpgrade(
+            const targetSocket = routeMap[parsedURL.pathname];
+            if (targetSocket) {
+                targetSocket.socket.handleUpgrade(
                     request,
                     socket,
                     head,
-                    function (ws) {
-                        WS_V1.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/tokens') {
-                WS_SC.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_SC.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/websocket/v2') {
-                WS_V2.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_V2.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/websocket/v2/precise') {
-                WS_V2_PRECISE.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_V2_PRECISE.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/websocket/commands') {
-                WS_COMMANDS.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_COMMANDS.socket.emit('connection', ws, request);
+                    (ws) => {
+                        targetSocket.socket.emit('connection', ws, request);
                     }
                 );
             }
