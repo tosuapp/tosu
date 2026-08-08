@@ -2,21 +2,16 @@ import {
     type ConfigBinding,
     ConfigManager,
     JsonSafeParse,
+    getStaticPath,
     wLogger
 } from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
 import fs from 'fs';
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 import path from 'path';
 import rosu from 'rosu-pp-js';
 
 import { Server, sendJson } from '../index';
-import {
-    type Report,
-    generateReport,
-    generateReportHTML
-} from '../utils/report';
+import { serveStaticFile } from '../utils/directories';
 import buildLegacyCountersApi from './counters';
 
 const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
@@ -43,7 +38,7 @@ export default function buildBaseApi(server: Server) {
     server.app.route('/api/settingsSave', 'POST', async (req, res) => {
         const body: Record<ConfigBinding, string> | Error = JsonSafeParse({
             isFile: false,
-            payload: req.body,
+            payload: req.body || '',
             defaultValue: new Error('Failed to parse body')
         });
         if (body instanceof Error) throw body;
@@ -129,31 +124,36 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route('/api/generateReport', 'GET', async (req, res) => {
-        let report: Report;
-        try {
-            report = await generateReport(req.instanceManager);
-            res.writeHead(200, {
-                'Content-Type': 'text/html; charset=utf-8',
-                'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
-            });
-        } catch (err) {
-            res.writeHead(500, {
-                'Content-Type': 'text/plain; charset=utf-8'
-            });
-            res.end(
-                `Server Error: ${(err as Error).message || 'Unknown error'}`
-            );
-            return;
-        }
+        // TODO: Temporary disabled for dev purposes.
+        //  Should be re-enabled before merging.
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+        return res.end('This page is no longer available.');
 
-        try {
-            await pipeline(Readable.from(generateReportHTML(report)), res);
-        } catch (err) {
-            // Headers are already sent; log and abort the response.
-            wLogger.warn('Failed to stream report:', (err as Error).message);
-            wLogger.debug('Report streaming error details:', err);
-            res.destroy();
-        }
+        // let report: Report;
+        // try {
+        //     report = await generateReport(req.instanceManager);
+        //     res.writeHead(200, {
+        //         'Content-Type': 'text/html; charset=utf-8',
+        //         'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
+        //     });
+        // } catch (err) {
+        //     res.writeHead(500, {
+        //         'Content-Type': 'text/plain; charset=utf-8'
+        //     });
+        //     res.end(
+        //         `Server Error: ${(err as Error).message || 'Unknown error'}`
+        //     );
+        //     return;
+        // }
+        //
+        // try {
+        //     await pipeline(Readable.from(generateReportHTML(report)), res);
+        // } catch (err) {
+        //     // Headers are already sent; log and abort the response.
+        //     wLogger.warn('Failed to stream report:', (err as Error).message);
+        //     wLogger.debug('Report streaming error details:', err);
+        //     res.destroy();
+        // }
     });
 
     server.app.route(/\/api\/ingame/, 'GET', (req, res) => {
@@ -204,72 +204,35 @@ export default function buildBaseApi(server: Server) {
     server.app.route(/.*/, 'GET', async (req, res) => {
         const url = req.pathname || '/';
         try {
-            if (url.startsWith(`/.well-know`)) {
+            /*
+             * Browsers and extensions automatically probe RFC 8615 /.well-known URIs
+             * to discover site manifests, passkeys, or local network policies.
+             * -
+             * tosu does not host any well-known services.
+             */
+            if (url.startsWith(`/.well-known`)) {
                 res.statusCode = 404;
                 res.statusMessage = 'Not Found';
+
                 return res.end();
             }
 
-            // TODO: Temporary disabled for dev purposes.
-            //  Should be re-enabled before merging.
-            if (
-                ['/', '/settings', '/local-overlays', '/available'].includes(
-                    url
-                )
-            ) {
+            const normalizedUrl =
+                url.length > 1 && url.endsWith('/') ? url.slice(0, -1) : url;
+
+            if (['/', '/settings', '/available'].includes(normalizedUrl)) {
                 res.writeHead(200, {
                     'Content-Type': 'text/plain; charset=utf-8'
                 });
                 return res.end('This page is no longer available.');
             }
 
-            // if (url === '/') {
-            //     const parseAddress = new URL(
-            //         req.headers.host
-            //             ? `http://${req.headers.host}/`
-            //             : req.headers.referer ||
-            //                   `http://${req.socket.remoteAddress}/`
-            //     );
-            //
-            //     return buildLocalCounters(res, parseAddress.hostname);
-            // }
-            //
-            // if (url === '/settings') {
-            //     if (req.query.overlay) return buildEmptyPage(res);
-            //     return buildSettings(res);
-            // }
-            // if (url === '/local-overlays') return buildInstructionLocal(res);
-            // if (url === '/available') {
-            //     const parseAddress = new URL(
-            //         req.headers.host
-            //             ? `http://${req.headers.host}/`
-            //             : req.headers.referer ||
-            //                   `http://${req.socket.remoteAddress}/`
-            //     );
-            //     return buildExternalCounters(res, parseAddress.hostname);
-            // }
-            //
-            // const staticPath = getStaticPath();
-            //
-            // const extension = path.extname(url);
-            //
-            // // ignore empty and one letter extension (extension returned with .)
-            // if (extension.length < 3 && !url.endsWith('/')) {
-            //     res.writeHead(301, { Location: url + '/' });
-            //     return res.end();
-            // }
-            //
-            // const selectIndexHTML = url.endsWith('/')
-            //     ? url + 'index.html'
-            //     : url;
-            // directoryWalker({
-            //     _htmlRedirect: true,
-            //     req,
-            //     res,
-            //     baseUrl: url,
-            //     pathname: selectIndexHTML,
-            //     folderPath: staticPath
-            // });
+            return serveStaticFile({
+                ctx: { req, res },
+                root: getStaticPath(),
+                pathname: url,
+                isOverlay: true
+            });
         } catch (error) {
             wLogger.warn(
                 `Failed to process request for %${url}%:`,

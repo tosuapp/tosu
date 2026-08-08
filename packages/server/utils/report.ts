@@ -4,6 +4,7 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import * as readline from 'node:readline/promises';
 import { battery, cpu, graphics, osInfo } from 'systeminformation';
+import type { AbstractInstance } from 'tosu/instances';
 import type { InstanceManager } from 'tosu/instances/manager';
 
 import { getLocalCounters } from './counters';
@@ -66,7 +67,7 @@ export async function generateReport(
     instanceManager: InstanceManager
 ): Promise<Report> {
     const instances = Object.values(instanceManager.osuInstances).map(
-        (instance) => ({
+        (instance: AbstractInstance) => ({
             pid: instance.pid,
             type: ClientType[instance.client] as keyof typeof ClientType,
             bitness: Bitness[instance.bitness] as keyof typeof Bitness,

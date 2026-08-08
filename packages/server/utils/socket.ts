@@ -1,231 +1,200 @@
-import { type ConfigKey, config, sleep, wLogger } from '@tosu/common';
-import type { AbstractInstance } from 'tosu/instances';
-import type { InstanceManager } from 'tosu/instances/manager';
+import { wLogger } from '@tosu/common';
+import { randomUUID } from 'node:crypto';
+import type { IncomingMessage } from 'node:http';
 import { WebSocket, WebSocketServer } from 'ws';
 
-import { getUniqueID } from './hashing';
+export type Filter = string | { field: string; keys: Filter[] };
 
-type Filter = string | { field: string; keys: Filter[] };
-
-export interface ModifiedWebsocket extends WebSocket {
+export interface WsConnection {
     id: string;
-    pathname: string;
-    query: Record<string, string>;
-
+    socket: WebSocket;
+    overlayName: string | null;
     filters: Filter[];
-
-    hostAddress: string;
-    localAddress: string;
-    originAddress: string;
-    remoteAddress: string;
 }
 
-type StateFunctionKey<T> = {
-    [K in keyof T]: T[K] extends (instanceManager: InstanceManager) => unknown
-        ? K
-        : never;
-}[keyof T];
-
-export class Websocket {
-    private instanceManager: InstanceManager;
-    private onMessageCallback: (
+export interface ChannelOptions {
+    onMessage?: (
         data: string,
-        socket: ModifiedWebsocket,
-        ws: Websocket
+        conn: WsConnection,
+        channel: WebSocketChannel
+    ) => void;
+}
+
+const pendingTokens = new Map<
+    string,
+    { overlayName: string; expiresAt: number }
+>();
+
+export function createOverlayToken(overlayName: string): string {
+    const token = randomUUID();
+
+    pendingTokens.set(token, {
+        overlayName,
+        expiresAt: Date.now() + 60000
+    });
+
+    return token;
+}
+
+export function redeemOverlayToken(token: string): string | null {
+    if (!token) return null;
+
+    const entry = pendingTokens.get(token);
+    if (!entry) return null;
+
+    if (Date.now() > entry.expiresAt) {
+        pendingTokens.delete(token);
+        return null;
+    }
+
+    return entry.overlayName;
+}
+
+export function extractOverlayName(request: IncomingMessage): string | null {
+    try {
+        const hostHeader = request.headers.host || 'localhost';
+        const parsedURL = new URL(request.url || '/', `http://${hostHeader}`);
+
+        const tokenParam =
+            parsedURL.searchParams.get('token') ||
+            parsedURL.searchParams.get('tosu_token');
+        if (tokenParam) {
+            const redeemed = redeemOverlayToken(tokenParam);
+            if (redeemed) return redeemed;
+        }
+
+        const queryOverlay =
+            parsedURL.searchParams.get('l') ||
+            parsedURL.searchParams.get('overlay');
+        if (queryOverlay) {
+            return decodeURIComponent(queryOverlay);
+        }
+    } catch {}
+
+    return null;
+}
+
+export function getConnName(conn: WsConnection): string {
+    return conn.overlayName
+        ? `${conn.overlayName} (#${conn.id})`
+        : `client (#${conn.id})`;
+}
+
+export class WebSocketChannel {
+    public readonly server = new WebSocketServer({ noServer: true });
+    public readonly connections = new Map<string, WsConnection>();
+
+    private readonly onMessage?: (
+        data: string,
+        conn: WsConnection,
+        channel: WebSocketChannel
     ) => void;
 
-    private onConnectionCallback: (id: string, url: string | undefined) => void;
+    constructor(options: ChannelOptions = {}) {
+        this.onMessage = options.onMessage;
 
-    socket: WebSocketServer;
-    clients = new Map<string, ModifiedWebsocket>();
+        this.server.on(
+            'connection',
+            (socket: WebSocket, request: IncomingMessage) => {
+                const overlayName = extractOverlayName(request);
 
-    constructor({
-        instanceManager,
-        pollRateFieldName,
-        stateFunctionName,
-        onMessageCallback,
-        onConnectionCallback
-    }: {
-        instanceManager: InstanceManager;
-        pollRateFieldName: ConfigKey | '';
-        stateFunctionName: StateFunctionKey<AbstractInstance> | '';
-        onMessageCallback?: (
-            data: string,
-            socket: ModifiedWebsocket,
-            ws: Websocket
-        ) => void;
-        onConnectionCallback?: (id: string, url: string | undefined) => void;
-    }) {
-        this.socket = new WebSocketServer({ noServer: true });
+                const conn: WsConnection = {
+                    id: randomUUID(),
+                    socket,
+                    overlayName,
+                    filters: []
+                };
 
-        this.instanceManager = instanceManager;
-
-        if (typeof onMessageCallback === 'function') {
-            this.onMessageCallback = onMessageCallback;
-        }
-        if (typeof onConnectionCallback === 'function') {
-            this.onConnectionCallback = onConnectionCallback;
-        }
-
-        this.handle = this.handle.bind(this);
-        this.start = this.start.bind(this);
-
-        this.handle(pollRateFieldName, stateFunctionName);
-    }
-
-    handle(
-        pollRateFieldName: ConfigKey | '',
-        stateFunctionName: StateFunctionKey<AbstractInstance> | ''
-    ) {
-        this.socket.on('connection', (ws: ModifiedWebsocket, request) => {
-            ws.id = getUniqueID();
-
-            ws.pathname = request.url as any;
-
-            ws.query = (request as any).query;
-
-            ws.hostAddress = request.headers.host || '';
-            ws.localAddress = `${request.socket.localAddress}:${request.socket.localPort}`;
-            ws.originAddress = request.headers.origin || '';
-            ws.remoteAddress = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
-
-            wLogger.debug(`WebSocket client connected: %${ws.id}%`);
-
-            ws.on('close', (reason, description) => {
-                this.clients.delete(ws.id);
-
+                this.connections.set(conn.id, conn);
                 wLogger.debug(
-                    `WebSocket client disconnected: %${ws.id}%`,
-                    reason,
-                    description
+                    `WebSocket client connected: %${getConnName(conn)}%`
                 );
-            });
 
-            ws.on('error', (reason: unknown, description: unknown) => {
-                this.clients.delete(ws.id);
-
-                wLogger.debug(
-                    `WebSocket client error: %${ws.id}%`,
-                    reason,
-                    description
-                );
-            });
-
-            if (typeof this.onMessageCallback === 'function') {
-                ws.on('message', (data) => {
-                    this.onMessageCallback(data.toString(), ws, this);
-                });
-            }
-
-            this.clients.set(ws.id, ws);
-            if (typeof this.onConnectionCallback === 'function') {
-                this.onConnectionCallback(ws.id, request.url);
-            }
-        });
-
-        // resend commands internally "this.socket.emit"
-        this.socket.on(
-            'message',
-            (
-                id: string,
-                command: string,
-                overlayName: string,
-                payload?: string
-            ) => {
-                this.clients.forEach((client) => {
-                    if (client.id === id) return;
-
-                    // skip sending settings to wrong overlay
-                    if (
-                        (command === 'getSettings' ||
-                            command === 'updateSettings') &&
-                        overlayName !== decodeURI(client.query.l || '')
-                    )
-                        return;
-
-                    client.emit(
-                        'message',
-                        [command, overlayName, payload].join(':')
+                const cleanup = () => {
+                    this.connections.delete(conn.id);
+                    wLogger.debug(
+                        `WebSocket client disconnected: %${getConnName(conn)}%`
                     );
-                });
+                };
+
+                socket.on('close', cleanup);
+                socket.on('error', cleanup);
+
+                if (this.onMessage) {
+                    socket.on('message', (data) => {
+                        this.onMessage!(data.toString(), conn, this);
+                    });
+                }
             }
         );
-
-        if (pollRateFieldName && stateFunctionName !== '') {
-            this.start(pollRateFieldName, stateFunctionName);
-        }
     }
 
-    async start(
-        pollRateFieldName: ConfigKey,
-        stateFunctionName: StateFunctionKey<AbstractInstance>
+    public dispatchCommand(
+        senderId: string,
+        command: string,
+        overlayName: string,
+        payload?: string
     ) {
-        let message = '';
-        let values = {};
+        this.connections.forEach((conn) => {
+            if (conn.id === senderId) return;
 
-        while (true) {
-            try {
-                const osuInstance = this.instanceManager.getInstance(
-                    this.instanceManager.focusedClient
-                );
-                if (!osuInstance || this.clients.size === 0) {
-                    await sleep(500);
-                    continue;
-                }
-
-                const buildedData = osuInstance[stateFunctionName](
-                    this.instanceManager
-                );
-
-                this.clients.forEach((client) => {
-                    if (
-                        Array.isArray(client.filters) &&
-                        client.filters.length > 0
-                    ) {
-                        values = {};
-                        this.applyFilter(client.filters, buildedData, values);
-
-                        client.send(JSON.stringify(values));
-                        return;
-                    }
-
-                    message = JSON.stringify(buildedData);
-                    client.send(message);
-                });
-            } catch (error) {
-                wLogger.error(
-                    'WebSocket data loop failed:',
-                    (error as any).message
-                );
-                wLogger.debug('WebSocket loop error details:', error);
+            if (
+                (command === 'getSettings' || command === 'updateSettings') &&
+                conn.overlayName &&
+                overlayName !== conn.overlayName
+            ) {
+                return;
             }
 
-            await sleep(config[pollRateFieldName] as number);
-        }
+            if (conn.socket.readyState === WebSocket.OPEN) {
+                const message =
+                    payload !== undefined
+                        ? `${command}:${overlayName}:${payload}`
+                        : `${command}:${overlayName}`;
+                conn.socket.send(message);
+            }
+        });
     }
 
-    applyFilter(filters: Filter[], data: any, value: any) {
-        if (data === null || data === undefined) return;
+    public broadcast(data: unknown) {
+        if (this.connections.size === 0) return;
 
-        for (let i = 0; i < filters.length; i++) {
-            const filter = filters[i];
-            switch (typeof filter) {
-                case 'string':
-                    value[filter] = data[filter];
-                    break;
+        let cachedJson: string | null = null;
 
-                case 'object': {
-                    if (!(filter.field && Array.isArray(filter.keys))) break;
-                    if (
-                        data[filter.field] === null ||
-                        data[filter.field] === undefined
-                    )
-                        break;
+        this.connections.forEach((conn) => {
+            if (conn.socket.readyState !== WebSocket.OPEN) return;
 
+            if (Array.isArray(conn.filters) && conn.filters.length > 0) {
+                const values: Record<string, unknown> = {};
+                this.applyFilter(conn.filters, data, values);
+                conn.socket.send(JSON.stringify(values));
+            } else {
+                if (cachedJson === null) {
+                    cachedJson =
+                        typeof data === 'string' ? data : JSON.stringify(data);
+                }
+                conn.socket.send(cachedJson);
+            }
+        });
+    }
+
+    private applyFilter(filters: Filter[], data: any, value: any) {
+        if (!data) return;
+
+        for (const filter of filters) {
+            if (typeof filter === 'string') {
+                value[filter] = data[filter];
+            } else if (
+                typeof filter === 'object' &&
+                filter.field &&
+                Array.isArray(filter.keys)
+            ) {
+                const fieldValue = data[filter.field];
+                if (fieldValue !== null && fieldValue !== undefined) {
                     value[filter.field] = {};
                     this.applyFilter(
                         filter.keys,
-                        data[filter.field],
+                        fieldValue,
                         value[filter.field]
                     );
                 }
