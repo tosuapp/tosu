@@ -25,13 +25,12 @@ export default function buildOverlaysApi(
         );
     });
 
-    app.route(/^\/api\/overlays\/status$/, 'GET', (_req, res) => {
+    app.get('/api/overlays/status', (_req, res) => {
         return sendJson(res, service.getStatus());
     });
 
-    app.route(
-        /^\/api\/overlays$/,
-        'GET',
+    app.get(
+        '/api/overlays',
         (req: ExtendedIncomingMessage, res: ServerResponse) => {
             const rawFilter = (req.query.status || req.query.state) as
                 | OverlayStatusFilter
@@ -40,9 +39,8 @@ export default function buildOverlaysApi(
         }
     );
 
-    app.route(
-        /^\/api\/overlays\/download$/,
-        'POST',
+    app.post(
+        '/api/overlays/download',
         async (req: ExtendedIncomingMessage, res: ServerResponse) => {
             let body: { id?: string; downloadUrl?: string } = {};
             try {
@@ -67,14 +65,41 @@ export default function buildOverlaysApi(
                     path: result.path
                 });
             } catch (err) {
+                wLogger.error('Overlay download endpoint error:', err);
                 return sendJson(res, { error: (err as Error).message }, 500);
             }
         }
     );
 
-    app.route(
-        /^\/api\/overlays\/(?<id>[^/]+)\/open$/,
-        'POST',
+    app.post(
+        '/api/overlays/:id/download',
+        async (req: ExtendedIncomingMessage, res: ServerResponse) => {
+            const id = safeDecodeURIComponent(req.params.id);
+            let body: { downloadUrl?: string } = {};
+            try {
+                if (req.body) {
+                    body = JSON.parse(req.body);
+                }
+            } catch {}
+
+            try {
+                const result = await service.downloadOverlay(
+                    id,
+                    body.downloadUrl
+                );
+                return sendJson(res, {
+                    status: 'success',
+                    path: result.path
+                });
+            } catch (err) {
+                wLogger.error('Overlay download endpoint error:', err);
+                return sendJson(res, { error: (err as Error).message }, 500);
+            }
+        }
+    );
+
+    app.post(
+        '/api/overlays/:id/open',
         async (req: ExtendedIncomingMessage, res: ServerResponse) => {
             const id = safeDecodeURIComponent(req.params.id);
             try {
@@ -86,9 +111,8 @@ export default function buildOverlaysApi(
         }
     );
 
-    app.route(
-        /^\/api\/overlays\/(?<id>[^/]+)$/,
-        'DELETE',
+    app.delete(
+        '/api/overlays/:id',
         async (req: ExtendedIncomingMessage, res: ServerResponse) => {
             const id = safeDecodeURIComponent(req.params.id);
             try {
@@ -100,9 +124,8 @@ export default function buildOverlaysApi(
         }
     );
 
-    app.route(
-        /^\/api\/overlays\/(?<id>[^/]+)$/,
-        'GET',
+    app.get(
+        '/api/overlays/:id',
         (req: ExtendedIncomingMessage, res: ServerResponse) => {
             const id = safeDecodeURIComponent(req.params.id);
             const overlay = service.getOverlayById(id);

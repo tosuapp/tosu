@@ -1,9 +1,9 @@
 import { wLogger } from '@tosu/common';
 
-import { Server, Websocket, isRequestAllowed } from '../index';
+import { Server, WebSocketChannel, isRequestAllowed } from '../index';
 
 export default function buildSocket(server: Server) {
-    const routeMap: Record<string, Websocket | undefined> = {
+    const routeMap: Record<string, WebSocketChannel | undefined> = {
         '/ws': server.sockets.v1,
         '/tokens': server.sockets.sc,
         '/websocket/v2': server.sockets.v2,
@@ -39,12 +39,12 @@ export default function buildSocket(server: Server) {
 
             const targetSocket = routeMap[parsedURL.pathname];
             if (targetSocket) {
-                targetSocket.socket.handleUpgrade(
+                targetSocket.server.handleUpgrade(
                     request,
                     socket,
                     head,
                     (ws) => {
-                        targetSocket.socket.emit('connection', ws, request);
+                        targetSocket.server.emit('connection', ws, request);
                     }
                 );
             }

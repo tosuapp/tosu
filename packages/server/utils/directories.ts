@@ -6,6 +6,7 @@ import path from 'path';
 
 import { type ExtendedIncomingMessage, getContentType } from '../index';
 import { OVERLAYS_STATIC } from './homepage';
+import { createOverlayToken } from './socket';
 
 const allowedRangeExtensions = [
     '.mp3',
@@ -99,7 +100,7 @@ export function directoryWalker({
                         }
 
                         if (isHTML === true) {
-                            html = injectOverlayRuntime(html, filePath);
+                            html = injectOverlayRuntime(html);
                         }
 
                         res.writeHead(200, {
@@ -123,7 +124,7 @@ export function directoryWalker({
             }
 
             if (isHTML === true) {
-                content = injectOverlayRuntime(content.toString(), filePath);
+                content = injectOverlayRuntime(content.toString());
             }
 
             if (req.headers.range) {
@@ -309,8 +310,16 @@ export async function serveStaticFile(options: ServeStaticOptions) {
     if (isOverlay && targetPath.endsWith('.html')) {
         try {
             const rawContent = await fs.promises.readFile(targetPath, 'utf8');
-            res.writeHead(200, { 'Content-Type': contentType });
-            return res.end(injectOverlayRuntime(rawContent, targetPath));
+            const relativeDir = path
+                .relative(getStaticPath(), path.dirname(targetPath))
+                .replace(/\\/g, '/');
+
+            const token = createOverlayToken(relativeDir);
+
+            res.writeHead(200, {
+                'Content-Type': contentType
+            });
+            return res.end(injectOverlayRuntime(rawContent, token));
         } catch {
             res.writeHead(500, { 'Content-Type': 'text/plain' });
             return res.end('Server Error');
@@ -336,24 +345,23 @@ export async function serveStaticFile(options: ServeStaticOptions) {
     return fs.createReadStream(targetPath).pipe(res);
 }
 
-export function injectOverlayRuntime(html: string, filePath: string): string {
+export function injectOverlayRuntime(html: string, token?: string): string {
     try {
-        const staticPath = getStaticPath();
-        const relativeDir = path.relative(staticPath, path.dirname(filePath));
-        const counterPath = relativeDir.replace(/\\/g, '/');
-
+        const tokenScript = token ? `window.TOSU_TOKEN = "${token}";` : '';
         const injection = `
+        <!-- Force transparent background for a nicer view in the dashboard. -->
         <style>
             html, body {
                 background: transparent !important;
             }
         </style>
+        <!-- Inject token for WebSocket authentication; Silence iframe logging. -->
         <script>
+            ${tokenScript}
             if (window.top !== window.self) {
                 const noop = () => {};
                 console.log = console.info = console.warn = console.debug = noop;
             }
-            window.COUNTER_PATH = "${counterPath}";
         </script>`.trim();
 
         if (/<head[^>]*>/i.test(html)) {

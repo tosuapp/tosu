@@ -104,8 +104,8 @@ export default function buildLegacyCountersApi(server: Server) {
                         );
                         fs.unlinkSync(tempPath);
 
-                        server.sockets.commands?.socket.emit(
-                            'message',
+                        server.sockets.commands?.dispatchCommand(
+                            '',
                             'unzip',
                             'getOverlays',
                             `__ingame__`
@@ -224,8 +224,8 @@ export default function buildLegacyCountersApi(server: Server) {
 
             fs.rmSync(folderPath, { recursive: true, force: true });
 
-            server.sockets.commands?.socket.emit(
-                'message',
+            server.sockets.commands?.dispatchCommand(
+                '',
                 'remove',
                 'getOverlays',
                 `__ingame__`
@@ -278,7 +278,7 @@ export default function buildLegacyCountersApi(server: Server) {
 
             const body: ISettings[] | Error = JsonSafeParse({
                 isFile: false,
-                payload: req.body,
+                payload: req.body || '',
                 defaultValue: new Error('Failed to parse body')
             });
             if (body instanceof Error) throw body;
@@ -336,8 +336,8 @@ export default function buildLegacyCountersApi(server: Server) {
                 });
             }
 
-            server.sockets.commands?.socket.emit(
-                'message',
+            server.sockets.commands?.dispatchCommand(
+                '',
                 'save settings',
                 'getSettings',
                 folderName

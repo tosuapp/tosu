@@ -19,6 +19,7 @@ import fs from 'fs';
 import path from 'path';
 
 const OVERLAYS_API_URL = 'https://tosu.app/api.json';
+const SANITIZE_FILENAME_REGEX = /[/\\?%*:|"<>]/g;
 
 export type OverlayStatusFilter = 'installed' | 'upgradable' | 'installable';
 
@@ -239,9 +240,9 @@ export class OverlaysService {
                     localMap.get(key) || localMap.get(r.id.toLowerCase());
 
                 if (matchedLocal) {
+                    matchedLocal.downloadUrl = r.downloadUrl;
                     if (r.version !== matchedLocal.version) {
                         matchedLocal.status = 'upgradable';
-                        matchedLocal.downloadUrl = r.downloadUrl;
                         updates++;
                     } else {
                         matchedLocal.status = 'installed';
@@ -338,9 +339,9 @@ export class OverlaysService {
         customDownloadUrl?: string
     ): Promise<{ path: string }> {
         const entry = this.getOverlayById(id);
-        const downloadUrl = customDownloadUrl || entry?.downloadUrl;
+        const rawUrl = customDownloadUrl || entry?.downloadUrl;
 
-        if (!downloadUrl) {
+        if (!rawUrl) {
             throw new Error('No download URL provided or found for this ID');
         }
 
@@ -348,26 +349,39 @@ export class OverlaysService {
             ? `${entry.name} by ${entry.author.name}`
             : entry?.name || id;
 
-        const sanitizedFolder = folderName.replace(/[/\\?%*:|"<>]/g, '_');
+        const sanitizedFolder = folderName.replace(
+            SANITIZE_FILENAME_REGEX,
+            '_'
+        );
+        const sanitizedId = id.replace(SANITIZE_FILENAME_REGEX, '_');
+
         const folderPath = path.join(getStaticPath(), sanitizedFolder);
-        const cacheFolder = getCachePath();
-        const tempZipPath = path.join(cacheFolder, `${id}.zip`);
-        const tempExtractPath = path.join(cacheFolder, id);
+        const cacheDir = getCachePath();
+        const tempZipPath = path.join(cacheDir, `${sanitizedId}.zip`);
+        const tempExtractPath = path.join(cacheDir, sanitizedId);
 
         try {
-            fs.mkdirSync(cacheFolder, { recursive: true });
-            await downloadFile(downloadUrl, tempZipPath);
+            fs.mkdirSync(cacheDir, { recursive: true });
+
+            // Strip osuck.link redirect to prevent throttling
+            const directUrl = rawUrl.replace(
+                /^https?:\/\/osuck\.link\/redirect\//i,
+                ''
+            );
+            let safeUrl: string;
+            try {
+                safeUrl = encodeURI(decodeURI(directUrl));
+            } catch {
+                safeUrl = encodeURI(directUrl);
+            }
+
+            wLogger.info(`Downloading overlay from %${safeUrl}%`);
+
+            await downloadFile(safeUrl, tempZipPath);
             await unzip(tempZipPath, tempExtractPath);
 
-            if (fs.existsSync(folderPath)) {
-                fs.rmSync(folderPath, { recursive: true, force: true });
-            }
-
-            try {
-                fs.renameSync(tempExtractPath, folderPath);
-            } catch {
-                fs.cpSync(tempExtractPath, folderPath, { recursive: true });
-            }
+            fs.rmSync(folderPath, { recursive: true, force: true });
+            fs.renameSync(tempExtractPath, folderPath);
 
             wLogger.info(
                 `Overlay %${sanitizedFolder}% downloaded and installed.`
