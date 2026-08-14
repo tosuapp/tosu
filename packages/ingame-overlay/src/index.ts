@@ -21,13 +21,11 @@ app.commandLine.appendSwitch('disable-direct-composition');
 
     // Check single instance and ignore manually launched instance without ipc
     if (!app.requestSingleInstanceLock()) {
-        console.log(
-            'warn: Another instance is already running. Please close it first. Exiting...'
+        throw new Error(
+            'Another instance is already running. Please close it first. Exiting...'
         );
-        return;
     } else if (!process.channel) {
-        console.log('warn: Failed to acquire IPC channel. Exiting...');
-        return;
+        throw new Error('Failed to acquire IPC channel. Exiting...');
     }
 
     console.log('warn: Starting...');
