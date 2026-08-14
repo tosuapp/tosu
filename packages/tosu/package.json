@@ -16,9 +16,9 @@
     "dependencies": {
         "@tosu/common": "workspace:*",
         "@tosu/ingame-overlay-updater": "workspace:*",
-        "@tosuapp/lazer-calculator-prebuilt": "0.6.1-20260729-main.0",
         "@tosu/server": "workspace:*",
         "@tosu/updater": "workspace:*",
+        "@tosuapp/lazer-calculator-prebuilt": "0.6.1-20260729-main.0",
         "osu-catch-stable": "^4.0.1",
         "osu-classes": "^3.1.0",
         "osu-mania-stable": "^5.0.1",
@@ -31,11 +31,11 @@
     },
     "devDependencies": {
         "@types/semver": "^7.7.1",
-        "@yao-pkg/pkg": "^6.20.0",
+        "@yao-pkg/pkg": "^6.22.0",
         "cross-env": "^7.0.3",
         "genversion": "^3.2.0",
-        "rolldown": "^1.1.5",
+        "rolldown": "^1.2.3",
         "rollup-plugin-copy": "^3.5.0",
-        "tsx": "^4.23.0"
+        "tsx": "^4.23.7"
     }
 }
