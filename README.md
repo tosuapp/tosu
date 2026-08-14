@@ -192,11 +192,11 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 ## Star History
 
-<a href="https://www.star-history.com/#tosuapp/tosu&Date">
+<a href="https://star-history.dera.page/#tosuapp/tosu&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=tosuapp/tosu&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=tosuapp/tosu&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=tosuapp/tosu&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=tosuapp/tosu&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=tosuapp/tosu&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=tosuapp/tosu&type=Date" />
  </picture>
 </a>
 
