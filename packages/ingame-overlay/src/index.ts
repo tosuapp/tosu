@@ -70,10 +70,7 @@ app.commandLine.appendSwitch('disable-direct-composition');
     ]);
     tray.setToolTip(packageJSON.name);
     tray.setContextMenu(contextMenu);
-})()
-    .catch((exc) => {
-        console.error(exc);
-    })
-    .finally(() => {
-        app.exit(0);
-    });
+})().catch((exc) => {
+    console.error(exc);
+    app.exit(0);
+});
