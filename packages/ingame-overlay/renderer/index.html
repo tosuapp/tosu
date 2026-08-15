@@ -103,6 +103,10 @@
                     settings
                     <i class="icon-link"></i>
                 </a>
+                <a class="ctx-button" :href="profile.overlays[context_overlay.index].url" target="_blank">
+                    interact
+                    <i class="icon-link"></i>
+                </a>
                 <div class="ctx-button" @click.left="reset_overlay(context_overlay.index)">
                     reset
                 </div>
