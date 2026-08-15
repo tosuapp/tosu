@@ -1,5 +1,4 @@
-import type { Key } from '@asdf-overlay/core';
-import type { InputState } from '@asdf-overlay/core/input';
+import type { Key, KeyInputState } from '@asdf-overlay/core';
 import { mapKeycode } from '@asdf-overlay/electron/input/conv';
 
 export class Keybind {
@@ -14,7 +13,7 @@ export class Keybind {
         }
     }
 
-    update(key: Key, state: InputState): boolean {
+    update(key: Key, state: KeyInputState): boolean {
         const index = this.keys.findIndex((keybindKey) => {
             return mapKeycode(key.code) === keybindKey;
         });

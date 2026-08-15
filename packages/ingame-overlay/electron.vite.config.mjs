@@ -10,7 +10,6 @@ export default defineConfig({
             },
             outDir: 'dist/src',
             minify: true,
-            bytecode: true,
             rollupOptions: {
                 external: ['@asdf-overlay/core']
             }

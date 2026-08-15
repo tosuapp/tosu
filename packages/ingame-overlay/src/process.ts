@@ -1,9 +1,10 @@
 import {
-    type GpuLuid,
     Overlay,
-    defaultDllDir,
-    length
+    type SurfaceInfo,
+    type TracingMetadata,
+    defaultDllDir
 } from '@asdf-overlay/core';
+import type { OverlaySurface } from '@asdf-overlay/electron';
 import { ElectronOverlayInput } from '@asdf-overlay/electron/input';
 import { ElectronOverlaySurface } from '@asdf-overlay/electron/surface';
 import { BrowserWindow } from 'electron';
@@ -20,29 +21,29 @@ export class OverlayProcess {
     readonly event: OverlayEventEmitter = new EventEmitter();
     keybind = new Keybind([]);
 
-    private readonly surface: ElectronOverlaySurface;
-    private input: ElectronOverlayInput | null = null;
+    private surfaceInterop: ElectronOverlaySurface;
+    private inputs: ElectronOverlayInput[] = [];
 
     private constructor(
-        readonly pid: number,
-        private readonly windowId: number,
-        readonly overlay: Overlay,
-        readonly window: BrowserWindow,
-        private readonly luid: GpuLuid
+        private surface: OverlaySurface,
+        readonly window: BrowserWindow
     ) {
-        overlay.event.once('disconnected', () => {
-            this.window.destroy();
-            this.event.emit('destroyed');
-        });
+        const { overlay } = surface;
 
-        overlay.event.on('resized', (hwnd, width, height) => {
-            if (hwnd !== this.windowId) {
+        overlay.event.on('tracing_event', (metadata, message) =>
+            this.onOverlayLog(metadata, message)
+        );
+
+        overlay.event.once('disconnected', () => this.onDisconnected());
+
+        overlay.event.on('surface_resized', (id, width, height) => {
+            if (id !== this.surface.id) {
                 return;
             }
 
             console.debug(
-                'window resized hwnd:',
-                hwnd,
+                'surface resized id:',
+                this.surface.id,
                 'width:',
                 width,
                 'height:',
@@ -54,37 +55,76 @@ export class OverlayProcess {
         let configurationEnabled = false;
         overlay.event.on('input_blocking_ended', () => {
             this.closeConfiguration();
-            this.input?.disconnect();
+            this.resetInputs();
             configurationEnabled = false;
         });
 
-        overlay.event.on('keyboard_input', (_, input) => {
+        overlay.event.on('window_keyboard_input', (id, input) => {
             if (
-                input.kind === 'Key' &&
+                input.type === 'Key' &&
                 this.keybind.update(input.key, input.state)
             ) {
                 configurationEnabled = !configurationEnabled;
 
-                overlay.blockInput(windowId, configurationEnabled);
+                overlay.blockInput(configurationEnabled);
                 if (configurationEnabled) {
-                    this.input = ElectronOverlayInput.connect(
-                        { id: windowId, overlay },
-                        window.webContents
+                    this.inputs.push(
+                        ElectronOverlayInput.connect(
+                            { id, overlay },
+                            window.webContents
+                        )
                     );
+
+                    const mainWindowId = this.surface.info.ty.windowId;
+                    // If the main window is not the same as the window that triggered the keybind, connect to it as well
+                    if (mainWindowId && mainWindowId !== id) {
+                        this.inputs.push(
+                            ElectronOverlayInput.connect(
+                                { id: mainWindowId, overlay },
+                                window.webContents
+                            )
+                        );
+                    }
+
                     this.openConfiguration();
                 }
             }
         });
 
-        this.surface = ElectronOverlaySurface.connect(
-            { id: windowId, overlay },
-            luid,
+        this.surfaceInterop = ElectronOverlaySurface.connect(
+            this.surface,
             window.webContents
         );
 
-        this.surface.events.on('error', (error: unknown) => {
-            console.error(error);
-        });
+        this.surfaceInterop.events.on('error', (error: unknown) =>
+            this.onSurfaceError(error)
+        );
+    }
+
+    private resetInputs() {
+        for (const input of this.inputs) {
+            input.disconnect();
+        }
+        this.inputs = [];
+    }
+
+    private onOverlayLog(metadata: TracingMetadata, message?: string): void {
+        const formatted = `${metadata.modulePath ?? '<unknown>'}:${metadata.line ?? '<unknown>'} ${message}`;
+
+        if (metadata.level === 'Error') {
+            console.error(formatted);
+            return;
+        }
+        console.log(formatted);
+    }
+
+    private onDisconnected() {
+        this.window.destroy();
+        this.event.emit('destroyed');
+    }
+
+    private onSurfaceError(error: unknown) {
+        console.error(error);
     }
 
     private openConfiguration() {
@@ -98,9 +138,9 @@ export class OverlayProcess {
     }
 
     destroy() {
-        this.input?.disconnect();
-        this.surface.disconnect();
-        this.overlay.destroy();
+        this.resetInputs();
+        this.surfaceInterop.disconnect();
+        this.surface.overlay.detach();
     }
 
     static async initialize(pid: number): Promise<OverlayProcess> {
@@ -110,26 +150,20 @@ export class OverlayProcess {
             5000
         );
 
-        const [hwnd, width, height, luid] = await new Promise<
-            [number, number, number, GpuLuid]
-        >((resolve) =>
-            overlay.event.once('added', (hwnd, width, height, luid) =>
-                resolve([hwnd, width, height, luid])
-            )
-        );
-        console.debug('found hwnd:', hwnd, 'for pid:', pid);
+        overlay.event.on('window_added', async (id) => {
+            // Listen for keyboard events
+            await overlay.listenInput(id, false, true);
+        });
 
-        await overlay.setPosition(hwnd, length(0), length(0));
-        await overlay.setAnchor(hwnd, length(0), length(0));
-        await overlay.setMargin(
-            hwnd,
-            length(0),
-            length(0),
-            length(0),
-            length(0)
+        const [surface, width, height] = await getMainWindowSurface(overlay);
+        console.debug(
+            'found id:',
+            surface.id,
+            'info:',
+            surface.info,
+            'for pid:',
+            pid
         );
-        // Listen for keyboard events
-        await overlay.listenInput(hwnd, false, true);
 
         const window = new BrowserWindow({
             webPreferences: {
@@ -147,6 +181,31 @@ export class OverlayProcess {
         });
         window.setSize(width, height, false);
 
-        return new OverlayProcess(pid, hwnd, overlay, window, luid);
+        return new OverlayProcess(surface, window);
     }
+}
+
+/**
+ * Find first found surface bound to a window.
+ */
+function getMainWindowSurface(
+    overlay: Overlay
+): Promise<[surface: OverlaySurface, width: number, height: number]> {
+    return new Promise<[OverlaySurface, number, number]>((resolve) => {
+        const handler = (
+            id: bigint,
+            width: number,
+            height: number,
+            info: SurfaceInfo
+        ) => {
+            if (info.ty.windowId == null) {
+                return;
+            }
+
+            resolve([{ id, overlay, info }, width, height]);
+            overlay.event.off('surface_added', handler);
+        };
+
+        overlay.event.on('surface_added', handler);
+    });
 }
