@@ -157,7 +157,7 @@ bool memory::read_buffer(void *process, uintptr_t address, std::size_t size, uin
   const auto success = result_size == size;
 
   if (!success && errno == EPERM) {
-    logger::println("failed to read address %x of size %x", address, size);
+    logger::println("failed to read address {:x} of size {:x}", address, size);
     logger::println("Consider running with sudo or using setcap:");
     logger::println("  sudo /path/to/tosu");
     logger::println("  sudo setcap cap_sys_ptrace=eip /path/to/tosu");
