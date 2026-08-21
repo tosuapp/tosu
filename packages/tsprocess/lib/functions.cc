@@ -32,7 +32,7 @@ Napi::Value read_byte(const Napi::CallbackInfo &args) {
 
   auto result = memory::read<int8_t>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, logger::format("Couldn't read byte at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read byte at {:x}", address)).ThrowAsJavaScriptException();
     return env.Null();
   }
   return Napi::Number::New(env, std::get<0>(result));
@@ -50,7 +50,7 @@ Napi::Value read_short(const Napi::CallbackInfo &args) {
 
   auto result = memory::read<int16_t>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, logger::format("Couldn't read short at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read short at {:x}", address)).ThrowAsJavaScriptException();
     return env.Null();
   }
   return Napi::Number::New(env, std::get<0>(result));
@@ -68,7 +68,7 @@ Napi::Value read_int(const Napi::CallbackInfo &args) {
 
   auto result = memory::read<int32_t>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, logger::format("Couldn't read int at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read int at {:x}", address)).ThrowAsJavaScriptException();
     return env.Null();
   }
   return Napi::Number::New(env, std::get<0>(result));
@@ -86,7 +86,7 @@ Napi::Value read_uint(const Napi::CallbackInfo &args) {
 
   auto result = memory::read<uint32_t>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, logger::format("Couldn't read uint at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read uint at {:x}", address)).ThrowAsJavaScriptException();
     return env.Null();
   }
   return Napi::Number::New(env, std::get<0>(result));
@@ -104,7 +104,7 @@ Napi::Value read_float(const Napi::CallbackInfo &args) {
 
   auto result = memory::read<float>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, logger::format("Couldn't read float at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read float at {:x}", address)).ThrowAsJavaScriptException();
     return env.Null();
   }
   return Napi::Number::New(env, std::get<0>(result));
@@ -122,7 +122,7 @@ Napi::Value read_long(const Napi::CallbackInfo &args) {
 
   auto result = memory::read<int64_t>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, logger::format("Couldn't read long at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read long at {:x}", address)).ThrowAsJavaScriptException();
     return env.Null();
   }
   return Napi::Number::New(env, std::get<0>(result));
@@ -141,7 +141,7 @@ Napi::Value read_double(const Napi::CallbackInfo &args) {
 
   auto result = memory::read<double>(handle, address);
   if (!std::get<1>(result)) {
-    Napi::TypeError::New(env, logger::format("Couldn't read double at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read double at {:x}", address)).ThrowAsJavaScriptException();
     return env.Null();
   }
   return Napi::Number::New(env, std::get<0>(result));
@@ -236,7 +236,7 @@ Napi::Value read_buffer(const Napi::CallbackInfo &args) {
   if (!result) {
     free(data);
     delete[] buffer;
-    Napi::TypeError::New(env, logger::format("Couldn't read buffer at %x", address)).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, std::format("Couldn't read buffer at {:x}", address)).ThrowAsJavaScriptException();
 
     return env.Null();
   }
@@ -453,11 +453,11 @@ Napi::Value read_csharp_string(const Napi::CallbackInfo &args) {
   auto [string_length, length_success] = memory::read<int>(handle, address + offset);
   if (!length_success) {
 #ifdef _WIN32
-    auto error_str = logger::format(
-      "Couldn't read C# string length (base: %x, length: %x, last error: %d)", address, address + sizeof(int), GetLastError()
+    auto error_str = std::format(
+      "Couldn't read C# string length (base: {:x}, length: {:x}, last error: {})", address, address + sizeof(int), GetLastError()
     );
 #else
-    auto error_str = logger::format("Couldn't read C# string length (base: %x)", address);
+    auto error_str = std::format("Couldn't read C# string length (base: {:x})", address);
 #endif
     Napi::TypeError::New(env, error_str.c_str()).ThrowAsJavaScriptException();
     return env.Null();
