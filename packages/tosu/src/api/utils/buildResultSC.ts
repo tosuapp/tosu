@@ -8,6 +8,7 @@ import {
 } from '@tosu/common';
 import path from 'path';
 
+import { toStreamCompanionStatus } from '@/api/utils/scStatus';
 import { InstanceManager } from '@/instances/manager';
 import { fixDecimals } from '@/utils/converters';
 import { toLegacyHits } from '@/utils/hitResult';
@@ -278,13 +279,13 @@ export const buildResult = (instanceManager: InstanceManager): ApiAnswer => {
         songSelectionMainPlayerScore: '{}',
 
         songSelectionTotalScores: -1,
-        status: global.status,
+        status: toStreamCompanionStatus(global.status, global.isWatchingReplay),
 
         osu_99_9PP: -1,
         osu_m99_9PP: -1,
         mania_1_000_000PP: -1,
         mania_m1_000_000PP: -1,
-        simulatedPp: -1,
+        simulatedPp: fixDecimals(beatmapPP.ppAcc[100]),
 
         plays: 0,
         tags: '',
