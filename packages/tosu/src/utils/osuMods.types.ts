@@ -439,16 +439,7 @@ export interface RD {
 
 export interface ManiaKeys {
     acronym:
-        | '1K'
-        | '2K'
-        | '3K'
-        | '4K'
-        | '5K'
-        | '6K'
-        | '7K'
-        | '8K'
-        | '9K'
-        | '10K';
+        '1K' | '2K' | '3K' | '4K' | '5K' | '6K' | '7K' | '8K' | '9K' | '10K';
 }
 
 export interface MR {

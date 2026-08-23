@@ -194,8 +194,7 @@ export type ITourneyUser =
     | Error;
 
 export type ILeaderboard =
-    | [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]]
-    | Error;
+    [boolean, LeaderboardPlayer | undefined, LeaderboardPlayer[]] | Error;
 
 export interface ILazerSpectatorEntry {
     team: MultiplayerTeamType;
