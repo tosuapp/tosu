@@ -7,10 +7,7 @@
   "main": "index.ts",
   "scripts": {},
   "dependencies": {
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.6.0",
     "dotenv": "^16.6.1"
-  },
-  "devDependencies": {
-    "@types/adm-zip": "^0.5.7"
   }
 }
