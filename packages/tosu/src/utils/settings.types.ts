@@ -1,11 +1,5 @@
 export type AllowedTypes =
-    | 'bool'
-    | 'byte'
-    | 'int'
-    | 'double'
-    | 'string'
-    | 'bstring'
-    | 'enum';
+    'bool' | 'byte' | 'int' | 'double' | 'string' | 'bstring' | 'enum';
 
 export type ConfigList = Record<string, [AllowedTypes, valuePath: string]>;
 export type BindingsList = Record<number, [AllowedTypes, valuePath: string]>;
