@@ -3,6 +3,7 @@ import { JsonSafeParse, debounce, wLogger } from '@tosu/common';
 import { getLocalCounters, saveSettings } from './counters';
 import type { bodyPayload } from './counters.types';
 import { parseCounterSettings } from './parseSettings';
+import { normalizeSocketCommand } from './scFilters';
 import { type ModifiedWebsocket, Websocket } from './socket';
 
 const saveDelay = debounce((overlayFrom: string, json: bodyPayload[]) => {
@@ -24,6 +25,7 @@ export function handleSocketCommands(
     ws: Websocket
 ) {
     wLogger.debug(`Received WebSocket command: %${data}%`);
+    data = normalizeSocketCommand(data, socket.pathname);
     if (!data.includes(':')) {
         return;
     }
