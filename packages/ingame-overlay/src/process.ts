@@ -99,6 +99,30 @@ export class OverlayProcess {
         this.surfaceInterop.events.on('error', (error: unknown) =>
             this.onSurfaceError(error)
         );
+
+        overlay.event.on('surface_destroyed', (id) => {
+            if (id !== this.surface.id) {
+                return;
+            }
+            console.log('main surface destroyed id:', this.surface.id);
+
+            getMainWindowSurface(overlay).then(([surface]) => {
+                console.debug(
+                    'surface found id:',
+                    surface.id,
+                    'info:',
+                    surface.info
+                );
+
+                this.surfaceInterop.disconnect();
+                this.surfaceInterop = ElectronOverlaySurface.connect(
+                    surface,
+                    window.webContents
+                );
+                this.surface = surface;
+                this.window.webContents.invalidate();
+            });
+        });
     }
 
     private resetInputs() {
@@ -150,14 +174,14 @@ export class OverlayProcess {
             5000
         );
 
-        overlay.event.on('window_added', async (id) => {
+        overlay.event.on('window_added', (id) => {
             // Listen for keyboard events
-            await overlay.listenInput(id, false, true);
+            overlay.listenInput(id, false, true);
         });
 
         const [surface, width, height] = await getMainWindowSurface(overlay);
         console.debug(
-            'found id:',
+            'surface found id:',
             surface.id,
             'info:',
             surface.info,

@@ -78,10 +78,10 @@ importers:
   packages/ingame-overlay:
     dependencies:
       '@asdf-overlay/core':
-        specifier: ^2.0.2
+        specifier: ^2.0.6
         version: 2.0.6
       '@asdf-overlay/electron':
-        specifier: ^2.0.2
+        specifier: ^2.0.6
         version: 2.0.6(@asdf-overlay/core@2.0.6)(electron@43.4.1)
     devDependencies:
       '@types/node':
@@ -246,6 +246,7 @@ packages:
   '@asdf-overlay/core@2.0.6':
     resolution: {integrity: sha512-9LyV8wFoU9oU55+9YREVpdULEHC+2O3dalNKxRV+cP00RUQhWC59t921KJ5P6N8rmmQ+1qW1zCVZztg56DbXTw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
+    cpu: [x64, arm64]
     os: [win32]
 
   '@asdf-overlay/electron@2.0.6':
@@ -1172,6 +1173,7 @@ packages:
 
   '@tosuapp/lazer-calculator-prebuilt@0.6.1-20260729-main.0':
     resolution: {integrity: sha512-ymhZSBU/SZuMGD+4j35AcngBhFhjJWvokhfTWbFTYE8hAX2xVGFIsh1rhBoZvqY95yTdnVjFay/qMMsjZLVZng==}
+    cpu: [x64]
     os: [win32, linux]
 
   '@tosuapp/lazer-calculator-win32-x64@0.6.1-20260729-main.0':
