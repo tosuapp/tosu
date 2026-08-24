@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.26.0](https://github.com/tosuapp/tosu/compare/v4.25.1...v4.26.0) (2026-08-24)
+
+### Features
+
+* add nestedScorePerObject for tick scores ([3986a21](https://github.com/tosuapp/tosu/commit/3986a2198aaf1bafba0e45c7609c6eecb9184eb2))
+* Add option to temporarily skip CI. ([4a76b60](https://github.com/tosuapp/tosu/commit/4a76b60daef9bf1d18dda20226921dbd6b80d091))
+* interact button ([47203ae](https://github.com/tosuapp/tosu/commit/47203ae291a877b6f239ecafcd1a35f41d9d02cd))
+* introduce hitWindow to v2 json ([1a410eb](https://github.com/tosuapp/tosu/commit/1a410eb1358713569e0054f45b28d357c72955db))
+* max achievable score calculation for std ([e6d0fe8](https://github.com/tosuapp/tosu/commit/e6d0fe89c2f30275c3de4f9cf3948b2fc2d529ad))
+* set default static folder path to local share on linux by default ([03ee809](https://github.com/tosuapp/tosu/commit/03ee809f658a3a7fd989216340878f2dba50888e))
+* set default static folder path to local share on linux by default ([bd50431](https://github.com/tosuapp/tosu/commit/bd504313169b098e88d991d9e4e24fdb1261d2cc))
+* update overlay library ([8ef181c](https://github.com/tosuapp/tosu/commit/8ef181c35c1ad1358d08b2caf5e5610e858ef3c0))
+
+### Bug Fixes
+
+* add scorev2 mod on multi ([7d2f791](https://github.com/tosuapp/tosu/commit/7d2f791a4202a32013a227dde65d10abae696ab5))
+* Electron bytecode build ([090a5e9](https://github.com/tosuapp/tosu/commit/090a5e9b5832911bb16c37f2a810889799ed6868))
+* exit only on error ([a2fa075](https://github.com/tosuapp/tosu/commit/a2fa075515355db771375351d1f9886c1913e9a8))
+* ghost process remaining background ([4a1ec27](https://github.com/tosuapp/tosu/commit/4a1ec27669b41dd57f4904c7ebcb78c617da06a4))
+* normalize SC tokens for tosu websocket ([fb0303b](https://github.com/tosuapp/tosu/commit/fb0303bffde7126c0712db64a8efcf7006796d1f))
+* remove unnecessary normalize call ([44ae83f](https://github.com/tosuapp/tosu/commit/44ae83f647d1095d4999377eb385834438cf784e))
+* resolve static folder creation path on linux ([2552335](https://github.com/tosuapp/tosu/commit/2552335d539bbe49f5d5eb70a56aca0457cc5d0e))
+* safe join ([713f945](https://github.com/tosuapp/tosu/commit/713f94561146ee652b33e2faf0bb15c7914a59fd))
+* split acc, combo score estimation ([a16d8cc](https://github.com/tosuapp/tosu/commit/a16d8ccf98acbe125f5a35729437060f965c72e3))
+* unsafe printf usage ([23ab177](https://github.com/tosuapp/tosu/commit/23ab177ff63c904aeb41f28ea454cf7df41c4160))
 ### [4.25.1](https://github.com/tosuapp/tosu/compare/v4.25.0...v4.25.1) (2026-07-15)
 
 
