@@ -2,6 +2,9 @@
 // Windows: MSVC from Visual Studio Build Tools; node.exe is delay-loaded and
 // resolved to the running executable by lib/win_delay_load_hook.cc (as node-gyp does).
 // Linux: g++ shared library; napi_* symbols resolve against the host executable.
+// The Windows build is x64-only (vcvarsall x64, /machine:x64).
+// Windows compiles with /EHsc while Linux uses -fno-exceptions; both pair this with
+// NAPI_DISABLE_CPP_EXCEPTIONS by design.
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -28,7 +31,10 @@ const defines = [
 function run(
     command: string,
     args: string[],
-    options: { windowsVerbatimArguments?: boolean } = {}
+    options: {
+        windowsVerbatimArguments?: boolean;
+        env?: NodeJS.ProcessEnv;
+    } = {}
 ) {
     const result = spawnSync(command, args, {
         cwd: root,
@@ -37,7 +43,9 @@ function run(
     });
     if (result.error) throw result.error;
     if (result.status !== 0) {
-        throw new Error(`${command} exited with code ${result.status}`);
+        throw new Error(
+            `${command} exited with ${result.status === null ? `signal ${result.signal}` : `code ${result.status}`}`
+        );
     }
 }
 
@@ -72,6 +80,7 @@ function buildWindows() {
         ],
         { encoding: 'utf8' }
     );
+    if (query.error) throw query.error;
     const vsPath = (query.stdout ?? '').trim();
     if (!vsPath) {
         throw new Error(
@@ -124,6 +133,7 @@ function buildWindows() {
         '/nologo',
         '/DLL',
         `/OUT:"${output}"`,
+        `/IMPLIB:"${buildDir}\\tsprocess.lib"`,
         `"${buildDir}\\functions.obj"`,
         `"${buildDir}\\memory_windows.obj"`,
         `"${buildDir}\\win_delay_load_hook.obj"`,
@@ -131,8 +141,6 @@ function buildWindows() {
         'delayimp.lib',
         'kernel32.lib',
         'user32.lib',
-        'Psapi.lib',
-        'ntdll.lib',
         '/DELAYLOAD:node.exe'
     ].join(' ');
 
@@ -144,7 +152,13 @@ function buildWindows() {
             '/c',
             `"call "${vcvarsall}" x64 >nul && ${compile} && ${importLib} && ${link}"`
         ],
-        { windowsVerbatimArguments: true }
+        {
+            windowsVerbatimArguments: true,
+            env: {
+                ...process.env,
+                PATH: `${path.dirname(vswhere)};${process.env.PATH ?? ''}`
+            }
+        }
     );
 }
 
@@ -166,6 +180,7 @@ function buildLinux() {
 }
 
 rmSync(buildDir, { recursive: true, force: true });
+rmSync(output, { force: true });
 mkdirSync(buildDir, { recursive: true });
 mkdirSync(outDir, { recursive: true });
 
