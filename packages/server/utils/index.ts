@@ -1,5 +1,4 @@
 import { config } from '@tosu/common';
-import http from 'http';
 import path from 'path';
 
 const contentTypes = {
@@ -77,40 +76,43 @@ export function getContentType(text: string) {
     return contentType;
 }
 
-export function sendJson(response: http.ServerResponse, json: object | any[]) {
-    response.setHeader('Content-Type', 'application/json');
-
+export function json(
+    data: object | any[],
+    status: number = 200,
+    statusText?: string
+) {
+    let body: string;
     try {
-        return response.end(JSON.stringify(json));
+        body = JSON.stringify(data);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        return response.end(JSON.stringify({ error: 'Json parsing error' }));
+        body = JSON.stringify({ error: 'Json parsing error' });
     }
+
+    return new Response(body, {
+        status,
+        statusText,
+        headers: { 'Content-Type': 'application/json' }
+    });
 }
 
-export function isRequestAllowed(req: http.IncomingMessage) {
-    const remoteAddress = req.socket.remoteAddress;
+export function html(body: string, status: number = 200) {
+    return new Response(body, {
+        status,
+        headers: { 'Content-Type': getContentType('file.html') }
+    });
+}
 
-    const origin = req.headers.origin;
-    const referer = req.headers.referer;
+export function isRequestAllowed(headers: Headers) {
+    const origin = headers.get('origin') ?? undefined;
+    const referer = headers.get('referer') ?? undefined;
 
-    const isOriginOrRefererAllowed =
-        isAllowedIP(origin) || isAllowedIP(referer);
-
-    // NOT SURE
+    // Requests without an origin/referer (curl, overlays opened from disk) are allowed.
     if (origin === undefined && referer === undefined) {
         return true;
     }
 
-    if (isOriginOrRefererAllowed) {
-        return true;
-    }
-
-    if (isOriginOrRefererAllowed && isAllowedIP(remoteAddress)) {
-        return false;
-    }
-
-    return false;
+    return isAllowedIP(origin) || isAllowedIP(referer);
 }
 
 function isAllowedIP(url: string | undefined) {

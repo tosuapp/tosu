@@ -1,233 +1,267 @@
 import { config, platformResolver, wLogger } from '@tosu/common';
-import { exec } from 'child_process';
-import http, { IncomingMessage, ServerResponse } from 'http';
+import type { Server as BunServer, WebSocketHandler } from 'bun';
+import { exec } from 'node:child_process';
 import type { InstanceManager } from 'tosu/instances/manager';
 
-import { sendJson } from './index';
+import { isRequestAllowed, json } from './index';
+import type { WsData } from './ws-types';
 
-export interface ExtendedIncomingMessage extends IncomingMessage {
-    instanceManager: InstanceManager;
-    body: string;
-    query: { [key: string]: string };
-    params: { [key: string]: string };
+export type HttpMethod =
+    | 'GET'
+    | 'POST'
+    | 'HEAD'
+    | 'PUT'
+    | 'DELETE'
+    | 'CONNECT'
+    | 'OPTIONS'
+    | 'TRACE'
+    | 'PATCH';
+
+export interface TosuRequest {
+    raw: Request;
+    method: HttpMethod;
+    url: URL;
     pathname: string;
-    getContentType: (text: string) => string;
-    sendJson: (
-        response: http.ServerResponse,
-        json: object | any[]
-    ) => http.ServerResponse<http.IncomingMessage>;
+    query: Record<string, string>;
+    params: Record<string, string>;
+    headers: Headers;
+    body: string;
+    remoteAddress: string;
+    instanceManager: InstanceManager;
 }
 
-type RequestHandler = (
-    req: ExtendedIncomingMessage,
-    res: http.ServerResponse,
-    next: () => void
-) => void;
+export type RouteHandler = (req: TosuRequest) => Response | Promise<Response>;
 
-type RouteHandler = {
-    (req: ExtendedIncomingMessage, res: ServerResponse): void;
+/** Returns true when the request was upgraded to a WebSocket. */
+export type UpgradeHandler = (
+    request: Request,
+    url: URL,
+    server: BunServer<WsData>
+) => boolean;
+
+interface RegexRoute {
+    path: RegExp;
+    method: HttpMethod;
+    handler: RouteHandler;
+}
+
+const CORS_HEADERS: Record<string, string> = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers':
+        'Origin, X-Requested-With, Content-Type, Accept',
+    'Access-Control-Allow-Methods': 'POST, GET, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Private-Network': 'true'
 };
 
+const BODY_METHODS: HttpMethod[] = ['POST', 'PUT', 'PATCH'];
+
 export class HttpServer {
-    private middlewares: RequestHandler[] = [];
-    server: http.Server;
-    private routes: {
-        [method: string]: {
-            path: string | RegExp;
-            handler: RouteHandler;
-        }[];
-    } = {};
+    server: BunServer<WsData> | null = null;
 
-    constructor() {
-        // @ts-ignore
-        this.server = http.createServer(this.handleRequest.bind(this));
+    private instanceManager: InstanceManager;
+    private websocket: WebSocketHandler<WsData>;
+    private staticRoutes = new Map<
+        string,
+        Partial<Record<HttpMethod, RouteHandler>>
+    >();
 
-        this.server.on('error', (err) => {
-            if (err.message.includes('getaddrinfo')) {
+    private regexRoutes: RegexRoute[] = [];
+    private upgradeHandler: UpgradeHandler | null = null;
+
+    constructor({
+        instanceManager,
+        websocket
+    }: {
+        instanceManager: InstanceManager;
+        websocket: WebSocketHandler<WsData>;
+    }) {
+        this.instanceManager = instanceManager;
+        this.websocket = websocket;
+    }
+
+    route(path: string | RegExp, method: HttpMethod, handler: RouteHandler) {
+        if (typeof path === 'string') {
+            const methods = this.staticRoutes.get(path) ?? {};
+            if (!methods[method]) methods[method] = handler;
+            this.staticRoutes.set(path, methods);
+            return;
+        }
+
+        const exists = this.regexRoutes.some(
+            (route) =>
+                route.method === method && route.path.source === path.source
+        );
+        if (!exists) this.regexRoutes.push({ path, method, handler });
+    }
+
+    onUpgrade(handler: UpgradeHandler) {
+        this.upgradeHandler = handler;
+    }
+
+    listen(port: number, hostname: string) {
+        try {
+            this.server = Bun.serve({
+                port,
+                hostname,
+                idleTimeout: 30,
+                websocket: this.websocket,
+                fetch: (request, server) => this.handleRequest(request, server),
+                error: (error) => {
+                    wLogger.error(
+                        'Server experienced an error:',
+                        error.message
+                    );
+                    wLogger.debug('Server error details:', error);
+
+                    return json({ error: error.message }, 500);
+                }
+            });
+        } catch (exc) {
+            const message = (exc as Error).message;
+            if (
+                message.includes('getaddrinfo') ||
+                message.includes('EADDRNOTAVAIL')
+            ) {
                 wLogger.warn(
                     'Server failed to start: Incorrect IP address or URL'
                 );
                 return;
             }
 
-            wLogger.error('Server experienced an error:', err.message);
-            wLogger.debug('Server error details:', err);
-        });
+            wLogger.error('Server experienced an error:', message);
+            wLogger.debug('Server error details:', exc);
+            return;
+        }
+
+        const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
+        wLogger.info(`Dashboard server started on %http://${ip}:${port}%`);
+
+        if (config.openDashboardOnStartup === true) {
+            const platform = platformResolver(process.platform);
+            exec(
+                `${platform.command} http://${ip}:${port}`,
+                { windowsHide: true },
+                (error, stdout, stderr) => {
+                    if (error || stderr) {
+                        return;
+                    }
+
+                    wLogger.info(`Web dashboard opened successfully`);
+                }
+            );
+        }
     }
 
-    use(middleware: RequestHandler) {
-        this.middlewares.push(middleware);
+    async stop() {
+        if (!this.server) return;
+
+        await this.server.stop(true);
+        this.server = null;
     }
 
-    route(
-        path: string | RegExp,
-        method:
-            | 'GET'
-            | 'POST'
-            | 'HEAD'
-            | 'PUT'
-            | 'DELETE'
-            | 'CONNECT'
-            | 'OPTIONS'
-            | 'TRACE'
-            | 'PATCH',
-        handler: RouteHandler
-    ) {
-        if (this.routes[method] == null) this.routes[method] = [];
-
-        const find = this.routes[method].find((r) => r.path === path);
-        if (!find) this.routes[method].push({ path, handler });
-    }
-
-    private handleRequest(
-        req: ExtendedIncomingMessage,
-        res: http.ServerResponse
-    ) {
+    private async handleRequest(
+        request: Request,
+        server: BunServer<WsData>
+    ): Promise<Response | undefined> {
         const startTime = performance.now();
-        let body = '';
+        const url = new URL(request.url);
+        const method = request.method as HttpMethod;
 
-        res.on('finish', () => {
+        const respond = (response: Response) => {
+            for (const [key, value] of Object.entries(CORS_HEADERS)) {
+                response.headers.set(key, value);
+            }
+
             const elapsedTime = (performance.now() - startTime).toFixed(2);
             wLogger.time(
                 `Request processed in %${elapsedTime}ms%`,
-                req.method,
-                res.statusCode,
-                res.getHeader('content-type'),
-                decodeURIComponent(req.url || '')
+                method,
+                response.status,
+                response.headers.get('content-type'),
+                decodeURIComponent(url.pathname + url.search)
             );
-        });
 
-        const next = (index: number) => {
-            if (index < this.middlewares.length) {
-                const savedIndex = index;
-                const middleware = this.middlewares[index++];
-
-                try {
-                    middleware(req, res, () => {
-                        next(savedIndex + 1);
-                    });
-                } catch (exc) {
-                    wLogger.error(
-                        'Middleware execution failed:',
-                        (exc as Error).message
-                    );
-                    wLogger.debug('Middleware error details:', exc);
-                }
-                return;
-            }
-
-            // get data aka body
-            if (['POST', 'PUT', 'PATCH'].includes(req.method || '')) {
-                req.on('data', (chunk) => {
-                    body += chunk;
-                });
-
-                req.on('end', () => {
-                    req.body = body;
-
-                    this.handleNext(req, res);
-                });
-                return;
-            }
-            this.handleNext(req, res);
+            return response;
         };
 
-        next(0);
-    }
-
-    private handleNext(req: ExtendedIncomingMessage, res: http.ServerResponse) {
-        const method = req.method || 'GET';
-        const hostname = req.headers.host; // Hostname
-
-        const parsedURL = new URL(`http://${hostname}${req.url}`);
-
-        // parse query parameters
-        req.query = {};
-        req.params = {};
-        req.pathname = parsedURL.pathname;
-
-        parsedURL.searchParams.forEach(
-            (value, key) => (req.query[key] = value)
-        );
-
-        const routes = this.routes[method] || [];
-        for (let i = 0; i < routes.length; i++) {
-            const route = routes[i];
-            let routeExists = false;
-
-            if (
-                route.path instanceof RegExp &&
-                route.path.test(parsedURL.pathname)
-            ) {
-                routeExists = true;
-
-                // turn groups to route params
-                const array = Object.keys(
-                    route.path.exec(parsedURL.pathname)?.groups || {}
-                );
-                for (let g = 0; g < array.length; g++) {
-                    const key = array[g];
-                    const value = route.path.exec(parsedURL.pathname)?.groups?.[
-                        key
-                    ];
-
-                    if (key == null || value == null) continue;
-                    req.params[key] = value;
+        if (!isRequestAllowed(request.headers)) {
+            wLogger.warn(
+                `Blocked unauthorized request to %${url.pathname}${url.search}%`,
+                {
+                    origin: request.headers.get('origin'),
+                    referer: request.headers.get('referer')
                 }
-            } else if (typeof route.path === 'string') {
-                routeExists = route.path === parsedURL.pathname;
-            }
+            );
 
-            if (!routeExists) continue;
-            try {
-                return route.handler(req, res);
-            } catch (exc) {
-                const message =
-                    typeof exc === 'string' ? exc : (exc as Error).message;
-
-                if ((exc as NodeJS.ErrnoException)?.code === 'ENOENT')
-                    res.statusMessage = encodeURI(
-                        `${parsedURL.pathname} ENOENT: no such file or directory`
-                    );
-                else res.statusMessage = encodeURI(message);
-
-                res.statusCode = 500;
-
-                wLogger.warn(
-                    `Request to %${parsedURL.pathname}% failed:`,
-                    message
-                );
-                wLogger.debug(
-                    `Route handling error for %${parsedURL.pathname}%:`,
-                    exc
-                );
-
-                return sendJson(res, { error: message });
-            }
+            return respond(new Response('Not Found', { status: 403 }));
         }
 
-        res.statusCode = 404;
-        res.end('Not Found');
+        if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
+            // Bun requires `undefined` after a successful upgrade.
+            if (this.upgradeHandler?.(request, url, server)) return undefined;
+            return respond(new Response('Not Found', { status: 404 }));
+        }
+
+        const query: Record<string, string> = {};
+        url.searchParams.forEach((value, key) => (query[key] = value));
+
+        const req: TosuRequest = {
+            raw: request,
+            method,
+            url,
+            pathname: url.pathname,
+            query,
+            params: {},
+            headers: request.headers,
+            body: BODY_METHODS.includes(method) ? await request.text() : '',
+            remoteAddress: server.requestIP(request)?.address ?? '',
+            instanceManager: this.instanceManager
+        };
+
+        const handler = this.match(url.pathname, method, req.params);
+        if (!handler)
+            return respond(new Response('Not Found', { status: 404 }));
+
+        try {
+            return respond(await handler(req));
+        } catch (exc) {
+            const message =
+                typeof exc === 'string' ? exc : (exc as Error).message;
+            const statusText =
+                (exc as NodeJS.ErrnoException)?.code === 'ENOENT'
+                    ? encodeURI(
+                          `${url.pathname} ENOENT: no such file or directory`
+                      )
+                    : encodeURI(message);
+
+            wLogger.warn(`Request to %${url.pathname}% failed:`, message);
+            wLogger.debug(`Route handling error for %${url.pathname}%:`, exc);
+
+            return respond(json({ error: message }, 500, statusText));
+        }
     }
 
-    listen(port: number, hostname: string) {
-        this.server.listen(port, hostname, () => {
-            const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
-            wLogger.info(`Dashboard server started on %http://${ip}:${port}%`);
+    private match(
+        pathname: string,
+        method: HttpMethod,
+        params: Record<string, string>
+    ): RouteHandler | undefined {
+        const exact = this.staticRoutes.get(pathname)?.[method];
+        if (exact) return exact;
 
-            if (config.openDashboardOnStartup === true) {
-                const platform = platformResolver(process.platform);
-                exec(
-                    `${platform.command} http://${ip}:${port}`,
-                    (error, stdout, stderr) => {
-                        if (error || stderr) {
-                            return;
-                        }
+        for (const route of this.regexRoutes) {
+            if (route.method !== method) continue;
 
-                        wLogger.info(`Web dashboard opened successfully`);
-                    }
-                );
+            const result = route.path.exec(pathname);
+            if (!result) continue;
+
+            for (const [key, value] of Object.entries(result.groups ?? {})) {
+                if (value != null) params[key] = value;
             }
-        });
+
+            return route.handler;
+        }
+
+        return undefined;
     }
 }
