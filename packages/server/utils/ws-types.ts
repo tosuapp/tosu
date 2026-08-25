@@ -3,7 +3,7 @@ export type WsEndpoint = 'v1' | 'sc' | 'v2' | 'v2precise' | 'commands';
 export interface WsData {
     endpoint: WsEndpoint;
     id: string;
-    /** Path + query string of the upgrade request, e.g. `/tokens?l=name`. */
+    /** Path of the upgrade request without the query string, e.g. `/tokens`. */
     pathname: string;
     query: Record<string, string>;
 

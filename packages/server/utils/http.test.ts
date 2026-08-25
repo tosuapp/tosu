@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import type { InstanceManager } from 'tosu/instances/manager';
 
-import { HttpServer } from './http';
+import { HttpServer, errorStatusText } from './http';
 import { json } from './index';
 
 const instanceManager = {
@@ -24,6 +24,7 @@ beforeAll(() => {
     app.route('/boom', 'GET', () => {
         throw new Error('osu is not ready/running');
     });
+    app.route('/redirect', 'GET', () => Response.redirect('/plain', 301));
     app.route(/.*/, 'GET', (req) => json({ catchAll: req.pathname }));
 
     app.listen(0, '127.0.0.1');
@@ -73,22 +74,24 @@ describe('HttpServer', () => {
         expect(await res.json()).toEqual({ body: '{"a":1}' });
     });
 
-    test('thrown errors become 500 JSON with encoded statusText', async () => {
+    test('thrown errors become 500 JSON with the error message', async () => {
         const res = await fetch(`${base}/boom`);
 
         expect(res.status).toBe(500);
         expect(await res.json()).toEqual({ error: 'osu is not ready/running' });
+    });
 
-        // NOTE: Bun.serve() does not transmit a custom Response.statusText over
-        // the wire -- a real fetch() always observes the standard HTTP reason
-        // phrase for the status code (e.g. "Internal Server Error" for 500),
-        // regardless of what is set (verified against Bun 1.4.0). The
-        // `json()` helper still builds the Response with the encoded
-        // statusText in-process, which is what HttpServer's error handler
-        // relies on, so we assert the contract there instead.
+    test('errorStatusText encodes the message, and maps ENOENT to a friendlier one', () => {
         expect(
-            json({}, 500, encodeURI('osu is not ready/running')).statusText
+            errorStatusText(new Error('osu is not ready/running'), '/boom')
         ).toBe(encodeURI('osu is not ready/running'));
+
+        expect(
+            errorStatusText(
+                Object.assign(new Error('x'), { code: 'ENOENT' }),
+                '/files/x.png'
+            )
+        ).toBe(encodeURI('/files/x.png ENOENT: no such file or directory'));
     });
 
     test('unknown method on a known path is 404', async () => {
@@ -112,5 +115,74 @@ describe('HttpServer', () => {
         });
 
         expect(res.status).toBe(200);
+    });
+
+    test('a redirect response still gets CORS headers without throwing', async () => {
+        const res = await fetch(`${base}/redirect`, { redirect: 'manual' });
+
+        expect(res.status).toBe(301);
+        expect(res.headers.get('location')).toContain('/plain');
+        expect(res.headers.get('access-control-allow-origin')).toBe('*');
+    });
+
+    test('a request with Upgrade: websocket and no handler registered is 404', async () => {
+        const res = await fetch(`${base}/ws`, {
+            headers: { Upgrade: 'websocket', Connection: 'Upgrade' }
+        });
+
+        expect(res.status).toBe(404);
+        expect(await res.text()).toBe('Not Found');
+    });
+});
+
+describe('HttpServer upgrade handling', () => {
+    let wsApp: HttpServer;
+    let wsBase: string;
+
+    beforeAll(() => {
+        wsApp = new HttpServer({
+            instanceManager,
+            websocket: {
+                open() {},
+                message() {}
+            }
+        });
+
+        wsApp.onUpgrade((request, url, server) =>
+            server.upgrade(request, {
+                data: {
+                    endpoint: 'v2',
+                    id: 'test',
+                    pathname: url.pathname,
+                    query: {},
+                    hostAddress: '',
+                    localAddress: '',
+                    originAddress: '',
+                    remoteAddress: ''
+                }
+            })
+        );
+
+        wsApp.listen(0, '127.0.0.1');
+        wsBase = `http://127.0.0.1:${wsApp.server!.port}`;
+    });
+
+    afterAll(async () => {
+        await wsApp.stop();
+    });
+
+    test('a registered upgrade handler completes a real WebSocket handshake', async () => {
+        const ws = new WebSocket(`${wsBase.replace('http', 'ws')}/ws`);
+
+        try {
+            await new Promise<void>((resolve, reject) => {
+                ws.addEventListener('open', () => resolve());
+                ws.addEventListener('error', () =>
+                    reject(new Error('WebSocket failed to open'))
+                );
+            });
+        } finally {
+            ws.close();
+        }
     });
 });

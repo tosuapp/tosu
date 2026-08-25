@@ -55,6 +55,22 @@ const CORS_HEADERS: Record<string, string> = {
 
 const BODY_METHODS: HttpMethod[] = ['POST', 'PUT', 'PATCH'];
 
+/**
+ * Note: Bun.serve() does not transmit a custom Response.statusText over the
+ * wire -- a real fetch() client always observes the standard HTTP reason
+ * phrase for the status code (e.g. "Internal Server Error" for 500),
+ * regardless of what is set here (verified against Bun 1.4.0). The value is
+ * still produced correctly in-process, so it's what error-handling code
+ * should rely on rather than a client-observed statusText.
+ */
+export function errorStatusText(exc: unknown, pathname: string): string {
+    const message = typeof exc === 'string' ? exc : (exc as Error).message;
+
+    return (exc as NodeJS.ErrnoException)?.code === 'ENOENT'
+        ? encodeURI(`${pathname} ENOENT: no such file or directory`)
+        : encodeURI(message);
+}
+
 export class HttpServer {
     server: BunServer<WsData> | null = null;
 
@@ -134,12 +150,13 @@ export class HttpServer {
         }
 
         const ip = hostname === '0.0.0.0' ? 'localhost' : hostname;
-        wLogger.info(`Dashboard server started on %http://${ip}:${port}%`);
+        const boundPort = this.server.port;
+        wLogger.info(`Dashboard server started on %http://${ip}:${boundPort}%`);
 
         if (config.openDashboardOnStartup === true) {
             const platform = platformResolver(process.platform);
             exec(
-                `${platform.command} http://${ip}:${port}`,
+                `${platform.command} http://${ip}:${boundPort}`,
                 { windowsHide: true },
                 (error, stdout, stderr) => {
                     if (error || stderr) {
@@ -168,8 +185,13 @@ export class HttpServer {
         const method = request.method as HttpMethod;
 
         const respond = (response: Response) => {
+            // Some Response variants (e.g. Response.redirect(), or responses
+            // passed through from fetch) carry an immutable header guard;
+            // `Headers.set` on them can throw. Copy into a fresh Headers
+            // instance instead of mutating the response's headers in place.
+            const headers = new Headers(response.headers);
             for (const [key, value] of Object.entries(CORS_HEADERS)) {
-                response.headers.set(key, value);
+                headers.set(key, value);
             }
 
             const elapsedTime = (performance.now() - startTime).toFixed(2);
@@ -177,11 +199,15 @@ export class HttpServer {
                 `Request processed in %${elapsedTime}ms%`,
                 method,
                 response.status,
-                response.headers.get('content-type'),
+                headers.get('content-type'),
                 decodeURIComponent(url.pathname + url.search)
             );
 
-            return response;
+            return new Response(response.body, {
+                status: response.status,
+                statusText: response.statusText,
+                headers
+            });
         };
 
         if (!isRequestAllowed(request.headers)) {
@@ -227,12 +253,7 @@ export class HttpServer {
         } catch (exc) {
             const message =
                 typeof exc === 'string' ? exc : (exc as Error).message;
-            const statusText =
-                (exc as NodeJS.ErrnoException)?.code === 'ENOENT'
-                    ? encodeURI(
-                          `${url.pathname} ENOENT: no such file or directory`
-                      )
-                    : encodeURI(message);
+            const statusText = errorStatusText(exc, url.pathname);
 
             wLogger.warn(`Request to %${url.pathname}% failed:`, message);
             wLogger.debug(`Route handling error for %${url.pathname}%:`, exc);
