@@ -3,6 +3,7 @@
     "lib": [
       "ES2023"
     ],
+    "types": ["bun", "node"],
     "target": "es2023",
     "ignoreDeprecations": "6.0",
     "module": "preserve",

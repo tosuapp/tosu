@@ -5,13 +5,12 @@
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {
-        "genver": "npx genversion -es src/_version.js",
-        "ts:run": "cross-env NODE_ENV=development tsx",
-        "ts:compile": "rolldown -c rolldown.config.mjs",
-        "watch": "pnpm run genver && pnpm run ts:run watch.ts",
-        "run:dev": "pnpm run genver && pnpm run ts:compile && node --enable-source-maps dist/index.js",
-        "compile:win": "pnpm run genver && pnpm run ts:compile && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.mts",
-        "compile:linux": "pnpm run genver && pnpm run ts:compile && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
+        "genver": "genversion -es src/_version.js",
+        "ts:compile": "rm -rf dist && rolldown -c rolldown.config.mjs",
+        "watch": "bun run genver && NODE_ENV=development bun watch.ts",
+        "run:dev": "bun run genver && bun run ts:compile && bun dist/index.js",
+        "compile:win": "bun run genver && bun run ts:compile && bun build.ts windows",
+        "compile:linux": "bun run genver && bun run ts:compile && bun build.ts linux"
     },
     "dependencies": {
         "@tosu/common": "workspace:*",
@@ -25,17 +24,14 @@
         "osu-parsers": "^4.1.7",
         "osu-standard-stable": "^5.0.1",
         "osu-taiko-stable": "^5.0.1",
-        "resedit": "^2.0.3",
         "semver": "^7.7.3",
         "tsprocess": "workspace:*"
     },
     "devDependencies": {
         "@types/semver": "^7.7.1",
-        "@yao-pkg/pkg": "^6.22.0",
-        "cross-env": "^7.0.3",
         "genversion": "^3.2.0",
         "rolldown": "^1.2.3",
         "rollup-plugin-copy": "^3.5.0",
-        "tsx": "^4.23.7"
+        "rosu-pp-js": "4.0.1"
     }
 }

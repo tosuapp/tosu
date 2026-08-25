@@ -8,7 +8,7 @@
     "build": "electron-vite build",
     "dev": "electron-vite dev",
     "watch": "electron-vite dev --watch",
-    "dist": "npm run build && electron-builder --windows"
+    "dist": "bun run build && electron-builder --windows"
   },
   "keywords": [],
   "author": "storycraft <storycraft@pancake.sh>",

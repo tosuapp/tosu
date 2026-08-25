@@ -10,11 +10,12 @@ export default defineConfig([
     {
         input: 'src/index.ts',
         platform: 'node',
+        external: [/^bun(:.*)?$/],
         moduleTypes: {
             '.node': 'copy'
         },
         output: {
-            minify: true,
+            minify: false,
             keepNames: true,
             sourcemap: true,
             sourcemapExcludeSources: true,
@@ -35,7 +36,7 @@ export default defineConfig([
                 copyOnce: true,
                 targets: [
                     {
-                        src: './node_modules/@tosu/server/assets/**/*',
+                        src: '../server/assets/**/*',
                         dest: 'dist/assets'
                     }
                 ],

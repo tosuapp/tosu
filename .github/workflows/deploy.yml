@@ -9,13 +9,13 @@ on:
       - ".github/workflows/**/*"
       - "packages/**/*"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "bun.lock"
   pull_request:
     paths:
       - ".github/workflows/**/*"
       - "packages/**/*"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "bun.lock"
 
 concurrency:
   group: deploy-${{ github.ref_name }}
@@ -50,24 +50,28 @@ jobs:
         shell: bash
         run: echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
 
-      - name: 🛠️ - Install Node
-        uses: actions/setup-node@v7
-        with: { node-version: 24.14.0 }
+      - name: 🛠️ - Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
 
       - name: 🛠️ - Install Deps
-        run: npm install -g pnpm@10.10.0 && pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
+
+      - name: 🧪 - Test
+        run: bun test
 
       - name: 📦 - Build (windows)
         if: ${{ matrix.os == 'windows-latest' }}
-        run: pnpm build:win
+        run: bun run build:win
 
       - name: 📦 - Build (linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: pnpm build:linux
+        run: bun run build:linux
 
       - name: 📦 - Build ingame-overlay (windows)
         if: ${{ matrix.os == 'windows-latest' }}
-        run: pnpm build:overlay
+        run: bun run build:overlay
 
       - name: 📦 - Prepare overlay for upload
         if: ${{ matrix.os == 'windows-latest' }}

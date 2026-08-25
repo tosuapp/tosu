@@ -1,15 +1,26 @@
 {
+  "name": "tosu-monorepo",
+  "private": true,
   "author": "Mikhail Babynichev",
   "license": "GPL-3.0",
   "version": "4.26.0",
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "bun@1.4.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "trustedDependencies": [
+    "electron",
+    "esbuild"
+  ],
   "scripts": {
-    "prepare": "husky install",
-    "start": "pnpm run -C packages/tosu run:dev",
-    "watch": "pnpm run -C packages/tosu watch",
-    "build:win": "pnpm run -C packages/tosu compile:win",
-    "build:linux": "pnpm run -C packages/tosu compile:linux",
-    "build:overlay": "pnpm run -C \"packages/ingame-overlay\" dist",
+    "prepare": "husky && bun run build:native && bun --cwd=packages/server run prepare",
+    "start": "bun --cwd=packages/tosu run run:dev",
+    "watch": "bun --cwd=packages/tosu run watch",
+    "build:native": "bun --cwd=packages/tsprocess run build",
+    "build:win": "bun --cwd=packages/tosu run compile:win",
+    "build:linux": "bun --cwd=packages/tosu run compile:linux",
+    "build:overlay": "bun --cwd=packages/ingame-overlay run dist",
+    "test": "bun test",
     "release": "commit-and-tag-version",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,css}\"",
     "prettier:ci": "prettier --check \"**/*.{js,jsx,ts,tsx,css}\"",
@@ -20,7 +31,8 @@
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^9.39.5",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/node": "^24.10.4",
+    "@types/bun": "^1.4.0",
+    "@types/node": "^26.3.0",
     "@typescript-eslint/eslint-plugin": "^8.66.0",
     "@typescript-eslint/parser": "^8.66.0",
     "commit-and-tag-version": "^13.1.2",
@@ -34,13 +46,12 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
     "prettier": "^3.7.4",
-    "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3"
   },
   "lint-staged": {
     "**/*.{js,ts}": [
-      "pnpm run prettier:fix",
-      "pnpm run lint:fix"
+      "bun run prettier:fix",
+      "bun run lint:fix"
     ]
   },
   "homepage": "https://github.com/tosuapp/tosu#readme",
@@ -52,6 +63,6 @@
     "url": "https://github.com/tosuapp/tosu/issues"
   },
   "engines": {
-    "node": ">=24.14.0 <25.0.0"
+    "bun": ">=1.4.0"
   }
 }

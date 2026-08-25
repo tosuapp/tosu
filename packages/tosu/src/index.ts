@@ -20,6 +20,7 @@ import { version as currentVersion } from './_version.js';
 
 (async () => {
     context.currentVersion = currentVersion;
+    process.title = 'tosu';
     wLogger.info(`Starting %tosu%`);
 
     Process.disablePowerThrottling();

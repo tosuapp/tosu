@@ -1,24 +1,21 @@
 {
-  "name": "tsprocess",
-  "version": "1.0.1",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "prepare": "npm run build",
-    "build": "tsc"
-  },
-  "dependencies": {
-    "@tosu/common": "workspace:*",
-    "node-addon-api": "^8.5.0"
-  },
-  "files": [
-    "lib",
-    "dist",
-    "binding.gyp"
-  ],
-  "devDependencies": {
-    "node-api-headers": "^1.7.0",
-    "node-gyp": "^12.4.0"
-  }
+    "name": "tsprocess",
+    "version": "1.0.1",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc && bun run build.ts",
+        "build:native": "bun run build.ts"
+    },
+    "dependencies": {
+        "@tosu/common": "workspace:*",
+        "node-addon-api": "^8.5.0",
+        "node-api-headers": "^1.7.0"
+    },
+    "files": [
+        "lib",
+        "dist",
+        "build.ts"
+    ]
 }

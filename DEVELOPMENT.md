@@ -4,11 +4,8 @@ This guide walks you through setting up your local environment, running the appl
 
 ## System Prerequisites
 
-To build and run tosu locally, you need the following tools installed on your system:
-
-* **Node.js**: Version 24 or newer is recommended.
-* **pnpm**: The package manager used by the monorepo workspace.
-* **C++ Build Tools**: Such as Visual Studio Build Tools (Windows) or build-essential (Linux), required by node-gyp to compile the `tsprocess` native addon.
+* **Bun**: version `1.4.0` (see `.bun-version`). Install from https://bun.com. Node.js is not required.
+* **C++ Build Tools**: Visual Studio Build Tools with the "Desktop development with C++" workload (Windows) or `build-essential` (Linux). They compile the `tsprocess` native addon.
 
 ## Project Setup
 
@@ -18,40 +15,52 @@ To build and run tosu locally, you need the following tools installed on your sy
    cd tosu
    ```
 
-2. Install dependencies (this will automatically build the native `tsprocess` C++ addon):
+2. Install dependencies (this also builds the native `tsprocess` addon and the dashboard stylesheet):
    ```bash
-   pnpm install
+   bun install
+   ```
+
+   To rebuild the native addon later:
+   ```bash
+   bun run build:native
    ```
 
 ## Running in Development
 
-To start tosu in development mode with hot-reloading:
+Hot-reloading (rolldown watch + automatic restart):
 ```bash
-pnpm run watch
+bun run watch
 ```
-This compiles the packages and runs the main server. The software will poll for a running osu! or osu!lazer process and attach to it automatically.
 
-Standard mode (without hot-reloading):
+Standard mode (single bundle + run):
 ```bash
-pnpm run start
+bun run start
 ```
+
+Both commands bundle `packages/tosu/src` into `packages/tosu/dist/index.js` and run it with Bun. The software polls for a running osu! or osu!lazer process and attaches automatically.
 
 ### Running Specific Files
-If you are developing or testing specific components, you can use the sub-package ts runners:
 ```bash
-pnpm --filter tosu run ts:run <file-path>
+bun packages/tosu/src/<file>.ts
+```
+
+### Debugging
+```bash
+bun --inspect packages/tosu/dist/index.js
+```
+Then attach with the Bun VS Code extension or open the printed devtools URL.
+
+## Tests
+
+```bash
+bun test
 ```
 
 ## Compilation
 
-You can compile a single self-contained binary file. The build outputs will be placed in `packages/tosu/dist/`.
+A single self-contained binary is produced in `packages/tosu/dist/`:
 
-* **For Windows**:
-  ```bash
-  pnpm build:win
-  ```
+* **Windows**: `bun run build:win` → `packages/tosu/dist/tosu.exe`
+* **Linux**: `bun run build:linux` → `packages/tosu/dist/tosu`
 
-* **For Linux**:
-  ```bash
-  pnpm build:linux
-  ```
+The in-game overlay (Electron) is built with `bun run build:overlay` (Windows only).

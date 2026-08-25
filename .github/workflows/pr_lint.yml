@@ -20,20 +20,19 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v7
 
-      - name: Install Node.js 🔧
-        uses: actions/setup-node@v7
+      - name: Install Bun 🔧
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 24.14.0
+          bun-version-file: .bun-version
 
       - name: Install Deps 🔧
-        run: |
-          npm install -g pnpm@10.10.0
-          pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Lint PR (prettier)
-        run: |
-          pnpm run prettier:ci
+        run: bun run prettier:ci
 
       - name: Lint PR (eslint)
-        run: |
-          pnpm run lint:ci
+        run: bun run lint:ci
+
+      - name: Test
+        run: bun test

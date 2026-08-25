@@ -20,8 +20,8 @@ watcher.on('event', (event) => {
         case 'END': {
             // Start tosu process after bundler has finished
             tosuProcess = childProcess.spawn(
-                'node',
-                ['--enable-source-maps', 'dist/index.js'],
+                process.execPath,
+                ['dist/index.js'],
                 {
                     stdio: 'inherit'
                 }
