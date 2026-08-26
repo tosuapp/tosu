@@ -1,3 +1,4 @@
+import type { TCPSocketListener } from 'bun';
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -8,6 +9,8 @@ import { progressManager } from './progress';
 
 const payload = new Uint8Array(1024 * 256).map((_, i) => i % 251);
 let server: ReturnType<typeof Bun.serve>;
+let truncating: TCPSocketListener;
+let truncatingOrigin: string;
 let dir: string;
 
 beforeAll(() => {
@@ -25,24 +28,37 @@ beforeAll(() => {
                     headers: { 'Content-Length': String(payload.byteLength) }
                 });
             }
-            if (url.pathname === '/abort') {
-                const chunk = payload.slice(0, 1024 * 64);
-                const stream = new ReadableStream({
-                    async start(controller) {
-                        controller.enqueue(chunk);
-                        await new Promise((resolve) => setTimeout(resolve, 20));
-                        controller.error(new Error('boom'));
-                    }
-                });
-                return new Response(stream);
-            }
             return new Response('nope', { status: 404 });
         }
     });
+
+    // Bun.serve() streams a ReadableStream with chunked encoding and ignores a
+    // declared Content-Length, so a truncated body has to be written straight
+    // onto the socket. Erroring the stream instead would work, but Bun prints
+    // the stream error to stderr on every run.
+    truncating = Bun.listen({
+        hostname: '127.0.0.1',
+        port: 0,
+        socket: {
+            data(socket) {
+                socket.write(
+                    'HTTP/1.1 200 OK\r\n' +
+                        'Content-Type: application/octet-stream\r\n' +
+                        `Content-Length: ${payload.byteLength}\r\n` +
+                        'Connection: close\r\n\r\n'
+                );
+                socket.write(payload.slice(0, 1024 * 64));
+                socket.flush();
+                setTimeout(() => socket.end(), 20);
+            }
+        }
+    });
+    truncatingOrigin = `http://127.0.0.1:${truncating.port}`;
 });
 
 afterAll(async () => {
     await server.stop(true);
+    truncating.stop(true);
     fs.rmSync(dir, { recursive: true, force: true });
 });
 
@@ -81,7 +97,7 @@ describe('downloadFile', () => {
         const destination = path.join(dir, 'abort.zip');
 
         await expect(
-            downloadFile(`${server.url.origin}/abort`, destination)
+            downloadFile(`${truncatingOrigin}/abort`, destination)
         ).rejects.toThrow();
         expect(fs.existsSync(destination)).toBe(false);
         expect(progressManager.isActive).toBe(false);
