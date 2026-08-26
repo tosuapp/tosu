@@ -82,6 +82,9 @@ export default function buildBaseApi(server: Server) {
         /^\/api\/counters\/download\/(?<url>.*)/,
         'GET',
         async (req) => {
+            // Downloading and unzipping a counter can outlive the 30 s idle timeout.
+            server.app.server?.timeout(req.raw, 0);
+
             const folderName = req.query.name;
             if (!folderName) {
                 return json({ error: 'no folder name' });
@@ -141,6 +144,9 @@ export default function buildBaseApi(server: Server) {
         /^\/api\/counters\/open\/(?<name>.*)/,
         'GET',
         async (req) => {
+            // Waiting on the OS file explorer can outlive the 30 s idle timeout.
+            server.app.server?.timeout(req.raw, 0);
+
             const folderName = req.params.name;
             if (!folderName) {
                 return json({ error: 'no folder name' });
@@ -299,7 +305,10 @@ export default function buildBaseApi(server: Server) {
         }
     );
 
-    server.app.route('/api/runUpdates', 'GET', async () => {
+    server.app.route('/api/runUpdates', 'GET', async (req) => {
+        // Downloading, verifying and unpacking a release can outlive the 30 s idle timeout.
+        server.app.server?.timeout(req.raw, 0);
+
         const result = await autoUpdater('server');
         if (result instanceof Error) return json({ status: result.message });
 

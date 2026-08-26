@@ -63,6 +63,41 @@ const BODY_METHODS: HttpMethod[] = ['POST', 'PUT', 'PATCH'];
  * still produced correctly in-process, so it's what error-handling code
  * should rely on rather than a client-observed statusText.
  */
+/**
+ * Adds the CORS headers every tosu response carries.
+ *
+ * Fast path: mutate the response's own headers in place so Bun's Bun.file()
+ * sendfile optimization on the response body stays intact. The catch below is
+ * defence-in-depth for a Response variant (e.g. Response.redirect(), or a
+ * response passed through from fetch) whose headers are guarded immutable and
+ * throw a TypeError from `Headers.set` -- verified against Bun 1.4.0, this
+ * guard is not currently enforced there, so the in-place path above is always
+ * the one taken. Keep the fallback for a future/different Bun version that
+ * does enforce it.
+ */
+function applyCorsHeaders(response: Response): Response {
+    try {
+        for (const [key, value] of Object.entries(CORS_HEADERS)) {
+            response.headers.set(key, value);
+        }
+
+        return response;
+    } catch (exc) {
+        if (!(exc instanceof TypeError)) throw exc;
+
+        const headers = new Headers(response.headers);
+        for (const [key, value] of Object.entries(CORS_HEADERS)) {
+            headers.set(key, value);
+        }
+
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers
+        });
+    }
+}
+
 export function errorStatusText(exc: unknown, pathname: string): string {
     const message = typeof exc === 'string' ? exc : (exc as Error).message;
 
@@ -119,6 +154,14 @@ export class HttpServer {
             this.server = Bun.serve({
                 port,
                 hostname,
+                // Bun derives `development` from NODE_ENV, which is unset in
+                // the compiled executable -- pin it so production never
+                // serves Bun's verbose error pages.
+                development: false,
+                // The idle timer also runs while a `fetch` handler's promise
+                // is pending, so routes that can legitimately take longer
+                // than this (downloads, report generation, shelling out)
+                // disable it per request with `server.timeout(req, 0)`.
                 idleTimeout: 30,
                 websocket: this.websocket,
                 fetch: (request, server) => this.handleRequest(request, server),
@@ -129,7 +172,9 @@ export class HttpServer {
                     );
                     wLogger.debug('Server error details:', error);
 
-                    return json({ error: error.message }, 500);
+                    return applyCorsHeaders(
+                        json({ error: error.message }, 500)
+                    );
                 }
             });
         } catch (exc) {
@@ -185,46 +230,18 @@ export class HttpServer {
         const method = request.method as HttpMethod;
 
         const respond = (response: Response) => {
-            // Fast path: mutate the response's own headers in place so Bun's
-            // Bun.file() sendfile optimization on the response body stays
-            // intact. The catch below is defence-in-depth for a Response
-            // variant (e.g. Response.redirect(), or a response passed
-            // through from fetch) whose headers are guarded immutable and
-            // throw a TypeError from `Headers.set` -- verified against Bun
-            // 1.4.0, this guard is not currently enforced there, so the
-            // in-place path above is always the one taken. Keep the fallback
-            // for a future/different Bun version that does enforce it.
-            let headers: Headers;
-            try {
-                for (const [key, value] of Object.entries(CORS_HEADERS)) {
-                    response.headers.set(key, value);
-                }
-                headers = response.headers;
-            } catch (exc) {
-                if (!(exc instanceof TypeError)) throw exc;
-
-                headers = new Headers(response.headers);
-                for (const [key, value] of Object.entries(CORS_HEADERS)) {
-                    headers.set(key, value);
-                }
-
-                response = new Response(response.body, {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers
-                });
-            }
+            const withCors = applyCorsHeaders(response);
 
             const elapsedTime = (performance.now() - startTime).toFixed(2);
             wLogger.time(
                 `Request processed in %${elapsedTime}ms%`,
                 method,
-                response.status,
-                headers.get('content-type'),
+                withCors.status,
+                withCors.headers.get('content-type'),
                 decodeURIComponent(url.pathname + url.search)
             );
 
-            return response;
+            return withCors;
         };
 
         if (!isRequestAllowed(request.headers)) {

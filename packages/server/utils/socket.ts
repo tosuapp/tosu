@@ -177,6 +177,12 @@ export function createWebsocketHandler(
     endpoints: Record<WsEndpoint, Websocket>
 ): WebSocketHandler<WsData> {
     return {
+        // Bun's current defaults, spelled out on purpose: overlays hold an
+        // idle socket open for as long as the dashboard is on screen, and a
+        // shorter idle timeout (or pings turned off) would drop them into a
+        // reconnect loop.
+        idleTimeout: 120,
+        sendPings: true,
         open: (ws) => endpoints[ws.data.endpoint].open(ws),
         message: (ws, message) =>
             endpoints[ws.data.endpoint].message(ws, message),
