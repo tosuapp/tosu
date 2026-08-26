@@ -23,16 +23,16 @@ Because stable and lazer have completely different codebases, rendering engines,
 
 ## Monorepo Directory Structure
 
-The project is structured as a pnpm workspace monorepo divided into the following modules:
+The project is structured as a Bun workspace monorepo (`bun install`, `bun test`, `bun build --compile`) divided into the following modules:
 
 * **Core Orchestrator (packages/tosu)**
   Handles process detection, memory reading, state management, and serializing outputs.
   reference: [packages/tosu/src/index.ts](packages/tosu/src/index.ts)
 * **C++ Native Addon (packages/tsprocess)**
-  Interacts directly with the OS to find processes, check window focus, read memory buffers, and run fast pattern scans.
+  Interacts directly with the OS to find processes, check window focus, read memory buffers, and run fast pattern scans. Built by `packages/tsprocess/build.ts` (MSVC on Windows, g++ on Linux) as an N-API addon; no node-gyp or Node.js is involved.
   reference: [packages/tsprocess/src/index.ts](packages/tsprocess/src/index.ts)
 * **HTTP & WebSocket Server (packages/server)**
-  Exposes the compiled game state data to external overlays and serves the dashboard.
+  Exposes the compiled game state data to external overlays and serves the dashboard. Runs on `Bun.serve` with native WebSockets; handlers return `Response` objects.
   reference: [packages/server/index.ts](packages/server/index.ts)
 * **In-Game Overlay (packages/ingame-overlay)**
   An optional Electron desktop application that renders a transparent overlay window directly on top of the active osu! game window.

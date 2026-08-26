@@ -56,6 +56,8 @@ Then attach with the Bun VS Code extension or open the printed devtools URL.
 bun test
 ```
 
+Run this from the repository root. `bunfig.toml`'s `[test] preload` (which sets up the shared test environment) only applies to `bun test` invocations made from the directory that contains `bunfig.toml` — Bun does not walk up parent directories to find it, unlike `tsconfig.json` resolution. Running `bun test` from inside a package directory (e.g. `packages/server`) skips the preload.
+
 ## Compilation
 
 A single self-contained binary is produced in `packages/tosu/dist/`:
