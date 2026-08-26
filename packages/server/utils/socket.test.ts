@@ -7,6 +7,10 @@ import { handleSocketCommands } from './commands';
 import { HttpServer } from './http';
 import { Websocket, type WsEndpoint, createWebsocketHandler } from './socket';
 
+// Belt-and-braces: the bunfig.toml preload (test-setup.ts) is not discovered
+// when tests run from a subdirectory (e.g. `cd packages/server && bun test`).
+config.openDashboardOnStartup = false;
+
 const stateV2 = { menu: { name: 'song' }, play: { combo: 5 } };
 
 const instanceManager = {

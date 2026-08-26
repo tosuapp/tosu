@@ -31,7 +31,13 @@ export async function serveFile(
         const start = parseInt(startText);
         const end = endText ? parseInt(endText) : stat.size - 1;
 
-        if (start >= stat.size || end >= stat.size) {
+        if (
+            !Number.isFinite(start) ||
+            !Number.isFinite(end) ||
+            start > end ||
+            start >= stat.size ||
+            end >= stat.size
+        ) {
             return new Response(null, {
                 status: 416,
                 headers: { 'Content-Range': `bytes */${stat.size}` }

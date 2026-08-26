@@ -75,6 +75,36 @@ describe('serveFile', () => {
         expect(res.headers.get('content-range')).toBe('bytes */1000');
     });
 
+    test('a suffix range (no start) is rejected with 416', async () => {
+        const res = await serveFile(filePath, {
+            range: 'bytes=-500',
+            contentType: 'audio/mpeg'
+        });
+
+        expect(res.status).toBe(416);
+        expect(res.headers.get('content-range')).toBe('bytes */1000');
+    });
+
+    test('a range where start is past end is rejected with 416', async () => {
+        const res = await serveFile(filePath, {
+            range: 'bytes=20-10',
+            contentType: 'audio/mpeg'
+        });
+
+        expect(res.status).toBe(416);
+        expect(res.headers.get('content-range')).toBe('bytes */1000');
+    });
+
+    test('a non-numeric range is rejected with 416', async () => {
+        const res = await serveFile(filePath, {
+            range: 'bytes=abc-def',
+            contentType: 'audio/mpeg'
+        });
+
+        expect(res.status).toBe(416);
+        expect(res.headers.get('content-range')).toBe('bytes */1000');
+    });
+
     test('extraHeaders cannot override the computed range headers', async () => {
         const res = await serveFile(filePath, {
             range: 'bytes=10-19',

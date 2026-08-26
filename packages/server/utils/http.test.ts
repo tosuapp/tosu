@@ -1,8 +1,13 @@
+import { config } from '@tosu/common';
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import type { InstanceManager } from 'tosu/instances/manager';
 
 import { HttpServer, errorStatusText } from './http';
 import { json } from './index';
+
+// Belt-and-braces: the bunfig.toml preload (test-setup.ts) is not discovered
+// when tests run from a subdirectory (e.g. `cd packages/server && bun test`).
+config.openDashboardOnStartup = false;
 
 const instanceManager = {
     focusedClient: 0,

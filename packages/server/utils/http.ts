@@ -187,10 +187,13 @@ export class HttpServer {
         const respond = (response: Response) => {
             // Fast path: mutate the response's own headers in place so Bun's
             // Bun.file() sendfile optimization on the response body stays
-            // intact. Some Response variants (e.g. Response.redirect(), or
-            // responses passed through from fetch) carry an immutable header
-            // guard where `Headers.set` throws a TypeError -- fall back to
-            // cloning into a fresh Response for those.
+            // intact. The catch below is defence-in-depth for a Response
+            // variant (e.g. Response.redirect(), or a response passed
+            // through from fetch) whose headers are guarded immutable and
+            // throw a TypeError from `Headers.set` -- verified against Bun
+            // 1.4.0, this guard is not currently enforced there, so the
+            // in-place path above is always the one taken. Keep the fallback
+            // for a future/different Bun version that does enforce it.
             let headers: Headers;
             try {
                 for (const [key, value] of Object.entries(CORS_HEADERS)) {
