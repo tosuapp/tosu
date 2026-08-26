@@ -9,12 +9,11 @@ import buildV1Api from './router/v1';
 import buildV2Api from './router/v2';
 import { handleSocketCommands } from './utils/commands';
 import { HttpServer } from './utils/http';
-import { isRequestAllowed } from './utils/index';
-import { Websocket } from './utils/socket';
+import { Websocket, createWebsocketHandler } from './utils/socket';
 
 export class Server {
     instanceManager: InstanceManager;
-    app = new HttpServer();
+    app: HttpServer;
 
     WS_V1: Websocket;
     WS_SC: Websocket;
@@ -25,65 +24,72 @@ export class Server {
     constructor({ instanceManager }: { instanceManager: InstanceManager }) {
         this.instanceManager = instanceManager;
 
-        this.middlewares();
+        const getServer = () => this.app.server;
+        const common = {
+            instanceManager,
+            onMessageCallback: handleSocketCommands,
+            getServer
+        };
+
+        this.WS_V1 = new Websocket({
+            ...common,
+            endpoint: 'v1',
+            pollRateFieldName: 'pollRate',
+            stateFunctionName: 'getState'
+        });
+        this.WS_SC = new Websocket({
+            ...common,
+            endpoint: 'sc',
+            pollRateFieldName: 'pollRate',
+            stateFunctionName: 'getStateSC'
+        });
+        this.WS_V2 = new Websocket({
+            ...common,
+            endpoint: 'v2',
+            pollRateFieldName: 'pollRate',
+            stateFunctionName: 'getStateV2'
+        });
+        this.WS_V2_PRECISE = new Websocket({
+            ...common,
+            endpoint: 'v2precise',
+            pollRateFieldName: 'preciseDataPollRate',
+            stateFunctionName: 'getPreciseData'
+        });
+        this.WS_COMMANDS = new Websocket({
+            ...common,
+            endpoint: 'commands',
+            pollRateFieldName: '',
+            stateFunctionName: ''
+        });
+
+        this.app = new HttpServer({
+            instanceManager,
+            websocket: createWebsocketHandler({
+                v1: this.WS_V1,
+                sc: this.WS_SC,
+                v2: this.WS_V2,
+                v2precise: this.WS_V2_PRECISE,
+                commands: this.WS_COMMANDS
+            })
+        });
     }
 
     start() {
-        this.WS_V1 = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getState',
-            onMessageCallback: handleSocketCommands
-        });
-        this.WS_SC = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getStateSC',
-            onMessageCallback: handleSocketCommands
-        });
-
-        this.WS_V2 = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'pollRate',
-            stateFunctionName: 'getStateV2',
-            onMessageCallback: handleSocketCommands
-        });
-        this.WS_V2_PRECISE = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: 'preciseDataPollRate',
-            stateFunctionName: 'getPreciseData',
-            onMessageCallback: handleSocketCommands
-        });
-        this.WS_COMMANDS = new Websocket({
-            instanceManager: this.instanceManager,
-            pollRateFieldName: '',
-            stateFunctionName: '',
-            onMessageCallback: handleSocketCommands
-        });
-
-        buildAssetsApi(this);
+        buildAssetsApi(this.app);
         buildV1Api(this.app);
         buildSCApi(this.app);
 
         buildV2Api(this.app);
 
-        buildSocket({
-            app: this.app,
-
-            WS_V1: this.WS_V1,
-            WS_SC: this.WS_SC,
-            WS_V2: this.WS_V2,
-            WS_V2_PRECISE: this.WS_V2_PRECISE,
-            WS_COMMANDS: this.WS_COMMANDS
-        });
+        buildSocket(this.app);
 
         buildBaseApi(this);
 
         this.app.listen(config.serverPort, config.serverIP);
     }
 
-    restart() {
-        this.app.server.close();
+    async restart() {
+        await this.app.stop();
         this.app.listen(config.serverPort, config.serverIP);
     }
 
@@ -93,7 +99,13 @@ export class Server {
             const portChanged = oldConfig.serverPort !== config.serverPort;
 
             if (ipChanged || portChanged) {
-                this.restart();
+                this.restart().catch((exc) => {
+                    wLogger.error(
+                        'Failed to restart server:',
+                        (exc as any).message
+                    );
+                    wLogger.debug('Server restart error details:', exc);
+                });
             }
         } catch (exc) {
             wLogger.error(
@@ -102,44 +114,6 @@ export class Server {
             );
             wLogger.debug('Server config update error details:', exc);
         }
-    }
-
-    middlewares() {
-        const instanceManager = this.instanceManager;
-
-        this.app.use((_, res, next) => {
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader(
-                'Access-Control-Allow-Headers',
-                'Origin, X-Requested-With, Content-Type, Accept'
-            );
-            res.setHeader(
-                'Access-Control-Allow-Methods',
-                'POST, GET, PUT, DELETE, OPTIONS'
-            );
-            res.setHeader('Access-Control-Allow-Private-Network', 'true');
-            next();
-        });
-
-        this.app.use((req, res, next) => {
-            const allowed = isRequestAllowed(req);
-            if (allowed) {
-                return next();
-            }
-
-            wLogger.warn(`Blocked unauthorized request to %${req.url}%`, {
-                origin: req.headers.origin,
-                referer: req.headers.referer
-            });
-
-            res.statusCode = 403;
-            res.end('Not Found');
-        });
-
-        this.app.use((req, _, next) => {
-            req.instanceManager = instanceManager;
-            next();
-        });
     }
 }
 
