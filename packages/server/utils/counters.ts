@@ -7,11 +7,10 @@ import {
     wLogger
 } from '@tosu/common';
 import fs from 'fs';
-import http from 'http';
 import path from 'path';
 import semver from 'semver';
 
-import { getContentType } from '../utils';
+import { html } from '../utils';
 import type { ICounter, bodyPayload } from './counters.types';
 import {
     authorHTML,
@@ -34,8 +33,36 @@ import {
     settingsTextareaInputHTML
 } from './htmls';
 import { parseCounterSettings } from './parseSettings';
+import { SERVER_ASSETS_PATH } from './paths';
 
-const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
+async function renderHomepage(
+    list: string,
+    amounts: { local?: string; available?: string; search?: string } = {}
+): Promise<Response> {
+    let content: string;
+    try {
+        content = await Bun.file(
+            path.join(SERVER_ASSETS_PATH, 'homepage.html')
+        ).text();
+    } catch (err) {
+        wLogger.debug('Failed to read homepage.html:', err);
+        return html('<html>page not found</html>', 404);
+    }
+
+    let page = content
+        .replace('{{LOCAL_AMOUNT}}', amounts.local ?? '')
+        .replace('{{AVAILABLE_AMOUNT}}', amounts.available ?? '')
+        .replace('{{SEARCH}}', amounts.search ?? '')
+        .replace('{{LIST}}', list);
+    if (semver.gt(context.updateVersion, context.currentVersion)) {
+        page = page
+            .replace('{OLD}', context.currentVersion)
+            .replace('{NEW}', context.updateVersion)
+            .replace('hidden update-available', 'update-available');
+    }
+
+    return html(page);
+}
 
 function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);
@@ -413,11 +440,10 @@ export function getLocalCounters(): ICounter[] {
     }
 }
 
-export function buildLocalCounters(
-    res: http.ServerResponse,
+export async function buildLocalCounters(
     address: string | undefined,
     query?: string
-) {
+): Promise<Response> {
     const array = getLocalCounters();
     const build = rebuildJSON({
         array,
@@ -426,55 +452,19 @@ export function buildLocalCounters(
         query
     });
 
-    if (query != null) {
-        res.writeHead(200, {
-            'Content-Type': getContentType('file.html')
-        });
-        return res.end(build || emptyCounters);
-    }
+    if (query != null) return html(build || emptyCounters);
 
-    fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
-        'utf8',
-        (err, content) => {
-            if (err) {
-                wLogger.debug(
-                    'Failed to read homepage.html for local counters:',
-                    err
-                );
-                res.writeHead(404, {
-                    'Content-Type': 'text/html'
-                });
-
-                res.end('<html>page not found</html>');
-                return;
-            }
-
-            let html = content
-                .replace('{{LOCAL_AMOUNT}}', ` (${array.length})`)
-                .replace('{{AVAILABLE_AMOUNT}}', ``)
-                .replace('{{SEARCH}}', searchBar)
-                .replace('{{LIST}}', build || emptyNotice);
-            if (semver.gt(context.updateVersion, context.currentVersion)) {
-                html = html
-                    .replace('{OLD}', context.currentVersion)
-                    .replace('{NEW}', context.updateVersion)
-                    .replace('hidden update-available', 'update-available');
-            }
-
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            res.end(html);
-        }
-    );
+    return renderHomepage(build || emptyNotice, {
+        local: ` (${array.length})`,
+        available: '',
+        search: searchBar
+    });
 }
 
 export async function buildExternalCounters(
-    res: http.ServerResponse,
     address: string | undefined,
     query?: string
-) {
+): Promise<Response> {
     let text = '';
     let totalLocal = 0;
     let totalAvailable = 0;
@@ -512,12 +502,7 @@ export async function buildExternalCounters(
             query
         });
 
-        if (query != null) {
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            return res.end(build || emptyCounters);
-        }
+        if (query != null) return html(build || emptyCounters);
 
         text = build;
 
@@ -531,51 +516,20 @@ export async function buildExternalCounters(
         wLogger.debug('External counters build error details:', error);
 
         if (query != null) {
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            return res.end((error as any).message || emptyCounters);
+            return html((error as any).message || emptyCounters);
         }
 
         text = `Error: ${(error as any).message}`;
     }
 
-    fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
-        'utf8',
-        (err, content) => {
-            if (err) {
-                wLogger.debug(
-                    'Failed to read homepage.html for external counters:',
-                    err
-                );
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-
-                res.end('<html>page not found</html>');
-                return;
-            }
-
-            let html = content
-                .replace('{{LOCAL_AMOUNT}}', ` (${totalLocal})`)
-                .replace('{{AVAILABLE_AMOUNT}}', ` (${totalAvailable})`)
-                .replace('{{SEARCH}}', searchBar)
-                .replace('{{LIST}}', text || noMoreCounters);
-            if (semver.gt(context.updateVersion, context.currentVersion)) {
-                html = html
-                    .replace('{OLD}', context.currentVersion)
-                    .replace('{NEW}', context.updateVersion)
-                    .replace('hidden update-available', 'update-available');
-            }
-
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            res.end(html);
-        }
-    );
+    return renderHomepage(text || noMoreCounters, {
+        local: ` (${totalLocal})`,
+        available: ` (${totalAvailable})`,
+        search: searchBar
+    });
 }
 
-export function buildSettings(res: http.ServerResponse) {
+export async function buildSettings(): Promise<Response> {
     const generalGroup = settingsGroupHTML
         .replace('{header}', 'General')
         .replace(
@@ -875,39 +829,10 @@ export function buildSettings(res: http.ServerResponse) {
 
     const settingsPage = `<div class="settings">${groups}</div>`;
 
-    fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
-        'utf8',
-        (err, content) => {
-            if (err) {
-                wLogger.debug('buildSettings', 'homepage read', err);
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-
-                res.end('<html>page not found</html>');
-                return;
-            }
-
-            let html = content
-                .replace('{{LOCAL_AMOUNT}}', '')
-                .replace('{{AVAILABLE_AMOUNT}}', '')
-                .replace('{{SEARCH}}', '')
-                .replace('{{LIST}}', settingsPage);
-            if (semver.gt(context.updateVersion, context.currentVersion)) {
-                html = html
-                    .replace('{OLD}', context.currentVersion)
-                    .replace('{NEW}', context.updateVersion)
-                    .replace('hidden update-available', 'update-available');
-            }
-
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            res.end(html);
-        }
-    );
+    return renderHomepage(settingsPage);
 }
 
-export function buildInstructionLocal(res: http.ServerResponse) {
+export async function buildInstructionLocal(): Promise<Response> {
     const pageContent = `<div class="settings">
         <h3>How to Add Your Own Counter <a>Locally</a></h3>
         <p>
@@ -919,67 +844,9 @@ export function buildInstructionLocal(res: http.ServerResponse) {
           4. <b>Fill out the metadata file</b>:<br>- Finally, <a>open</a> the metadata.txt file and <a>fill out</a> the necessary information.
         </p>
       </div>`;
-    fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
-        'utf8',
-        (err, content) => {
-            if (err) {
-                wLogger.debug('buildInstructionLocal', 'homepage read', err);
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-
-                res.end('<html>page not found</html>');
-                return;
-            }
-
-            let html = content
-                .replace('{{LOCAL_AMOUNT}}', '')
-                .replace('{{AVAILABLE_AMOUNT}}', '')
-                .replace('{{SEARCH}}', '')
-                .replace('{{LIST}}', pageContent);
-            if (semver.gt(context.updateVersion, context.currentVersion)) {
-                html = html
-                    .replace('{OLD}', context.currentVersion)
-                    .replace('{NEW}', context.updateVersion)
-                    .replace('hidden update-available', 'update-available');
-            }
-
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            res.end(html);
-        }
-    );
+    return renderHomepage(pageContent);
 }
 
-export function buildEmptyPage(res: http.ServerResponse) {
-    fs.readFile(
-        path.join(pkgAssetsPath, 'homepage.html'),
-        'utf8',
-        (err, content) => {
-            if (err) {
-                wLogger.debug('buildEmptyPage', 'homepage read', err);
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-
-                res.end('<html>page not found</html>');
-                return;
-            }
-
-            let html = content
-                .replace('{{LOCAL_AMOUNT}}', '')
-                .replace('{{AVAILABLE_AMOUNT}}', '')
-                .replace('{{SEARCH}}', '')
-                .replace('{{LIST}}', '');
-            if (semver.gt(context.updateVersion, context.currentVersion)) {
-                html = html
-                    .replace('{OLD}', context.currentVersion)
-                    .replace('{NEW}', context.updateVersion)
-                    .replace('hidden update-available', 'update-available');
-            }
-
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            res.end(html);
-        }
-    );
+export async function buildEmptyPage(): Promise<Response> {
+    return renderHomepage('');
 }

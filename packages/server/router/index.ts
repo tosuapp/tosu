@@ -11,14 +11,14 @@ import {
     wLogger
 } from '@tosu/common';
 import { autoUpdater } from '@tosu/updater';
-import { exec } from 'child_process';
-import fs from 'fs';
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-import path from 'path';
+import { exec } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { promisify } from 'node:util';
 import rosu from 'rosu-pp-js';
 
-import { Server, sendJson } from '../index';
+import type { Server } from '../index';
+import { html, json } from '../utils';
 import {
     buildEmptyPage,
     buildExternalCounters,
@@ -30,17 +30,28 @@ import {
 } from '../utils/counters';
 import { type ISettings } from '../utils/counters.types';
 import { directoryWalker } from '../utils/directories';
+import type { TosuRequest } from '../utils/http';
 import { parseCounterSettings } from '../utils/parseSettings';
+import { SERVER_ASSETS_PATH } from '../utils/paths';
 import {
     type Report,
     generateReport,
     generateReportHTML
 } from '../utils/report';
 
-const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
+const execAsync = promisify(exec);
+
+function requestAddress(req: TosuRequest) {
+    const host = req.headers.get('host');
+    const referer = req.headers.get('referer');
+
+    return new URL(
+        host ? `http://${host}/` : referer || `http://${req.remoteAddress}/`
+    );
+}
 
 export default function buildBaseApi(server: Server) {
-    server.app.route('/json', 'GET', (req, res) => {
+    server.app.route('/json', 'GET', (req) => {
         const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
@@ -48,45 +59,32 @@ export default function buildBaseApi(server: Server) {
             throw new Error('osu is not ready/running');
         }
 
-        const json = osuInstance.getState(req.instanceManager);
-        return sendJson(res, json);
+        return json(osuInstance.getState(req.instanceManager));
     });
 
-    server.app.route(
-        /^\/api\/counters\/search\/(?<query>.*)/,
-        'GET',
-        (req, res) => {
-            const query = decodeURI(req.params.query)
-                .replace(/[^a-z0-9A-Z]/, '')
-                .toLowerCase();
+    server.app.route(/^\/api\/counters\/search\/(?<query>.*)/, 'GET', (req) => {
+        const query = decodeURI(req.params.query)
+            .replace(/[^a-z0-9A-Z]/, '')
+            .toLowerCase();
 
-            const parseAddress = new URL(
-                req.headers.host
-                    ? `http://${req.headers.host}/`
-                    : req.headers.referer ||
-                          `http://${req.socket.remoteAddress}/`
-            );
-
-            const parseReferer = new URL(
-                req.headers.referer || `http://${req.socket.remoteAddress}/`
-            );
-            if (parseReferer.pathname === `/available`) {
-                return buildExternalCounters(res, parseAddress.hostname, query);
-            }
-
-            return buildLocalCounters(res, parseAddress.hostname, query);
+        const parseAddress = requestAddress(req);
+        const parseReferer = new URL(
+            req.headers.get('referer') || `http://${req.remoteAddress}/`
+        );
+        if (parseReferer.pathname === `/available`) {
+            return buildExternalCounters(parseAddress.hostname, query);
         }
-    );
+
+        return buildLocalCounters(parseAddress.hostname, query);
+    });
 
     server.app.route(
         /^\/api\/counters\/download\/(?<url>.*)/,
         'GET',
-        (req, res) => {
+        async (req) => {
             const folderName = req.query.name;
             if (!folderName) {
-                return sendJson(res, {
-                    error: 'no folder name'
-                });
+                return json({ error: 'no folder name' });
             }
 
             const cacheFolder = getCachePath();
@@ -96,73 +94,56 @@ export default function buildBaseApi(server: Server) {
             const tempPath = path.join(cacheFolder, `${Date.now()}.zip`);
 
             if (fs.existsSync(folderPath) && req.query.update !== 'true') {
-                return sendJson(res, {
-                    error: 'Folder already exist'
-                });
+                return json({ error: 'Folder already exist' });
             }
 
             if (!fs.existsSync(cacheFolder)) fs.mkdirSync(cacheFolder);
 
-            const startUnzip = (result: string) => {
-                unzip(result, folderPath)
-                    .then(() => {
-                        wLogger.info(
-                            `PP Counter %${folderName}% downloaded successfully (%${req.headers.referer}%)`
-                        );
-                        fs.unlinkSync(tempPath);
+            let result: string;
+            try {
+                result = await downloadFile(req.params.url, tempPath);
+            } catch (reason) {
+                wLogger.error(
+                    `Failed to download counter %${folderName}%:`,
+                    (reason as Error).message
+                );
+                wLogger.debug(`Counter download error details:`, reason);
 
-                        server.WS_COMMANDS.socket.emit(
-                            'message',
-                            'unzip',
-                            'getOverlays',
-                            `__ingame__`
-                        );
+                return json({ error: (reason as Error).message });
+            }
 
-                        sendJson(res, {
-                            status: 'Finished',
-                            path: result
-                        });
-                    })
-                    .catch((reason) => {
-                        fs.unlinkSync(tempPath);
+            try {
+                await unzip(result, folderPath);
+            } catch (reason) {
+                fs.unlinkSync(tempPath);
 
-                        wLogger.error(
-                            `Failed to unzip counter %${folderName}%:`,
-                            (reason as Error).message
-                        );
-                        wLogger.debug('Counter unzip error details:', reason);
+                wLogger.error(
+                    `Failed to unzip counter %${folderName}%:`,
+                    (reason as Error).message
+                );
+                wLogger.debug('Counter unzip error details:', reason);
 
-                        sendJson(res, {
-                            error: (reason as Error).message
-                        });
-                    });
-            };
+                return json({ error: (reason as Error).message });
+            }
 
-            downloadFile(req.params.url, tempPath)
-                .then(startUnzip)
-                .catch((reason) => {
-                    wLogger.error(
-                        `Failed to download counter %${folderName}%:`,
-                        (reason as Error).message
-                    );
-                    wLogger.debug(`Counter download error details:`, reason);
+            wLogger.info(
+                `PP Counter %${folderName}% downloaded successfully (%${req.headers.get('referer')}%)`
+            );
+            fs.unlinkSync(tempPath);
 
-                    sendJson(res, {
-                        error: (reason as Error).message
-                    });
-                });
+            server.WS_COMMANDS.redispatch('unzip', 'getOverlays', `__ingame__`);
+
+            return json({ status: 'Finished', path: result });
         }
     );
 
     server.app.route(
         /^\/api\/counters\/open\/(?<name>.*)/,
         'GET',
-        (req, res) => {
+        async (req) => {
             const folderName = req.params.name;
             if (!folderName) {
-                return sendJson(res, {
-                    error: 'no folder name'
-                });
+                return json({ error: 'no folder name' });
             }
 
             const staticPath = getStaticPath();
@@ -171,84 +152,65 @@ export default function buildBaseApi(server: Server) {
             else if (folderName === 'static.exe') folderPath = getStaticPath();
 
             if (!fs.existsSync(folderPath)) {
-                return sendJson(res, {
-                    error: "Folder doesn't exists"
-                });
+                return json({ error: "Folder doesn't exists" });
             }
 
             wLogger.info(
-                `Opening PP Counter folder: %${folderName}% (%${req.headers.referer}%)`
+                `Opening PP Counter folder: %${folderName}% (%${req.headers.get('referer')}%)`
             );
 
             const platform = platformResolver(process.platform);
-            exec(`${platform.command} "${folderPath}"`, (err) => {
-                if (err) {
-                    wLogger.error(
-                        `Failed to open folder %${folderName}%:`,
-                        err.message
-                    );
-                    wLogger.debug('Folder open error details:', err);
-
-                    return sendJson(res, {
-                        error: `Error opening folder: ${err.message}`
-                    });
-                }
-
-                return sendJson(res, {
-                    status: 'opened'
+            try {
+                await execAsync(`${platform.command} "${folderPath}"`, {
+                    windowsHide: true
                 });
-            });
-        }
-    );
+            } catch (err) {
+                wLogger.error(
+                    `Failed to open folder %${folderName}%:`,
+                    (err as Error).message
+                );
+                wLogger.debug('Folder open error details:', err);
 
-    server.app.route(
-        /^\/api\/counters\/delete\/(?<name>.*)/,
-        'GET',
-        (req, res) => {
-            const folderName = req.params.name;
-            if (!folderName) {
-                return sendJson(res, {
-                    error: 'no folder name'
+                return json({
+                    error: `Error opening folder: ${(err as Error).message}`
                 });
             }
 
-            const staticPath = getStaticPath();
-            const folderPath = path.join(staticPath, decodeURI(folderName));
-
-            if (!fs.existsSync(folderPath)) {
-                return sendJson(res, {
-                    error: "Folder doesn't exists"
-                });
-            }
-
-            wLogger.info(
-                `PP Counter removed: %${folderName}% (%${req.headers.referer}%)`
-            );
-
-            fs.rmSync(folderPath, { recursive: true, force: true });
-
-            server.WS_COMMANDS.socket.emit(
-                'message',
-                'remove',
-                'getOverlays',
-                `__ingame__`
-            );
-
-            return sendJson(res, {
-                status: 'deleted'
-            });
+            return json({ status: 'opened' });
         }
     );
+
+    server.app.route(/^\/api\/counters\/delete\/(?<name>.*)/, 'GET', (req) => {
+        const folderName = req.params.name;
+        if (!folderName) {
+            return json({ error: 'no folder name' });
+        }
+
+        const staticPath = getStaticPath();
+        const folderPath = path.join(staticPath, decodeURI(folderName));
+
+        if (!fs.existsSync(folderPath)) {
+            return json({ error: "Folder doesn't exists" });
+        }
+
+        wLogger.info(
+            `PP Counter removed: %${folderName}% (%${req.headers.get('referer')}%)`
+        );
+
+        fs.rmSync(folderPath, { recursive: true, force: true });
+
+        server.WS_COMMANDS.redispatch('remove', 'getOverlays', `__ingame__`);
+
+        return json({ status: 'deleted' });
+    });
 
     server.app.route(
         /^\/api\/counters\/settings\/(?<name>.*)/,
         'GET',
-        (req, res) => {
+        (req) => {
             const folderName = req.params.name;
             if (!folderName) {
-                return sendJson(res, {
-                    error: 'No folder name'
-                });
+                return json({ error: 'No folder name' });
             }
 
             const settings = parseCounterSettings(folderName, 'parse');
@@ -258,23 +220,21 @@ export default function buildBaseApi(server: Server) {
                     settings
                 );
 
-                return sendJson(res, {
-                    error: settings.message
-                });
+                return json({ error: settings.message });
             }
 
             wLogger.info(
-                `Settings accessed for %${folderName}% (%${req.headers.referer}%)`
+                `Settings accessed for %${folderName}% (%${req.headers.get('referer')}%)`
             );
 
-            return sendJson(res, settings);
+            return json(settings);
         }
     );
 
     server.app.route(
         /^\/api\/counters\/settings\/(?<name>.*)/,
         'POST',
-        (req, res) => {
+        (req) => {
             const body: ISettings[] | Error = JsonSafeParse({
                 isFile: false,
                 payload: req.body,
@@ -284,9 +244,7 @@ export default function buildBaseApi(server: Server) {
 
             const folderName = req.params.name;
             if (!folderName) {
-                return sendJson(res, {
-                    error: 'no folder name'
-                });
+                return json({ error: 'no folder name' });
             }
 
             if (req.query.update === 'yes') {
@@ -301,13 +259,11 @@ export default function buildBaseApi(server: Server) {
                         result
                     );
 
-                    return sendJson(res, {
-                        error: result.message
-                    });
+                    return json({ error: result.message });
                 }
 
                 wLogger.info(
-                    `Settings re-created for %${folderName}% (%${req.headers.referer}%)`
+                    `Settings re-created for %${folderName}% (%${req.headers.get('referer')}%)`
                 );
 
                 fs.writeFileSync(
@@ -316,41 +272,41 @@ export default function buildBaseApi(server: Server) {
                     'utf8'
                 );
 
-                return sendJson(res, { result: 'success' });
+                return json({ result: 'success' });
             }
 
             wLogger.info(
-                `Settings saved for %${folderName}% (%${req.headers.referer}%)`
+                `Settings saved for %${folderName}% (%${req.headers.get('referer')}%)`
             );
 
-            const html = saveSettings(folderName, body as any);
-            if (html instanceof Error) {
+            const saved = saveSettings(folderName, body as any);
+            if (saved instanceof Error) {
                 wLogger.debug(
                     `Failed to save settings for %${folderName}%:`,
-                    html
+                    saved
                 );
 
-                return sendJson(res, {
-                    error: html.message
-                });
+                return json({ error: saved.message });
             }
 
-            server.WS_COMMANDS.socket.emit(
-                'message',
+            server.WS_COMMANDS.redispatch(
                 'save settings',
                 'getSettings',
                 folderName
             );
 
-            return sendJson(res, { result: 'success' });
+            return json({ result: 'success' });
         }
     );
 
-    server.app.route('/api/runUpdates', 'GET', (req, res) =>
-        autoUpdater('server', res)
-    );
+    server.app.route('/api/runUpdates', 'GET', async () => {
+        const result = await autoUpdater('server');
+        if (result instanceof Error) return json({ status: result.message });
 
-    server.app.route('/api/settingsSave', 'POST', async (req, res) => {
+        return json({ status: result.status });
+    });
+
+    server.app.route('/api/settingsSave', 'POST', (req) => {
         const body: Record<ConfigBinding, string> | Error = JsonSafeParse({
             isFile: false,
             payload: req.body,
@@ -359,10 +315,10 @@ export default function buildBaseApi(server: Server) {
         if (body instanceof Error) throw body;
 
         ConfigManager.refreshConfig(body, true);
-        return sendJson(res, { status: 'updated' });
+        return json({ status: 'updated' });
     });
 
-    server.app.route('/api/calculate/pp', 'GET', (req, res) => {
+    server.app.route('/api/calculate/pp', 'GET', (req) => {
         const query = req.query;
 
         const osuInstance = req.instanceManager.getInstance(
@@ -419,8 +375,7 @@ export default function buildBaseApi(server: Server) {
         if (query.n50 !== undefined) params.n50 = +query.n50;
         if (query.nGeki !== undefined) params.nGeki = +query.nGeki;
         if (query.nKatu !== undefined) params.nKatu = +query.nKatu;
-        if (query.mods !== undefined)
-            params.mods = Array.isArray(query.mods) ? query.mods : +query.mods;
+        if (query.mods !== undefined) params.mods = +query.mods;
         if (query.acc !== undefined) params.accuracy = +query.acc;
         if (query.sliderEndHits !== undefined)
             params.sliderEndHits = +query.sliderEndHits;
@@ -432,113 +387,117 @@ export default function buildBaseApi(server: Server) {
             params.hitresultPriority = +query.hitresultPriority;
 
         const calculate = new rosu.Performance(params).calculate(beatmap);
-        sendJson(res, calculate);
+        const response = json(calculate);
 
         beatmap.free();
         calculate.free();
+
+        return response;
     });
 
-    server.app.route('/api/generateReport', 'GET', async (req, res) => {
+    server.app.route('/api/generateReport', 'GET', async (req) => {
         let report: Report;
         try {
             report = await generateReport(req.instanceManager);
-            res.writeHead(200, {
-                'Content-Type': 'text/html; charset=utf-8',
-                'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
-            });
         } catch (err) {
-            res.writeHead(500, {
-                'Content-Type': 'text/plain; charset=utf-8'
-            });
-            res.end(
-                `Server Error: ${(err as Error).message || 'Unknown error'}`
+            return new Response(
+                `Server Error: ${(err as Error).message || 'Unknown error'}`,
+                {
+                    status: 500,
+                    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                }
             );
-            return;
         }
 
-        try {
-            await pipeline(Readable.from(generateReportHTML(report)), res);
-        } catch (err) {
-            // Headers are already sent; log and abort the response.
-            wLogger.warn('Failed to stream report:', (err as Error).message);
-            wLogger.debug('Report streaming error details:', err);
-            res.destroy();
-        }
-    });
+        // Report streaming can outlive the 30 s idle timeout.
+        server.app.server?.timeout(req.raw, 0);
 
-    server.app.route(/\/api\/ingame/, 'GET', (req, res) => {
-        fs.readFile(
-            path.join(pkgAssetsPath, 'ingame.html'),
-            'utf8',
-            (err, content) => {
-                if (err) {
-                    wLogger.debug(`Failed to read ingame.html:`, err);
-                    res.writeHead(500);
-                    return res.end(`Server Error: ${err.code}`);
+        const encoder = new TextEncoder();
+        const generator = generateReportHTML(report);
+        const stream = new ReadableStream<Uint8Array>({
+            async pull(controller) {
+                const { value, done } = await generator.next();
+                if (done) {
+                    controller.close();
+                    return;
                 }
 
-                const counters = getLocalCounters();
-                content += `\n\n\n<script>\rwindow.COUNTERS = ${JSON.stringify(counters)}\r</script>\n`;
-
-                res.writeHead(200, {
-                    'Content-Type': 'text/html; charset=utf-8'
-                });
-                res.end(content, 'utf-8');
+                controller.enqueue(encoder.encode(value));
+            },
+            cancel() {
+                wLogger.warn('Report download cancelled by the client');
+                generator.return(undefined);
             }
-        );
-    });
+        });
 
-    server.app.route('/favicon.ico', 'GET', (req, res) => {
-        fs.readFile(path.join(pkgAssetsPath, 'favicon.ico'), (err, content) => {
-            if (err) {
-                wLogger.debug(`Failed to read favicon.ico:`, err);
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-
-                res.end('<html>page not found</html>');
-                return;
+        return new Response(stream, {
+            headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Content-Disposition': `attachment; filename="${encodeURIComponent(`tosu-report-${report.date.getTime()}.html`)}"`
             }
-
-            res.writeHead(200, {
-                'Content-Type': 'image/vnd.microsoft.icon; charset=utf-8'
-            });
-
-            res.end(content);
         });
     });
 
-    server.app.route(/.*/, 'GET', async (req, res) => {
+    server.app.route(/\/api\/ingame/, 'GET', async () => {
+        let content: string;
+        try {
+            content = await Bun.file(
+                path.join(SERVER_ASSETS_PATH, 'ingame.html')
+            ).text();
+        } catch (err) {
+            wLogger.debug(`Failed to read ingame.html:`, err);
+
+            return new Response(
+                `Server Error: ${(err as NodeJS.ErrnoException).code}`,
+                { status: 500 }
+            );
+        }
+
+        const counters = getLocalCounters();
+        content += `\n\n\n<script>\rwindow.COUNTERS = ${JSON.stringify(counters)}\r</script>\n`;
+
+        return html(content);
+    });
+
+    server.app.route('/favicon.ico', 'GET', async () => {
+        const file = Bun.file(path.join(SERVER_ASSETS_PATH, 'favicon.ico'));
+        if (!(await file.exists())) {
+            wLogger.debug(`Failed to read favicon.ico: not found`);
+
+            return new Response('<html>page not found</html>', {
+                status: 404,
+                headers: { 'Content-Type': 'text/html' }
+            });
+        }
+
+        return new Response(file, {
+            headers: {
+                'Content-Type': 'image/vnd.microsoft.icon; charset=utf-8'
+            }
+        });
+    });
+
+    server.app.route(/.*/, 'GET', async (req) => {
         const url = req.pathname || '/';
         try {
             if (url.startsWith(`/.well-know`)) {
-                res.statusCode = 404;
-                res.statusMessage = 'Not Found';
-                return res.end();
+                return new Response(null, {
+                    status: 404,
+                    statusText: 'Not Found'
+                });
             }
 
             if (url === '/') {
-                const parseAddress = new URL(
-                    req.headers.host
-                        ? `http://${req.headers.host}/`
-                        : req.headers.referer ||
-                              `http://${req.socket.remoteAddress}/`
-                );
-
-                return buildLocalCounters(res, parseAddress.hostname);
+                return buildLocalCounters(requestAddress(req).hostname);
             }
 
             if (url === '/settings') {
-                if (req.query.overlay) return buildEmptyPage(res);
-                return buildSettings(res);
+                if (req.query.overlay) return buildEmptyPage();
+                return buildSettings();
             }
-            if (url === '/local-overlays') return buildInstructionLocal(res);
+            if (url === '/local-overlays') return buildInstructionLocal();
             if (url === '/available') {
-                const parseAddress = new URL(
-                    req.headers.host
-                        ? `http://${req.headers.host}/`
-                        : req.headers.referer ||
-                              `http://${req.socket.remoteAddress}/`
-                );
-                return buildExternalCounters(res, parseAddress.hostname);
+                return buildExternalCounters(requestAddress(req).hostname);
             }
 
             const staticPath = getStaticPath();
@@ -547,17 +506,17 @@ export default function buildBaseApi(server: Server) {
 
             // ignore empty and one letter extension (extension returned with .)
             if (extension.length < 3 && !url.endsWith('/')) {
-                res.writeHead(301, { Location: url + '/' });
-                return res.end();
+                return new Response(null, {
+                    status: 301,
+                    headers: { Location: url + '/' }
+                });
             }
 
             const selectIndexHTML = url.endsWith('/')
                 ? url + 'index.html'
                 : url;
-            directoryWalker({
-                _htmlRedirect: true,
+            return await directoryWalker({
                 req,
-                res,
                 baseUrl: url,
                 pathname: selectIndexHTML,
                 folderPath: staticPath
@@ -569,8 +528,9 @@ export default function buildBaseApi(server: Server) {
             );
             wLogger.debug(`Request error details for %${url}%:`, error);
 
-            res.writeHead(404);
-            return res.end((error as Error).message || '');
+            return new Response((error as Error).message || '', {
+                status: 404
+            });
         }
     });
 }

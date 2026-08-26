@@ -7,6 +7,7 @@ import { battery, cpu, graphics, osInfo } from 'systeminformation';
 import type { InstanceManager } from 'tosu/instances/manager';
 
 import { getLocalCounters } from './counters';
+import { SERVER_ASSETS_PATH } from './paths';
 
 export type ReportSpecs = {
     systemType: 'Desktop' | 'Laptop';
@@ -136,13 +137,11 @@ export async function generateReport(
     };
 }
 
-const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
-
 export async function* generateReportHTML(
     report: Report
 ): AsyncGenerator<string> {
     const rawHtml = await readFile(
-        path.join(pkgAssetsPath, 'report.html'),
+        path.join(SERVER_ASSETS_PATH, 'report.html'),
         'utf8'
     );
 
