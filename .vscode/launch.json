@@ -1,26 +1,22 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
-            "name": "run tosu",
+            "type": "bun",
             "request": "launch",
-            "args": ["src/index.ts"],
-            "outputCapture": "std",
-            "runtimeArgs": ["--nolazy", "--inspect", "--expose-gc", "--inspect", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
-            "cwd": "${workspaceRoot}/packages/tosu",
+            "name": "Debug tosu (bundle)",
+            "program": "packages/tosu/dist/index.js",
+            "cwd": "${workspaceFolder}/packages/tosu",
+            "stopOnEntry": false,
+            "watchMode": false
         },
         {
-            "type": "node",
-            "name": "Current TS File",
+            "type": "bun",
             "request": "launch",
-            "args": ["${relativeFile}"],
-            "outputCapture": "std",
-            "runtimeArgs": ["--nolazy", "--inspect", "--expose-gc", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
-            "cwd": "${workspaceRoot}/packages/tosu",
+            "name": "Debug bun test",
+            "runtimeArgs": ["test"],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false
         }
     ]
 }
