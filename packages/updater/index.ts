@@ -8,10 +8,13 @@ import {
     verifyDownload,
     wLogger
 } from '@tosu/common';
-import { spawn } from 'child_process';
-import fs from 'fs';
-import { IncomingMessage, ServerResponse } from 'http';
-import path from 'path';
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export type UpdateResult = {
+    status: 'updated' | 'up-to-date' | 'noFiles' | 'unverified';
+};
 
 const platform = platformResolver(process.platform);
 
@@ -112,10 +115,32 @@ export const checkUpdates = async (from: 'autoUpdater' | 'startup') => {
     }
 };
 
+/** Spawns the freshly unpacked executable with the same arguments and exits. */
+async function restartProcess() {
+    wLogger.info('Restarting program to apply updates...');
+
+    if (platform.type === 'linux') {
+        const stats = await fs.promises.stat(backupExecutablePath);
+        await fs.promises.chmod(executablePath, stats.mode).catch(() => null);
+    }
+
+    // shell + detached: the new console app gets its own window and outlives this process.
+    spawn(`"${executablePath}"`, process.argv.slice(1), {
+        detached: true,
+        shell: true,
+        stdio: 'ignore'
+    }).unref();
+
+    wLogger.info('Closing program...');
+
+    await sleep(1000);
+
+    process.exit();
+}
+
 export const autoUpdater = async (
-    from: 'server' | 'startup',
-    res?: ServerResponse<IncomingMessage>
-) => {
+    from: 'server' | 'startup'
+): Promise<UpdateResult | Error> => {
     try {
         const check = await checkUpdates('autoUpdater');
         if (check instanceof Error) {
@@ -139,7 +164,7 @@ export const autoUpdater = async (
                 await deleteNotLocked(backupExecutablePath);
             }
 
-            return;
+            return { status: 'up-to-date' };
         }
 
         const findAsset = assets.find(
@@ -149,7 +174,7 @@ export const autoUpdater = async (
             wLogger.info(
                 `Update files not found for platform (%${platform.type}%)`
             );
-            return 'noFiles';
+            return { status: 'noFiles' };
         }
 
         await downloadFile(findAsset.browser_download_url, updateArchivePath);
@@ -160,49 +185,30 @@ export const autoUpdater = async (
         );
         if (verify === false) {
             await fs.promises.rm(updateArchivePath);
-            return;
+            return { status: 'unverified' };
         }
 
-        await fs.promises.rename(process.argv[0], backupExecutablePath);
+        await fs.promises.rename(process.execPath, backupExecutablePath);
         await unzip(updateArchivePath, getProgramPath());
 
-        // close request to allow destroy server
-        if (from === 'server' && res) {
-            res.setHeader('Content-Type', 'application/json');
-            res.end('{"status":"updated"}');
+        if (from === 'startup') {
+            await restartProcess();
+            return { status: 'updated' };
         }
 
-        await sleep(100);
+        // Let the HTTP response reach the dashboard before the process goes away.
+        setTimeout(() => {
+            restartProcess().catch((exc) => {
+                wLogger.error('Restart failed:', (exc as any).message);
+                wLogger.debug('Restart error details:', exc);
+            });
+        }, 100);
 
-        wLogger.info('Restarting program to apply updates...');
-
-        if (platform.type === 'linux') {
-            const stats = await fs.promises.stat(backupExecutablePath);
-            await fs.promises
-                .chmod(executablePath, stats.mode)
-                .catch(() => null);
-        }
-
-        spawn(`"${executablePath}"`, process.argv.slice(1), {
-            detached: true,
-            shell: true,
-            stdio: 'ignore'
-        }).unref();
-
-        wLogger.info('Closing program...');
-
-        await sleep(1000);
-
-        process.exit();
+        return { status: 'updated' };
     } catch (exc) {
         wLogger.error('Auto-update failed:', (exc as any).message);
         wLogger.debug('Auto-update error details:', exc);
 
-        if (from === 'server' && res) {
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ status: (exc as any).message }));
-        }
-
-        return exc;
+        return exc as Error;
     }
 };
