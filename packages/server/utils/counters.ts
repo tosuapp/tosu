@@ -54,7 +54,11 @@ async function renderHomepage(
         .replace('{{AVAILABLE_AMOUNT}}', amounts.available ?? '')
         .replace('{{SEARCH}}', amounts.search ?? '')
         .replace('{{LIST}}', list);
-    if (semver.gt(context.updateVersion, context.currentVersion)) {
+    if (
+        semver.valid(context.currentVersion) &&
+        semver.valid(context.updateVersion) &&
+        semver.gt(context.updateVersion, context.currentVersion)
+    ) {
         page = page
             .replace('{OLD}', context.currentVersion)
             .replace('{NEW}', context.updateVersion)

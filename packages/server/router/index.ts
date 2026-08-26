@@ -396,6 +396,9 @@ export default function buildBaseApi(server: Server) {
     });
 
     server.app.route('/api/generateReport', 'GET', async (req) => {
+        // Report generation and streaming can outlive the 30 s idle timeout.
+        server.app.server?.timeout(req.raw, 0);
+
         let report: Report;
         try {
             report = await generateReport(req.instanceManager);
@@ -409,24 +412,31 @@ export default function buildBaseApi(server: Server) {
             );
         }
 
-        // Report streaming can outlive the 30 s idle timeout.
-        server.app.server?.timeout(req.raw, 0);
-
         const encoder = new TextEncoder();
         const generator = generateReportHTML(report);
         const stream = new ReadableStream<Uint8Array>({
             async pull(controller) {
-                const { value, done } = await generator.next();
-                if (done) {
-                    controller.close();
-                    return;
-                }
+                try {
+                    const { value, done } = await generator.next();
+                    if (done) {
+                        controller.close();
+                        return;
+                    }
 
-                controller.enqueue(encoder.encode(value));
+                    controller.enqueue(encoder.encode(value));
+                } catch (err) {
+                    wLogger.warn(
+                        'Failed to stream report:',
+                        (err as Error).message
+                    );
+                    wLogger.debug('Report streaming error details:', err);
+
+                    controller.error(err);
+                }
             },
             cancel() {
-                wLogger.warn('Report download cancelled by the client');
-                generator.return(undefined);
+                wLogger.debug('Report download cancelled by the client');
+                return generator.return(undefined).then(() => undefined);
             }
         });
 
@@ -488,16 +498,18 @@ export default function buildBaseApi(server: Server) {
             }
 
             if (url === '/') {
-                return buildLocalCounters(requestAddress(req).hostname);
+                return await buildLocalCounters(requestAddress(req).hostname);
             }
 
             if (url === '/settings') {
-                if (req.query.overlay) return buildEmptyPage();
-                return buildSettings();
+                if (req.query.overlay) return await buildEmptyPage();
+                return await buildSettings();
             }
-            if (url === '/local-overlays') return buildInstructionLocal();
+            if (url === '/local-overlays') return await buildInstructionLocal();
             if (url === '/available') {
-                return buildExternalCounters(requestAddress(req).hostname);
+                return await buildExternalCounters(
+                    requestAddress(req).hostname
+                );
             }
 
             const staticPath = getStaticPath();
