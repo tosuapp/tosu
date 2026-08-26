@@ -1,12 +1,13 @@
 import { ClientType } from '@tosu/common';
-import path from 'path';
+import path from 'node:path';
 
-import { HttpServer, sendJson } from '../index';
 import { beatmapFileShortcut } from '../scripts/beatmapFile';
+import { json } from '../utils';
 import { directoryWalker } from '../utils/directories';
+import type { HttpServer } from '../utils/http';
 
 export default function buildV2Api(app: HttpServer) {
-    app.route('/json/v2', 'GET', (req, res) => {
+    app.route('/json/v2', 'GET', (req) => {
         const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
@@ -14,11 +15,10 @@ export default function buildV2Api(app: HttpServer) {
             throw new Error('osu is not ready/running');
         }
 
-        const json = osuInstance.getStateV2(req.instanceManager);
-        return sendJson(res, json);
+        return json(osuInstance.getStateV2(req.instanceManager));
     });
 
-    app.route('/json/v2/precise', 'GET', (req, res) => {
+    app.route('/json/v2/precise', 'GET', (req) => {
         const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
@@ -26,17 +26,16 @@ export default function buildV2Api(app: HttpServer) {
             throw new Error('osu is not ready/running');
         }
 
-        const json = osuInstance.getPreciseData(req.instanceManager);
-        return sendJson(res, json);
+        return json(osuInstance.getPreciseData(req.instanceManager));
     });
 
     app.route(
         /\/files\/beatmap\/(?<type>background|audio|file)/,
         'GET',
-        (req, res) => beatmapFileShortcut(req, res, req.params.type as any)
+        (req) => beatmapFileShortcut(req, req.params.type as any)
     );
 
-    app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/^\/files\/beatmap\/(?<filePath>.*)/, 'GET', (req) => {
         const url = req.pathname || '/';
         const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
@@ -49,16 +48,15 @@ export default function buildV2Api(app: HttpServer) {
             throw new Error('osu is not ready/running');
         }
 
-        directoryWalker({
+        return directoryWalker({
             req,
-            res,
             baseUrl: url,
             pathname: req.params.filePath,
             folderPath: global.songsFolder
         });
     });
 
-    app.route(/^\/files\/skin\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/^\/files\/skin\/(?<filePath>.*)/, 'GET', (req) => {
         const url = req.pathname || '/';
 
         const osuInstance = req.instanceManager.getInstance(
@@ -86,9 +84,8 @@ export default function buildV2Api(app: HttpServer) {
         }
 
         const folder = path.join(global.gameFolder, 'Skins', global.skinFolder);
-        directoryWalker({
+        return directoryWalker({
             req,
-            res,
             baseUrl: url,
             pathname: req.params.filePath,
             folderPath: folder

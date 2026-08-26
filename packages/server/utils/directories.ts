@@ -1,11 +1,11 @@
 import { getStaticPath, wLogger } from '@tosu/common';
-import fs from 'fs';
-import http from 'http';
-import type { OutgoingHttpHeaders } from 'http2';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
-import { type ExtendedIncomingMessage, getContentType } from '../index';
+import { getContentType, html } from '../utils';
 import { OVERLAYS_STATIC } from './homepage';
+import type { TosuRequest } from './http';
+import { serveFile } from './serveFile';
 
 const allowedRangeExtensions = [
     '.mp3',
@@ -18,175 +18,89 @@ const allowedRangeExtensions = [
     '.webp'
 ];
 
-function isPathDirectory(path: string) {
-    const stat = fs.statSync(path);
-    return Boolean(stat && stat.isDirectory());
-}
-
-export function directoryWalker({
-    _htmlRedirect,
+export async function directoryWalker({
     req,
-    res,
     baseUrl,
     folderPath,
     pathname
 }: {
-    _htmlRedirect?: boolean;
-
-    req: ExtendedIncomingMessage;
-    res: http.ServerResponse;
+    req: TosuRequest;
     baseUrl: string;
-
     pathname: string;
     folderPath: string;
-}) {
-    let cleanedUrl;
+}): Promise<Response> {
+    let cleanedUrl: string;
     try {
         cleanedUrl = decodeURIComponent(pathname);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        res.writeHead(404, {
-            'Content-Type': getContentType('file.txt')
+        return new Response('', {
+            status: 404,
+            headers: { 'Content-Type': getContentType('file.txt') }
         });
-        res.end('');
-        return;
     }
 
     const contentType = getContentType(cleanedUrl);
     const filePath = path.join(folderPath, cleanedUrl);
-
-    const isDirectory = isPathDirectory(filePath);
     const isHTML = filePath.endsWith('.html');
 
-    if (isDirectory) {
+    // Throws ENOENT for missing files; the router maps it to 500 (files API) or 404 (catch-all).
+    const stat = await fs.promises.stat(filePath);
+
+    if (stat.isDirectory()) {
         if (!baseUrl.endsWith('/')) {
-            res.writeHead(301, {
-                Location: baseUrl + '/'
+            return new Response(null, {
+                status: 301,
+                headers: { Location: baseUrl + '/' }
             });
-            res.end();
-            return;
         }
 
-        return readDirectory(filePath, baseUrl, (html: Error | string) => {
-            if (html instanceof Error) {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('404 Not Found');
-                return;
-            }
+        const listing = await readDirectory(filePath, baseUrl);
+        if (listing instanceof Error) return html('404 Not Found', 404);
 
-            res.writeHead(200, {
-                'Content-Type': getContentType('file.html')
-            });
-            res.end(html);
-        });
+        return html(listing);
     }
 
-    const fileSize = fs.statSync(filePath).size;
+    if (isHTML) {
+        const content = await Bun.file(filePath).text();
+        return html(addCounterMetadata(content, filePath));
+    }
 
-    return fs.readFile(
-        filePath,
-        isHTML === true ? 'utf8' : null,
-        (err, content) => {
-            if (err?.code === 'ENOENT' && _htmlRedirect === true) {
-                return readDirectory(
-                    filePath.replace('index.html', ''),
-                    baseUrl,
-                    (html: Error | string) => {
-                        if (html instanceof Error) {
-                            res.writeHead(404, { 'Content-Type': 'text/html' });
-                            res.end('404 Not Found');
-                            return;
-                        }
+    const extraHeaders: Record<string, string> = {};
+    if (allowedRangeExtensions.includes(path.extname(pathname))) {
+        extraHeaders['Accept-Ranges'] = 'bytes';
+        extraHeaders['Content-Length'] = String(stat.size);
+    }
 
-                        if (isHTML === true) {
-                            html = addCounterMetadata(html, filePath);
-                        }
-
-                        res.writeHead(200, {
-                            'Content-Type': getContentType('file.html')
-                        });
-                        res.end(html);
-                    }
-                );
-            }
-
-            if (err?.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('404 Not Found');
-                return;
-            }
-
-            if (err) {
-                res.writeHead(500);
-                res.end(`Server Error: ${err.code}`);
-                return;
-            }
-
-            if (isHTML === true) {
-                content = addCounterMetadata(content.toString(), filePath);
-            }
-
-            if (req.headers.range) {
-                const range = req.headers.range
-                    .replace('bytes=', '')
-                    .split('-');
-                const start = parseInt(range[0]);
-                const end = range[1] ? parseInt(range[1]) : fileSize - 1;
-
-                if (start >= fileSize || end >= fileSize) {
-                    res.writeHead(416, {
-                        'Content-Range': `bytes */${fileSize}`
-                    });
-                    return res.end();
-                }
-
-                res.writeHead(206, {
-                    'Accept-Ranges': 'bytes',
-                    'Content-Type': contentType,
-                    'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-                    'Content-Length': end - start + 1
-                });
-
-                fs.createReadStream(filePath, { start, end }).pipe(res);
-                return;
-            }
-
-            const headOptions: OutgoingHttpHeaders = {
-                'Content-Type': contentType
-            };
-            if (allowedRangeExtensions.includes(path.extname(pathname))) {
-                headOptions['Accept-Ranges'] = 'bytes';
-                headOptions['Content-Length'] = fs.statSync(filePath).size;
-            }
-            res.writeHead(200, headOptions);
-            res.end(content, 'utf-8');
-        }
-    );
+    return serveFile(filePath, {
+        range: req.headers.get('range'),
+        contentType,
+        extraHeaders
+    });
 }
 
-export function readDirectory(
+export async function readDirectory(
     folderPath: string,
-    url: string,
-    callback: Function
-) {
-    fs.readdir(folderPath, (err, folders) => {
-        if (err) {
-            return callback(new Error(`Files not found: ${folderPath}`));
-        }
+    url: string
+): Promise<string | Error> {
+    let folders: string[];
+    try {
+        folders = await fs.promises.readdir(folderPath);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+        return new Error(`Files not found: ${folderPath}`);
+    }
 
-        const html = folders.map((r) => {
-            const slashAtTheEnd = getContentType(r) === '' ? '/' : '';
+    const list = folders.map((r) => {
+        const slashAtTheEnd = getContentType(r) === '' ? '/' : '';
 
-            return `<li><a href="${url === '/' ? '' : url}${encodeURIComponent(r)}${slashAtTheEnd}">${r}</a></li>`;
-        });
-
-        return callback(
-            OVERLAYS_STATIC.replace('{OVERLAYS_LIST}', html.join('\n')).replace(
-                '{PAGE_URL}',
-                `tosu - ${url}`
-            )
-        );
+        return `<li><a href="${url === '/' ? '' : url}${encodeURIComponent(r)}${slashAtTheEnd}">${r}</a></li>`;
     });
+
+    return OVERLAYS_STATIC.replace('{OVERLAYS_LIST}', list.join('\n')).replace(
+        '{PAGE_URL}',
+        `tosu - ${url}`
+    );
 }
 
 export function addCounterMetadata(html: string, filePath: string) {

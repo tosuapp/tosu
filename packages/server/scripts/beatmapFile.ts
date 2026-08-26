@@ -1,15 +1,14 @@
-import fs from 'fs';
-import type { ServerResponse } from 'http';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
-import type { ExtendedIncomingMessage } from '../utils/http';
-import { sendJson } from '../utils/index';
+import type { TosuRequest } from '../utils/http';
+import { json } from '../utils/index';
+import { serveFile } from '../utils/serveFile';
 
 export function beatmapFileShortcut(
-    req: ExtendedIncomingMessage,
-    res: ServerResponse,
+    req: TosuRequest,
     beatmapFileType: 'audio' | 'background' | 'file'
-) {
+): Response | Promise<Response> {
     const osuInstance = req.instanceManager.getInstance(
         req.instanceManager.focusedClient
     );
@@ -39,56 +38,35 @@ export function beatmapFileShortcut(
         fileName = menu.filename;
         fileMimetype = 'text/plain; charset=utf-8';
     } else {
-        return sendJson(res, {
-            error: 'Unknown file type'
-        });
+        return json({ error: 'Unknown file type' });
     }
 
     if (!folder || !fileName) {
-        res.writeHead(404);
-        return res.end();
+        return new Response(null, { status: 404 });
     }
 
     const filePath = path.join(folder, fileName);
     if (!fs.existsSync(filePath)) {
-        res.writeHead(404, { 'Content-Type': fileMimetype });
-        return res.end();
+        return new Response(null, {
+            status: 404,
+            headers: { 'Content-Type': fileMimetype }
+        });
     }
 
     const fileStat = fs.statSync(filePath);
     if (!fileStat.isFile()) {
-        res.writeHead(404, { 'Content-Type': fileMimetype });
-        return res.end();
-    }
-
-    if (req.headers.range) {
-        const range = req.headers.range.replace('bytes=', '').split('-');
-        const start = parseInt(range[0]);
-        const end = range[1] ? parseInt(range[1]) : fileStat.size - 1;
-
-        if (start >= fileStat.size || end >= fileStat.size) {
-            res.writeHead(416, {
-                'Content-Range': `bytes */${fileStat.size}`
-            });
-            return res.end();
-        }
-
-        res.writeHead(206, {
-            'Accept-Ranges': 'bytes',
-            'Content-Type': fileMimetype,
-            'Content-Range': `bytes ${start}-${end}/${fileStat.size}`,
-            'Content-Length': end - start + 1
+        return new Response(null, {
+            status: 404,
+            headers: { 'Content-Type': fileMimetype }
         });
-
-        fs.createReadStream(filePath, { start, end }).pipe(res);
-        return;
     }
 
-    res.writeHead(200, {
-        'Accept-Ranges': 'bytes',
-        'Content-Type': fileMimetype,
-        'Content-Length': fileStat.size
+    return serveFile(filePath, {
+        range: req.headers.get('range'),
+        contentType: fileMimetype,
+        extraHeaders: {
+            'Accept-Ranges': 'bytes',
+            'Content-Length': String(fileStat.size)
+        }
     });
-
-    fs.createReadStream(filePath).pipe(res);
 }

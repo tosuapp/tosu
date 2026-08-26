@@ -1,8 +1,9 @@
-import { HttpServer, sendJson } from '../index';
 import { beatmapFileShortcut } from '../scripts/beatmapFile';
+import { json } from '../utils';
+import type { HttpServer } from '../utils/http';
 
 export default function buildSCApi(app: HttpServer) {
-    app.route('/json/sc', 'GET', (req, res) => {
+    app.route('/json/sc', 'GET', (req) => {
         const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
         );
@@ -10,11 +11,10 @@ export default function buildSCApi(app: HttpServer) {
             throw new Error('osu is not ready/running');
         }
 
-        const json = osuInstance.getStateSC(req.instanceManager);
-        return sendJson(res, json);
+        return json(osuInstance.getStateSC(req.instanceManager));
     });
 
-    app.route('/backgroundImage', 'GET', (req, res) =>
-        beatmapFileShortcut(req, res, 'background')
+    app.route('/backgroundImage', 'GET', (req) =>
+        beatmapFileShortcut(req, 'background')
     );
 }

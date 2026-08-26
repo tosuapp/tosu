@@ -1,33 +1,29 @@
 import { wLogger } from '@tosu/common';
-import fs from 'fs';
-import path from 'path';
+import path from 'node:path';
 
-import { Server, getContentType } from '../index';
+import { getContentType } from '../utils';
+import type { HttpServer } from '../utils/http';
+import { SERVER_ASSETS_PATH } from '../utils/paths';
+import { serveFile } from '../utils/serveFile';
 
-const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
+export default function buildAssetsApi(app: HttpServer) {
+    app.route(/^\/assets\/(?<filePath>.*)/, 'GET', async (req) => {
+        const filePath = path.join(SERVER_ASSETS_PATH, req.params.filePath);
+        const file = Bun.file(filePath);
 
-export default function buildAssetsApi(server: Server) {
-    server.app.route(/^\/assets\/(?<filePath>.*)/, 'GET', (req, res) => {
-        fs.readFile(
-            path.join(pkgAssetsPath, req.params.filePath),
-            (err, content) => {
-                if (err) {
-                    wLogger.debug(
-                        `Asset retrieval error for %${req.params.filePath}%:`,
-                        err
-                    );
-                    res.writeHead(404, { 'Content-Type': 'text/html' });
+        if (!(await file.exists())) {
+            wLogger.debug(
+                `Asset retrieval error for %${req.params.filePath}%: not found`
+            );
 
-                    res.end('<html>page not found</html>');
-                    return;
-                }
+            return new Response('<html>page not found</html>', {
+                status: 404,
+                headers: { 'Content-Type': 'text/html' }
+            });
+        }
 
-                res.writeHead(200, {
-                    'Content-Type': getContentType(req.params.filePath)
-                });
-
-                res.end(content);
-            }
-        );
+        return serveFile(filePath, {
+            contentType: getContentType(req.params.filePath)
+        });
     });
 }

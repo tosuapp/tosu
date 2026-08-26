@@ -1,8 +1,8 @@
-import { HttpServer } from '../index';
 import { directoryWalker } from '../utils/directories';
+import type { HttpServer } from '../utils/http';
 
 export default function buildV1Api(app: HttpServer) {
-    app.route(/^\/Songs\/(?<filePath>.*)/, 'GET', (req, res) => {
+    app.route(/^\/Songs\/(?<filePath>.*)/, 'GET', (req) => {
         const url = req.pathname || '/';
         const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient
@@ -16,9 +16,8 @@ export default function buildV1Api(app: HttpServer) {
             throw new Error('osu is not ready/running');
         }
 
-        directoryWalker({
+        return directoryWalker({
             req,
-            res,
             baseUrl: url,
             pathname: req.params.filePath,
             folderPath: global.songsFolder
