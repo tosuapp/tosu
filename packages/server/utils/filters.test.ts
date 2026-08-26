@@ -39,4 +39,13 @@ describe('applyFilter', () => {
 
         expect(value).toEqual({});
     });
+
+    test('skips a null entry in the filter array instead of throwing', () => {
+        const value = {};
+
+        expect(() =>
+            applyFilter([null as any, 'a'], { a: 1, b: 2 }, value)
+        ).not.toThrow();
+        expect(value).toEqual({ a: 1 });
+    });
 });

@@ -8,6 +8,8 @@ export function applyFilter(filters: Filter[], data: any, value: any) {
 
     for (let i = 0; i < filters.length; i++) {
         const filter = filters[i];
+        if (filter === null || filter === undefined) continue;
+
         switch (typeof filter) {
             case 'string':
                 value[filter] = data[filter];
