@@ -155,6 +155,7 @@ describe('HttpServer upgrade handling', () => {
                     id: 'test',
                     pathname: url.pathname,
                     query: {},
+                    filters: [],
                     hostAddress: '',
                     localAddress: '',
                     originAddress: '',

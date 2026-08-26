@@ -185,13 +185,31 @@ export class HttpServer {
         const method = request.method as HttpMethod;
 
         const respond = (response: Response) => {
-            // Some Response variants (e.g. Response.redirect(), or responses
-            // passed through from fetch) carry an immutable header guard;
-            // `Headers.set` on them can throw. Copy into a fresh Headers
-            // instance instead of mutating the response's headers in place.
-            const headers = new Headers(response.headers);
-            for (const [key, value] of Object.entries(CORS_HEADERS)) {
-                headers.set(key, value);
+            // Fast path: mutate the response's own headers in place so Bun's
+            // Bun.file() sendfile optimization on the response body stays
+            // intact. Some Response variants (e.g. Response.redirect(), or
+            // responses passed through from fetch) carry an immutable header
+            // guard where `Headers.set` throws a TypeError -- fall back to
+            // cloning into a fresh Response for those.
+            let headers: Headers;
+            try {
+                for (const [key, value] of Object.entries(CORS_HEADERS)) {
+                    response.headers.set(key, value);
+                }
+                headers = response.headers;
+            } catch (exc) {
+                if (!(exc instanceof TypeError)) throw exc;
+
+                headers = new Headers(response.headers);
+                for (const [key, value] of Object.entries(CORS_HEADERS)) {
+                    headers.set(key, value);
+                }
+
+                response = new Response(response.body, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers
+                });
             }
 
             const elapsedTime = (performance.now() - startTime).toFixed(2);
@@ -203,11 +221,7 @@ export class HttpServer {
                 decodeURIComponent(url.pathname + url.search)
             );
 
-            return new Response(response.body, {
-                status: response.status,
-                statusText: response.statusText,
-                headers
-            });
+            return response;
         };
 
         if (!isRequestAllowed(request.headers)) {
