@@ -1,109 +1,48 @@
 import { wLogger } from '@tosu/common';
 
-import { HttpServer, Websocket, isRequestAllowed } from '../index';
+import { getUniqueID } from '../utils/hashing';
+import type { HttpServer } from '../utils/http';
+import type { WsData, WsEndpoint } from '../utils/socket';
 
-export default function buildSocket({
-    app,
+const WS_PATHS: Record<string, WsEndpoint> = {
+    '/ws': 'v1',
+    '/tokens': 'sc',
+    '/websocket/v2': 'v2',
+    '/websocket/v2/precise': 'v2precise',
+    '/websocket/commands': 'commands'
+};
 
-    WS_V1,
-    WS_SC,
-    WS_V2,
-    WS_V2_PRECISE,
-    WS_COMMANDS
-}: {
-    app: HttpServer;
-    WS_V1: Websocket;
-    WS_SC: Websocket;
-    WS_V2: Websocket;
-    WS_V2_PRECISE: Websocket;
-    WS_COMMANDS: Websocket;
-}) {
-    app.server.on('upgrade', function (request, socket, head) {
-        const allowed = isRequestAllowed(request);
-        if (!allowed) {
-            wLogger.warn(
-                'Blocked external WebSocket request to %' + request.url + '%',
-                {
-                    address: request.socket.remoteAddress,
-                    origin: request.headers.origin,
-                    referer: request.headers.referer
-                }
-            );
-
-            socket.write('HTTP/1.1 403 Not Found\r\n\r\n');
-            socket.destroy();
-            return;
-        }
+export default function buildSocket(app: HttpServer) {
+    app.onUpgrade((request, url, server) => {
+        const endpoint = WS_PATHS[url.pathname];
+        if (!endpoint) return false;
 
         try {
-            const hostname = request.headers.host;
-            const parsedURL = new URL(`http://${hostname}${request.url}`);
-            (request as any).query = {};
+            const query: Record<string, string> = {};
+            url.searchParams.forEach((value, key) => (query[key] = value));
 
-            parsedURL.searchParams.forEach(
-                (value, key) => ((request as any).query[key] = value)
-            );
+            const remote = server.requestIP(request);
+            const data: WsData = {
+                endpoint,
+                id: getUniqueID(),
+                pathname: url.pathname + url.search,
+                query,
+                filters: [],
+                hostAddress: request.headers.get('host') || '',
+                localAddress: `${server.hostname}:${server.port}`,
+                originAddress: request.headers.get('origin') || '',
+                remoteAddress: remote ? `${remote.address}:${remote.port}` : ''
+            };
 
-            if (parsedURL.pathname === '/ws') {
-                WS_V1.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_V1.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/tokens') {
-                WS_SC.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_SC.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/websocket/v2') {
-                WS_V2.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_V2.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/websocket/v2/precise') {
-                WS_V2_PRECISE.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_V2_PRECISE.socket.emit('connection', ws, request);
-                    }
-                );
-            }
-
-            if (parsedURL.pathname === '/websocket/commands') {
-                WS_COMMANDS.socket.handleUpgrade(
-                    request,
-                    socket,
-                    head,
-                    function (ws) {
-                        WS_COMMANDS.socket.emit('connection', ws, request);
-                    }
-                );
-            }
+            return server.upgrade(request, { data });
         } catch (exc) {
             wLogger.error(
-                `WebSocket upgrade failed for %${request.url}%:`,
+                `WebSocket upgrade failed for %${url.pathname}%:`,
                 (exc as any).message
             );
             wLogger.debug(`WebSocket upgrade error details:`, exc);
+
+            return false;
         }
     });
 }

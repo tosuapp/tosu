@@ -4,7 +4,7 @@ import { getLocalCounters, saveSettings } from './counters';
 import type { bodyPayload } from './counters.types';
 import { parseCounterSettings } from './parseSettings';
 import { normalizeSocketCommand } from './scFilters';
-import { type ModifiedWebsocket, Websocket } from './socket';
+import { type TosuSocket, Websocket } from './socket';
 
 const saveDelay = debounce((overlayFrom: string, json: bodyPayload[]) => {
     const html = saveSettings(overlayFrom, json);
@@ -21,11 +21,11 @@ const saveDelay = debounce((overlayFrom: string, json: bodyPayload[]) => {
 
 export function handleSocketCommands(
     data: string,
-    socket: ModifiedWebsocket,
+    socket: TosuSocket,
     ws: Websocket
 ) {
     wLogger.debug(`Received WebSocket command: %${data}%`);
-    data = normalizeSocketCommand(data, socket.pathname);
+    data = normalizeSocketCommand(data, socket.data.pathname);
     if (!data.includes(':')) {
         return;
     }
@@ -44,7 +44,7 @@ export function handleSocketCommands(
 
     let message: unknown;
 
-    const overlayFrom = decodeURI(socket.query?.l || '');
+    const overlayFrom = decodeURI(socket.data.query.l || '');
     switch (command) {
         case 'getOverlays':
         case 'getCounters': {
@@ -124,9 +124,8 @@ export function handleSocketCommands(
 
             saveDelay(overlayFrom, json);
 
-            ws.socket.emit(
-                'message',
-                socket.id,
+            ws.redispatch(
+                socket.data.id,
                 'updateSettings',
                 overlayName,
                 payload
@@ -152,13 +151,13 @@ export function handleSocketCommands(
             try {
                 if (!Array.isArray(json)) {
                     wLogger.error(
-                        `Invalid filter format for socket %${socket.id}% [${socket.pathname}]:`,
+                        `Invalid filter format for socket %${socket.data.id}% [${socket.data.pathname}]:`,
                         `Filters should be an array of strings (received: ${json})`
                     );
                     return;
                 }
 
-                socket.filters = json;
+                ws.setFilters(socket, json);
                 return;
             } catch (exc) {
                 wLogger.error(

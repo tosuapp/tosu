@@ -1,24 +1,18 @@
 import { type ConfigKey, config, sleep, wLogger } from '@tosu/common';
+import type {
+    Server as BunServer,
+    ServerWebSocket,
+    WebSocketHandler
+} from 'bun';
 import type { AbstractInstance } from 'tosu/instances';
 import type { InstanceManager } from 'tosu/instances/manager';
-import { WebSocket, WebSocketServer } from 'ws';
 
-import { getUniqueID } from './hashing';
+import { type Filter, applyFilter } from './filters';
+import type { WsData, WsEndpoint } from './ws-types';
 
-type Filter = string | { field: string; keys: Filter[] };
+export type { WsData, WsEndpoint } from './ws-types';
 
-export interface ModifiedWebsocket extends WebSocket {
-    id: string;
-    pathname: string;
-    query: Record<string, string>;
-
-    filters: Filter[];
-
-    hostAddress: string;
-    localAddress: string;
-    originAddress: string;
-    remoteAddress: string;
-}
+export type TosuSocket = ServerWebSocket<WsData>;
 
 type StateFunctionKey<T> = {
     [K in keyof T]: T[K] extends (instanceManager: InstanceManager) => unknown
@@ -26,133 +20,108 @@ type StateFunctionKey<T> = {
         : never;
 }[keyof T];
 
+export type MessageCallback = (
+    data: string,
+    socket: TosuSocket,
+    ws: Websocket
+) => void;
+
 export class Websocket {
+    readonly endpoint: WsEndpoint;
+    readonly topic: string;
+    clients = new Map<string, TosuSocket>();
+
     private instanceManager: InstanceManager;
-    private onMessageCallback: (
-        data: string,
-        socket: ModifiedWebsocket,
-        ws: Websocket
-    ) => void;
-
-    private onConnectionCallback: (id: string, url: string | undefined) => void;
-
-    socket: WebSocketServer;
-    clients = new Map<string, ModifiedWebsocket>();
+    private getServer: () => BunServer<WsData> | null;
+    private onMessageCallback?: MessageCallback;
+    private onConnectionCallback?: (id: string, url: string) => void;
 
     constructor({
+        endpoint,
         instanceManager,
         pollRateFieldName,
         stateFunctionName,
         onMessageCallback,
-        onConnectionCallback
+        onConnectionCallback,
+        getServer
     }: {
+        endpoint: WsEndpoint;
         instanceManager: InstanceManager;
         pollRateFieldName: ConfigKey | '';
         stateFunctionName: StateFunctionKey<AbstractInstance> | '';
-        onMessageCallback?: (
-            data: string,
-            socket: ModifiedWebsocket,
-            ws: Websocket
-        ) => void;
-        onConnectionCallback?: (id: string, url: string | undefined) => void;
+        onMessageCallback?: MessageCallback;
+        onConnectionCallback?: (id: string, url: string) => void;
+        getServer: () => BunServer<WsData> | null;
     }) {
-        this.socket = new WebSocketServer({ noServer: true });
-
+        this.endpoint = endpoint;
+        this.topic = `tosu:${endpoint}`;
         this.instanceManager = instanceManager;
-
-        if (typeof onMessageCallback === 'function') {
-            this.onMessageCallback = onMessageCallback;
-        }
-        if (typeof onConnectionCallback === 'function') {
-            this.onConnectionCallback = onConnectionCallback;
-        }
-
-        this.handle = this.handle.bind(this);
-        this.start = this.start.bind(this);
-
-        this.handle(pollRateFieldName, stateFunctionName);
-    }
-
-    handle(
-        pollRateFieldName: ConfigKey | '',
-        stateFunctionName: StateFunctionKey<AbstractInstance> | ''
-    ) {
-        this.socket.on('connection', (ws: ModifiedWebsocket, request) => {
-            ws.id = getUniqueID();
-
-            ws.pathname = request.url as any;
-
-            ws.query = (request as any).query;
-
-            ws.hostAddress = request.headers.host || '';
-            ws.localAddress = `${request.socket.localAddress}:${request.socket.localPort}`;
-            ws.originAddress = request.headers.origin || '';
-            ws.remoteAddress = `${request.socket.remoteAddress}:${request.socket.remotePort}`;
-
-            wLogger.debug(`WebSocket client connected: %${ws.id}%`);
-
-            ws.on('close', (reason, description) => {
-                this.clients.delete(ws.id);
-
-                wLogger.debug(
-                    `WebSocket client disconnected: %${ws.id}%`,
-                    reason,
-                    description
-                );
-            });
-
-            ws.on('error', (reason: unknown, description: unknown) => {
-                this.clients.delete(ws.id);
-
-                wLogger.debug(
-                    `WebSocket client error: %${ws.id}%`,
-                    reason,
-                    description
-                );
-            });
-
-            if (typeof this.onMessageCallback === 'function') {
-                ws.on('message', (data) => {
-                    this.onMessageCallback(data.toString(), ws, this);
-                });
-            }
-
-            this.clients.set(ws.id, ws);
-            if (typeof this.onConnectionCallback === 'function') {
-                this.onConnectionCallback(ws.id, request.url);
-            }
-        });
-
-        // resend commands internally "this.socket.emit"
-        this.socket.on(
-            'message',
-            (
-                id: string,
-                command: string,
-                overlayName: string,
-                payload?: string
-            ) => {
-                this.clients.forEach((client) => {
-                    if (client.id === id) return;
-
-                    // skip sending settings to wrong overlay
-                    if (
-                        (command === 'getSettings' ||
-                            command === 'updateSettings') &&
-                        overlayName !== decodeURI(client.query.l || '')
-                    )
-                        return;
-
-                    client.emit(
-                        'message',
-                        [command, overlayName, payload].join(':')
-                    );
-                });
-            }
-        );
+        this.getServer = getServer;
+        this.onMessageCallback = onMessageCallback;
+        this.onConnectionCallback = onConnectionCallback;
 
         if (pollRateFieldName && stateFunctionName !== '') {
             this.start(pollRateFieldName, stateFunctionName);
+        }
+    }
+
+    open(ws: TosuSocket) {
+        this.clients.set(ws.data.id, ws);
+        ws.subscribe(this.topic);
+
+        wLogger.debug(`WebSocket client connected: %${ws.data.id}%`);
+
+        this.onConnectionCallback?.(ws.data.id, ws.data.pathname);
+    }
+
+    message(ws: TosuSocket, data: string | Buffer) {
+        this.onMessageCallback?.(data.toString(), ws, this);
+    }
+
+    close(ws: TosuSocket, code: number, reason: string) {
+        this.clients.delete(ws.data.id);
+
+        wLogger.debug(
+            `WebSocket client disconnected: %${ws.data.id}%`,
+            code,
+            reason
+        );
+    }
+
+    /** Filtered clients leave the broadcast topic and receive individual payloads. */
+    setFilters(ws: TosuSocket, filters: Filter[]) {
+        ws.data.filters = filters;
+
+        if (filters.length > 0) ws.unsubscribe(this.topic);
+        else ws.subscribe(this.topic);
+    }
+
+    /**
+     * Re-runs a command for every other client as if that client had sent it.
+     * `getSettings`/`updateSettings` only reach the overlay they are addressed to.
+     */
+    redispatch(
+        fromId: string,
+        command: string,
+        overlayName: string,
+        payload?: string
+    ) {
+        if (!this.onMessageCallback) return;
+
+        for (const client of this.clients.values()) {
+            if (client.data.id === fromId) continue;
+
+            if (
+                (command === 'getSettings' || command === 'updateSettings') &&
+                overlayName !== decodeURI(client.data.query.l || '')
+            )
+                continue;
+
+            this.onMessageCallback(
+                [command, overlayName, payload].join(':'),
+                client,
+                this
+            );
         }
     }
 
@@ -160,9 +129,6 @@ export class Websocket {
         pollRateFieldName: ConfigKey,
         stateFunctionName: StateFunctionKey<AbstractInstance>
     ) {
-        let message = '';
-        let values = {};
-
         while (true) {
             try {
                 const osuInstance = this.instanceManager.getInstance(
@@ -177,21 +143,22 @@ export class Websocket {
                     this.instanceManager
                 );
 
-                this.clients.forEach((client) => {
-                    if (
-                        Array.isArray(client.filters) &&
-                        client.filters.length > 0
-                    ) {
-                        values = {};
-                        this.applyFilter(client.filters, buildedData, values);
+                let broadcast: string | null = null;
+                for (const client of this.clients.values()) {
+                    if (client.data.filters.length > 0) {
+                        const values = {};
+                        applyFilter(client.data.filters, buildedData, values);
 
                         client.send(JSON.stringify(values));
-                        return;
+                        continue;
                     }
 
-                    message = JSON.stringify(buildedData);
-                    client.send(message);
-                });
+                    broadcast ??= JSON.stringify(buildedData);
+                }
+
+                if (broadcast !== null) {
+                    this.getServer()?.publish(this.topic, broadcast);
+                }
             } catch (error) {
                 wLogger.error(
                     'WebSocket data loop failed:',
@@ -203,33 +170,17 @@ export class Websocket {
             await sleep(config[pollRateFieldName] as number);
         }
     }
+}
 
-    applyFilter(filters: Filter[], data: any, value: any) {
-        if (data === null || data === undefined) return;
-
-        for (let i = 0; i < filters.length; i++) {
-            const filter = filters[i];
-            switch (typeof filter) {
-                case 'string':
-                    value[filter] = data[filter];
-                    break;
-
-                case 'object': {
-                    if (!(filter.field && Array.isArray(filter.keys))) break;
-                    if (
-                        data[filter.field] === null ||
-                        data[filter.field] === undefined
-                    )
-                        break;
-
-                    value[filter.field] = {};
-                    this.applyFilter(
-                        filter.keys,
-                        data[filter.field],
-                        value[filter.field]
-                    );
-                }
-            }
-        }
-    }
+/** Single Bun.serve websocket handler that dispatches by endpoint. */
+export function createWebsocketHandler(
+    endpoints: Record<WsEndpoint, Websocket>
+): WebSocketHandler<WsData> {
+    return {
+        open: (ws) => endpoints[ws.data.endpoint].open(ws),
+        message: (ws, message) =>
+            endpoints[ws.data.endpoint].message(ws, message),
+        close: (ws, code, reason) =>
+            endpoints[ws.data.endpoint].close(ws, code, reason)
+    };
 }
