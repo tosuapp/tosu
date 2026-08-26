@@ -80,7 +80,15 @@ function buildWindows() {
         ],
         { encoding: 'utf8' }
     );
+    // A machine without Visual Studio has no vswhere.exe at all, so spawnSync
+    // fails with ENOENT before it can report a missing workload.
+    if ((query.error as NodeJS.ErrnoException | undefined)?.code === 'ENOENT') {
+        throw new Error(
+            `vswhere.exe not found at ${vswhere} -- install the Visual Studio Build Tools with the "Desktop development with C++" workload`
+        );
+    }
     if (query.error) throw query.error;
+
     const vsPath = (query.stdout ?? '').trim();
     if (!vsPath) {
         throw new Error(
