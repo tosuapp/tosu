@@ -11,6 +11,7 @@ const payload = new Uint8Array(1024 * 256).map((_, i) => i % 251);
 let server: ReturnType<typeof Bun.serve>;
 let truncating: TCPSocketListener;
 let truncatingOrigin: string;
+const answered = new WeakSet<object>();
 let dir: string;
 
 beforeAll(() => {
@@ -41,6 +42,10 @@ beforeAll(() => {
         port: 0,
         socket: {
             data(socket) {
+                // A request split across TCP segments would fire `data` twice.
+                if (answered.has(socket)) return;
+                answered.add(socket);
+
                 socket.write(
                     'HTTP/1.1 200 OK\r\n' +
                         'Content-Type: application/octet-stream\r\n' +
