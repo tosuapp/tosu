@@ -105,7 +105,9 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             [],
             {
                 detached: false,
-                stdio: ['ignore', 'overlapped', 'overlapped', 'ipc'],
+                // Bun <-> Node.js (Electron) IPC must use JSON serialization.
+                serialization: 'json',
+                stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
                 windowsHide: true,
                 shell: false,
                 env: {
