@@ -1,3 +1,4 @@
+import type { FileSink } from 'bun';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 
@@ -21,7 +22,7 @@ export const downloadFile = async (
         }
     });
 
-    if (!response.ok || !response.body) {
+    if (!response.ok) {
         await response.body?.cancel().catch(() => null);
 
         throw new Error(
@@ -29,9 +30,25 @@ export const downloadFile = async (
         );
     }
 
-    const totalSize = parseInt(response.headers.get('content-length') || '0');
+    if (!response.body) {
+        throw new Error(
+            `Download failed: empty response body (${response.status})`
+        );
+    }
+
+    let writer: FileSink;
+    try {
+        writer = Bun.file(destination).writer();
+    } catch (err) {
+        await response.body.cancel().catch(() => null);
+        throw err;
+    }
+
+    const totalSize = parseInt(
+        response.headers.get('content-length') || '0',
+        10
+    );
     const token = progressManager.start('Downloading File');
-    const writer = Bun.file(destination).writer();
     let downloadedSize = 0;
 
     try {
@@ -57,7 +74,11 @@ export const downloadFile = async (
             // Ignore cleanup errors to avoid masking the original download failure
         }
         await fs.promises.unlink(destination).catch(() => null);
-        await progressManager.end(token, 'Download failed');
+        try {
+            await progressManager.end(token, 'Download failed');
+        } catch {
+            // Ignore progress-bar cleanup errors to avoid masking the original download failure
+        }
 
         throw err;
     }

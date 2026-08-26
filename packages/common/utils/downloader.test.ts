@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { downloadFile } from './downloader';
+import { progressManager } from './progress';
 
 const payload = new Uint8Array(1024 * 256).map((_, i) => i % 251);
 let server: ReturnType<typeof Bun.serve>;
@@ -23,6 +24,17 @@ beforeAll(() => {
                 return new Response(payload, {
                     headers: { 'Content-Length': String(payload.byteLength) }
                 });
+            }
+            if (url.pathname === '/abort') {
+                const chunk = payload.slice(0, 1024 * 64);
+                const stream = new ReadableStream({
+                    async start(controller) {
+                        controller.enqueue(chunk);
+                        await new Promise((resolve) => setTimeout(resolve, 20));
+                        controller.error(new Error('boom'));
+                    }
+                });
+                return new Response(stream);
             }
             return new Response('nope', { status: 404 });
         }
@@ -53,5 +65,25 @@ describe('downloadFile', () => {
             downloadFile(`${server.url.origin}/missing.zip`, destination)
         ).rejects.toThrow('Download failed: 404');
         expect(fs.existsSync(destination)).toBe(false);
+    });
+
+    test('rejects and ends the progress bar when the destination directory does not exist', async () => {
+        const destination = path.join(dir, 'no', 'such', 'dir', 'x.zip');
+
+        await expect(
+            downloadFile(`${server.url.origin}/file.zip`, destination)
+        ).rejects.toThrow();
+        expect(fs.existsSync(destination)).toBe(false);
+        expect(progressManager.isActive).toBe(false);
+    });
+
+    test('rejects and removes the file when the stream aborts mid-download', async () => {
+        const destination = path.join(dir, 'abort.zip');
+
+        await expect(
+            downloadFile(`${server.url.origin}/abort`, destination)
+        ).rejects.toThrow();
+        expect(fs.existsSync(destination)).toBe(false);
+        expect(progressManager.isActive).toBe(false);
     });
 });
