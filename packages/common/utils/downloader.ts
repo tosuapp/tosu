@@ -1,96 +1,67 @@
-import crypto from 'crypto';
-import fs from 'fs';
-import https from 'https';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
 
 import { wLogger } from './logger';
 import { progressManager } from './progress';
 
+const toMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(2);
+
 /**
- * A cyperdark's downloadFile implmentation based on pure node api
- * @param url {string}
- * @param destination {string}
- * @returns  {Promise<string>}
+ * Streams `url` into `destination` with a console progress bar.
+ * @returns the destination path
  */
-export const downloadFile = (
+export const downloadFile = async (
     url: string,
     destination: string
-): Promise<string> =>
-    new Promise((resolve, reject) => {
-        let token: symbol | undefined;
-
-        const options = {
-            headers: {
-                Accept: 'application/octet-stream',
-                'User-Agent': '@tosuapp/tosu'
-            },
-            agent: new https.Agent({
-                secureOptions: crypto.constants.SSL_OP_ALL
-            })
-        };
-
-        // find url
-        https
-            .get(url, options, (response) => {
-                if (response.headers.location) {
-                    downloadFile(response.headers.location, destination)
-                        .then(resolve)
-                        .catch(reject);
-                    return;
-                }
-
-                const file = fs.createWriteStream(destination);
-                token = progressManager.start('Downloading File');
-
-                file.on('error', async (err) => {
-                    try {
-                        if (fs.existsSync(destination))
-                            fs.unlinkSync(destination);
-                    } catch {
-                        // Ignore cleanup errors to avoid masking the original download failure
-                    }
-                    if (token)
-                        await progressManager.end(token, 'Download failed');
-                    reject(err);
-                });
-
-                file.on('finish', async () => {
-                    file.close();
-                    if (token)
-                        await progressManager.end(token, 'Download completed');
-                    resolve(destination);
-                });
-
-                const totalSize = parseInt(
-                    response.headers['content-length']!,
-                    10
-                );
-                let downloadedSize = 0;
-
-                response.on('data', (data) => {
-                    downloadedSize += data.length;
-                    const progress = downloadedSize / totalSize;
-
-                    const downloadedMB = (downloadedSize / 1024 / 1024).toFixed(
-                        2
-                    );
-                    const totalMB = (totalSize / 1024 / 1024).toFixed(2);
-
-                    if (token) {
-                        progressManager.update(
-                            token,
-                            progress,
-                            `| ${downloadedMB} / ${totalMB} MB`
-                        );
-                    }
-                });
-
-                response.pipe(file);
-            })
-            .on('error', async (err) => {
-                if (token) await progressManager.end(token, 'Download failed');
-                reject(err);
-            });
+): Promise<string> => {
+    const response = await fetch(url, {
+        headers: {
+            Accept: 'application/octet-stream',
+            'User-Agent': '@tosuapp/tosu'
+        }
     });
+
+    if (!response.ok || !response.body) {
+        await response.body?.cancel().catch(() => null);
+
+        throw new Error(
+            `Download failed: ${response.status} ${response.statusText}`
+        );
+    }
+
+    const totalSize = parseInt(response.headers.get('content-length') || '0');
+    const token = progressManager.start('Downloading File');
+    const writer = Bun.file(destination).writer();
+    let downloadedSize = 0;
+
+    try {
+        for await (const chunk of response.body) {
+            writer.write(chunk);
+            downloadedSize += chunk.byteLength;
+
+            progressManager.update(
+                token,
+                totalSize > 0 ? downloadedSize / totalSize : 0,
+                `| ${toMB(downloadedSize)} / ${toMB(totalSize)} MB`
+            );
+        }
+
+        await writer.end();
+        await progressManager.end(token, 'Download completed');
+
+        return destination;
+    } catch (err) {
+        try {
+            await writer.end();
+        } catch {
+            // Ignore cleanup errors to avoid masking the original download failure
+        }
+        await fs.promises.unlink(destination).catch(() => null);
+        await progressManager.end(token, 'Download failed');
+
+        throw err;
+    }
+};
 
 export async function verifyDownload(
     githubDigest: `${string}:${string}`,
