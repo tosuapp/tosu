@@ -44,15 +44,19 @@ export async function serveFile(
             });
         }
 
+        const rangeHeaders: Record<string, string> = {
+            ...options.extraHeaders,
+            'Accept-Ranges': 'bytes',
+            'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+            'Content-Length': String(end - start + 1)
+        };
+        // Unknown extensions (.ini, .osb, ...) have no content type -- send no
+        // header at all rather than an empty one, same as the 200 path below.
+        if (contentType) rangeHeaders['Content-Type'] = contentType;
+
         return new Response(file.slice(start, end + 1), {
             status: 206,
-            headers: {
-                ...options.extraHeaders,
-                'Accept-Ranges': 'bytes',
-                'Content-Type': contentType,
-                'Content-Range': `bytes ${start}-${end}/${stat.size}`,
-                'Content-Length': String(end - start + 1)
-            }
+            headers: rangeHeaders
         });
     }
 

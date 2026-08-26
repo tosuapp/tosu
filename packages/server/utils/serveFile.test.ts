@@ -7,11 +7,14 @@ import { serveFile } from './serveFile';
 
 let folder: string;
 let filePath: string;
+let unknownPath: string;
 
 beforeAll(() => {
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'tosu-servefile-'));
     filePath = path.join(folder, 'song.mp3');
     fs.writeFileSync(filePath, Buffer.alloc(1000, 7));
+    unknownPath = path.join(folder, 'storyboard.osb');
+    fs.writeFileSync(unknownPath, Buffer.alloc(1000, 3));
 });
 
 afterAll(() => {
@@ -114,6 +117,22 @@ describe('serveFile', () => {
 
         expect(res.status).toBe(206);
         expect(res.headers.get('content-length')).toBe('10');
+    });
+
+    test('a ranged unknown extension does not get an empty Content-Type', async () => {
+        // getContentType() has no mapping for .osb, so neither branch may set
+        // the header itself -- Bun then falls back to the file's own type.
+        const full = await serveFile(unknownPath);
+        const ranged = await serveFile(unknownPath, { range: 'bytes=10-19' });
+
+        expect(full.status).toBe(200);
+        expect(ranged.status).toBe(206);
+        expect(ranged.headers.get('content-range')).toBe('bytes 10-19/1000');
+
+        expect(ranged.headers.get('content-type')).not.toBe('');
+        expect(ranged.headers.get('content-type')).toBe(
+            full.headers.get('content-type')
+        );
     });
 
     test('throws ENOENT for a missing file', async () => {
