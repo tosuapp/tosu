@@ -7,6 +7,9 @@ import { directoryWalker } from './directories';
 import type { TosuRequest } from './http';
 
 let folder: string;
+let secretPath: string;
+
+const SECRET = 'do-not-serve-me';
 
 function request(pathname: string, headers: Record<string, string> = {}) {
     return {
@@ -23,10 +26,20 @@ beforeAll(() => {
         path.join(folder, 'overlay', 'song.mp3'),
         Buffer.alloc(1000, 7)
     );
+    fs.mkdirSync(path.join(folder, 'overlay', 'nested'));
+    fs.writeFileSync(
+        path.join(folder, 'overlay', 'nested', 'deep.txt'),
+        'nested file'
+    );
+
+    // Sibling of the served folder: reachable only by escaping it.
+    secretPath = path.join(folder, '..', `${path.basename(folder)}-secret.txt`);
+    fs.writeFileSync(secretPath, SECRET);
 });
 
 afterAll(() => {
     fs.rmSync(folder, { recursive: true, force: true });
+    fs.rmSync(secretPath, { force: true });
 });
 
 describe('directoryWalker', () => {
@@ -91,6 +104,56 @@ describe('directoryWalker', () => {
         });
 
         expect(res.status).toBe(416);
+    });
+
+    test('refuses an encoded traversal out of the served folder', async () => {
+        const escaped = `overlay%2F..%2F..%2F${path.basename(secretPath)}`;
+        const res = await directoryWalker({
+            req: request(`/${escaped}`),
+            baseUrl: `/${escaped}`,
+            pathname: escaped,
+            folderPath: folder
+        });
+
+        expect(res.status).toBe(404);
+        expect(await res.text()).toBe('');
+        // The file is there -- the guard is what kept it out of the response.
+        expect(fs.readFileSync(secretPath, 'utf8')).toBe(SECRET);
+    });
+
+    test('refuses the windows separator form of the traversal', async () => {
+        const escaped = `overlay%5C..%5C..%5C${path.basename(secretPath)}`;
+        const walk = directoryWalker({
+            req: request(`/${escaped}`),
+            baseUrl: `/${escaped}`,
+            pathname: escaped,
+            folderPath: folder
+        });
+
+        if (process.platform === 'win32') {
+            const res = await walk;
+
+            expect(res.status).toBe(404);
+            expect(await res.text()).toBe('');
+        } else {
+            // On POSIX a backslash is an ordinary filename character, so the
+            // decoded path never leaves the folder -- it simply does not exist.
+            await expect(walk).rejects.toMatchObject({ code: 'ENOENT' });
+        }
+
+        expect(fs.readFileSync(secretPath, 'utf8')).toBe(SECRET);
+    });
+
+    test('still serves a legitimate nested path', async () => {
+        const res = await directoryWalker({
+            req: request('/overlay/nested/deep.txt'),
+            baseUrl: '/overlay/nested/deep.txt',
+            pathname: 'overlay/nested/deep.txt',
+            folderPath: folder
+        });
+
+        expect(res.status).toBe(200);
+        expect(await res.text()).toBe('nested file');
     });
 
     test('throws ENOENT for a missing file (mapped to 500/404 by the caller)', async () => {

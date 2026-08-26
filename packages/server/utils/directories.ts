@@ -18,6 +18,13 @@ const allowedRangeExtensions = [
     '.webp'
 ];
 
+function notFound(): Response {
+    return new Response('', {
+        status: 404,
+        headers: { 'Content-Type': getContentType('file.txt') }
+    });
+}
+
 export async function directoryWalker({
     req,
     baseUrl,
@@ -34,14 +41,20 @@ export async function directoryWalker({
         cleanedUrl = decodeURIComponent(pathname);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        return new Response('', {
-            status: 404,
-            headers: { 'Content-Type': getContentType('file.txt') }
-        });
+        return notFound();
+    }
+
+    // WHATWG URL parsing already collapses literal `..` segments, but percent
+    // encoded separators (%2F, %5C) survive `url.pathname` and only turn into
+    // separators here, after decodeURIComponent -- so the joined path has to
+    // be checked against the served folder before anything is read.
+    const root = path.resolve(folderPath);
+    const filePath = path.resolve(path.join(root, cleanedUrl));
+    if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+        return notFound();
     }
 
     const contentType = getContentType(cleanedUrl);
-    const filePath = path.join(folderPath, cleanedUrl);
     const isHTML = filePath.endsWith('.html');
 
     // Throws ENOENT for missing files; the router maps it to 500 (files API) or 404 (catch-all).
