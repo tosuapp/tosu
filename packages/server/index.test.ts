@@ -6,6 +6,7 @@ import path from 'node:path';
 import type { InstanceManager } from 'tosu/instances/manager';
 
 import { Server } from './index';
+import type { Websocket } from './utils/socket';
 
 const instanceManager = {
     focusedClient: 0,
@@ -20,13 +21,30 @@ let staticFolder: string;
 let previousStaticFolderPath: string;
 let previousServerPort: number;
 let previousServerIP: string;
+let previousOpenDashboardOnStartup: boolean;
 let previousCurrentVersion: string;
 let previousUpdateVersion: string;
+
+/**
+ * The server-side `close` handler can lag the client-observed close, so a
+ * socket closed by an earlier test may still be counted here -- wait for every
+ * endpoint to be empty again instead of asserting straight away.
+ */
+async function drainClients(instances: Websocket[]) {
+    const deadline = Date.now() + 2000;
+    while (
+        instances.some((instance) => instance.clients.size > 0) &&
+        Date.now() < deadline
+    ) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+}
 
 beforeAll(() => {
     previousStaticFolderPath = config.staticFolderPath;
     previousServerPort = config.serverPort;
     previousServerIP = config.serverIP;
+    previousOpenDashboardOnStartup = config.openDashboardOnStartup;
     previousCurrentVersion = context.currentVersion;
     previousUpdateVersion = context.updateVersion;
 
@@ -52,6 +70,7 @@ afterAll(async () => {
     config.staticFolderPath = previousStaticFolderPath;
     config.serverPort = previousServerPort;
     config.serverIP = previousServerIP;
+    config.openDashboardOnStartup = previousOpenDashboardOnStartup;
     context.currentVersion = previousCurrentVersion;
     context.updateVersion = previousUpdateVersion;
 });
@@ -118,7 +137,13 @@ describe('Server', () => {
         const reply = await new Promise<string>((resolve) => {
             ws.onmessage = (event) => resolve(String(event.data));
         });
-        ws.close();
+
+        // Do not leave the close in flight: the next test asserts on the
+        // server-side client counts.
+        await new Promise<void>((resolve) => {
+            ws.onclose = () => resolve();
+            ws.close();
+        });
 
         expect(JSON.parse(reply)).toEqual({
             command: 'getSettings',
@@ -140,6 +165,11 @@ describe('Server', () => {
             server.WS_V2_PRECISE,
             server.WS_COMMANDS
         ];
+
+        await drainClients(all);
+        for (const instance of all) {
+            expect(instance.clients.size).toBe(0);
+        }
 
         for (const { path: endpointPath, ws: target } of endpoints) {
             const socket = await new Promise<WebSocket>((resolve, reject) => {
@@ -165,13 +195,30 @@ describe('Server', () => {
             // server-side `Websocket.close()` handler removes the entry
             // from `clients` -- poll briefly rather than asserting on the
             // client-observed close alone.
-            const deadline = Date.now() + 2000;
-            while (target.clients.size > 0 && Date.now() < deadline) {
-                await new Promise((resolve) => setTimeout(resolve, 10));
-            }
+            await drainClients(all);
 
             expect(target.clients.size).toBe(0);
         }
+    });
+
+    test('a websocket upgrade from a disallowed origin is rejected', async () => {
+        let opened = false;
+        const socket = new WebSocket(
+            `${base.replace('http', 'ws')}/websocket/v2`,
+            { headers: { Origin: 'http://evil.example' } }
+        );
+        socket.onopen = () => {
+            opened = true;
+        };
+
+        const outcome = await new Promise<string>((resolve) => {
+            socket.onerror = () => resolve('error');
+            socket.onclose = () => resolve('close');
+        });
+
+        expect(['error', 'close']).toContain(outcome);
+        expect(opened).toBe(false);
+        expect(server.WS_V2.clients.size).toBe(0);
     });
 
     // Keep last: restart() rebinds the underlying Bun server to a new port,
