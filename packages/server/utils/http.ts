@@ -56,14 +56,6 @@ const CORS_HEADERS: Record<string, string> = {
 const BODY_METHODS: HttpMethod[] = ['POST', 'PUT', 'PATCH'];
 
 /**
- * Note: Bun.serve() does not transmit a custom Response.statusText over the
- * wire -- a real fetch() client always observes the standard HTTP reason
- * phrase for the status code (e.g. "Internal Server Error" for 500),
- * regardless of what is set here (verified against Bun 1.4.0). The value is
- * still produced correctly in-process, so it's what error-handling code
- * should rely on rather than a client-observed statusText.
- */
-/**
  * Adds the CORS headers every tosu response carries.
  *
  * Fast path: mutate the response's own headers in place so Bun's Bun.file()
@@ -98,6 +90,14 @@ function applyCorsHeaders(response: Response): Response {
     }
 }
 
+/**
+ * Note: Bun.serve() does not transmit a custom Response.statusText over the
+ * wire -- a real fetch() client always observes the standard HTTP reason
+ * phrase for the status code (e.g. "Internal Server Error" for 500),
+ * regardless of what is set here (verified against Bun 1.4.0). The value is
+ * still produced correctly in-process, so it's what error-handling code
+ * should rely on rather than a client-observed statusText.
+ */
 export function errorStatusText(exc: unknown, pathname: string): string {
     const message = typeof exc === 'string' ? exc : (exc as Error).message;
 
