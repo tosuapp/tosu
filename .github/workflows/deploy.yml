@@ -10,12 +10,14 @@ on:
       - "packages/**/*"
       - "package.json"
       - "bun.lock"
+      - ".bun-version"
   pull_request:
     paths:
       - ".github/workflows/**/*"
       - "packages/**/*"
       - "package.json"
       - "bun.lock"
+      - ".bun-version"
 
 concurrency:
   group: deploy-${{ github.ref_name }}

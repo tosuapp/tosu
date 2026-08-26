@@ -17,11 +17,11 @@ All contributions happen through GitHub Pull Requests.
 Before submitting, please make sure your code compiles and passes our linter checks:
 * To run code formatting automatically:
   ```bash
-  pnpm run prettier:fix
+  bun run prettier:fix
   ```
 * To run the ESLint rules checker:
   ```bash
-  pnpm run lint:fix
+  bun run lint:fix
   ```
 
 All custom code, variable names, documentation, and comments must be written in English. Ensure your logic remains readable, descriptive, and clean.
