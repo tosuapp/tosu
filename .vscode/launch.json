@@ -5,7 +5,7 @@
             "type": "bun",
             "request": "launch",
             "name": "Debug tosu (bundle)",
-            "program": "packages/tosu/dist/index.js",
+            "program": "${workspaceFolder}/packages/tosu/dist/index.js",
             "cwd": "${workspaceFolder}/packages/tosu",
             "stopOnEntry": false,
             "watchMode": false
