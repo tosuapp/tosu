@@ -21,6 +21,8 @@ export class Server {
     WS_V2_PRECISE: Websocket;
     WS_COMMANDS: Websocket;
 
+    private restarting: Promise<void> | null = null;
+
     constructor({ instanceManager }: { instanceManager: InstanceManager }) {
         this.instanceManager = instanceManager;
 
@@ -88,7 +90,18 @@ export class Server {
         this.app.listen(config.serverPort, config.serverIP);
     }
 
-    async restart() {
+    /**
+     * Chains onto any in-flight restart so two config updates cannot
+     * interleave `stop`/`listen` on the same underlying Bun server.
+     */
+    restart(): Promise<void> {
+        const previous = this.restarting ?? Promise.resolve();
+        const next = previous.catch(() => {}).then(() => this.doRestart());
+        this.restarting = next;
+        return next;
+    }
+
+    private async doRestart() {
         await this.app.stop();
         this.app.listen(config.serverPort, config.serverIP);
     }

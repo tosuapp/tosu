@@ -17,7 +17,19 @@ let server: Server;
 let base: string;
 let staticFolder: string;
 
+let previousStaticFolderPath: string;
+let previousServerPort: number;
+let previousServerIP: string;
+let previousCurrentVersion: string;
+let previousUpdateVersion: string;
+
 beforeAll(() => {
+    previousStaticFolderPath = config.staticFolderPath;
+    previousServerPort = config.serverPort;
+    previousServerIP = config.serverIP;
+    previousCurrentVersion = context.currentVersion;
+    previousUpdateVersion = context.updateVersion;
+
     staticFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'tosu-static-'));
     config.staticFolderPath = staticFolder;
     config.serverIP = '127.0.0.1';
@@ -28,12 +40,20 @@ beforeAll(() => {
 
     server = new Server({ instanceManager });
     server.start();
+
+    expect(server.app.server).not.toBeNull();
     base = `http://127.0.0.1:${server.app.server!.port}`;
 });
 
 afterAll(async () => {
     await server.app.stop();
     fs.rmSync(staticFolder, { recursive: true, force: true });
+
+    config.staticFolderPath = previousStaticFolderPath;
+    config.serverPort = previousServerPort;
+    config.serverIP = previousServerIP;
+    context.currentVersion = previousCurrentVersion;
+    context.updateVersion = previousUpdateVersion;
 });
 
 describe('Server', () => {
@@ -51,6 +71,7 @@ describe('Server', () => {
         expect(res.headers.get('content-type')).toBe(
             'image/vnd.microsoft.icon; charset=utf-8'
         );
+        expect(res.headers.get('access-control-allow-origin')).toBe('*');
     });
 
     test('/assets/* serves dashboard files', async () => {
@@ -94,6 +115,89 @@ describe('Server', () => {
         });
 
         ws.send('getSettings:other');
+        const reply = await new Promise<string>((resolve) => {
+            ws.onmessage = (event) => resolve(String(event.data));
+        });
+        ws.close();
+
+        expect(JSON.parse(reply)).toEqual({
+            command: 'getSettings',
+            message: { error: 'Wrong overlay' }
+        });
+    });
+
+    test('each websocket endpoint registers only on its matching Websocket instance', async () => {
+        const endpoints = [
+            { path: '/ws', ws: server.WS_V1 },
+            { path: '/tokens', ws: server.WS_SC },
+            { path: '/websocket/v2', ws: server.WS_V2 },
+            { path: '/websocket/v2/precise', ws: server.WS_V2_PRECISE }
+        ];
+        const all = [
+            server.WS_V1,
+            server.WS_SC,
+            server.WS_V2,
+            server.WS_V2_PRECISE,
+            server.WS_COMMANDS
+        ];
+
+        for (const { path: endpointPath, ws: target } of endpoints) {
+            const socket = await new Promise<WebSocket>((resolve, reject) => {
+                const s = new WebSocket(
+                    `${base.replace('http', 'ws')}${endpointPath}`
+                );
+                s.onopen = () => resolve(s);
+                s.onerror = reject;
+            });
+
+            expect(target.clients.size).toBe(1);
+            for (const other of all) {
+                if (other === target) continue;
+                expect(other.clients.size).toBe(0);
+            }
+
+            await new Promise<void>((resolve) => {
+                socket.onclose = () => resolve();
+                socket.close();
+            });
+
+            // The client's `close` event can fire slightly before the
+            // server-side `Websocket.close()` handler removes the entry
+            // from `clients` -- poll briefly rather than asserting on the
+            // client-observed close alone.
+            const deadline = Date.now() + 2000;
+            while (target.clients.size > 0 && Date.now() < deadline) {
+                await new Promise((resolve) => setTimeout(resolve, 10));
+            }
+
+            expect(target.clients.size).toBe(0);
+        }
+    });
+
+    // Keep last: restart() rebinds the underlying Bun server to a new port,
+    // so every test above (and `base`) must run against the pre-restart port.
+    test('restart() rebinds routes and websocket upgrades on a new port', async () => {
+        await server.restart();
+
+        expect(server.app.server).not.toBeNull();
+        expect(server.app.server!.port).toBeGreaterThan(0);
+
+        const newBase = `http://127.0.0.1:${server.app.server!.port}`;
+
+        const res = await fetch(`${newBase}/`);
+        const body = await res.text();
+        expect(res.status).toBe(200);
+        expect(body).toContain('<html');
+
+        const ws = await new Promise<WebSocket>((resolve, reject) => {
+            const socket = new WebSocket(
+                `${newBase.replace('http', 'ws')}/websocket/commands?l=__ingame__`
+            );
+            socket.onopen = () => resolve(socket);
+            socket.onerror = reject;
+        });
+
+        ws.send('getSettings:nope');
         const reply = await new Promise<string>((resolve) => {
             ws.onmessage = (event) => resolve(String(event.data));
         });
