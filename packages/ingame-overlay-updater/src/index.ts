@@ -106,6 +106,11 @@ export async function runOverlay(): Promise<ChildProcess | Error> {
             {
                 detached: false,
                 // Bun <-> Node.js (Electron) IPC must use JSON serialization.
+                // node:child_process already defaults to 'json', so this looks
+                // redundant -- it is not: Bun.spawn defaults to 'advanced'
+                // (its own V8-serialized wire format), which Electron cannot
+                // read. Pinning it documents the contract and keeps the value
+                // from being dropped as noise.
                 serialization: 'json',
                 stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
                 windowsHide: true,
