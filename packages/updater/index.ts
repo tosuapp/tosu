@@ -141,6 +141,16 @@ async function restartProcess() {
 export const autoUpdater = async (
     from: 'server' | 'startup'
 ): Promise<UpdateResult | Error> => {
+    // Outside a compiled binary `process.execPath` is the bun runtime itself,
+    // and applying an update would rename bun.exe to tosu_old.exe.
+    if (!Bun.isStandaloneExecutable) {
+        wLogger.debug(
+            'Auto-update skipped: not running from a compiled binary'
+        );
+
+        return { status: 'up-to-date' };
+    }
+
     try {
         const check = await checkUpdates('autoUpdater');
         if (check instanceof Error) {
