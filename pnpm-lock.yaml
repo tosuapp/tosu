@@ -78,11 +78,11 @@ importers:
   packages/ingame-overlay:
     dependencies:
       '@asdf-overlay/core':
-        specifier: ^2.0.6
-        version: 2.0.6
+        specifier: ^2.0.10
+        version: 2.0.10
       '@asdf-overlay/electron':
-        specifier: ^2.0.6
-        version: 2.0.6(@asdf-overlay/core@2.0.6)(electron@43.4.1)
+        specifier: ^2.0.10
+        version: 2.0.10(@asdf-overlay/core@2.0.10)(electron@43.4.1)
     devDependencies:
       '@types/node':
         specifier: ^24.10.4
@@ -243,16 +243,16 @@ importers:
 
 packages:
 
-  '@asdf-overlay/core@2.0.6':
-    resolution: {integrity: sha512-9LyV8wFoU9oU55+9YREVpdULEHC+2O3dalNKxRV+cP00RUQhWC59t921KJ5P6N8rmmQ+1qW1zCVZztg56DbXTw==}
+  '@asdf-overlay/core@2.0.10':
+    resolution: {integrity: sha512-HR7z/3e7oSnE54saHh5Q2F37k5pUwbteZQm3LC6SAiF7Kpsy48foZQooL277MJ1Lyju4HpbQF/MnXQT8IbQ7yA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64, arm64]
     os: [win32]
 
-  '@asdf-overlay/electron@2.0.6':
-    resolution: {integrity: sha512-IeXNS/T6K2AdQpRotucPycyswSciqFptpgk+vfDdXhQcHwVXt+InlKOe/aLJ2KdHVWvevodqQSYF722szDEyDA==}
+  '@asdf-overlay/electron@2.0.10':
+    resolution: {integrity: sha512-XEoZmhLvX62QGChyuDHgMTJiVMDpJ5g+Q1F+MyKuxuarI88wD9mf0svSLbsf5LouVhE2+XghQ3XtxligZd+PHw==}
     peerDependencies:
-      '@asdf-overlay/core': 2.0.6
+      '@asdf-overlay/core': 2.0.10
       electron: ^43.3.0
 
   '@babel/code-frame@7.29.7':
@@ -1173,7 +1173,6 @@ packages:
 
   '@tosuapp/lazer-calculator-prebuilt@0.6.1-20260729-main.0':
     resolution: {integrity: sha512-ymhZSBU/SZuMGD+4j35AcngBhFhjJWvokhfTWbFTYE8hAX2xVGFIsh1rhBoZvqY95yTdnVjFay/qMMsjZLVZng==}
-    cpu: [x64]
     os: [win32, linux]
 
   '@tosuapp/lazer-calculator-win32-x64@0.6.1-20260729-main.0':
@@ -3821,11 +3820,11 @@ packages:
 
 snapshots:
 
-  '@asdf-overlay/core@2.0.6': {}
+  '@asdf-overlay/core@2.0.10': {}
 
-  '@asdf-overlay/electron@2.0.6(@asdf-overlay/core@2.0.6)(electron@43.4.1)':
+  '@asdf-overlay/electron@2.0.10(@asdf-overlay/core@2.0.10)(electron@43.4.1)':
     dependencies:
-      '@asdf-overlay/core': 2.0.6
+      '@asdf-overlay/core': 2.0.10
       electron: 43.4.1
 
   '@babel/code-frame@7.29.7':
