@@ -13,8 +13,8 @@
   "keywords": [],
   "author": "storycraft <storycraft@pancake.sh>",
   "dependencies": {
-    "@asdf-overlay/core": "^2.0.6",
-    "@asdf-overlay/electron": "^2.0.6"
+    "@asdf-overlay/core": "^2.0.10",
+    "@asdf-overlay/electron": "^2.0.10"
   },
   "devDependencies": {
     "@types/node": "^24.10.4",
