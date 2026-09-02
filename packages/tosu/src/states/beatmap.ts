@@ -17,7 +17,7 @@ import {
 } from '@tosuapp/lazer-calculator-prebuilt';
 import fs from 'fs';
 import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
-import { BeatmapDecoder, SlidableObject } from 'osu-parsers';
+import { BeatmapDecoder } from 'osu-parsers';
 
 import type { BeatmapStrains } from '@/api/types/v1';
 import type { HitWindow } from '@/api/types/v2';
@@ -638,13 +638,8 @@ export class BeatmapPP extends AbstractState {
 
             const objects = this.lazerBeatmap.hitObjects;
 
-            const start =
-                Math.round(objects.at(0)?.startTime ?? 0) / this.clockRate;
-            const end =
-                Math.round(
-                    (objects.at(-1)?.startTime ?? 0) +
-                        ((objects.at(-1) as SlidableObject)?.duration ?? 0)
-                ) / this.clockRate;
+            const start = this.timings.firstObj / this.clockRate;
+            const end = this.timings.full / this.clockRate;
 
             const firstGraphObj =
                 Math.round(
@@ -679,30 +674,57 @@ export class BeatmapPP extends AbstractState {
                 totalTime >= end
                     ? Math.ceil((end - lastGraphObj) / oldStrains.sectionLength)
                     : 0;
+            if (
+                !isRealNumber(EMPTY_OFFSET_L) ||
+                !isRealNumber(EMPTY_OFFSET_R) ||
+                !isRealNumber(OFFSET_L) ||
+                !isRealNumber(OFFSET_R)
+            )
+                return;
 
-            const updateWithOffset = (name: string, strains: PeakStrains) => {
-                let data: number[] = [];
+            const updateWithOffset = (
+                name: string,
+                strains: PeakStrains,
+                insertAxis?: boolean
+            ) => {
+                resultStrains.series.push({
+                    name,
+                    data: ([] as number[])
+                        .concat(Array(EMPTY_OFFSET_L).fill(-100))
+                        .concat(Array(OFFSET_L).fill(-50))
+                        .concat(Array.from(strains.value))
+                        .concat(Array(OFFSET_R).fill(-50))
+                        .concat(Array(EMPTY_OFFSET_R).fill(-100))
+                });
 
-                if (isRealNumber(EMPTY_OFFSET_L) && EMPTY_OFFSET_L > 0)
-                    data = Array(EMPTY_OFFSET_L).fill(-100);
+                if (!insertAxis) return;
 
-                if (isRealNumber(OFFSET_L) && OFFSET_L > 0)
-                    data = Array(OFFSET_L).fill(-50);
-
-                data = data.concat(Array.from(strains.value));
-
-                if (isRealNumber(OFFSET_R) && OFFSET_R > 0)
-                    data = data.concat(Array(OFFSET_R).fill(-50));
-
-                if (isRealNumber(EMPTY_OFFSET_R) && EMPTY_OFFSET_R > 0)
-                    data = data.concat(Array(EMPTY_OFFSET_R).fill(-100));
-
-                resultStrains.series.push({ name, data });
+                resultStrains.xaxis = ([] as number[])
+                    .concat(
+                        Array.from(
+                            { length: OFFSET_L + EMPTY_OFFSET_L },
+                            (_, ind) => ind * strains.sectionLength
+                        )
+                    )
+                    .concat(
+                        Array.from(
+                            { length: strains.value.length },
+                            (_, ind) =>
+                                firstGraphObj + ind * strains.sectionLength
+                        )
+                    )
+                    .concat(
+                        Array.from(
+                            { length: OFFSET_R + EMPTY_OFFSET_R },
+                            (_, ind) =>
+                                lastGraphObj + ind * strains.sectionLength
+                        )
+                    );
             };
 
             switch (this.beatmap.mode) {
                 case 0:
-                    updateWithOffset('aim', this.diffStrains.aim);
+                    updateWithOffset('aim', this.diffStrains.aim, true);
                     updateWithOffset(
                         'aimNoSliders',
                         this.diffStrains.aimWithoutSliders
@@ -712,64 +734,29 @@ export class BeatmapPP extends AbstractState {
                     updateWithOffset('speed', this.diffStrains.speed);
                     break;
                 case 1:
-                    updateWithOffset('color', this.diffStrains.color);
+                    updateWithOffset('color', this.diffStrains.color, true);
                     updateWithOffset('rhythm', this.diffStrains.rhythm);
                     updateWithOffset('stamina', this.diffStrains.stamina);
                     updateWithOffset('reading', this.diffStrains.reading);
                     break;
                 case 2:
-                    updateWithOffset('movement', this.diffStrains.movement);
+                    updateWithOffset(
+                        'movement',
+                        this.diffStrains.movement,
+                        true
+                    );
                     break;
                 case 3:
-                    updateWithOffset('strains', this.diffStrains.strains);
+                    updateWithOffset('strains', this.diffStrains.strains, true);
                     break;
                 default:
                 // no-default
             }
 
-            let oldStrainsArray = Array.from(oldStrains.value);
-            const LEGACY_GRAPH_OFFSETS_L = EMPTY_OFFSET_L + OFFSET_L;
-            const LEGACY_GRAPH_OFFSETS_R = EMPTY_OFFSET_R + OFFSET_R;
-            if (isRealNumber(LEGACY_GRAPH_OFFSETS_L)) {
-                oldStrainsArray = Array(LEGACY_GRAPH_OFFSETS_L)
-                    .fill(0)
-                    .concat(oldStrainsArray);
-            }
-
-            if (isRealNumber(LEGACY_GRAPH_OFFSETS_R)) {
-                oldStrainsArray = oldStrainsArray.concat(
-                    Array(LEGACY_GRAPH_OFFSETS_R).fill(0)
-                );
-            }
-
-            const beginning = resultStrains.series
-                .at(0)!
-                .data.findIndex((r) => r >= -50);
-            const ending = resultStrains.series
-                .at(0)!
-                .data.toReversed()
-                .findIndex((r) => r >= -50, beginning + 1);
-
-            for (let i = 0; i < beginning; i++) {
-                resultStrains.xaxis.push(i * oldStrains.sectionLength);
-            }
-
-            resultStrains.series
-                .at(0)!
-                .data.slice(beginning, -ending)
-                .forEach((_, ind) => {
-                    resultStrains.xaxis.push(
-                        firstGraphObj + ind * oldStrains.sectionLength
-                    );
-                });
-
-            for (let i = 0; i < ending; i++) {
-                resultStrains.xaxis.push(
-                    lastGraphObj + i * oldStrains.sectionLength
-                );
-            }
-
-            this.strains = oldStrainsArray;
+            this.strains = ([] as number[])
+                .concat(Array(EMPTY_OFFSET_L + OFFSET_L).fill(0))
+                .concat(Array.from(oldStrains.value))
+                .concat(Array(EMPTY_OFFSET_R + OFFSET_R).fill(0));
             this.strainsAll = resultStrains;
 
             this.game.resetReportCount('beatmapPP updateGraph');
