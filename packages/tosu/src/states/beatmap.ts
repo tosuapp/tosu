@@ -1,4 +1,10 @@
-import { ClientType, config, measureTime, wLogger } from '@tosu/common';
+import {
+    ClientType,
+    config,
+    isRealNumber,
+    measureTime,
+    wLogger
+} from '@tosu/common';
 import {
     type DifficultyAttrs,
     type LazerMod,
@@ -11,7 +17,7 @@ import {
 } from '@tosuapp/lazer-calculator-prebuilt';
 import fs from 'fs';
 import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
-import { BeatmapDecoder } from 'osu-parsers';
+import { BeatmapDecoder, SlidableObject } from 'osu-parsers';
 
 import type { BeatmapStrains } from '@/api/types/v1';
 import type { HitWindow } from '@/api/types/v2';
@@ -80,7 +86,6 @@ interface BeatmapPPCurrentAttributes {
 
 interface BeatmapPPTimings {
     firstObj: number;
-    firstNonSpinnerObj: number;
     full: number;
 }
 
@@ -144,7 +149,6 @@ export class BeatmapPP extends AbstractState {
 
     timings: BeatmapPPTimings = {
         firstObj: 0,
-        firstNonSpinnerObj: 0,
         full: 0
     };
 
@@ -235,7 +239,6 @@ export class BeatmapPP extends AbstractState {
         };
         this.timings = {
             firstObj: 0,
-            firstNonSpinnerObj: 0,
             full: 0
         };
         this.timingPoints = [];
@@ -497,11 +500,6 @@ export class BeatmapPP extends AbstractState {
                 this.timings.firstObj = Math.round(
                     this.lazerBeatmap.hitObjects.at(0)?.startTime ?? 0
                 );
-                this.timings.firstNonSpinnerObj = Math.round(
-                    this.lazerBeatmap.hitObjects.find(
-                        (r) => !(r.hitType & HitType.Spinner)
-                    )?.startTime ?? 0
-                );
                 this.timings.full = Math.round(this.lazerBeatmap.totalLength);
 
                 this.mode = this.lazerBeatmap.mode;
@@ -608,7 +606,11 @@ export class BeatmapPP extends AbstractState {
 
     @measureTime
     updateGraph() {
-        if (this.diffStrains === undefined || this.beatmap === undefined)
+        if (
+            this.diffStrains === undefined ||
+            this.beatmap === undefined ||
+            this.lazerBeatmap === undefined
+        )
             return;
         try {
             const { menu } = this.game.getServices(['menu']);
@@ -634,37 +636,66 @@ export class BeatmapPP extends AbstractState {
                     break;
             }
 
-            const firstObjectTime =
-                this.timings.firstNonSpinnerObj / this.clockRate;
-            const lastObjectTime =
-                firstObjectTime +
-                oldStrains.value.length * oldStrains.sectionLength;
-            const mp3LengthTime = menu.mp3Length / this.clockRate;
+            const objects = this.lazerBeatmap.hitObjects;
 
-            const LEFT_OFFSET = Math.floor(
-                firstObjectTime / oldStrains.sectionLength
+            const start =
+                Math.round(objects.at(0)?.startTime ?? 0) / this.clockRate;
+            const end =
+                Math.round(
+                    (objects.at(-1)?.startTime ?? 0) +
+                        ((objects.at(-1) as SlidableObject)?.duration ?? 0)
+                ) / this.clockRate;
+
+            const firstGraphObj =
+                Math.round(
+                    objects.find((r) => !(r.hitType & HitType.Spinner))
+                        ?.startTime ?? 0
+                ) / this.clockRate;
+            const lastGraphObj =
+                Math.round(
+                    objects
+                        .toReversed()
+                        .find((r) => !(r.hitType & HitType.Spinner))
+                        ?.startTime ?? 0
+                ) / this.clockRate;
+            const totalTime = menu.mp3Length / this.clockRate;
+
+            // offsets before any objects
+            const EMPTY_OFFSET_L = Math.floor(start / oldStrains.sectionLength);
+            const EMPTY_OFFSET_R =
+                totalTime >= end
+                    ? Math.ceil((totalTime - end) / oldStrains.sectionLength)
+                    : 0;
+
+            /*
+                offsets for spinner and long sliders
+                example: /b/5298466
+                example: /b/1586453
+            */
+            const OFFSET_L = Math.floor(
+                (firstGraphObj - start) / oldStrains.sectionLength
             );
-
-            const RIGHT_OFFSET =
-                mp3LengthTime >= lastObjectTime
-                    ? Math.ceil(
-                          (mp3LengthTime - lastObjectTime) /
-                              oldStrains.sectionLength
-                      )
+            const OFFSET_R =
+                totalTime >= end
+                    ? Math.ceil((end - lastGraphObj) / oldStrains.sectionLength)
                     : 0;
 
             const updateWithOffset = (name: string, strains: PeakStrains) => {
                 let data: number[] = [];
 
-                if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
-                    data = Array(LEFT_OFFSET).fill(-100);
-                }
+                if (isRealNumber(EMPTY_OFFSET_L) && EMPTY_OFFSET_L > 0)
+                    data = Array(EMPTY_OFFSET_L).fill(-100);
+
+                if (isRealNumber(OFFSET_L) && OFFSET_L > 0)
+                    data = Array(OFFSET_L).fill(-50);
 
                 data = data.concat(Array.from(strains.value));
 
-                if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
-                    data = data.concat(Array(RIGHT_OFFSET).fill(-100));
-                }
+                if (isRealNumber(OFFSET_R) && OFFSET_R > 0)
+                    data = data.concat(Array(OFFSET_R).fill(-50));
+
+                if (isRealNumber(EMPTY_OFFSET_R) && EMPTY_OFFSET_R > 0)
+                    data = data.concat(Array(EMPTY_OFFSET_R).fill(-100));
 
                 resultStrains.series.push({ name, data });
             };
@@ -697,35 +728,44 @@ export class BeatmapPP extends AbstractState {
             }
 
             let oldStrainsArray = Array.from(oldStrains.value);
-            if (Number.isFinite(LEFT_OFFSET) && LEFT_OFFSET > 0) {
-                oldStrainsArray = Array(LEFT_OFFSET)
+            const LEGACY_GRAPH_OFFSETS_L = EMPTY_OFFSET_L + OFFSET_L;
+            const LEGACY_GRAPH_OFFSETS_R = EMPTY_OFFSET_R + OFFSET_R;
+            if (isRealNumber(LEGACY_GRAPH_OFFSETS_L)) {
+                oldStrainsArray = Array(LEGACY_GRAPH_OFFSETS_L)
                     .fill(0)
                     .concat(oldStrainsArray);
             }
 
-            if (Number.isFinite(RIGHT_OFFSET) && RIGHT_OFFSET > 0) {
+            if (isRealNumber(LEGACY_GRAPH_OFFSETS_R)) {
                 oldStrainsArray = oldStrainsArray.concat(
-                    Array(RIGHT_OFFSET).fill(0)
+                    Array(LEGACY_GRAPH_OFFSETS_R).fill(0)
                 );
             }
 
-            for (let i = 0; i < LEFT_OFFSET; i++) {
+            const beginning = resultStrains.series
+                .at(0)!
+                .data.findIndex((r) => r >= -50);
+            const ending = resultStrains.series
+                .at(0)!
+                .data.toReversed()
+                .findIndex((r) => r >= -50, beginning + 1);
+
+            for (let i = 0; i < beginning; i++) {
                 resultStrains.xaxis.push(i * oldStrains.sectionLength);
             }
 
-            const total =
-                resultStrains.series[0].data.length -
-                LEFT_OFFSET -
-                RIGHT_OFFSET;
-            for (let i = 0; i < total; i++) {
-                resultStrains.xaxis.push(
-                    firstObjectTime + i * oldStrains.sectionLength
-                );
-            }
+            resultStrains.series
+                .at(0)!
+                .data.slice(beginning, -ending)
+                .forEach((_, ind) => {
+                    resultStrains.xaxis.push(
+                        firstGraphObj + ind * oldStrains.sectionLength
+                    );
+                });
 
-            for (let i = 0; i < RIGHT_OFFSET; i++) {
+            for (let i = 0; i < ending; i++) {
                 resultStrains.xaxis.push(
-                    lastObjectTime + i * oldStrains.sectionLength
+                    lastGraphObj + i * oldStrains.sectionLength
                 );
             }
 
