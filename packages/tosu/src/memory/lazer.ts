@@ -234,6 +234,7 @@ export interface Offsets {
         statistics: number;
         maximumStatistics: number;
         user: number;
+        guid: number;
     };
     'osu.Framework.Platform.Storage': {
         '<BasePath>k__BackingField': number;
@@ -1753,6 +1754,13 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         retries: number = 0,
         combo?: number
     ): IScore {
+        const guid = this.process
+            .readBuffer(
+                scoreInfo + this.offsets['osu.Game.Scoring.ScoreInfo'].guid,
+                16
+            )
+            .toString('hex');
+
         const statistics = this.readStatistics(scoreInfo);
         const maximumStatistics = this.readMaximumStatistics(scoreInfo);
 
@@ -1847,7 +1855,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     this.offsets['osu.Game.Scoring.ScoreInfo'][
                         '<MaxCombo>k__BackingField'
                     ]
-            )
+            ),
+            guid
         };
     }
 
@@ -2093,7 +2102,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             score: score.score,
             statistics: score.statistics,
             maximumStatistics: score.maximumStatistics,
-            date
+            date,
+            guid: score.guid
         };
     }
 

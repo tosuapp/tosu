@@ -29,6 +29,8 @@ export class ResultScreen extends AbstractState {
     pp: number;
     fcPP: number;
 
+    guid: string;
+
     previousBeatmap: string;
 
     constructor(game: AbstractInstance) {
@@ -57,6 +59,8 @@ export class ResultScreen extends AbstractState {
         this.pp = 0;
         this.fcPP = 0;
 
+        this.guid = '';
+
         this.previousBeatmap = '';
     }
 
@@ -74,6 +78,7 @@ export class ResultScreen extends AbstractState {
                 return 'not-ready';
             }
 
+            this.guid = result.guid ?? '';
             this.onlineId = result.onlineId;
             this.playerName = result.playerName;
             this.mods = result.mods;
@@ -121,7 +126,10 @@ export class ResultScreen extends AbstractState {
                 'menu'
             ]);
 
-            const key = `${menu.checksum}${this.mods.checksum}${this.mode}${this.playerName}`;
+            const key =
+                this.game.client === ClientType.lazer
+                    ? this.guid
+                    : `${menu.checksum}${this.mods.checksum}${this.mode}${this.playerName}`;
             if (this.previousBeatmap === key) {
                 return;
             }
