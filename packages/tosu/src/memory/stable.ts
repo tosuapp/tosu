@@ -1381,7 +1381,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 try {
                     const result = this.configValue(configPointer, position);
                     if (result instanceof Error) throw result;
-                    if (result === null || !result.key || !result.value)
+                    if (
+                        result === null ||
+                        !result.key ||
+                        result.value === undefined ||
+                        result.value === null
+                    )
                         continue;
 
                     const value = configList[result.key];
@@ -1414,7 +1419,12 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
                 try {
                     const result = this.bindingValue(bindingPointer, position);
                     if (result instanceof Error) throw result;
-                    if (!result.key || !result.value) continue;
+                    if (
+                        !result.key ||
+                        result.value === undefined ||
+                        result.value === null
+                    )
+                        continue;
 
                     const value = bindingList[result.key];
                     if (!value || !isAllowedValue(value[0], result.value))
