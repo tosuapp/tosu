@@ -69,6 +69,7 @@ import {
 
 type LazerPatternData = {
     scalingContainerTargetDrawSize: number;
+    scalingContainerTargetDrawSizeLoose: number;
 };
 
 interface KeyCounter {
@@ -431,12 +432,42 @@ const frameworkConfigList = [
 // VTABLE FROM 2026.518.0
 const FALLBACK_GAME_BASE_VTABLE: number = 7730957910016;
 
+/**
+ * Bare Vector2(1024, 768) constant without the two-bool prefix.
+ *
+ * The exact pattern assumes the ScalingContainerTargetDrawSize backing field
+ * is directly preceded by two `true` booleans. Recompiled forks (torii) insert
+ * their own fields into OsuGame — e.g. a Nullable<double> lands between the
+ * bools and the Vector2 in the runtime layout — so only the float pair can be
+ * relied on there. Candidates from this pattern are validated the same way.
+ */
+const LOOSE_SCALING_CONTAINER_PATTERN = '00 00 80 44 00 00 40 44';
+
+/** Known-good anchor->externalLinkOpener distances on official builds. */
+const FAST_GAME_BASE_DELTAS = [0x24, 0x28, 0x2c, 0x20, 0x30, 0x1c, 0x34];
+
+/**
+ * Byte-step sweep used for forked clients whose OsuGame layout deviates from
+ * official builds (extra/removed fields shift the distance by arbitrary
+ * amounts, so 4-byte stepping is not enough).
+ */
+const WIDE_GAME_BASE_DELTAS: number[] = (() => {
+    const deltas: number[] = [];
+    for (let d = 0x10; d <= 0xc0; d++) deltas.push(d);
+    return deltas;
+})();
+
 export class LazerMemory extends AbstractMemory<LazerPatternData> {
     offsets: Offsets = localOffsets;
 
     private scanPatterns: ScanPatterns = {
         scalingContainerTargetDrawSize: {
             pattern: '01 01 00 00 00 00 80 44 00 00 40 44',
+            offset: 0,
+            nonZeroMask: false
+        },
+        scalingContainerTargetDrawSizeLoose: {
+            pattern: LOOSE_SCALING_CONTAINER_PATTERN,
             offset: 0,
             nonZeroMask: false
         }
@@ -464,8 +495,24 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     private isLeaderboardVisible: boolean = false;
 
     patterns: LazerPatternData = {
-        scalingContainerTargetDrawSize: 0
+        scalingContainerTargetDrawSize: 0,
+        scalingContainerTargetDrawSizeLoose: 0
     };
+
+    /**
+     * Both anchors are alternatives — either one being found is enough to
+     * proceed; updateGameBaseAddress re-scans and validates properly.
+     */
+    override checkIsBasesValid(): boolean {
+        wLogger.debug(
+            `checkIsBasesValid scalingContainerTargetDrawSize: ${this.patterns.scalingContainerTargetDrawSize.toString(16).toUpperCase()}, loose: ${this.patterns.scalingContainerTargetDrawSizeLoose.toString(16).toUpperCase()} %${ClientType[this.game.client]}%`
+        );
+
+        return (
+            this.patterns.scalingContainerTargetDrawSize !== 0 ||
+            this.patterns.scalingContainerTargetDrawSizeLoose !== 0
+        );
+    }
 
     private lazerToStableStatus = {
         '-4': 1, // Locally modified
@@ -479,48 +526,117 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         4: 7
     };
 
+    /**
+     * True when attached to torii (community osu!lazer fork). Torii builds are
+     * recompiled with their own fields, so build-specific constants published
+     * for official lazer (GameBaseVtable) never match and layout distances can
+     * deviate — validation and sweeping adapt below.
+     */
+    private get isTorii(): boolean {
+        return (this.game as LazerInstance).flavor === 'torii';
+    }
+
+    /**
+     * Vtable value learned at runtime for forked clients (see checkIfGameBase).
+     */
+    private learnedGameBaseVtable: number = 0;
+
     @measureTime
     private updateGameBaseAddress() {
         const oldAddress = this.gameBaseAddress;
 
+        // Re-resolution means the learned vtable value can no longer be
+        // trusted (that's usually why we're here) — fall back to structural
+        // validation and re-learn it from the accepted candidate.
+        this.learnedGameBaseVtable = 0;
+
         const scanPattern = this.scanPatterns.scalingContainerTargetDrawSize;
-        const candidates = this.process.scanAll(
-            scanPattern.pattern,
-            scanPattern.nonZeroMask
-        );
 
-        for (const match of candidates) {
-            const anchor = match + (scanPattern.offset || 0);
+        const attempts: { pattern: string; bias: number; deltas: number[] }[] =
+            [
+                // 1) exact pattern + known deltas: resolves official builds
+                //    (and unchanged forks) the same way upstream tosu does.
+                {
+                    pattern: scanPattern.pattern,
+                    bias: scanPattern.offset || 0,
+                    deltas: FAST_GAME_BASE_DELTAS
+                },
+                // 2) bare Vector2 constant: works when a fork inserted fields
+                //    between the bool prefix and the Vector2. The bias
+                //    normalizes the loose match back to exact-anchor semantics
+                //    (the float pair starts 4 bytes after the bools).
+                {
+                    pattern: LOOSE_SCALING_CONTAINER_PATTERN,
+                    bias: -4,
+                    deltas: this.isTorii
+                        ? WIDE_GAME_BASE_DELTAS
+                        : FAST_GAME_BASE_DELTAS
+                }
+            ];
 
-            const gameBaseAddress = this.resolveGameBaseFromAnchor(anchor);
-            if (gameBaseAddress === null) {
-                continue;
+        // 3) torii only: byte-step sweep on the exact anchor, in case the
+        //    distance shifted by a non-multiple of 4 but the prefix survived.
+        if (this.isTorii) {
+            attempts.push({
+                pattern: scanPattern.pattern,
+                bias: scanPattern.offset || 0,
+                deltas: WIDE_GAME_BASE_DELTAS
+            });
+        }
+
+        let candidateCount = 0;
+
+        for (const attempt of attempts) {
+            const candidates = this.process.scanAll(attempt.pattern, false);
+            candidateCount += candidates.length;
+
+            for (const match of candidates) {
+                const anchor = match + attempt.bias;
+
+                const gameBaseAddress = this.resolveGameBaseFromAnchor(
+                    anchor,
+                    attempt.deltas
+                );
+                if (gameBaseAddress === null) {
+                    continue;
+                }
+
+                this.setPattern('scalingContainerTargetDrawSize', anchor);
+                this.gameBaseAddress = gameBaseAddress;
+
+                wLogger.debug(
+                    `%${ClientType[this.game.client]}%`,
+                    `GameBase address updated: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
+                );
+
+                return;
             }
-
-            this.setPattern('scalingContainerTargetDrawSize', anchor);
-            this.gameBaseAddress = gameBaseAddress;
-
-            wLogger.debug(
-                `%${ClientType[this.game.client]}%`,
-                `GameBase address updated: %${oldAddress?.toString(16)}% => %${this.gameBaseAddress.toString(16)}%`
-            );
-
-            return;
         }
 
         wLogger.error(
             `%${ClientType[this.game.client]}%`,
-            `Failed to resolve GameBase from %${candidates.length}% candidate(s)`
+            `Failed to resolve GameBase from %${candidateCount}% candidate(s)`
         );
+
+        if (this.isTorii) {
+            wLogger.error(
+                `%${ClientType[this.game.client]}%`,
+                `Torii hint: this usually means the loaded offsets do not match this exact torii build. Regenerate them with tools/torii-offsets for version %${this.game.version}% (see TORII.md)`
+            );
+        }
     }
 
-    private resolveGameBaseFromAnchor(anchor: number): number | null {
+    private resolveGameBaseFromAnchor(
+        anchor: number,
+        deltas: number[]
+    ): number | null {
         // Byte distance from the ScalingContainerTargetDrawSize Vector2 field back
         // to externalLinkOpener pointer inside OsuGame. It shifts between osu!
         // versions (0x24 on older builds, 0x28 on newer) and neither field's offset
         // ships in offsets.json, so sweep the small aligned window and let the
         // GameBase vtable check pick the correct one per client version.
-        for (const delta of [0x24, 0x28, 0x2c, 0x20, 0x30, 0x1c, 0x34]) {
+        // Forked clients (torii) get a wider byte-step sweep.
+        for (const delta of deltas) {
             try {
                 const externalLinkOpener = this.process.readIntPtr(
                     anchor - delta
@@ -556,10 +672,106 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 return false;
             }
 
-            const expected =
-                this.offsets.GameBaseVtable || FALLBACK_GAME_BASE_VTABLE;
+            const vtableValue = this.process.readLong(vtable);
 
-            return this.process.readLong(vtable) === expected;
+            if (!this.isTorii) {
+                const expected =
+                    this.offsets.GameBaseVtable || FALLBACK_GAME_BASE_VTABLE;
+
+                return vtableValue === expected;
+            }
+
+            // Torii builds are recompiled, so the GameBaseVtable constants
+            // published for official builds never match. Validate the
+            // candidate structurally once, then remember its vtable value for
+            // the lifetime of the process (fast path for the polling loops).
+            // If the value ever changes (re-JIT), the next call falls back to
+            // structural validation and re-learns it.
+            if (this.learnedGameBaseVtable !== 0) {
+                return vtableValue === this.learnedGameBaseVtable;
+            }
+
+            if (!vtableValue || !this.validateGameBaseStructure(address)) {
+                return false;
+            }
+
+            this.learnedGameBaseVtable = vtableValue;
+
+            wLogger.debug(
+                `%${ClientType[this.game.client]}%`,
+                `Learned torii GameBase vtable value: %${vtableValue.toString(16)}%`
+            );
+
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Offsets-file-independent sanity check confirming a discovered
+     * OsuGameBase candidate on forked clients.
+     *
+     * The API roundtrip (game -> API -> game must point back at the same
+     * object) plus two readable C# strings (MD5 version hash and the storage
+     * base path) make accidental matches on random heap data practically
+     * impossible. NOTE: it still relies on the offsets file being correct for
+     * this build — wrong offsets make every candidate fail here, which is the
+     * desired clean-failure behavior.
+     */
+    private validateGameBaseStructure(address: number): boolean {
+        try {
+            const api = this.process.readIntPtr(
+                address +
+                    this.offsets['osu.Game.OsuGameBase']['<API>k__BackingField']
+            );
+            if (!api) return false;
+
+            // roundtrip: the APIAccess object must reference this game base
+            const apiGame = this.process.readIntPtr(
+                api + this.offsets['osu.Game.Online.API.APIAccess'].game
+            );
+            if (apiGame !== address) return false;
+
+            // VersionHash is an MD5 hex string on every lazer-family build
+            const versionHash = this.process.readSharpStringPtr(
+                address +
+                    this.offsets['osu.Game.OsuGameBase'][
+                        '<VersionHash>k__BackingField'
+                    ]
+            );
+            if (versionHash.length < 8 || versionHash.length > 128)
+                return false;
+
+            if (!/^[\x20-\x7e]+$/.test(versionHash)) return false;
+
+            // Storage -> WrappedStorage -> BasePath must look like a path
+            const storage = this.process.readIntPtr(
+                address +
+                    this.offsets['osu.Game.OsuGameBase'][
+                        '<Storage>k__BackingField'
+                    ]
+            );
+            if (!storage) return false;
+
+            const underlyingStorage = this.process.readIntPtr(
+                storage +
+                    this.offsets['osu.Game.IO.WrappedStorage'][
+                        '<UnderlyingStorage>k__BackingField'
+                    ]
+            );
+            if (!underlyingStorage) return false;
+
+            const basePath = this.process.readSharpStringPtr(
+                underlyingStorage +
+                    this.offsets['osu.Framework.Platform.Storage'][
+                        '<BasePath>k__BackingField'
+                    ]
+            );
+            if (!basePath.includes('/') && !basePath.includes('\\'))
+                return false;
+
+            return true;
         } catch {
             return false;
         }
