@@ -19,7 +19,10 @@ import { isRealNumber } from './manipulation';
 const defaultSchema: ConfigSchema = {
     enableAutoUpdate: {
         binding: 'ENABLE_AUTOUPDATE',
-        default: true
+        // Fork default: the upstream updater downloads official tosu releases,
+        // which would replace this build and drop torii support. Opt back in
+        // with ENABLE_AUTOUPDATE=true if you know what you're doing.
+        default: false
     },
     openDashboardOnStartup: {
         binding: 'OPEN_DASHBOARD_ON_STARTUP',
