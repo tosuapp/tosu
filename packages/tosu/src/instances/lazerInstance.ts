@@ -5,6 +5,7 @@ import {
     JsonSafeParse,
     config,
     getCachePath,
+    getProgramPath,
     sleep,
     wLogger
 } from '@tosu/common';
@@ -17,9 +18,19 @@ import { LazerMemory } from '@/memory/lazer';
 
 import { AbstractInstance } from '.';
 
+/**
+ * osu!lazer-family client flavor.
+ * - `osu`: official osu!lazer (osu!.exe / osulazer.exe, osu!.deps.json)
+ * - `torii`: torii / torii nova community fork (torii.exe, torii.deps.json,
+ *   recompiled assemblies and its own version scheme, e.g. 2026.901.3-nova)
+ */
+export type LazerFlavor = 'osu' | 'torii';
+
 export class LazerInstance extends AbstractInstance {
     memory: LazerMemory;
     previousCombo: number = 0;
+
+    flavor: LazerFlavor = 'osu';
 
     constructor(pid: number) {
         super(pid, Bitness.x64);
@@ -58,99 +69,13 @@ export class LazerInstance extends AbstractInstance {
             }
 
             const controller = new AbortController();
-            const links = [
-                `https://tosu.app/offsets/${this.version}.json`,
-                `https://osuck.net/offsets/${this.version}.json`
-            ];
 
-            const jsonCache = path.join(cacheFolder, `${this.version}.json`);
-            if (
-                localOffsets.OsuVersion !== this.version &&
-                fs.existsSync(jsonCache)
-            ) {
-                this.memory.offsets = JsonSafeParse({
-                    isFile: true,
-                    payload: jsonCache,
-                    defaultValue: null
-                });
+            const offsetsResolved =
+                this.flavor === 'torii'
+                    ? await this.resolveToriiOffsets(controller)
+                    : await this.resolveOsuOffsets(cacheFolder, controller);
 
-                wLogger.info(
-                    `Loaded offsets from cache for version %${this.version}%`
-                );
-            }
-
-            if (
-                this.memory.offsets === null ||
-                this.memory.offsets.OsuVersion !== this.version
-            ) {
-                for (let i = 0; i < links.length; i++) {
-                    const link = links[i];
-                    const host = new URL(link).host;
-
-                    const timeout = setTimeout(() => controller.abort, 10_000);
-                    try {
-                        const request = await fetch(link, {
-                            method: 'GET',
-                            signal: controller.signal,
-                            headers: {
-                                'User-Agent': `tosu/${this.version} (https://tosu.app; i@kotrik.ru)`
-                            }
-                        });
-
-                        clearTimeout(timeout);
-                        if (!request.ok) {
-                            wLogger.debug(
-                                `Failed to fetch offsets from %${host}%:`,
-                                request.status,
-                                request.statusText
-                            );
-                            continue;
-                        }
-
-                        const text = await request.text();
-                        const json = JsonSafeParse({
-                            isFile: false,
-                            payload: text,
-                            defaultValue: null
-                        });
-                        if (json === null) {
-                            wLogger.debug(
-                                `Broken response from %${host}%:`,
-                                request.status,
-                                request.statusText
-                            );
-                            continue;
-                        }
-
-                        wLogger.info(
-                            `Successfully retrieved offsets for version %${this.version}%`
-                        );
-
-                        this.memory.offsets = json;
-                        await fsp.writeFile(jsonCache, text, 'utf8');
-
-                        break;
-                    } catch (exc) {
-                        wLogger.error(
-                            `Error fetching offsets from %${host}%:`,
-                            (exc as any).message
-                        );
-                        wLogger.debug(`Offset fetch error details:`, exc);
-                    }
-                }
-
-                if (this.memory.offsets.OsuVersion !== this.version) {
-                    wLogger.error(
-                        `Failed to fetch offsets for %${this.version}%, report to devs: https://discord.gg/WX7BTs8kwh`
-                    );
-                    return;
-                }
-            }
-
-            if (this.memory.offsets === null) {
-                wLogger.error(
-                    `Offsets not found for osu! version %${this.version}%`
-                );
+            if (!offsetsResolved) {
                 return;
             }
 
@@ -381,45 +306,318 @@ export class LazerInstance extends AbstractInstance {
         }
     }
 
-    async getOsuVersion() {
-        const rootPath = await this.process.getRootPath();
-        let osuDepsJson = {
-            libraries: {}
-        };
-        try {
-            const filePath = path.join(rootPath, 'osu!.deps.json');
-            const isAppImage =
-                process.platform === 'linux' &&
-                rootPath.includes('/tmp/.mount_');
-            const isRoot =
-                process.platform === 'linux' && process.getuid?.() === 0;
+    /**
+     * Official osu!lazer offsets resolution: local cache first (per exact
+     * version), then remote hosts. Unchanged from upstream tosu behavior.
+     */
+    private async resolveOsuOffsets(
+        cacheFolder: string,
+        controller: AbortController
+    ): Promise<boolean> {
+        const jsonCache = path.join(cacheFolder, `${this.version}.json`);
+        if (
+            localOffsets.OsuVersion !== this.version &&
+            fs.existsSync(jsonCache)
+        ) {
+            this.memory.offsets = JsonSafeParse({
+                isFile: true,
+                payload: jsonCache,
+                defaultValue: null
+            });
 
-            const osuDepsRaw =
-                isRoot && isAppImage
-                    ? await this.process.readFileAsOwner(filePath)
-                    : await fsp.readFile(filePath, 'utf-8');
-
-            osuDepsJson = JSON.parse(osuDepsRaw);
-        } catch {
-            wLogger.error("Can't read osu dependencies");
+            wLogger.info(
+                `Loaded offsets from cache for version %${this.version}%`
+            );
         }
 
-        const osuLib =
-            Object.keys(osuDepsJson.libraries).find((key) =>
-                key.startsWith('osu!/')
-            ) || '';
-        try {
-            // key example: osu!/2026.525.0-lazer | osu!/2026.518.0-tachyon
-            const osuVersion = osuLib.slice(
-                osuLib.indexOf('/') + 1,
-                osuLib.indexOf('-')
+        if (
+            this.memory.offsets === null ||
+            this.memory.offsets.OsuVersion !== this.version
+        ) {
+            const fetched = await this.fetchRemoteOffsets(
+                this.version,
+                jsonCache,
+                controller
             );
 
-            wLogger.info(`Detected osu! version: %${osuVersion}%`);
-            return osuVersion;
-        } catch {
-            wLogger.error("Can't read osu! version");
-            return '';
+            if (
+                !fetched ||
+                this.memory.offsets === null ||
+                this.memory.offsets.OsuVersion !== this.version
+            ) {
+                wLogger.error(
+                    `Failed to fetch offsets for %${this.version}%, report to devs: https://discord.gg/WX7BTs8kwh`
+                );
+                return false;
+            }
         }
+
+        if (this.memory.offsets === null) {
+            wLogger.error(
+                `Offsets not found for osu! version %${this.version}%`
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Torii offsets resolution.
+     *
+     * tosu.app only hosts offsets for official osu!lazer builds, and torii is
+     * a recompiled fork that adds its own fields to OsuGame/OsuGameBase (and
+     * torii nova runs .NET 10), so official offsets generally do NOT apply.
+     * The reliable source is a locally generated offsets file produced by the
+     * `tools/torii-offsets` generator against the actual torii install.
+     *
+     * Search order:
+     *  1. TOSU_TORII_OFFSETS env (file, or folder containing <version>.json)
+     *  2. <cache>/torii/<version>.json
+     *  3. <program folder>/torii-offsets/<version>.json
+     *  4. (gamble) official upstream offsets for the numeric base version —
+     *     will only work if that torii build didn't shift any read fields;
+     *     the structural game-base validation protects against garbage.
+     */
+    private async resolveToriiOffsets(
+        controller: AbortController
+    ): Promise<boolean> {
+        const searchPaths = this.getToriiOffsetsPaths();
+
+        for (const offsetsPath of searchPaths) {
+            if (!fs.existsSync(offsetsPath)) continue;
+
+            const json = JsonSafeParse({
+                isFile: true,
+                payload: offsetsPath,
+                defaultValue: null
+            });
+
+            if (json === null || typeof json !== 'object') {
+                wLogger.warn(
+                    `Broken torii offsets file %${offsetsPath}%, skipping`
+                );
+                continue;
+            }
+
+            if (json.OsuVersion !== this.version) {
+                wLogger.warn(
+                    `Torii offsets file %${offsetsPath}% says version %${json.OsuVersion}% but the client is %${this.version}% — using it anyway; if reads fail, regenerate offsets for this exact build`
+                );
+            }
+
+            json.OsuVersion = this.version;
+            this.memory.offsets = json;
+
+            wLogger.info(
+                `Loaded torii offsets from %${offsetsPath}% for version %${this.version}%`
+            );
+            return true;
+        }
+
+        const numericVersion = this.version.split('-')[0];
+        wLogger.warn(
+            `No torii offsets found for %${this.version}%; falling back to official lazer offsets for %${numericVersion}%. This usually FAILS for torii builds — generate offsets with tools/torii-offsets (see TORII.md)`
+        );
+
+        const jsonCache = path.join(
+            getCachePath(),
+            'torii',
+            `upstream-${numericVersion}.json`
+        );
+
+        // reuse a previously fetched upstream fallback before hitting network
+        if (fs.existsSync(jsonCache)) {
+            const cached = JsonSafeParse({
+                isFile: true,
+                payload: jsonCache,
+                defaultValue: null
+            });
+            if (cached !== null && typeof cached === 'object') {
+                cached.OsuVersion = this.version;
+                this.memory.offsets = cached;
+
+                wLogger.info(
+                    `Loaded cached upstream offsets from %${jsonCache}%`
+                );
+                return true;
+            }
+        }
+
+        if (
+            await this.fetchRemoteOffsets(numericVersion, jsonCache, controller)
+        ) {
+            if (this.memory.offsets !== null) {
+                this.memory.offsets.OsuVersion = this.version;
+            }
+            return true;
+        }
+
+        wLogger.error(
+            `Failed to find offsets for torii %${this.version}%. Generate them with the torii-offsets tool (see TORII.md) and place "${this.version}.json" into one of: ${searchPaths.join(' | ')}`
+        );
+        return false;
+    }
+
+    private getToriiOffsetsPaths(): string[] {
+        const paths: string[] = [];
+
+        const envPath = process.env.TOSU_TORII_OFFSETS || '';
+        if (envPath !== '') {
+            const stats = fs.statSync(envPath, { throwIfNoEntry: false });
+            paths.push(
+                stats?.isDirectory()
+                    ? path.join(envPath, `${this.version}.json`)
+                    : envPath
+            );
+        }
+
+        paths.push(path.join(getCachePath(), 'torii', `${this.version}.json`));
+        paths.push(
+            path.join(getProgramPath(), 'torii-offsets', `${this.version}.json`)
+        );
+
+        return paths;
+    }
+
+    private async fetchRemoteOffsets(
+        version: string,
+        jsonCache: string,
+        controller: AbortController
+    ): Promise<boolean> {
+        const links = [
+            `https://tosu.app/offsets/${version}.json`,
+            `https://osuck.net/offsets/${version}.json`
+        ];
+
+        for (let i = 0; i < links.length; i++) {
+            const link = links[i];
+            const host = new URL(link).host;
+
+            const timeout = setTimeout(() => controller.abort(), 10_000);
+            try {
+                const request = await fetch(link, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    headers: {
+                        'User-Agent': `tosu/${version} (https://tosu.app; i@kotrik.ru)`
+                    }
+                });
+
+                clearTimeout(timeout);
+                if (!request.ok) {
+                    wLogger.debug(
+                        `Failed to fetch offsets from %${host}%:`,
+                        request.status,
+                        request.statusText
+                    );
+                    continue;
+                }
+
+                const text = await request.text();
+                const json = JsonSafeParse({
+                    isFile: false,
+                    payload: text,
+                    defaultValue: null
+                });
+                if (json === null) {
+                    wLogger.debug(
+                        `Broken response from %${host}%:`,
+                        request.status,
+                        request.statusText
+                    );
+                    continue;
+                }
+
+                wLogger.info(
+                    `Successfully retrieved offsets for version %${version}%`
+                );
+
+                this.memory.offsets = json;
+
+                await fsp.mkdir(path.dirname(jsonCache), { recursive: true });
+                await fsp.writeFile(jsonCache, text, 'utf8');
+
+                return true;
+            } catch (exc) {
+                clearTimeout(timeout);
+                wLogger.error(
+                    `Error fetching offsets from %${host}%:`,
+                    (exc as any).message
+                );
+                wLogger.debug(`Offset fetch error details:`, exc);
+            }
+        }
+
+        return false;
+    }
+
+    async getOsuVersion() {
+        const rootPath = await this.process.getRootPath();
+
+        const isAppImage =
+            process.platform === 'linux' && rootPath.includes('/tmp/.mount_');
+        const isRoot = process.platform === 'linux' && process.getuid?.() === 0;
+
+        // Official lazer ships "osu!.deps.json" with a library key like
+        // "osu!/2026.525.0-lazer". Torii ships "torii.deps.json" (its entry
+        // assembly is torii.dll) with keys like "torii/2026.901.3-torii" or
+        // "torii/2026.901.3-nova".
+        const candidates: {
+            flavor: LazerFlavor;
+            file: string;
+            libPrefix: string;
+        }[] = [
+            { flavor: 'osu', file: 'osu!.deps.json', libPrefix: 'osu!/' },
+            { flavor: 'torii', file: 'torii.deps.json', libPrefix: 'torii/' }
+        ];
+
+        for (const candidate of candidates) {
+            let osuDepsJson: { libraries: Record<string, unknown> } = {
+                libraries: {}
+            };
+
+            try {
+                const filePath = path.join(rootPath, candidate.file);
+
+                const osuDepsRaw =
+                    isRoot && isAppImage
+                        ? await this.process.readFileAsOwner(filePath)
+                        : await fsp.readFile(filePath, 'utf-8');
+
+                osuDepsJson = JSON.parse(osuDepsRaw);
+            } catch {
+                continue;
+            }
+
+            const osuLib =
+                Object.keys(osuDepsJson.libraries).find((key) =>
+                    key.startsWith(candidate.libPrefix)
+                ) || '';
+            if (osuLib === '') continue;
+
+            // key example: osu!/2026.525.0-lazer | torii/2026.901.3-nova
+            const rawVersion = osuLib.slice(osuLib.indexOf('/') + 1);
+            const dashIndex = rawVersion.indexOf('-');
+
+            // Official lazer: strip the "-lazer" suffix (existing behavior).
+            // Torii: KEEP the "-torii"/"-nova" suffix — the two streams are
+            // compiled against different runtimes (.NET 8 vs .NET 10) and
+            // need separate offsets files.
+            const osuVersion =
+                candidate.flavor === 'torii' || dashIndex === -1
+                    ? rawVersion
+                    : rawVersion.slice(0, dashIndex);
+
+            this.flavor = candidate.flavor;
+
+            wLogger.info(
+                `Detected %${candidate.flavor === 'torii' ? 'torii' : 'osu!'}% version: %${osuVersion}%`
+            );
+            return osuVersion;
+        }
+
+        wLogger.error("Can't read osu dependencies");
+        return '';
     }
 }

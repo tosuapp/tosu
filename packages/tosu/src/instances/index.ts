@@ -37,7 +37,15 @@ export interface DataRepoList {
 }
 
 export type OsuVersion = `b${number}${'tourney' | 'cuttingedge' | ''}`;
-export type OsuLazerVersion = `${number}.${number}.${number}`;
+/**
+ * Official lazer versions look like `2026.804.2`.
+ * Torii (community fork) versions keep their stream suffix, e.g.
+ * `2026.901.3-torii` (stable stream, .NET 8) or `2026.901.3-nova`
+ * (experimental stream, .NET 10) — the suffix matters because the two
+ * streams are built from different runtimes and need separate offsets.
+ */
+export type OsuLazerVersion =
+    `${number}.${number}.${number}` | `${number}.${number}.${number}-${string}`;
 
 export abstract class AbstractInstance {
     errorsCount: { [key: string | number]: number } = {};
