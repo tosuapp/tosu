@@ -1,0 +1,330 @@
+{
+  "_comment": "Classes and fields tosu reads from lazer-family clients. Generated from packages/tosu/src/assets/offsets.json. All entries are best-effort: missing ones are reported, not fatal.",
+  "classes": {
+    "osu.Game.OsuGame": [
+      "osuLogo",
+      "<ScreenStack>k__BackingField",
+      "<frameworkConfig>k__BackingField",
+      "channelManager",
+      "sentryLogger",
+      "chatOverlay",
+      "ScreenStack"
+    ],
+    "osu.Framework.Game": [
+      "<Host>k__BackingField"
+    ],
+    "osu.Game.OsuGameBase": [
+      "<API>k__BackingField",
+      "<SpectatorClient>k__BackingField",
+      "<ScoreManager>k__BackingField",
+      "<MultiplayerClient>k__BackingField",
+      "<LeaderboardManager>k__BackingField",
+      "<SessionStatics>k__BackingField",
+      "beatmapClock",
+      "<Storage>k__BackingField",
+      "<Beatmap>k__BackingField",
+      "<SkinManager>k__BackingField",
+      "<VersionHash>k__BackingField",
+      "<LocalConfig>k__BackingField",
+      "rulesetConfigCache",
+      "realm"
+    ],
+    "osu.Game.Screens.Select.SongSelect": [
+      "<game>k__BackingField"
+    ],
+    "osu.Game.Screens.Play.SubmittingPlayer": [
+      "<api>k__BackingField",
+      "<spectatorClient>k__BackingField"
+    ],
+    "osu.Game.Screens.Play.PlayerLoader": [
+      "osuLogo",
+      "<leaderboardManager>k__BackingField"
+    ],
+    "osu.Game.Screens.Play.SpectatorPlayer": [
+      "score",
+      "<SpectatorClient>k__BackingField"
+    ],
+    "osu.Game.Beatmaps.FramedBeatmapClock": [
+      "finalClockSource",
+      "decoupledTrack"
+    ],
+    "osu.Framework.Timing.DecouplingFramedClock": [
+      "<Source>k__BackingField"
+    ],
+    "osu.Framework.Audio.Track.Track": [
+      "length"
+    ],
+    "osu.Framework.Timing.FramedClock": [
+      "<CurrentTime>k__BackingField"
+    ],
+    "osu.Game.Screens.OsuScreen": [
+      "<logo>k__BackingField"
+    ],
+    "osu.Game.Screens.Ranking.SoloResultsScreen": [
+      "<api>k__BackingField",
+      "SelectedScore"
+    ],
+    "osu.Game.Screens.Edit.Editor": [
+      "<realm>k__BackingField",
+      "<api>k__BackingField"
+    ],
+    "osu.Game.Screens.OnlinePlay.OnlinePlayScreen": [
+      "<API>k__BackingField"
+    ],
+    "osu.Game.Screens.OnlinePlay.Multiplayer.Multiplayer": [
+      "<client>k__BackingField"
+    ],
+    "osu.Game.Online.Multiplayer.MultiplayerRoom": [
+      "RoomID",
+      "<ChannelID>k__BackingField",
+      "<MatchState>k__BackingField"
+    ],
+    "osu.Game.Screens.Spectate.SpectatorScreen": [
+      "<spectatorClient>k__BackingField",
+      "gameplayStates"
+    ],
+    "osu.Game.Screens.OnlinePlay.Multiplayer.Spectate.MultiSpectatorScreen": [
+      "<multiplayerClient>k__BackingField"
+    ],
+    "osu.Game.Online.Multiplayer.OnlineMultiplayerClient": [
+      "<IsConnected>k__BackingField"
+    ],
+    "osu.Game.Online.Multiplayer.MultiplayerClient": [
+      "room"
+    ],
+    "osu.Game.Overlays.ChatOverlay": [
+      "State"
+    ],
+    "osu.Game.Screens.Menu.OsuLogo": [
+      "visualizer"
+    ],
+    "osu.Game.Screens.Menu.LogoVisualisation": [
+      "frequencyAmplitudes"
+    ],
+    "osu.Game.Screens.Play.Player": [
+      "<api>k__BackingField",
+      "<scoreManager>k__BackingField",
+      "<Score>k__BackingField",
+      "<ScoreProcessor>k__BackingField",
+      "<HealthProcessor>k__BackingField",
+      "<HUDOverlay>k__BackingField",
+      "<DrawableRuleset>k__BackingField",
+      "dependencies"
+    ],
+    "osu.Framework.Screens.ScreenStack": [
+      "stack"
+    ],
+    "osu.Game.Rulesets.RulesetConfigCache": [
+      "configCache"
+    ],
+    "osu.Game.Online.Chat.ExternalLinkOpener": [
+      "<api>k__BackingField"
+    ],
+    "osu.Game.Online.API.APIAccess": [
+      "localUserState",
+      "game"
+    ],
+    "osu.Game.Online.API.LocalUserState": [
+      "localUser"
+    ],
+    "osu.Desktop.OsuGameDesktop": [
+      "AvailableMods",
+      "SelectedMods",
+      "Ruleset"
+    ],
+    "osu.Game.Scoring.ScoreInfo": [
+      "<OnlineID>k__BackingField",
+      "<LegacyOnlineID>k__BackingField",
+      "<ModsJson>k__BackingField",
+      "<HitEvents>k__BackingField",
+      "<RealmUser>k__BackingField",
+      "<TotalScore>k__BackingField",
+      "<MaxCombo>k__BackingField",
+      "<Combo>k__BackingField",
+      "<Passed>k__BackingField",
+      "<Ruleset>k__BackingField",
+      "<Accuracy>k__BackingField",
+      "<Date>k__BackingField",
+      "statistics",
+      "maximumStatistics",
+      "user"
+    ],
+    "osu.Framework.Platform.Storage": [
+      "<BasePath>k__BackingField"
+    ],
+    "osu.Game.IO.WrappedStorage": [
+      "<UnderlyingStorage>k__BackingField"
+    ],
+    "osu.Game.Beatmaps.WorkingBeatmapCache+BeatmapManagerWorkingBeatmap": [
+      "BeatmapInfo",
+      "BeatmapSetInfo"
+    ],
+    "osu.Game.Models.RealmUser": [
+      "<Username>k__BackingField",
+      "<OnlineID>k__BackingField"
+    ],
+    "osu.Game.Rulesets.RulesetInfo": [
+      "<OnlineID>k__BackingField"
+    ],
+    "osu.Game.Screens.Play.SoloPlayer": [
+      "RestartCount"
+    ],
+    "osu.Game.Rulesets.Osu.Scoring.OsuScoreProcessor": [
+      "Combo"
+    ],
+    "osu.Game.Rulesets.Scoring.ScoreProcessor": [
+      "hitEvents"
+    ],
+    "osu.Game.Online.API.Requests.Responses.APIMe": [
+      "PlayMode"
+    ],
+    "osu.Game.Online.API.Requests.Responses.APIUser": [
+      "<Id>k__BackingField",
+      "<Username>k__BackingField",
+      "countryCodeString",
+      "statistics",
+      "MatchmakingStatistics"
+    ],
+    "osu.Game.Online.API.Requests.Responses.APIUserMatchmakingStatistics": [
+      "<Rating>k__BackingField",
+      "<Rank>k__BackingField",
+      "<Plays>k__BackingField",
+      "<FirstPlacements>k__BackingField",
+      "<IsRatingProvisional>k__BackingField"
+    ],
+    "osu.Game.Online.Chat.ChannelManager": [
+      "joinedChannels"
+    ],
+    "osu.Game.Online.Chat.Channel": [
+      "Id",
+      "Messages"
+    ],
+    "osu.Game.Online.Chat.Message": [
+      "Timestamp",
+      "Content",
+      "Sender"
+    ],
+    "osu.Game.Users.UserStatistics": [
+      "RankedScore",
+      "GlobalRank",
+      "PlayCount",
+      "Accuracy",
+      "Level",
+      "PP"
+    ],
+    "osu.Game.Rulesets.Osu.Scoring.OsuHealthProcessor": [
+      "Health"
+    ],
+    "osu.Game.Screens.Play.HUDOverlay": [
+      "InputCountController",
+      "<ShowHud>k__BackingField"
+    ],
+    "osu.Game.Screens.Play.HUD.InputCountController": [
+      "triggers"
+    ],
+    "osu.Game.Rulesets.UI.DrawableRuleset": [
+      "<ReplayScore>k__BackingField"
+    ],
+    "osu.Game.Beatmaps.BeatmapInfo": [
+      "<OnlineID>k__BackingField",
+      "<MD5Hash>k__BackingField",
+      "<StatusInt>k__BackingField",
+      "<Metadata>k__BackingField",
+      "<Difficulty>k__BackingField",
+      "<DifficultyName>k__BackingField",
+      "<TotalObjectCount>k__BackingField",
+      "<Hash>k__BackingField"
+    ],
+    "osu.Game.Beatmaps.BeatmapSetInfo": [
+      "<OnlineID>k__BackingField"
+    ],
+    "osu.Game.Beatmaps.BeatmapMetadata": [
+      "<Title>k__BackingField",
+      "<TitleUnicode>k__BackingField",
+      "<Artist>k__BackingField",
+      "<ArtistUnicode>k__BackingField",
+      "<Author>k__BackingField",
+      "<Source>k__BackingField",
+      "<Tags>k__BackingField",
+      "<UserTags>k__BackingField",
+      "<PreviewTime>k__BackingField",
+      "<AudioFile>k__BackingField",
+      "<BackgroundFile>k__BackingField"
+    ],
+    "osu.Game.Beatmaps.BeatmapDifficulty": [
+      "<DrainRate>k__BackingField",
+      "<CircleSize>k__BackingField",
+      "<OverallDifficulty>k__BackingField",
+      "<ApproachRate>k__BackingField",
+      "<SliderMultiplier>k__BackingField",
+      "<SliderTickRate>k__BackingField"
+    ],
+    "osu.Game.Online.Multiplayer.MultiplayerRoomUser": [
+      "UserID",
+      "<State>k__BackingField",
+      "<BeatmapAvailability>k__BackingField",
+      "<Mods>k__BackingField",
+      "<MatchState>k__BackingField",
+      "RulesetId",
+      "BeatmapId",
+      "<User>k__BackingField"
+    ],
+    "osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayRoomState": [
+      "<Stage>k__BackingField",
+      "<CurrentRound>k__BackingField",
+      "<DamageMultiplier>k__BackingField",
+      "<Users>k__BackingField",
+      "<ActiveUserId>k__BackingField",
+      "<StarRating>k__BackingField",
+      "<WinningUserId>k__BackingField"
+    ],
+    "osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo": [
+      "<Rating>k__BackingField",
+      "<Life>k__BackingField",
+      "<Hand>k__BackingField",
+      "<RatingAfter>k__BackingField",
+      "DamageInfo",
+      "<RoundsWon>k__BackingField",
+      "<DamageMultiplier>k__BackingField"
+    ],
+    "osu.Game.Skinning.SkinManager": [
+      "CurrentSkin"
+    ],
+    "osu.Game.Skinning.Skin": [
+      "<Name>k__BackingField"
+    ],
+    "osu.Framework.Platform.GameHost": [
+      "<inputConfig>k__BackingField"
+    ],
+    "osu.Framework.Configuration.InputConfigManager": [
+      "<InputHandlers>k__BackingField"
+    ],
+    "osu.Framework.Input.Handlers.Tablet.OpenTabletDriverHandler": [
+      "<AreaOffset>k__BackingField",
+      "<AreaSize>k__BackingField",
+      "<Rotation>k__BackingField",
+      "<PressureThreshold>k__BackingField"
+    ],
+    "osu.Framework.Input.Handlers.Mouse.MouseHandler": [
+      "<UseRelativeMode>k__BackingField"
+    ],
+    "osu.Game.Utils.SentryLogger": [
+      "sentrySession"
+    ],
+    "Sentry.SentrySdk+DisposeHandle": [
+      "_localHub"
+    ],
+    "Sentry.Internal.Hub": [
+      "_options"
+    ],
+    "Sentry.SentryOptions": [
+      "<Release>k__BackingField"
+    ],
+    "osu.Game.Screens.Select.SoloSongSelect": [
+      "<game>k__BackingField"
+    ],
+    "osu.Game.Screens.SelectV2.SoloSongSelect": [
+      "<game>k__BackingField"
+    ]
+  }
+}
