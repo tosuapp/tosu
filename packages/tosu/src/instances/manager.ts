@@ -74,8 +74,18 @@ export class InstanceManager {
         try {
             let osuProcesses = Process.findProcesses([
                 'osu!.exe',
-                'osulazer.exe'
+                'osulazer.exe',
+                'torii.exe'
             ]);
+
+            // torii (community osu!lazer fork) on linux: /proc/<pid>/comm is
+            // "torii", so it never matches "torii.exe". Torii is always a
+            // 64-bit lazer-family client, remember its pids to force the
+            // lazer code path regardless of how the other searches went.
+            const toriiLinuxPids =
+                process.platform === 'linux'
+                    ? Process.findProcesses(['torii'])
+                    : [];
 
             let lazerOnLinux = false;
 
@@ -90,6 +100,11 @@ export class InstanceManager {
                 lazerOnLinux = true;
             }
 
+            if (toriiLinuxPids.length > 0) {
+                osuProcesses.push(...toriiLinuxPids);
+                osuProcesses = [...new Set(osuProcesses)];
+            }
+
             for (const processId of osuProcesses || []) {
                 if (processId in this.osuInstances) {
                     // dont deploy not needed instances
@@ -97,6 +112,7 @@ export class InstanceManager {
                 }
 
                 const isLazer =
+                    toriiLinuxPids.includes(processId) ||
                     (Process.isProcess64bit(processId) &&
                         process.platform !== 'linux') ||
                     lazerOnLinux;
