@@ -24,6 +24,7 @@ import type {
     IOffsets,
     IRankedPlay,
     IResultScreen,
+    IRoom,
     ISettings,
     ITourney,
     ITourneyChat,
@@ -1459,5 +1460,9 @@ export class StableMemory extends AbstractMemory<OsuPatternData> {
 
     rankedPlay(): IRankedPlay | 'not-ready' {
         throw new Error('Stable does not have Ranked Play.');
+    }
+
+    room(): IRoom {
+        return 'not-ready';
     }
 }

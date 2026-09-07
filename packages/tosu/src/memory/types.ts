@@ -1,3 +1,4 @@
+import type { CountryCodes } from '@tosu/common';
 import type { RankedPlayStage } from '@tosu/common/enums/osu';
 
 import type { ITourneyManagerChatItem } from '@/states/tourney';
@@ -227,6 +228,20 @@ export type IRankedPlay =
           activeUserId: number;
           winningUserId: number;
           users: IRankedPlayUserInfo[];
+      }
+    | string;
+
+export type IRoomUser = {
+    id: number;
+    username: string;
+    countryCode: CountryCodes;
+    avatarUrl: string | undefined;
+};
+
+export type IRoom =
+    | {
+          roomID: number;
+          users: IRoomUser[];
       }
     | string;
 

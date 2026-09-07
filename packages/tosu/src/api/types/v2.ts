@@ -1,6 +1,6 @@
 import type { OsuHitResult } from '@tosuapp/lazer-calculator-prebuilt';
 
-import type { IRankedPlay } from '@/memory/types';
+import type { IRankedPlay, IRoom } from '@/memory/types';
 import type { CalculateMods } from '@/utils/osuMods.types';
 
 export type ApiAnswer = TosuAPi | { error?: string };
@@ -24,6 +24,7 @@ export interface TosuAPi {
     directPath: DirectPath;
     tourney: Tourney | undefined;
     rankedPlay: IRankedPlay | undefined;
+    room: IRoom | undefined;
 }
 
 export interface Game {
