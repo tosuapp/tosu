@@ -166,6 +166,7 @@ export interface Offsets {
         RoomID: number;
         '<ChannelID>k__BackingField': number;
         '<MatchState>k__BackingField': number;
+        '<Users>k__BackingField': number;
     };
     'osu.Game.Screens.Spectate.SpectatorScreen': {
         '<spectatorClient>k__BackingField': number;
@@ -3827,21 +3828,20 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                     .RoomID
         );
 
-        const multiplayerUsers = this.process.readIntPtr(room + 0x10);
-        const multiplayerUsersItems = this.process.readIntPtr(
-            multiplayerUsers + 0x8
+        const multiplayerUsers = this.process.readIntPtr(
+            room +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerRoom'][
+                    '<Users>k__BackingField'
+                ]
         );
-        const multiplayerUsersCount = this.process.readInt(
-            multiplayerUsers + 0x10
-        );
+
+        if (!multiplayerUsers) {
+            return 'not-ready';
+        }
 
         const users: IRoomUser[] = [];
 
-        for (let i = 0; i < multiplayerUsersCount; i++) {
-            const current = this.process.readIntPtr(
-                multiplayerUsersItems + 0x10 + 0x8 * i
-            );
-
+        for (const current of this.readListItems(multiplayerUsers)) {
             const userId = this.process.readInt(
                 current +
                     this.offsets[

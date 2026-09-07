@@ -24,6 +24,7 @@ export interface TosuAPi {
     directPath: DirectPath;
     tourney: Tourney | undefined;
     rankedPlay: IRankedPlay | undefined;
+    room: IRoom | undefined;
 }
 
 export interface Game {

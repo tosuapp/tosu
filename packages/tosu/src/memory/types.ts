@@ -1,4 +1,4 @@
-import { CountryCodes } from '@tosu/common';
+import type { CountryCodes } from '@tosu/common';
 import type { RankedPlayStage } from '@tosu/common/enums/osu';
 
 import type { ITourneyManagerChatItem } from '@/states/tourney';
