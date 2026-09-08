@@ -413,6 +413,12 @@ export interface Offsets {
         '<RoundsWon>k__BackingField': number;
         '<DamageMultiplier>k__BackingField': number;
     };
+    'osu.Game.Online.Leaderboards.LeaderboardManager': {
+        scores: number;
+    };
+    'osu.Game.Online.Leaderboards.LeaderboardScores': {
+        '<TopScores>k__BackingField': number;
+    };
 }
 
 const localConfigList = [
@@ -3575,6 +3581,49 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 player.combo = combo;
 
                 leads.push(player);
+            }
+        } else {
+            // there are multiple players, including solo, multiplayer, spectating, playlist
+            // idk it is kinda hard to extract leaderboard from each of them, also each player has its own leaderboard type
+            // the method below works for solo playing, but does not work for spectating.
+
+            // https://github.com/ppy/osu/blob/master/osu.Game/Screens/Play/SoloPlayer.cs
+            // https://github.com/ppy/osu/blob/master/osu.Game/Screens/Play/Leaderboards/SoloGameplayLeaderboardProvider.cs
+            // it is basically 1 additionbal property, and it is hard to be sure it is soloplayer and not something else
+            // and solo leaderboard is basically using leaderboardManager, so its not really that different.
+            const leaderboardManager = this.process.readIntPtr(
+                this.gameBase() +
+                    this.offsets['osu.Game.OsuGameBase'][
+                        '<LeaderboardManager>k__BackingField'
+                    ]
+            );
+
+            const bindableScores = this.process.readIntPtr(
+                leaderboardManager +
+                    this.offsets[
+                        'osu.Game.Online.Leaderboards.LeaderboardManager'
+                    ].scores
+            );
+
+            if (bindableScores) {
+                const leaderboardScores =
+                    this.process.readBindableRef(bindableScores);
+                const scoresArray = this.process.readIntPtr(
+                    leaderboardScores +
+                        this.offsets[
+                            'osu.Game.Online.Leaderboards.LeaderboardScores'
+                        ]['<TopScores>k__BackingField']
+                );
+                const scores = this.process.readSharpRefArray(scoresArray);
+                let index = 0;
+                for (const scoreInfo of scores) {
+                    const player = this.readLeaderboardScore(
+                        scoreInfo,
+                        index++
+                    );
+
+                    leads.push(player);
+                }
             }
         }
 
