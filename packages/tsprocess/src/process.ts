@@ -236,6 +236,10 @@ export class Process {
         return result;
     }
 
+    readBindableInt(address: number) {
+        return this.readInt(address + 0x8 + 56);
+    }
+
     readNullableInt(address: number): number | undefined {
         if (this.readByte(address) === 0) {
             return undefined;
