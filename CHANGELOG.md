@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.26.2](https://github.com/tosuapp/tosu/compare/v4.26.1...v4.26.2) (2026-09-04)
+
+### Bug Fixes
+
+* Fix graph on maps with long sliders and spinners ([f94f9a2](https://github.com/tosuapp/tosu/commit/f94f9a234669035333b58be293bb0089f833d28a))
+* Revert graph offset fix ([78f466e](https://github.com/tosuapp/tosu/commit/78f466e4bc4638a230ed4783e1f1d877f4c4f4dc))
 ## [4.26.1](https://github.com/tosuapp/tosu/compare/v4.26.0...v4.26.1) (2026-08-27)
 ## [4.26.0](https://github.com/tosuapp/tosu/compare/v4.25.1...v4.26.0) (2026-08-24)
 

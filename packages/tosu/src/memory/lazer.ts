@@ -36,6 +36,8 @@ import type {
     IMenu,
     IRankedPlay,
     IResultScreen,
+    IRoom,
+    IRoomUser,
     IScore,
     ISettings,
     ITourney,
@@ -164,6 +166,7 @@ export interface Offsets {
         RoomID: number;
         '<ChannelID>k__BackingField': number;
         '<MatchState>k__BackingField': number;
+        '<Users>k__BackingField': number;
     };
     'osu.Game.Screens.Spectate.SpectatorScreen': {
         '<spectatorClient>k__BackingField': number;
@@ -268,6 +271,7 @@ export interface Offsets {
     'osu.Game.Online.API.Requests.Responses.APIUser': {
         '<Id>k__BackingField': number;
         '<Username>k__BackingField': number;
+        AvatarUrl: number;
         countryCodeString: number;
         statistics: number;
         MatchmakingStatistics: number;
@@ -2036,6 +2040,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         'osu.Game.Online.API.Requests.Responses.APIUser'
                     ]['<Username>k__BackingField']
             ),
+            avatarUrl: this.process.readSharpStringPtr(
+                user +
+                    this.offsets[
+                        'osu.Game.Online.API.Requests.Responses.APIUser'
+                    ].AvatarUrl
+            ),
             accuracy,
             rankedScore,
             level,
@@ -3802,6 +3812,76 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         ]['<DamageMultiplier>k__BackingField']
                 )
             }))
+        };
+    }
+
+    room(): IRoom {
+        const multiplayerClient = this.multiplayerClient();
+
+        if (!multiplayerClient) {
+            return 'not-ready';
+        }
+
+        const room = this.process.readIntPtr(
+            multiplayerClient +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerClient']
+                    .room
+        );
+
+        if (!room) {
+            return 'not-ready';
+        }
+
+        const roomId = this.process.readLong(
+            room +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerRoom']
+                    .RoomID
+        );
+
+        const multiplayerUsers = this.process.readIntPtr(
+            room +
+                this.offsets['osu.Game.Online.Multiplayer.MultiplayerRoom'][
+                    '<Users>k__BackingField'
+                ]
+        );
+
+        if (!multiplayerUsers) {
+            return 'not-ready';
+        }
+
+        const users: IRoomUser[] = [];
+
+        for (const current of this.readListItems(multiplayerUsers)) {
+            const userId = this.process.readInt(
+                current +
+                    this.offsets[
+                        'osu.Game.Online.Multiplayer.MultiplayerRoomUser'
+                    ].UserID
+            );
+
+            const apiUser = this.process.readIntPtr(
+                current +
+                    this.offsets[
+                        'osu.Game.Online.Multiplayer.MultiplayerRoomUser'
+                    ]['<User>k__BackingField']
+            );
+
+            // during my tests, this field was never null. but just in case, lets skip a user if its null
+            if (apiUser) {
+                const user = this.readUser(apiUser);
+
+                users.push({
+                    id: userId,
+                    username: user.name,
+                    countryCode: user.countryCode,
+                    avatarUrl: user.avatarUrl
+                });
+            }
+        }
+
+        return {
+            roomID: roomId,
+            users
         };
     }
 
