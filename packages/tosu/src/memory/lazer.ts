@@ -237,7 +237,7 @@ export interface Offsets {
         statistics: number;
         maximumStatistics: number;
         user: number;
-        guid: number;
+        '<ID>k__BackingField': number;
     };
     'osu.Framework.Platform.Storage': {
         '<BasePath>k__BackingField': number;
@@ -1760,7 +1760,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
     ): IScore {
         const guid = this.process
             .readBuffer(
-                scoreInfo + this.offsets['osu.Game.Scoring.ScoreInfo'].guid,
+                scoreInfo +
+                    this.offsets['osu.Game.Scoring.ScoreInfo'][
+                        '<ID>k__BackingField'
+                    ],
                 16
             )
             .toString('hex');
