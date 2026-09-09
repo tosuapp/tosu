@@ -79,6 +79,7 @@ export type IResultScreen =
           statistics: Statistics;
           maximumStatistics: Statistics;
           date: string;
+          guid?: string;
       }
     | string
     | Error;
@@ -98,6 +99,7 @@ export type IScore = {
     combo: number;
     maxCombo: number;
     pp?: number;
+    guid?: string;
 };
 
 export type IGameplay = IScore | string | Error;
