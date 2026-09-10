@@ -3604,10 +3604,10 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         'osu.Game.Online.Leaderboards.LeaderboardManager'
                     ].scores
             );
+            const leaderboardScores =
+                this.process.readBindableRef(bindableScores);
 
-            if (bindableScores) {
-                const leaderboardScores =
-                    this.process.readBindableRef(bindableScores);
+            if (leaderboardScores) {
                 const scoresArray = this.process.readIntPtr(
                     leaderboardScores +
                         this.offsets[
