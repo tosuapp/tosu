@@ -13,7 +13,7 @@ import type {
 } from '@/states/types';
 import { calculateGrade } from '@/utils/calculators';
 import { defaultCalculatedMods } from '@/utils/osuMods';
-import { type CalculateMods, OsuMods } from '@/utils/osuMods.types';
+import { type CalculateMods } from '@/utils/osuMods.types';
 import { calculateFcScore, calculateMaxAchievableScore } from '@/utils/score';
 
 export const defaultStatistics = {
@@ -233,19 +233,7 @@ export class Gameplay extends AbstractState {
 
             if (this.maxCombo > 0) {
                 const baseUR = this.calculateUR();
-                if (
-                    (this.mods.number & OsuMods.DoubleTime) ===
-                    OsuMods.DoubleTime
-                ) {
-                    this.unstableRate = baseUR / 1.5;
-                } else if (
-                    (this.mods.number & OsuMods.HalfTime) ===
-                    OsuMods.HalfTime
-                ) {
-                    this.unstableRate = baseUR * 1.33;
-                } else {
-                    this.unstableRate = baseUR;
-                }
+                this.unstableRate = baseUR / this.mods.rate;
             }
 
             if (this.comboPrev > this.maxCombo) {
