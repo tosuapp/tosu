@@ -162,6 +162,21 @@ export interface Offsets {
     'osu.Game.Screens.OnlinePlay.Multiplayer.Multiplayer': {
         '<client>k__BackingField': number;
     };
+    'osu.Game.Screens.OnlinePlay.Multiplayer.MultiplayerPlayer': {
+        '<client>k__BackingField': number;
+        leaderboardProvider: number;
+    };
+    'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider': {
+        UserScores: number;
+    };
+    'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider.TrackedUserData': {
+        User: number;
+        ScoreProcessor: number;
+    };
+    'osu.Game.Online.Spectator.SpectatorScoreProcessor': {
+        scoreInfo: number;
+        Combo: number;
+    };
     'osu.Game.Online.Multiplayer.MultiplayerRoom': {
         RoomID: number;
         '<ChannelID>k__BackingField': number;
@@ -397,6 +412,12 @@ export interface Offsets {
         DamageInfo: number;
         '<RoundsWon>k__BackingField': number;
         '<DamageMultiplier>k__BackingField': number;
+    };
+    'osu.Game.Online.Leaderboards.LeaderboardManager': {
+        scores: number;
+    };
+    'osu.Game.Online.Leaderboards.LeaderboardScores': {
+        '<TopScores>k__BackingField': number;
     };
 }
 
@@ -660,6 +681,17 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                             '<ScoreManager>k__BackingField'
                         ]
                 )
+        );
+    }
+
+    private checkIfMultiplayerPlayer(address: number) {
+        return (
+            this.process.readIntPtr(
+                address +
+                    this.offsets[
+                        'osu.Game.Screens.OnlinePlay.Multiplayer.MultiplayerPlayer'
+                    ]['<client>k__BackingField']
+            ) === this.multiplayerClient()
         );
     }
 
@@ -3462,22 +3494,140 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
             -1
         );
 
-        // TODO: update once I bother todo it :)
-        // const leaderboardScores = this.process.readIntPtr(
-        //     player + (this.replayMode ? 0x4e8 : 0x520)
-        // );
+        const leads: LeaderboardPlayer[] = [];
 
-        // const items = this.readListItems(
-        //     this.process.readIntPtr(leaderboardScores + 0x18)
-        // );
+        if (this.checkIfMultiplayerPlayer(player)) {
+            const leaderboard = this.process.readIntPtr(
+                player +
+                    this.offsets[
+                        'osu.Game.Screens.OnlinePlay.Multiplayer.MultiplayerPlayer'
+                    ].leaderboardProvider
+            );
 
-        // const scores: LeaderboardPlayer[] = [];
+            // https://github.com/ppy/osu/blob/master/osu.Game/Screens/Play/Leaderboards/MultiplayerLeaderboardProvider.cs
+            // you can read score info from 2 places
+            // 1. IBindableList<GameplayLeaderboardScore> Scores
+            // 2. Dictionary<int, TrackedUserData> UserScores
+            // first one has less info, including mod data. though second one looks weirder to use.
+            // the second does not have "position" data
 
-        // for (let i = 0; i < items.length; i++) {
-        //     scores.push(this.readLeaderboardScore(items[i], i));
-        // }
+            const userScoresDictionary = this.process.readIntPtr(
+                leaderboard +
+                    this.offsets[
+                        'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider'
+                    ].UserScores
+            );
 
-        return [this.isLeaderboardVisible, personalScore, []];
+            const userScores =
+                this.process.readSharpDictionaryIntToRef(userScoresDictionary);
+
+            // TODO properly set/read position, teamid
+            // teamid is in tracked user data
+            // UserQuit also maybe (i need this actually)
+
+            for (const userScore of userScores) {
+                const scoreProcessor = this.process.readIntPtr(
+                    userScore.address +
+                        this.offsets[
+                            'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider.TrackedUserData'
+                        ].ScoreProcessor
+                );
+
+                const scoreInfo = this.process.readIntPtr(
+                    scoreProcessor +
+                        this.offsets[
+                            'osu.Game.Online.Spectator.SpectatorScoreProcessor'
+                        ].scoreInfo
+                );
+
+                if (!scoreInfo) continue;
+
+                const comboBind = this.process.readIntPtr(
+                    scoreProcessor +
+                        this.offsets[
+                            'osu.Game.Online.Spectator.SpectatorScoreProcessor'
+                        ].Combo
+                );
+
+                const combo = this.process.readBindableInt(comboBind);
+
+                // i think its better to explicitly show we dont know position
+                const player = this.readLeaderboardScore(scoreInfo, 0);
+
+                const user = this.process.readIntPtr(
+                    userScore.address +
+                        this.offsets[
+                            'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider.TrackedUserData'
+                        ].User
+                );
+
+                const apiUser = this.process.readIntPtr(
+                    user +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MultiplayerRoomUser'
+                        ]['<User>k__BackingField']
+                );
+
+                const userName = this.process.readSharpStringPtr(
+                    apiUser +
+                        this.offsets[
+                            'osu.Game.Online.API.Requests.Responses.APIUser'
+                        ]['<Username>k__BackingField']
+                );
+
+                player.userId = userScore.key;
+                player.name = userName;
+                // ScoreInfo does not have current combo :)
+                player.combo = combo;
+
+                leads.push(player);
+            }
+        } else {
+            // there are multiple players, including solo, multiplayer, spectating, playlist
+            // idk it is kinda hard to extract leaderboard from each of them, also each player has its own leaderboard type
+            // the method below works for solo playing, but does not work for spectating.
+
+            // https://github.com/ppy/osu/blob/master/osu.Game/Screens/Play/SoloPlayer.cs
+            // https://github.com/ppy/osu/blob/master/osu.Game/Screens/Play/Leaderboards/SoloGameplayLeaderboardProvider.cs
+            // it is basically 1 additionbal property, and it is hard to be sure it is soloplayer and not something else
+            // and solo leaderboard is basically using leaderboardManager, so its not really that different.
+            const leaderboardManager = this.process.readIntPtr(
+                this.gameBase() +
+                    this.offsets['osu.Game.OsuGameBase'][
+                        '<LeaderboardManager>k__BackingField'
+                    ]
+            );
+
+            const bindableScores = this.process.readIntPtr(
+                leaderboardManager +
+                    this.offsets[
+                        'osu.Game.Online.Leaderboards.LeaderboardManager'
+                    ].scores
+            );
+            const leaderboardScores =
+                this.process.readBindableRef(bindableScores);
+
+            if (leaderboardScores) {
+                const scoresArray = this.process.readIntPtr(
+                    leaderboardScores +
+                        this.offsets[
+                            'osu.Game.Online.Leaderboards.LeaderboardScores'
+                        ]['<TopScores>k__BackingField']
+                );
+                const scores = this.process.readSharpRefArray(scoresArray);
+                let index = 0;
+                for (const scoreInfo of scores) {
+                    const player = this.readLeaderboardScore(
+                        scoreInfo,
+                        index++
+                    );
+
+                    leads.push(player);
+                }
+            }
+        }
+
+        return [this.isLeaderboardVisible, personalScore, leads];
     }
 
     readSpectatingData(): ILazerSpectator {
