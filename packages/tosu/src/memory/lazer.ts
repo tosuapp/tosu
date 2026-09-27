@@ -169,7 +169,7 @@ export interface Offsets {
     'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider': {
         UserScores: number;
     };
-    'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider.TrackedUserData': {
+    'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider+TrackedUserData': {
         User: number;
         ScoreProcessor: number;
     };
@@ -3529,7 +3529,7 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 const scoreProcessor = this.process.readIntPtr(
                     userScore.address +
                         this.offsets[
-                            'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider.TrackedUserData'
+                            'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider+TrackedUserData'
                         ].ScoreProcessor
                 );
 
@@ -3552,12 +3552,12 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                 const combo = this.process.readBindableInt(comboBind);
 
                 // i think its better to explicitly show we dont know position
-                const player = this.readLeaderboardScore(scoreInfo, 0);
+                const player = this.readLeaderboardScore(scoreInfo, -2);
 
                 const user = this.process.readIntPtr(
                     userScore.address +
                         this.offsets[
-                            'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider.TrackedUserData'
+                            'osu.Game.Screens.Play.Leaderboards.MultiplayerLeaderboardProvider+TrackedUserData'
                         ].User
                 );
 
