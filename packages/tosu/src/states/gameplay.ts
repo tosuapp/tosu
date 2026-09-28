@@ -70,6 +70,7 @@ export class Gameplay extends AbstractState {
 
     unstableRate: number;
     totalHitErrors: number = 0;
+    totalSquares: number = 0;
 
     hitMissPrev: number;
     hitUR: number;
@@ -110,6 +111,8 @@ export class Gameplay extends AbstractState {
 
         this.hitErrors = [];
         this.totalHitErrors = 0;
+        this.totalSquares = 0;
+
         this.maxCombo = 0;
         this.score = 0;
         this.statistics = Object.assign({}, defaultStatistics);
@@ -170,6 +173,8 @@ export class Gameplay extends AbstractState {
     resetHitErrors() {
         this.hitErrors = [];
         this.totalHitErrors = 0;
+        this.totalSquares = 0;
+
         this.previousHitErrorIndex = 0;
     }
 
@@ -345,6 +350,7 @@ export class Gameplay extends AbstractState {
             for (const hit of result.array) {
                 this.hitErrors.push(hit);
                 this.totalHitErrors += hit;
+                this.totalSquares += hit * hit;
             }
             this.previousHitErrorIndex = result.index;
 
@@ -372,13 +378,10 @@ export class Gameplay extends AbstractState {
         }
 
         const average = this.totalHitErrors / this.hitErrors.length;
-        let variance = 0;
-        for (const hit of this.hitErrors) {
-            variance += Math.pow(hit - average, 2);
-        }
-        variance = variance / this.hitErrors.length;
+        const variance =
+            this.totalSquares / this.hitErrors.length - average * average;
 
-        return Math.sqrt(variance) * 10;
+        return Math.sqrt(Math.max(variance, 0)) * 10;
     }
 
     private updateGrade(objectCount: number) {
