@@ -84,14 +84,14 @@ export class OsuInstance extends AbstractInstance {
                 settings.updateState();
 
                 const currentMods =
-                    global.status === GameState.play
+                    global.status === GameState.play && !gameplay.isDefaultState
                         ? gameplay.mods
                         : global.status === GameState.resultScreen
                           ? resultScreen.mods
                           : global.menuMods;
 
                 const currentMode =
-                    global.status === GameState.play
+                    global.status === GameState.play && !gameplay.isDefaultState
                         ? gameplay.mode
                         : global.status === GameState.resultScreen
                           ? resultScreen.mode
