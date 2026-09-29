@@ -57,6 +57,14 @@ jobs:
       - name: 🛠️ - Install Deps
         run: npm install -g pnpm@10.10.0 && pnpm install --frozen-lockfile
 
+      - name: 💾 - Cache pkg base binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.pkg-cache
+          key: pkg-cache-${{ runner.os }}-${{ hashFiles('packages/tosu/package.json', 'packages/tosu/pkg.win.json', 'packages/tosu/pkg.linux.json', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            pkg-cache-${{ runner.os }}-
+
       - name: 📦 - Build (windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: pnpm build:win
