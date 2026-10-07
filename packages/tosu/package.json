@@ -10,8 +10,8 @@
         "ts:compile": "rolldown -c rolldown.config.mjs",
         "watch": "pnpm run genver && pnpm run ts:run watch.ts",
         "run:dev": "pnpm run genver && pnpm run ts:compile && node --enable-source-maps dist/index.js",
-        "compile:win": "pnpm run genver && pnpm run ts:compile && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress brotli dist/index.js && pnpm run ts:run src/postBuild.mts",
-        "compile:linux": "pnpm run genver && pnpm run ts:compile && pkg --output dist/tosu --debug --config pkg.linux.json --compress brotli dist/index.js"
+        "compile:win": "pnpm run genver && pnpm run ts:compile && pkg --output dist/tosu.exe --debug --config pkg.win.json --compress Zstd dist/index.js && pnpm run ts:run src/postBuild.mts",
+        "compile:linux": "pnpm run genver && pnpm run ts:compile && pkg --output dist/tosu --debug --config pkg.linux.json --compress Zstd dist/index.js"
     },
     "dependencies": {
         "@tosu/common": "workspace:*",
