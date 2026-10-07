@@ -18,6 +18,10 @@ import { InstanceManager } from '@/instances/manager';
 // NOTE: _version.js packs with pkg support in tosu build
 import { version as currentVersion } from './_version.js';
 
+if (process.platform === 'win32') {
+    process.title = 'tosu - memory reader for osu!';
+}
+
 (async () => {
     context.currentVersion = currentVersion;
     wLogger.info(`Starting %tosu%`);

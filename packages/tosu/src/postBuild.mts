@@ -3,8 +3,14 @@ import path from 'path';
 import * as ResEdit from 'resedit';
 import { parse as semverParse } from 'semver';
 
+import packageJSON from '../package.json';
+
 async function windowsPostBuild(output: string) {
     const packageVersion = await import(new URL('./_version.js', import.meta.url).href).then((mod) => mod.default);
+    const author =
+        typeof packageJSON.author === 'string'
+            ? packageJSON.author
+            : packageJSON.author?.name ?? '';
 
     const exe = ResEdit.NtExecutable.from(await fs.readFile(output));
     const res = ResEdit.NtExecutableResource.from(exe);
@@ -32,9 +38,9 @@ async function windowsPostBuild(output: string) {
         { lang: 1033, codepage: 1200 },
         {
             ProductName: 'tosu',
-            FileDescription: 'osu! memory reader, built in typescript',
-            CompanyName: 'KotRik',
-            LegalCopyright: '© KotRik. All rights reserved.'
+            FileDescription: 'tosu - memory reader for osu!',
+            CompanyName: author,
+            LegalCopyright: `Copyright (C) ${new Date().getFullYear()} ${author}`
         }
     );
     vi.setFileVersion(
