@@ -11,7 +11,7 @@
     "dist": "npm run build && electron-builder --windows"
   },
   "keywords": [],
-  "author": "storycraft <storycraft@pancake.sh>",
+  "author": "storycraft <me@pancake.sh>",
   "dependencies": {
     "@asdf-overlay/core": "^2.1.1",
     "@asdf-overlay/electron": "^2.1.1"
