@@ -78,11 +78,11 @@ importers:
   packages/ingame-overlay:
     dependencies:
       '@asdf-overlay/core':
-        specifier: ^2.0.13
-        version: 2.0.13
+        specifier: ^2.1.1
+        version: 2.1.1
       '@asdf-overlay/electron':
-        specifier: ^2.0.13
-        version: 2.0.13(@asdf-overlay/core@2.0.13)(electron@43.4.1)
+        specifier: ^2.1.1
+        version: 2.1.1(@asdf-overlay/core@2.1.1)(electron@43.4.1)
     devDependencies:
       '@types/node':
         specifier: ^24.10.4
@@ -243,16 +243,16 @@ importers:
 
 packages:
 
-  '@asdf-overlay/core@2.0.13':
-    resolution: {integrity: sha512-n/9JO0EEDEj2egjx+JHzFY3S6+JnVVbNNmVBjaknn3e/QNc+/lDLRL5RSpBM2tGTPBa9biENaUQis5aePhoNzg==}
+  '@asdf-overlay/core@2.1.1':
+    resolution: {integrity: sha512-reuJvV4EHGeSqJPpUGJEHNAwZKwNb5kD4fOPEx2l6HGo7VBAqkPf+l19ZlaSivuig4w37W0KpxmAfxpD9P52Nw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64, arm64]
     os: [win32]
 
-  '@asdf-overlay/electron@2.0.13':
-    resolution: {integrity: sha512-WnwXjzkckbr0FhNhIOja22Unf67hhyyXjU+cgaWFHcZnqR6aCZsW9kqI3lzeIKmZ7ZHBCwGId0PC5+wYgzQGmQ==}
+  '@asdf-overlay/electron@2.1.1':
+    resolution: {integrity: sha512-itzp5trPrx5FNWkfbyoh50h6DIL/i4wyZcS74S2gERA0oeHUiJwl7De/AGGnRXLN72O0Qb5hCzNsAeWQepLc9Q==}
     peerDependencies:
-      '@asdf-overlay/core': 2.0.13
+      '@asdf-overlay/core': 2.1.1
       electron: ^43.3.0
 
   '@babel/code-frame@7.29.7':
@@ -3820,11 +3820,11 @@ packages:
 
 snapshots:
 
-  '@asdf-overlay/core@2.0.13': {}
+  '@asdf-overlay/core@2.1.1': {}
 
-  '@asdf-overlay/electron@2.0.13(@asdf-overlay/core@2.0.13)(electron@43.4.1)':
+  '@asdf-overlay/electron@2.1.1(@asdf-overlay/core@2.1.1)(electron@43.4.1)':
     dependencies:
-      '@asdf-overlay/core': 2.0.13
+      '@asdf-overlay/core': 2.1.1
       electron: 43.4.1
 
   '@babel/code-frame@7.29.7':
