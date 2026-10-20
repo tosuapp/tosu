@@ -4,7 +4,11 @@ import { getLocalCounters, saveSettings } from './counters';
 import type { bodyPayload } from './counters.types';
 import { parseCounterSettings } from './parseSettings';
 import { normalizeSocketCommand } from './scFilters';
-import { type ModifiedWebsocket, Websocket } from './socket';
+import {
+    type WebSocketChannel,
+    type WsConnection,
+    getConnName
+} from './socket';
 
 const saveDelay = debounce((overlayFrom: string, json: bodyPayload[]) => {
     const html = saveSettings(overlayFrom, json);
@@ -21,54 +25,54 @@ const saveDelay = debounce((overlayFrom: string, json: bodyPayload[]) => {
 
 export function handleSocketCommands(
     data: string,
-    socket: ModifiedWebsocket,
-    ws: Websocket
+    conn: WsConnection,
+    channel: WebSocketChannel
 ) {
-    wLogger.debug(`Received WebSocket command: %${data}%`);
-    data = normalizeSocketCommand(data, socket.pathname);
+    wLogger.debug(
+        `Received WebSocket command: %${data}% from %${getConnName(conn)}%`
+    );
+    data = normalizeSocketCommand(data, conn.pathname);
     if (!data.includes(':')) {
         return;
     }
 
     const firstIndex = data.indexOf(':');
-    const SecondIndex = data.indexOf(':', firstIndex + 1);
+    const secondIndex = data.indexOf(':', firstIndex + 1);
 
     const command = data.substring(0, firstIndex);
     const overlayName =
-        SecondIndex === -1
+        secondIndex === -1
             ? decodeURIComponent(data.substring(firstIndex + 1))
-            : decodeURIComponent(data.substring(firstIndex + 1, SecondIndex));
+            : decodeURIComponent(data.substring(firstIndex + 1, secondIndex));
 
     const legacyPayload = data.substring(firstIndex + 1);
-    const payload = data.substring(SecondIndex + 1);
+    const payload = secondIndex === -1 ? '' : data.substring(secondIndex + 1);
 
     let message: unknown;
 
-    const overlayFrom = decodeURI(socket.query?.l || '');
     switch (command) {
         case 'getOverlays':
         case 'getCounters': {
-            if (overlayFrom !== '__ingame__' || overlayName !== overlayFrom) {
-                message = {
-                    error: 'Wrong overlay'
-                };
-                break;
-            }
-
             message = getLocalCounters();
             break;
         }
 
         case 'getSettings': {
-            if (overlayName !== overlayFrom) {
-                message = {
-                    error: 'Wrong overlay'
-                };
-                break;
-            }
-
             try {
-                const result = parseCounterSettings(overlayName, 'counter/get');
+                const targetOverlay =
+                    overlayName && overlayName !== 'undefined'
+                        ? overlayName
+                        : conn.overlayName || '';
+
+                if (!targetOverlay) {
+                    message = { error: 'No overlay specified or resolved' };
+                    break;
+                }
+
+                const result = parseCounterSettings(
+                    targetOverlay,
+                    'counter/get'
+                );
                 if (result instanceof Error) {
                     message = {
                         error: result.message
@@ -79,7 +83,7 @@ export function handleSocketCommands(
                 message = result.values;
             } catch (exc) {
                 wLogger.error(
-                    `Failed to get data for command %${command}%:`,
+                    `Failed to get settings for %${overlayName}% from %${getConnName(conn)}%:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Settings retrieval error details:`, exc);
@@ -96,7 +100,7 @@ export function handleSocketCommands(
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    `Failed to parse JSON for command %${command}%:`,
+                    `Failed to parse JSON for command %${command}% from %${getConnName(conn)}%:`,
                     (json as Error).message
                 );
                 wLogger.debug(`JSON parsing error details:`, json);
@@ -115,20 +119,23 @@ export function handleSocketCommands(
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    `Failed to parse JSON for command %${command}%:`,
+                    `Failed to parse JSON for command %${command}% from %${getConnName(conn)}%:`,
                     (json as Error).message
                 );
                 wLogger.debug(`JSON parsing error details:`, json);
                 return;
             }
 
-            saveDelay(overlayFrom, json);
+            const targetOverlay =
+                overlayName && overlayName !== 'undefined'
+                    ? overlayName
+                    : conn.overlayName || '';
+            saveDelay(targetOverlay, json);
 
-            ws.socket.emit(
-                'message',
-                socket.id,
+            channel.dispatchCommand(
+                conn.id,
                 'updateSettings',
-                overlayName,
+                targetOverlay,
                 payload
             );
             return;
@@ -137,12 +144,12 @@ export function handleSocketCommands(
         case 'applyFilters': {
             const json = JsonSafeParse({
                 isFile: false,
-                payload: payload.startsWith('[') ? payload : legacyPayload, // FIXME:
+                payload: payload.startsWith('[') ? payload : legacyPayload,
                 defaultValue: new Error('Broken json')
             });
             if (json instanceof Error) {
                 wLogger.error(
-                    `Failed to parse JSON for command %${command}%:`,
+                    `Failed to parse JSON for command %${command}% from %${getConnName(conn)}%:`,
                     (json as Error).message
                 );
                 wLogger.debug(`JSON parsing error details:`, json);
@@ -152,17 +159,17 @@ export function handleSocketCommands(
             try {
                 if (!Array.isArray(json)) {
                     wLogger.error(
-                        `Invalid filter format for socket %${socket.id}% [${socket.pathname}]:`,
+                        `Invalid filter format for socket %${getConnName(conn)}%:`,
                         `Filters should be an array of strings (received: ${json})`
                     );
                     return;
                 }
 
-                socket.filters = json;
+                conn.filters = json;
                 return;
             } catch (exc) {
                 wLogger.error(
-                    `Failed to apply filters for command %${command}%:`,
+                    `Failed to apply filters for command %${command}% from %${getConnName(conn)}%:`,
                     (exc as Error).message
                 );
                 wLogger.debug(`Filter application error details:`, exc);
@@ -171,7 +178,7 @@ export function handleSocketCommands(
     }
 
     try {
-        socket.send(
+        conn.socket.send(
             JSON.stringify({
                 command,
                 message
@@ -179,7 +186,7 @@ export function handleSocketCommands(
         );
     } catch (exc) {
         wLogger.error(
-            `Failed to send response for command %${command}%:`,
+            `Failed to send response for command %${command}% to %${getConnName(conn)}%:`,
             (exc as Error).message
         );
         wLogger.debug(`Command response error details:`, exc);
