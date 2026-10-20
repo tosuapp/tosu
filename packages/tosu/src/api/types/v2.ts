@@ -306,6 +306,15 @@ export interface Objects {
     total: number;
 }
 
+export interface BeatmapTimeline {
+    checksum: string;
+    mode: number;
+    fileFormat: number;
+    comboColours: { red: number; green: number; blue: number }[];
+    breaks: { startTime: number; endTime: number }[];
+    hitObjects: { startTime: number; type: number }[];
+}
+
 export interface Play {
     failed: boolean;
 

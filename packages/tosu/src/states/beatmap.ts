@@ -20,7 +20,8 @@ import { HitType, Beatmap as ParsedBeatmap, TimingPoint } from 'osu-classes';
 import { BeatmapDecoder } from 'osu-parsers';
 
 import type { BeatmapStrains } from '@/api/types/v1';
-import type { HitWindow } from '@/api/types/v2';
+import type { BeatmapTimeline, HitWindow } from '@/api/types/v2';
+import { buildBeatmapTimeline } from '@/api/utils/buildBeatmapTimeline';
 import { AbstractInstance } from '@/instances';
 import { AbstractState } from '@/states';
 import { fixDecimals, safeJoin } from '@/utils/converters';
@@ -106,6 +107,9 @@ export class BeatmapPP extends AbstractState {
 
     beatmap?: PlayBeatmap;
     lazerBeatmap?: ParsedBeatmap;
+    private timeline?: BeatmapTimeline;
+    private timelineChecksum: string = '';
+    private timelinePath: string = '';
     difficultyAttributes?: DifficultyAttrs;
     diffStrains?: StrainsData;
     maxScore?: ScoreInfoData;
@@ -163,6 +167,9 @@ export class BeatmapPP extends AbstractState {
     }
 
     init() {
+        this.timeline = undefined;
+        this.timelineChecksum = '';
+        this.timelinePath = '';
         this.isKiai = false;
         this.isBreak = false;
 
@@ -309,12 +316,33 @@ export class BeatmapPP extends AbstractState {
         return this.beatmap;
     }
 
+    getTimeline(): BeatmapTimeline | undefined {
+        const { menu, global } = this.game.getServices(['menu', 'global']);
+        if (
+            !this.lazerBeatmap ||
+            !this.timelineChecksum ||
+            this.timelineChecksum !== menu.checksum ||
+            this.timelinePath !==
+                safeJoin(global.songsFolder, menu.folder, menu.filename)
+        ) {
+            return;
+        }
+
+        return (this.timeline ??= buildBeatmapTimeline(
+            this.lazerBeatmap,
+            this.timelineChecksum
+        ));
+    }
+
     @measureTime
     updateMapMetadata(
         currentMods: CalculateMods,
         currentMode: number,
         lazerBypass: boolean = false
     ) {
+        this.timeline = undefined;
+        this.timelineChecksum = '';
+        this.timelinePath = '';
         try {
             const startTime = performance.now();
 
@@ -465,13 +493,16 @@ export class BeatmapPP extends AbstractState {
                         parseTimingPoints: true,
                         parseHitObjects: true,
 
-                        parseColours: false,
+                        parseColours: true,
                         parseEditor: false,
                         parseGeneral: true,
                         parseStoryboard: false,
                         parseMetadata: true
                     }
                 );
+
+                this.timelineChecksum = menu.checksum;
+                this.timelinePath = mapPath;
 
                 const { bpm, bpmMin, bpmMax } = this.lazerBeatmap;
 

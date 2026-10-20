@@ -5,6 +5,7 @@
     "main": "dist/index.js",
     "bin": "dist/index.js",
     "scripts": {
+        "test:timeline": "tsx --test tests/beatmap-timeline.test.ts tests/beatmap-timeline-route.test.ts",
         "genver": "npx genversion -es src/_version.js",
         "ts:run": "cross-env NODE_ENV=development tsx",
         "ts:compile": "rolldown -c rolldown.config.mjs",

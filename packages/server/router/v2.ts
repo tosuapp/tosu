@@ -6,6 +6,19 @@ import { beatmapFileShortcut } from '../scripts/beatmapFile';
 import { directoryWalker } from '../utils/directories';
 
 export default function buildV2Api(app: HttpServer) {
+    app.route('/api/v2/beatmap/timeline', 'GET', (req, res) => {
+        const osuInstance = req.instanceManager.getInstance(
+            req.instanceManager.focusedClient
+        );
+        const timeline = osuInstance?.get('beatmapPP')?.getTimeline();
+        if (!timeline) {
+            res.statusCode = 503;
+            return sendJson(res, { error: 'beatmap_not_ready' });
+        }
+
+        return sendJson(res, timeline);
+    });
+
     app.route('/json/v2', 'GET', (req, res) => {
         const osuInstance = req.instanceManager.getInstance(
             req.instanceManager.focusedClient

@@ -107,6 +107,7 @@ v2 _**(tosu own api)**_
 - `/files/beatmap/audio` - Audio for current beatmap
 - `/files/beatmap/file` - .osu file for current beatmap
 - `/files/skin/{path}` - similar as `/files/beatmap/{path}`, but for a skin
+- `/api/v2/beatmap/timeline` - Parsed hit object times/types, combo colours and breaks for the current beatmap. See [timeline API](docs/beatmap-timeline.md).
 
 api
 - `/api/calculate/pp` - Calculate pp for beatmap with custom data
