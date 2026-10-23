@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.26.3](https://github.com/tosuapp/tosu/compare/v4.26.2...v4.26.3) (2026-10-23)
+
+### Bug Fixes
+
+* brand process and executable as tosu ([9a0dc80](https://github.com/tosuapp/tosu/commit/9a0dc80d96535e868074652e0a8b633a6d6bbc79))
+* Fix UR on rate changes ([732c09c](https://github.com/tosuapp/tosu/commit/732c09c3037aae306badc316d3be9f1e1dafdfae))
+* keep score mods applied while beatmap is loading. ([9af7564](https://github.com/tosuapp/tosu/commit/9af7564faedfa73fb2e9bf93a12e072b1fd959d3))
+* Speed up calculation of UR ([a1e9029](https://github.com/tosuapp/tosu/commit/a1e90290e66b15c34a36d29ba30f8251a09e09c9))
+* **stable:** allow falsy config and keybind values in settings ([eb48402](https://github.com/tosuapp/tosu/commit/eb48402364a0218c2da19e42698ac900f528a257))
+* use generated room offsets ([c754caa](https://github.com/tosuapp/tosu/commit/c754caa5584c09d783b5ff797c0343108683571e))
+* use package metadata in Windows post-build ([e77a260](https://github.com/tosuapp/tosu/commit/e77a260a8a6b33303fcd85afd2455236b32ba583))
 ## [4.26.2](https://github.com/tosuapp/tosu/compare/v4.26.1...v4.26.2) (2026-09-04)
 
 ### Bug Fixes
