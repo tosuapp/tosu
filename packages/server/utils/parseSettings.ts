@@ -18,6 +18,10 @@ export function parseCounterSettings(
     action: 'parse' | 'user/save' | 'counter/get' | 'dev/save' | '',
     payload?: bodyPayload[] & ISettings[]
 ) {
+    if (!folderName || folderName === 'undefined' || folderName === 'null') {
+        return new Error('Invalid or missing overlay folder name');
+    }
+
     const ingameOverlay = folderName === '__ingame__';
     const staticPath = getStaticPath();
     const settingsPath = path.join(

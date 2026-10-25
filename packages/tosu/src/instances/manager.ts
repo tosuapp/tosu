@@ -13,6 +13,10 @@ import { ChildProcess } from 'node:child_process';
 import { setTimeout } from 'node:timers/promises';
 import { Process } from 'tsprocess';
 
+import { buildResult } from '@/api/utils/buildResult';
+import { buildResult as buildResultSC } from '@/api/utils/buildResultSC';
+import { buildResult as buildResultV2 } from '@/api/utils/buildResultV2';
+import { buildResult as buildResultV2Precise } from '@/api/utils/buildResultV2Precise';
 import type { AbstractInstance } from '@/instances';
 
 import { LazerInstance } from './lazerInstance';
@@ -59,6 +63,22 @@ export class InstanceManager {
             return search;
         }
         return Object.values(this.osuInstances)[0];
+    }
+
+    public getState() {
+        return buildResult(this);
+    }
+
+    public getStateV2() {
+        return buildResultV2(this);
+    }
+
+    public getStateSC() {
+        return buildResultSC(this);
+    }
+
+    public getPreciseData() {
+        return buildResultV2Precise(this);
     }
 
     private onProcessDestroy(pid: number) {
