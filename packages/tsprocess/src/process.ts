@@ -37,6 +37,11 @@ export interface DictionaryIntToRefEntry {
     address: number;
 }
 
+export interface DictionaryRefToRefEntry {
+    key: number;
+    value: number;
+}
+
 export class Process {
     public id: number;
     public handle: number;
@@ -266,6 +271,49 @@ export class Process {
         }
 
         return result;
+    }
+
+    readSharpDictionaryRefToRef(address: number): DictionaryRefToRefEntry[] {
+        const result: DictionaryRefToRefEntry[] = [];
+
+        const entriesArray = this.readIntPtr(address + 0x8 + 0x8);
+        if (!entriesArray) return result;
+
+        const entriesLength = this.readInt(entriesArray + 0x8);
+        if (entriesLength < 0 || entriesLength > 1000) return result;
+
+        for (let i = 0; i < entriesLength; i++) {
+            const entrySize = 24;
+            const entry = entriesArray + 0x8 + 0x8 + i * entrySize;
+
+            const next = this.readInt(entry + 0x14);
+            if (next < -1) continue;
+
+            const key = this.readIntPtr(entry);
+            if (!key) continue;
+
+            result.push({
+                key,
+                value: this.readIntPtr(entry + 0x8)
+            });
+        }
+
+        return result;
+    }
+
+    readGuid(address: number): string {
+        const buffer = this.readBuffer(address, 16);
+
+        const hex = (start: number, end: number) =>
+            buffer.subarray(start, end).toString('hex');
+
+        return [
+            buffer.readUInt32LE(0).toString(16).padStart(8, '0'),
+            buffer.readUInt16LE(4).toString(16).padStart(4, '0'),
+            buffer.readUInt16LE(6).toString(16).padStart(4, '0'),
+            hex(8, 10),
+            hex(10, 16)
+        ].join('-');
     }
 
     private static buildPattern(pattern: string): Pattern {

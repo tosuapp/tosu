@@ -35,6 +35,7 @@ import type {
     IMatchmakingStats,
     IMenu,
     IRankedPlay,
+    IRankedPlayCard,
     IResultScreen,
     IRoom,
     IRoomUser,
@@ -180,6 +181,7 @@ export interface Offsets {
     };
     'osu.Game.Online.Multiplayer.MultiplayerClient': {
         room: number;
+        cardsWithPlaylistItems: number;
     };
     'osu.Game.Overlays.ChatOverlay': {
         State: number;
@@ -397,6 +399,19 @@ export interface Offsets {
         DamageInfo: number;
         '<RoundsWon>k__BackingField': number;
         '<DamageMultiplier>k__BackingField': number;
+    };
+    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayCardItem': {
+        '<ID>k__BackingField': number;
+    };
+    'osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.RankedPlayCardWithPlaylistItem': {
+        PlaylistItem: number;
+        '<DisplayOrder>k__BackingField': number;
+    };
+    'osu.Game.Online.Rooms.MultiplayerPlaylistItem': {
+        '<BeatmapID>k__BackingField': number;
+        '<BeatmapChecksum>k__BackingField': number;
+        '<RulesetID>k__BackingField': number;
+        '<StarRating>k__BackingField': number;
     };
 }
 
@@ -3673,6 +3688,117 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
         return { chat: chatItems, spectatingClients };
     }
 
+    // card guid -> RankedPlayCardWithPlaylistItem
+    private readRankedPlayCards(
+        multiplayerClient: number
+    ): Map<string, number> {
+        const cards = new Map<string, number>();
+
+        for (const entry of this.process.readSharpDictionaryRefToRef(
+            this.process.readIntPtr(
+                multiplayerClient +
+                    this.offsets[
+                        'osu.Game.Online.Multiplayer.MultiplayerClient'
+                    ].cardsWithPlaylistItems
+            )
+        )) {
+            // Should never happen, but better be safe than sorry
+            if (!entry.value) continue;
+
+            cards.set(
+                this.process.readGuid(
+                    entry.key +
+                        this.offsets[
+                            'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayCardItem'
+                        ]['<ID>k__BackingField']
+                ),
+                entry.value
+            );
+        }
+
+        return cards;
+    }
+
+    /**
+     * Ranked players only keep guids of cards (visible cards in game)
+     * And the multiplayer client owns the actual beatmaps in a dictionary
+     * This links the two to get guid -> actual beatmap
+     */
+    private readRankedPlayHand(
+        userInfo: number,
+        cards: Map<string, number>
+    ): IRankedPlayCard[] {
+        const hand = this.process.readIntPtr(
+            userInfo +
+                this.offsets[
+                    'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
+                ]['<Hand>k__BackingField']
+        );
+        if (!hand) {
+            return [];
+        }
+
+        const wrapperOffsets =
+            this.offsets[
+                'osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.RankedPlayCardWithPlaylistItem'
+            ];
+        const playlistItemOffsets =
+            this.offsets['osu.Game.Online.Rooms.MultiplayerPlaylistItem'];
+
+        return this.readListItems(hand).map((card) => {
+            const id = this.process.readGuid(
+                card +
+                    this.offsets[
+                        'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayCardItem'
+                    ]['<ID>k__BackingField']
+            );
+
+            const wrapper = cards.get(id);
+            if (!wrapper) {
+                return { id, displayOrder: null, beatmap: null };
+            }
+
+            const displayOrder =
+                this.process.readNullableInt(
+                    wrapper + wrapperOffsets['<DisplayOrder>k__BackingField']
+                ) ?? null;
+
+            // Bindable<MultiplayerPlaylistItem?>.Value, null until the card is revealed (used for opponent cards whose guid exists, but playlistitem doesn't)
+            const bindable = this.process.readIntPtr(
+                wrapper + wrapperOffsets.PlaylistItem
+            );
+            const item = bindable
+                ? this.process.readIntPtr(bindable + 0x20)
+                : 0;
+            if (!item) {
+                return { id, displayOrder, beatmap: null };
+            }
+
+            return {
+                id,
+                displayOrder,
+                beatmap: {
+                    id: this.process.readInt(
+                        item + playlistItemOffsets['<BeatmapID>k__BackingField']
+                    ),
+                    checksum: this.process.readSharpStringPtr(
+                        item +
+                            playlistItemOffsets[
+                                '<BeatmapChecksum>k__BackingField'
+                            ]
+                    ),
+                    rulesetId: this.process.readInt(
+                        item + playlistItemOffsets['<RulesetID>k__BackingField']
+                    ),
+                    starRating: this.process.readDouble(
+                        item +
+                            playlistItemOffsets['<StarRating>k__BackingField']
+                    )
+                }
+            };
+        });
+    }
+
     rankedPlay(): IRankedPlay {
         const multiplayerClient = this.multiplayerClient();
 
@@ -3756,6 +3882,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
 
         const users = this.process.readSharpDictionaryIntToRef(usersDictionary);
 
+        const cards = this.readRankedPlayCards(multiplayerClient);
+
         return {
             stage,
             currentRound: round,
@@ -3800,7 +3928,8 @@ export class LazerMemory extends AbstractMemory<LazerPatternData> {
                         this.offsets[
                             'osu.Game.Online.Multiplayer.MatchTypes.RankedPlay.RankedPlayUserInfo'
                         ]['<DamageMultiplier>k__BackingField']
-                )
+                ),
+                hand: this.readRankedPlayHand(u.address, cards)
             }))
         };
     }

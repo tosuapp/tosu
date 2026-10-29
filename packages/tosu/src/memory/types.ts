@@ -211,12 +211,24 @@ export type ILazerSpectator =
       }
     | undefined;
 
+export type IRankedPlayCard = {
+    id: string;
+    displayOrder: number | null;
+    beatmap: {
+        id: number;
+        checksum: string;
+        rulesetId: number;
+        starRating: number;
+    } | null;
+};
+
 export type IRankedPlayUserInfo = {
     id: number;
     rating: number;
     life: number;
     roundsWon: number;
     damageMultiplier: number;
+    hand: IRankedPlayCard[];
 };
 
 export type IRankedPlay =
