@@ -372,24 +372,18 @@ export default function buildBaseApi(server: Server) {
             throw new Error('osu is not ready/running');
         }
 
-        const { global, menu, beatmapPP } = osuInstance.getServices([
-            'global',
-            'menu',
-            'beatmapPP'
-        ]);
-
         let beatmap: rosu.Beatmap;
         const exists = fs.existsSync(query.path);
         if (exists) {
-            const beatmapFilePath = path.join(
-                global.songsFolder,
-                menu.folder,
-                menu.filename
-            );
-
-            const beatmapContent = fs.readFileSync(beatmapFilePath, 'utf8');
+            const beatmapContent = fs.readFileSync(query.path, 'utf8');
             beatmap = new rosu.Beatmap(beatmapContent);
         } else {
+            const { beatmapPP } = osuInstance.getServices([
+                'global',
+                'menu',
+                'beatmapPP'
+            ]);
+
             const beatmapContent: string | undefined = beatmapPP.beatmapContent;
             if (!beatmapContent) {
                 throw new Error('No beatmap currently playing');
