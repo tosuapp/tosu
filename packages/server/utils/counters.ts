@@ -37,6 +37,19 @@ import { parseCounterSettings } from './parseSettings';
 
 const pkgAssetsPath = path.join(import.meta.dirname, 'assets');
 
+const htmlEscapes: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+};
+
+/** Counter metadata comes from metadata.txt files and the remote counter list, so it must not be inserted into the page as markup. */
+function escapeHTML(value: unknown): string {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => htmlEscapes[c]);
+}
+
 function splitTextByIndex(text: string, letter: string) {
     const index = text.indexOf(letter);
     if (index === -1) {
@@ -174,20 +187,26 @@ function rebuildJSON({
 
             if (!Array.isArray(item.settings)) item.settings = [];
 
+            const name = escapeHTML(item.name);
+            const author = escapeHTML(item.author);
+            const version = escapeHTML(item.version);
+            const folderName = escapeHTML(item.folderName);
+            const downloadLink = escapeHTML(item.downloadLink);
+
             const externalHasSettings =
                 item._settings === true && external === true
                     ? '<div class="external-exists flexer"><i class="icon-settings"></i> customisable</div>'
                     : '';
 
-            const name = nameHTML
+            const nameBlock = nameHTML
                 .replace(
                     '{NAME}',
                     item.version
-                        ? `${item.name} v${item.version}${externalHasSettings}`
-                        : `${item.name}${externalHasSettings}`
+                        ? `${name} v${version}${externalHasSettings}`
+                        : `${name}${externalHasSettings}`
                 )
                 .replace('{CLASS}', 'flexer');
-            const author = authorHTML.replace('{AUTHOR}', item.author);
+            const authorBlock = authorHTML.replace('{AUTHOR}', author);
 
             const authorlinks = Array.isArray(item.authorlinks)
                 ? item.authorlinks
@@ -206,7 +225,7 @@ function rebuildJSON({
                     if (!iconUrl) return null;
 
                     return authorLinksHTML
-                        .replace('{LINK}', r)
+                        .replace('{LINK}', escapeHTML(r))
                         .replace('{ICON_URL}', iconUrl);
                 })
                 .filter((r) => r != null)
@@ -218,7 +237,7 @@ function rebuildJSON({
             const iframe = iframeHTML
                 .replace(
                     '{URL}',
-                    `http://${address || ip}:${config.serverPort}/${item.folderName}/`
+                    `http://${address || ip}:${config.serverPort}/${folderName}/`
                 )
                 .replace(
                     '{WIDTH}',
@@ -238,14 +257,14 @@ function rebuildJSON({
                           ? '300px'
                           : `${item.resolution[1]}px`
                 )
-                .replace('{NAME}', item.folderName);
+                .replace('{NAME}', folderName);
 
             const metadata = metadataHTML
                 .replace(
                     '{COPY_URL}',
-                    `http://${address || ip}:${config.serverPort}/${item.folderName}/`
+                    `http://${address || ip}:${config.serverPort}/${folderName}/`
                 )
-                .replace('{TEXT_URL}', `/${item.folderName}/`)
+                .replace('{TEXT_URL}', `/${folderName}/`)
                 .replace(
                     '{COPY_X}',
                     item.resolution[0] === -1 || item.resolution[0] === -2
@@ -271,37 +290,40 @@ function rebuildJSON({
                         : item.resolution[1].toString()
                 );
 
-            const settingsBuilderBtn = `<button class="button settings-builder-button flexer" n="${item.folderName}"><i class="icon-builder"></i></button>`;
+            const settingsBuilderBtn = `<button class="button settings-builder-button flexer" n="${folderName}"><i class="icon-builder"></i></button>`;
 
             const settingsBtn =
                 item.settings.length > 0
-                    ? `<button class="button settings-button flexer" n="${item.folderName}"><span>Settings</span></button>`
+                    ? `<button class="button settings-button flexer" n="${folderName}"><span>Settings</span></button>`
                     : '';
 
             const updateBtn =
                 item._updatable === true
-                    ? `<button class="button update-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Update</span></button>`
+                    ? `<button class="button update-button flexer" l="${downloadLink}" n="${name}" a="${author}"><span>Update</span></button>`
                     : '';
             const downloadBtn =
                 item.downloadLink && item._downloaded !== true
-                    ? `<button class="button dl-button flexer" l="${item.downloadLink}" n="${item.name}" a="${item.author}"><span>Download</span></button>`
-                    : `<button class="button open-button flexer" n="${item.name} by ${item.author}"><span>Open Folder</span></button>`;
+                    ? `<button class="button dl-button flexer" l="${downloadLink}" n="${name}" a="${author}"><span>Download</span></button>`
+                    : `<button class="button open-button flexer" n="${name} by ${author}"><span>Open Folder</span></button>`;
 
             const externalButtons = `<div class="buttons-group flexer indent-left">
                 ${updateBtn}
                 ${downloadBtn}
             </div>`;
 
-            const localButtons = `<div class="calu buttons-group flexer indent-left" n="${item.name}" a="${item.author}" v="${item.version}">
+            const localButtons = `<div class="calu buttons-group flexer indent-left" n="${name}" a="${author}" v="${version}">
                 ${settingsBuilderBtn}
                 ${settingsBtn}
-                <button class="button open-button flexer" n="${item.folderName}"><span>Open Folder</span></button>
-                <button class="button delete-button flexer" n="${item.folderName}"><span>Delete</span></button>
+                <button class="button open-button flexer" n="${folderName}"><span>Open Folder</span></button>
+                <button class="button delete-button flexer" n="${folderName}"><span>Delete</span></button>
             </div>`;
 
             const assets = (item.assets || [])
                 .map((r) => {
-                    return galleryImageHTML.replace('{LINK}', r.url);
+                    return galleryImageHTML.replace(
+                        '{LINK}',
+                        escapeHTML(r.url)
+                    );
                 })
                 .filter((r) => r != null)
                 .join(' ');
@@ -319,8 +341,8 @@ function rebuildJSON({
 
             items += resultItemHTML
                 .replace('{CLASS}', itemStatus)
-                .replace('{NAME}', name)
-                .replace('{AUTHOR}', author)
+                .replace('{NAME}', nameBlock)
+                .replace('{AUTHOR}', authorBlock)
                 .replace('{AUTHOR_LINKS}', links)
                 .replace('{BUTTONS}', external ? externalButtons : localButtons)
                 .replace('{GALLERY}', gallery)
