@@ -1245,7 +1245,7 @@ async function deleteCounter(element) {
   if (results.innerHTML.trim() != '') return;
 
   results.innerHTML = `<div class="no-results">
-  No counters<br /><a href="/available-overlays">Go here to get one 👉</a>
+  No counters<br /><a href="/available">Go here to get one 👉</a>
   </div>`;
 };
 
