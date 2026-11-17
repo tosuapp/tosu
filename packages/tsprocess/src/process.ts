@@ -236,11 +236,33 @@ export class Process {
         return result;
     }
 
+    readBindableInt(address: number) {
+        return this.readInt(address + 0x8 + 56);
+    }
+
+    readBindableRef(address: number) {
+        return this.readIntPtr(address + 24 + 8);
+    }
+
     readNullableInt(address: number): number | undefined {
         if (this.readByte(address) === 0) {
             return undefined;
         }
         return this.readInt(address + 0x4);
+    }
+
+    readSharpRefArray(address: number): number[] {
+        const result = [];
+
+        const entriesLength = this.readInt(address + 0x8);
+        for (let i = 0; i < entriesLength; i++) {
+            const entrySize = 8;
+            const entry = address + 8 + 0x8 + i * entrySize;
+
+            result.push(this.readIntPtr(entry));
+        }
+
+        return result;
     }
 
     readSharpDictionaryIntToRef(address: number): DictionaryIntToRefEntry[] {
