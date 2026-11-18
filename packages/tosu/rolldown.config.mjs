@@ -51,7 +51,7 @@ export default defineConfig([
  */
 function rosuPlugin() {
     const rosuDir = path.dirname(
-        createRequire(import.meta.url).resolve('rosu-pp-js')
+        createRequire(import.meta.resolve('@tosu/server')).resolve('rosu-pp-js')
     );
 
     return {
