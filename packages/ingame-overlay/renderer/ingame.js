@@ -275,6 +275,17 @@ const app = createApp({
             return Number.isFinite(num) ? +num.toFixed(4) : 0;
         }
 
+        function encode_folder_name(folderName) {
+            if (!folderName) return '';
+
+            return folderName.split('/').map(encodeURIComponent).join('/');
+        }
+
+        function overlay_url(overlay) {
+            const folderName = encode_folder_name(overlay.folderName);
+            return folderName ? `tosu://server/${folderName}` : '';
+        }
+
         function side_decide(event, is_resize) {
             if (is_dragging && is_resize != true) return;
 
@@ -719,7 +730,6 @@ const app = createApp({
                 id: _id,
                 folderName: overlay.folderName,
 
-                url: `tosu://server/${overlay.folderName}`,
                 width: Math.min(
                     max_width.value - context_empty.value.x1,
                     overlay.resolution[0]
@@ -743,8 +753,8 @@ const app = createApp({
             const item = profile.value.overlays[index];
             if (!item) return;
 
-            const find = available_overlays.value.find((r) =>
-                item.url.endsWith(r.folderName)
+            const find = available_overlays.value.find(
+                (r) => r.folderName === item.folderName
             );
             if (!find) return;
 
@@ -932,6 +942,7 @@ const app = createApp({
             remove_overlay,
             reset_hover,
             round_up,
+            overlay_url,
             notification
         };
     }
@@ -945,7 +956,6 @@ app.mount('.main');
  * @property {boolean | undefined} _settings
  * @property {string} id
  * @property {string} folderName
- * @property {string} url
  * @property {number} top
  * @property {number} left
  * @property {number} width
