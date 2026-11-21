@@ -162,7 +162,7 @@ const app = createApp({
         const is_edit_available_by_default =
             import.meta.env.DEV || params.get('edit') === 'true';
 
-        const url_profile_name = params.get('profile');
+        const profile_param = params.get('profile');
 
         const is_edit = ref(is_edit_available_by_default);
         const editing_profiles = ref(false);
@@ -177,11 +177,8 @@ const app = createApp({
         const overlay_ctx = ref(null);
         const profiles_ctx = ref(null);
 
-        const profile_name = window.obsstudio ? 'obs' : 'ingame';
-
-        /** @type { { value: { obs_profile: string, ingame_profile: string, profiles: Profile[] } } } */
+        /** @type { { value: { ingame_profile: string, profiles: Profile[] } } } */
         const settings = ref({
-            obs_profile: 'default',
             ingame_profile: 'default',
             profiles: [
                 {
@@ -198,11 +195,10 @@ const app = createApp({
         /** @type { { value: Profile } } */
         const profile = computed(
             () =>
+                settings.value.profiles.find((r) => r.id == profile_param) ||
+                settings.value.profiles.find((r) => r.name == profile_param) ||
                 settings.value.profiles.find(
-                    (r) => r.name == url_profile_name
-                ) ||
-                settings.value.profiles.find(
-                    (r) => r.id == settings.value[`${profile_name}_profile`]
+                    (r) => r.id == settings.value.ingame_profile
                 ) ||
                 settings.value.profiles.at(0)
         );
@@ -273,6 +269,16 @@ const app = createApp({
 
             const num = parseFloat(value);
             return Number.isFinite(num) ? +num.toFixed(4) : 0;
+        }
+
+        // Same implementation as packages/server/utils/hashing.ts
+        function get_unique_id() {
+            const s4 = () =>
+                Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+
+            return s4() + s4() + '-' + s4();
         }
 
         function encode_folder_name(folderName) {
@@ -786,24 +792,40 @@ const app = createApp({
             cursor.value.type = 'default';
         }
 
+        function update_enabled_overlays() {
+            if (!Array.isArray(settings.value.profiles)) return;
+
+            for (let i = 0; i < settings.value.profiles.length; i++) {
+                const profile = settings.value.profiles[i];
+                if (!profile || !Array.isArray(profile.overlays)) continue;
+
+                profile.overlays.forEach(
+                    (r) =>
+                        (r._enabled = available_overlays.value.some(
+                            (a) => a.folderName == r.folderName
+                        ))
+                );
+            }
+        }
+
         function add_profile() {
             if (new_profile.value == '') return;
 
-            const id = crypto.randomUUID();
+            const id = get_unique_id();
             settings.value.profiles.push({
                 id: id,
                 name: new_profile.value,
                 overlays: []
             });
 
-            settings.value[`${profile_name}_profile`] = id;
+            settings.value.ingame_profile = id;
             new_profile.value = '';
 
             save_settings();
         }
 
-        function switch_profile(id, type) {
-            settings.value[`${type}_profile`] = id;
+        function switch_profile(id) {
+            settings.value.ingame_profile = id;
             save_settings();
         }
 
@@ -819,10 +841,9 @@ const app = createApp({
                 });
             }
 
-            if (settings.value.obs_profile == id)
-                settings.value.obs_profile = 'default';
+            const fallback_id = settings.value.profiles[0].id;
             if (settings.value.ingame_profile == id)
-                settings.value.ingame_profile = 'default';
+                settings.value.ingame_profile = fallback_id;
 
             save_settings();
         }
@@ -855,6 +876,57 @@ const app = createApp({
             }, delay);
         }
 
+        function get_profile_link(profile) {
+            return `http://${socket.host}/api/ingame?profile=${encodeURIComponent(profile.id)}`;
+        }
+
+        function copy_text_fallback(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-1000px';
+            textarea.style.opacity = '0';
+
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            let copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } catch (error) {
+                copied = false;
+            }
+
+            document.body.removeChild(textarea);
+            return copied;
+        }
+
+        function copy_text(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard
+                    .writeText(text)
+                    .then(() => true)
+                    .catch(() => copy_text_fallback(text));
+            }
+
+            return Promise.resolve(copy_text_fallback(text));
+        }
+
+        function copy_profile_link(profile) {
+            const link = get_profile_link(profile);
+
+            copy_text(link).then((copied) => {
+                notification({
+                    text: copied
+                        ? 'Copied OBS profile link'
+                        : `Could not copy: ${link}`,
+                    classes: copied ? ['green'] : [],
+                    delay: 3000
+                });
+            });
+        }
+
         socket.sendCommand('getOverlays', encodeURI('__ingame__'));
         socket.sendCommand('getSettings', encodeURI('__ingame__'));
         socket.commands((data) => {
@@ -866,7 +938,6 @@ const app = createApp({
                         (Object.keys(message).length == 1 && message.overlays)
                     )
                         message = {
-                            obs_profile: 'default',
                             ingame_profile: 'default',
                             profiles: [
                                 {
@@ -883,10 +954,9 @@ const app = createApp({
                     ) {
                         settings.value = message;
 
-                        if (!settings.value.obs_profile)
-                            settings.value.obs_profile = 'default';
                         if (!settings.value.ingame_profile)
                             settings.value.ingame_profile = 'default';
+                        delete settings.value.obs_profile;
                     }
                 }
 
@@ -894,23 +964,17 @@ const app = createApp({
                     available_overlays.value = message;
                 }
 
-                if (
-                    (command == 'getSettings' || command == 'getOverlays') &&
-                    Array.isArray(settings.value.profiles)
-                ) {
-                    for (let i = 0; i < settings.value.profiles.length; i++) {
-                        const profile = settings.value.profiles[i];
-                        profile.overlays.forEach(
-                            (r) =>
-                                (r._enabled = available_overlays.value.some(
-                                    (a) => a.folderName == r.folderName
-                                ))
-                        );
-                    }
-                }
-
                 if (command == 'updateSettings') {
                     settings.value = message;
+                    delete settings.value.obs_profile;
+                }
+
+                if (
+                    command == 'getSettings' ||
+                    command == 'getOverlays' ||
+                    command == 'updateSettings'
+                ) {
+                    update_enabled_overlays();
                 }
             } catch (error) {
                 console.log(error);
@@ -943,6 +1007,8 @@ const app = createApp({
             reset_hover,
             round_up,
             overlay_url,
+            save_settings,
+            copy_profile_link,
             notification
         };
     }

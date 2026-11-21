@@ -29,14 +29,11 @@
                 No profiles
             </div>
 
-            <div class="profiles-header">
-                <span>ingame</span>
-                <span>obs</span>
-            </div>
             <div v-if="settings.profiles.length > 0" class="scroll">
                 <div v-for="(value, index) in settings.profiles" class="flexer profile-item">
                     <span v-text="value.overlays.length"></span>
-                    <input type="text" class="input" placeholder="profile name" v-model="value.name">
+                    <input type="text" class="input" placeholder="profile name" v-model="value.name"
+                        @change="save_settings()">
 
                     <div class="buttons flexer">
                         <button class="button remove-button flexer" @click="delete_profile(index)">
@@ -44,13 +41,12 @@
                         </button>
                         <button class="button selected-button flexer"
                             :class="{'active': settings.ingame_profile == value.id }"
-                            @click="switch_profile(value.id, 'ingame')">
+                            @click="switch_profile(value.id)">
                             <i class="icon-check"></i>
                         </button>
-                        <button class="button selected-button flexer"
-                            :class="{'active': settings.obs_profile == value.id }"
-                            @click="switch_profile(value.id, 'obs')">
-                            <i class="icon-check"></i>
+                        <button class="button flexer" title="Copy OBS profile link"
+                            aria-label="Copy OBS profile link" @click="copy_profile_link(value)">
+                            <i class="icon-link"></i>
                         </button>
                     </div>
                 </div>
@@ -75,7 +71,7 @@
             <div class="scroll">
                 <div v-if="available_overlays.length == 0" class="no-available">
                     <span>You have 0 overlays</span><br />
-                    <a href="http://127.0.0.1:24050/available?ingame=true" target="_blank">
+                    <a href="tosu://server/available?ingame=true" target="_blank">
                         Download more
                         <i class="icon-link"></i>
                     </a>
@@ -94,7 +90,7 @@
         }" ref="overlay_ctx">
             <div class="cm-buttons">
                 <a v-if="profile.overlays[context_overlay.index]._settings == true" class="ctx-button btn-settings"
-                    :href="`http://127.0.0.1:24050/settings?overlay=${profile.overlays[context_overlay.index].folderName}&ingame=true`"
+                    :href="`tosu://server/settings?overlay=${profile.overlays[context_overlay.index].folderName}&ingame=true`"
                     target="_blank" @click.left="notification({
                 text: `Settings opened in separate window`,
                 classes: ['green'],
@@ -175,20 +171,20 @@
             </div>
         </div>
         <transition-group name="scale-up" mode="out-in">
-            <div v-for="(o, ind) in profile.overlays.filter(r=> r._enabled == true)" class="overlay" :style="{
+            <div v-for="o in profile.overlays.filter(r=> r._enabled == true)" class="overlay" :style="{
             top: `${o.top}px`,
             left: `${o.left}px`,
             width: `${o.width}px`,
             height: `${o.height}px`,
             scale: o.scale,
             zIndex: Math.max(0, o.z_index)
-          }" :data-ind="ind" @mousemove="side_decide" @mousedown="enable_drag"
+          }" :data-ind="profile.overlays.indexOf(o)" @mousemove="side_decide" @mousedown="enable_drag"
                 @mouseout="reset_hover" @mouseleave="reset_hover" :key="`${o.folderName}-${o.id}`">
                 <iframe :src="overlay_url(o)"></iframe>
             </div>
         </transition-group>
 
-        <a href="http://127.0.0.1:24050/available?ingame=true" target="_blank" class="ctx-button download-more">
+        <a href="tosu://server/available?ingame=true" target="_blank" class="ctx-button download-more">
             <i class="icon-link"></i>
             Download more overlays
         </a>
