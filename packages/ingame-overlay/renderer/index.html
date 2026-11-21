@@ -103,7 +103,7 @@
                     settings
                     <i class="icon-link"></i>
                 </a>
-                <a class="ctx-button" :href="profile.overlays[context_overlay.index].url" target="_blank">
+                <a class="ctx-button" :href="overlay_url(profile.overlays[context_overlay.index])" target="_blank">
                     interact
                     <i class="icon-link"></i>
                 </a>
@@ -182,9 +182,9 @@
             height: `${o.height}px`,
             scale: o.scale,
             zIndex: Math.max(0, o.z_index)
-          }" :data-ind="ind" :data-url="o.url" @mousemove="side_decide" @mousedown="enable_drag"
-                @mouseout="reset_hover" @mouseleave="reset_hover" :key="`${o.url}-${o.id}`">
-                <iframe :src="o.url"></iframe>
+          }" :data-ind="ind" @mousemove="side_decide" @mousedown="enable_drag"
+                @mouseout="reset_hover" @mouseleave="reset_hover" :key="`${o.folderName}-${o.id}`">
+                <iframe :src="overlay_url(o)"></iframe>
             </div>
         </transition-group>
 
