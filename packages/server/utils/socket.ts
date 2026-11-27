@@ -5,6 +5,8 @@ import { WebSocket, WebSocketServer } from 'ws';
 
 import { getUniqueID } from './hashing';
 
+const MAX_BUFFERED_AMOUNT = 512 * 1024; // 512 KB per client
+
 type Filter = string | { field: string; keys: Filter[] };
 
 export interface ModifiedWebsocket extends WebSocket {
@@ -57,6 +59,10 @@ export class Websocket {
         onConnectionCallback?: (id: string, url: string | undefined) => void;
     }) {
         this.socket = new WebSocketServer({ noServer: true });
+        this.socket.on('error', (err) => {
+            wLogger.error('WebSocket server error:', err.message);
+            wLogger.debug('WebSocket server error details:', err);
+        });
 
         this.instanceManager = instanceManager;
 
@@ -160,9 +166,6 @@ export class Websocket {
         pollRateFieldName: ConfigKey,
         stateFunctionName: StateFunctionKey<AbstractInstance>
     ) {
-        let message = '';
-        let values = {};
-
         while (true) {
             try {
                 const osuInstance = this.instanceManager.getInstance(
@@ -173,23 +176,51 @@ export class Websocket {
                     continue;
                 }
 
+                let hasReadyClient = false;
+                for (const client of this.clients.values()) {
+                    if (
+                        client.readyState === WebSocket.OPEN &&
+                        client.bufferedAmount <= MAX_BUFFERED_AMOUNT
+                    ) {
+                        hasReadyClient = true;
+                        break;
+                    }
+                }
+
+                if (!hasReadyClient) {
+                    await sleep(config[pollRateFieldName] as number);
+                    continue;
+                }
+
                 const buildedData = osuInstance[stateFunctionName](
                     this.instanceManager
                 );
 
+                let message: string | null = null;
+
                 this.clients.forEach((client) => {
+                    if (
+                        client.readyState !== WebSocket.OPEN ||
+                        client.bufferedAmount > MAX_BUFFERED_AMOUNT
+                    ) {
+                        return;
+                    }
+
                     if (
                         Array.isArray(client.filters) &&
                         client.filters.length > 0
                     ) {
-                        values = {};
+                        const values = {};
                         this.applyFilter(client.filters, buildedData, values);
 
                         client.send(JSON.stringify(values));
                         return;
                     }
 
-                    message = JSON.stringify(buildedData);
+                    if (message === null) {
+                        message = JSON.stringify(buildedData);
+                    }
+
                     client.send(message);
                 });
             } catch (error) {
